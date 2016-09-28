@@ -356,5 +356,6 @@
     <Build Include="dbo\Tables\tblARptticmst.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportInvoiceFromPTTICMST.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportInvoiceBackupPTTICMST.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateForPrintDeliveryTicketView.sql" />
   </ItemGroup>
 </Project>

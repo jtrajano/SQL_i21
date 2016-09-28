@@ -19,6 +19,9 @@ FROM (
 		dblAmountPaid,
 		SUM(dblAppliedPrepayment) AS dblAppliedPrepayment,
 		SUM(dblQtyBillCreated) AS dblQtyBillCreated,
+		SUM(dblNetQtyReceived) AS dblNetQtyReceived,
+		SUM(dblGrossQtyReceived) AS dblGrossQtyReceived,
+		SUM(dblGrossQtyReceived) - SUM(dblNetQtyReceived) AS dblIRWeightLoss,
 		CASE 
 		WHEN dblFranchise > 0
 			THEN SUM(dblNetShippedWeight) * (dblFranchise / 100)
@@ -64,6 +67,7 @@ FROM (
 		SELECT
 			 BillClaim.intBillId 
 			,Receipts.dblNetQtyReceived
+			,Receipts.dblGrossQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
 			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
 					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty / B.dblCostUnitQty) ELSE B.dblCost END AS dblCost
@@ -142,7 +146,8 @@ FROM (
 		) Container
 		CROSS APPLY (
 			SELECT 
-				SUM(C.dblNet) AS dblNetQtyReceived
+				SUM(C.dblNet) AS dblNetQtyReceived,
+				SUM(C.dblGross) AS dblGrossQtyReceived
 			FROM tblICInventoryReceiptItem C 
 			WHERE C.intLineNo = IRI.intLineNo AND C.intOrderId = IRI.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
 		) Receipts

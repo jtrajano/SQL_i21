@@ -11,3 +11,4 @@ FROM
 INNER JOIN
 	tblARCustomer ARC
 		ON ARCI.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+WHERE ARC.ysnActive = 1
