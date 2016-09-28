@@ -4588,7 +4588,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
             search.show();
         };
-        showAddScreen();
+       
+         var task = new Ext.util.DelayedTask(function () {
+            showAddScreen();          
+        });
+        task.delay(10);
     },
 
     onReplicateBalanceLotClick: function(button) {
