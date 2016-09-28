@@ -4347,6 +4347,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateTableReceiptInspection.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContractResult.sql" />
     <Build Include="dbo\Tables\tblPATTransferType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRescheduleAndSaveWorkOrderByForward.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
