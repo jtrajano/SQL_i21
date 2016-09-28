@@ -750,7 +750,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             grdIncomingInspection: {
-                colInspect: 'ysnSelected',
+                colInspect: {
+                    dataIndex: 'ysnSelected',
+                    disabled: '{current.ysnPosted}'
+                },
                 colQualityPropertyName: 'strPropertyName'
             },
 
