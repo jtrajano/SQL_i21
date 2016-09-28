@@ -225,14 +225,22 @@ WHERE intTicketId = @intTicketId
 											END
 		,[intCostUOMId]						= @intTicketItemUOMId
 		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
-		,[dblAmount]						= CASE
+		,[dblAmount]                        = CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN 
 												CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-													WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+													WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId) * -1)
+													WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId)
 												END
 											END
+		--,[dblAmount]                        = CASE
+		--										WHEN IC.strCostMethod = 'Per Unit' THEN 0
+		--										WHEN IC.strCostMethod = 'Amount' THEN 
+		--										CASE 
+		--											WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+		--											WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+		--										END
+		--									END
 		,[strAllocateCostBy]				= NULL
 		,[intContractHeaderId]				= NULL
 		,[intContractDetailId]				= NULL
