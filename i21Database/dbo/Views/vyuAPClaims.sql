@@ -17,6 +17,7 @@ FROM (
 			THEN SUM(dblNetShippedWeight) * (dblFranchise / 100)
 		ELSE 0 END AS dblFranchiseWeight,
 		dblCost,
+		dblBillCost,
 		dblQtyReceived,
 		dblCostUnitQty,
 		dblWeightUnitQty,
@@ -53,6 +54,7 @@ FROM (
 			,J.dblAmountApplied AS dblAppliedPrepayment
 			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
 					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty / B.dblCostUnitQty) ELSE B.dblCost END AS dblCost
+			,B.dblCost AS dblBillCost
 			,B.dblQtyReceived
 			,B.dblQtyOrdered AS dblQtyBillCreated
 			,B.intUnitOfMeasureId
@@ -123,6 +125,7 @@ FROM (
 		AND E.intContractStatusId = 5
 	) tmpClaim
 	GROUP BY dblCost,
+		dblBillCost,
 		dblCostUnitQty,
 		dblWeightUnitQty,
 		dblUnitQty,
