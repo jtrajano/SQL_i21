@@ -452,6 +452,7 @@ BEGIN
 	IF EXISTS (SELECT 1 FROM @BankTransactionTable WHERE strTransactionId = @strTransactionId AND dblAmount <> @dblCurrentAmount)
 	BEGIN
 		DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
+		DELETE FROM tblGLDetailRecap WHERE strTransactionId = @strTransactionId AND strModuleName = 'Payroll'
 		SELECT @intTransactionId = NULL
 	END
 
@@ -587,7 +588,7 @@ BEGIN
 END 
 
 -- Check if the transaction is already posted
-IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
+IF @ysnPost = 1 AND @ysnRecap = 0 AND @ysnTransactionPostedFlag = 1
 BEGIN 
 	-- The transaction is already posted.
 	RAISERROR(50007, 11, 1)
@@ -595,7 +596,7 @@ BEGIN
 END 
 
 -- Check if the transaction is already unposted
-IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
+IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN 
 	-- The transaction is already unposted.
 	RAISERROR(50008, 11, 1)
