@@ -105,7 +105,7 @@ AS
 				,0
 				,'Invoice'
 				,'Service Charge'
-				,0
+				,NULL
 				,@intARAccountId
 				,[intFreightTermId]
 				,[intEntityId]
