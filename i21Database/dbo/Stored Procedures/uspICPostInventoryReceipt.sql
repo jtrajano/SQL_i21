@@ -218,7 +218,7 @@ BEGIN
 		INNER JOIN tblICItem item ON item.intItemId = receiptItem.intItemId
 		LEFT JOIN tblICInventoryReceiptItemLot itemLot ON itemLot.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 	WHERE dbo.fnGetItemLotType(item.intItemId) <> 0
-		AND itemLot.intLotId IS NULL
+		AND itemLot.intInventoryReceiptItemLotId IS NULL
 		AND receipt.intInventoryReceiptId = @intTransactionId
 
 	IF @strItemNo IS NOT NULL
