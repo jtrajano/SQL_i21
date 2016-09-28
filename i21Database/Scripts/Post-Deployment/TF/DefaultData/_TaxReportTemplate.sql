@@ -1,5 +1,11 @@
 ﻿DECLARE @TemplateId NVARCHAR(250)
 
+DELETE FROM tblTFTaxReportTemplate WHERE strTemplateItemId IS NULL
+OR strTemplateItemId = 'TID' OR strTemplateItemId = 'License Number' 
+OR strTemplateItemId = 'Filing Type' 
+OR strTemplateItemId = 'License Holder Name' 
+OR strTemplateItemId = 'TaxPayerName'
+
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-FilingType-001')
 IF (@TemplateId IS NULL)
 		BEGIN
