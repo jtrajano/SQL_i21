@@ -51,18 +51,13 @@ BEGIN
 	END
 END
 
--- Call the grain sp when deleting the receipt. 
 IF @ForDelete = 1
 BEGIN 
+	-- Call the grain sp when deleting the receipt. 
 	EXEC uspGRReverseOnReceiptDelete @ReceiptId
 
-	-- Remove values from Quality Table for Incoming Inspection Result
-	DELETE
-	FROM tblQMTestResult
-	WHERE intSampleId IS NULL
-		AND intControlPointId = 3
-		AND intProductTypeId = 3
-		AND intProductValueId = @ReceiptId
+	-- Call the quality sp when deleting the receipt.
+	EXEC uspQMInspectionDeleteResult @ReceiptId
 END 
 
 -- Validate. 
