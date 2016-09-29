@@ -7,7 +7,8 @@
 	,@dblOverrideStorageUnits DECIMAL(24, 10) = NULL
 	,@StorageChargeDate DATETIME = NULL
 	,@UserKey INT
-	,@ScreenName NVARCHAR(30)='Settle Storage'
+	,@returnChargeByPeriodWise BIT=1
+	,@strPeriodData NVARCHAR(MAX)= NULL
 	,@dblStorageDuePerUnit DECIMAL(24, 10) OUTPUT
 	,@dblStorageDueAmount DECIMAL(24, 10) OUTPUT
 	,@dblStorageDueTotalPerUnit DECIMAL(24, 10) OUTPUT
@@ -48,11 +49,14 @@ BEGIN TRY
 	DECLARE @StorageChargeCalculationRequired BIT = 1
 	DECLARE @CalculatedNumberOfDays INT=0
 	DECLARE @FirstMonthFullChargeApplicable BIT
-	DECLARE @LastMonthChargeApplicable BIT=1
+	
 	DECLARE @strAllowancePeriod NVARCHAR(50)
 	DECLARE @dtmAllowancePeriodFrom DATETIME
 	DECLARE @dtmAllowancePeriodTo DATETIME
 	DECLARE @ActualStorageChargeDate DATETIME
+
+	DECLARE @idoc INT
+	EXEC sp_xml_preparedocument @idoc OUTPUT,@strPeriodData
 	
 	SET @ActualStorageChargeDate=@StorageChargeDate	
 	
@@ -168,31 +172,58 @@ BEGIN TRY
 		WHERE intStorageScheduleRuleId = @intStorageScheduleId
 	END
 
-	INSERT INTO @tblGRStorageSchedulePeriod 
-	(
-		 [intPeriodKey]
+	IF @strPeriodData= NULL
+	BEGIN
+		INSERT INTO @tblGRStorageSchedulePeriod 
+		(
+			 [intPeriodKey]
+			,[strPeriodType]
+			,[dtmEffectiveDate]
+			,[dtmEndingDate]
+			,[intNumberOfDays]
+			,[dblStorageRate]
+		)
+		SELECT
+			 RANK() OVER (ORDER BY intSort)
+			,[strPeriodType]
+			,[dtmEffectiveDate]
+			,[dtmEndingDate]
+			,[intNumberOfDays]
+			,[dblStorageRate]
+		FROM tblGRStorageSchedulePeriod
+		WHERE intStorageScheduleRule = @intStorageScheduleId
+		ORDER BY intSort
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblGRStorageSchedulePeriod 
+		(
+			 [intPeriodKey]
+			,[strPeriodType]
+			,[dtmEffectiveDate]
+			,[dtmEndingDate]
+			,[intNumberOfDays]
+			,[dblStorageRate]
+		)
+		 SELECT 
+		 RANK() OVER (ORDER BY intSort)
 		,[strPeriodType]
-		,[dtmEffectiveDate]
-		,[dtmEndingDate]
+		,(CASE WHEN CONVERT(DATE, [dtmEffectiveDate]) = '1900-01-01' THEN NULL ELSE [dtmEffectiveDate] END) [dtmEffectiveDate]
+		,(CASE WHEN CONVERT(DATE, [dtmEndingDate]) = '1900-01-01' THEN NULL    ELSE [dtmEndingDate] END)    [dtmEndingDate]
 		,[intNumberOfDays]
 		,[dblStorageRate]
-	)
-	SELECT
-	     RANK() OVER (ORDER BY intSort)
-		,[strPeriodType]
-		,[dtmEffectiveDate]
-		,[dtmEndingDate]
-		,[intNumberOfDays]
-		,[dblStorageRate]
-	FROM tblGRStorageSchedulePeriod
-	WHERE intStorageScheduleRule = @intStorageScheduleId
-	ORDER BY intSort
-	
-	--IF @ScreenName='Process Grain Storage'
-	--	SET @StorageChargeDate=DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,@StorageChargeDate),0))
-
-	IF @ScreenName='Transfer Storage'
-	 SET @LastMonthChargeApplicable=0
+		FROM OPENXML(@idoc, 'root/Period', 2) WITH 
+		(
+			 intCustomerStorageId INT
+			,strPeriodType Nvarchar(30)
+			,dtmEffectiveDate DATETIME
+			,dtmEndingDate DATETIME
+			,intNumberOfDays INT
+			,dblStorageRate NUMERIC(18,6)
+			,intSort INT
+		)
+		ORDER BY intSort
+	END
 	
 	--Suppose Termination Date is not Blank and Storage Charge Date is later on Termination Date then Charge Upto Termination Date.    
 	IF @StorageChargeDate > @dtmTerminationDate AND @dtmTerminationDate IS NOT NULL
@@ -4224,7 +4255,7 @@ BEGIN TRY
 
 	SELECT @dblStorageBilledAmount = @dblStorageBilledPerUnit * @dblOpenBalance
 	
-	IF @ScreenName <> 'Process Grain Storage'
+	IF @returnChargeByPeriodWise = 1
 	BEGIN
 
 		IF @strStorageRate = 'Monthly'
@@ -4258,10 +4289,12 @@ BEGIN TRY
 		,[dblCummulativeStorageDuePerUnit] FROM @DailyStorageCharge
 
 	END
+	EXEC sp_xml_removedocument @idoc
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	SET @ErrMsg = 'uspGRCalculateStorageCharge: ' + @ErrMsg
+	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH

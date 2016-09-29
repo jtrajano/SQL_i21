@@ -143,7 +143,8 @@ BEGIN TRY
 				,1
 				,@StorageChargeDate
 				,@intUserId
-				,'Process Grain Storage'
+				,0
+				,NULL	
 				,@dblStorageDuePerUnit OUTPUT
 				,@dblStorageDueAmount OUTPUT
 				,@dblStorageDueTotalPerUnit OUTPUT

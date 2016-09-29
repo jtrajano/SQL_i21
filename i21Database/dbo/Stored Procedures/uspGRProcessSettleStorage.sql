@@ -335,7 +335,8 @@ BEGIN TRY
 			,@dblStorageUnits
 			,@dtmCalculateStorageThrough
 			,@UserKey
-			,'Process Grain Storage'
+			,0
+			,NULL	
 			,@dblStorageDuePerUnit OUTPUT
 			,@dblStorageDueAmount OUTPUT
 			,@dblStorageDueTotalPerUnit OUTPUT
