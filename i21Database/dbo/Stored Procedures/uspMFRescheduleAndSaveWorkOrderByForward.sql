@@ -128,182 +128,194 @@ BEGIN TRY
 		,intSetupDuration INT
 		)
 
-	INSERT INTO @tblMFScheduleWorkOrder (
-		intManufacturingCellId
-		,intWorkOrderId
-		,intItemId
-		,intItemUOMId
-		,intUnitMeasureId
-		,dblQuantity
-		,dblBalance
-		,dtmEarliestDate
-		,dtmExpectedDate
-		,dtmLatestDate
-		,intStatusId
-		,intExecutionOrder
-		,strComments
-		,strNote
-		,strAdditionalComments
-		,intNoOfSelectedMachine
-		,dtmEarliestStartDate
-		,intPackTypeId
-		,strPackName
-		,intNoOfUnit
-		,dblConversionFactor
-		,intScheduleWorkOrderId
-		,ysnFrozen
-		,intConcurrencyId
-		,strWIPItemNo
-		,intSetupDuration
-		,ysnPicked
-		,intDemandRatio
-		,intNoOfFlushes
-		)
-	SELECT intManufacturingCellId
-		,intWorkOrderId
-		,intItemId
-		,intItemUOMId
-		,intUnitMeasureId
-		,dblQuantity
-		,dblBalance
-		,dtmEarliestDate
-		,dtmExpectedDate
-		,dtmLatestDate
-		,intStatusId
-		,intExecutionOrder
-		,strComments
-		,strNote
-		,strAdditionalComments
-		,intNoOfSelectedMachine
-		,dtmEarliestStartDate
-		,intPackTypeId
-		,strPackName
-		,intNoOfUnit
-		,dblConversionFactor
-		,intScheduleWorkOrderId
-		,ysnFrozen
-		,intConcurrencyId
-		,strWIPItemNo
-		,intSetupDuration
-		,ysnPicked
-		,intDemandRatio
-		,intNoOfFlushes
+	SELECT @intManufacturingCellId1 = MIN(intManufacturingCellId)
 	FROM @tblMFWorkOrder
 
-	IF EXISTS (
-			SELECT *
+	WHILE @intManufacturingCellId1 IS NOT NULL
+	BEGIN
+		DELETE
+		FROM @tblMFScheduleWorkOrder
+
+		INSERT INTO @tblMFScheduleWorkOrder (
+			intManufacturingCellId
+			,intWorkOrderId
+			,intItemId
+			,intItemUOMId
+			,intUnitMeasureId
+			,dblQuantity
+			,dblBalance
+			,dtmEarliestDate
+			,dtmExpectedDate
+			,dtmLatestDate
+			,intStatusId
+			,intExecutionOrder
+			,strComments
+			,strNote
+			,strAdditionalComments
+			,intNoOfSelectedMachine
+			,dtmEarliestStartDate
+			,intPackTypeId
+			,strPackName
+			,intNoOfUnit
+			,dblConversionFactor
+			,intScheduleWorkOrderId
+			,ysnFrozen
+			,intConcurrencyId
+			,strWIPItemNo
+			,intSetupDuration
+			,ysnPicked
+			,intDemandRatio
+			,intNoOfFlushes
+			)
+		SELECT intManufacturingCellId
+			,intWorkOrderId
+			,intItemId
+			,intItemUOMId
+			,intUnitMeasureId
+			,dblQuantity
+			,dblBalance
+			,dtmEarliestDate
+			,dtmExpectedDate
+			,dtmLatestDate
+			,intStatusId
+			,intExecutionOrder
+			,strComments
+			,strNote
+			,strAdditionalComments
+			,intNoOfSelectedMachine
+			,dtmEarliestStartDate
+			,intPackTypeId
+			,strPackName
+			,intNoOfUnit
+			,dblConversionFactor
+			,intScheduleWorkOrderId
+			,ysnFrozen
+			,intConcurrencyId
+			,strWIPItemNo
+			,intSetupDuration
+			,ysnPicked
+			,intDemandRatio
+			,intNoOfFlushes
+		FROM @tblMFWorkOrder x
+		WHERE intManufacturingCellId = @intManufacturingCellId1
+		ORDER BY x.intExecutionOrder
+
+		IF EXISTS (
+				SELECT *
+				FROM @tblMFScheduleWorkOrder x
+				WHERE x.intPackTypeId IS NULL
+					AND intStatusId <> 1
+				)
+		BEGIN
+			SELECT @intWorkOrderId = intWorkOrderId
+				,@intItemId = intItemId
 			FROM @tblMFScheduleWorkOrder x
 			WHERE x.intPackTypeId IS NULL
 				AND intStatusId <> 1
-			)
-	BEGIN
-		SELECT @intWorkOrderId = intWorkOrderId
-			,@intItemId = intItemId
-		FROM @tblMFScheduleWorkOrder x
-		WHERE x.intPackTypeId IS NULL
-			AND intStatusId <> 1
-		ORDER BY intExecutionOrder DESC
+			ORDER BY intExecutionOrder DESC
 
-		SELECT @strWorkOrderNo = strWorkOrderNo
-		FROM dbo.tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
+			SELECT @strWorkOrderNo = strWorkOrderNo
+			FROM dbo.tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @strItemNo = strItemNo
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
+			SELECT @strItemNo = strItemNo
+			FROM dbo.tblICItem
+			WHERE intItemId = @intItemId
 
-		RAISERROR (
-				51188
-				,11
-				,1
-				,@strItemNo
-				,@strWorkOrderNo
+			RAISERROR (
+					51188
+					,11
+					,1
+					,@strItemNo
+					,@strWorkOrderNo
+					)
+
+			RETURN
+		END
+
+		IF EXISTS (
+				SELECT *
+				FROM @tblMFScheduleWorkOrder
+				WHERE intPackTypeId IS NULL
+					AND intStatusId <> 1
+					AND dblBalance > 0
 				)
-
-		RETURN
-	END
-
-	IF EXISTS (
-			SELECT *
+		BEGIN
+			SELECT @intWorkOrderId = intWorkOrderId
 			FROM @tblMFScheduleWorkOrder
 			WHERE intPackTypeId IS NULL
 				AND intStatusId <> 1
 				AND dblBalance > 0
-			)
-	BEGIN
-		SELECT @intWorkOrderId = intWorkOrderId
-		FROM @tblMFScheduleWorkOrder
-		WHERE intPackTypeId IS NULL
-			AND intStatusId <> 1
-			AND dblBalance > 0
-		ORDER BY intExecutionOrder DESC
+			ORDER BY intExecutionOrder DESC
 
-		SELECT @strWorkOrderNo = strWorkOrderNo
-		FROM tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
+			SELECT @strWorkOrderNo = strWorkOrderNo
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @strCellName = strCellName
-		FROM tblMFManufacturingCell
-		WHERE intManufacturingCellId = @intManufacturingCellId
+			SELECT @strCellName = strCellName
+			FROM tblMFManufacturingCell
+			WHERE intManufacturingCellId = @intManufacturingCellId
 
-		SELECT @intPackTypeId = intPackTypeId
-		FROM @tblMFScheduleWorkOrder x
-		WHERE x.intWorkOrderId = @intWorkOrderId
+			SELECT @intPackTypeId = intPackTypeId
+			FROM @tblMFScheduleWorkOrder x
+			WHERE x.intWorkOrderId = @intWorkOrderId
 
-		SELECT @strPackName = strPackName
-		FROM tblMFPackType
-		WHERE intPackTypeId = @intPackTypeId
+			SELECT @strPackName = strPackName
+			FROM tblMFPackType
+			WHERE intPackTypeId = @intPackTypeId
 
-		RAISERROR (
-				51186
-				,11
-				,1
-				,@strPackName
-				,@strWorkOrderNo
-				,@strCellName
+			RAISERROR (
+					51186
+					,11
+					,1
+					,@strPackName
+					,@strWorkOrderNo
+					,@strCellName
+					)
+
+			RETURN
+		END
+
+		IF EXISTS (
+				SELECT *
+				FROM @tblMFScheduleWorkOrder
+				WHERE dblConversionFactor IS NULL
+					AND intStatusId <> 1
+					AND dblBalance > 0
 				)
-
-		RETURN
-	END
-
-	IF EXISTS (
-			SELECT *
+		BEGIN
+			SELECT @intWorkOrderId = intWorkOrderId
 			FROM @tblMFScheduleWorkOrder
 			WHERE dblConversionFactor IS NULL
 				AND intStatusId <> 1
 				AND dblBalance > 0
-			)
-	BEGIN
-		SELECT @intWorkOrderId = intWorkOrderId
-		FROM @tblMFScheduleWorkOrder
-		WHERE dblConversionFactor IS NULL
-			AND intStatusId <> 1
-			AND dblBalance > 0
-		ORDER BY intExecutionOrder DESC
+			ORDER BY intExecutionOrder DESC
 
-		SELECT @strWorkOrderNo = strWorkOrderNo
-		FROM tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
+			SELECT @strWorkOrderNo = strWorkOrderNo
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
 
-		RAISERROR (
-				51187
-				,11
-				,1
-				,@strWorkOrderNo
-				)
+			RAISERROR (
+					51187
+					,11
+					,1
+					,@strWorkOrderNo
+					)
 
-		RETURN
-	END
+			RETURN
+		END
 
-	SELECT @intManufacturingCellId1 = MIN(intManufacturingCellId)
-		,@intLocationId = MIN(intLocationId)
-	FROM @tblMFScheduleWorkOrder
-
-	WHILE @intManufacturingCellId1 IS NOT NULL
-	BEGIN
 		SELECT @intPreviousWorkOrderId = 0
 
 		SELECT @intAllottedNoOfMachine = 0
+
+		IF @ysnScheduleByManufacturingCell = 0
+		BEGIN
+			SELECT @intCalendarId = intCalendarId
+			FROM tblMFScheduleCalendar
+			WHERE intManufacturingCellId = @intManufacturingCellId1
+				AND ysnStandard = 1
+		END
 
 		DELETE
 		FROM @tblMFScheduleWorkOrderCalendarDetail
@@ -376,18 +388,6 @@ BEGIN TRY
 
 			WHILE @intRecordId IS NOT NULL
 			BEGIN
-				SELECT @intRecordId = MIN(intRecordId)
-				FROM @tblMFScheduleWorkOrder S
-				WHERE S.intNoOfUnit > 0
-					AND intManufacturingCellId = @intManufacturingCellId1
-					AND S.intStatusId <> 1
-					AND NOT EXISTS (
-						SELECT *
-						FROM @tblMFScheduleWorkOrderDetail SD
-						WHERE SD.intWorkOrderId = S.intWorkOrderId
-							AND SD.intCalendarDetailId = @intCalendarDetailId
-						)
-
 				SELECT @intWorkOrderId = NULL
 					,@intNoOfUnit = NULL
 					,@intPackTypeId = NULL
@@ -1454,7 +1454,7 @@ BEGIN TRY
 		END
 
 		SELECT @intManufacturingCellId1 = MIN(intManufacturingCellId)
-		FROM @tblMFScheduleWorkOrder
+		FROM @tblMFWorkOrder
 		WHERE intManufacturingCellId > @intManufacturingCellId1
 	END
 

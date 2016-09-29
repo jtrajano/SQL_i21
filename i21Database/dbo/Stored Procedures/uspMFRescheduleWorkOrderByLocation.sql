@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE dbo.uspMFRescheduleWorkOrderByLocation (@strXML NVARCHAR(MAX),@ysnScheduleByManufacturingCell int=0
+﻿CREATE PROCEDURE dbo.uspMFRescheduleWorkOrderByLocation (
+	@strXML NVARCHAR(MAX)
+	,@ysnScheduleByManufacturingCell INT = 0
 	)
 AS
 BEGIN TRY
@@ -11,24 +13,29 @@ BEGIN TRY
 		,@dtmFromDate DATETIME
 		,@dtmToDate DATETIME
 		,@intUserId INT
-		,@intManufacturingCellId int
-		,@intScheduleId int
-		,@ysnStandard bit
-		,@intConcurrencyId int
+		,@intManufacturingCellId INT
+		,@intScheduleId INT
+		,@ysnStandard BIT
+		,@intConcurrencyId INT
 		,@tblMFScheduleConstraint AS ScheduleConstraintTable
-		,@intCalendarId int
-
+		,@intCalendarId INT
 	DECLARE @tblMFSequence TABLE (
 		intWorkOrderId INT
 		,intExecutionOrder INT
 		,dtmTargetDate DATETIME
-		,intNoOfFlushes int
+		,intNoOfFlushes INT
 		)
 	DECLARE @strScheduleType NVARCHAR(50)
 		,@intAttributeId INT
 		,@strAttributeValue NVARCHAR(50)
 		,@intBlendAttributeId INT
 		,@strBlendAttributeValue NVARCHAR(50)
+		,@dtmCurrentDateTime DATETIME
+		,@dtmCurrentDate DATETIME
+
+	SELECT @dtmCurrentDateTime = GETDATE()
+
+	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -52,21 +59,21 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@dtmFromDate = dtmFromDate
 		,@dtmToDate = dtmToDate
-		,@intManufacturingCellId=intManufacturingCellId
-		,@intScheduleId=intScheduleId
-		,@ysnStandard=ysnStandard
-		,@intCalendarId=intCalendarId
-		,@intConcurrencyId=intConcurrencyId
+		,@intManufacturingCellId = intManufacturingCellId
+		,@intScheduleId = intScheduleId
+		,@ysnStandard = ysnStandard
+		,@intCalendarId = intCalendarId
+		,@intConcurrencyId = intConcurrencyId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intUserId INT
 			,intLocationId INT
 			,dtmFromDate DATETIME
 			,dtmToDate DATETIME
 			,intManufacturingCellId INT
-			,intScheduleId int
-			,ysnStandard bit
-			,intConcurrencyId int
-			,intCalendarId int
+			,intScheduleId INT
+			,ysnStandard BIT
+			,intConcurrencyId INT
+			,intCalendarId INT
 			)
 
 	INSERT INTO @tblMFWorkOrder (
@@ -89,6 +96,7 @@ BEGIN TRY
 		,ysnPicked
 		,intLocationId
 		,intPackTypeId
+		,strPackName
 		,intItemUOMId
 		,intUnitMeasureId
 		,intScheduleId
@@ -100,16 +108,18 @@ BEGIN TRY
 		,strAdditionalComments
 		,intNoOfFlushes
 		,strWIPItemNo
-		,dtmEarliestStartDate 
+		,dtmEarliestStartDate
+		,intNoOfUnit
+		,dblConversionFactor
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
 		,x.intItemId
 		,x.dblQuantity
 		,x.dblBalance
-		,ISNULL(x.dtmEarliestDate,W.dtmEarliestDate)
+		,ISNULL(x.dtmEarliestDate, W.dtmEarliestDate)
 		,x.dtmExpectedDate
-		,ISNULL(x.dtmLatestDate,W.dtmLatestDate)
+		,ISNULL(x.dtmLatestDate, W.dtmLatestDate)
 		,x.dtmExpectedDate
 		,2
 		,x.intStatusId
@@ -121,22 +131,28 @@ BEGIN TRY
 		,0
 		,@intLocationId
 		,x.intPackTypeId
+		,P.strPackName
 		,x.intItemUOMId
 		,x.intUnitMeasureId
 		,x.intScheduleId
 		,x.ysnFrozen
-		,x.intNoOfSelectedMachine
+		,IsNULL(x.intNoOfSelectedMachine, 1)
 		,x.intSetupDuration
 		,x.strComments
-		,x.strNote
+		,CASE 
+			WHEN @dtmCurrentDate > x.dtmExpectedDate
+				THEN 'Past Expected Date'
+			END strNote
 		,x.strAdditionalComments
 		,x.intNoOfFlushes
 		,x.strWIPItemNo
-		,x.dtmEarliestStartDate 
-		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
+		,x.dtmEarliestStartDate
+		,x.dblBalance * PTD.dblConversionFactor
+		,PTD.dblConversionFactor
+	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
-			,intScheduleId int
+			,intScheduleId INT
 			,intItemId INT
 			,intUnitMeasureId INT
 			,intItemUOMId INT
@@ -145,22 +161,22 @@ BEGIN TRY
 			,dtmEarliestDate DATETIME
 			,dtmExpectedDate DATETIME
 			,dtmLatestDate DATETIME
-			,dtmTargetDate Datetime
+			,dtmTargetDate DATETIME
 			,intStatusId INT
 			,intExecutionOrder INT
 			,intPackTypeId INT
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			,intSetupDuration INT
-			,intNoOfSelectedMachine int
+			,intNoOfSelectedMachine INT
 			,strComments NVARCHAR(MAX)
 			,strNote NVARCHAR(MAX)
 			,strAdditionalComments NVARCHAR(MAX)
-			,intNoOfFlushes int
-			,strWIPItemNo nvarchar(50)
-			,dtmEarliestStartDate datetime
+			,intNoOfFlushes INT
+			,strWIPItemNo NVARCHAR(50)
+			,dtmEarliestStartDate DATETIME
 			) x
-	JOIN dbo.tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
+	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = x.intWorkOrderId
 	LEFT JOIN dbo.tblICItemFactory F1 ON F1.intFactoryId = @intLocationId
 		AND F1.intItemId = x.intItemId
 	LEFT JOIN dbo.tblICItemFactoryManufacturingCell MC1 ON MC1.intItemFactoryId = F1.intItemFactoryId
@@ -173,34 +189,69 @@ BEGIN TRY
 		AND F3.intItemId = x.intItemId
 	LEFT JOIN dbo.tblICItemFactoryManufacturingCell MC3 ON MC3.intItemFactoryId = F3.intItemFactoryId
 		AND MC3.intPreference = 3
+	LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = x.intManufacturingCellId
+		AND MC.intPackTypeId = x.intPackTypeId
+	LEFT JOIN tblMFPackType P ON P.intPackTypeId = x.intPackTypeId
+	LEFT JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
+		AND PTD.intTargetUnitMeasureId = x.intUnitMeasureId
+		AND PTD.intSourceUnitMeasureId = MC.intLineCapacityUnitMeasureId
 	ORDER BY x.intManufacturingCellId
 		,x.dtmExpectedDate
 		,x.intItemId
-IF @strScheduleType = 'Backward Schedule'
+
+	IF @strScheduleType = 'Backward Schedule'
 	BEGIN
+		INSERT INTO @tblMFSequence
+		EXEC dbo.uspMFCheckContamination @tblMFWorkOrder
+			,@intLocationId
 
-	INSERT INTO @tblMFSequence
-	EXEC dbo.uspMFCheckContamination @tblMFWorkOrder
-		,@intLocationId
+		UPDATE W
+		SET W.intExecutionOrder = S.intExecutionOrder
+			,W.dtmTargetDate = S.dtmTargetDate
+			,W.intNoOfFlushes = S.intNoOfFlushes
+		FROM @tblMFWorkOrder W
+		JOIN @tblMFSequence S ON S.intWorkOrderId = W.intWorkOrderId
 
-	UPDATE W
-	SET W.intExecutionOrder = S.intExecutionOrder
-		,W.dtmTargetDate = S.dtmTargetDate
-		,W.intNoOfFlushes=S.intNoOfFlushes
-	FROM @tblMFWorkOrder W
-	JOIN @tblMFSequence S ON S.intWorkOrderId = W.intWorkOrderId
-
-	IF @ysnScheduleByManufacturingCell = 1
-	BEGIN
-		INSERT INTO @tblMFScheduleConstraint(intScheduleRuleId,intPriorityNo)
-		SELECT intScheduleRuleId,intPriorityNo
-		FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
-				intScheduleRuleId INT
-				,intPriorityNo int
-				,ysnSelect bit
+		IF @ysnScheduleByManufacturingCell = 1
+		BEGIN
+			INSERT INTO @tblMFScheduleConstraint (
+				intScheduleRuleId
+				,intPriorityNo
 				)
-		WHERE ysnSelect=1
-		ORDER BY intPriorityNo
+			SELECT intScheduleRuleId
+				,intPriorityNo
+			FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
+					intScheduleRuleId INT
+					,intPriorityNo INT
+					,ysnSelect BIT
+					)
+			WHERE ysnSelect = 1
+			ORDER BY intPriorityNo
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblMFScheduleConstraint (
+				intScheduleRuleId
+				,intPriorityNo
+				)
+			SELECT intScheduleRuleId
+				,intPriorityNo
+			FROM tblMFScheduleRule
+			WHERE ysnActive = 1
+			ORDER BY intPriorityNo
+		END
+
+		EXEC dbo.uspMFRescheduleAndSaveWorkOrder @tblMFWorkOrder = @tblMFWorkOrder
+			,@dtmFromDate = @dtmFromDate
+			,@dtmToDate = @dtmToDate
+			,@intUserId = @intUserId
+			,@intChartManufacturingCellId = @intManufacturingCellId
+			,@ysnScheduleByManufacturingCell = @ysnScheduleByManufacturingCell
+			,@intScheduleId = @intScheduleId
+			,@ysnStandard = @ysnStandard
+			,@intConcurrencyId = @intConcurrencyId
+			,@tblMFScheduleConstraint = @tblMFScheduleConstraint
+			,@intCalendarId = @intCalendarId
 	END
 	ELSE
 	BEGIN
@@ -213,47 +264,21 @@ IF @strScheduleType = 'Backward Schedule'
 		FROM tblMFScheduleRule
 		WHERE ysnActive = 1
 		ORDER BY intPriorityNo
-	END
 
-	EXEC dbo.uspMFRescheduleAndSaveWorkOrder @tblMFWorkOrder = @tblMFWorkOrder
-		,@dtmFromDate = @dtmFromDate
-		,@dtmToDate = @dtmToDate
-		,@intUserId = @intUserId
-		,@intChartManufacturingCellId=@intManufacturingCellId
-		,@ysnScheduleByManufacturingCell=@ysnScheduleByManufacturingCell
-		,@intScheduleId=@intScheduleId
-		,@ysnStandard = @ysnStandard
-		,@intConcurrencyId = @intConcurrencyId
-		,@tblMFScheduleConstraint=@tblMFScheduleConstraint
-		,@intCalendarId=@intCalendarId
-			End
-	Else
-	Begin
-	INSERT INTO @tblMFScheduleConstraint (
-			intScheduleRuleId
-			,intPriorityNo
-			)
-		SELECT intScheduleRuleId
-			,intPriorityNo
-		FROM tblMFScheduleRule
-		WHERE ysnActive = 1
-		ORDER BY intPriorityNo
-
-		EXEC dbo.uspMFRescheduleAndSaveWorkOrderByForward 
-			@tblMFWorkOrder
-			,@intManufacturingCellId 
-			,@intCalendarId 
-			,@intScheduleId 
-			,@intConcurrencyId 
-			,@intUserId 
-			,@intLocationId 
-			,@ysnStandard 
-			,@dtmFromDate 
-			,@dtmToDate 
+		EXEC dbo.uspMFRescheduleAndSaveWorkOrderByForward @tblMFWorkOrder
+			,@intManufacturingCellId
+			,@intCalendarId
+			,@intScheduleId
+			,@intConcurrencyId
+			,@intUserId
+			,@intLocationId
+			,@ysnStandard
+			,@dtmFromDate
+			,@dtmToDate
 			,@tblMFScheduleConstraint
 			,0
-			,1
-	End
+			,0
+	END
 END TRY
 
 BEGIN CATCH
@@ -266,4 +291,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-
