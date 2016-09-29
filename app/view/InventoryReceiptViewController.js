@@ -2160,7 +2160,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     //Set Default Value for Lot UOM
                                     if(lot.get('strUnitMeasure') === null || lot.get('strUnitMeasure') === '') {
                                             lot.set('strUnitMeasure', record.get('strUnitMeasure'));
-                                            lot.set('intItemUnitMeasureId', record.get('intItemUnitMeasureId'));
+                                            lot.set('intItemUnitMeasureId', record.get('intUnitMeasureId'));
                                         } 
                                 
                                  // Get the Gross Qty
