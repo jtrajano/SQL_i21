@@ -155,7 +155,7 @@ namespace iRely.Inventory.BusinessLayer
                 }
                 else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemPricing_tblICItemLocation\""))
                 {
-                    msg = "The location(s) you are trying to remove were being used in Pricing tab.";
+                    msg = "The location(s) you are trying to remove are being used in Pricing tab.";
                 }
             }
 
