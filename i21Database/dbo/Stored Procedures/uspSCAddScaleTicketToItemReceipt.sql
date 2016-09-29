@@ -221,7 +221,7 @@ WHERE intTicketId = @intTicketId
 													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
 													WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 												END
-												WHEN IC.strCostMethod = 'Amount' THEN 0
+												WHEN IC.strCostMethod = 'Amount' THEN 1
 											END
 		,[intCostUOMId]						= @intTicketItemUOMId
 		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId

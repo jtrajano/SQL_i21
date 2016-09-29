@@ -33,14 +33,15 @@ BEGIN
 	ELSE IF  @strDiscountCalculationOptionId = '2' --WET WEIGHT
 		BEGIN
 			SELECT @dblGrossShrinkPercentage = SUM(dblShrinkPercent) FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strShrinkWhat = 'Gross Weight'
-			SELECT @dblWetShrinkPercentage = SUM(dblShrinkPercent) FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strShrinkWhat = 'Wet Weight'
+			--SELECT @dblWetShrinkPercentage = SUM(dblShrinkPercent) FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strShrinkWhat = 'Wet Weight'
 			SET @dblTicketNetWeight = @dblTicketGrossWeight - @dblTicketTareWeight;
 			SET @dblGrossShrink = @dblTicketNetWeight * ISNULL(@dblGrossShrinkPercentage,0);
 			SET @dblGrossShrink = @dblGrossShrink / 100;
 			SET @dblTicketWetUnits = (@dblTicketNetWeight - @dblGrossShrink)
-            SET @dblWetShrink =  @dblTicketWetUnits * @dblWetShrinkPercentage;
-            SET @dblWetShrink = @dblWetShrink / 100;
-			SET @calculatedValue =  @dblDiscountAmount * (@dblTicketWetUnits - @dblWetShrink)
+            --SET @dblWetShrink =  @dblTicketWetUnits * @dblWetShrinkPercentage;
+            --SET @dblWetShrink = @dblWetShrink / 100;
+			--SET @calculatedValue =  @dblDiscountAmount * (@dblTicketWetUnits - @dblWetShrink)
+			SET @calculatedValue =  @dblDiscountAmount * @dblTicketWetUnits
 		END
 	ELSE 
 		SET @calculatedValue =  @dblDiscountAmount * @dblTicketGrossUnit
