@@ -819,11 +819,15 @@ BEGIN
 		WHERE intInTransitSourceLocationId IS NOT NULL 
 	END 
 
-	EXEC dbo.uspICCreateGLEntries 
+	DECLARE @intReturnValue INT
+
+	EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 		@strBatchId
 		,@strAccountToCounterInventory
 		,@intEntityUserSecurityId
 		,@strGLDescription
 		,@intContraInventory_ItemLocationId
+
+	IF @intReturnValue < 0 RETURN -1
 END 
 
