@@ -102,6 +102,24 @@ BEGIN
 	RAISERROR(50008, 11, 1)  
 	GOTO Post_Exit  
 END   
+
+--------------------------------------------------------------------------------
+-- Check if lot numbers are unique.	
+--------------------------------------------------------------------------------
+BEGIN 
+	IF EXISTS(SELECT	Lot.intLotId, COUNT(Lot.intLotId) intCount
+		FROM	dbo.tblICInventoryAdjustment Header
+				INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				INNER JOIN dbo.tblICLot Lot ON Lot.intLotId = Detail.intLotId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+		GROUP BY Lot.intLotId
+		HAVING COUNT(Lot.intLotId) > 1
+	)
+	BEGIN
+		RAISERROR('Adjusting multiple lots with the same lot number is not allowed.', 11, 1)  
+		GOTO Post_Exit  
+	END
+END 
  
 -- Check Company preference: Allow User Self Post  
 IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
@@ -120,7 +138,7 @@ BEGIN
 		RAISERROR(50013, 11, 1, 'Unpost')  
 		GOTO Post_Exit    
 	END  
-END   
+END
 
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
