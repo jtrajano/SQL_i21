@@ -109,7 +109,7 @@ BEGIN
 		)
 		SELECT
 		intOrderType				= @intOrderType
-		,intEntityCustomerId		= SC.intEntityId
+		,intEntityCustomerId		= @intEntityId
 		,intCurrencyId				= SC.intCurrencyId
 		,intShipFromLocationId		= SC.intProcessingLocationId
 		,intShipToLocationId		= (select top 1 intShipToId from tblARCustomer where intEntityCustomerId = @intEntityId)
