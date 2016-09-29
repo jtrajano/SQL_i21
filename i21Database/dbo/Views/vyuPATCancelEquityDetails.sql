@@ -16,7 +16,7 @@ SELECT	CED.intCancelDetailId,
 		CED.intConcurrencyId
 	FROM tblPATCancelEquityDetail CED
 	INNER JOIN tblGLFiscalYear FY
-		ON FY.intFiscalYearId = FY.intFiscalYearId
+		ON FY.intFiscalYearId = CED.intFiscalYearId
 	INNER JOIN tblPATRefundRate RR
 		ON RR.intRefundTypeId = CED.intRefundTypeId
 	INNER JOIN tblEMEntity ENT
