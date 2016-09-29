@@ -182,3 +182,28 @@ GO
 	UPDATE tblSMTransaction SET strRecordNo = '0'
 	WHERE strRecordNo = 'ActivityEmail-1'
 GO
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMDocumentMaintenance WHERE strCode LIKE 'COM-%')
+	BEGIN
+		DECLARE @currentNumber INT
+
+		SELECT @currentNumber = MAX(CAST(REPLACE(strCode, 'COM-', '') AS INT)) 
+		FROM tblSMDocumentMaintenance 
+		WHERE strCode LIKE '%COM%'
+
+		UPDATE tblSMDocumentMaintenance SET strCode = 'DOC-' + CAST(CAST(REPLACE(strCode, 'DOC-', '') AS INT) + @currentNumber AS NVARCHAR)
+		FROM tblSMDocumentMaintenance 
+		WHERE strCode LIKE '%DOC%'
+
+		UPDATE tblSMDocumentMaintenance SET strCode = REPLACE(strCode, 'COM', 'DOC')
+		WHERE strCode LIKE '%COM%'
+
+		SELECT @currentNumber = MAX(CAST(REPLACE(strCode, 'DOC-', '') AS INT)) + 1 
+		FROM tblSMDocumentMaintenance 
+		WHERE strCode LIKE '%DOC%'
+
+		UPDATE tblSMStartingNumber SET intNumber = @currentNumber 
+		WHERE strPrefix IN ('COM-', 'DOC-')
+	END
+
+GO

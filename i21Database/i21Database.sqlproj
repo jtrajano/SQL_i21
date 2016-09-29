@@ -4383,6 +4383,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateTableReceiptInspection.sql" />
     <None Include="Scripts\Post-Deployment\IC\1620_to_1630.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRescheduleAndSaveWorkOrderByForward.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMInspectionDeleteResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
