@@ -20,9 +20,10 @@ BEGIN
 	,@dblTicketWetUnits AS NUMERIC(18, 6)
 	,@calculatedValue AS NUMERIC(18, 6)
 	,@strDiscountCalculationOptionId varchar
+	,@dblConvertedUOMQty AS NUMERIC(38, 20);
 
 	SELECT @dblTicketGrossUnit = dblGrossUnits, @dblTicketShrinkUnit = dblShrink, @dblTicketNetUnits = dblNetUnits 
-	,@dblTicketGrossWeight = dblGrossWeight, @dblTicketTareWeight = dblTareWeight
+	,@dblTicketGrossWeight = dblGrossWeight, @dblTicketTareWeight = dblTareWeight, @dblConvertedUOMQty = dblConvertedUOMQty
 	FROM tblSCTicket WHERE intTicketId = @intTicketId
 	SELECT @dblDiscountAmount = dblDiscountAmount, @strDiscountCalculationOptionId = strCalcMethod FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId;
 
@@ -41,7 +42,7 @@ BEGIN
             --SET @dblWetShrink =  @dblTicketWetUnits * @dblWetShrinkPercentage;
             --SET @dblWetShrink = @dblWetShrink / 100;
 			--SET @calculatedValue =  @dblDiscountAmount * (@dblTicketWetUnits - @dblWetShrink)
-			SET @calculatedValue =  @dblDiscountAmount * @dblTicketWetUnits
+			SET @calculatedValue =  (@dblDiscountAmount * @dblTicketWetUnits) * @dblConvertedUOMQty
 		END
 	ELSE 
 		SET @calculatedValue =  @dblDiscountAmount * @dblTicketGrossUnit
