@@ -26,7 +26,7 @@ BEGIN TRANSACTION
 -- CREATE THE TEMPORARY TABLE 
 CREATE TABLE #tmpGLDetail (
 	[dtmDate] [datetime] NOT NULL
-	,[strBatchId] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL
+	,[strBatchId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 	,[intAccountId] [int] NULL
 	,[dblDebit] [numeric](18, 6) NULL
 	,[dblCredit] [numeric](18, 6) NULL
