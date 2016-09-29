@@ -130,7 +130,6 @@ END
 
 IF (@ysnPost = 1)
 BEGIN
-
 	--Insert Earning Distribution to Temporary Table
 	CREATE TABLE #tmpEarning (
 		intPaycheckId			INT
@@ -449,21 +448,86 @@ BEGIN
 		   @dblCurrentAmount = dblAmount
 		FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
 
-	IF EXISTS (SELECT 1 FROM @BankTransactionTable WHERE strTransactionId = @strTransactionId AND dblAmount <> @dblCurrentAmount)
+	IF (@intTransactionId IS NULL) 
 	BEGIN
-		DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
-		DELETE FROM tblGLDetailRecap WHERE strTransactionId = @strTransactionId AND strModuleName = 'Payroll'
-		SELECT @intTransactionId = NULL
-	END
-
-	IF (@intTransactionId IS NULL)
 		EXEC uspCMCreateBankTransactionEntries @BankTransactionTable, @BankTransactionDetail, @intTransactionId
-
-	IF (@@ERROR <> 0)
+		IF (@@ERROR <> 0)
 		BEGIN
 			RAISERROR('Failed to Generate Bank Transaction entries.', 11, 1)
 			GOTO Post_Rollback
 		END
+	END
+	ELSE
+	BEGIN
+		UPDATE tblCMBankTransaction
+		SET 
+			[strTransactionId] = BT.strTransactionId	
+			,[intBankTransactionTypeId] = BT.intBankTransactionTypeId
+			,[intBankAccountId] = BT.intBankAccountId
+			,[dtmDate] = BT.dtmDate
+			,[strPayee] = BT.strPayee
+			,[intPayeeId] = BT.intPayeeId
+			,[strAddress] = BT.strAddress
+			,[strZipCode] = BT.strZipCode
+			,[strCity] = BT.strCity
+			,[strState] = BT.strState
+			,[strCountry] = BT.strCountry
+			,[dblAmount] = BT.dblAmount
+			,[strAmountInWords] = BT.strAmountInWords
+			,[strMemo] = BT.strMemo
+			,[strReferenceNo] = BT.strReferenceNo
+			,[dtmCheckPrinted] = BT.dtmCheckPrinted
+			,[ysnCheckToBePrinted] = BT.ysnCheckToBePrinted
+			,[ysnCheckVoid] = BT.ysnCheckVoid
+			,[ysnPosted] = BT.ysnPosted
+			,[strLink] = BT.strLink			
+			,[ysnClr] = BT.ysnClr			
+			,[dtmDateReconciled] = BT.dtmDateReconciled
+			,[intBankStatementImportId]	= BT.intBankStatementImportId
+			,[intBankFileAuditId] = BT.intBankFileAuditId
+			,[strSourceSystem] = BT.strSourceSystem
+			,[intEntityId] = BT.intEntityId	
+			,[intCreatedUserId] = BT.intCreatedUserId	
+			,[intCompanyLocationId] = BT.intCompanyLocationId
+			,[dtmCreated] = BT.dtmCreated	
+			,[intLastModifiedUserId] = BT.intLastModifiedUserId
+			,[dtmLastModified] = BT.dtmLastModified
+		FROM @BankTransactionTable BT
+		WHERE tblCMBankTransaction.intTransactionId = @intTransactionId
+
+		/* Reinsert Bank Transaction Detail */
+		DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
+		
+		INSERT INTO [dbo].[tblCMBankTransactionDetail]
+			([intTransactionId]
+			,[dtmDate]
+			,[intGLAccountId]
+			,[strDescription]
+			,[dblDebit]
+			,[dblCredit]
+			,[intUndepositedFundId]
+			,[intEntityId]
+			,[intCreatedUserId]
+			,[dtmCreated]
+			,[intLastModifiedUserId]
+			,[dtmLastModified]
+			,[intConcurrencyId])
+		SELECT
+			@intTransactionId
+			,[dtmDate]
+			,[intGLAccountId]
+			,[strDescription]
+			,[dblDebit]
+			,[dblCredit]
+			,[intUndepositedFundId]
+			,[intEntityId]
+			,[intCreatedUserId]
+			,[dtmCreated]
+			,[intLastModifiedUserId]
+			,[dtmLastModified]
+			,[intConcurrencyId]
+		FROM @BankTransactionDetail
+	END
 END
 
 
@@ -715,7 +779,7 @@ END
 
 IF @ysnPost = 1
 BEGIN
-	-- Create the G/L Entries for Misc Checks. 	
+	-- Create the G/L Entries for Paychecks. 	
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
@@ -940,109 +1004,90 @@ Post_Exit:
 	AFTER POSTING PROCEDURES
 *****************************************/
 IF (@isSuccessful <> 0)
+BEGIN
+	IF (@ysnPost = 1) 
 	BEGIN
-		IF (@ysnPost = 1) 
-			BEGIN
-				IF (@ysnRecap = 0) 
-					BEGIN
-						/* If Posting succeeds, mark transaction as posted */
-						UPDATE tblPRPaycheck SET 
-							ysnPosted = 1
-							,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
-						WHERE strPaycheckId = @strTransactionId
-						SET @isSuccessful = 1
-
-						/* Update the Employee Time Off Hours Used */
-						UPDATE tblPREmployeeTimeOff
-							SET	dblHoursUsed = dblHoursUsed + A.dblHours
-							FROM (SELECT 
-									intPaycheckId
-									,intEmployeeTimeOffId
-									,dblHours = SUM(dblHours)
-								  FROM tblPRPaycheckEarning
-								  WHERE intPaycheckId = @intPaycheckId
-								  GROUP BY intPaycheckId, intEmployeeTimeOffId) A
-							WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
-								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
-
-						/* Update Paycheck Direct Deposit Distribution */
-						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
-							EXEC uspPRPaycheckEFTDistribution @intPaycheckId
-					END
-			END
-		ELSE
-			BEGIN 
-				IF (@ysnRecap = 0) 
-					BEGIN
-					/* If Unposting succeeds, mark transaction as unposted and delete the corresponding bank transaction */
-						UPDATE tblPRPaycheck SET 
-							ysnPosted = 0
-							,dtmPosted = NULL 
-						WHERE strPaycheckId = @strTransactionId
-
-						/* Update the Employee Time Off Hours Used */
-						UPDATE tblPREmployeeTimeOff
-							SET	dblHoursUsed = dblHoursUsed - A.dblHours
-							FROM (SELECT 
-									intPaycheckId
-									,intEmployeeTimeOffId
-									,dblHours = SUM(dblHours)
-								  FROM tblPRPaycheckEarning
-								  WHERE intPaycheckId = @intPaycheckId
-								  GROUP BY intPaycheckId, intEmployeeTimeOffId) A
-							WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
-								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
-
-						SELECT @intTransactionId = intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
-						DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
-						DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
-
-						/* Delete Any Direct Deposit Entry */
-						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
-							DELETE FROM tblPRPaycheckDirectDeposit WHERE intPaycheckId = @intPaycheckId
-
-						SET @isSuccessful = 1
-					END
-			END
-
-		/* Update the Employee Time Off Tiers and Accrued Hours */
-		SELECT DISTINCT EE.intEmployeeAccrueTimeOffId
-		INTO #tmpAccrueTimeOff
-		FROM tblPRPaycheckEarning PE
-			INNER JOIN tblPREmployeeEarning EE
-				ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
-				WHERE EE.intEmployeeAccrueTimeOffId IS NOT NULL
-					AND PE.intPaycheckId = @intPaycheckId
-					AND EE.intEntityEmployeeId = @intEmployeeId
-		
-		DECLARE @intAccrueTimeOffId INT
-		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAccrueTimeOff)
+		IF (@ysnRecap = 0) 
 		BEGIN
-			SELECT TOP 1 @intAccrueTimeOffId = intEmployeeAccrueTimeOffId FROM #tmpAccrueTimeOff
+			/* If Posting succeeds, mark transaction as posted */
+			UPDATE tblPRPaycheck SET 
+				ysnPosted = 1
+				,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
+			WHERE strPaycheckId = @strTransactionId
+			SET @isSuccessful = 1
 
-			EXEC uspPRUpdateEmployeeTimeOff @intAccrueTimeOffId, @intEmployeeId
-			EXEC uspPRUpdateEmployeeTimeOffHours @intAccrueTimeOffId, @intEmployeeId
+			/* Update the Employee Time Off Hours Used */
+			UPDATE tblPREmployeeTimeOff
+				SET	dblHoursUsed = dblHoursUsed + A.dblHours
+				FROM (SELECT 
+						intPaycheckId
+						,intEmployeeTimeOffId
+						,dblHours = SUM(dblHours)
+						FROM tblPRPaycheckEarning
+						WHERE intPaycheckId = @intPaycheckId
+						GROUP BY intPaycheckId, intEmployeeTimeOffId) A
+				WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
+					AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
 
-			DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
+			/* Update Paycheck Direct Deposit Distribution */
+			IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
+				EXEC uspPRPaycheckEFTDistribution @intPaycheckId
 		END
-
-		EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 	END
-ELSE
+	ELSE
+	BEGIN 
+		IF (@ysnRecap = 0) 
+		BEGIN
+			/* If Unposting succeeds, mark transaction as unposted */
+			UPDATE tblPRPaycheck SET 
+				ysnPosted = 0
+				,dtmPosted = NULL 
+			WHERE strPaycheckId = @strTransactionId
+
+			/* Update the Employee Time Off Hours Used */
+			UPDATE tblPREmployeeTimeOff
+				SET	dblHoursUsed = dblHoursUsed - A.dblHours
+				FROM (SELECT 
+						intPaycheckId
+						,intEmployeeTimeOffId
+						,dblHours = SUM(dblHours)
+						FROM tblPRPaycheckEarning
+						WHERE intPaycheckId = @intPaycheckId
+						GROUP BY intPaycheckId, intEmployeeTimeOffId) A
+				WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
+					AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
+
+			/* Delete Any Direct Deposit Entry */
+			IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
+				DELETE FROM tblPRPaycheckDirectDeposit WHERE intPaycheckId = @intPaycheckId
+
+			SET @isSuccessful = 1
+		END
+	END
+
+	/* Update the Employee Time Off Tiers and Accrued Hours */
+	SELECT DISTINCT EE.intEmployeeAccrueTimeOffId
+	INTO #tmpAccrueTimeOff
+	FROM tblPRPaycheckEarning PE
+		INNER JOIN tblPREmployeeEarning EE
+			ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
+			WHERE EE.intEmployeeAccrueTimeOffId IS NOT NULL
+				AND PE.intPaycheckId = @intPaycheckId
+				AND EE.intEntityEmployeeId = @intEmployeeId
+		
+	DECLARE @intAccrueTimeOffId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAccrueTimeOff)
 	BEGIN
-		IF (@ysnPost = 1) 
-			BEGIN
-				/* If Posting fails, delete the created bank transaction */
-				DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
-				DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
-				SET @isSuccessful = 0
-			END
-		ELSE
-			BEGIN
-				SET @isSuccessful = 0
-			END
+		SELECT TOP 1 @intAccrueTimeOffId = intEmployeeAccrueTimeOffId FROM #tmpAccrueTimeOff
+
+		EXEC uspPRUpdateEmployeeTimeOff @intAccrueTimeOffId, @intEmployeeId
+		EXEC uspPRUpdateEmployeeTimeOffHours @intAccrueTimeOffId, @intEmployeeId
+
+		DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
 	END
 
+	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
+END
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAccrueTimeOff')) DROP TABLE #tmpAccrueTimeOff
