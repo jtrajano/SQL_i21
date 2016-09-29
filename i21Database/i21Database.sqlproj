@@ -4349,6 +4349,7 @@
     <Build Include="dbo\Tables\tblPATTransferType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRescheduleAndSaveWorkOrderByForward.sql" />
     <Build Include="dbo\Stored Procedures\uspQMInspectionDeleteResult.sql" />
+    <Build Include="dbo\Views\vyuPATRefundSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
