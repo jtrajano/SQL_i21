@@ -172,7 +172,7 @@ BEGIN TRY
 		WHERE intStorageScheduleRuleId = @intStorageScheduleId
 	END
 
-	IF @strPeriodData= NULL
+	IF @strPeriodData IS NULL
 	BEGIN
 		INSERT INTO @tblGRStorageSchedulePeriod 
 		(
