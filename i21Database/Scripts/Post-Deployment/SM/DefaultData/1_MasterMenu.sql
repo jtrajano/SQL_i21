@@ -2580,6 +2580,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Documents
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.ContractDocument', intSort = 17 WHERE strMenuName = 'Documents' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Producers' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Producers', N'Contract Management', @ContractManagementParentMenuId, N'Producers', N'Maintenance', N'Screen', N'EntityManagement.view.Entity:searchEntityProducer', N'small-menu-maintenance', 1, 1, 0, 1, 18, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.Entity:searchEntityProducer', intSort = 18 WHERE strMenuName = 'Producers' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
 
 /* NOTES RECEIVABLE */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable' AND strModuleName = 'Notes Receivable' AND intParentMenuID = 0)
