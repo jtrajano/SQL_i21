@@ -1,8 +1,8 @@
 ﻿GO
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Invoice')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Invoice')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Invoice',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -23,14 +23,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Invoice' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'General Journal',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -51,14 +51,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'General Journal' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Voucher')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Voucher')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Voucher',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -78,14 +78,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Voucher' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Purchase Order')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Purchase Order')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Purchase Order',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -105,14 +105,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Purchase Order' 
 		END
 	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bill Template')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bill Template')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Bill Template',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -132,14 +132,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Bill Template' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Voucher')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Voucher')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Approve',
 				   [strType]        	=        N'Voucher',
 				   [strMessage]			=        N'{0} {1} {2} unapproved.',
@@ -149,14 +149,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unapproved.'
 			WHERE [strReminder] = N'Approve' AND [strType] = N'Voucher' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Update' AND [strType] = N'Invoice')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Update' AND [strType] = N'Invoice')
 	BEGIN
-		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
 		SELECT [strReminder]        =        N'Update',
 				[strType]        	=        N'Invoice',
 				[strMessage]		=        N'{0} Customer''s Budget need to update for final budget.',
@@ -165,20 +165,20 @@
 				[intSort]           =        7
 	END	
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
-	BEGIN
-		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
-		SELECT [strReminder]        =        N'Post',
-				[strType]        	=        N'General Journal',
-				[strMessage]		=        N'{0} {1} {2} left unposted.',
-				[strQuery]  		=        N'Select intJournalId FROM vyuGLPostRemind WHERE intEntityId = {0}',
-				[strNamespace]      =        N'GeneralLedger.view.GeneralJournal?unposted=1',
-				[intSort]           =        8
-	END	
+	--IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
+	--BEGIN
+	--	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+	--	SELECT [strReminder]        =        N'Post',
+	--			[strType]        	=        N'General Journal',
+	--			[strMessage]		=        N'{0} {1} {2} left unposted.',
+	--			[strQuery]  		=        N'Select intJournalId FROM vyuGLPostRemind WHERE intEntityId = {0}',
+	--			[strNamespace]      =        N'GeneralLedger.view.GeneralJournal?unposted=1',
+	--			[intSort]           =        8
+	--END	
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9)
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9)
 	BEGIN
-		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
 		SELECT [strReminder]        =        N'Overdue',
 				[strType]        	=        N'Scale Ticket',
 				[strMessage]		=        N'{0} Overdue Ticket(s).',
@@ -192,7 +192,7 @@
 				[intSort]           =        9
 	END
 	ELSE
-		UPDATE [dbo].[tblSMReminderList] SET [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true&searchCommand=reminderSearchConfig'
+		UPDATE [tblSMReminderList] SET [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true&searchCommand=reminderSearchConfig'
 		,[strQuery] = N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus from tblSCUncompletedTicketAlert SCAlert
 		LEFT JOIN tblSCTicket SCTicket ON SCAlert.intCompanyLocationId = SCTicket.intProcessingLocationId
 		WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
@@ -201,9 +201,9 @@
 		AND SCAlert.intEntityId = {0}'  
 		WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9
 	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10)
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10)
 	BEGIN
-		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
 		SELECT [strReminder]        =        N'Overdue',
 				[strType]        	=        N'Scale Ticket',
 				[strMessage]		=        N'{0} Overdue Ticket(s).',
@@ -217,7 +217,7 @@
 				[intSort]           =        10
 	END
 	ELSE
-		UPDATE [dbo].[tblSMReminderList] SET [strQuery] = N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus,intProcessingLocationId,SCAlert.intEntityId from tblSCUncompletedTicketAlert SCAlert,tblSCTicket SCTicket
+		UPDATE [tblSMReminderList] SET [strQuery] = N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus,intProcessingLocationId,SCAlert.intEntityId from tblSCUncompletedTicketAlert SCAlert,tblSCTicket SCTicket
 		WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
 		AND ysnHasGeneratedTicketNumber = 1
 		AND (strTicketStatus = ''O'' OR strTicketStatus = ''A'')
@@ -227,9 +227,9 @@
 		WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10
 
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction')
 	BEGIN
-		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
+		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
         SELECT	[strReminder]		=        N'Approve',
 				[strType]			=        N'Transaction',
 				[strMessage]		=        N'{0} {1} {2} unapproved.',
@@ -244,7 +244,7 @@
 	END
 	ELSE
 	BEGIN
-		UPDATE [dbo].[tblSMReminderList]
+		UPDATE [tblSMReminderList]
 		SET	[strQuery] =        N'SELECT intTransactionId 
                                  FROM tblSMApproval 
                                  WHERE  ysnCurrent = 1 AND 
@@ -253,9 +253,9 @@
 		WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction'
 	END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction')
 	BEGIN
-		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
+		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
 		SELECT [strReminder]        =        N'Approved',
 				[strType]           =        N'Transaction',
 				[strMessage]        =        N'{0} Transaction(s) {2} approved.',
@@ -274,9 +274,9 @@
 
 	END
 
-    IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Closed' AND [strType] = N'Transaction')
+    IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Closed' AND [strType] = N'Transaction')
     BEGIN
-        INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
+        INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
         SELECT [strReminder]        =        N'Closed',
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} closed.',
@@ -296,9 +296,9 @@
                 [intSort]           =        13
     END    
   
-    IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Transaction')
+    IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Transaction')
     BEGIN
-        INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
+        INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
         SELECT [strReminder]        =        N'Unsubmitted',
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} unsubmitted.',
@@ -312,9 +312,9 @@
                 [intSort]           =        14
     END    
   
-    IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction')
+    IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction')
     BEGIN
-        INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
+        INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
         SELECT [strReminder]        =        N'Rejected',
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} rejected.',
@@ -328,9 +328,9 @@
                 [intSort]           =        15
     END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Activity' AND [strType] = N'Reminder')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Activity' AND [strType] = N'Reminder')
     BEGIN
-        INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
+        INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
         SELECT [strReminder]        =        N'Activity',
                 [strType]           =        N'Reminder',
                 [strMessage]        =        N'{0} Activity Reminders.',
@@ -371,9 +371,9 @@
                 [intSort]           =        1
     END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Approve',
 				   [strType]        	=        N'Purchase Order',
 				   [strMessage]			=        N'{0} {1} {2} unapproved.',
@@ -383,14 +383,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unapproved.'
 			WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Sales Order')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Sales Order')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Sales Order',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -410,14 +410,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Sales Order' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transfer')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transfer')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Bank Transfer',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -438,14 +438,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transfer' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transaction')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transaction')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Bank Transaction',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -466,14 +466,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transaction' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Deposit')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Deposit')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Bank Deposit',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -494,14 +494,14 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Bank Deposit' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Misc Checks')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Misc Checks')
 		BEGIN
-			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
 				   [strType]        	=        N'Misc Checks',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
@@ -522,8 +522,13 @@
 		END
 	ELSE
 		BEGIN
-			UPDATE [dbo].[tblSMReminderList]
+			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Misc Checks' 
 		END
+GO
+
+	IF EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
+	DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal'
+
 GO
