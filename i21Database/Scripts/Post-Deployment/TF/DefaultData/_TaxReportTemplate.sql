@@ -1705,3 +1705,27 @@ IF (@TemplateId IS NULL)
 		BEGIN
 			UPDATE tblTFTaxReportTemplate SET strDescription = 'EDI File Name - 3rd part (Next Sequence Number)' WHERE strTemplateItemId = 'EDI-FileName3rd'
 		END
+
+--GT-103 GUT Rate Config
+SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-2DGasoline')
+IF (@TemplateId IS NULL)
+		BEGIN
+			INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [strTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId])
+			VALUES (43, N'GT-103-2DGasoline', N'GT-103', 14, N'IN', N'Schedule', 0, 0, N'Reporting Period GUT Rate', NULL, N'0', 0, NULL, N'Summary', 0, 0)
+			
+		END
+	ELSE
+		BEGIN
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Reporting Period GUT Rate' WHERE strTemplateItemId = 'GT-103-2DGasoline'
+		END
+
+SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-2DGasohol')
+IF (@TemplateId IS NULL)
+		BEGIN
+			INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [strTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId])
+			VALUES (44, N'GT-103-2DGasohol', N'GT-103', 14, N'IN', N'Schedule', 0, 0, N'Reporting Period GUT Rate', NULL, N'0', 0, NULL, N'Summary', 0, 0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'EDI File Name - 3rd part (Next Sequence Number)' WHERE strTemplateItemId = 'GT-103-2DGasohol'
+		END

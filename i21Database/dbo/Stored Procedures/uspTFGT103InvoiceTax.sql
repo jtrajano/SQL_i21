@@ -189,11 +189,11 @@ DECLARE @tblTempTransaction TABLE (
 		EXEC(@QueryInvoice)
 
 		-- SET INCREMENT PRIMARY ID FOR TEMP @tblTempTransaction
-		DECLARE @tblTempTransaction_intId int
+		DECLARE @tblTempTransaction_intId INT
 		SET @tblTempTransaction_intId = 0 UPDATE @tblTempTransaction SET @tblTempTransaction_intId = intId = @tblTempTransaction_intId + 1
 	 
-		SET @Count = (select COUNT(intId) from @tblTempTransaction) 				
-				WHILE(@Count > 0) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
+		SET @Count = (SELECT COUNT(intId) FROM @tblTempTransaction) 				
+				WHILE(@Count > 0) -- LOOP ON INVOICE ID/S
 					BEGIN
 						SET @InvoiceDetailId = (SELECT intInvoiceDetailId FROM @tblTempTransaction WHERE intId = @Count)
 						DECLARE @TaxAmount NUMERIC(18, 6)
@@ -218,6 +218,7 @@ DECLARE @tblTempTransaction TABLE (
 						WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId AND (tblTFTaxCategory.strTaxCategory = 'IN Gasoline Use Tax (GUT)') AND tblARInvoiceDetailTax.dblTax = 0)
 
 						UPDATE @tblTempTransaction SET dblTaxExempt = ISNULL(@TaxExempt, 0), strTaxCategory = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+						--select * from @tblTempTransaction
 						SET @Count = @Count - 1
 				END
 
@@ -227,7 +228,7 @@ DECLARE @tblTempTransaction TABLE (
 				DECLARE @InvQueryPart2 NVARCHAR(MAX)
 		
 				SET @InvQueryPart1 = 'SELECT DISTINCT 0, 
-						 NULL, 
+						 tblICInventoryTransferDetail.intInventoryTransferDetailId, 
 						 tblTFReportingComponent.intTaxAuthorityId, 
 						 tblTFReportingComponent.strFormCode,
 						 tblTFReportingComponent.intReportingComponentId,
@@ -288,7 +289,7 @@ DECLARE @tblTempTransaction TABLE (
                          tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId CROSS JOIN
                          tblSMCompanySetup
 					WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + ')) 
-					AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
+					AND (tblSMCompanyLocation.ysnTrackMFTActivity = 0)
 					AND (tblARInvoice.strBOLNumber IS NULL)
 					AND (tblTRLoadHeader.dtmLoadDateTime BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
 					AND (tblICInventoryTransfer.ysnPosted = 1)'
@@ -296,6 +297,37 @@ DECLARE @tblTempTransaction TABLE (
 					SET @InvTransferQuery = @InvQueryPart1 + @InvQueryPart2
 					INSERT INTO @tblTempTransaction
 					EXEC(@InvTransferQuery)
+
+					-- INVENTORY TRANSFER --
+					-- SET INCREMENT PRIMARY ID FOR TEMP @tblTempTransaction
+
+					SET @tblTempTransaction_intId = 0 UPDATE @tblTempTransaction SET @tblTempTransaction_intId = intId = @tblTempTransaction_intId + 1
+					SET @Count = (SELECT COUNT(intId) FROM @tblTempTransaction) 				
+					WHILE(@Count > 0) -- LOOP ON INVOICE ID/S
+						BEGIN
+							SET @InvoiceDetailId = (SELECT intInvoiceDetailId FROM @tblTempTransaction WHERE intId = @Count)
+							DECLARE @TaxAmountInvTransfer NUMERIC(18, 6)
+							DECLARE @TaxExemptInvTransfer NUMERIC(18, 6)
+							DECLARE @TaxAmountInvTransferTotal NUMERIC(18, 6)
+							DECLARE @ConfigGUTRate NUMERIC(18, 6)
+							DECLARE @GasoholConfig NUMERIC(18, 6)
+
+							-- GASOLINE USE TAX COLLECTED
+							SET @ConfigGUTRate = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-2DGasoline') 
+							SET @TaxAmountInvTransfer = (SELECT dblQtyShipped FROM @tblTempTransaction WHERE intId = @Count)
+							SET @TaxAmountInvTransferTotal = @TaxAmountInvTransfer * @ConfigGUTRate
+							UPDATE @tblTempTransaction SET dblTax = ISNULL(@TaxAmountInvTransferTotal, 0) WHERE strInvoiceNumber IS NULL AND intInvoiceDetailId = @InvoiceDetailId
+
+							--EXEMPT GALLONS SOLD
+							SET @TaxExemptInvTransfer = (SELECT tblARInvoiceDetail.dblQtyShipped
+							FROM tblSMTaxCode INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
+										  INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId 
+										  INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetailTax.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId 
+										  INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
+							WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId AND (tblTFTaxCategory.strTaxCategory = 'IN Gasoline Use Tax (GUT)') AND tblARInvoiceDetailTax.dblTax = 0)
+							UPDATE @tblTempTransaction SET dblTaxExempt = ISNULL(@TaxExemptInvTransfer, 0), strTaxCategory = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+							SET @Count = @Count - 1
+					END
 
 				IF (@ReportingComponentId <> '')
 					BEGIN
@@ -394,7 +426,6 @@ DECLARE @tblTempTransaction TABLE (
 																		@DateTo,
 																		1
 																		FROM @tblTempTransaction
-																		
 					END
 				ELSE
 					BEGIN
@@ -402,7 +433,6 @@ DECLARE @tblTempTransaction TABLE (
 					END
 			SET @CountRC = @CountRC - 1
 		END
-
 		DECLARE @HasResult INT
 		SELECT TOP 1 @HasResult = intId from @tblTempTransaction
 		IF(@HasResult IS NULL AND @IsEdi = 'false')
