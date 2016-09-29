@@ -44,8 +44,13 @@ SELECT
 	,strCurrency					= CUR.strCurrency
 	,intEntredById					= I.intEntityId
 	,strEnteredBy					= EB.strName
-	,dtmBatchDate					= GL.dtmDate
-	,strBatchId						= GL.strBatchId
+	,dtmBatchDate					= GL.dtmDate	
+	,strBatchId						= CASE WHEN I.strTransactionType = 'Customer Prepayment' 
+										THEN  (SELECT TOP 1 strBatchId FROM tblARPayment A 
+												INNER JOIN (SELECT intPaymentId, intInvoiceId FROM tblARPaymentDetail ) B ON A.intPaymentId = B.intPaymentId 
+												INNER JOIN (SELECT strTransactionId, strBatchId FROM tblGLDetail) C ON A.strRecordNumber = C.strTransactionId 
+												WHERE B.intInvoiceId = I.intInvoiceId) 
+										ELSE  GL.strBatchId END   
 	,strUserEntered					= GL.strName
 	,intEntityContactId				= I.intEntityContactId
 	,strContactName					= EC.strName
@@ -56,7 +61,7 @@ INNER JOIN
 	dbo.tblARCustomer AS C 
 		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
 LEFT OUTER JOIN
-	dbo.vyuEMEntityContact AS EC ON I.intEntityContactId = EC.intEntityContactId	
+	(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact) EC ON I.intEntityContactId = EC.intEntityContactId	
 INNER JOIN
 	dbo.tblEMEntity AS CE 
 		ON C.[intEntityCustomerId] = CE.intEntityId 
@@ -98,10 +103,10 @@ LEFT OUTER JOIN
 		tblEMEntity E
 			ON G.intEntityId = E.intEntityId
 	WHERE
-			G.strTransactionType IN ('Invoice')
+		G.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Customer Prepayment')
 		AND G.ysnIsUnposted = 0
 		AND G.strCode = 'AR'
 	) GL
 		ON I.intInvoiceId = GL.intTransactionId
 		AND I.intAccountId = GL.intAccountId
-		AND I.strInvoiceNumber = GL.strTransactionId					 
+		AND I.strInvoiceNumber = GL.strTransactionId									 
