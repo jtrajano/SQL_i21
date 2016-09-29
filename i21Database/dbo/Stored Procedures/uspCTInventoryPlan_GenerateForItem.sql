@@ -443,7 +443,7 @@ BEGIN TRY
 			WHERE RI.intRecipeId = @intBlendDemandItemRecipeId
 				AND intRecipeItemTypeId = 1
 
-			INSERT INTO #TempInputAll
+			INSERT INTO #TempInputALL
 			SELECT *
 			FROM #TempInput
 
@@ -504,7 +504,7 @@ BEGIN TRY
 					WHERE intRecipeId = @intRecipeId
 						AND intRecipeItemTypeId = 1
 
-					INSERT INTO #TempInputAll
+					INSERT INTO #TempInputALL
 					SELECT *
 					FROM #TempInput
 					WHERE Id > @MaxId
@@ -523,7 +523,7 @@ BEGIN TRY
 			WHERE Id > @MinBlendDemandItemId
 		END
 
-		--SELECT * FROM #TempInputAll
+		--SELECT * FROM #TempInputALL
 		-- Forecast based on Multiple Recipe level ends
 		--If @MinReportAttributeID = 8 --Forecasted Consumption
 		--BEGIN
@@ -584,7 +584,7 @@ BEGIN TRY
 					--	)
 					SET @ForecastedConsumption = (
 							SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @SourceUOMKey, @TargetUOMKey, ISNULL(SUM(TIA.dblQuantity * BD.dblQuantity), 0))
-							FROM #TempInputAll TIA
+							FROM #TempInputALL TIA
 							JOIN tblCTBlendDemand BD ON BD.intItemId = TIA.intBlendDemandItemId
 								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
@@ -621,7 +621,7 @@ BEGIN TRY
 				--		)
 				SET @ForecastedConsumption = (
 						SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @SourceUOMKey, @TargetUOMKey, ISNULL(SUM(TIA.dblQuantity * BD.dblQuantity), 0))
-						FROM #TempInputAll TIA
+						FROM #TempInputALL TIA
 						JOIN tblCTBlendDemand BD ON BD.intItemId = TIA.intBlendDemandItemId
 							AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 							AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)

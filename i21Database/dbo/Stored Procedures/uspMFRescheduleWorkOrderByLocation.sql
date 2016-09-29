@@ -24,6 +24,26 @@ BEGIN TRY
 		,dtmTargetDate DATETIME
 		,intNoOfFlushes int
 		)
+	DECLARE @strScheduleType NVARCHAR(50)
+		,@intAttributeId INT
+		,@strAttributeValue NVARCHAR(50)
+		,@intBlendAttributeId INT
+		,@strBlendAttributeValue NVARCHAR(50)
+
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Schedule Type'
+
+	SELECT @strScheduleType = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = @intAttributeId
+
+	IF @strScheduleType IS NULL
+		OR @strScheduleType = ''
+	BEGIN
+		SELECT @strScheduleType = strScheduleType
+		FROM dbo.tblMFCompanyPreference
+	END
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -156,6 +176,8 @@ BEGIN TRY
 	ORDER BY x.intManufacturingCellId
 		,x.dtmExpectedDate
 		,x.intItemId
+IF @strScheduleType = 'Backward Schedule'
+	BEGIN
 
 	INSERT INTO @tblMFSequence
 	EXEC dbo.uspMFCheckContamination @tblMFWorkOrder
@@ -204,6 +226,34 @@ BEGIN TRY
 		,@intConcurrencyId = @intConcurrencyId
 		,@tblMFScheduleConstraint=@tblMFScheduleConstraint
 		,@intCalendarId=@intCalendarId
+			End
+	Else
+	Begin
+	INSERT INTO @tblMFScheduleConstraint (
+			intScheduleRuleId
+			,intPriorityNo
+			)
+		SELECT intScheduleRuleId
+			,intPriorityNo
+		FROM tblMFScheduleRule
+		WHERE ysnActive = 1
+		ORDER BY intPriorityNo
+
+		EXEC dbo.uspMFRescheduleAndSaveWorkOrderByForward 
+			@tblMFWorkOrder
+			,@intManufacturingCellId 
+			,@intCalendarId 
+			,@intScheduleId 
+			,@intConcurrencyId 
+			,@intUserId 
+			,@intLocationId 
+			,@ysnStandard 
+			,@dtmFromDate 
+			,@dtmToDate 
+			,@tblMFScheduleConstraint
+			,0
+			,1
+	End
 END TRY
 
 BEGIN CATCH

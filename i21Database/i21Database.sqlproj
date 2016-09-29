@@ -4383,6 +4383,7 @@
     <Build Include="dbo\Stored Procedures\uspICSaveReceiptInspection.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateTableReceiptInspection.sql" />
     <None Include="Scripts\Post-Deployment\IC\1620_to_1630.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRescheduleAndSaveWorkOrderByForward.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4508,7 +4509,9 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
+    <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

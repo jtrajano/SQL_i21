@@ -205,7 +205,7 @@ CROSS APPLY
 		WHERE C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and intBillId = @billId AND C2.intContractDetailId = C.intContractDetailId
 	) Total
 	WHERE intBillId = @billId 
-	--AND C.intContractHeaderId = B.intContractHeaderId AND C.intItemId = B.intItemId --FOR CONTRACT W/ ITEM
+	AND C.intContractHeaderId = B.intContractHeaderId AND C.intItemId = B.intItemId AND B.intContractDetailId = C.intContractDetailId--FOR CONTRACT W/ ITEM
 ) CurrentBill 
 WHERE A.intTransactionType IN (2)
 AND A.intEntityVendorId = @vendorId

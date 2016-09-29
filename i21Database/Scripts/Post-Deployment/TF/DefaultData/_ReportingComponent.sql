@@ -3,7 +3,7 @@ PRINT 'START TF CLEAR TEST DATA'
 
 TRUNCATE TABLE tblTFScheduleFieldTemplate
 TRUNCATE TABLE tblTFScheduleFields
-TRUNCATE TABLE tblTFTaxReportTemplate
+--TRUNCATE TABLE tblTFTaxReportTemplate
 TRUNCATE TABLE tblTFTransactions
 -- CONFIGS
 TRUNCATE TABLE tblTFValidAccountStatusCode
