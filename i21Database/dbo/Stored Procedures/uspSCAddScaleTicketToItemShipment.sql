@@ -69,7 +69,15 @@ DECLARE @ShipmentStagingTable AS ShipmentStagingTable,
         @total as int,
 		@intSurchargeItemId as int,
 		@intFreightItemId as int;
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
+BEGIN 
+	CREATE TABLE #tmpAddItemShipmentResult (
+		intSourceId INT
+		,intInventoryShipmentId INT
+	)
+END 
 
+-- Insert Entries to Stagging table that needs to processed to Shipment Load
 BEGIN 
 	INSERT INTO @ShipmentStagingTable(
 		intOrderType
@@ -513,14 +521,27 @@ EXEC dbo.uspICAddItemShipment
 --    EXEC uspICReserveStockForInventoryShipment
 --        @InventoryShipmentId
 --END 
-SELECT @InventoryShipmentId = intInventoryShipmentId  FROM tblICInventoryShipmentItem
-where intSourceId = @intTicketId
-ORDER BY intInventoryShipmentId DESC
+DECLARE @ShipmentId INT
+		,@strTransactionId NVARCHAR(50);
+WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddItemShipmentResult) 
+BEGIN
+	SELECT TOP 1 
+			@ShipmentId = intInventoryShipmentId  
+	FROM	#tmpAddItemShipmentResult 
+
+	SET @InventoryShipmentId = @ShipmentId
+
+	DELETE FROM #tmpAddItemShipmentResult 
+	WHERE intInventoryShipmentId = @ShipmentId
+END 
+
+--SELECT @InventoryShipmentId = MAX(intInventoryShipmentId) from tblICInventoryShipmentItem
+--WHERE intSourceId = @intTicketId
 
 UPDATE	SC
 SET		SC.intInventoryShipmentId = addResult.intInventoryShipmentId
 FROM	dbo.tblSCTicket SC INNER JOIN tblICInventoryShipmentItem addResult
-			ON SC.intTicketId = addResult.intSourceId
+		ON SC.intTicketId = addResult.intSourceId
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
