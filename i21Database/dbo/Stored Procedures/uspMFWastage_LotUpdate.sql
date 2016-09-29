@@ -1,5 +1,5 @@
 CREATE PROCEDURE uspMFWastage_LotUpdate
-     @strXml NVARCHAR(Max)
+	@strXml NVARCHAR(Max)
 	,@intWastageId INT
 	,@strLotNumber NVARCHAR(50) OUTPUT
 	,@intLotId INT OUTPUT
@@ -28,12 +28,6 @@ BEGIN TRY
 		,@intLocationId INT
 		,@intItemLocationId INT
 		,@dblStandardCost NUMERIC(38, 20)
-	DECLARE @intOldLotId INT
-		,@intOldItemId INT
-		,@intOldWorkOrderId INT
-		,@intOldStorageLocationId INT
-		,@dblOldWeight NUMERIC(38, 20)
-		,@intOldWeightUOMId INT
 
 	-- New Data
 	SELECT @strLotNumber = strLotNumber
@@ -61,16 +55,6 @@ BEGIN TRY
 			,intLocationId INT
 			)
 
-	-- Existing Data
-	SELECT @intOldLotId = ISNULL(intLotId, '')
-		,@intOldItemId = intItemId
-		,@intOldWorkOrderId = ISNULL(intWorkOrderId, '')
-		,@intOldStorageLocationId = intStorageLocationId
-		,@dblOldWeight = dblNetWeight
-		,@intOldWeightUOMId = intGrossWeightUnitMeasureId
-	FROM tblMFWastage
-	WHERE intWastageId = @intWastageId
-
 	SELECT @intItemLocationId = intItemLocationId
 	FROM tblICItemLocation
 	WHERE intItemId = @intItemId
@@ -81,113 +65,88 @@ BEGIN TRY
 	WHERE intItemId = @intItemId
 		AND intItemLocationId = @intItemLocationId
 
-	IF (
-			@intLotId <> @intOldLotId
-			OR @intItemId <> @intOldItemId
-			OR @intWorkOrderId <> @intOldWorkOrderId
-			OR @intStorageLocationId <> @intOldStorageLocationId
-			)
+	DECLARE @GLEntries AS RecapTableType
+		,@strBatchId NVARCHAR(50)
+
+	SELECT @strBatchId = strBatchId
+	FROM tblICInventoryTransaction
+	WHERE intTransactionId = @intBatchId
+		AND strTransactionId = @strShiftActivityNo
+
+	BEGIN TRAN
+
+	-- Old Lot UnPosting
+	IF (ISNULL(@strBatchId, '') <> '')
 	BEGIN
-		-- UnPosting and Posting
-		DECLARE @GLEntries AS RecapTableType
-			,@strBatchId NVARCHAR(50)
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			)
+		EXEC uspICUnpostCosting @intBatchId
+			,@strShiftActivityNo
+			,@strBatchId
+			,@intUserId
+			,0
 
-		SELECT @strBatchId = strBatchId
-		FROM tblICInventoryTransaction
-		WHERE intTransactionId = @intBatchId
-			AND strTransactionId = @strShiftActivityNo
-
-		--BEGIN TRAN
-
-		IF (ISNULL(@strBatchId, '') <> '')
-		BEGIN
-			INSERT INTO @GLEntries (
-				[dtmDate]
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				)
-			EXEC uspICUnpostCosting @intBatchId
-				,@strShiftActivityNo
-				,@strBatchId
-				,@intUserId
-				,0
-
-			EXEC uspGLBookEntries @GLEntries
-				,0
-		END
-
-		IF (@dblStandardCost > 0)
-		BEGIN
-			EXEC uspMFWastage_LotCreate @strXml
-				,@strLotNumber OUTPUT
-				,@intLotId OUTPUT
-				,@intBatchId OUTPUT
-		END
+		EXEC uspGLBookEntries @GLEntries
+			,0
 	END
-	ELSE IF (
-			@dblWeight <> @dblOldWeight
-			OR @intWeightUOMId <> @intOldWeightUOMId
-			)
+
+	-- Posting
+	IF (@dblStandardCost > 0)
 	BEGIN
-		-- Posting (Only Quantity Update. Should not Create Lot)
-		IF (@dblStandardCost > 0)
-		BEGIN
-			EXEC uspMFWastage_LotCreate @strXml
-				,@strLotNumber OUTPUT
-				,@intLotId OUTPUT
-				,@intBatchId OUTPUT
-		END
+		EXEC uspMFWastage_LotCreate @strXml
+			,@strLotNumber OUTPUT
+			,@intLotId OUTPUT
+			,@intBatchId OUTPUT
 	END
 	ELSE
 	BEGIN
-		-- No Changes related to Lot. Just send existing data
-		SELECT @intLotId = W.intLotId
-			,@intBatchId = W.intBatchId
-			,@strLotNumber = L.strLotNumber
-		FROM tblMFWastage W
-		JOIN tblICLot L ON L.intLotId = W.intLotId
-		WHERE W.intWastageId = @intWastageId
+		SELECT @intBatchId = NULL
+			,@intLotId = NULL
+			,@strLotNumber = ''
 	END
 
 	EXEC sp_xml_removedocument @idoc
 
-	--COMMIT TRAN
+	COMMIT TRAN
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	--IF XACT_STATE() != 0
-	--	AND @@TRANCOUNT > 0
-	--	ROLLBACK TRANSACTION
+	IF XACT_STATE() != 0
+		AND @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0
 		EXEC sp_xml_removedocument @idoc
