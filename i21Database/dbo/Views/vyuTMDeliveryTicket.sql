@@ -55,6 +55,7 @@ SELECT
 	,strSerialNumber = Q.strSerialNumber
 	,R.strTaxGroup
 	,A.dblYTDGalsThisSeason
+	,ysnTaxable = ISNULL(A.ysnTaxable,0)
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
