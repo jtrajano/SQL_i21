@@ -73,6 +73,7 @@ BEGIN
 				,strTaxGroup = R.vwlcl_tax_state
 				,A.dblYTDGalsThisSeason
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
+				,strSiteDescription = ISNULL(A.strDescription,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -170,6 +171,7 @@ BEGIN
 				,R.strTaxGroup
 				,A.dblYTDGalsThisSeason
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
+				,strSiteDescription = ISNULL(A.strDescription,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
