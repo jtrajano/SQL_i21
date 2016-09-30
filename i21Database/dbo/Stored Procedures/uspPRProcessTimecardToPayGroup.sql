@@ -160,14 +160,18 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		FROM
 		(SELECT
 			intTimecardId
-			,dblRegularHours = CASE WHEN (X.dblDefaultHours > X.dblRunningHours) THEN X.dblHours 
+			,dblRegularHours = CASE WHEN (X.dblDefaultHours > 0) THEN
+								CASE WHEN (X.dblDefaultHours > X.dblRunningHours) THEN X.dblHours 
 									ELSE CASE WHEN (X.dblHours < (X.dblRunningHours - X.dblDefaultHours)) THEN 0
 											ELSE X.dblHours - (X.dblRunningHours - X.dblDefaultHours) END
 									END
-			,dblOvertimeHours = CASE WHEN (X.dblDefaultHours > X.dblRunningHours) THEN 0 
+								ELSE X.dblHours END
+		   ,dblOvertimeHours = CASE WHEN (X.dblDefaultHours > 0) THEN
+								CASE WHEN (X.dblDefaultHours > X.dblRunningHours) THEN 0 
 									ELSE CASE WHEN (X.dblHours < (X.dblRunningHours - X.dblDefaultHours)) THEN X.dblHours 
 									ELSE (X.dblRunningHours - X.dblDefaultHours) END
 									END
+								ELSE 0 END
 		FROM
 			(SELECT 
 				TC.intTimecardId
