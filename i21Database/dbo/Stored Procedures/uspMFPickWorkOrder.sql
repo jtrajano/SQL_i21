@@ -336,13 +336,19 @@ BEGIN TRY
 			)
 		AND ri.intConsumptionMethodId <> 4
 		AND NOT EXISTS (
-			SELECT *
+			SELECT 1
 			FROM dbo.tblMFWorkOrderConsumedLot WC
 			JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON WC.intWorkOrderId = SI.intWorkOrderId
 				AND WC.intWorkOrderId = @intWorkOrderId
 				AND WC.intBatchId = @intBatchId
 				AND WC.intItemId = SI.intSubstituteItemId
 				AND SI.intItemId = ri.intItemId
+			UNION
+			SELECT 1
+			FROM dbo.tblMFWorkOrderConsumedLot WC
+			Where WC.intWorkOrderId = @intWorkOrderId
+				AND WC.intBatchId = @intBatchId
+				AND WC.intItemId = ri.intItemId
 			)
 	
 	UNION
