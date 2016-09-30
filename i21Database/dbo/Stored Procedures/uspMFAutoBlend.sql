@@ -547,10 +547,10 @@ Begin
 
 	--Add Lots/Items to workorder consume table
 	Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,ysnStaged)
+	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,ysnStaged,intSubLocationId,intStorageLocationId)
 	Select @intWorkOrderId,intLotId,intItemId,dblQty,intItemUOMId,
 	dblQty,intItemUOMId,null,
-	@dtmDate,@intUserId,@dtmDate,@intUserId,null,1
+	@dtmDate,@intUserId,@dtmDate,@intUserId,null,1,intSubLocationId,intStorageLocationId
 	From @tblWorkOrderPickedLot
 
 	--Start Blend Sheet
