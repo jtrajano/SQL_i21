@@ -10,20 +10,22 @@ SELECT	NEWID() AS id,
 		strCustomerName = ENT.strName,
 		intFiscalYearId = CV.intFiscalYear,
 		AC.strStockStatus,
+		ysnEligibleRefund = CASE WHEN Total.dblRefundAmount < ComPref.dblMinimumRefund THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 		dblTotalPurchases = Total.dblTotalPurchases,
 		dblTotalSales = Total.dblTotalSales,
 		dblRefundAmount = Total.dblRefundAmount,
-		dblEquityRefund = Total.dblRefundAmount - Total.dblCashRefund
+		dblEquityRefund = CASE WHEN (Total.dblRefundAmount - Total.dblCashRefund) < 0 THEN 0 ELSE Total.dblRefundAmount - Total.dblCashRefund END 
 	FROM tblPATCustomerVolume CV
 	INNER JOIN tblARCustomer AC
 		ON AC.intEntityCustomerId = CV.intCustomerPatronId
 	INNER JOIN tblEMEntity ENT
 		ON ENT.intEntityId = CV.intCustomerPatronId
+	CROSS APPLY ComPref
 	CROSS APPLY (
 		SELECT  intCustomerId = B.intCustomerPatronId,
 				dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN SUM(dblVolume) ELSE 0 END,
 				dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN SUM(dblVolume) ELSE 0 END,
-				dblRefundAmount = CASE WHEN SUM(RRD.dblRate) * SUM(dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate) * SUM(dblVolume) END,
+				dblRefundAmount = SUM(RRD.dblRate) * SUM(dblVolume),
 				dblCashRefund = ((SUM(RRD.dblRate) * SUM(dblVolume)) * (RR.dblCashPayout/100)) 
 			FROM tblPATCustomerVolume B
 		INNER JOIN tblPATRefundRateDetail RRD
@@ -40,7 +42,8 @@ SELECT	NEWID() AS id,
 		ENT.strName, 
 		AC.strStockStatus, 
 		CV.intFiscalYear,
-		CV.dblVolume, 
+		CV.dblVolume,
+		ComPref.dblMinimumRefund,
 		CV.dtmLastActivityDate,
 		Total.dblTotalPurchases,
 		Total.dblTotalSales,
