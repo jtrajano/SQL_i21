@@ -152,17 +152,70 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		  AND TCE.dblOvertimeHours > 0
 		  AND EL.strCalculationType IN ('Overtime')
 
-		/* Updated Processed Timecards */
-		UPDATE tblPRTimecard 
-		SET intPayGroupDetailId = @intPayGroupDetailId
-		WHERE ysnApproved = 1
-			AND intPaycheckId IS NULL
-			AND intPayGroupDetailId IS NULL
-			AND dblHours > 0
-			AND intEmployeeEarningId = @intEmployeeEarningId
-			AND intEmployeeDepartmentId = @intEmployeeDepartmentId
-			AND CAST(FLOOR(CAST(dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDateIn) AS FLOAT)) AS DATETIME)
-			AND CAST(FLOOR(CAST(dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDateOut) AS FLOAT)) AS DATETIME)
+		/* Update Processed Timecards */
+		UPDATE tblPRTimecard
+		SET dblRegularHours = Y.dblRegularHours
+			,dblOvertimeHours = Y.dblOvertimeHours
+			,intPayGroupDetailId = @intPayGroupDetailId
+		FROM
+		(SELECT
+			intTimecardId
+			,dblRegularHours = CASE WHEN (X.dblDefaultHours > X.dblRunningHours) THEN X.dblHours 
+									ELSE CASE WHEN (X.dblHours < (X.dblRunningHours - X.dblDefaultHours)) THEN 0
+											ELSE X.dblHours - (X.dblRunningHours - X.dblDefaultHours) END
+									END
+			,dblOvertimeHours = CASE WHEN (X.dblDefaultHours > X.dblRunningHours) THEN 0 
+									ELSE CASE WHEN (X.dblHours < (X.dblRunningHours - X.dblDefaultHours)) THEN X.dblHours 
+									ELSE (X.dblRunningHours - X.dblDefaultHours) END
+									END
+		FROM
+			(SELECT 
+				TC.intTimecardId
+				,TC.intEntityEmployeeId
+				,TC.dtmDate
+				,TC.intEmployeeEarningId
+				,TC.intEmployeeDepartmentId
+				,TC.dtmDateIn
+				,TC.dtmTimeIn
+				,TC.dtmDateOut
+				,TC.dtmTimeOut
+				,TC.ysnApproved
+				,TC.dblHours
+				,EE.dblDefaultHours
+				,dblRunningHours = (SELECT
+										SUM (TCR.dblHours) 
+									FROM
+										tblPRTimecard TCR
+									WHERE 
+										TCR.dtmDateOut <= TC.dtmDateOut 
+										AND TCR.intEntityEmployeeId = TC.intEntityEmployeeId
+										AND TCR.intEmployeeEarningId = TC.intEmployeeEarningId
+										AND TCR.intEmployeeDepartmentId = TC.intEmployeeDepartmentId)
+			FROM
+				tblPRTimecard TC LEFT JOIN tblPREmployeeEarning EE
+				ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
+			WHERE
+				TC.ysnApproved = 1
+				AND TC.dblHours > 0
+				AND TC.intEmployeeEarningId = @intEmployeeEarningId
+				AND TC.intEmployeeDepartmentId = @intEmployeeDepartmentId
+				AND CAST(FLOOR(CAST(TC.dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TC.dtmDateIn) AS FLOAT)) AS DATETIME)
+				AND CAST(FLOOR(CAST(TC.dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TC.dtmDateOut) AS FLOAT)) AS DATETIME)
+			GROUP BY 
+				TC.intTimecardId
+				,TC.intEntityEmployeeId
+				,TC.dtmDate
+				,TC.intEmployeeEarningId
+				,TC.intEmployeeDepartmentId
+				,TC.dblHours
+				,TC.dtmDateIn
+				,TC.dtmTimeIn
+				,TC.dtmDateOut
+				,TC.dtmTimeOut
+				,TC.ysnApproved
+				,EE.dblDefaultHours) X
+			) Y
+		WHERE tblPRTimecard.intTimecardId = Y.intTimecardId
 
 		/* Loop Control */
 		DELETE FROM #tmpTimecard 
@@ -174,4 +227,3 @@ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTi
 
 END
 GO
-
