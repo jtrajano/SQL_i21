@@ -92,39 +92,41 @@ Ext.define('iRely.TestEngine', {
         chain.push(
             function(next) {
                 t.diag("Waiting for Login Screen");
-                t.waitForCQVisible('#Login', 
-                    function () { 
-                        var win = me.getComponentByQuery('#Login'), 
+                t.waitForCQVisible('#Login',
+                    function () {
+                        var win = me.getComponentByQuery('#Login'),
                             txtUserName = win.down('#txtUserName'),
                             txtPassword = win.down('#txtPassword'),
-                            txtCompany = win.down('#txtCompany');
+                            cboCompany = win.down('#cboCompany');
 
-                        next(txtUserName,txtPassword,txtCompany); 
-                    }, this, 60000); 
+                        txtUserName.setValue('');
+                        txtPassword.setValue('');
+                        cboCompany.setValue('');
+
+                        next(txtUserName,txtPassword,cboCompany);
+                    }, this, 60000);
             },
-            function(next,txtUserName,txtPassword,txtCompany) {
+            function(next,txtUserName,txtPassword,cboCompany) {
                 t.diag('System Login');
-                next(txtUserName,txtPassword,txtCompany);
+                next(txtUserName,txtPassword,cboCompany);
             },
-            function(next,txtUserName,txtPassword,txtCompany) {
-                t.click(txtUserName, function(txtUserName,txtPassword,txtCompany) { next(txtUserName,txtPassword,txtCompany);});
-            }, function(next,txtUserName,txtPassword,txtCompany) {
-                t.type(txtUserName, userName + '[TAB]', function(txtUserName,txtPassword,txtCompany) { next(txtUserName,txtPassword,txtCompany);});
-            }, function(next,txtUserName,txtPassword,txtCompany) {
-                t.type(txtPassword, password + '[TAB]', function(txtUserName,txtPassword,txtCompany) { next(txtUserName,txtPassword,txtCompany);});
-            }, function(next,txtUserName,txtPassword,txtCompany) {
-                t.type(txtCompany, company + '[TAB]', next);
-            }, {
-                action: 'wait',
-                delay: 1000
+            function(next,txtUserName,txtPassword,cboCompany) {
+                t.click(txtUserName, function(txtUserName,txtPassword,cboCompany) { next(txtUserName,txtPassword,cboCompany);});
+            }, function(next,txtUserName,txtPassword,cboCompany) {
+                t.type(txtUserName, userName + '[TAB]', function(txtUserName,txtPassword,cboCompany) { next(txtUserName,txtPassword,cboCompany);});
+            }, function(next,txtUserName,txtPassword,cboCompany) {
+                t.type(txtPassword, password + '[TAB]', function(txtUserName,txtPassword,cboCompany) { next(txtUserName,txtPassword,cboCompany);});
+            }, function(next,txtUserName,txtPassword,cboCompany) {
+                t.type(cboCompany, company + '[TAB]', next);
             }, function(next) {
                 var win = me.getComponentByQuery('#Login'),
                     btnLogin = win.down('#btnLogin');
+                btnLogin.focus();
                 t.click(btnLogin, next);
             },
             {
                 action: 'wait',
-                delay: 300
+                delay: 1000
             },
             function(next) {
                 var win = Ext.WindowManager.getActive();
@@ -154,11 +156,11 @@ Ext.define('iRely.TestEngine', {
      * @param {Object} [config] Configuration object
      *
      * @param {Object/Function} [config.expected] The expected Value or a function to generate the expected value
-     * 
+     *
      * @param {Object/Function} [config.actual] The actual Value or a function to generate the actual value
      *
      * @param {Null/Function} [config.success] callback to execute when the assertion is succeeds
-     * 
+     *
      * @param {Null/Function} [config.failure] callback to execute when the assertion is fails. If no failure callback is supplied the test chain execution is terminated
      *
      * @param {Null/String} [config.successMessage] optional message to display when the assertion succeeds
@@ -172,7 +174,7 @@ Ext.define('iRely.TestEngine', {
     continueIf : function (config) {
         var me = this,
             chain = me.chain;
-            
+
         chain.push(
             function(next){
                 var win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard'),
@@ -181,7 +183,7 @@ Ext.define('iRely.TestEngine', {
                     assertTrue = expected === actual;
 
                 next(win, actual, expected, assertTrue);
-        });
+            });
 
         chain.push(
             function(next, win, actual, expected, assertTrue) {
@@ -189,7 +191,7 @@ Ext.define('iRely.TestEngine', {
 
                 if (assertTrue && typeof config.success === 'undefined') {
                     fn = function(next) {
-                        if(config.successMessage) 
+                        if(config.successMessage)
                             this.ok(true, config.successMessage);
 
                         next();
@@ -198,7 +200,7 @@ Ext.define('iRely.TestEngine', {
 
                 if (assertTrue && typeof config.success === 'function') {
                     fn = function(next) {
-                        if(config.successMessage) 
+                        if(config.successMessage)
                             this.ok(true, config.successMessage);
 
                         config.success.call(me, next);
@@ -208,16 +210,16 @@ Ext.define('iRely.TestEngine', {
                 if(!assertTrue && typeof config.failure === 'undefined') {
                     if(typeof config.continueOnFail === 'undefined' || !config.continueOnFail) {
                         fn = function(next) {
-                            if(config.failMessage) 
+                            if(config.failMessage)
                                 this.ok(false, config.failMessage);
 
                             this.ok(false, 'Test conditions not met. Terminating test execution.');
-                            this.done();    
+                            this.done();
                         }
                     }
                     else {
                         fn = function(next) {
-                             if(config.failMessage) 
+                            if(config.failMessage)
                                 this.ok(false, config.failMessage);
 
                             next();
@@ -227,7 +229,7 @@ Ext.define('iRely.TestEngine', {
 
                 if (!assertTrue && typeof config.failure === 'function') {
                     fn = function(next) {
-                        if(config.failMessage) 
+                        if(config.failMessage)
                             this.ok(false, config.failMessage);
 
                         config.failure.call(me, next);
@@ -365,28 +367,37 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} folderName Folder name to expand in the menu.
      *
-	 * @param {String} type Type of menu ('Folder', 'Screen', 'Report', 'Favorites').
+     * @param {String} type Type of menu ('Folder', 'Screen', 'Report', 'Favorites').
      *
      * @returns {iRely.TestEngine}
      */
     expandMenu: function(folderName, type) {
         var me = this,
             t = me.t,
-            chain = me.chain;
+            chain = me.chain,
+            timeout = 30000;
 
         var fn = function(next) {
-            var folder = type !== undefined ? type : 'folder',
-				record = me.getRecordFromMenu(folder, folderName),
-                node = me.getNodeFromMenu(folder, folderName);
+            var t = this,
+                folder = type !== undefined ? type : 'folder',
+                record = me.getRecordFromMenu(folder, folderName),
+                node = null;
 
-            if(!record.data.expanded) {
-                t.diag('Expanding Folder ' + folderName);
-                t.click(node, next);
-            }
-            else {
-                t.diag('Folder ' + folderName + ' is already Expanded');
-                next();
-            }
+            t.waitForFn(function() {
+                node = me.getNodeFromMenu(folder, folderName);
+                if(node) return true;
+            },function() {
+                record = me.getRecordFromMenu(folder, folderName),
+                    node = me.getNodeFromMenu(folder, folderName);
+                if(!record.data.expanded) {
+                    t.diag('Expanding Folder ' + folderName);
+                    t.click(node, next);
+                }
+                else {
+                    t.diag('Folder ' + folderName + ' is already Expanded');
+                    next();
+                }
+            },this, timeout)
         };
 
         chain.push(fn);
@@ -435,19 +446,27 @@ Ext.define('iRely.TestEngine', {
     openScreen: function(screenName, type) {
         var me = this,
             t = me.t,
-            chain = me.chain;
+            chain = me.chain,
+            timeout = 30000;
 
         var fn = function(next) {
-            var menu = type !== undefined ? type : 'screen',
-                node = me.getNodeFromMenu(menu, screenName);
+            var t = this,
+                menu = type !== undefined ? type : 'screen',
+                node = null;
 
             t.diag('Opening Screen ' + screenName);
 
-            if (node) {
-                t.click(node, next);
-            } else {
-                next();
-            }
+            t.waitForFn(function() {
+                node = me.getNodeFromMenu(menu, screenName)
+                if(node) return true;
+            },function() {
+                node = me.getNodeFromMenu(menu, screenName)
+                if (node) {
+                    t.click(node, next);
+                } else {
+                    next();
+                }
+            },this, timeout)
         };
 
         chain.push(fn);
@@ -533,7 +552,7 @@ Ext.define('iRely.TestEngine', {
                         },
                         {
                             action: 'wait',
-                            delay: 10
+                            delay: 500
                         },
                         function(next) {
                             var newActive = Ext.WindowManager.getActive();
@@ -558,7 +577,7 @@ Ext.define('iRely.TestEngine', {
         chain.push(fn);
         return this;
     },
-    
+
     /**
      * Clicks any button on title bar area
      *
@@ -583,15 +602,15 @@ Ext.define('iRely.TestEngine', {
                 }
                 if (btn){
                     t.diag('Clicking button ' + button);
-                    t.click(btn, next);                
+                    t.click(btn, next);
                 } else {
                     this.ok(false, button + ' button is not found.');
                     next();
-                }                               
+                }
             } else {
                 next();
             }
-        };      
+        };
 
         chain.push(fn);
         return this;
@@ -685,23 +704,23 @@ Ext.define('iRely.TestEngine', {
         var fn = function(next) {
             var t = this,
                 win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
-				
+
             if (win) {
                 var tab = win.down(item) || win.down('tabpanel [text='+ item  +']');
 
-                if (tab) {  
-				
-					if(tab.xtype == 'panel')
+                if (tab) {
+
+                    if(tab.xtype == 'panel')
                     {
                         tab = tab.tab;
                     }
 
-                    if(tab.active === false ){                       
+                    if(tab.active === false ){
                         t.click(tab, next);
                     }
-					else{
-						next();
-					}                    
+                    else{
+                        next();
+                    }
                 } else {
                     this.ok(false, item + ' tab is not found.');
                     next();
@@ -732,7 +751,7 @@ Ext.define('iRely.TestEngine', {
                 win = Ext.WindowManager.getActive();
             if (win) {
                 var chkBox = typeof item === 'function' ? item(win) : (item.tagName || item.nodeName) ? item : win.down(item);
-                
+
                 if (chkBox) {
                     if(typeof checked !== 'undefined') {
                         if(typeof checked !== 'boolean') {
@@ -742,7 +761,7 @@ Ext.define('iRely.TestEngine', {
 
                         if(chkBox.getValue) {
                             if(chkBox.getValue() !== checked) {
-                                t.click(chkBox, next);  
+                                t.click(chkBox, next);
                             }
                             else {
                                 next();
@@ -751,25 +770,25 @@ Ext.define('iRely.TestEngine', {
                         else {
                             if(chkBox.type !== 'checkbox') {
                                 var el = chkBox;
-                                
+
                                 while(!/x-form-type-checkbox/i.test(el.className)) {
                                     el = el.parentNode;
                                 }
 
                                 if(/x-form-cb-checked/i.test(el.className) !== checked) {
-                                    t.click(chkBox, next); 
+                                    t.click(chkBox, next);
                                 }
                                 else {
                                     next();
                                 }
                             }
                             else {
-                               if(chkBox.checked !== checked) {
-                                   t.click(chkBox, next); 
-                               }
-                               else {
+                                if(chkBox.checked !== checked) {
+                                    t.click(chkBox, next);
+                                }
+                                else {
                                     next();
-                               }
+                                }
                             }
                         }
                     }
@@ -807,8 +826,8 @@ Ext.define('iRely.TestEngine', {
                 next();
             }
 
-            var win = Ext.WindowManager.getActive();            
-            
+            var win = Ext.WindowManager.getActive();
+
             if(win) {
                 var chkBox = win.down(item);
                 if(chkBox) {
@@ -830,7 +849,7 @@ Ext.define('iRely.TestEngine', {
         chain.push({action:fn,timeout:120000});
         return this;
     },
-    
+
     /**
      * Clicks a check box in the grid
      *
@@ -1000,8 +1019,8 @@ Ext.define('iRely.TestEngine', {
 
                             t.diag('Entering data on grid ' + item);
 
-                           /* start = start || 0;
-                            end = end || value ? value.length : 0;*/
+                            /* start = start || 0;
+                             end = end || value ? value.length : 0;*/
 
                             t.selectText(editor, 0, 50);
                             t.type(editor, data, function() {
@@ -1260,7 +1279,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @returns {iRely.TestEngine}
      */
-     selectGridRow: function(item, index, tab){
+    selectGridRow: function(item, index, tab){
         var me = this,
             chain = this.chain;
 
@@ -1280,7 +1299,7 @@ Ext.define('iRely.TestEngine', {
 
                 if (grid) {
                     var sm = grid.getSelectionModel(),
-                        store = grid.getStore(), 
+                        store = grid.getStore(),
                         indexArrs = Ext.isArray(index) ? index : [index],
                         selected = [], bufferedData;
 
@@ -1335,7 +1354,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @returns {iRely.TestEngine}
      */
-     selectGridRowByFilter: function(item, filters){
+    selectGridRowByFilter: function(item, filters){
         var chain = this.chain;
 
         var fn = function(next) {
@@ -1350,12 +1369,12 @@ Ext.define('iRely.TestEngine', {
                 if (grid) {
                     var sm = grid.getSelectionModel(),
                         store = grid.getStore(),
-                        selected = [], data = [], 
+                        selected = [], data = [],
                         filterArrs = Ext.isArray(filters) ? filters : [filters],
                         filterFn = function(filter) {
                             if(!data.length && !filter) return;
                             var matchCase = typeof filter.matchCase === 'undefined' ? true : filter.matchCase;
-                            
+
                             for(var i = 0; i < data.length; i++) {
                                 var currentData = data[i].data;
                                 if(matchCase) {
@@ -1515,15 +1534,15 @@ Ext.define('iRely.TestEngine', {
      *         conjuction: 'and'
      *     }])
      *
-	 * {String} comboColumn Data Index of the combo grid to be filtered
-	 *
+     * {String} comboColumn Data Index of the combo grid to be filtered
+     *
      * @returns {iRely.TestEngine}
      */
     selectComboRowByFilter: function(item, filter, delay, comboColumn) {
         var me = this,
             chain = this.chain;
-			
-			delay = delay ? delay : 0;
+
+        delay = delay ? delay : 0;
 
         var fn = function(next) {
             var t = this,
@@ -1532,11 +1551,11 @@ Ext.define('iRely.TestEngine', {
                 var combo = item.value ? item : win.down(item);
                 if (combo) {
                     var els = (function() {
-                                    var cell = combo.el.query('.x-trigger-cell'),
-                                        form = combo.el.query('.x-form-trigger');
+                            var cell = combo.el.query('.x-trigger-cell'),
+                                form = combo.el.query('.x-form-trigger');
 
-                                        return (cell.length && cell) || (form.length && form);
-                              })(),
+                            return (cell.length && cell) || (form.length && form);
+                        })(),
                         length = els.length,
                         trigger = els[length - 1],
                         store = combo.store;
@@ -1671,7 +1690,7 @@ Ext.define('iRely.TestEngine', {
                                     var cell = editor.field.el.query('.x-trigger-cell'),
                                         form = editor.field.el.query('.x-form-trigger');
 
-                                        return (cell.length && cell) || (form.length && form);
+                                    return (cell.length && cell) || (form.length && form);
                                 })(),
                                 length = els.length,
                                 trigger = els[length - 1];
@@ -1758,7 +1777,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Integer} delay The delay value in millisecond.
      *
-	 * @param {String} comboColumn Data Index of the combo grid to be filtered
+     * @param {String} comboColumn Data Index of the combo grid to be filtered
      *
      * @returns {iRely.TestEngine}
      */
@@ -1797,7 +1816,7 @@ Ext.define('iRely.TestEngine', {
                                     var cell = editor.field.el.query('.x-trigger-cell'),
                                         form = editor.field.el.query('.x-form-trigger');
 
-                                        return (cell.length && cell) || (form.length && form);
+                                    return (cell.length && cell) || (form.length && form);
                                 })(),
                                 length = els.length,
                                 trigger = els[length - 1];
@@ -2308,7 +2327,7 @@ Ext.define('iRely.TestEngine', {
                         next();
                     }
                 }
-                 else {
+                else {
                     this.ok(false, 'There is no Active Window Open.');
                     next();
                 }
@@ -2346,7 +2365,7 @@ Ext.define('iRely.TestEngine', {
                 var grid = item.editingPlugin ? item : win.down(item);
                 if (grid) {
                     var store = grid.store,
-						row = store.getAt(row1);
+                        row = store.getAt(row1);
 
                     if (Ext.Array.indexOf(grid.columns, column) === -1) {
                         column = grid.columns[column] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + column + ']');
@@ -2406,17 +2425,17 @@ Ext.define('iRely.TestEngine', {
 
             if (win) {
                 var grid = item.editingPlugin ? item : win.down(item);
-                
+
                 if (grid) {
                     var store = grid.store,
                         count = store.getCount(),
                         result;
-                        
-                        if(grid.editingPlugin) {
-                            count--;
-                        }
 
-                        result = count === expectedCount;
+                    if(grid.editingPlugin) {
+                        count--;
+                    }
+
+                    result = count === expectedCount;
 
                     t.ok(result, result ? 'Grid count is correct.' : 'Grid count is incorrect.');
                 } else {
@@ -2956,7 +2975,7 @@ Ext.define('iRely.TestEngine', {
                                 t.diag('Entering data on grid ' + item);
 
                                 /*start = start || 0;
-                                end = end || value ? value.length : 0;*/
+                                 end = end || value ? value.length : 0;*/
 
                                 t.selectText(editor, 0, 50);
                                 t.type(editor, data, function() {
@@ -3124,7 +3143,7 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             var t = this,
-			win = Ext.WindowManager.getActive(),
+                win = Ext.WindowManager.getActive(),
                 com = Ext.ComponentQuery.query(item)[0];
 
             if (win === null || win === undefined) {
@@ -3327,24 +3346,24 @@ Ext.define('iRely.TestEngine', {
     /**
      * Checks if a component has a field label
      *     var engine = new iRely.TestEngine();
-                  engine.start(t)
-                        .login('AGADMIN','AGADMIN','AG').wait(1500)
-                        .expandMenu('Tank Management').wait(100)
-                        .expandMenu('Maintenance').wait(100)
-                        .openScreen('Devices').wait(1000)
-                        .selectSearchRowByIndex(0)
-                        .clickButton('#btnOpenSelected').wait(100)
-                        .checkFieldLabel([
-                              {
-                                    itemId : '#txtDescription',
-                                    label: 'Description'
-                              },
-                              {
-                                    itemId : '#txtPurchasePrice',
-                                    label: 'Purchase Price'
-                              }
-                        ])
-                        .done();
+     engine.start(t)
+     .login('AGADMIN','AGADMIN','AG').wait(1500)
+     .expandMenu('Tank Management').wait(100)
+     .expandMenu('Maintenance').wait(100)
+     .openScreen('Devices').wait(1000)
+     .selectSearchRowByIndex(0)
+     .clickButton('#btnOpenSelected').wait(100)
+     .checkFieldLabel([
+     {
+           itemId : '#txtDescription',
+           label: 'Description'
+     },
+     {
+           itemId : '#txtPurchasePrice',
+           label: 'Purchase Price'
+     }
+     ])
+     .done();
      *
      * @param {Object/Object[]} item
      *
@@ -3618,18 +3637,20 @@ Ext.define('iRely.TestEngine', {
                             balance = true;
 
                         if(parseFloat(BeginningBalance.replace(/,/g, '')) == parseFloat(EndingBalance.replace(/,/g, ''))){
-                            t.diag('Beginning and Ending Balance matched.');
+                            //t.diag('Beginning and Ending Balance matched.');
+                            balance = true
                         }
                         else{
-                            t.diag('Beginning and Ending Balance did not matched.');
+                            //t.diag('Beginning and Ending Balance did not matched.');
                             balance = false;
                         }
 
                         if(parseFloat(Debit.replace(/,/g, '')) == parseFloat(Credit.replace(/,/g, ''))){
-                            t.diag('Debit and Credit matched.');
+                            //t.diag('Debit and Credit matched.');
+                            balance = true
                         }
                         else{
-                            t.diag('Debit and Credit did not matched.');
+                            //t.diag('Debit and Credit did not matched.');
                             balance = false;
                         }
 
@@ -3686,7 +3707,7 @@ Ext.define('iRely.TestEngine', {
                         },
                         {
                             action: 'wait',
-                            delay: 10
+                            delay: 500
                         },
                         function(next) {
                             var newActive = Ext.WindowManager.getActive();
@@ -3706,6 +3727,7 @@ Ext.define('iRely.TestEngine', {
             } else {
                 next();
             }
+
         };
 
         chain.push(fn);
@@ -3717,20 +3739,15 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} item Item Id of the control.
      *
-     * @param {String} msg Custom message.
-     *
-     * @param {Integer} timeout Maximum timeout / limit.
-     *
      * @returns {iRely.TestEngine}
      */
-    waitTillVisible : function(item, msg, timeout) {
+    waitTillVisible : function(item, msg) {
         var me = this,
             chain = me.chain;
 
         var fn = function(next) {
-            var t = this;
-
-            if(!timeout) timeout = 60000;
+            var t = this,
+                result = false;
 
             t.waitForFn(function() {
                 var com = me.getComponentByQuery(item);
@@ -3739,7 +3756,7 @@ Ext.define('iRely.TestEngine', {
                 if(!msg) msg = 'Component is shown';
                 t.ok(true, msg);
                 next();
-            },this, timeout)
+            },this, 60000)
         };
 
         chain.push(fn);
@@ -3751,20 +3768,15 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} item Item Id of the control.
      *
-     * @param {String} msg Custom message.
-     *
-     * @param {Integer} timeout Maximum timeout / limit.
-     *
      * @returns {iRely.TestEngine}
      */
-    waitTillVisibleReportViewer : function(item, msg, timeout) {
+    waitTillVisibleReportViewer : function(item, msg) {
         var me = this,
             chain = me.chain;
 
         var fn = function(next) {
-            var t = this;
-
-            if(!timeout) timeout = 60000;
+            var t = this,
+                result = false;
 
             t.waitForFn(function() {
                 var iframe = window.parent.document.getElementsByClassName('tr-iframe');
@@ -3785,7 +3797,7 @@ Ext.define('iRely.TestEngine', {
                 if(!msg) msg = 'Component is shown';
                 t.ok(true, msg);
                 next();
-            },this, timeout)
+            },this, 180000)
         };
 
         chain.push(fn);
