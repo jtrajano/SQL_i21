@@ -749,6 +749,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotCertified: 'dtmCertified'
             },
 
+            // -- Incoming Inspection Tab
+            btnSelectAll: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnClearAll: {
+                disabled: '{current.ysnPosted}'
+            },
             grdIncomingInspection: {
                 colInspect: {
                     dataIndex: 'ysnSelected',
