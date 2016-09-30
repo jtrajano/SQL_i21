@@ -102,7 +102,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	LEFT JOIN tblICUnitMeasure CostUOM 
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 	OUTER APPLY (
-		SELECT
+		SELECT TOP 1
 			A.intInventoryReceiptItemId
 		FROM tblICInventoryReceiptItem A
 		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
@@ -222,7 +222,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	LEFT JOIN tblICUnitMeasure CostUOM 
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 	OUTER APPLY (
-		SELECT
+		SELECT TOP 1
 			A.intInventoryReceiptItemId
 		FROM tblICInventoryReceiptItem A
 		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
