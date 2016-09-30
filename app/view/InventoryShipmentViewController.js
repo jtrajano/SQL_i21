@@ -2415,7 +2415,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             });
             search.show();
         }
-        showAddScreen();
+        
+         var task = new Ext.util.DelayedTask(function () {
+            showAddScreen();          
+        });
+        task.delay(10);
     },
 
     onOrderTypeSelect: function(combo, records, eOpts) {
