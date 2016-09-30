@@ -123,5 +123,5 @@ Begin --New WOs
 			Select *,@intMachineId AS intMachineId,@strMachineName AS strMachineName,@dblMachineCapacity AS dblMachineCapacity,@strUOM AS strUOM From @tblWO
 		End
 	Else
-		Select 0 AS intWorkOrderId,'' AS strWorkOrderNo,@dblQuantity AS dblQuantity,@dtmOrderDate AS dtmDueDate,@intCellId AS intCellId,@strCellName AS strCellName,@strUOM AS strUOM
+		Select 0 AS intWorkOrderId,'' AS strWorkOrderNo,@dblQuantity AS dblQuantity,@dtmOrderDate AS dtmDueDate,@intCellId AS intCellId,@strCellName AS strCellName,@strUOM AS strUOM,0 AS intMachineId,0.0 AS dblMachineCapacity
 End
