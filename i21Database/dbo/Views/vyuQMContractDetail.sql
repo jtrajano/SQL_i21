@@ -28,6 +28,7 @@ SELECT CD.intContractDetailId
 	,S.strSampleNumber
 	,S.strContainerNumber
 	,S.strSampleTypeName
+	,ISNULL(S.ysnFinalApproval, 'false') AS ysnFinalApproval
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
@@ -47,6 +48,7 @@ LEFT JOIN (
 			,S.strSampleNumber
 			,S.strContainerNumber
 			,ST.strSampleTypeName
+			,ST.ysnFinalApproval
 			,SS.strStatus AS strSampleStatus
 		FROM tblQMSample S
 		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
