@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGetElectronicPricingURL]
 	 @FutureMarketId INT
 	,@FutureMonthId INT
+	,@strFutSymbol Nvarchar(5) = NULL
+	,@strSymbolPrefix Nvarchar(5) = NULL
 	,@intUserId INT
 AS
 BEGIN TRY
@@ -17,7 +19,12 @@ BEGIN TRY
 	DECLARE @URL NVARCHAR(1000)
 	DECLARE @SymbolPrefix NVARCHAR(5)
 
-	SELECT @Commoditycode = strFutSymbol,@SymbolPrefix=strSymbolPrefix
+	SET @strFutSymbol=ISNULL(@strFutSymbol,'')
+	SET @strSymbolPrefix=ISNULL(@strSymbolPrefix,'')
+
+	SELECT 
+	 @Commoditycode = CASE WHEN @strFutSymbol='' THEN strFutSymbol ELSE @strFutSymbol END
+	,@SymbolPrefix=   CASE WHEN @strSymbolPrefix='' THEN strSymbolPrefix ELSE @strSymbolPrefix END
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId
 
