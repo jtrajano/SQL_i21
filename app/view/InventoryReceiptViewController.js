@@ -1021,7 +1021,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     key: 'tblICInventoryReceiptInspections',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdIncomingInspection,
-                       // position: 'none'
+                        position: 'none'
                     })
                 }
             ]
