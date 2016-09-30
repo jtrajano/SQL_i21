@@ -84,12 +84,12 @@ Ext.define('Inventory.model.ReceiptCharge', {
         }
 
         if (
-            this.get('dblAmount') <= 0 && 
-            this.get('strCostMethod') === 'Amount'        
+            this.get('strCostMethod') === 'Amount' && 
+            ( Ext.isNumeric(this.get('dblAmount')) ? this.get('dblAmount') === 0 : false )
         ) {
             errors.add({
                 field: 'dblAmount',
-                message: 'Amount must be greater than zero.'
+                message: 'Amount must have a value.'
             })
         }
 
