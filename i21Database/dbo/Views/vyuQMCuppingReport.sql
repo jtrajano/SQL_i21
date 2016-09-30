@@ -20,6 +20,19 @@ SELECT S.intSampleId
 	,S.strSampleNote
 	,ST.strSampleTypeName
 	,S.intLocationId
+	,CD.dtmStartDate
+	,CD.dtmEndDate
+	,CD.intContractDetailId
+	,CD.intContractHeaderId
+	,S.intLoadDetailContainerLinkId
+	,(
+		SELECT strShipperCode
+		FROM dbo.fnQMGetShipperName(S.strMarks)
+		) AS strShipperCode
+	,(
+		SELECT strShipperName
+		FROM dbo.fnQMGetShipperName(S.strMarks)
+		) AS strShipperName
 FROM dbo.tblQMSample AS S
 JOIN dbo.tblICItem AS I ON I.intItemId = S.intItemId
 JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
