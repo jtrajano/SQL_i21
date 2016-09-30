@@ -207,33 +207,33 @@ BEGIN
 	--=====================================================================================================================================
 	-- 	UPDATE REFUND TABLE
 	---------------------------------------------------------------------------------------------------------------------------------------
-	SELECT	TRD.intRefundId as intRefundId, 
-			TRD.intFiscalYearId as intFiscalYearId, 
-			dblPurchaseVolume = SUM(TRD.dblPurchaseVolume), 
-			dblSaleVolume = SUM(TRD.dblSaleVolume), 
-			dblEquityRefund = SUM(TRD.dblEquityRefund), 
-			dblCashRefund = SUM(TRD.dblCashRefund),
-			dblLessFWT = SUM(TRD.dblLessFWT),
-			dblLessService = SUM(TRD.dblLessService),
-			dblCheckAmount = SUM(TRD.dblCheckAmount),
-			dblNoRefund = SUM(TRD.dblNoRefund)
-	INTO #tmpCurrentData
-	FROM #tmpRefundData TRD
-	WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)
-	GROUP BY TRD.intRefundId, TRD.intFiscalYearId;
+	--SELECT	TRD.intRefundId as intRefundId, 
+	--		TRD.intFiscalYearId as intFiscalYearId, 
+	--		dblPurchaseVolume = SUM(TRD.dblPurchaseVolume), 
+	--		dblSaleVolume = SUM(TRD.dblSaleVolume), 
+	--		dblEquityRefund = SUM(TRD.dblEquityRefund), 
+	--		dblCashRefund = SUM(TRD.dblCashRefund),
+	--		dblLessFWT = SUM(TRD.dblLessFWT),
+	--		dblLessService = SUM(TRD.dblLessService),
+	--		dblCheckAmount = SUM(TRD.dblCheckAmount),
+	--		dblNoRefund = SUM(TRD.dblNoRefund)
+	--INTO #tmpCurrentData
+	--FROM #tmpRefundData TRD
+	--WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)
+	--GROUP BY TRD.intRefundId, TRD.intFiscalYearId;
 
-	UPDATE Ref
-	SET Ref.dblPurchaseVolume = CDat.dblPurchaseVolume, 
-	Ref.dblSaleVolume = CDat.dblSaleVolume,
-	Ref.dblEquityRefund = CDat.dblEquityRefund,
-	Ref.dblCashRefund = CDat.dblCashRefund,
-	Ref.dblLessFWT = CDat.dblLessFWT,
-	Ref.dblLessService = CDat.dblLessService,
-	Ref.dblCheckAmount = CDat.dblCheckAmount,
-	Ref.dblNoRefund = CDat.dblNoRefund
-	FROM tblPATRefund Ref
-	INNER JOIN #tmpCurrentData CDat
-	ON Ref.intRefundId = CDat.intRefundId
+	--UPDATE Ref
+	--SET Ref.dblPurchaseVolume = CDat.dblPurchaseVolume, 
+	--Ref.dblSaleVolume = CDat.dblSaleVolume,
+	--Ref.dblEquityRefund = CDat.dblEquityRefund,
+	--Ref.dblCashRefund = CDat.dblCashRefund,
+	--Ref.dblLessFWT = CDat.dblLessFWT,
+	--Ref.dblLessService = CDat.dblLessService,
+	--Ref.dblCheckAmount = CDat.dblCheckAmount,
+	--Ref.dblNoRefund = CDat.dblNoRefund
+	--FROM tblPATRefund Ref
+	--INNER JOIN #tmpCurrentData CDat
+	--ON Ref.intRefundId = CDat.intRefundId
 
 	--=====================================================================================================================================
 	-- 	UPDATE REFUND CATEGORY TABLE
