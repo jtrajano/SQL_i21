@@ -340,14 +340,14 @@ BEGIN TRY
 			FROM dbo.tblMFWorkOrderConsumedLot WC
 			JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON WC.intWorkOrderId = SI.intWorkOrderId
 				AND WC.intWorkOrderId = @intWorkOrderId
-				AND WC.intBatchId = @intBatchId
+				AND IsNull(WC.intBatchId,@intBatchId) = @intBatchId
 				AND WC.intItemId = SI.intSubstituteItemId
 				AND SI.intItemId = ri.intItemId
 			UNION
 			SELECT 1
 			FROM dbo.tblMFWorkOrderConsumedLot WC
 			Where WC.intWorkOrderId = @intWorkOrderId
-				AND WC.intBatchId = @intBatchId
+				AND IsNull(WC.intBatchId,@intBatchId) = @intBatchId
 				AND WC.intItemId = ri.intItemId
 			)
 	
@@ -375,7 +375,7 @@ BEGIN TRY
 	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
 		AND rs.intWorkOrderId = ri.intWorkOrderId
 	JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intWorkOrderId = rs.intWorkOrderId
-		AND WC.intBatchId = @intBatchId
+		AND IsNull(WC.intBatchId,@intBatchId) = @intBatchId
 		AND WC.intItemId = rs.intSubstituteItemId
 		AND rs.intItemId = ri.intItemId
 	JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
