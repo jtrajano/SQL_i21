@@ -284,6 +284,13 @@ BEGIN
 	VALUES('Rejected','Rejected','Rejected',4)
 END
 GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleStatus WHERE strStatus = 'Pending')
+BEGIN
+	INSERT INTO tblQMSampleStatus(strStatus,strDescription,strSecondaryStatus,intSequence)
+	VALUES('Pending','Pending','Pending',5)
+END
+GO
 
 -- Computation Type
 GO
