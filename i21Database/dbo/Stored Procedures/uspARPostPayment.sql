@@ -1832,6 +1832,7 @@ IF @recap = 0
 						ON A.intInvoiceId = C.intInvoiceId
 					WHERE
 						A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+						AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARID.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 					GROUP BY
 						A.intInvoiceId
 				) P
@@ -1851,6 +1852,7 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 				
 			UPDATE 
 				tblARInvoice
@@ -1865,6 +1867,7 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId				
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 				
 				
 			UPDATE 
@@ -2084,11 +2087,12 @@ IF @recap = 0
 						ON A.intInvoiceId = C.intInvoiceId
 					WHERE
 						A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+						AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 					GROUP BY
 						A.intInvoiceId
 				) P
 			WHERE
-				tblARInvoice.intInvoiceId = P.intInvoiceId
+				tblARInvoice.intInvoiceId = P.intInvoiceId				
 				
 				
 			UPDATE 
@@ -2102,7 +2106,8 @@ IF @recap = 0
 			INNER JOIN tblARInvoice C
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
-				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
+				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 					
 				
 			UPDATE 
@@ -2117,7 +2122,8 @@ IF @recap = 0
 			INNER JOIN tblARInvoice C
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
-				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)							
+				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 								
 
 			UPDATE 

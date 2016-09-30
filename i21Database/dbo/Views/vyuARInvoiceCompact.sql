@@ -47,6 +47,7 @@ SELECT
 	,dblTermAPR						= SMT.dblAPR	
 	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = ARI.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + ARI.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	,dblTotalTermDiscount			= ARI.dblTotalTermDiscount
+	,ysnExcludeForPayment			= CASE WHEN ARI.strTransactionType = 'Customer Prepayment' AND EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intInvoiceId = ARI.intInvoiceId AND (ISNULL(ysnRestricted, 0) = 1 OR ISNULL(intContractDetailId, 0) <> 0)) THEN 1 ELSE 0 END
 FROM         
 	dbo.tblARInvoice AS ARI 
 INNER JOIN
