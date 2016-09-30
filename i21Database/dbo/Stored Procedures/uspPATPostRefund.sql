@@ -130,9 +130,6 @@ GROUP BY
 		Total.dblPurchaseVolume, 
 		Total.dblSaleVolume, 
 		Total.dblRate,
-		Ref.dblLessFWT, 
-		Ref.dblLessService,
-		Ref.dblNoRefund,
 		Ref.ysnPosted,
 		RCus.intRefundCustomerId,
 		RCus.intCustomerId,
@@ -147,7 +144,6 @@ GROUP BY
 		RCat.dblRefundRate, 
 		Total.dblVolume,
 		Total.dblCashPayout,
-		Ref.dblCashRefund,
 		ARC.ysnSubjectToFWT
 
 SELECT	intRefundId, 
@@ -292,9 +288,7 @@ BEGIN
 	UPDATE CVol
 	SET CVol.dtmLastActivityDate = GETDATE()
 	FROM tblPATCustomerVolume CVol
-	INNER JOIN #tmpCurrentData
-	ON CVol.intFiscalYear = #tmpCurrentData.intFiscalYearId
-	WHERE CVol.dblVolume <> 0.00
+	WHERE CVol.dblVolume <> 0.00 AND CVol.intFiscalYear = @intFiscalYearId
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -534,7 +528,7 @@ Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundData
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundDataCombined
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundPostData')) DROP TABLE #tmpRefundPostData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCurrentData')) DROP TABLE #tmpCurrentData
+	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCurrentData')) DROP TABLE #tmpCurrentData
 END
 ---------------------------------------------------------------------------------------------------------------------------------------
 GO
