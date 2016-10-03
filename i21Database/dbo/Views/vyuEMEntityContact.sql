@@ -34,7 +34,8 @@ SELECT
 	strFormatArea = isnull(h.strAreaCityFormat,i.strAreaCityFormat),
 	strFormatLocal = isnull(h.strLocalNumberFormat,i.strLocalNumberFormat),
 	intAreaCityLength= isnull(h.intAreaCityLength,i.intAreaCityLength),
-	intCountryId = isnull(h.intCountryID,i.intCountryID)
+	intCountryId = isnull(h.intCountryID,i.intCountryID),
+	strMobileLookUp = mob.strPhoneLookUp
 
 FROM dbo.tblEMEntity AS B 			
 	INNER JOIN dbo.[tblEMEntityToContact] AS C 
