@@ -46,9 +46,9 @@ SELECT	TD.intTransferDetailId,
 	LEFT OUTER JOIN tblPATPatronageCategory PC
 		ON PC.intPatronageCategoryId = TD.intPatronageCategoryId
 	LEFT OUTER JOIN tblGLFiscalYear transfereeFY
-		ON transfereeFY.intFiscalYearId = TD.intFiscalYearId
+		ON transfereeFY.intFiscalYearId = TD.intToFiscalYearId
 	LEFT OUTER JOIN tblGLFiscalYear transferorFY
-		ON transferorFY.intFiscalYearId = TD.intToFiscalYearId
+		ON transferorFY.intFiscalYearId = TD.intFiscalYearId
 	LEFT OUTER JOIN tblPATRefundRate transfereeRR
 		ON transfereeRR.intRefundTypeId = TD.intRefundTypeId
 	LEFT OUTER JOIN tblPATRefundRate transferorRR
