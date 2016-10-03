@@ -345,7 +345,7 @@ Begin
 	Delete From @tblPickedLots Where intLotId=0
 
 	Insert @tblReservedQty(intLotId,dblReservedQty)
-	Select sr.intLotId,sum(sr.dblQty) from tblICLot l join tblICStockReservation sr on l.intLotId=sr.intLotId 
+	Select sr.intLotId,sum(distinct sr.dblQty) from tblICLot l join tblICStockReservation sr on l.intLotId=sr.intLotId 
 	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId Where ISNULL(sr.ysnPosted,0)=0
 	Group by sr.intLotId
 
