@@ -402,6 +402,7 @@ BEGIN
 				FROM	dbo.tblICInventoryLotCostAdjustmentLog
 				WHERE	intInventoryLotId = @CostBucketId
 						AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+						AND ysnIsUnposted = 0 
 		)
 		BEGIN 
 			INSERT INTO tblICInventoryLotCostAdjustmentLog (

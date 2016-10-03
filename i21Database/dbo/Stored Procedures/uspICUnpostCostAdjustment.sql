@@ -47,7 +47,11 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
-		,@INV_TRANS_TYPE_Inventory_Auto_Variance AS INT = 35
+		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 35
+		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 36
+		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 37
+		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 38
+
 
 DECLARE	@intItemId AS INT
 		,@intItemLocationId AS INT 
@@ -103,6 +107,10 @@ FROM	(
 						, @INV_TRANS_TYPE_Revalue_Produced
 						, @INV_TRANS_TYPE_Revalue_Transfer
 						, @INV_TRANS_TYPE_Revalue_Build_Assembly
+						, @INV_TRANS_TYPE_Revalue_Item_Change 
+						, @INV_TRANS_TYPE_Revalue_Split_Lot 
+						, @INV_TRANS_TYPE_Revalue_Lot_Merge 
+						, @INV_TRANS_TYPE_Revalue_Lot_Move 
 				)
 				AND 1 = 
 					CASE	WHEN	inventory_transaction.strTransactionId = Source_Query.strTransactionId 
