@@ -221,10 +221,11 @@ BEGIN
 		FROM tblAPBill A 
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
-			INNER JOIN tblGLAccount D ON B.intAccountId = D.intAccountId
-			INNER JOIN tblGLAccountGroup E ON D.intAccountGroupId = E.intAccountGroupId
+			--INNER JOIN tblGLAccount D ON B.intAccountId = D.intAccountId
+			--INNER JOIN tblGLAccountGroup E ON D.intAccountGroupId = E.intAccountGroupId
+			INNER JOIN vyuGLAccountDetail GLD ON B.intAccountId = GLD.intAccountId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND E.intAccountCategoryId IN (1, 2, 5)
+		AND GLD.intAccountCategoryId IN (1, 2, 5)
 
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
 		--COMPARE THE CASH PRICE
