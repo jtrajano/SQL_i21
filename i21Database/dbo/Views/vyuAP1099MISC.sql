@@ -34,7 +34,7 @@ AS
 (
 	SELECT
 		  strEmployerAddress = [dbo].[fnAPFormatAddress](NULL
-										, NULL
+										, B.strCompanyName
 										, NULL
 										, B.strAddress
 										, B.strCity
