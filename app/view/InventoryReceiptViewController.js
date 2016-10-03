@@ -4337,6 +4337,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var SourceType = currentRecord.get('intSourceType').toString();
         var CurrencyId = currentRecord.get('intCurrencyId') === null ? 0 : currentRecord.get('intCurrencyId').toString();
         var ContractStore = win.viewModel.storeInfo.purchaseContractList;
+        var win = me.view;
+
         if (ReceiptType === 'Transfer Order') {
             VendorId = currentRecord.get('intTransferorId').toString();
         }
@@ -4498,6 +4500,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         // Calculate the taxes
                         win.viewModel.data.currentReceiptItem = newReceiptItem;
                         me.calculateItemTaxes();
+
+                        // Calculate the Wgt or Volume Gain/Loss 
+                        me.validateWeightLoss(win);
 
                         if (ReceiptType === 'Purchase Contract') {
                             ContractStore.load({
