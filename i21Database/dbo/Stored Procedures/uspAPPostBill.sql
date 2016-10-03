@@ -335,7 +335,7 @@ BEGIN
 
 		--Update Inventory Item Receipt
 		UPDATE A
-			SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived
+			SET A.dblBillQty = A.dblBillQty - (CASE WHEN A.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)
 		FROM tblICInventoryReceiptItem A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND B.intInventoryReceiptChargeId IS NULL

@@ -169,7 +169,7 @@ BEGIN
 			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
 			INNER JOIN tblICItem D ON C.intItemId = D.intItemId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND (C.dblBillQty + B.dblQtyReceived) > C.dblOpenReceive
+		AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)) > C.dblOpenReceive
 
 		--VALIDATION FOR MISCELLANEOUS ITEM
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
