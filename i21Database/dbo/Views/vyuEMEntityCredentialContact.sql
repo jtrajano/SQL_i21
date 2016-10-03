@@ -10,6 +10,7 @@ SELECT
 	vEntityContact.strLocationName,
 	vEntityContact.strPhone,
 	vEntityContact.strMobile,
+	vEntityContact.strMobileLookUp,
 	vEntityContact.strTimezone,
 	vEntityContact.strTitle,
 	vEntityContact.ysnPortalAccess,
