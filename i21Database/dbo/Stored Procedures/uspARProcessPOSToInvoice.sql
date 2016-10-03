@@ -101,7 +101,7 @@ SELECT
 	,[intInvoiceId]							= NULL --NULL Value will create new invoice
 	,[intEntityCustomerId]					= POS.intEntityCustomerId
 	,[intCompanyLocationId]					= POS.intCompanyLocationId
-	,[intCurrencyId]						= 1
+	,[intCurrencyId]						= POS.intCurrencyId
 	,[intTermId]							= NULL --Check this one
 	,[dtmDate]								= POS.dtmDate
 	,[dtmDueDate]							= NULL
