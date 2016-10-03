@@ -35,7 +35,7 @@ SELECT	TD.intTransferDetailId,
 	FROM tblPATTransferDetail TD
 	INNER JOIN tblEMEntity transferor
 		ON transferor.intEntityId = TD.intTransferorId
-	INNER JOIN tblEMEntity transferee
+	LEFT OUTER JOIN tblEMEntity transferee
 		ON transferee.intEntityId = TD.intTransfereeId
 	LEFT OUTER JOIN (SELECT iCS.intCustomerStockId,iCS.dtmIssueDate, iCS.dblParValue, iCS.strStockStatus, iCS.strCertificateNo, iSC.strStockName
 						FROM tblPATCustomerStock iCS INNER JOIN tblPATStockClassification iSC 
@@ -50,7 +50,7 @@ SELECT	TD.intTransferDetailId,
 	LEFT OUTER JOIN tblGLFiscalYear transferorFY
 		ON transferorFY.intFiscalYearId = TD.intFiscalYearId
 	LEFT OUTER JOIN tblPATRefundRate transfereeRR
-		ON transfereeRR.intRefundTypeId = TD.intRefundTypeId
+		ON transfereeRR.intRefundTypeId = TD.intToRefundTypeId
 	LEFT OUTER JOIN tblPATRefundRate transferorRR
-		ON transferorRR.intRefundTypeId = TD.intToRefundTypeId
+		ON transferorRR.intRefundTypeId = TD.intRefundTypeId
 GO
