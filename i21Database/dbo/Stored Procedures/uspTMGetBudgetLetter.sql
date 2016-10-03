@@ -111,7 +111,7 @@ BEGIN
 			,strCustomerState = D.strState
 			,strCustomerZip = D.strZipCode
 			,intEntityCustomerId = B.intEntityCustomerId
-			,dblBudget = B.dblBudgetAmountForBudgetBilling
+			,dblBudget = B.dblMonthlyBudget
 			,dtmFirstDueDate = ''' + @strFirstPaymentDue + '''
 			,blbLetterBody = E.blbMessage 
 			,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
