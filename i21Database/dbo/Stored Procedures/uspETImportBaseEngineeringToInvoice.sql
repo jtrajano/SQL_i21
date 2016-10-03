@@ -91,13 +91,16 @@ BEGIN
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
-		,strInvoiceNumber			NVARCHAR(25)
+		,strRecordId				NVARCHAR(25)
 		,strSiteNumber				NVARCHAR(5)
 		,dtmDate					DATETIME
 		,intLineItem				INT
 		,strFileName				NVARCHAR(300)
 		,strStatus					NVARCHAR(MAX)
 		,ysnSuccessful				BIT
+		,strInvoiceNumber			NVARCHAR(50)
+		,strItemNumber				NVARCHAR(50)
+		,intInvoiceId				INT
 	)
 
 
@@ -242,23 +245,30 @@ BEGIN
 			LOGSUCCESS:
 			INSERT INTO @ResultTableLog (
 				strCustomerNumber			
-				,strInvoiceNumber			
+				,strRecordId			
 				,strSiteNumber				
 				,dtmDate					
 				,intLineItem				
 				,strFileName				
 				,strStatus
 				,ysnSuccessful
+				,strInvoiceNumber
+				,strItemNumber
+				,intInvoiceId
 			)
 			SELECT
 					strCustomerNumber = @strCustomerNumber		
-					,strInvoiceNumber =	CAST(@intRecordId AS NVARCHAR(15))	
+					,strRecordId =	CAST(@intRecordId AS NVARCHAR(15))	
 					,strSiteNumber = @strSiteNumber				
 					,dtmDate = @dtmDate					
 					,intLineItem = @intRecordId		
 					,strFileName = ''				
 					,strStatus = 'Created ' + @strNewInvoiceNumber
 					,ysnSuccessful = 1
+					,strInvoiceNumber = @strNewInvoiceNumber
+					,strItemNumber = @strItemNumber
+					,intInvoiceId = @intNewInvoiceId
+
 
 			GOTO CONTINUELOOP
 		END
@@ -482,23 +492,27 @@ BEGIN
 		LOGERROR:		 
 		INSERT INTO @ResultTableLog (
 				strCustomerNumber			
-				,strInvoiceNumber			
+				,strRecordId			
 				,strSiteNumber				
 				,dtmDate					
 				,intLineItem				
 				,strFileName				
 				,strStatus
 				,ysnSuccessful
+				,strInvoiceNumber 
+				,strItemNumber 
 		)
 		SELECT
 				strCustomerNumber = @strCustomerNumber		
-				,strInvoiceNumber =	CAST(@intRecordId AS NVARCHAR(15))	
+				,strRecordId =	CAST(@intRecordId AS NVARCHAR(15))	
 				,strSiteNumber = @strSiteNumber				
 				,dtmDate = @dtmDate					
 				,intLineItem = @intRecordId		
 				,strFileName = ''				
 				,strStatus = @strErrorMessage
 				,ysnSuccessful = 0
+				,strInvoiceNumber = ''
+				,strItemNumber = @strItemNumber
 					
 		GOTO CONTINUELOOP
 		CONTINUELOOP:
