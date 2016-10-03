@@ -14,6 +14,8 @@ SELECT
 	,[intCurrencyId]		= ISNULL((SELECT [intMainCurrencyId] FROM tblSMCurrency WHERE intCurrencyID = CTCD.[intCurrencyId]), CTCD.[intCurrencyId])
 	,[intCompanyLocationId]	= CTCD.[intCompanyLocationId]	
 	,[intItemId]			= CTCD.[intItemId]
+	,[strItemNo]			= ICI.[strItemNo]
+	,[strItemDescription]	= ICI.[strDescription]
 	,[intItemUOMId]			= CTCD.[intItemUOMId]
 	,[strUnitMeasure]		= ICUM.[strUnitMeasure]
 	,[intPricingTypeId]		= CTPT.[intPricingTypeId]
@@ -27,12 +29,16 @@ SELECT
 	,[dblScheduleQty]		= CTCD.[dblScheduleQty]
 	,[dblAvailableQty]		= (ISNULL(CTCD.dblBalance,0) - ISNULL(CTCD.dblScheduleQty,0))	
 	,[ysnUnlimitedQuantity]	= CTCH.[ysnUnlimitedQuantity]
-	,[ysnLoad]				= CTCH.[ysnLoad] 
+	,[ysnLoad]				= CTCH.[ysnLoad]
+	,[ysnAllowedToShow]		= CAST(CASE WHEN CTCD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)
 	FROM
 		tblCTContractDetail CTCD
 	INNER JOIN
 		tblCTContractHeader CTCH
 			ON CTCD.[intContractHeaderId] = CTCH.[intContractHeaderId]
+	LEFT OUTER JOIN
+		tblICItem ICI
+			ON CTCD.[intItemId] = ICI.[intItemId] 
 	LEFT OUTER JOIN
 		tblCTPricingType CTPT
 			ON CTCD.[intPricingTypeId] = CTPT.[intPricingTypeId]
