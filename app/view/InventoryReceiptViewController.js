@@ -1750,15 +1750,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        this.calculateGrossNet(current, 1);
+        // Calculate the Gross/Net 
+        if (combo.itemId !== 'cboStorageLocation'){
+            this.calculateGrossNet(current, 1);
+        }
+        
+        // Calculate the taxes
         win.viewModel.data.currentReceiptItem = current;
         this.calculateItemTaxes();
         
-        //Calculate Line Total
+        //Calculate Line Total        
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var currentReceipt  = win.viewModel.data.current;
         currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
 
+        // Show or hide the Lot Panel (or Grid)
         var pnlLotTracking = win.down("#pnlLotTracking");
 
         if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
