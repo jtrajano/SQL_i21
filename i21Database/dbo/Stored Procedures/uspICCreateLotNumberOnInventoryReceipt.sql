@@ -105,7 +105,7 @@ BEGIN
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 2) <> ReceiptItem.dblOpenReceive
+			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
 			--AND ReceiptItem.intWeightUOMId IS NULL 
 			
 	IF @intItemId IS NOT NULL 
