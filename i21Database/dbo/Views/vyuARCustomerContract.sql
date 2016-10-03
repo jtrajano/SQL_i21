@@ -15,13 +15,13 @@ SELECT
 	,[intCompanyLocationId]	= CTCD.[intCompanyLocationId]	
 	,[intItemId]			= CTCD.[intItemId]
 	,[intItemUOMId]			= CTCD.[intItemUOMId]
+	,[strUnitMeasure]		= ICUM.[strUnitMeasure]
 	,[strPricingType]		= CTPT.[strPricingType]
-	,[dblCashPrice]			= CTCD.[dblCashPrice]
+	,[dblCashPrice]			= CTCD.[dblCashPrice] / ISNULL(ICIU1.dblUnitQty,1)
 	,[intSubCurrencyId]		= CTCD.[intCurrencyId]
 	,[dblSubCurrencyRate]	= CONVERT(NUMERIC(18,6),ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = CTCD.[intCurrencyId]), 1.000000))
 	,[strSubCurrency]		= SMC.[strCurrency]
-	,[intPriceItemUOMId]	= CTCD.[intPriceItemUOMId]
-	,[strPriceUOM]			= ICUM.[strUnitMeasure]
+	,[intPriceItemUOMId]	= CTCD.[intPriceItemUOMId]	
 	,[dblBalance]			= CTCD.[dblBalance]
 	,[dblScheduleQty]		= CTCD.[dblScheduleQty]
 	,[dblAvailableQty]		= (ISNULL(CTCD.dblBalance,0) - ISNULL(CTCD.dblScheduleQty,0))	
@@ -42,11 +42,15 @@ SELECT
 			ON CTCH.[intContractTypeId] = CTCT.[intContractTypeId]
 	LEFT OUTER JOIN
 		tblICItemUOM ICIU
-			ON CTCD.[intPriceItemUOMId] = ICIU.[intItemUOMId]
+			ON CTCD.[intItemUOMId] = ICIU.[intItemUOMId]
 			AND CTCD.[intItemId] = ICIU.[intItemId]
 	LEFT OUTER JOIN
 		tblICUnitMeasure ICUM
 			ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]
+	LEFT OUTER JOIN
+		tblICItemUOM ICIU1
+			ON CTCD.[intPriceItemUOMId] = ICIU1.[intItemUOMId]
+			AND CTCD.[intItemId] = ICIU1.[intItemId]			
 	LEFT OUTER JOIN
 		tblSMCurrency SMC
 			ON CTCD.[intCurrencyId] = SMC.[intCurrencyID]					 

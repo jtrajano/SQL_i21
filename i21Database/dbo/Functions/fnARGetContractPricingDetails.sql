@@ -62,8 +62,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@AvailableQuantity = ARCC.[dblAvailableQty]
 		,@UnlimitedQuantity = ARCC.[ysnUnlimitedQuantity]
 		,@PricingType		= ARCC.[strPricingType]
-		,@ItemUOMId			= ARCC.[intPriceItemUOMId] 
-		,@PriceUOM			= ARCC.[strPriceUOM] 
+		,@ItemUOMId			= ARCC.[intItemUOMId] 
+		,@PriceUOM			= ARCC.[strUnitMeasure] 
 	FROM
 		[vyuARCustomerContract] ARCC
 	WHERE
@@ -79,7 +79,6 @@ DECLARE	 @Price				NUMERIC(18,6)
 		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
 		AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 		AND ARCC.[strPricingType] NOT IN ('Unit','Index')
-		AND ARCC.[strContractType] = 'Sale'
 		AND (ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId)
 	ORDER BY
 		 ARCC.[dtmStartDate]
@@ -143,8 +142,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@AvailableQuantity = ARCC.[dblAvailableQty]
 		,@UnlimitedQuantity = ARCC.[ysnUnlimitedQuantity]
 		,@PricingType		= ARCC.[strPricingType]
-		,@ItemUOMId			= ARCC.[intPriceItemUOMId] 
-		,@PriceUOM			= ARCC.[strPriceUOM] 
+		,@ItemUOMId			= ARCC.[intItemUOMId] 
+		,@PriceUOM			= ARCC.[strUnitMeasure] 
 	FROM
 		[vyuARCustomerContract] ARCC
 	WHERE
@@ -158,7 +157,6 @@ DECLARE	 @Price				NUMERIC(18,6)
 		AND (ARCC.[dblBalance] > 0 OR ARCC.[ysnUnlimitedQuantity] = 1)
 		AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 		AND ARCC.[strPricingType] NOT IN ('Unit','Index')
-		AND ARCC.[strContractType] = 'Sale'
 		AND (ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId)
 	ORDER BY
 		 dtmStartDate

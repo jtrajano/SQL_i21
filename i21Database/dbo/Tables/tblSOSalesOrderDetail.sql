@@ -46,6 +46,8 @@
 	[dblRecipeQuantity]		NUMERIC(18, 6)	NULL DEFAULT 0,
 	[intCustomerStorageId]	INT				NULL,
 	[intStorageScheduleTypeId]		INT				NULL,
+	[intSubCurrencyId]		INT				NULL,
+	[dblSubCurrencyRate]	NUMERIC(18, 6)	NULL DEFAULT 1,
     CONSTRAINT [PK_tblSOSalesOrderDetail] PRIMARY KEY CLUSTERED ([intSalesOrderDetailId] ASC),
     CONSTRAINT [FK_tblSOSalesOrderDetail_tblSOSalesOrder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -58,5 +60,6 @@
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
-	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [dbo].[tblGRStorageType] ([intStorageScheduleTypeId])
+	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [dbo].[tblGRStorageType] ([intStorageScheduleTypeId]),
+	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 );
