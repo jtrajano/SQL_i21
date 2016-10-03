@@ -21,6 +21,7 @@ SELECT	TD.intTransferDetailId,
 		transferee.strName AS strTransfereeName,
 		TD.intToStockId,
 		SC.strStockName AS strToStockName,
+		transfereeCS.dblParValue AS dblToParValue,
 		TD.intToFiscalYearId,
 		transfereeFY.strFiscalYear AS strTransfereeFiscal,
 		TD.strToStockStatus,
@@ -53,4 +54,6 @@ SELECT	TD.intTransferDetailId,
 		ON transfereeRR.intRefundTypeId = TD.intToRefundTypeId
 	LEFT OUTER JOIN tblPATRefundRate transferorRR
 		ON transferorRR.intRefundTypeId = TD.intRefundTypeId
+	LEFT OUTER JOIN tblPATCustomerStock transfereeCS
+		ON transfereeCS.intStockId = TD.intToStockId
 GO
