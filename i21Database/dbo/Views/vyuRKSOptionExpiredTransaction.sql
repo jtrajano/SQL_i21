@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuRKSOptionExpiredTransaction
 AS
 SELECT m.intOptionsPnSExpiredId,
-	   strTranNo,
+	   convert(int,strTranNo) strTranNo,
 	   dtmExpiredDate,
 	   t.strInternalTradeNo,
 	   intLots,

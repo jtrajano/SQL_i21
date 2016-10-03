@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuRKSOptionExerciseAssignTransaction
 AS
 SELECT m.intOptionsPnSExercisedAssignedId,
-	   strTranNo,
+	   convert(int,strTranNo) strTranNo,
 	   dtmTranDate,
 	   t.strInternalTradeNo,
 	   t.dtmFilledDate as dtmTransactionDate,

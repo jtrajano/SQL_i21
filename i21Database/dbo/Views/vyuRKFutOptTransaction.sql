@@ -2,7 +2,7 @@
 
 AS  
 
-SELECT *,isnull(dblContractSize,0)*intOpenContract as dblHedgeQty FROM (
+SELECT top 100 percent *,convert(int,ROW_NUMBER() OVER (ORDER BY intFutOptTransactionId)) AS intRowNum,isnull(dblContractSize,0)*intOpenContract as dblHedgeQty FROM (
 SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId], 
 			ft.[intFutOptTransactionHeaderId] AS [intFutOptTransactionHeaderId], 
 			fom.[strFutMarketName] AS [strFutMarketName], 
@@ -60,4 +60,4 @@ LEFT OUTER JOIN [dbo].[tblSMCompanyLocation] AS cl ON ft.[intLocationId] = cl.[i
 LEFT OUTER JOIN [dbo].[tblCMBank] AS b ON ft.[intBankId] = b.[intBankId]
 LEFT OUTER JOIN [dbo].[tblCMBankAccount] AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
 LEFT OUTER JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
-)t
+)t order by convert(int,REPLACE(REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''),'-H','')) ASC

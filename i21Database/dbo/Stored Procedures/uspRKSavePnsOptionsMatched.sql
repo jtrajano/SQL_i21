@@ -129,7 +129,8 @@ END
   
 SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY();    
 ---------------Matched Record Insert ----------------  
-SELECT @strTranNo=isnull(max(strTranNo),0) from tblRKOptionsMatchPnS     
+
+SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPnS   
    
    INSERT INTO tblRKOptionsMatchPnS  
   (   
@@ -160,7 +161,7 @@ SELECT @strTranNo=isnull(max(strTranNo),0) from tblRKOptionsMatchPnS
  [intSFutOptTransactionId] INT  
  )     
    ---------------Expired Record Insert ----------------  
- SELECT @strExpiredTranNo=isnull(max(strTranNo),0) from tblRKOptionsPnSExpired     
+ SELECT @strExpiredTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsPnSExpired     
    
    INSERT INTO tblRKOptionsPnSExpired  
   (   
@@ -236,7 +237,7 @@ BEGIN
    SELECT @strExercisedAssignedNo=isnull(max(convert(int,strTranNo)),0)+1 from tblRKOptionsPnSExercisedAssigned     
    SELECT @intFutOptTransactionId=intFutOptTransactionId,@intLots=intLots,@dtmTranDate=dtmTranDate,@ysnAssigned=ysnAssigned FROM @tblExercisedAssignedDetail WHERE RowNumber=@mRowNumber    
 
-   INSERT INTO tblRKOptionsPnSExercisedAssigned  
+  INSERT INTO tblRKOptionsPnSExercisedAssigned  
   (   
   intOptionsMatchPnSHeaderId,  
   strTranNo,   
