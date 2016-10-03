@@ -303,7 +303,7 @@ BEGIN
 				,vwcus_ytd_pur = 0  
 				,vwcus_ytd_sls = ISNULL(CI.dblYTDSales, 0.0)
 				,vwcus_ytd_cgs = 0.0  
-				,vwcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling
+				,vwcus_budget_amt = Cus.dblMonthlyBudget
 				,vwcus_budget_beg_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),0) AS INT)
 				,vwcus_budget_end_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),0) AS INT)
 				,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END
@@ -321,7 +321,7 @@ BEGIN
 				,vwcus_bus_loc_no = ''''
 				,vwcus_cred_limit = Cus.dblCreditLimit
 				,vwcus_last_stmt_bal = ISNULL(CI.dblLastStatement,0.0)
-				,vwcus_budget_amt_due  = ISNULL(CI.dblTotalDue,0.0)
+				,vwcus_budget_amt_due  = ISNULL(CI.dblBudgetAmount,0.0)
 				,vwcus_cred_ppd  = CAST(ISNULL(CI.dblPrepaids,0.0) AS NUMERIC(18,6))
 				,vwcus_ytd_srvchr = 0.0 
 				,vwcus_last_pymt = ISNULL(CI.dblLastPayment,0.0)
