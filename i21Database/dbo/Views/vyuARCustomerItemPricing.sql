@@ -25,6 +25,9 @@ SELECT
 	,[intSourceTransactionId]	= CAST(2 AS INT)											--CAST(NULL AS INT)
 	,[ysnApplied]				= ARPH.[ysnApplied] 										--CAST(NULL AS BIT)
 	,[intSort]					= CAST(0 AS INT)											--CAST(NULL AS INT)
+	,[intSubCurrencyId]			= ARID.[intSubCurrencyId]
+	,[dblSubCurrencyRate]		= ARID.[dblSubCurrencyRate]
+	,[strSubCurrency]			= CAST('' AS NVARCHAR(40))
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -63,6 +66,9 @@ SELECT
 	,[intSourceTransactionId]	= CAST(2 AS INT)			--CAST(NULL AS INT)
 	,[ysnApplied]				= CAST(0 AS BIT)			--CAST(NULL AS BIT)
 	,[intSort]					= IP.[intSort]				--CAST(NULL AS INT)
+	,[intSubCurrencyId]			= IP.[intSubCurrencyId]
+	,[dblSubCurrencyRate]		= IP.[dblSubCurrencyRate]
+	,[strSubCurrency]			= IP.[strSubCurrency]
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -135,6 +141,9 @@ SELECT
 	,[intSourceTransactionId]	= CAST(1 AS INT)											--CAST(NULL AS INT)
 	,[ysnApplied]				= ARPH.[ysnApplied] 										--CAST(NULL AS BIT)
 	,[intSort]					= CAST(0 AS INT)											--CAST(NULL AS INT)
+	,[intSubCurrencyId]			= SOSOD.[intSubCurrencyId]
+	,[dblSubCurrencyRate]		= SOSOD.[dblSubCurrencyRate]
+	,[strSubCurrency]			= CAST('' AS NVARCHAR(40))
 FROM
 	tblSOSalesOrderDetail SOSOD
 INNER JOIN
@@ -173,6 +182,9 @@ SELECT
 	,[intSourceTransactionId]	= CAST(1 AS INT)				--CAST(NULL AS INT)
 	,[ysnApplied]				= CAST(0 AS BIT)				--CAST(NULL AS BIT)
 	,[intSort]					= IP.[intSort]					--CAST(NULL AS INT)
+	,[intSubCurrencyId]			= IP.[intSubCurrencyId]
+	,[dblSubCurrencyRate]		= IP.[dblSubCurrencyRate]
+	,[strSubCurrency]			= IP.[strSubCurrency]
 FROM
 	tblSOSalesOrderDetail SOSOD
 INNER JOIN

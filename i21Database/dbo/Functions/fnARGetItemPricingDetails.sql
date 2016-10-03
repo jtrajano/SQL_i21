@@ -59,6 +59,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@PricingType		NVARCHAR(50)
 		,@TermDiscountBy	NVARCHAR(50)
 		,@SubCurrencyRate	NUMERIC(18,6)
+		,@SubCurrencyId		INT
 		,@SubCurrency		NVARCHAR(40)
 		,@PriceUOM			NVARCHAR(50)
 
@@ -90,7 +91,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,@AvailableQuantity = dblAvailableQty
 			,@UnlimitedQuantity = ysnUnlimitedQty
 			,@PricingType		= strPricingType
-			,@CurrencyId		= intSubCurrencyId
+			,@SubCurrencyId		= intSubCurrencyId
 			,@SubCurrencyRate	= dblSubCurrencyRate
 			,@SubCurrency		= strSubCurrency
 			,@ItemUOMId			= intPriceUOMId 
@@ -114,7 +115,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		IF(@Price IS NOT NULL)
 		BEGIN
 			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType, intSort)
-			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @CurrencyId, @SubCurrencyRate, @SubCurrency, @ItemUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, 1
+			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ItemUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, 1
 			IF @GetAllAvailablePricing = 0 RETURN
 		END	
 		

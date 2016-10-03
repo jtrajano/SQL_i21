@@ -16,6 +16,7 @@ SELECT
 	,[intItemId]			= CTCD.[intItemId]
 	,[intItemUOMId]			= CTCD.[intItemUOMId]
 	,[strUnitMeasure]		= ICUM.[strUnitMeasure]
+	,[intPricingTypeId]		= CTPT.[intPricingTypeId]
 	,[strPricingType]		= CTPT.[strPricingType]
 	,[dblCashPrice]			= CTCD.[dblCashPrice] / ISNULL(ICIU1.dblUnitQty,1)
 	,[intSubCurrencyId]		= CTCD.[intCurrencyId]
@@ -25,7 +26,8 @@ SELECT
 	,[dblBalance]			= CTCD.[dblBalance]
 	,[dblScheduleQty]		= CTCD.[dblScheduleQty]
 	,[dblAvailableQty]		= (ISNULL(CTCD.dblBalance,0) - ISNULL(CTCD.dblScheduleQty,0))	
-	,[ysnUnlimitedQuantity]	= CTCH.[ysnUnlimitedQuantity]	
+	,[ysnUnlimitedQuantity]	= CTCH.[ysnUnlimitedQuantity]
+	,[ysnLoad]				= CTCH.[ysnLoad] 
 	FROM
 		tblCTContractDetail CTCD
 	INNER JOIN

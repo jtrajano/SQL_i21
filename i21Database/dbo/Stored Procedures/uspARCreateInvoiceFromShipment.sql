@@ -193,6 +193,8 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
 	,[intStorageScheduleTypeId]
+	,[intSubCurrencyId] 
+	,[dblSubCurrencyRate] 
 	)
 SELECT
 	 [strSourceTransaction]					= 'Inventory Shipment'
@@ -295,6 +297,8 @@ SELECT
 	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
 	,[ysnBlended]							= ARSI.[ysnBlended]
 	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
+	,[intSubCurrencyId]						= NULL
+	,[dblSubCurrencyRate]					= 1
 FROM
 	vyuARShippedItems ARSI
 WHERE
@@ -404,6 +408,8 @@ SELECT
 	,[intTempDetailIdForTaxes]				= SOD.intSalesOrderDetailId
 	,[ysnBlended]							= 0
 	,[intStorageScheduleTypeId]				= SOD.intStorageScheduleTypeId
+	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
+	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
 FROM 
 	tblICInventoryShipment ICIS
 	INNER JOIN tblSOSalesOrder SO 

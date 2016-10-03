@@ -89,7 +89,9 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							dblContractBalance			INT,
 							dblContractAvailable		INT,
 							intEntityContactId			INT,
-							intStorageScheduleTypeId	INT)
+							intStorageScheduleTypeId	INT,
+							[intSubCurrencyId]			INT,
+							[dblSubCurrencyRate]		NUMERIC(18,6))
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -140,6 +142,8 @@ SELECT intItemId					= SI.intItemId
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
 	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId				= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -190,6 +194,8 @@ SELECT intItemId					= SOD.intItemId
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
 	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId				= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -234,6 +240,8 @@ SELECT intItemId					= ICSI.intItemId
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
 	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId				= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 FROM tblICInventoryShipmentItem ICSI 
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
@@ -280,7 +288,9 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblContractBalance			= 0
 	 , dblContractAvailable			= 0
 	 , intEntityCustomerId			= NULL
-	 , intStorageScheduleTypeId		= ARSI.intStorageScheduleTypeId	
+	 , intStorageScheduleTypeId		= ARSI.intStorageScheduleTypeId
+	 , intSubCurrencyId				= NULL
+	 , dblSubCurrencyRate			= 1
 FROM vyuARShippedItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -494,7 +504,9 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dtmMaintenanceDate]
 					,[intTaxGroupId]
 					,[intConcurrencyId]
-					,[intStorageScheduleTypeId])
+					,[intStorageScheduleTypeId]
+					,[intSubCurrencyId]
+					,[dblSubCurrencyRate])
 				SELECT 	
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
@@ -522,6 +534,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intTaxGroupId]			--[intTaxGroupId]
 					,0
 					,[intStorageScheduleTypeId]
+					,[intSubCurrencyId]
+					,[dblSubCurrencyRate]
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -629,7 +643,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemMargin				NUMERIC(18,6),
 						@ItemRecipeQty			NUMERIC(18,6),
 						@ContractBalance		INT,
-						@ContractAvailable		INT						
+						@ContractAvailable		INT,
+						@ItemSubCurrencyId		INT,
+						@ItemSubCurrencyRate	NUMERIC(18,6)					
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -668,7 +684,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ContractBalance		= dblContractBalance,
 						@ContractAvailable		= dblContractAvailable,	
 						@EntityContactId		= intEntityContactId,	
-						@StorageScheduleTypeId	= intStorageScheduleTypeId
+						@StorageScheduleTypeId	= intStorageScheduleTypeId,
+						@ItemSubCurrencyId		= intSubCurrencyId,
+						@ItemSubCurrencyRate	= dblSubCurrencyRate 
 				FROM @tblItemsToInvoice ORDER BY intSalesOrderDetailId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -712,6 +730,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemMaintenanceType			= @ItemMaintenanceType
 							,@ItemFrequency					= @ItemFrequency
 							,@ItemMaintenanceDate			= @ItemMaintenanceDate
+							,@ItemSubCurrencyId				= @ItemSubCurrencyId
+							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 
 				UPDATE tblARInvoiceDetail SET dblContractBalance = @ContractBalance, dblContractAvailable = @ContractAvailable
 				FROM @tblItemsToInvoice 

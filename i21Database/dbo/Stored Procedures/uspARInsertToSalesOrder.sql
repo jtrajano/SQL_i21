@@ -181,7 +181,9 @@ BEGIN
 			,[intContractDetailId]
 			,[intItemWeightUOMId]
 			,[dblItemWeight]
-			,[dblOriginalItemWeight])
+			,[dblOriginalItemWeight]
+			,[intSubCurrencyId]
+			,[dblSubCurrencyRate])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -214,6 +216,8 @@ BEGIN
 			,[intItemWeightUOMId]
 			,[dblItemWeight]
 			,[dblOriginalItemWeight]
+			,[intSubCurrencyId]
+			,[dblSubCurrencyRate]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 

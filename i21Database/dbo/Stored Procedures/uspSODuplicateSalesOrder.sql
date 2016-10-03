@@ -190,6 +190,8 @@ BEGIN
 				   ,[dblOriginalItemWeight]
 				   ,[intItemWeightUOMId]
 				   ,[intStorageScheduleTypeId]	
+				   ,[intSubCurrencyId]
+				   ,[dblSubCurrencyRate]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -223,6 +225,8 @@ BEGIN
 				   ,[dblOriginalItemWeight]
 				   ,[intItemWeightUOMId] 	
 				   ,[intStorageScheduleTypeId]
+				   ,[intSubCurrencyId]
+				   ,[dblSubCurrencyRate]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE
