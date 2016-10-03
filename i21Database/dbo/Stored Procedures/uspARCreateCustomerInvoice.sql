@@ -109,6 +109,7 @@
 	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@DocumentMaintenanceId			INT				= NULL
 	,@StorageScheduleTypeId			INT				= NULL
+	,@UseOriginIdAsInvoiceNumber    BIT				= 0
 AS
 
 BEGIN
@@ -284,7 +285,8 @@ DECLARE  @NewId INT
 
 BEGIN TRY
 	INSERT INTO [tblARInvoice]
-		([strTransactionType]
+		([strInvoiceNumber]
+		,[strTransactionType]
 		,[strType]
 		,[intEntityCustomerId]
 		,[intCompanyLocationId]
@@ -348,8 +350,8 @@ BEGIN TRY
 		,[intLoadId]
 		,[intEntityId]
 		,[intConcurrencyId])
-	SELECT
-		 [strTransactionType]			= @TransactionType
+	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @OriginalInvoiceId ELSE NULL END
+		,[strTransactionType]			= @TransactionType
 		,[strType]						= @Type
 		,[intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[intCompanyLocationId]			= @CompanyLocationId

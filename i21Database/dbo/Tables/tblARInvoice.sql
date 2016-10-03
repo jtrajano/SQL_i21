@@ -130,7 +130,7 @@ DECLARE @intMaxCount INT = 0
 DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
-SELECT intInvoiceId, strTransactionType, strType FROM INSERTED ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType, strType FROM INSERTED WHERE strInvoiceNumber IS NULL ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
