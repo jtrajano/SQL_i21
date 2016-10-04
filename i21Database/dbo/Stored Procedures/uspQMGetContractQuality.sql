@@ -51,55 +51,63 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb.dbo.#ContractQuality') IS NOT NULL
 		DROP TABLE #ContractQuality
 
-	SELECT DENSE_RANK() OVER (
-			ORDER BY S.intSampleId DESC
-			) intRankNo
-		,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
-		,E.strName
-		,I1.strItemNo AS strBundleItemNo
-		,I.strItemNo
-		,I.strDescription
-		,ISNULL(C.strContainerNumber, S.strContainerNumber) AS strContainerNumber
-		,S.strSampleNumber
-		,ST.strSampleTypeName
-		,SS.strStatus
-		,P.strPropertyName + ' - ' + T.strTestName AS strPropertyName
-		,TR.strPropertyValue
-		,S.intSampleId
-		,IC.strContractItemName
-		,S.strMarks
-		,(
-			SELECT strShipperCode
-			FROM dbo.fnQMGetShipperName(S.strMarks)
-			) AS strShipperCode
-		,(
-			SELECT strShipperName
-			FROM dbo.fnQMGetShipperName(S.strMarks)
-			) AS strShipperName
-		,CS.strSubLocationName
-		,L.strLoadNumber
-		,S.dtmSampleReceivedDate
-		,S.dtmSamplingEndDate
+	SET @SQL = 
+		'SELECT *
 	INTO #ContractQuality
-	FROM dbo.tblCTContractHeader AS CH
-	JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId
-	JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId
-	JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId
-	JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
-		AND S.intLocationId = @strLocationId
-	JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-	JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-	JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId
-	JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
-	JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId
-	LEFT JOIN dbo.tblLGLoadContainer AS C ON C.intLoadContainerId = S.intLoadContainerId
-	LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
-	LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
-	LEFT JOIN dbo.tblLGLoad L ON L.intLoadId = S.intLoadId
-	LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
+	FROM (						
+		SELECT DENSE_RANK() OVER (
+				ORDER BY S.intSampleId DESC
+				) intRankNo
+			,CH.strContractNumber + '' - '' + LTRIM(CD.intContractSeq) AS strContractNumber
+			,E.strName
+			,I1.strItemNo AS strBundleItemNo
+			,I.strItemNo
+			,I.strDescription
+			,S.strContainerNumber
+			,S.strSampleNumber
+			,ST.strSampleTypeName
+			,SS.strStatus
+			,S.intSampleId
+			,IC.strContractItemName
+			,S.strMarks
+			,(
+				SELECT strShipperCode
+				FROM dbo.fnQMGetShipperName(S.strMarks)
+				) AS strShipperCode
+			,(
+				SELECT strShipperName
+				FROM dbo.fnQMGetShipperName(S.strMarks)
+				) AS strShipperName
+			,CS.strSubLocationName
+			,L.strLoadNumber
+			,S.dtmSampleReceivedDate
+			,S.dtmSamplingEndDate
+			,COUNT(*) OVER () AS intTotalCount
+		FROM dbo.tblCTContractHeader AS CH
+		JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId
+		JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId
+		JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
+			AND S.intLocationId = ' 
+	+ @strLocationId + '
+		JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+		JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+		LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
+		LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+		LEFT JOIN dbo.tblLGLoad L ON L.intLoadId = S.intLoadId
+		LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId'
+		
+	IF (LEN(@strFilterCriteria) > 0)
+		SET @SQL = @SQL + 'WHERE ' + @strFilterCriteria
 
-	SET @SQL = 'SELECT TOP ' + @strLimit + '   
-  strContractNumber  
+	SET @SQL = @SQL + ') t '
+
+	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
+			AND intRankNo <= ' + @strStart + '+' + @strLimit
+
+	SET @SQL = @SQL + ' SELECT   
+  intTotalCount
+  ,strContractNumber  
   ,strName  
   ,strContractItemName
   ,strBundleItemNo
@@ -117,16 +125,37 @@ BEGIN TRY
   ,intSampleId  
   ,dtmSampleReceivedDate
   ,dtmSamplingEndDate
-  ,(COUNT(*) OVER () + ' + @strStart + ') AS intTotalCount
-  ,' + @str + 'FROM (  
-	SELECT *
-	FROM #ContractQuality
+  ,' + @str + 
+		'FROM (  
+	SELECT intTotalCount
+		,strContractNumber
+		,strName
+		,strContractItemName
+		,strBundleItemNo
+		,strItemNo
+		,CQ.strDescription
+		,strLoadNumber
+		,strContainerNumber
+		,strMarks
+		,strShipperCode
+		,strShipperName
+		,strSubLocationName
+		,strSampleNumber
+		,strSampleTypeName
+		,strStatus
+		,CQ.intSampleId
+		,dtmSampleReceivedDate
+		,dtmSamplingEndDate
+		,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName
+		,TR.strPropertyValue
+	FROM #ContractQuality CQ
+	JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = CQ.intSampleId
+	JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
+	JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId
   ) t  
- PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @str + ')) pvt WHERE intRankNo > ' + @strStart
+ PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @str + ')) pvt'
 
-	IF (LEN(@strFilterCriteria) > 0)
-		SET @SQL = @SQL + ' and ' + @strFilterCriteria
-	SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
+ SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
 
 	EXEC sp_executesql @SQL
 END TRY
