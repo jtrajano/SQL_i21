@@ -145,18 +145,19 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 
 -- General Ledger
-:r .\GL\DefaultData\1_AccountStructure.sql
-:r .\GL\DefaultData\1_AccountType.sql
-:r .\GL\DefaultData\2_AccountGroup.sql
-:r .\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql
-:r .\GL\DefaultData\3_AccountCategory.sql
-:r .\GL\DefaultData\4_AccountTemplate.sql
-:r .\GL\DefaultData\5_AccountSegmentTemplate.sql
-:r .\GL\DefaultData\6_AccountRange.sql
-:r .\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql
-:r .\GL\DefaultData\7_FiscalYearPeriod.sql
-:r .\GL\DefaultData\8_AccountCurrency.sql
-:r .\GL\DefaultData\9_AlterTable.sql
+:r .\GL\DefaultData\1a_AccountStructure.sql
+:r .\GL\DefaultData\1b_AccountType.sql
+:r .\GL\DefaultData\1c_AccountGroup.sql
+:r .\GL\DefaultData\1d_RemoveDuplicateCOGSales_AccountGroup.sql
+:r .\GL\DefaultData\1e_AccountCategory.sql
+:r .\GL\DefaultData\1f_AccountTemplate.sql
+:r .\GL\DefaultData\1g_AccountSegmentTemplate.sql
+:r .\GL\DefaultData\1h_AccountRange.sql
+:r .\GL\DefaultData\1i_RemoveCOGSales_AccountRange.sql
+:r .\GL\DefaultData\1j_FiscalYearPeriod.sql
+:r .\GL\DefaultData\1k_AccountCurrency.sql
+:r .\GL\DefaultData\1l_AlterTable.sql
+:r .\GL\DefaultData\1m_UpdateCompany.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
