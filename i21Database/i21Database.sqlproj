@@ -4350,6 +4350,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRescheduleAndSaveWorkOrderByForward.sql" />
     <Build Include="dbo\Stored Procedures\uspQMInspectionDeleteResult.sql" />
     <Build Include="dbo\Views\vyuPATRefundSummary.sql" />
+    <Build Include="dbo\Views\vyuGRGetAllStorageType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
