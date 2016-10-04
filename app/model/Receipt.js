@@ -70,7 +70,14 @@ Ext.define('Inventory.model.Receipt', {
             if (iRely.Functions.isEmpty(this.get('intTransferorId'))) {
                 errors.add({
                     field: 'intTransferorId',
-                    message: 'Transferor must be present.'
+                    message: 'From Location must be present.'
+                })
+            }
+
+            if (this.get('intLocationId') === this.get('intTransferorId')) {
+                errors.add({
+                    field: 'intLocationId',
+                    message: 'Value of Location and From Location must be of different.'
                 })
             }
         }
