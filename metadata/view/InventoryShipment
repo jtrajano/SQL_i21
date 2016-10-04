@@ -390,6 +390,7 @@
                             "userConfig": {
                                 "bodyPadding": 5,
                                 "container|align": "stretch",
+                                "itemId": "pgeDetails",
                                 "layout": "vbox",
                                 "title": "Details"
                             },
@@ -1132,6 +1133,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "container|align": "stretch",
+                                                "itemId": "tabShippingCompany",
                                                 "layout": "vbox",
                                                 "title": "Shipping Company"
                                             },
@@ -1367,6 +1369,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "container|align": "stretch",
+                                                "itemId": "tabDelivery",
                                                 "layout": "vbox",
                                                 "title": "Delivery"
                                             },
@@ -4375,6 +4378,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "pgeAttachments",
                                 "layout": "fit",
                                 "title": "Attachments"
                             },

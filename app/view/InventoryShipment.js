@@ -185,6 +185,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                 items: [
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeDetails',
                                         bodyPadding: 5,
                                         title: 'Details',
                                         layout: {
@@ -559,6 +560,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'tabShippingCompany',
                                                         title: 'Shipping Company',
                                                         layout: {
                                                             type: 'vbox',
@@ -659,6 +661,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'tabDelivery',
                                                         title: 'Delivery',
                                                         layout: {
                                                             type: 'vbox',
@@ -2067,6 +2070,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeAttachments',
                                         layout: 'fit',
                                         title: 'Attachments',
                                         items: [
