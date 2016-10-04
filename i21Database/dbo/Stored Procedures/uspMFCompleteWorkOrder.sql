@@ -645,7 +645,7 @@ BEGIN TRY
 	BEGIN
 		IF EXISTS (
 				SELECT *
-				FROM tblMFWorkOrder
+				FROM tblMFWorkOrderRecipe 
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intItemUOMId = @intProduceUnitMeasureId
 				)
