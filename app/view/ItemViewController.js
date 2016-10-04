@@ -829,6 +829,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
+                        readOnly: true,
                         store: '{pricingLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
