@@ -2735,15 +2735,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         };
 
-        // If there is no data change, do the post.
+        // If there is no data change, calculate the charge and do the recap. 
         if (!context.data.hasChanges()) {
+            me.doOtherChargeCalculate(context, win.viewModel.data.current);
             doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
             return;
         }
 
-        // Save has data changes first before doing the post.
+        // Save has data changes first before anything else. 
         context.data.saveRecord({
             successFn: function () {
+                me.doOtherChargeCalculate(context, win.viewModel.data.current);
                 doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
             }
         });
@@ -5004,44 +5006,45 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     },
 
+    doOtherChargeCalculate: function(context, current){
+        if (context && current ) {
+            Ext.Ajax.request({
+                timeout: 120000,
+                url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
+                method: 'post',
+                success: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    if (!jsonData.success) {
+                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                    }
+                    else {
+                        context.configuration.paging.store.load();
+                    }
+                },
+                failure: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                }
+            });
+        }
+    },
+
     onCalculateChargeClick: function (button, e, eOpts) {
+        var me = this;
         var win = button.up('window');
         var context = win.context;
         var current = win.viewModel.data.current;
 
-        var doPost = function () {
-            if (current) {
-                Ext.Ajax.request({
-                    timeout: 120000,
-                    url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
-                    method: 'post',
-                    success: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        if (!jsonData.success) {
-                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                        }
-                        else {
-                            context.configuration.paging.store.load();
-                        }
-                    },
-                    failure: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-                    }
-                });
-            }
-        };
-
-        // If there is no data change, do the post.
+        // If there is no data change, do the ajax request.
         if (!context.data.hasChanges()){
-            doPost();
+            me.doOtherChargeCalculate(context, current);
             return;
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
             successFn: function () {
-                doPost();
+                me.doOtherChargeCalculate(context, current);
             }
         });
     },
