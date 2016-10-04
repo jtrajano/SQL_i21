@@ -4388,6 +4388,7 @@
     <Build Include="dbo\Stored Procedures\uspQMInspectionDeleteResult.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentAndCreditMemo.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetContractQualityColumns.sql" />
+    <Build Include="dbo\Views\vyuHDCustomerContactList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
