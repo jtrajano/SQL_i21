@@ -146,66 +146,6 @@ BEGIN
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
---		INSERT INTO dbo.tblICInventoryShipment (
---				strShipmentNumber
---				,dtmShipDate
---				,intOrderType
---				,strReferenceNumber
---				,dtmRequestedArrivalDate
---				,intShipFromLocationId
---				,intEntityCustomerId
---				,intShipToLocationId
---				,intFreightTermId
---				,strBOLNumber
---				,intShipViaId
---				,strVessel
---				,strProNumber
---				,strDriverId
---				,strSealNumber
---				,strDeliveryInstruction
---				,dtmAppointmentTime
---				,dtmDepartureTime
---				,dtmArrivalTime
---				,dtmDeliveredDate
---				,dtmFreeTime
---				,strReceivedBy
---				,strComment
---				,ysnPosted
---				,intEntityId
---				,intCreatedUserId
---				,intConcurrencyId
---				,intSourceType
---		)
---		SELECT	strShipmentNumber			= @ShipmentNumber
---				,dtmShipDate				= SC.dtmTicketDateTime
---				,intOrderType				= @intOrderType
---				,strReferenceNumber			= SC.strCustomerReference
---				,dtmRequestedArrivalDate	= NULL -- TODO
---				,intShipFromLocationId		= SC.intProcessingLocationId
---				,intEntityCustomerId		= SC.intEntityId
---				,intShipToLocationId		= NULL -- TODO
---				,intFreightTermId			= 1 -- TODO
---				,strBOLNumber				= SC.strTicketNumber -- TODO
---				,intShipViaId				= NULL
---				,strVessel					= SC.strTruckName -- TODO
---				,strProNumber				= NULL 
---				,strDriverId				= SC.strDriverName
---				,strSealNumber				= NULL 
---				,strDeliveryInstruction		= NULL 
---				,dtmAppointmentTime			= NULL 
---				,dtmDepartureTime			= NULL 
---				,dtmArrivalTime				= NULL 
---				,dtmDeliveredDate			= NULL 
---				,dtmFreeTime				= NULL 
---				,strReceivedBy				= NULL 
---				,strComment					= SC.strTicketComment
---				,ysnPosted					= 0 
---				,intEntityId				= dbo.fnGetUserEntityId(@intUserId) 
---				,intCreatedUserId			= @intUserId
---				,intConcurrencyId			= 1
---				,intSourceType				= 1
---FROM	dbo.tblSCTicket SC
---WHERE	SC.intTicketId = @intTicketId
 END 
 
 -- Get the identity value from tblICInventoryShipment
@@ -293,10 +233,7 @@ BEGIN
 	--										WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
 	--									END
 	,[ysnAccrue]						= 0
-	,[ysnPrice]							= CASE
-											WHEN QM.dblDiscountAmount < 0 THEN 1
-											WHEN QM.dblDiscountAmount > 0 THEN IC.ysnPrice
-										END
+	,[ysnPrice]							= 1
 	FROM @ShipmentStagingTable SE
 	INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
 	INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
@@ -424,54 +361,6 @@ ELSE
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 		WHERE SE.intSourceId = @intTicketId AND SC.dblFreightRate > 0
 	END
-	--INSERT INTO dbo.tblICInventoryShipmentItem (
-	--		intInventoryShipmentId
-	--		,intSourceId
-	--		,intLineNo
-	--		,intOrderId
-	--		,intItemId
-	--		,intSubLocationId
-	--		,dblQuantity
-	--		,intItemUOMId
-	--		,intWeightUOMId
-	--		,dblUnitPrice
-	--		,intDockDoorId
-	--		,strNotes
-	--		,intSort
-	--		,intConcurrencyId
-	--		,intOwnershipType
-	--		,intStorageLocationId
-	--		,intDiscountSchedule
-	--)
-	--SELECT			
-	--		intInventoryShipmentId	= @InventoryShipmentId
-	--		,intSourceId			= @intTicketId
-	--		,intLineNo				= ISNULL (LI.intTransactionDetailId, 1)
-	--		,intOrderId				= CNT.intContractHeaderId
-	--		,intItemId				= SC.intItemId
-	--		,intSubLocationId		= SC.intSubLocationId
-	--		,dblQuantity			= LI.dblQty
-	--		,intItemUOMId			= LI.intItemUOMId
-	--		,intWeightUOMId			= (SELECT intUnitMeasureId from tblSCScaleSetup WHERE intScaleSetupId = SC.intScaleSetupId)
-	--		--,dblUnitPrice			= LI.dblCost
-	--		,dblUnitPrice			= SC.dblUnitPrice + SC.dblUnitBasis
-	--		,intDockDoorId			= NULL
-	--		,strNotes				= SC.strTicketComment
-	--		,intSort				= 1
-	--		,intConcurrencyId		= 1
-	--		,intOwnershipType       = CASE
-	--								  WHEN LI.ysnIsStorage = 0
-	--								  THEN 1
-	--								  WHEN LI.ysnIsStorage = 1
-	--								  THEN 2
-	--								  END
-	--		,intStorageLocationId	= SC.intStorageLocationId
-	--		,intDiscountSchedule	= SC.intDiscountId
-	--FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
-	--		INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId
-	--		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-	--		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
-	--WHERE	SC.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 END
 SELECT @checkContract = COUNT(intTransactionDetailId) FROM @Items WHERE intTransactionDetailId > 0;
 IF(@checkContract > 0)
