@@ -2674,9 +2674,10 @@ IF @post = 1
 				,@ACTUALCOST AS INT = 5
 
 		--Update onhand
-		BEGIN TRY	
+		BEGIN TRY
 			-- Get the items to post  
-			DECLARE @ItemsForPost AS ItemCostingTableType  
+			DECLARE @ItemsForPost AS ItemCostingTableType  			
+
 			INSERT INTO @ItemsForPost (  
 				intItemId  
 				,intItemLocationId 
@@ -2770,7 +2771,7 @@ IF @post = 1
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
 				AND Header.strTransactionType <> 'Debit Memo'
-				
+				AND (Detail.intCustomerStorageId IS NULL OR ISNULL(Detail.intCustomerStorageId,0) = 0)				
 
 			UNION ALL
 
@@ -2830,6 +2831,7 @@ IF @post = 1
 				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 				AND ARI.[strTransactionType] <> 'Debit Memo'
 				AND ARIC.strType <> 'Finished Good'
+				AND (ARID.intCustomerStorageId IS NULL OR ISNULL(ARID.intCustomerStorageId,0) = 0)			
 			
 		END TRY
 		BEGIN CATCH
@@ -2838,7 +2840,7 @@ IF @post = 1
 		END CATCH
 
 		-- Call the post routine 
-		BEGIN TRY 
+		BEGIN TRY
 			-- Call the post routine 
 			INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -2877,6 +2879,161 @@ IF @post = 1
 					@ItemsForPost  
 					,@batchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@UserEntityID
+					
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH
+
+			
+
+		--Update customer storage items
+		BEGIN TRY
+			-- Get the items to post  
+			DECLARE @StorageItemsForPost AS ItemCostingTableType  			
+
+			INSERT INTO @StorageItemsForPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId 
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+				,strActualCostId
+			) 
+			SELECT 
+				 intItemId					= Detail.intItemId  
+				,intItemLocationId			= IST.intItemLocationId
+				,intItemUOMId				= Detail.intItemUOMId  
+				,dtmDate					= Header.dtmShipDate
+				,dblQty						= (Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,dblUOMQty					= ItemUOM.dblUnitQty
+				-- If item is using average costing, it must use the average cost. 
+				-- Otherwise, it must use the last cost value of the item. 
+				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN IST.strType = 'Finished Good' AND Detail.ysnBlended = 1 
+																			THEN (
+																				SELECT SUM(ICIT.[dblCost]) 
+																				FROM
+																					tblICInventoryTransaction ICIT
+																				INNER JOIN
+																					tblMFWorkOrder MFWO
+																						ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
+																						AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
+																				WHERE
+																					MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.intWorkOrderId)FROM tblMFWorkOrder WHERE tblMFWorkOrder.intInvoiceDetailId = Detail.intInvoiceDetailId)
+																					AND ICIT.[ysnIsUnposted] = 0
+																					AND ICIT.[strTransactionForm] = 'Produce'
+																			)
+																			ELSE
+																				CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
+																							dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
+																						ELSE 
+																							IST.dblLastCost  
+																				END 
+																		END
+																		,ItemUOM.dblUnitQty
+																	),@ZeroDecimal)
+				,dblSalesPrice				= Detail.dblPrice 
+				,intCurrencyId				= Header.intCurrencyId
+				,dblExchangeRate			= 1.00
+				,intTransactionId			= Header.intInvoiceId
+				,intTransactionDetailId		= Detail.intInvoiceDetailId
+				,strTransactionId			= Header.strInvoiceNumber 
+				,intTransactionTypeId		= @INVENTORY_SHIPMENT_TYPE
+				,intLotId					= NULL 
+				,intSubLocationId			= Detail.intCompanyLocationSubLocationId 
+				,intStorageLocationId		= Detail.intStorageLocationId
+				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
+			FROM 
+				tblARInvoiceDetail Detail
+			INNER JOIN
+				tblARInvoice Header
+					ON Detail.intInvoiceId = Header.intInvoiceId
+					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
+					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
+					and 1 = CASE	
+								WHEN Header.strTransactionType = 'Credit Memo'
+									THEN Header.ysnImpactInventory
+									ELSE 1
+								END
+
+			INNER JOIN
+				@PostInvoiceData P
+					ON Header.intInvoiceId = P.intInvoiceId	
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+			LEFT OUTER JOIN
+				vyuICGetItemStock IST
+					ON Detail.intItemId = IST.intItemId 
+					AND Header.intCompanyLocationId = IST.intLocationId 
+			WHERE				
+				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
+				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
+				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
+				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
+				AND Header.strTransactionType <> 'Debit Memo'
+				AND (Detail.intCustomerStorageId IS NOT NULL OR ISNULL(Detail.intCustomerStorageId,0) <> 0)		
+		
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()
+			GOTO Do_Rollback
+		END CATCH
+
+		-- Call the post routine 
+		BEGIN TRY
+			-- Call the post routine 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+			)
+			EXEC	dbo.uspICPostStorage  
+					@StorageItemsForPost  
+					,@batchId  		
 					,@UserEntityID
 					
 		END TRY
@@ -3051,17 +3208,36 @@ IF @post = 0
 				BEGIN
 				
 					DECLARE @intTransactionIdIC INT
-							,@strTransactionIdIC NVARCHAR(80);
+							,@strTransactionIdIC NVARCHAR(80)
+							,@WStorageCount INT
+							,@WOStorageCount INT
 					
 					SELECT TOP 1 @intTransactionIdIC = intInvoiceId, @strTransactionIdIC = strTransactionId FROM @UnPostICInvoiceData ORDER BY intInvoiceId
 
-					EXEC	dbo.uspICUnpostCosting
-								 @intTransactionIdIC
-								,@strTransactionIdIC
+					SELECT @WStorageCount = COUNT(intCustomerStorageId) FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND (intItemId IS NOT NULL OR intItemId <> 0) AND (intCustomerStorageId IS NOT NULL OR ISNULL(intCustomerStorageId,0) <> 0)	
+					SELECT @WOStorageCount = COUNT(intCustomerStorageId) FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND (intItemId IS NOT NULL OR intItemId <> 0) AND (intCustomerStorageId IS NULL OR ISNULL(intCustomerStorageId,0) = 0)
+
+					IF @WOStorageCount > 1
+					BEGIN
+						-- Unpost onhand stocks. 
+						EXEC	dbo.uspICUnpostCosting
+									 @intTransactionIdIC
+									,@strTransactionIdIC
+									,@batchId
+									,@UserEntityID
+									,@recap 
+					END
+
+					IF @WStorageCount > 1 
+					BEGIN 
+						-- Unpost storage stocks. 
+						EXEC	dbo.uspICUnpostStorage
+								@intTransactionId
+								,@strTransactionId
 								,@batchId
 								,@UserEntityID
-								,@recap 
-
+								,@recap
+					END					
 										
 					DELETE FROM @UnPostICInvoiceData WHERE intInvoiceId = @intTransactionIdIC AND strTransactionId = @strTransactionIdIC 
 												
@@ -3460,4 +3636,4 @@ Post_Exit:
 	SET @successfulCount = 0	
 	SET @invalidCount = @totalInvalid + @totalRecords
 	SET @success = 0	
-	RETURN 0;	
+	RETURN 0;
