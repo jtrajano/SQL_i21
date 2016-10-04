@@ -131,7 +131,7 @@ BEGIN
 			,intDockDoorId			= NULL
 			,strNotes				= SODetail.strComments
 			,intSort				= SODetail.intSalesOrderDetailId
-			,intOwnershipType		= CASE WHEN SODetail.intStorageScheduleTypeId = NULL THEN 0 ELSE 2 END
+			,intOwnershipType		= CASE WHEN SODetail.intStorageScheduleTypeId = NULL THEN 1 ELSE 2 END
 			,intCustomerStorageId	= SODetail.intCustomerStorageId
 			,intConcurrencyId		= 1
 	FROM	dbo.tblSOSalesOrderDetail SODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
