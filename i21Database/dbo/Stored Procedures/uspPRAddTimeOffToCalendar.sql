@@ -88,9 +88,12 @@ SELECT @intTimeOffRequestId = @intTransactionId
 		@intUserId
 		,NULL
 		,'Time Off - ' + ENT.strName
-		,'<p><strong>Time Off Type:</strong> ' + TTO.strTimeOff +'</p>' 
-			+ '<p><strong>Reason:</strong> </br>' + TOR.strReason +'</p>'
-			+ '<p><strong>Address while on Time Off:</strong></br>' + TOR.strAddress +'</p>'
+		,'<table style="font-size: 14px;"><tbody>'
+			+ '<tr><td><strong>Time Off Type</strong></td><td>' + REPLACE(TTO.strTimeOff, '''', '''''') +'</td></tr>'
+			+ '<tr><td><strong>Time Off Hours</strong></td><td>' + CAST(CAST(TOR.dblRequest AS FLOAT) AS NVARCHAR(50)) + '</td></tr>'
+			+ '<tr><td><strong>Reason</strong></td><td>' + REPLACE(TOR.strReason, '''', '''''') + '</td></tr>'
+			+ '<tr><td><strong>Address while on Time Off</strong></td><td>' + REPLACE(TOR.strAddress, '''', '''''') + '</td></tr>'
+			+ '</tbody></table>'
 		,'{"drillDown":{"enabled":true,"url":"#/PR/TimeOffRequest?routeId=' + CAST(intTimeOffRequestId AS NVARCHAR(20))+'%7C%5E%7C&activeTab=Details","text":"View Time Off Request "},"title":"Time Off - ' + REPLACE(ENT.strName, '', '''') + '"}'
 		,'Payroll.view.TimeOffRequest'
 		,CAST(TOR.intTimeOffRequestId AS NVARCHAR(100))
