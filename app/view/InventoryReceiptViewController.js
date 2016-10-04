@@ -1372,7 +1372,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var vendorLocation = records[0].getDefaultLocation();
             if (vendorLocation) {
                 current.set('intShipViaId', vendorLocation.get('intShipViaId'));
-                current.set('intTaxGroupId', vendorLocation.get('intTaxGroupId'));
+                //current.set('intTaxGroupId', vendorLocation.get('intTaxGroupId'));
             }
         }
 
@@ -1453,9 +1453,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                                     //Remove all Storage Locations in Lot Grid
                                     var currentReceiptItem = receiptItemRecords[i];
-                                    var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots'](),
-                                        receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
-
+                                    var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots']();
+                                    if(receiptItemLots) {
+                                        var receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
                                         var li = receiptItemLotRecords.length - 1;
 
                                       for (; li >= 0; li--) {
@@ -1463,14 +1463,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                           receiptItemLotRecords[li].set('intStorageLocationId', null);
                                           receiptItemLotRecords[li].set('strStorageLocation', null);
                                       }
+                                    }
+        
                                   }
                                  current.set('strLocationName', records[0].get('strLocationName'));
                                 
-                                current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+                                var valFOBPoint = current.get('strFobPoint').trim();
+
+                                //Assign Tax Group Id from Location FOB Point is Destination
+                                if(valFOBPoint.toLowerCase() === 'destination') {
+                                   current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+                                }
+                                
+                                //Calculate Item Taxes
                                 if (current.tblICInventoryReceiptItems()) {
                                     Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
-                                        current.currentReceiptItem = item;
-                                        me.calculateItemTaxes();
+                                        if(!item.dummy) {
+                                            win.viewModel.data.currentReceiptItem = item;
+                                            me.calculateItemTaxes();
+                                        }
                                     });
                                 }
                             }
@@ -1519,13 +1530,42 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (records.length <= 0)
             return;
 
-        var win = combo.up('window');
-        var current = win.viewModel.data.current;
+        var win = combo.up('window'),
+            current = win.viewModel.data.current,
+            me = this;
 
         if (current) current.set('strFobPoint', records[0].get('strFobPoint'));
 
-        // Calculate the taxes
-        this.calculateItemTaxes();
+        // Save first before calculating the taxes
+        win.context.data.saveRecord({
+            successFn: function () {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryReceipt/GetTaxGroupId?id=' + current.get('intInventoryReceiptId'),
+                    method: 'post',
+                    success: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        if (jsonData.success) 
+                            //Set intTaxGroupId
+                            current.set('intTaxGroupId', jsonData.message.taxGroupId);
+
+                        if (current.tblICInventoryReceiptItems()) {
+                            Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
+                                    if(!item.dummy) {
+                                        //Calculate Taxes
+                                        win.viewModel.data.currentReceiptItem = item;
+                                        me.calculateItemTaxes();
+                                    }
+                            });
+                        }
+                    },
+                    failure: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    }
+               });
+            }
+        });
     },
 
     onReceiptItemSelect: function (combo, records, eOpts) {
@@ -1730,10 +1770,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
+        else if (combo.itemId === 'cboSubLocation' || combo.itemId === 'cboStorageLocation') {
+            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+        }
 
-        this.calculateGrossNet(current, 1);
-        win.viewModel.data.currentReceiptItem = current;
-        this.calculateItemTaxes();
+        // Calculate the Gross/Net 
+        if (combo.itemId !== 'cboStorageLocation'){
+            this.calculateGrossNet(current, 1);
+        }
+        
+        // Calculate the taxes
+       // win.viewModel.data.currentReceiptItem = current;
+       // this.calculateItemTaxes();
         
         //Calculate Line Total
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
@@ -1749,7 +1798,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    calculateItemTaxes: function (reset) {
+    calculateItemTaxes: function () {
         var me = this;
         var win = me.getView();
         var masterRecord = win.viewModel.data.current;
@@ -1759,9 +1808,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (!detailRecord) return;
         if (iRely.Functions.isEmpty(detailRecord.get('intItemId'))) return;
 
-        if (reset !== false) reset = true;
+        //if (reset !== false) reset = true;
 
-        var computeItemTax = function (itemTaxes, me, reset) {
+        var computeItemTax = function (itemTaxes, me) {
 
             if (!detailRecord) {
                 return;
@@ -1771,7 +1820,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 qtyOrdered = detailRecord.get('dblOpenReceive'),
                 unitCost = detailRecord.get('dblUnitCost');
 
-            if (reset !== false) reset = true;
+           // if (reset !== false) reset = true;
 
             // Adjust the item price by the sub currency
             {
@@ -1823,6 +1872,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var taxableAmount,
                     taxAmount;
                 
+                masterRecord.set('intTaxGroupId', itemDetailTax.intTaxGroupId);
 
                 taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
                 if (itemDetailTax.strCalculationMethod === 'Percentage') {
@@ -1873,7 +1923,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             detailRecord.set('dblLineTotal', me.calculateLineTotal(masterRecord, detailRecord));
         }
 
-
         if (detailRecord) {
             var current = {
                 ItemId: detailRecord.get('intItemId'),
@@ -1886,7 +1935,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 FreightTermId: masterRecord.get('intFreightTermId')
             };
 
-            if (reset)
+            iRely.Functions.getItemTaxes(current, computeItemTax, me);
+
+           /* if (reset)
                 iRely.Functions.getItemTaxes(current, computeItemTax, me);
             else {
                 var receiptItemTaxes = detailRecord.tblICInventoryReceiptItemTaxes();
@@ -1919,7 +1970,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         iRely.Functions.getItemTaxes(current, computeItemTax, me);
                     }
                 }
-            }
+            }*/
         }
     },
 
@@ -3071,7 +3122,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (current) {
             current.set('intShipViaId', records[0].get('intShipViaId'));
-            current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+            //current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
         }
     },
 
@@ -5089,6 +5140,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onSelectTaxGroup: function (combo, records, eOpts) {
+		if (records.length <= 0)
+        return;
+
+        var win = combo.up('window'),
+            current = win.viewModel.data.current,
+            me = this;
+
+        //Calculate Taxes
+        if (current.tblICInventoryReceiptItems()) {
+            Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
+                if(!item.dummy) {
+                    win.viewModel.data.currentReceiptItem = item;
+                    me.calculateItemTaxes();
+                }
+            });
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -5106,7 +5176,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onCurrencySelect
             },
             "#cboTaxGroup": {
-                drilldown: this.onTaxGroupDrilldown
+                drilldown: this.onTaxGroupDrilldown,
+                select: this.onSelectTaxGroup
             },
             "#cboTransferor": {
                 select: this.onTransferorSelect
@@ -5251,6 +5322,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnClearAll": {
                 click: this.onSelectClearGridInspectionClick
+            },
+            "#cboSubLocation": {
+                select: this.onReceiptItemSelect
             }
         })
     }

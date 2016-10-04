@@ -698,5 +698,36 @@ namespace iRely.Inventory.BusinessLayer
             }
             return saveResult;
         }
+
+        public SaveResult GetTaxGroupId(int receiptId, out int? taxGroup)
+        {
+            SaveResult saveResult = new SaveResult();
+            int? newTaxGroupId = null;
+
+            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            {
+                var connection = _db.ContextManager.Database.Connection;
+                try
+                {
+                    var idParameter = new SqlParameter("@ReceiptId", receiptId);
+                    var outParam = new SqlParameter("@intTaxGroupId", newTaxGroupId);
+                    outParam.Direction = System.Data.ParameterDirection.Output;
+                    outParam.DbType = System.Data.DbType.Int32;
+                    outParam.SqlDbType = System.Data.SqlDbType.Int;
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICGetTaxGroupIdOnInventoryReceipt @ReceiptId, @intTaxGroupId OUTPUT", idParameter, outParam);
+                    newTaxGroupId = (int)outParam.Value;
+                    saveResult = _db.Save(false);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                }
+            }
+            taxGroup = newTaxGroupId;
+            return saveResult;
+        }
     }
 }
