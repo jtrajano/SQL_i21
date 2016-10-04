@@ -207,3 +207,5 @@ GO
 	END
 
 GO
+	UPDATE tblSMActivity SET strFilter = NULL WHERE strType = 'Email' AND (strFilter = '' OR strFilter = 'null')
+GO
