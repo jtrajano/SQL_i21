@@ -47,7 +47,7 @@ FROM dbo.tblAPBill A
 			,H.dtmDateReconciled
 		FROM dbo.tblAPPayment B 
 			LEFT JOIN dbo.tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
-		INNER JOIN dbo.tblCMBankAccount G ON B.intAccountId = G.intGLAccountId
+		LEFT JOIN dbo.tblCMBankAccount G ON B.intBankAccountId = G.intBankAccountId
 		LEFT JOIN dbo.tblCMBankTransaction H ON B.strPaymentRecordNum = H.strTransactionId
 		--WHERE B.ysnPosted = 1
 		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr,
