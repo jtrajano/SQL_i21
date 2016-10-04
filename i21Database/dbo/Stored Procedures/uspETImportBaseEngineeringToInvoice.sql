@@ -46,6 +46,7 @@ BEGIN
 	DECLARE @dblTaxCategory28 NUMERIC(18, 6)  
 	DECLARE @dblTaxCategory29 NUMERIC(18, 6)  
 	DECLARE @dblTaxCategory30 NUMERIC(18, 6)
+	DECLARE @strOriginInvoiceNumber NVARCHAR(50) 
 
 	DECLARE @intTaxCategory1 INT 
 	DECLARE @intTaxCategory2 INT
@@ -176,6 +177,7 @@ BEGIN
 			 ,@dblTaxCategory28 = dblTaxCategory28  
 			 ,@dblTaxCategory29 = dblTaxCategory29  
 			 ,@dblTaxCategory30 = dblTaxCategory30 
+			 ,@strOriginInvoiceNumber = strInvoiceNumber
 		FROM #tmpBaseToInvoice
 		ORDER BY intImportBaseEngineeringId ASC
 			 
@@ -228,8 +230,8 @@ BEGIN
 			,@ItemPercentFull		   = @dblPercentFullAfterDelivery
 			,@ItemTaxGroupId		   = @intTaxGroupId	
 			,@RaiseError			   = 1 
-			
-
+			,@UseOriginIdAsInvoiceNumber = 1
+			,@InvoiceOriginId         = @strOriginInvoiceNumber
 		--GEt the created invoice number
 		SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
 		SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)

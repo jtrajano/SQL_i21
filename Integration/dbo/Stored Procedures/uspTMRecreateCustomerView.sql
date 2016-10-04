@@ -288,7 +288,7 @@ BEGIN
 				,vwcus_state = SUBSTRING(Loc.strState,1,2)
 				,vwcus_zip = SUBSTRING(Loc.strZipCode,1,10)  
 				,vwcus_phone = E.strPhone
-				,vwcus_phone_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX(''x'',Con.strPhone) + 1, LEN(Con.strPhone))END)
+				,vwcus_phone_ext = E.strPhoneExtension
 				,vwcus_bill_to = ''''  
 				,vwcus_contact = SUBSTRING((Con.strName),1,20) 
 				,vwcus_comments = SUBSTRING(Con.strInternalNotes,1,30) 
@@ -337,7 +337,7 @@ BEGIN
 				,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END   
 				,vwcus_tax_state = ''''  
 				,A4GLIdentity = Ent.intEntityId
-				,vwcus_phone2 =  ''''
+				,vwcus_phone2 =  F.strPhone
 				,vwcus_balance = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0) 
 				,vwcus_ptd_sls = ISNULL(CI.dblYTDSales,0.0)
 				,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
@@ -365,6 +365,8 @@ BEGIN
 				ON Ent.intEntityId = CI.intEntityCustomerId
 			LEFT JOIN tblEMEntityPhoneNumber E
 				ON Con.intEntityId = E.intEntityId
+			LEFT JOIN tblEMEntityMobileNumber F
+				ON Con.intEntityId = F.intEntityId  
 		
 		')
 	END
