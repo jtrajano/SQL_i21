@@ -69,6 +69,7 @@ BEGIN
 		NULL AS dtmDate,
 		NULL AS dtmDueDate,
 		NULL AS strVendorId,
+		NULL AS strVendorName,
 		0 AS intEntityVendorId,
 		0 AS intBillId,
 		NULL AS strBillId,
@@ -87,6 +88,7 @@ BEGIN
 		0 AS dblAmountDue,
 		0 AS dblUnappliedAmount,
 		0 AS dblCurrent,
+		0 AS dbl0,
 		0 AS dbl1,
 		0 AS dbl30,
 		0 AS dbl60,
@@ -268,6 +270,7 @@ SET @query = '
 	A.dtmDate
 	,A.dtmDueDate
 	,B.strVendorId
+	,C.strName as strVendorName
 	,B.[intEntityVendorId]
 	,A.intBillId
 	,A.strBillId
@@ -288,14 +291,16 @@ SET @query = '
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 0
 			ELSE DATEDIFF(dayofyear,A.dtmDueDate,GETDATE()) END AS intAging
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dblCurrent,
-		CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl1, 
-		CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl30, 
-		CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl60,
-		CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90  
+			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dblCurrent
+	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=10 
+			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl0
+	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>10 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 
+			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl1 
+	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60
+			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl30
+	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 
+			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl60
+	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90  
 			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl90
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN ''Current''
 			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 THEN ''01 - 30 Days''
