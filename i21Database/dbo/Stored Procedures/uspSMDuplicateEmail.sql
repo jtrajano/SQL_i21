@@ -20,19 +20,25 @@ BEGIN
 	EXEC uspSMGetStartingNumber 103, @startingNo OUT
 
 	-- DUPLICATE tblSMActivity
-	INSERT dbo.tblSMActivity([intEntityId], [intTransactionId], [strType], [strSubject], [strDetails], [strImageId], [strMessageType], [strStatus], [strFilter], [strActivityNo], [dtmCreated])
-	SELECT [intEntityId],
-	[intTransactionId],
-	'Email',
-    'FW: ' + [strSubject],
-    [strDetails],
-	@newImageId as [strImageId],
-	[strMessageType],
-	'Forward' AS [strStatus],
-	[strFilter],
-	@startingNo,
-	CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) as [dtmDate]
-	FROM dbo.tblSMActivity
+	INSERT tblSMActivity([intTransactionId], [strType], [strSubject], [intEntityId], [dtmStartDate], [dtmEndDate], [dtmStartTime], [dtmEndTime], [strStatus], [strPriority], [strActivityNo], [strDetails], [dtmCreated], [intCreatedBy], [strImageId], [strMessageType], [strFilter])
+	SELECT [intTransactionId]
+	,'Email'
+	,'FW: ' + [strSubject]
+	,[intEntityId]
+	,[dtmStartDate]
+	,[dtmEndDate]
+	,[dtmStartTime]
+	,[dtmEndTime]
+	,'Forward' AS [strStatus]
+	,[strPriority]
+	,@startingNo
+	,[strDetails]
+	,CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) as [dtmCreated]
+	,[intCreatedBy]
+	,@newImageId as [strImageId]
+	,[strMessageType]
+	,[strFilter]
+	FROM tblSMActivity
 	WHERE [intActivityId] = @intEmailId;
 	
 	SELECT @newEmailId = SCOPE_IDENTITY();
