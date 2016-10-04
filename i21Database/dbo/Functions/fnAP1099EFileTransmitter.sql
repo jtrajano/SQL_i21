@@ -12,8 +12,8 @@ BEGIN
 	SELECT 
 	@transmitter = 
 		'T' --1
-		+ CAST(2015 AS NVARCHAR(10))  --Position 2-5
-		+ CASE WHEN 2015 = YEAR(GETDATE()) THEN ' ' ELSE 'P' END -- Position 6
+		+ CAST(@year AS NVARCHAR(10))  --Position 2-5
+		+ CASE WHEN @year = YEAR(GETDATE()) THEN ' ' ELSE 'P' END -- Position 6
 		+ ISNULL(NULLIF(LEFT(A.strFederalTaxID,9),''),SPACE(9)) --Position 7-15 TIN
 		+ '12345' --Position 16-20 TCC
 		+ SPACE(7) -- 21-27Position 
