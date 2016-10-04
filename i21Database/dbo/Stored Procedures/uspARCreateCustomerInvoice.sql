@@ -350,7 +350,7 @@ BEGIN TRY
 		,[intLoadId]
 		,[intEntityId]
 		,[intConcurrencyId])
-	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @OriginalInvoiceId ELSE NULL END
+	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
 		,[strType]						= @Type
 		,[intEntityCustomerId]			= C.[intEntityCustomerId]
