@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var livereload = require('gulp-livereload');
 
 var source = './app';
-var destination = '../../../atifacts/16.3/Inventory/app';
+var destination = '../../../artifacts/16.3/Inventory/app';
 
 gulp.task('publish', function() {
     gulp.src(['app/**/*.js'])
