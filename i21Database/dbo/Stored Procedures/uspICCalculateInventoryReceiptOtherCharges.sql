@@ -27,6 +27,7 @@ BEGIN
 	DECLARE @strItemNo AS NVARCHAR(50)
 			,@strUnitMeasure AS NVARCHAR(50)
 			,@intItemId AS INT
+			,@strOtherCharge AS NVARCHAR(50)
 END 
 
 
@@ -107,6 +108,7 @@ BEGIN
 				@strItemNo = Item.strItemNo
 				,@strUnitMeasure = UOM.strUnitMeasure
 				,@intItemId = Item.intItemId
+				,@strOtherCharge = ItemOtherCharge.strItemNo
 		FROM	dbo.tblICInventoryReceiptChargePerItem ChargePerItem INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId		
 				INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
@@ -117,13 +119,16 @@ BEGIN
 					ON ChargeUOM.intItemUOMId = Charge.intCostUOMId
 				LEFT JOIN tblICUnitMeasure UOM
 					ON UOM.intUnitMeasureId = ChargeUOM.intUnitMeasureId
+				--For Other Charge
+				LEFT JOIN tblICItem ItemOtherCharge
+					ON ItemOtherCharge.intItemId = ChargePerItem.intChargeId
 		WHERE	ChargePerItem.intInventoryReceiptId = @intInventoryReceiptId 
 				AND ChargePerItem.dblCalculatedAmount IS NULL
 
 		IF @intItemId IS NOT NULL 
 		BEGIN 
-			-- 'Unable to calculate the Other Charges per unit. Please check if UOM {Unit of Measure} is assigned to item {Item}.'
-			RAISERROR(80050, 11, 1, @strUnitMeasure, @strItemNo)  
+			-- 'Unable to calculate {Other Charge Item} as the {Unit of Measure} is not setup for item {Item}.'
+			RAISERROR(80050, 11, 1, @strOtherCharge, @strUnitMeasure, @strItemNo)  
 			GOTO _Exit
 		END 
 	END 

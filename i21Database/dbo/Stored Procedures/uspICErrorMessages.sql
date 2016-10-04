@@ -265,7 +265,7 @@ EXEC sp_addmessage 80049,11,@strmessage,'us_english','False'
 
 -- was 51163
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80050) EXEC sp_dropmessage 80050, 'us_english'	
-SET @strmessage = 'Unable to calculate the Other Charges per unit. Please check if UOM %s is assigned to item %s.'
+SET @strmessage = 'Unable to calculate %s as the %s is not setup for item %s.'
 EXEC sp_addmessage 80050,11,@strmessage,'us_english','False'
 
 -- was 51164
