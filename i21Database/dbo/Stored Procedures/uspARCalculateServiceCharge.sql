@@ -115,7 +115,7 @@ AS
 										AND P.ysnPosted = 1 
 										AND P.dtmDatePaid <= @asOfDate
 								  GROUP BY PD.intInvoiceId
-						) AS PD ON PD.intInvoiceId = I.intInvoiceId AND PD.dtmDatePaid > I.dtmDueDate						
+						) AS PD ON PD.intInvoiceId = I.intInvoiceId
 					WHERE I.ysnPosted = 1 							  
 						AND I.strTransactionType = 'Invoice'
 						AND I.strType IN ('Standard', 'Transport Delivery')
