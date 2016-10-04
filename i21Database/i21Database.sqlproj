@@ -619,9 +619,9 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPOverflow.sql" />
     <Build Include="dbo\Tables\tblRMSubreportCondition.sql" />
     <Build Include="dbo\Tables\tblRMSubreportFilter.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\2_AccountGroup.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\5_AccountSegmentTemplate.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\1_AccountStructure.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1c_AccountGroup.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1g_AccountSegmentTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1a_AccountStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportCMChecks.sql" />
@@ -646,7 +646,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
     <None Include="Scripts\Post-Deployment\FRD\FRDEntryDataFix.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\4_AccountTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1f_AccountTemplate.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixEntitiesData.sql" />
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
@@ -2394,9 +2394,9 @@
     <Build Include="dbo\Tables\tblIUPatchDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectAuditLog.sql" />
     <Build Include="dbo\Tables\tblSMNotification.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\7_FiscalYearPeriod.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1j_FiscalYearPeriod.sql" />
     <Build Include="dbo\Tables\tblGLForBatchPosting.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\8_AccountCurrency.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1k_AccountCurrency.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetCommodityUOM.sql" />
     <Build Include="dbo\Views\vyuCTCostType.sql" />
     <Build Include="dbo\Views\vyuRKGetContractBalanceLot.sql" />
@@ -4498,27 +4498,30 @@
     </ArtifactReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\3_AccountCategory.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategory.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\6_AccountRange.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1h_AccountRange.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1i_RemoveCOGSales_AccountRange.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1d_RemoveDuplicateCOGSales_AccountGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\16_PaymentMethod.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\1_AccountType.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1b_AccountType.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\9_AlterTable.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1l_AlterTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\18_SecurityPolicy.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1m_UpdateCompany.sql" />
   </ItemGroup>
 </Project>
