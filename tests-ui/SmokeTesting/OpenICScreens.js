@@ -8,30 +8,39 @@ StartTest(function (t) {
 
     engine.start(t)
 
-        /*Scenario 1: Opening Inventory Screens*/
-        .addFunction(function (next) { commonSM.commonLogin(t, next); }).wait(2000)
-        .addFunction(function (next) { t.diag("Scenario 1. Open Inventory screens and check default controls' state"); next(); }).wait(1000)
-      /*.waitTillVisible('frmintegrateddashboardgridpanel','Login Successful',60000).wait(1000)*/
+
+
+        // LOG IN
+        .displayText('Log In').wait(500)
+        .addFunction(function (next) { commonSM.commonLogin(t, next); }).wait(100)
+        .waitTillMainMenuLoaded('Login Successful').wait(500)
+
+
+
+        //START OF TEST CASE
+        .displayText('======== Scenario 1: Opening Inventory Screens ========"').wait(1000)
         .expandMenu('Inventory').wait(1000)
 
 
-
         /*Inventory Receipt Screen*/
+        //#1
+        .displayText('1. Open Inventory Receipt Search Screen Check All Fields').wait(500)
         .openScreen('Inventory Receipts').wait(1000)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Receipts Search Screen Successful').wait(1000)
+        .waitTillLoaded('Open Inventory Receipts Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Details').wait(500)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Receipts Details Tab Successful',60000).wait(5000)
+        .waitTillLoaded('Open Inventory Receipts Search Screen Details Tab Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Lots').wait(500)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Receipts Lots Tab Successful',60000).wait(5000)
+        .waitTillLoaded('Open Inventory Receipts Search Screen Lots Tab Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Vouchers').wait(500)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Receipts Lots Tab Successful',60000).wait(5000)
+        .waitTillLoaded('Open Inventory Receipts Search Screen Vouchers Tab Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Inventory Receipt').wait(500)
 
-        .addFunction(function (next) { t.diag("Check Inventory Receipt Screen Fields"); next(); }).wait(500)
+        //#2
+        .displayText('2. Click New, Check Inventory Receipt Screen Fields.').wait(1000)
         .clickButton('#btnNew').wait(1000)
         .waitTillVisible('icinventoryreceipt','Open New Inventory Receipt Screen Successful',60000).wait(1000)
         .checkControlVisible(['#btnNew', '#btnSave', '#btnSearch', '#btnDelete', '#btnUndo','#btnPrint','#btnReceive','#btnRecap','#btnClose'], true).wait(500)
@@ -43,7 +52,7 @@ StartTest(function (t) {
         .checkControlVisible(['#btnHelp', '#btnSupport', '#btnFieldName', '#btnEmailUrl'], true).wait(500)
         .checkStatusMessage('Ready')
 
-        .addFunction(function (next) { t.diag("Check IR Tabs and Fields"); next(); }).wait(300)
+        .displayText('Open Inventory Receipt Screen Tabs').wait(500)
         .clickTab('#pgeFreightInvoice').wait(500)
         .checkControlVisible(['#btnInsertCharge', '#btnRemoveCharge', '#btnCalculateCharges', '#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid'], true).wait(500)
         .checkControlVisible(['#colOtherCharge', '#colOnCostType', '#colCostMethod', '#colChargeCurrency', '#colRate', '#colChargeUOM','#colChargeAmount','#colAccrue','#colCostVendor','#colInventoryCost','#colAllocateCostBy'], true).wait(500)
@@ -66,18 +75,22 @@ StartTest(function (t) {
 
 
         /*Inventory Shipment Screen*/
+        //#3
+        .displayText('3. Open Inventory Shipment Search Screen Check All Fields').wait(500)
         .openScreen('Inventory Shipments').wait(1000)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Shipments Search Screen Successful',60000).wait(1000)
+        .waitTillLoaded('Open Inventory Shipment Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Details').wait(500)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Receipts Details Tab Successful',60000).wait(5000)
+        .waitTillLoaded('Open Inventory Shipment Search Screen Details Tab Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Lots').wait(500)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Receipts Lots Tab Successful',60000).wait(5000)
+        .waitTillLoaded('Open Inventory Shipment Search Screen Lots Tab Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Inventory Shipment').wait(500)
 
-        .addFunction(function (next) { t.diag("Check Inventory Shipment Screen Fields"); next(); }).wait(500)
+
+        //#4
+        .displayText('4. Click New, Check Inventory Shipment Screen Fields').wait(1000)
         .clickButton('#btnNew').wait(1000)
         .waitTillVisible('icinventoryshipment','Open New Inventory Shipment Screen Successful').wait(1000)
         .checkControlVisible(['#btnNew', '#btnSave', '#btnSearch', '#btnDelete', '#btnUndo','#btnPrint','#btnPrintBOL','#btnShip', '#btnRecap','#btnCustomer','#btnWarehouseInstruction','#btnClose'], true).wait(500)
@@ -90,6 +103,7 @@ StartTest(function (t) {
         .clickTab('#tabShipping').wait(500)
         .checkControlVisible(['#txtAppointmentTime', '#dtmDelivered', '#txtDepartureTime', '#dtmFreeTime','#txtArrivalTime','#txtReceivedBy'], true).wait(500)
         .checkControlVisible(['#btnInsertItem', '#btnViewItem', '#btnQuality', '#btnRemoveItem','#btnGridLayout','#btnInsertCriteria','#txtFilterGrid'], true).wait(500)*/
+        .displayText('Open Inventory Shipment Screen Tabs Check All Fields').wait(500)
         .clickTab('#pgeChargesInvoice').wait(500)
         .checkControlVisible(['#btnInsertCharge', '#btnRemoveCharge', '#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid'], true).wait(500)
         .clickTab('#pgeComments').wait(500)
@@ -103,15 +117,18 @@ StartTest(function (t) {
 
 
         /*Inventory Transfers Screen*/
+        //#5
+        .displayText('5. Open Inventory Transfers Search Screen Check All Fields').wait(500)
         .openScreen('Inventory Transfers').wait(1000)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Transfers Search Screen Successful',60000).wait(1000)
+        .waitTillLoaded('Open Inventory Transfer Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Details').wait(500)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Transfers Details Tab Successful',60000).wait(5000)
+        .waitTillLoaded('Open Inventory Transfer Search Screen Details Tab Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Inventory Transfer').wait(500)
 
-        .addFunction(function (next) { t.diag("Check Inventory Transfer Screen Fields"); next(); }).wait(500)
+        //#6
+        .displayText('6. Click New, Check Inventory Transfer Screen Fields')
         .clickButton('#btnNew').wait(1000)
         .waitTillVisible('icinventorytransfer','Open New Inventory Transfer Screen Successful').wait(1000)
         .checkControlVisible(['#btnNew', '#btnSave', '#btnSearch', '#btnDelete', '#btnUndo','#btnPrint','#btnPost','#btnRecap','#btnClose'], true).wait(500)
@@ -127,15 +144,18 @@ StartTest(function (t) {
 
 
         /*Inventory Adjustments Screen*/
+        //#7
+        .displayText('7. Open Inventory Adjustments Search Screen Check All Fields').wait(500)
         .openScreen('Inventory Adjustments').wait(1000)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Adjustments Search Screen Successful',60000).wait(1000)
+        .waitTillLoaded('Open Inventory Adjustments Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Details').wait(500)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Adjustments Details Tab Successful',60000).wait(5000)
+        .waitTillLoaded('Open Inventory Adjustments Search Screen Details Tab Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .clickTab('Inventory Adjustment').wait(500)
 
-        .addFunction(function (next) { t.diag("Check Inventory Adjustment Screen Fields"); next(); }).wait(500)
+        //#8
+        .displayText('8. Click New, Check Inventory Adjustment Screen Fields')
         .clickButton('#btnNew').wait(1000)
         .waitTillVisible('icinventoryadjustment','Open New Inventory Adjustment Screen Successful').wait(1000)
         .checkControlVisible(['#btnNew', '#btnSave', '#btnSearch', '#btnDelete', '#btnUndo','#btnPrint','#btnPost','#btnRecap','#btnClose'], true).wait(500)
@@ -151,11 +171,14 @@ StartTest(function (t) {
 
 
         /*Inventory Count Screen*/
+        //#9
+        .displayText('9. Open Inventory Count Search Screen Check All Fields').wait(500)
         .openScreen('Inventory Count').wait(1000)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Inventory Count Search Screen Successful',60000).wait(1000)
+        .waitTillLoaded('Open Inventory Count Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
 
-        .addFunction(function (next) { t.diag("Check Inventory Count Screen Fields"); next(); }).wait(500)
+        //#10
+        .displayText('10. Click New, Check Inventory Count Screen Fields')
         .clickButton('#btnNew').wait(1000)
         .checkControlVisible(['#btnNew', '#btnSave', '#btnDelete', '#btnUndo','#btnPrintCountSheets', '#btnClose'], true).wait(500)
         .checkControlVisible(['#cboLocation', '#cboCategory', '#cboCommodity', '#cboCountGroup', '#dtpCountDate'], true).wait(500)
@@ -173,13 +196,15 @@ StartTest(function (t) {
 
 
         /*Storage Measurement Reading Screen*/
+        //#11
+        .displayText('11. Open Storage Measurement Reading Search Screen Check All Fields').wait(500)
         .openScreen('Storage Measurement Reading').wait(1000)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Storage Measurement Reading Search Screen Successful',60000).wait(1000)
+        .waitTillLoaded('Open Storage Measurement Reading Screen Successful').wait(500)
         /*.clickButton('#btnNew').wait(200)*/
         .waitTillVisible('storagemeasurementreading','Open New Storage Measurement Reading Screen Successful').wait(1000)
 
-
-        .addFunction(function (next) { t.diag("Check Inventory Count Screen Fields"); next(); }).wait(500)
+        //#12
+        .displayText('12. Check Storage Measurement Reading Screen Check All Fields').wait(500)
         .checkControlVisible(['#btnNew', '#btnSave', '#btnSearch','#btnDelete', '#btnUndo', '#btnClose'], true).wait(500)
         .checkControlVisible(['#cboLocation', '#dtmDate', '#txtReadingNumber'], true).wait(500)
         .checkControlVisible(['#btnInsert', '#btnRemove','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
@@ -191,19 +216,27 @@ StartTest(function (t) {
 
 
         /*Item Screen*/
+        //#13
+        .displayText('11. Items Search Screen Check All Fields').wait(500)
         .openScreen('Items').wait(1000)
-        .waitTillVisible('frmintegrateddashboardgridpanel','Open Item Search Screen Successful').wait(500)
+        .waitTillLoaded('Open Items Search Screen Successful').wait(500)
+        .clickTab('Locations').wait(500)
+        .waitTillLoaded('Open Items Search Screen Locations Tab Successful').wait(500)
+        .clickTab('Pricing').wait(500)
+        .waitTillLoaded('Open Items Search Screen Pricing Tab Successful').wait(500)
         .checkScreenWindow({ alias: 'icitems', title: 'Inventory UOMs', collapse: true, maximize: true, minimize: false, restore: false, close: true }).wait(1000)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(100)
 
+        //#14
+        .displayText('14. Check Items Screen Check All Fields').wait(500)
         .clickButton('#btnNew').wait(200)
         .waitTillVisible('icitem','Open New Item Screen Successful').wait(500)
         .checkScreenShown('icitem').wait(500)
         .checkControlVisible(['#btnNew', '#btnSave', '#btnFind', '#btnDelete', '#btnUndo','#btnDuplicate','#btnClose'], true).wait(500)
         .checkControlVisible(['#txtItemNo', '#cboType', '#txtShortName', '#txtDescription', '#cboManufacturer','#cboStatus','#cboCommodity','#cboLotTracking','#cboBrand','#txtModelNo','#cboCategory','#cboTracking'], true).wait(500)
         .checkControlVisible(['#btnInsertUom', '#btnDeleteUom', '#btnLoadUOM', '#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid'], true).wait(500)
-        .checkControlVisible(['#colDetailUnitMeasure','#coLDetailUnitQty', '#coLDetailShortUPC','#colDetailUpcCode', '#coLStockUnit', '#colAllowPurchase','#colDetailLength','#colDetailWidth','#colDetailHeight' ], true).wait(500)
-        .checkControlVisible(['#colDetailDimensionUOM', '#colDetailVolume', '#coLDewtailVolumeUOM', '#colDetailWeight', '#colDetailWeightUOM', '#colDetailMaxQty'], true).wait(500)
+        //.checkControlVisible(['#colDetailUnitMeasure','#coLDetailUnitQty', '#coLDetailShortUPC','#colDetailUpcCode', '#coLStockUnit', '#colAllowPurchase','#colDetailLength','#colDetailWidth','#colDetailHeight' ], true).wait(500)
+        .checkControlVisible(['#colDetailDimensionUOM', '#colDetailVolume', '#coLDetailVolumeUOM', '#colDetailWeight', '#colDetailWeightUOM', '#colDetailMaxQty'], true).wait(500)
         .checkControlVisible(['#btnHelp', '#btnSupport', '#btnFieldName', '#btnEmailUrl'], true).wait(500)
         .checkStatusMessage('Ready')
         /*Setup Tabs*/
@@ -226,24 +259,30 @@ StartTest(function (t) {
         .checkControlVisible(['#grdCategory', '#btnInsertCategories', '#btnDeleteCategories', '#colPOSCategoryName'], true).wait(500)
         .checkControlVisible(['#grdServiceLevelAgreement', '#btnInsertSLA', '#btnDeleteSLA', '#colPOSSLAContract', '#colPOSSLAPrice','#colPOSSLAWarranty'], true).wait(500)
 
-        .clickTab('#cfgPOS').wait(500)
+        .clickTab('#cfgContract').wait(500)
         .checkControlVisible(['#btnInsertContractItem', '#btnDeleteContractItem','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
         .checkControlVisible(['#grdContractItem','#colContractLocation', '#colContractItemName','#colContractOrigin', '#colContractGrade', '#colContractGradeType','#colContractGarden','#colContractYield','#colContractTolerance','#colContractFranchise' ], true).wait(500)
         .checkControlVisible(['#grdDocumentAssociation','#btnInsertDocumentAssociation', '#btnDeleteDocumentAssociation','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid','#colDocument' ], true).wait(500)
         .checkControlVisible(['#grdCertification','#btnInsertCertification', '#btnDeleteCertification','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid','#colCertification' ], true).wait(500)
 
         .clickTab('#cfgXref').wait(500)
-        .checkControlVisible(['#btnInsertCustomerXrf', '#btnDeleteCustomerXrf','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
+        //.checkControlVisible(['#btnInsertCustomerXrf', '#btnDeleteCustomerXrf','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
         .checkControlVisible(['#grdCustomerXref','#colCustomerXrefLocation', '#colCustomerXrefCustomer','#colCustomerXrefProduct', '#colCustomerXrefDescription', '#colCustomerXrefPickTicketNotes' ], true).wait(500)
-        .checkControlVisible(['#btnInsertVendorXrf', '#btnDeleteVendorXrf','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
-        .checkControlVisible(['#grdVendorrXref','#colVendorXrefLocation', '#colVendorXrefVendor','#colVendorXrefProduct', '#colVendorXrefDescription', '#colVendorXrefConversionFactor','#colVendorXrefUnitMeasure' ], true).wait(500)
+        //.checkControlVisible(['#btnInsertVendorXrf', '#btnDeleteVendorXrf','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
+        //.checkControlVisible(['#grdVendorrXref','#colVendorXrefLocation', '#colVendorXrefVendor','#colVendorXrefProduct', '#colVendorXrefDescription', '#colVendorXrefConversionFactor','#colVendorXrefUnitMeasure' ], true).wait(500)
 
         .clickTab('#cfgMotorFuelTax').wait(500)
         .checkControlVisible(['#btnInsertCustomerXrf', '#btnDeleteCustomerXrf','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
         .checkControlVisible(['#grdCustomerXref','#colCustomerXrefLocation', '#colCustomerXrefCustomer','#colCustomerXrefProduct', '#colCustomerXrefDescription', '#colCustomerXrefPickTicketNotes' ], true).wait(500)
 
+        .clickTab('#cfgOthers').wait(500)
+        .checkControlVisible(['#btnInsertCustomerXrf', '#btnDeleteCustomerXrf','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
+        .checkControlVisible(['#grdCustomerXref','#colCustomerXrefLocation', '#colCustomerXrefCustomer','#colCustomerXrefProduct', '#colCustomerXrefDescription', '#colCustomerXrefPickTicketNotes' ], true).wait(500)
+
+
+
         .clickButton('#btnClose').wait(100)
-        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question').wait(1000)
+        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question').wait(500)
         .clickMessageBoxButton('no').wait(100)
         .checkIfScreenClosed('icitem').wait(100)
 

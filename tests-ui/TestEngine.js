@@ -1486,8 +1486,13 @@ Ext.define('iRely.TestEngine', {
                                 grid = combo.getPicker();
                             }
 
-                            if (grid) {
+                            if (grid && grid.getNode) {
                                 var node = grid.getNode(index);
+                                t.click(node, next);
+                            }
+                            else if(grid && grid.getView){
+                                var view = grid.getView(),
+                                    node = view.getNode(index);
                                 t.click(node, next);
                             } else {
                                 t.ok(false, 'Combo Box is not existing.');
@@ -3801,6 +3806,112 @@ Ext.define('iRely.TestEngine', {
         };
 
         chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Continuously checks if the item becomes visible / ready
+     *
+     *
+     * @returns {iRely.TestEngine}
+     */
+    waitTillMainMenuLoaded: function(){
+    var me = this,
+        t = me.t,
+        chain = me.chain;
+
+    chain.push(
+        function(next) {
+            var win = Ext.WindowManager.getActive();
+            if(win && win.xtype === 'messagebox') {
+                next();
+            }
+            else {
+                t.waitForCQVisible('viewport',
+                    function () {
+                        t.ok(true, "Successfully Logged In");
+                        t.diag("Loading i21 Menu");
+                        t.waitForRowsVisible('#tplMenu', function () {
+                            t.ok(true, 'i21 Menu successfully loaded');
+                            next();
+                        });
+                    }, this, 60000);
+            }
+        });
+    return me;
+    },
+
+    /**
+     * Continuously checks if the item becomes visible / ready
+     *
+     *
+     * @returns {iRely.TestEngine}
+     */
+    waitTillLoaded : function(msg) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this,
+                result = false;
+
+            t.waitForFn(function() {
+                var loadmask = Ext.ComponentQuery.query('loadmask');
+                if (loadmask){
+                    var ctr = loadmask.length - 1,
+                        current = loadmask[ctr];
+                    if(current.isVisible() == false) return true;
+                }
+            },function() {
+                if(!msg) msg = 'Successfully loaded.';
+                t.ok(true, msg);
+                next();
+            },this, 60000)
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Display custom text
+     *
+     *
+     * @returns {iRely.TestEngine}
+     */
+    displayText: function(msg) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next){
+            var t = this;
+            t.diag(msg);
+            next();
+        };
+
+        chain.push({action:fn,timeout:60000});
+
+        return this;
+    },
+
+    /**
+     * Mark success text
+     *
+     *
+     * @returns {iRely.TestEngine}
+     */
+    markSuccess: function(msg) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next){
+            var t = this;
+            t.ok(true,msg);
+            next();
+        };
+
+        chain.push({action:fn,timeout:60000});
+
         return this;
     }
 });
