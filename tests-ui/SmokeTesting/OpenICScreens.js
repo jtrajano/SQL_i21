@@ -204,7 +204,7 @@ StartTest(function (t) {
         .waitTillVisible('storagemeasurementreading','Open New Storage Measurement Reading Screen Successful').wait(1000)
 
         //#12
-        .displayText('12. Check Storage Measurement Reading Screen Check All Fields').wait(500)
+        .displayText('12. Click New, Storage Measurement Reading Screen Check All Fields').wait(500)
         .checkControlVisible(['#btnNew', '#btnSave', '#btnSearch','#btnDelete', '#btnUndo', '#btnClose'], true).wait(500)
         .checkControlVisible(['#cboLocation', '#dtmDate', '#txtReadingNumber'], true).wait(500)
         .checkControlVisible(['#btnInsert', '#btnRemove','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
@@ -217,7 +217,7 @@ StartTest(function (t) {
 
         /*Item Screen*/
         //#13
-        .displayText('11. Items Search Screen Check All Fields').wait(500)
+        .displayText('13. Open Items Search Screen Check All Fields').wait(500)
         .openScreen('Items').wait(1000)
         .waitTillLoaded('Open Items Search Screen Successful').wait(500)
         .clickTab('Locations').wait(500)
@@ -228,7 +228,7 @@ StartTest(function (t) {
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(100)
 
         //#14
-        .displayText('14. Check Items Screen Check All Fields').wait(500)
+        .displayText('14. Click New, Items Screen Check All Fields').wait(500)
         .clickButton('#btnNew').wait(200)
         .waitTillVisible('icitem','Open New Item Screen Successful').wait(500)
         .checkScreenShown('icitem').wait(500)
@@ -276,16 +276,68 @@ StartTest(function (t) {
         .checkControlVisible(['#grdCustomerXref','#colCustomerXrefLocation', '#colCustomerXrefCustomer','#colCustomerXrefProduct', '#colCustomerXrefDescription', '#colCustomerXrefPickTicketNotes' ], true).wait(500)
 
         .clickTab('#cfgOthers').wait(500)
-        .checkControlVisible(['#btnInsertCustomerXrf', '#btnDeleteCustomerXrf','#btnGridLayout', '#btnInsertCriteria', '#txtFilterGrid' ], true).wait(500)
-        .checkControlVisible(['#grdCustomerXref','#colCustomerXrefLocation', '#colCustomerXrefCustomer','#colCustomerXrefProduct', '#colCustomerXrefDescription', '#colCustomerXrefPickTicketNotes' ], true).wait(500)
+        .checkControlVisible(['#txtInvoiceComments', '#txtPickListComments','#chkTankRequired', '#chkAvailableForTm', '#txtDefaultPercentFull','#cboPatronage','#cboPatronageDirect' ], true).wait(500)
 
+        .clickTab('#cfgPricing').wait(500)
+        .checkControlVisible(['#btnInsertPricing', '#btnDeletePricing','#btnGridLayout', '#btnInsertCriteria', '#txtFilterField' ], true).wait(500)
+        .checkControlVisible(['#grdPrcingLevel', '#btnInsertPricingLevel','#btnDeletePricingLevel', '#btnGridLayout', '#btnInsertCriteria','#txtFilterField' ], true).wait(500)
 
+        .clickTab('Promotional Pricing')
 
+        .clickTab('#cfgStock').wait(500)
+        .checkControlVisible(['#btnGridLayout', '#btnInsertCriteria', '#txtFilterField' ], true).wait(500)
+
+        //.clickTab('#cfgCommodity').wait(500)
+        //.checkControlVisible(['#txtGaShrinkFactor', '#cboOrigin','#cboProductType', '#cboRegion', '#cboSeason','#cboClass','#cboProductLine','#cboGrade','#cboMarketValuation' ], true).wait(500)
+       // .checkControlVisible(['#btnInsertCommodityCost','#btnDeleteCommodityCost','#btnGridLayout', '#btnInsertCriteria', '#txtFilterField' ], true).wait(500)
+
+        //.clickTab('#cfgComments').wait(500)
+        //.checkControlVisible(['#btnOpenActivity', '#btnNewEvent', '#btnNewTask', '#btnNewComment', '#btnLogCall', '#btnSendEmail','#btnGridLayout','#btnInsertCriteria','#txtFilterGrid','#btnMaximizeGrid'], true).wait(500)
+        //.clickTab('#pgeAttachments').wait(500)
+        //.checkControlVisible(['#btnAddAttachment', '#btnOpenAttachment', '#btnEditAttachment', '#btnDownloadAttachment', '#btnDeleteAttachment'], true).wait(500)
+        //.clickTab('#pgeAuditLog').wait(500)
+        //.checkControlVisible(['#btnInsertCriteria', '#txtFilterGrid'], true).wait(500)
         .clickButton('#btnClose').wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question').wait(500)
         .clickMessageBoxButton('no').wait(100)
         .checkIfScreenClosed('icitem').wait(100)
+        .displayText('Checking item Screen Fields Successful').wait(500)
 
+
+        //#15
+        .displayText('15. Open Commodities Search Screen Check All Fields').wait(500)
+        .openScreen('Commodities').wait(1000)
+        .waitTillLoaded('Open Commodities Search Screen Successful').wait(500)
+        .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(100)
+
+        //#16
+        .displayText('16. Click New, Commodity Screen Check All Fields').wait(500)
+        .clickButton('#btnNew').wait(200)
+        .waitTillVisible('iccommodity','Open New Item Screen Successful').wait(500)
+        .checkScreenShown('iccommodity').wait(500)
+        .checkControlVisible(['#btnNew', '#btnSave','#btnFind', '#btnDelete', '#btnUndo','#btnClose' ], true).wait(500)
+        .checkControlVisible(['#txtCommodityCode', '#txtDescription','#chkExchangeTraded', '#txtDecimalsOnDpr', '#cboFutureMarket','#txtConsolidateFactor','#chkFxExposure','#chkPriceChecksMin','#chkPriceChecksMax' ], true).wait(500)
+        .checkControlVisible(['#dtmCropEndDateCurrent', '#dtmCropEndDateNew','#txtEdiCode', '#cboDefaultScheduleStore', '#cboDefaultScheduleDiscount','#cboScaleAutoDistDefault'], true).wait(500)
+        .checkControlVisible(['#btnDeleteUom', '#btnGridLayout','#btnInsertCriteria', '#txtFilterGrid'], true).wait(500)
+        .displayText('Check Commodity Screen Fields Successful')
+
+        //#17
+        .displayText('17. Open Categories Search Screen Check All Fields').wait(500)
+        .openScreen('Categories').wait(1000)
+        .waitTillLoaded('Open Commodities Search Screen Successful').wait(500)
+        .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(100)
+
+        //#18
+        .displayText('18. Click New, Category Screen Check All Fields').wait(500)
+        .clickButton('#btnNew').wait(200)
+        .waitTillVisible('iccategory','Open New Item Screen Successful').wait(500)
+        .checkScreenShown('iccategory').wait(500)
+        .checkControlVisible(['#btnNew', '#btnSave','#btnFind', '#btnDelete', '#btnUndo','#btnClose' ], true).wait(500)
+        .checkControlVisible(['#txtCategoryCode', '#txtDescription','#cboInventoType', '#cboLineOfBusiness', '#cboCostingMethod' ], true).wait(500)
+        .checkControlVisible(['#dtmCropEndDateCurrent', '#dtmCropEndDateNewryType', '#cboLineOfBusiness', '#cboCostingMethod','#cboInventoryValuation','#txtGlDivisionNumber','#chkSalesAnalysisByTon','#txtStandardQty','#cboStandardUOM' ], true).wait(500)
+        .checkControlVisible(['#btnInsertTax', '#btnDeleteTax','#btnGridLayout','#btnInsertCriteria', '#txtFilterGrid'], true).wait(500)
+        .checkControlVisible(['#btnDeleteUom', '#btnGridLayout','#btnInsertCriteria', '#txtFilterGrid'], true).wait(500)
+        .displayText('Check Category Screen Fields Successful')
 
 
         .done();
