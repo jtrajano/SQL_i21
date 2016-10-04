@@ -51,6 +51,23 @@ BEGIN
 	);
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
+	--CREATE TABLE #tmpVoucherGLAccount(intAccountId INT NOT NULL, strDescription NVARCHAR(260) COLLATE Latin1_General_CI_AS)
+	--CREATE NONCLUSTERED INDEX [#tmpVoucherGLAccount] ON [#tmpVoucherGLAccount](intAccountId)
+
+	----GET ACCOUNTS
+	--INSERT INTO #tmpVoucherGLAccount
+	--SELECT 
+	--	C.intAccountId, C.strDescription
+	--FROM tblAPBill A
+	--INNER JOIN @tmpTransacions B ON A.intBillId = B.intTransactionId
+	--INNER JOIN tblGLAccount C ON A.intAccountId = C.intAccountId
+	--UNION
+	--SELECT 
+	--	C.intAccountId, C.strDescription
+	--FROM tblAPBillDetail A
+	--INNER JOIN @tmpTransacions B ON A.intBillId = B.intTransactionId
+	--INNER JOIN tblGLAccount C ON A.intAccountId = C.intAccountId
+
 	INSERT INTO @returntable
 	--CREDIT
 	SELECT	
@@ -428,6 +445,11 @@ BEGIN
 	,B.dblRate
 	,B.dblOldCost
 	,dblTotalICTax
+
+	UPDATE A
+		SET A.strDescription = B.strDescription
+	FROM @returntable A
+	INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 	
 	RETURN
 END

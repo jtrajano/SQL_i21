@@ -423,5 +423,10 @@ BEGIN
 		A.dtmDatePaid;
 	END
 
+	UPDATE A
+		SET A.strDescription = B.strDescription
+	FROM @returntable A
+	INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
+
 	RETURN
 END
