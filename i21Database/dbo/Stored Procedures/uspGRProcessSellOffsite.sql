@@ -558,6 +558,11 @@ BEGIN TRY
 							  
 				SET @dblSpotUnits = 0
 			END
+
+			SELECT @SellOffsiteKey = MIN(intSellOffsiteKey)
+			FROM [#SellStorage]
+			WHERE intSellOffsiteKey > @SellOffsiteKey AND dblStorageUnits > 0
+
 		END
 		ELSE
 			BREAK;
