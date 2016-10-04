@@ -892,7 +892,9 @@ BEGIN TRY
 	WHILE @intSettleVoucherKey > 0
 	BEGIN
 		SET @LocationId = NULL
-		SELECT @LocationId = intCompanyLocationId
+		SET @intCustomerStorageId=NULL
+		
+		SELECT @LocationId = intCompanyLocationId,@intCustomerStorageId=intCustomerStorageId
 		FROM @SettleVoucherCreate
 		WHERE intSettleVoucherKey = @intSettleVoucherKey
 		
@@ -948,7 +950,7 @@ BEGIN TRY
 		FROM @SettleVoucherCreate SV
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
-		WHERE SV.intCompanyLocationId = @LocationId AND SV.intItemSort=1 AND SV.IsProcessed = 0  
+		WHERE SV.intCustomerStorageId=@intCustomerStorageId AND SV.intItemSort=1 AND SV.IsProcessed = 0   
 		ORDER BY SV.intItemSort
 
 		INSERT INTO @ItemsToPost
@@ -992,7 +994,7 @@ BEGIN TRY
 		FROM @SettleVoucherCreate SV
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=1
-		WHERE SV.intCompanyLocationId = @LocationId AND SV.intItemSort=1 AND SV.IsProcessed = 0  
+		WHERE SV.intCustomerStorageId=@intCustomerStorageId AND SV.intItemSort=1 AND SV.IsProcessed = 0     
 		ORDER BY SV.intItemSort
 						
 		--Reduce the On-Storage Quantity		
@@ -1098,7 +1100,7 @@ BEGIN TRY
 				,strSourceId				= NULL
 				,strSourceScreenName		= 'Settle Storage'
 			FROM @SettleVoucherCreate SV
-			WHERE SV.intCompanyLocationId = @LocationId AND SV.IsProcessed = 0 AND SV.intItemSort=1 ORDER BY intSettleVoucherKey
+			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort=1 ORDER BY intSettleVoucherKey
 			
 			INSERT INTO @OtherCharges
 			(
@@ -1144,7 +1146,7 @@ BEGIN TRY
 			,[ysnPrice]							= CASE WHEN SV.[dblCashPrice] < 0 THEN 1 ELSE 0 END
 			FROM @SettleVoucherCreate SV
 			JOIN tblICItem Item ON Item.intItemId = SV.[intItemId]
-			WHERE SV.intCompanyLocationId = @LocationId AND SV.IsProcessed = 0 AND SV.intItemSort <> 1 ORDER BY intSettleVoucherKey
+			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort <> 1 ORDER BY intSettleVoucherKey
 			
 			
 
@@ -1214,7 +1216,7 @@ BEGIN TRY
 		
 		UPDATE @SettleVoucherCreate
 		SET IsProcessed = 1
-		WHERE intCompanyLocationId = @LocationId
+		WHERE intCustomerStorageId=@intCustomerStorageId 
 		
 		SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
 		FROM @SettleVoucherCreate
