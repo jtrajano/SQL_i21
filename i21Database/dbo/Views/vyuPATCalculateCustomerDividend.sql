@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateCustomerDividend]
 	AS
-SELECT DISTINCT CS.intCustomerPatronId AS intCustomerId,
+SELECT CS.intCustomerStockId,
+	CS.intCustomerPatronId AS intCustomerId,
 	NEWID() as id,
 	CS.intStockId,
 	SC.strStockName,
