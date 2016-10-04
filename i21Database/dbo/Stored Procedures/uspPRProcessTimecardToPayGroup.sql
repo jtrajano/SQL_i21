@@ -194,7 +194,9 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 										TCR.dtmDateOut <= TC.dtmDateOut 
 										AND TCR.intEntityEmployeeId = TC.intEntityEmployeeId
 										AND TCR.intEmployeeEarningId = TC.intEmployeeEarningId
-										AND TCR.intEmployeeDepartmentId = TC.intEmployeeDepartmentId)
+										AND TCR.intEmployeeDepartmentId = TC.intEmployeeDepartmentId
+										AND CAST(FLOOR(CAST(TCR.dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TCR.dtmDateIn) AS FLOAT)) AS DATETIME)
+										AND CAST(FLOOR(CAST(TCR.dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TCR.dtmDateOut) AS FLOAT)) AS DATETIME))
 			FROM
 				tblPRTimecard TC LEFT JOIN tblPREmployeeEarning EE
 				ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
