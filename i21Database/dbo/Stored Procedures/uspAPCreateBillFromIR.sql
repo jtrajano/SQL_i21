@@ -209,7 +209,9 @@ BEGIN
 		[dblCostUnitQty],
 		[dblUnitQty],
 		[intCurrencyId],
-		[intStorageLocationId]
+		[intStorageLocationId],
+		[int1099Form],
+		[int1099Category]
 	)
 	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
 	SELECT
@@ -259,7 +261,13 @@ BEGIN
 		[dblUnitQty]				=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
 		[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 										ELSE ISNULL(A.intCurrencyId,0) END,
-		[intStorageLocationId]		=   B.intStorageLocationId                                       
+		[intStorageLocationId]		=   B.intStorageLocationId,
+		[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
+										     WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
+											 WHEN (SELECT CHARINDEX('B', D2.str1099Form)) > 0 THEN 3 
+										ELSE 0
+										END,
+		[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0)							   
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -283,6 +291,7 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	OUTER APPLY (
 		SELECT
 			PODetails.intContractDetailId
@@ -323,7 +332,9 @@ BEGIN
 		[dblCostUnitQty]			=	1,
 		[dblUnitQty]				=	1,
 		[intCurrencyId]				=	ISNULL(A.intCurrencyId,0),
-		[intStorageLocationId]		=	NULL
+		[intStorageLocationId]		=	NULL,
+		[int1099Form]				=	0,
+		[int1099Category]			=	0       
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
