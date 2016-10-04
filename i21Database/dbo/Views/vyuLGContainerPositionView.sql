@@ -56,7 +56,7 @@ SELECT * FROM (
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDLink.intLoadContainerId
 		AND ISNULL(LC.ysnRejected, 0) = 0
 	LEFT JOIN (
-		SELECT Seq.intContractHeaderId
+		SELECT DISTINCT Seq.intContractHeaderId
 			,Samp.intItemId
 			,COUNT(*) intApprovalCount
 		FROM tblQMSample Samp
@@ -73,7 +73,7 @@ SELECT * FROM (
 		) Samp ON Samp.intContractHeaderId = CH.intContractHeaderId
 		AND Samp.intItemId = CD.intItemId
 	LEFT JOIN (
-		SELECT Seq.intContractHeaderId
+		SELECT DISTINCT Seq.intContractHeaderId
 			,Samp.intItemId
 			,COUNT(*) intApprovalCount
 		FROM tblQMSample Samp
