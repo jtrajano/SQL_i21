@@ -4,7 +4,7 @@ Select r.intRecipeId,ri.intRecipeItemId,r.strName,rhi.strItemNo AS strRecipeItem
 cl.strLocationName,mp.strProcessName,cs.strName AS strCustomer,r.intVersionNo,rt.strName AS strRecipeItemType,
 i.strItemNo,i.strDescription,ri.dblQuantity,um.strUnitMeasure strUOM,ri.dblLowerTolerance,ri.dblUpperTolerance,cm.strName AS strConsumptionMethod,
 sl.strName AS strStorageLocation,ct.strName AS strCommentType,ri.dtmValidFrom,ri.dtmValidTo,
-mg.strName AS strMarginBy,ri.dblMargin,ri.ysnCostAppliedAtInvoice
+mg.strName AS strMarginBy,ri.dblMargin,ri.ysnCostAppliedAtInvoice,r.intLocationId,r.intItemId AS intRecipeHeaderItemId,ri.intItemId AS intRecipeIngredientItemId,ri.intRecipeItemTypeId
 from tblMFRecipe r
 Left Join tblICItem rhi on r.intItemId=rhi.intItemId
 Left Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId
