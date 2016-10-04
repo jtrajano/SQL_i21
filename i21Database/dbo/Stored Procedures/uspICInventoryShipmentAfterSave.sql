@@ -29,9 +29,24 @@ BEGIN
 
 	BEGIN TRY
 
-		SELECT @ShipmentType = intOrderType
-		FROM tblICInventoryShipment
-		WHERE intInventoryShipmentId = @ShipmentId
+		IF (@ForDelete = 1)
+		BEGIN
+			SELECT @ShipmentType = intOrderType
+			FROM tblICInventoryShipment
+			WHERE intInventoryShipmentId = @ShipmentId
+			
+			SELECT 
+				@ShipmentType = intOrderType
+			FROM tblICTransactionDetailLog
+			WHERE intTransactionId = @ShipmentId
+				AND strTransactionType = 'Inventory Shipment'	
+		END
+		ELSE
+		BEGIN
+			SELECT @ShipmentType = intOrderType
+			FROM tblICInventoryShipment
+			WHERE intInventoryShipmentId = @ShipmentId
+		END
 	
 		-- Create current snapshot of Shipment Items after Save
 		SELECT
@@ -218,7 +233,7 @@ BEGIN
 			BEGIN
 				SELECT	@intContractDetailId		=	intContractDetailId,
 						@intFromItemUOMId			=	intItemUOMId,
-						@dblQty						=	dblQty * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END), -- * -1,
+						@dblQty						=	(CASE WHEN @ForDelete = 1 THEN dblQty ELSE -dblQty END), -- * -1,
 						@intInventoryShipmentItemId	=	intInventoryShipmentItemId
 				FROM	@tblContractsToProcess 
 				WHERE	intKeyId				=	 @Id
