@@ -22,9 +22,13 @@ END
 --------------------------------------------------------------------------------------------------------------------------------------
 BEGIN 
 	-- Add the G/L entries from the temporary table to the permanent table (tblGLDetail)
+	DECLARE @intCompanyId INT
+	SELECT TOP 1 @intCompanyId=intCompanySetupID from tblSMCompanySetup
+
 	INSERT INTO dbo.tblGLDetail (
 			[dtmDate]
 			,[strBatchId]
+			,[intCompanyId]
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
@@ -58,6 +62,7 @@ BEGIN
 	SELECT 
 			dbo.fnRemoveTimeOnDate([dtmDate])
 			,[strBatchId]
+			,@intCompanyId
 			,[intAccountId]
 			,[dblDebit] = Debit.Value
 			,[dblCredit] = Credit.Value 
@@ -132,6 +137,7 @@ BEGIN
 	WHEN NOT MATCHED  THEN 
 		INSERT (
 			intAccountId
+			,intCompanyId
 			,dtmDate
 			,dblDebit
 			,dblCredit
@@ -142,6 +148,7 @@ BEGIN
 		)
 		VALUES (
 			Source_Query.intAccountId
+			,@intCompanyId
 			,Source_Query.dtmDate
 			,Source_Query.dblDebit
 			,Source_Query.dblCredit

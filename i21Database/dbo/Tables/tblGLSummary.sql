@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLSummary] (
     [intSummaryId]     INT             IDENTITY (1, 1) NOT NULL,
+	[intCompanyId]	   INT			   NULL,
     [intAccountId]     INT             NULL,
     [dtmDate]          DATETIME        NULL,
     [dblDebit]         NUMERIC (18, 6) NULL,

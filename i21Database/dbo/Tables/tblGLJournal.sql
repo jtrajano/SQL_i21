@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLJournal] (
     [intJournalId]       INT              IDENTITY (1, 1) NOT NULL,
+	[intCompanyId]		 INT			  NULL,
     [dtmReverseDate]     DATETIME         NULL,
     [strJournalId]       NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
     [strTransactionType] NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,

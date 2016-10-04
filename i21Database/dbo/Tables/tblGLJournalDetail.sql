@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLJournalDetail] (
     [intJournalDetailId] INT             IDENTITY (1, 1) NOT NULL,
+	[intCompanyId]		 INT			 NULL,
     [intLineNo]          INT             NULL,
     [intJournalId]       INT             NOT NULL,
     [dtmDate]            DATETIME        NULL,
