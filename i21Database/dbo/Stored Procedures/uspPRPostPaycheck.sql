@@ -19,6 +19,7 @@ DECLARE @intPaycheckId INT
 		,@intBankTransactionTypeId INT = 21
 		,@intCreatedEntityId AS INT
 		,@intBankAccountId AS INT
+		,@strBatchNo AS NVARCHAR(50) = @strBatchId
 		,@PAYCHECK INT = 21
 		,@DIRECT_DEPOSIT INT = 23
 		,@BankTransactionTable BankTransactionTable
@@ -771,9 +772,9 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Get the batch post id. 
-IF (@ysnPost = 1 AND @strBatchId IS NULL)
+IF (@ysnPost = 1 AND @strBatchNo IS NULL)
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchNo OUTPUT 
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
@@ -810,7 +811,7 @@ BEGIN
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= @intTransactionId
 			,[dtmDate]				= @dtmDate
-			,[strBatchId]			= @strBatchId
+			,[strBatchId]			= @strBatchNo
 			,[intAccountId]			= BankAccnt.intGLAccountId
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblAmount
@@ -844,7 +845,7 @@ BEGIN
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= @intTransactionId
 			,[dtmDate]				= @dtmDate
-			,[strBatchId]			= @strBatchId
+			,[strBatchId]			= @strBatchNo
 			,[intAccountId]			= B.intGLAccountId
 			,[dblDebit]				= B.dblDebit
 			,[dblCredit]			= B.dblCredit
@@ -979,6 +980,12 @@ Post_Commit:
 	SELECT @actionType = CASE WHEN (@ysnPost = 1) THEN 'Posted' ELSE 'Unposted' END
 	EXEC uspSMAuditLog 'Payroll.view.Paycheck', @intPaycheckId, @intUserId, @actionType, '', '', ''
 
+	IF (@ysnPost = 1 AND @strBatchId IS NOT NULL)
+	BEGIN
+		UPDATE	tblSMStartingNumber
+		SET		intNumber = ISNULL(intNumber, 0) + 1
+		WHERE	intStartingNumberId = @STARTING_NUM_TRANSACTION_TYPE_Id
+	END
 	GOTO Post_Exit
 
 -- If error occured, undo changes to all tables affected
