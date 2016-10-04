@@ -115,12 +115,13 @@ AS
 										AND P.ysnPosted = 1 
 										AND P.dtmDatePaid <= @asOfDate
 								  GROUP BY PD.intInvoiceId
-						) AS PD ON PD.intInvoiceId = I.intInvoiceId AND PD.dtmDatePaid > I.dtmDueDate						
+						) AS PD ON PD.intInvoiceId = I.intInvoiceId
 					WHERE I.ysnPosted = 1 							  
 						AND I.strTransactionType = 'Invoice'
 						AND I.strType IN ('Standard', 'Transport Delivery')
 						AND I.intEntityCustomerId = @entityId
 						AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < @asOfDate
+						AND (PD.dtmDatePaid IS NOT NULL AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < PD.dtmDatePaid OR PD.dtmDatePaid IS NULL)
 					
 					--GET CUSTOMER BUDGET DUE
 					IF ISNULL(@isIncludeBudget, 0) = 1
