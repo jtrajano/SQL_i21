@@ -261,8 +261,16 @@ DECLARE @ysnValidLocation BIT
 EXEC dbo.uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT
 IF @ysnValidLocation = 0
 BEGIN
-	RAISERROR(80087, 11, 1, '')  
-	GOTO Post_Exit
+	DECLARE @ToLocationName AS NVARCHAR(50)
+
+	SELECT @ToLocationName = toLocation.strLocationName
+	FROM tblICInventoryReceipt Receipt
+		 LEFT JOIN tblSMCompanyLocation toLocation ON toLocation.intCompanyLocationId = Receipt.intLocationId
+	WHERE Receipt.strReceiptNumber = @strTransactionId
+
+		-- 'Line item and Lot storage location is not under {To Location Name}.'
+		RAISERROR(80087, 11, 1, @ToLocationName)  
+		GOTO Post_Exit
 END
 
 -- Get the next batch number
