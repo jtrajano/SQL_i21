@@ -50,7 +50,7 @@ AS
 		ON A.intProduct = L.intItemId
 	LEFT JOIN (
 		SELECT intSiteId = intSiteID
-			,intOpenCount = COUNT(intSiteID)
+			,intOpenCount = ROW_NUMBER() OVER(PARTITION BY intSiteID ORDER BY intSiteID)
 		FROM tblTMWorkOrder 
 		WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusTypeID 
 									 FROM tblTMWorkStatusType 
