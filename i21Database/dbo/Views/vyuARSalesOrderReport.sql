@@ -27,11 +27,13 @@ SELECT SO.intSalesOrderId
 	 , dtmDueDate				= SO.dtmDueDate
 	 , strFreightTerm			= FT.strFreightTerm
 	 , strItemNo				= I.strItemNo
+	 , strItem					= CASE WHEN ISNULL(I.strItemNo, '') = '' THEN SD.strItemDescription ELSE LTRIM(RTRIM(I.strItemNo)) + ' - ' + ISNULL(SD.strItemDescription, '') END
 	 , strType					= I.strType
 	 , intCategoryId			= CASE WHEN QT.strOrganization IN ('Product Type', 'Item Category') THEN I.intCategoryId ELSE NULL END
 	 , strCategoryCode			= ICC.strCategoryCode
 	 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
 	 , intSalesOrderDetailId	= SD.intSalesOrderDetailId
+	 , dblContractBalance		= CASE WHEN SD.dblContractBalance = 0 THEN CD.dblBalance ELSE SD.dblContractBalance END
 	 , strContractNumber		= CH.strContractNumber
 	 , strItemDescription		= SD.strItemDescription
 	 , strUnitMeasure			= UOM.strUnitMeasure
@@ -78,7 +80,8 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblSOSalesOrderDetailTax SDT ON SD.intSalesOrderDetailId = SDT.intSalesOrderDetailId
 	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
-	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId) ON SO.intSalesOrderId = SD.intSalesOrderId
+	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId
+	LEFT JOIN tblCTContractDetail CD ON SD.intContractDetailId = CD.intContractDetailId) ON SO.intSalesOrderId = SD.intSalesOrderId
 LEFT JOIN (tblARCustomer C 
 	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
 LEFT JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId

@@ -43,8 +43,9 @@ SELECT INV.intInvoiceId
 	 , dblInvoiceTotal			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN ISNULL(INV.dblInvoiceTotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceTotal, 0) END
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , I.strItemNo
+	 , strItem					= CASE WHEN ISNULL(I.strItemNo, '') = '' THEN ID.strItemDescription ELSE LTRIM(RTRIM(I.strItemNo)) + ' - ' + ISNULL(ID.strItemDescription, '') END
 	 , ID.intInvoiceDetailId
-	 , dblContractBalance		= CASE WHEN ID.dblContractBalance = 0 THEN NULL ELSE ID.dblContractBalance END
+	 , dblContractBalance		= CASE WHEN ID.dblContractBalance = 0 THEN CD.dblBalance ELSE ID.dblContractBalance END
 	 , CH.strContractNumber
 	 , strItemDescription		= ID.strItemDescription
 	 , UOM.strUnitMeasure
@@ -72,7 +73,9 @@ LEFT JOIN (tblARInvoiceDetail ID
 									   AND ID.intItemId <> ISNULL((SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference), 0)
 									   AND IDT.dblAdjustedTax <> 0.000000
 	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
-	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId) ON INV.intInvoiceId = ID.intInvoiceId
+	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
+	LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
+	) ON INV.intInvoiceId = ID.intInvoiceId
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId
