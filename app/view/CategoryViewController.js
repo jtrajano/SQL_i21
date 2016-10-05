@@ -584,8 +584,8 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                // me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                // me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Raw Material":
@@ -597,8 +597,8 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                // me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                // me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Finished Good":
@@ -609,8 +609,8 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                // me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                // me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Other Charge":
