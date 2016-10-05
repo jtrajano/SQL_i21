@@ -97,6 +97,44 @@ namespace iRely.Inventory.WebApi
             });
         }
 
+        [HttpPost]
+        [ActionName("UpdateReceiptInspection")]
+        public HttpResponseMessage UpdateReceiptInspection(int id)
+        {
+            var result = _bl.UpdateReceiptInspection(id);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+        [HttpPost]
+        [ActionName("GetTaxGroupId")]
+        public HttpResponseMessage GetTaxGroupId(int id)
+        {
+            int? taxGroup = null;
+            var result = _bl.GetTaxGroupId(id, out taxGroup);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    taxGroupId = taxGroup,
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
         [HttpGet]
         [ActionName("SearchReceiptItems")]
         public async Task<HttpResponseMessage> SearchReceiptItems(GetParameter param)

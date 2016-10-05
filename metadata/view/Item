@@ -8747,6 +8747,8 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "arrowVisible": false,
+                                                        "hidden": true,
                                                         "icon": null,
                                                         "iconCls": "small-insert",
                                                         "itemId": "btnInsertPricing",
@@ -8765,6 +8767,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "hidden": true,
                                                         "icon": null,
                                                         "iconCls": "small-remove",
                                                         "itemId": "btnDeletePricing",

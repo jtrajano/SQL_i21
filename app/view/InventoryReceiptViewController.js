@@ -749,8 +749,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotCertified: 'dtmCertified'
             },
 
+            // -- Incoming Inspection Tab
+            btnSelectAll: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnClearAll: {
+                disabled: '{current.ysnPosted}'
+            },
             grdIncomingInspection: {
-                colInspect: 'ysnSelected',
+                colInspect: {
+                    dataIndex: 'ysnSelected',
+                    disabled: '{current.ysnPosted}'
+                },
                 colQualityPropertyName: 'strPropertyName'
             },
 
@@ -1163,7 +1173,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var record = Ext.create('Inventory.model.Receipt');
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
         var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intReceiptSourceType');
-        
+        var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         if(defaultReceiptType !== null) {
             record.set('strReceiptType', defaultReceiptType);
         }
@@ -1185,6 +1195,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dtmReceiptDate', today);
         record.set('intBlanketRelease', 0);
         record.set('ysnPosted', false);
+        record.set('intCurrencyId', defaultCurrency);
         config.viewModel.set('locationFromTransferOrder', null);
         action(record);
     },
@@ -1381,7 +1392,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var vendorLocation = records[0].getDefaultLocation();
             if (vendorLocation) {
                 current.set('intShipViaId', vendorLocation.get('intShipViaId'));
-                current.set('intTaxGroupId', vendorLocation.get('intTaxGroupId'));
+                //current.set('intTaxGroupId', vendorLocation.get('intTaxGroupId'));
             }
         }
 
@@ -1462,9 +1473,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                                     //Remove all Storage Locations in Lot Grid
                                     var currentReceiptItem = receiptItemRecords[i];
-                                    var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots'](),
-                                        receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
-
+                                    var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots']();
+                                    if(receiptItemLots) {
+                                        var receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
                                         var li = receiptItemLotRecords.length - 1;
 
                                       for (; li >= 0; li--) {
@@ -1472,14 +1483,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                           receiptItemLotRecords[li].set('intStorageLocationId', null);
                                           receiptItemLotRecords[li].set('strStorageLocation', null);
                                       }
+                                    }
+        
                                   }
                                  current.set('strLocationName', records[0].get('strLocationName'));
                                 
-                                current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+                                var valFOBPoint = current.get('strFobPoint').trim();
+
+                                //Assign Tax Group Id from Location FOB Point is Destination
+                                if(valFOBPoint.toLowerCase() === 'destination') {
+                                   current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+                                }
+                                
+                                //Calculate Item Taxes
                                 if (current.tblICInventoryReceiptItems()) {
                                     Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
-                                        current.currentReceiptItem = item;
-                                        me.calculateItemTaxes();
+                                        if(!item.dummy) {
+                                            win.viewModel.data.currentReceiptItem = item;
+                                            me.calculateItemTaxes();
+                                        }
                                     });
                                 }
                             }
@@ -1528,13 +1550,42 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (records.length <= 0)
             return;
 
-        var win = combo.up('window');
-        var current = win.viewModel.data.current;
+        var win = combo.up('window'),
+            current = win.viewModel.data.current,
+            me = this;
 
         if (current) current.set('strFobPoint', records[0].get('strFobPoint'));
 
-        // Calculate the taxes
-        this.calculateItemTaxes();
+        // Save first before calculating the taxes
+        win.context.data.saveRecord({
+            successFn: function () {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryReceipt/GetTaxGroupId?id=' + current.get('intInventoryReceiptId'),
+                    method: 'post',
+                    success: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        if (jsonData.success) 
+                            //Set intTaxGroupId
+                            current.set('intTaxGroupId', jsonData.message.taxGroupId);
+
+                        if (current.tblICInventoryReceiptItems()) {
+                            Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
+                                    if(!item.dummy) {
+                                        //Calculate Taxes
+                                        win.viewModel.data.currentReceiptItem = item;
+                                        me.calculateItemTaxes();
+                                    }
+                            });
+                        }
+                    },
+                    failure: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    }
+               });
+            }
+        });
     },
 
     onReceiptItemSelect: function (combo, records, eOpts) {
@@ -1739,16 +1790,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
+        else if (combo.itemId === 'cboSubLocation' || combo.itemId === 'cboStorageLocation') {
+            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+        }
 
-        this.calculateGrossNet(current, 1);
-        win.viewModel.data.currentReceiptItem = current;
-        this.calculateItemTaxes();
+        // Calculate the Gross/Net 
+        if (combo.itemId !== 'cboStorageLocation'){
+            this.calculateGrossNet(current, 1);
+        }
         
-        //Calculate Line Total
+        // Calculate the taxes
+       // win.viewModel.data.currentReceiptItem = current;
+       // this.calculateItemTaxes();
+        
+        //Calculate Line Total        
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var currentReceipt  = win.viewModel.data.current;
         currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
 
+        // Show or hide the Lot Panel (or Grid)
         var pnlLotTracking = win.down("#pnlLotTracking");
 
         if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
@@ -1758,7 +1819,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    calculateItemTaxes: function (reset) {
+    calculateItemTaxes: function () {
         var me = this;
         var win = me.getView();
         var masterRecord = win.viewModel.data.current;
@@ -1768,9 +1829,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (!detailRecord) return;
         if (iRely.Functions.isEmpty(detailRecord.get('intItemId'))) return;
 
-        if (reset !== false) reset = true;
+        //if (reset !== false) reset = true;
 
-        var computeItemTax = function (itemTaxes, me, reset) {
+        var computeItemTax = function (itemTaxes, me) {
 
             if (!detailRecord) {
                 return;
@@ -1780,7 +1841,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 qtyOrdered = detailRecord.get('dblOpenReceive'),
                 unitCost = detailRecord.get('dblUnitCost');
 
-            if (reset !== false) reset = true;
+           // if (reset !== false) reset = true;
 
             // Adjust the item price by the sub currency
             {
@@ -1832,6 +1893,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var taxableAmount,
                     taxAmount;
                 
+                masterRecord.set('intTaxGroupId', itemDetailTax.intTaxGroupId);
 
                 taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
                 if (itemDetailTax.strCalculationMethod === 'Percentage') {
@@ -1882,7 +1944,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             detailRecord.set('dblLineTotal', me.calculateLineTotal(masterRecord, detailRecord));
         }
 
-
         if (detailRecord) {
             var current = {
                 ItemId: detailRecord.get('intItemId'),
@@ -1895,7 +1956,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 FreightTermId: masterRecord.get('intFreightTermId')
             };
 
-            if (reset)
+            iRely.Functions.getItemTaxes(current, computeItemTax, me);
+
+           /* if (reset)
                 iRely.Functions.getItemTaxes(current, computeItemTax, me);
             else {
                 var receiptItemTaxes = detailRecord.tblICInventoryReceiptItemTaxes();
@@ -1928,7 +1991,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         iRely.Functions.getItemTaxes(current, computeItemTax, me);
                     }
                 }
-            }
+            }*/
         }
     },
 
@@ -2157,7 +2220,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     //Set Default Value for Lot UOM
                                     if(lot.get('strUnitMeasure') === null || lot.get('strUnitMeasure') === '') {
                                             lot.set('strUnitMeasure', record.get('strUnitMeasure'));
-                                            lot.set('intItemUnitMeasureId', record.get('intItemUnitMeasureId'));
+                                            lot.set('intItemUnitMeasureId', record.get('intUnitMeasureId'));
                                         } 
                                 
                                  // Get the Gross Qty
@@ -2719,15 +2782,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         };
 
-        // If there is no data change, do the post.
+        // If there is no data change, calculate the charge and do the recap. 
         if (!context.data.hasChanges()) {
+            me.doOtherChargeCalculate(context, win.viewModel.data.current);
             doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
             return;
         }
 
-        // Save has data changes first before doing the post.
+        // Save has data changes first before anything else. 
         context.data.saveRecord({
             successFn: function () {
+                me.doOtherChargeCalculate(context, win.viewModel.data.current);
                 doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
             }
         });
@@ -3080,7 +3145,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (current) {
             current.set('intShipViaId', records[0].get('intShipViaId'));
-            current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+            //current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
         }
     },
 
@@ -4234,6 +4299,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intChargeId', record.get('intItemId'));
             current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
             current.set('ysnAccrue', record.get('ysnAccrue'));
+            current.set('ysnPrice', record.get('ysnPrice'));
 
             if (record.get('ysnAccrue') === true) {
                 current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
@@ -4327,6 +4393,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var SourceType = currentRecord.get('intSourceType').toString();
         var CurrencyId = currentRecord.get('intCurrencyId') === null ? 0 : currentRecord.get('intCurrencyId').toString();
         var ContractStore = win.viewModel.storeInfo.purchaseContractList;
+        var win = me.view;
+
         if (ReceiptType === 'Transfer Order') {
             VendorId = currentRecord.get('intTransferorId').toString();
         }
@@ -4489,6 +4557,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         win.viewModel.data.currentReceiptItem = newReceiptItem;
                         me.calculateItemTaxes();
 
+                        // Calculate the Wgt or Volume Gain/Loss 
+                        me.validateWeightLoss(win);
+
                         if (ReceiptType === 'Purchase Contract') {
                             ContractStore.load({
                                 filters: [
@@ -4588,7 +4659,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
             search.show();
         };
-        showAddScreen();
+       
+         var task = new Ext.util.DelayedTask(function () {
+            showAddScreen();          
+        });
+        task.delay(10);
     },
 
     onReplicateBalanceLotClick: function(button) {
@@ -4979,44 +5054,45 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     },
 
+    doOtherChargeCalculate: function(context, current){
+        if (context && current ) {
+            Ext.Ajax.request({
+                timeout: 120000,
+                url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
+                method: 'post',
+                success: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    if (!jsonData.success) {
+                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                    }
+                    else {
+                        context.configuration.paging.store.load();
+                    }
+                },
+                failure: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                }
+            });
+        }
+    },
+
     onCalculateChargeClick: function (button, e, eOpts) {
+        var me = this;
         var win = button.up('window');
         var context = win.context;
         var current = win.viewModel.data.current;
 
-        var doPost = function () {
-            if (current) {
-                Ext.Ajax.request({
-                    timeout: 120000,
-                    url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
-                    method: 'post',
-                    success: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        if (!jsonData.success) {
-                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                        }
-                        else {
-                            context.configuration.paging.store.load();
-                        }
-                    },
-                    failure: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-                    }
-                });
-            }
-        };
-
-        // If there is no data change, do the post.
+        // If there is no data change, do the ajax request.
         if (!context.data.hasChanges()){
-            doPost();
+            me.doOtherChargeCalculate(context, current);
             return;
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
             successFn: function () {
-                doPost();
+                me.doOtherChargeCalculate(context, current);
             }
         });
     },
@@ -5037,6 +5113,96 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         Inventory.view.InventoryReceiptViewController.orgValueLocation = current.get('intLocationId');
     },
 
+    onReceiptTabChange: function(tabPanel, newCard, oldCard, eOpts) {
+        switch (newCard.itemId) { 
+            case 'pgeIncomingInspection':
+                var win = tabPanel.up('window');
+                var context = win.context;
+                var current = win.viewModel.data.current;
+
+                var doPost = function () {
+                    if (current) {
+                        Ext.Ajax.request({
+                            timeout: 120000,
+                            url: '../Inventory/api/InventoryReceipt/UpdateReceiptInspection?id=' + current.get('intInventoryReceiptId'),
+                            method: 'post',
+                            success: function (response) {
+                                var jsonData = Ext.decode(response.responseText);
+                                if (!jsonData.success) {
+                                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                                }
+                                else {
+                                    context.configuration.paging.store.load();
+                                }
+                            },
+                            failure: function (response) {
+                                var jsonData = Ext.decode(response.responseText);
+                                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                            }
+                        });
+                    }
+                };
+
+                // If there is no data change, do the post.
+                if (!context.data.hasChanges()){
+                    doPost();
+                    return;
+                }
+
+                // Save has data changes first before doing the post.
+                context.data.saveRecord({
+                    successFn: function () {
+                        doPost();
+                    }
+                });
+            break;
+        }
+    },
+
+    onSelectClearGridInspectionClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+
+        if(button.itemId === 'btnSelectAll') {
+            if (current.tblICInventoryReceiptInspections()) {
+                Ext.Array.each(current.tblICInventoryReceiptInspections().data.items, function(row) {
+                    if (!row.dummy) {
+                            row.set('ysnSelected', true);
+                        }
+                    });
+            }
+        }
+
+        if(button.itemId === 'btnClearAll') {
+            if (current.tblICInventoryReceiptInspections()) {
+                Ext.Array.each(current.tblICInventoryReceiptInspections().data.items, function(row) {
+                    if (!row.dummy) {
+                            row.set('ysnSelected', false);
+                        }
+                    });
+            }
+        }
+    },
+
+    onSelectTaxGroup: function (combo, records, eOpts) {
+		if (records.length <= 0)
+        return;
+
+        var win = combo.up('window'),
+            current = win.viewModel.data.current,
+            me = this;
+
+        //Calculate Taxes
+        if (current.tblICInventoryReceiptItems()) {
+            Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
+                if(!item.dummy) {
+                    win.viewModel.data.currentReceiptItem = item;
+                    me.calculateItemTaxes();
+                }
+            });
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -5054,7 +5220,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onCurrencySelect
             },
             "#cboTaxGroup": {
-                drilldown: this.onTaxGroupDrilldown
+                drilldown: this.onTaxGroupDrilldown,
+                select: this.onSelectTaxGroup
             },
             "#cboTransferor": {
                 select: this.onTransferorSelect
@@ -5190,6 +5357,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#colLoadContract": {
                 beforecheckchange: this.onPostedTransactionBeforeCheckChange
+            },
+            "#tabInventoryReceipt": {
+                tabChange: this.onReceiptTabChange
+            },
+            "#btnSelectAll": {
+                click: this.onSelectClearGridInspectionClick
+            },
+            "#btnClearAll": {
+                click: this.onSelectClearGridInspectionClick
+            },
+            "#cboSubLocation": {
+                select: this.onReceiptItemSelect
             }
         })
     }

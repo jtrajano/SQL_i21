@@ -390,6 +390,7 @@
                             "userConfig": {
                                 "bodyPadding": 5,
                                 "container|align": "stretch",
+                                "itemId": "pgeDetails",
                                 "layout": "vbox",
                                 "title": "Details"
                             },
@@ -1132,6 +1133,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "container|align": "stretch",
+                                                "itemId": "tabShippingCompany",
                                                 "layout": "vbox",
                                                 "title": "Shipping Company"
                                             },
@@ -1367,6 +1369,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "container|align": "stretch",
+                                                "itemId": "tabDelivery",
                                                 "layout": "vbox",
                                                 "title": "Delivery"
                                             },
@@ -3691,6 +3694,23 @@
                                                     "designerId": "efc85ce3-90c9-4c5a-be38-a0e3cbddba2f"
                                                 },
                                                 {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "iconCls": "small-calculator",
+                                                        "itemId": "btnCalculateCharges",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Calculate"
+                                                    },
+                                                    "name": "MyButton9",
+                                                    "designerId": "6e1c70ed-d711-4301-82ce-91b6969bcdac"
+                                                },
+                                                {
                                                     "type": "linkedinstance",
                                                     "reference": {
                                                         "name": "items",
@@ -3698,7 +3718,9 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "layout|flex": null
+                                                        "height": null,
+                                                        "layout|flex": null,
+                                                        "width": 198
                                                     },
                                                     "name": "filter126",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
@@ -3854,7 +3876,7 @@
                                             "userConfig": {
                                                 "flex": 1,
                                                 "itemId": "colCostMethod",
-                                                "text": "Cost Method"
+                                                "text": "Price Method"
                                             },
                                             "name": "MyColumn11",
                                             "designerId": "1dcffb56-9aa7-4cb4-9c68-21b043708bc3",
@@ -4176,9 +4198,9 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strVendorId",
+                                                        "displayField": "strName",
                                                         "itemId": "cboCostVendor",
-                                                        "valueField": "strVendorId"
+                                                        "valueField": "strName"
                                                     },
                                                     "name": "MyComboBox83",
                                                     "configAlternates": {
@@ -4247,6 +4269,58 @@
                                             "codeClass": null,
                                             "name": "MyCheckboxSelectionModel12",
                                             "designerId": "4c3edbb7-9d52-4154-b525-6470c3a77921"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "colAllocatePriceBy",
+                                                "text": "Allocate Price By"
+                                            },
+                                            "name": "MyColumn",
+                                            "designerId": "bfd3d180-b9ed-43d0-ba31-53d787a9907e",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "{",
+                                                            "dataIndex: 'strAllocatePriceBy',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Allocate Cost By',",
+                                                            "flex: 1",
+                                                            "}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strAllocatePriceBy",
+                                                        "itemId": "cboAllocatePriceBy",
+                                                        "valueField": "strAllocatePriceBy"
+                                                    },
+                                                    "name": "MyComboBox9",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "284f17e7-24e7-4424-8150-3ded8cd3d837",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
@@ -4304,6 +4378,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "pgeAttachments",
                                 "layout": "fit",
                                 "title": "Attachments"
                             },

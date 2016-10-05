@@ -984,8 +984,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             return;
 
         var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepPhysicalCount');
-        var current = plugin.getActiveRecord();
+        var plugin = grid ? grid.getPlugin('cepPhysicalCount') : null;
+        var current = plugin ? plugin.getActiveRecord() : null;
 
         if (current) {
             switch (combo.itemId) {

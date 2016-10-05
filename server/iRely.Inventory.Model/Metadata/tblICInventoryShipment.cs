@@ -706,6 +706,7 @@ namespace iRely.Inventory.Model
         public int? intCostUOMId { get; set; }
         public int? intCurrencyId { get; set; }
         public decimal? dblAmount { get; set; }
+        public string strAllocatePriceBy { get; set; }
         public bool? ysnAccrue { get; set; }
         public int? intEntityVendorId { get; set; }
         public bool? ysnPrice { get; set; }
@@ -860,6 +861,25 @@ namespace iRely.Inventory.Model
                 _currency = value;
             }
         }
+        private string _vendorName;
+        [NotMapped]
+        public string strVendorName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorName))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strVendorName;
+                    else
+                        return null;
+                else
+                    return _vendorName;
+            }
+            set
+            {
+                _vendorName = value;
+            }
+        }
 
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
         public vyuICGetInventoryShipmentCharge vyuICGetInventoryShipmentCharge { get; set; }
@@ -883,9 +903,11 @@ namespace iRely.Inventory.Model
         public bool? ysnPrice { get; set; }
         public string strOnCostType { get; set; }
         public decimal? dblAmount { get; set; }
+        public string strAllocatePriceBy { get; set; }
         public bool? ysnAccrue { get; set; }
         public int? intEntityVendorId { get; set; }
         public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
 
         public tblICInventoryShipmentCharge tblICInventoryShipmentCharge { get; set; }
     }

@@ -280,7 +280,7 @@ namespace iRely.Inventory.Model
         }
     }
     
-    public class tblMFQAPropertyMap : EntityTypeConfiguration<tblMFQAProperty>
+ /*   public class tblMFQAPropertyMap : EntityTypeConfiguration<tblMFQAProperty>
     {
         public tblMFQAPropertyMap()
         {
@@ -299,7 +299,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strPropertyName).HasColumnName("strPropertyName");
             this.Property(t => t.ysnActive).HasColumnName("ysnActive");
         }
-    }
+    }*/
 
     public class tblSMCompanyLocationSubLocationMap : EntityTypeConfiguration<tblSMCompanyLocationSubLocation>
     {

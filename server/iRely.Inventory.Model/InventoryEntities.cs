@@ -178,7 +178,7 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblICCompanyPreferenceMap());
             modelBuilder.Configurations.Add(new tblSMStartingNumberMap());
-            modelBuilder.Configurations.Add(new tblMFQAPropertyMap());
+           // modelBuilder.Configurations.Add(new tblMFQAPropertyMap());
 
             modelBuilder.Configurations.Add(new vyuICGetInventoryValuationMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryValuationSummaryMap());

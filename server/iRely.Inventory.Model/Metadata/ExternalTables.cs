@@ -189,7 +189,7 @@ namespace iRely.Inventory.Model
         public bool ysnEnable { get; set; }
     }
 
-    public class tblMFQAProperty : BaseEntity
+   /* public class tblMFQAProperty : BaseEntity
     {
         public int intQAPropertyId { get; set; }
         public string strPropertyName { get; set; }
@@ -202,7 +202,7 @@ namespace iRely.Inventory.Model
         public bool ysnActive { get; set; }
 
         public ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
-    }
+    }*/
 
     public class tblSMCompanyLocationSubLocation : BaseEntity
     {

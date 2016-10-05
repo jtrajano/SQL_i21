@@ -8,7 +8,7 @@ Ext.define('Inventory.model.InventoryValuation', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intInventoryValuationKeyId',
+    idProperty: 'intItemId',
 
     fields: [
         { name: 'intInventoryValuationKeyId', type: 'int' },

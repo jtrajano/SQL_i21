@@ -752,7 +752,12 @@ namespace iRely.Inventory.Model
         public vyuICGetInventoryValuationMap()
         {
             // Primary Key
-            this.HasKey(p => p.intInventoryValuationKeyId);
+            //this.HasKey(p => p.intInventoryValuationKeyId);
+            this.HasKey(p => new
+            {
+                p.intItemId,
+                p.intInventoryTransactionId
+            }); 
 
             // Table & Column Mappings
             this.ToTable("vyuICGetInventoryValuation");
