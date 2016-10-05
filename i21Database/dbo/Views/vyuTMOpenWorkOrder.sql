@@ -52,7 +52,7 @@ AS
 		SELECT intSiteId = intSiteID
 			,intOpenCount = COUNT(intSiteID)
 		FROM tblTMWorkOrder 
-		WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusTypeID 
+		WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
 									 FROM tblTMWorkStatusType 
 									 WHERE strWorkStatus = 'Open' 
 										AND ysnDefault = 1)
