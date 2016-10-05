@@ -4298,6 +4298,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intChargeId', record.get('intItemId'));
             current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
             current.set('ysnAccrue', record.get('ysnAccrue'));
+            current.set('ysnPrice', record.get('ysnPrice'));
 
             if (record.get('ysnAccrue') === true) {
                 current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
