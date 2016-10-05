@@ -84,7 +84,7 @@ AS
 						 , @entityId
 						 , I.strInvoiceNumber
 						 , NULL
-						 , dblAmountDue = I.dblInvoiceTotal
+						 , dblAmountDue = I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)
 						 , dblTotalAmount = CASE WHEN SC.strCalculationType = 'Percent'
 						 						THEN
 						 							CASE WHEN SC.dblServiceChargeAPR > 0
@@ -92,12 +92,12 @@ AS
 						 									CASE WHEN SC.dblMinimumCharge > ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
 																																					THEN I.dtmDueDate 
 																																					ELSE I.dtmCalculated 
-																																				 END, ISNULL(PD.dtmDatePaid, @asOfDate)) * I.dblInvoiceTotal
+																																				 END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
 						 		  								THEN SC.dblMinimumCharge
-																ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
-																																	THEN I.dtmDueDate 
- 																																	ELSE I.dtmCalculated 
-																																END, ISNULL(PD.dtmDatePaid, @asOfDate)) * I.dblInvoiceTotal)
+						 		  								ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
+																															  THEN I.dtmDueDate 
+																															  ELSE I.dtmCalculated 
+																														   END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))
 						 									END
 						 								ELSE 0
 						 							END
@@ -115,13 +115,13 @@ AS
 										AND P.ysnPosted = 1 
 										AND P.dtmDatePaid <= @asOfDate
 								  GROUP BY PD.intInvoiceId
-						) AS PD ON PD.intInvoiceId = I.intInvoiceId
+						) AS PD ON PD.intInvoiceId = I.intInvoiceId 
 					WHERE I.ysnPosted = 1 							  
 						AND I.strTransactionType = 'Invoice'
 						AND I.strType IN ('Standard', 'Transport Delivery')
 						AND I.intEntityCustomerId = @entityId
 						AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < @asOfDate
-						AND (PD.dtmDatePaid IS NOT NULL AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < PD.dtmDatePaid OR PD.dtmDatePaid IS NULL)
+						AND I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal) > @zeroDecimal
 					
 					--GET CUSTOMER BUDGET DUE
 					IF ISNULL(@isIncludeBudget, 0) = 1
