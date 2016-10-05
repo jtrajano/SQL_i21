@@ -28,9 +28,13 @@ SELECT
 	,[dblBalance]			= CTCD.[dblBalance]
 	,[dblScheduleQty]		= CTCD.[dblScheduleQty]
 	,[dblAvailableQty]		= (ISNULL(CTCD.dblBalance,0) - ISNULL(CTCD.dblScheduleQty,0))	
-	,[ysnUnlimitedQuantity]	= CTCH.[ysnUnlimitedQuantity]
-	,[ysnLoad]				= CTCH.[ysnLoad]
+	,[dblDetailQuantity]	= CTCD.[dblQuantity] 
+	,[ysnUnlimitedQuantity]	= CAST(ISNULL(CTCH.[ysnUnlimitedQuantity],0) AS BIT)
+	,[ysnLoad]				= CAST(ISNULL(CTCH.[ysnLoad],0) AS BIT)
 	,[ysnAllowedToShow]		= CAST(CASE WHEN CTCD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)
+	,[intFreightTermId]		= CTCD.[intFreightTermId]
+	,[intTermId]			= CTCH.[intTermId]
+	,[intShipViaId]			= CTCD.[intShipViaId] 
 	FROM
 		tblCTContractDetail CTCD
 	INNER JOIN

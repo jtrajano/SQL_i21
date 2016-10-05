@@ -130,7 +130,7 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	[dblTotal]		= (	CASE WHEN ((ISNULL([intShipmentId],0) <> 0 OR ISNULL([intShipmentPurchaseSalesContractId],0) <> 0) AND ISNULL([intItemWeightUOMId],0) <> 0)
+	[dblTotal]		= (	CASE WHEN ((ISNULL([intShipmentId],0) <> 0 OR ISNULL([intShipmentPurchaseSalesContractId],0) <> 0 OR ISNULL(intLoadDetailId,0) <> 0) AND ISNULL([intItemWeightUOMId],0) <> 0)
 							THEN
 								ROUND(ROUND((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 							ELSE
