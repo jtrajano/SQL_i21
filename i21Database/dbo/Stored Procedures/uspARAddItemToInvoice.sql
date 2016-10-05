@@ -15,8 +15,6 @@
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
-	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
-	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@RefreshPrice					BIT				= 0
@@ -116,8 +114,6 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
-			,@ItemTermDiscount				= @ItemTermDiscount
-			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@ItemPrice						= @ItemPrice
 			,@ItemPricing					= @ItemPricing
 			,@RefreshPrice					= @RefreshPrice
@@ -208,8 +204,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
 				,[dblDiscount]
-				,[dblItemTermDiscount]
-				,[strItemTermDiscountBy]
 				,[dblPrice]
 				,[strPricing]
 				,[intSiteId]
@@ -249,8 +243,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemDiscount
-				,@ItemTermDiscount
-				,@ItemTermDiscountBy
 				,@ItemPrice
 				,@ItemPricing
 				,@ItemSiteId

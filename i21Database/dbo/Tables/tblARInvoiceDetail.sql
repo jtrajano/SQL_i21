@@ -14,7 +14,6 @@
 	[intItemWeightUOMId]					INT												NULL,    
 	[dblDiscount]							NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblItemTermDiscount]					NUMERIC(18, 6)									NULL DEFAULT 0,	
-	[strItemTermDiscountBy]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
     [dblPrice]								NUMERIC(18, 6)									NULL DEFAULT 0,
 	[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblTotalTax]							NUMERIC(18, 6)									NULL DEFAULT 0,

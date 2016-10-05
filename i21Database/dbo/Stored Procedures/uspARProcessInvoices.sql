@@ -188,7 +188,6 @@ DECLARE  @Id									INT
 		,@ItemQtyShipped						NUMERIC(18, 6)
 		,@ItemDiscount							NUMERIC(18, 6)
 		,@ItemTermDiscount						NUMERIC(18, 6)
-		,@ItemTermDiscountBy					NVARCHAR(50)
 		,@ItemPrice								NUMERIC(18, 6)
 		,@ItemPricing							NVARCHAR(250)
 		,@RefreshPrice							BIT
@@ -329,8 +328,6 @@ BEGIN
 		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
 		,@ItemQtyShipped				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyShipped] ELSE NULL END)
 		,@ItemDiscount					= (CASE WHEN @GroupingOption = 0 THEN [dblDiscount] ELSE NULL END)
-		,@ItemTermDiscount				= (CASE WHEN @GroupingOption = 0 THEN [dblItemTermDiscount] ELSE NULL END)
-		,@ItemTermDiscountBy			= (CASE WHEN @GroupingOption = 0 THEN [strItemTermDiscountBy] ELSE NULL END)
 		,@ItemPrice						= (CASE WHEN @GroupingOption = 0 THEN [dblPrice] ELSE NULL END)
 		,@ItemPricing					= (CASE WHEN @GroupingOption = 0 THEN [strPricing] ELSE NULL END)
 		,@RefreshPrice					= (CASE WHEN @GroupingOption = 0 THEN [ysnRefreshPrice] ELSE 0 END)
@@ -532,8 +529,6 @@ BEGIN
 			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
-			,@ItemTermDiscount				= @ItemTermDiscount
-			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@ItemPrice						= @ItemPrice
 			,@RefreshPrice					= @RefreshPrice
 			,@ItemMaintenanceType			= @ItemMaintenanceType
@@ -663,8 +658,6 @@ BEGIN
 					,@ItemUOMId						= [intItemUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
-					,@ItemTermDiscount				= [dblItemTermDiscount]
-					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 					,@ItemPrice						= [dblPrice]
 					,@ItemPricing					= [strPricing]
 					,@RefreshPrice					= [ysnRefreshPrice]
@@ -738,8 +731,6 @@ BEGIN
 						,@ItemUOMId						= @ItemUOMId
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemDiscount					= @ItemDiscount
-						,@ItemTermDiscount				= @ItemTermDiscount
-						,@ItemTermDiscountBy			= @ItemTermDiscountBy
 						,@ItemPrice						= @ItemPrice
 						,@ItemPricing					= @ItemPricing
 						,@RefreshPrice					= @RefreshPrice
@@ -1575,7 +1566,6 @@ BEGIN TRY
 							,@ContractNumber			= @ContractNumber		OUTPUT
 							,@ContractSeq				= @ContractSeq			OUTPUT
 							,@TermDiscount				= @ItemTermDiscount		OUTPUT
-							,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT							
 							--,@AvailableQuantity			= NULL OUTPUT
 							--,@UnlimitedQuantity			= 0    OUTPUT
 							--,@OriginalQuantity			= NULL
@@ -1614,7 +1604,6 @@ BEGIN TRY
 						,[dblQtyShipped]						= @ItemQtyShipped
 						,[dblDiscount]							= @ItemDiscount
 						,[dblItemTermDiscount]					= @ItemTermDiscount
-						,[strItemTermDiscountBy]				= @ItemTermDiscountBy
 						,[dblPrice]								= (CASE WHEN (ISNULL(@RefreshPrice,0) = 1 AND ISNULL(@SubCurrency,0) = 1) THEN @ItemPrice / ISNULL(@SubCurrencyCents,1) ELSE @ItemPrice END)
 						,[strPricing]							= @ItemPricing							
 						,[strMaintenanceType]					= @ItemMaintenanceType
