@@ -4669,16 +4669,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var grdLotTracking = win.down('grdLotTracking');
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
-
-
-        if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
-            var lineItemQty = currentReceiptItem.get('dblOpenReceive');
-            var lineItemCF = currentReceiptItem.get('dblItemUOMConvFactor');
-        }
-        else {
-            var lineItemQty = currentReceiptItem.get('dblNet');
-            var lineItemCF = currentReceiptItem.get('dblWeightUOMConvFactor');
-        }
+        var lineItemQty = currentReceiptItem.get('dblOpenReceive');
+        var lineItemCF = currentReceiptItem.get('dblItemUOMConvFactor');
 
         // Validate the lot qty.
         if (lineItemQty <= 0) {
