@@ -1096,6 +1096,10 @@ Ext.define('Inventory.view.ItemViewController', {
                             column: 'strType',
                             value: 'Inventory',
                             conjunction: 'and'
+                        }, {
+                            column: 'intCommodityId',
+                            value: '{current.intCommodityId}',
+                            conjunction: 'and'
                         }]
                     }
                 },
