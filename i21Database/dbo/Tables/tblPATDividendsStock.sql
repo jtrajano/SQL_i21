@@ -7,7 +7,7 @@
 	[intCustomerStockId] INT NOT NULL, 
     [dblParValue] NUMERIC(18, 6) NULL, 
     [dblSharesNo] NUMERIC(18, 6) NULL, 
-    [dblDividendPerShare] NUMERIC(18, 6) NULL, 
+    [intDividendsPerShare] INT NULL, 
     [dblDividendAmount] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATDividendsStock] PRIMARY KEY ([intDividendStockId]), 
