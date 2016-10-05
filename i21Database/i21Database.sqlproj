@@ -4354,6 +4354,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetContractQualityColumns.sql" />
     <Build Include="dbo\Views\vyuPRReportTimecardHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetTaxGroupIdOnInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuRKOptionStrikeList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -9,7 +9,8 @@ SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strO
   case when strBuySell='B' then  dblMarketValue-dblPremiumValue else  dblPremiumValue-dblMarketValue end as dblMTM,  
  strStatus,strCommodityCode,strLocationName,strBook,strSubBook,dblDelta,  
  -(dblOpenLots*dblDelta*dblContractSize) AS dblDeltaHedge,  
- strHedgeUOM,strBuySell,dblContractSize,intFutOptTransactionHeaderId,intCurrencyId,intCent,ysnSubCurrency,dtmExpirationDate,ysnExpired    
+ strHedgeUOM,strBuySell,dblContractSize,intFutOptTransactionHeaderId,intCurrencyId,intCent,ysnSubCurrency,dtmExpirationDate,ysnExpired ,intTypeId
+ ,intEntityId,intFutureMarketId,intCommodityId,intOptionMonthId      
 FROM (  
 SELECT (intTotalLot-dblSelectedLot1-intExpiredLots-intAssignedLots) AS dblOpenLots,'' as dblSelectedLot,  
   ((intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium)/ case when ysnSubCurrency = 'true' then intCent else 1 end  as dblPremiumValue,  
@@ -56,6 +57,9 @@ SELECT DISTINCT
     isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa where  opa.intFutOptTransactionId= ot.intFutOptTransactionId),0) intAssignedLots, 
 	    c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency,ot.intFutOptTransactionHeaderId, 
 		CASE WHEN CONVERT(VARCHAR(10),dtmExpirationDate,111) < CONVERT(VARCHAR(10),GETDATE(),111) then 1 else 0 end  ysnExpired 
+		,case when ot.strOptionType='Put' then 1 else 2 end intTypeId
+	,ot.intEntityId
+	,ot.intCommodityId 
 FROM tblRKFutOptTransaction ot  
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.strStatus='Filled' 
 join tblICUnitMeasure um on fm.intUnitMeasureId=um.intUnitMeasureId  
