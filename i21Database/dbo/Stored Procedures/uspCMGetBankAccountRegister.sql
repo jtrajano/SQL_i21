@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMGetBankAccountRegister] 
 @intBankAccountId  INT,
-@skip INT = NULL,
-@take INT = NULL,
 @totalCount AS INT = 0 OUTPUT 
 
 AS
@@ -27,7 +25,9 @@ DECLARE @openingBalance AS NUMERIC(18,6),
 		@strBankTransactionTypeName AS NVARCHAR(100),
 		@strReferenceNo AS NVARCHAR(50),
 		@strMemo AS NVARCHAR(250),
-		@strPayee AS NVARCHAR(100)
+		@strPayee AS NVARCHAR(100),
+		@skip INT = NULL,
+		@take INT = NULL
 
 
 -- Get the opAS ening balance from the first bank reconciliation record. 
