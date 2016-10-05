@@ -78,7 +78,7 @@ BEGIN
 				ON A.intProduct = L.A4GLIdentity
 			LEFT JOIN (
 				SELECT intSiteId = intSiteID
-					,intOpenCount = ROW_NUMBER() OVER(PARTITION BY intSiteID ORDER BY intSiteID)
+					,intOpenCount = COUNT(intSiteID)
 				FROM tblTMWorkOrder 
 				WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusTypeID 
 											 FROM tblTMWorkStatusType 
@@ -144,7 +144,7 @@ BEGIN
 				ON A.intProduct = L.intItemId
 			LEFT JOIN (
 				SELECT intSiteId = intSiteID
-					,intOpenCount = ROW_NUMBER() OVER(PARTITION BY intSiteID ORDER BY intSiteID)
+					,intOpenCount = COUNT(intSiteID)
 				FROM tblTMWorkOrder 
 				WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusTypeID 
 											 FROM tblTMWorkStatusType 
