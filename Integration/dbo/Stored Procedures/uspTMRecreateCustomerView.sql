@@ -313,7 +313,7 @@ BEGIN
 				,vwcus_ar_per3 = ISNULL(CI.dbl60Days,0.0)
 				,vwcus_ar_per4 = ISNULL(CI.dbl90Days,0.0)
 				,vwcus_ar_per5 = ISNULL(CI.dbl91Days,0.0)
-				,vwcus_pend_ivc = ISNULL(CI.dblInvoiceTotal,0.0)
+				,vwcus_pend_ivc = ISNULL(CI.dblPendingInvoice,0.0)
 				,vwcus_cred_reg = ISNULL(CI.dblUnappliedCredits,0.0)
 				,vwcus_pend_pymt = ISNULL(CI.dblPendingPayment,0.0)
 				,vwcus_cred_ga = 0.0
@@ -342,7 +342,7 @@ BEGIN
 				,vwcus_ptd_sls = ISNULL(CI.dblYTDSales,0.0)
 				,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
 				,vwcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId)
-				,dblFutureCurrent = 0.0
+				,dblFutureCurrent = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0)
 				,intConcurrencyId = 0
 				,strFullLocation =  ISNULL(Loc.strLocationName ,'''')
 				,intTaxId = CAST(NULL AS INT)
