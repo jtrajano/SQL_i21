@@ -375,6 +375,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dtmDate]
 							,[dtmDueDate]
 							,[dtmShipDate]
+							,[dtmPostDate]
 							,[intEntitySalespersonId]
 							,[intFreightTermId]
 							,[intShipViaId]
@@ -455,6 +456,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dtmDate]					= @Date
 							,[dtmDueDate]				= @DueDate
 							,[dtmShipDate]				= @ShipDate
+							,[dtmPostDate]				= @PostDate
 							,[intEntitySalespersonId]	= @EntitySalespersonId
 							,[intFreightTermId]			= @FreightTermId
 							,[intShipViaId]				= @ShipViaId

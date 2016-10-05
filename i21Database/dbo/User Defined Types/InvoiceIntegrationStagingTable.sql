@@ -52,6 +52,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[dtmDate]								DATETIME										NOT NULL	-- Invoice Date
 	,[dtmDueDate]							DATETIME										NULL		-- Due Date(If NULL will be computed base on Term) 	
 	,[dtmShipDate]							DATETIME										NULL		-- Ship Date
+	,[dtmPostDate]							DATETIME										NULL		-- Post Date
 	,[intEntitySalespersonId]				INT												NULL		-- Entity Id of SalesPerson(If NULL, customer's default will be used)	
 	,[intFreightTermId]						INT												NULL		-- Freight Term Id
 	,[intShipViaId]							INT												NULL		-- Entity Id of ShipVia
