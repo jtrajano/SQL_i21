@@ -277,7 +277,7 @@ BEGIN
 		,@SubCurrencyCents				= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = [intCurrencyId]),1) ELSE 1 END)
 		,@TermId						= [intTermId]
 		,@Date							= CAST(ISNULL([dtmDate], @DateNow) AS DATE)
-		,@DueDate						= CAST(ISNULL([dtmDueDate], @DateNow) AS DATE)
+		,@DueDate						= [dtmDueDate]
 		,@ShipDate						= CAST(ISNULL([dtmShipDate], @DateNow) AS DATE)
 		,@EntitySalespersonId			= [intEntitySalespersonId]
 		,@FreightTermId					= [intFreightTermId]
