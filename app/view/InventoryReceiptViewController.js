@@ -1173,7 +1173,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var record = Ext.create('Inventory.model.Receipt');
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
         var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intReceiptSourceType');
-        
+        var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         if(defaultReceiptType !== null) {
             record.set('strReceiptType', defaultReceiptType);
         }
@@ -1195,6 +1195,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dtmReceiptDate', today);
         record.set('intBlanketRelease', 0);
         record.set('ysnPosted', false);
+        record.set('intCurrencyId', defaultCurrency);
         config.viewModel.set('locationFromTransferOrder', null);
         action(record);
     },
