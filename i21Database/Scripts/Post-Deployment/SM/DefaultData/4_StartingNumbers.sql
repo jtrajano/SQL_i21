@@ -965,6 +965,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Activity')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 104
+			,[strTransactionType]	= N'Truck Billing'
+			,[strPrefix]			= N'TB-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Energy Trac'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Truck Billing')
+	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
