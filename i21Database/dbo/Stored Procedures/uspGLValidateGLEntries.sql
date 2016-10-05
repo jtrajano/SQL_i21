@@ -8,7 +8,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors'))
 	DROP TABLE #FoundErrors
 
 CREATE TABLE #FoundErrors (
@@ -29,6 +29,7 @@ FROM	dbo.fnGetGLEntriesErrors(@GLEntriesToValidate) Errors;
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60001)
 BEGIN 
 	RAISERROR(60001, 11, 1)
+	RETURN 60001
 	GOTO _Exit
 END;
 
@@ -36,6 +37,7 @@ END;
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60003)
 BEGIN 
 	RAISERROR(60003, 11, 1)
+	RETURN 60003
 	GOTO _Exit
 END;
 
@@ -43,6 +45,7 @@ END;
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60004)
 BEGIN 
 	RAISERROR(60004, 11, 1)
+	RETURN 60004
 	GOTO _Exit
 END 
 
@@ -50,6 +53,7 @@ END
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60005)
 BEGIN 
 	RAISERROR(60005, 11, 1)
+	RETURN 60005
 	GOTO _Exit
 END 
 
@@ -59,9 +63,11 @@ IF EXISTS(SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60009)
 BEGIN 
 	DECLARE @strModuleName NVARCHAR(50) = (SELECT TOP 1 strModuleName FROM #FoundErrors WHERE intErrorCode = 60009)
 	RAISERROR(60009, 11, 1,@strModuleName)
+	RETURN 60009
 	GOTO _Exit
 END 
 
 _Exit: 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
+RETURN 0

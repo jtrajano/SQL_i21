@@ -68,8 +68,14 @@ RETURN (
 					'You cannot post this transaction because it has inactive account id: ' + B.strAccountId + '.' AS strMessage
 				FROM tblGLJournalDetail A JOIN tblGLJournal J ON A.intJournalId = J.intJournalId
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND @ysnPost = 1 
-				AND ISNULL(J.strJournalType,'') NOT IN('Origin Journal','Adjusted Origin Journal', 'Historical Journal')
+					OUTER APPLY (SELECT strJournalType FROM tblGLJournal where intJournalId = J.intJournalIdToReverse)T 
+				WHERE ISNULL(B.ysnActive, 0) = 0 
+				AND A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds)
+				AND @ysnPost = 1
+				AND CHARINDEX (ISNULL(J.strJournalType,''),'Origin Journal') = 0
+				AND CHARINDEX (ISNULL(J.strJournalType,''),'Historical Journal') = 0
+				AND CHARINDEX (ISNULL(T.strJournalType,''),'Origin Journal') = 0
+				AND CHARINDEX (ISNULL(T.strJournalType,''),'Historical Journal') = 0
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage
