@@ -633,7 +633,12 @@ END CATCH
 				WHERE
 					ARI.dblInvoiceTotal = @ZeroDecimal
 					AND ISNULL(ARI.strImportFormat, '') <> 'CarQuest'
-					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.dblTotal <> @ZeroDecimal AND tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId)
+					--AND (
+					--	NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.dblTotal <> @ZeroDecimal AND tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId)
+					--	OR
+					--	NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0 AND tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId)
+					--	)
+					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0)
 								
 					
 				--negative amount
@@ -1465,7 +1470,7 @@ END CATCH
 				--Contract Item Price not Equal to Contract Sequence Cash Price
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST((ISNULL([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * [dbo].[fnConvertToBaseCurrency](CT.[intSeqCurrencyId], CT.[dblCashPrice]), CT.[dblCashPrice])) AS MONEY),2) + ').',
+					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(ARCC.dblCashPrice, @ZeroDecimal) AS MONEY),2) + ').',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -1482,13 +1487,13 @@ END CATCH
 					tblICItem I
 						ON D.intItemId = I.intItemId
 				INNER JOIN
-					vyuCTContractDetailView CT
-						ON D.intContractHeaderId = CT.intContractHeaderId 
-						AND D.intContractDetailId = CT.intContractDetailId 		 				
+					vyuARCustomerContract ARCC
+						ON D.intContractHeaderId = ARCC.intContractHeaderId 
+						AND D.intContractDetailId = ARCC.intContractDetailId 		 				
 				WHERE
 					D.dblPrice <> @ZeroDecimal				
-					AND CAST((ISNULL([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * [dbo].[fnConvertToBaseCurrency](CT.[intSeqCurrencyId], CT.[dblCashPrice]), CT.[dblCashPrice])) AS MONEY) <> CAST(ISNULL(D.dblPrice,0) AS MONEY)
-					AND CT.strPricingType <> 'Index'
+					AND CAST(ISNULL(ARCC.dblCashPrice, @ZeroDecimal) AS MONEY) <> CAST(ISNULL(D.dblPrice, @ZeroDecimal) AS MONEY)
+					AND ARCC.strPricingType <> 'Index'
 
 
 				--Fiscal Year
@@ -2140,12 +2145,12 @@ IF @post = 1
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
 					AND A.intCompanyLocationId = ICIS.intLocationId 
-			WHERE
-				B.dblTotal <> @ZeroDecimal  
-				AND (B.intItemId IS NOT NULL OR B.intItemId <> 0)
+			WHERE			 
+				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+				--AND B.dblTotal <> @ZeroDecimal 
 
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
