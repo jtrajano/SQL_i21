@@ -212,8 +212,8 @@ SELECT se.intShipmentId, se.intItemId, se.intOwnershipType, se.dblQuantity, se.i
 FROM @ShipmentEntries se
 
 -- Insert shipment charges
-INSERT INTO tblICInventoryShipmentCharge(intInventoryShipmentId, intEntityVendorId, intChargeId, strCostMethod, dblAmount, dblRate, intConcurrencyId, intContractId, ysnPrice, ysnAccrue)
-SELECT intShipmentId, intEntityVendorId, intChargeId, strCostMethod, dblAmount, dblRate, 1, intContractId, ysnPrice, ysnAccrue
+INSERT INTO tblICInventoryShipmentCharge(intInventoryShipmentId, intEntityVendorId, intChargeId, strCostMethod, dblAmount, dblRate, intConcurrencyId, intContractId, ysnPrice, ysnAccrue, intCostUOMId, intCurrencyId)
+SELECT intShipmentId, intEntityVendorId, intChargeId, strCostMethod, dblAmount, dblRate, 1, intContractId, ysnPrice, ysnAccrue, intCostUOMId, intCurrency
 FROM @ShipmentCharges
 
 -- Insert item lots
