@@ -443,10 +443,6 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
-			AND (SELECT OtherCharge.intEntityVendorId 
-				 FROM tblICInventoryShipment Shipment 
-					  INNER JOIN tblICInventoryShipmentCharge OtherCharge ON OtherCharge.intInventoryShipmentId = Shipment.intInventoryShipmentId
-				  WHERE Shipment.intInventoryShipmentId = @intInventoryShipmentId) IS NULL
 
 	UNION ALL 
 	SELECT	
@@ -490,10 +486,6 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
-			AND (SELECT OtherCharge.intEntityVendorId 
-				 FROM tblICInventoryShipment Shipment 
-					  INNER JOIN tblICInventoryShipmentCharge OtherCharge ON OtherCharge.intInventoryShipmentId = Shipment.intInventoryShipmentId
-				  WHERE Shipment.intInventoryShipmentId = @intInventoryShipmentId) IS NULL
 
 	-------------------------------------------------------------------------------------------
 	-- Accrue: Yes
@@ -546,10 +538,6 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
-			AND (SELECT OtherCharge.intEntityVendorId 
-				 FROM tblICInventoryShipment Shipment 
-					  INNER JOIN tblICInventoryShipmentCharge OtherCharge ON OtherCharge.intInventoryShipmentId = Shipment.intInventoryShipmentId
-				  WHERE Shipment.intInventoryShipmentId = @intInventoryShipmentId) IS NOT NULL
 
 	UNION ALL 
 	SELECT	
@@ -593,10 +581,6 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
-			AND (SELECT OtherCharge.intEntityVendorId 
-				 FROM tblICInventoryShipment Shipment 
-					  INNER JOIN tblICInventoryShipmentCharge OtherCharge ON OtherCharge.intInventoryShipmentId = Shipment.intInventoryShipmentId
-				  WHERE Shipment.intInventoryShipmentId = @intInventoryShipmentId) IS NOT NULL
 
 	-------------------------------------------------------------------------------------------
 	-- Accrue: Yes
@@ -649,10 +633,6 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 1
-			AND (SELECT OtherCharge.intEntityVendorId 
-				 FROM tblICInventoryShipment Shipment 
-					  INNER JOIN tblICInventoryShipmentCharge OtherCharge ON OtherCharge.intInventoryShipmentId = Shipment.intInventoryShipmentId
-				  WHERE Shipment.intInventoryShipmentId = @intInventoryShipmentId) IS NOT NULL
 
 	UNION ALL 
 	SELECT	
@@ -696,10 +676,6 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 1
-			AND (SELECT OtherCharge.intEntityVendorId 
-				 FROM tblICInventoryShipment Shipment 
-					  INNER JOIN tblICInventoryShipmentCharge OtherCharge ON OtherCharge.intInventoryShipmentId = Shipment.intInventoryShipmentId
-				  WHERE Shipment.intInventoryShipmentId = @intInventoryShipmentId) IS NOT NULL
 END
 
 -- Exit point
