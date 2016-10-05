@@ -30,10 +30,10 @@ FROM (
 		, intCommodityId			= item.intCommodityId
 		, intContainerId			= CAST(NULL AS INT)
 		, strContainer				= CAST(NULL AS NVARCHAR(50))
-		, intSubLocationId			= fromSubLocation.intCompanyLocationSubLocationId
-		, strSubLocationName		= fromSubLocation.strSubLocationName 
-		, intStorageLocationId		= fromStorageLocation.intStorageLocationId
-		, strStorageLocationName	= fromStorageLocation.strName
+		, intSubLocationId			= toSubLocation.intCompanyLocationSubLocationId
+		, strSubLocationName		= toSubLocation.strSubLocationName 
+		, intStorageLocationId		= toStorageLocation.intStorageLocationId
+		, strStorageLocationName	= toStorageLocation.strName
 		, intOrderUOMId				= ItemUOM.intItemUOMId
 		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
 		, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
