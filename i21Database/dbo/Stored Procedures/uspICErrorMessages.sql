@@ -424,7 +424,7 @@ SET @strmessage = 'Cannot post this Inventory Receipt. The transfer order "%s" w
 EXEC sp_addmessage 80086,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80087) EXEC sp_dropmessage 80087, 'us_english'	
-SET @strmessage = 'Please ensure that the line items and lots are located in the receipt''s location.'
+SET @strmessage = 'Line item and Lot storage location is not under %s.'
 EXEC sp_addmessage 80087,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80088) EXEC sp_dropmessage 80088, 'us_english'	
