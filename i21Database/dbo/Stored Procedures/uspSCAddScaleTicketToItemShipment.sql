@@ -217,7 +217,11 @@ BEGIN
 	,[intOtherChargeEntityVendorId]		= NULL
 	,[dblAmount]						= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 0
-											WHEN IC.strCostMethod = 'Amount' THEN QM.dblDiscountAmount
+											WHEN IC.strCostMethod = 'Amount' THEN dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId)
+											--CASE 
+											--	WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId) * -1)
+											--	WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId)
+											--END
 										END
 	--Comment this line for temporary fixes in Inventory Shipment Cost
 	--,[dblAmount]						= CASE
@@ -233,7 +237,7 @@ BEGIN
 	--										WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
 	--									END
 	,[ysnAccrue]						= 0
-	,[ysnPrice]							= 1
+	,[ysnPrice]							= 0
 	FROM @ShipmentStagingTable SE
 	INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
 	INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId

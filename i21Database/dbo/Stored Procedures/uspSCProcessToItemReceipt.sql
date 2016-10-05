@@ -370,6 +370,7 @@ BEGIN TRY
 		BEGIN
 			IF @ysnDPStorage = 1
 				BEGIN
+					SET @strReceiptType = 'Delayed Price';
 					INSERT INTO @LineItems (
 					intContractDetailId,
 					dblUnitsDistributed,

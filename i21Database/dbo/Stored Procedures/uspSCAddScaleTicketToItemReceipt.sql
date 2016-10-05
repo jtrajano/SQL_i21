@@ -100,7 +100,7 @@ SELECT
 										WHEN LI.strSourceTransactionId = 'SPT' THEN 'Purchase Contract'
 										WHEN LI.strSourceTransactionId = 'CNT' THEN 'Purchase Contract'
 										WHEN LI.strSourceTransactionId = 'LOD' THEN 'Purchase Contract'
-										--WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
+										WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
 										ELSE 'Direct'
 									  END
 		,intEntityVendorId			= @intEntityId
