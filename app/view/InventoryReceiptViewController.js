@@ -15,42 +15,42 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 read: '../Inventory/api/InventoryReceipt/Search'
             },
             columns: [
-                {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
-                {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
-                {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName'},
-                {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName'},
-                {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string'},
-                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'},
+                { dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
+                { dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
+                { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+                { dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
+                { dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName' },
+                { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName' },
+                { dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string' },
+                { dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
 
-                {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strVendorId', text: 'Vendor Id', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strTransferor', text: 'Transferor', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strCurrency', text: 'Currency', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'intBlanketRelease', text: 'Blanket Release', flex: 1, dataType: 'int', hidden: true },
-                {dataIndex: 'strVendorRefNo', text: 'Vendor Reference No', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strShipVia', text: 'Ship Via', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strShipFrom', text: 'Ship From', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strReceiver', text: 'Receiver', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strVessel', text: 'Vessel', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strFreightTerm', text: 'Freight Term', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strFobPoint', text: 'Fob Point', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'intShiftNumber', text: 'Shift Number', flex: 1, dataType: 'int', hidden: true },
-                {dataIndex: 'dblInvoiceAmount', text: 'Invoice Amount', flex: 1, dataType: 'float', hidden: true },
-                {dataIndex: 'ysnPrepaid', text: 'Prepaid', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                {dataIndex: 'ysnInvoicePaid', text: 'Invoice Paid', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                {dataIndex: 'intCheckNo', text: 'Check No', flex: 1, dataType: 'int', hidden: true },
-                {dataIndex: 'dtmCheckDate', text: 'Check Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
-                {dataIndex: 'intTrailerTypeId', text: 'Trailer Type Id', flex: 1, dataType: 'int', hidden: true },
-                {dataIndex: 'dtmTrailerArrivalDate', text: 'Trailer Arrival Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
-                {dataIndex: 'dtmTrailerArrivalTime', text: 'Trailer Arrival Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
-                {dataIndex: 'strSealNo', text: 'Seal No', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strSealStatus', text: 'Seal Status', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'dtmReceiveTime', text: 'Receive Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
-                {dataIndex: 'dblActualTempReading', text: 'Actual Temp Reading', flex: 1, dataType: 'float', hidden: true },
-                {dataIndex: 'strEntityName', text: 'Entity Name', flex: 1, dataType: 'string', hidden: true },
-                {dataIndex: 'strActualCostId', text: 'Actual Cost Id', flex: 1, dataType: 'string', hidden: true }
+                { dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strVendorId', text: 'Vendor Id', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strTransferor', text: 'Transferor', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strCurrency', text: 'Currency', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'intBlanketRelease', text: 'Blanket Release', flex: 1, dataType: 'int', hidden: true },
+                { dataIndex: 'strVendorRefNo', text: 'Vendor Reference No', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strShipVia', text: 'Ship Via', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strShipFrom', text: 'Ship From', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strReceiver', text: 'Receiver', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strVessel', text: 'Vessel', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strFreightTerm', text: 'Freight Term', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strFobPoint', text: 'Fob Point', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'intShiftNumber', text: 'Shift Number', flex: 1, dataType: 'int', hidden: true },
+                { dataIndex: 'dblInvoiceAmount', text: 'Invoice Amount', flex: 1, dataType: 'float', hidden: true },
+                { dataIndex: 'ysnPrepaid', text: 'Prepaid', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                { dataIndex: 'ysnInvoicePaid', text: 'Invoice Paid', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                { dataIndex: 'intCheckNo', text: 'Check No', flex: 1, dataType: 'int', hidden: true },
+                { dataIndex: 'dtmCheckDate', text: 'Check Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                { dataIndex: 'intTrailerTypeId', text: 'Trailer Type Id', flex: 1, dataType: 'int', hidden: true },
+                { dataIndex: 'dtmTrailerArrivalDate', text: 'Trailer Arrival Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                { dataIndex: 'dtmTrailerArrivalTime', text: 'Trailer Arrival Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                { dataIndex: 'strSealNo', text: 'Seal No', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strSealStatus', text: 'Seal Status', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'dtmReceiveTime', text: 'Receive Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                { dataIndex: 'dblActualTempReading', text: 'Actual Temp Reading', flex: 1, dataType: 'float', hidden: true },
+                { dataIndex: 'strEntityName', text: 'Entity Name', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strActualCostId', text: 'Actual Cost Id', flex: 1, dataType: 'string', hidden: true }
             ],
             buttons: [
                 {
@@ -97,28 +97,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         read: '../Inventory/api/InventoryReceipt/SearchReceiptItems'
                     },
                     columns: [
-                        {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                        {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
-                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
-                        {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
-                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
-                        {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string'},
-                        {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string'},
-                        {dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string'},
+                        { dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
+                        { dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
+                        { dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
+                        { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
+                        { dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string' },
 
-                        { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', format: '0,000.000##', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float' },
+                        { xtype: 'numbercolumn', format: '0,000.000##', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', flex: 1, dataType: 'float' },
 
-                        {dataIndex: 'strCostUOM', text: 'Cost UOM', flex: 1, dataType: 'string', hidden: true},
-                        {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true},
-                        {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName', hidden: true},
-                        {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName', hidden: true},
-                        {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true},
-                        {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: false},
-                        {dataIndex: 'strVendorRefNo', text: 'Vendor Reference No.', flex: 1, dataType: 'string', hidden: false},
-                        {dataIndex: 'strShipFrom', text: 'Ship From', flex: 1, dataType: 'string', hidden: false}
+                        { dataIndex: 'strCostUOM', text: 'Cost UOM', flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                        { dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName', hidden: true },
+                        { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName', hidden: true },
+                        { dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: false },
+                        { dataIndex: 'strVendorRefNo', text: 'Vendor Reference No.', flex: 1, dataType: 'string', hidden: false },
+                        { dataIndex: 'strShipFrom', text: 'Ship From', flex: 1, dataType: 'string', hidden: false }
                     ]
                 },
                 {
@@ -127,29 +127,29 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         read: '../Inventory/api/InventoryReceipt/SearchReceiptItemLots'
                     },
                     columns: [
-                        {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                        {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
-                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
-                        {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
-                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        { dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
+                        { dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
+                        { dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
+                        { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
 
-                        {dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string'},
-                        {dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string'},
-                        {dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string'},
-                        {dataIndex: 'strUnitMeasure', text: 'Lot UOM', flex: 1, dataType: 'string'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblQuantity', text: 'Lot Qty', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblGrossWeight', text: 'Gross Wgt', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblTareWeight', text: 'Tare Wgt', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblNetWeight', text: 'Net Wgt', flex: 1, dataType: 'float'},
-                        {dataIndex: 'dtmExpiryDate', text: 'Expiry Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                        { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strUnitMeasure', text: 'Lot UOM', flex: 1, dataType: 'string' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblQuantity', text: 'Lot Qty', flex: 1, dataType: 'float' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblGrossWeight', text: 'Gross Wgt', flex: 1, dataType: 'float' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblTareWeight', text: 'Tare Wgt', flex: 1, dataType: 'float' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblNetWeight', text: 'Net Wgt', flex: 1, dataType: 'float' },
+                        { dataIndex: 'dtmExpiryDate', text: 'Expiry Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
 
-                        {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string', hidden: true},
-                        {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', hidden: true},
-                        {dataIndex: 'strItemUOM', text: 'Receipt UOM', flex: 1, dataType: 'string', hidden: true},
-                        {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true},
-                        {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName', hidden: true},
-                        {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true},
-                        {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true}
+                        { dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'strItemUOM', text: 'Receipt UOM', flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                        { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName', hidden: true },
+                        { dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true }
                     ]
                 },
                 {
@@ -158,26 +158,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         read: '../Inventory/api/InventoryReceipt/GetReceiptVouchers'
                     },
                     columns: [
-                        {dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, dataType: 'numeric', key: true, hidden: true },
-                        {dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strBillId', text: 'Voucher No', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
-                        {dataIndex: 'dtmBillDate', text: 'Voucher Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+                        { dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strBillId', text: 'Voucher No', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
+                        { dataIndex: 'dtmBillDate', text: 'Voucher Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
 
-                        {dataIndex: 'strVendor', text: 'Vendor', flex: 1, dataType: 'string' },
-                        {dataIndex: 'strLocationName', text: 'Destination', flex: 1, dataType: 'string' },
-                        {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string' },
-                        {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
-                        {dataIndex: 'strBillOfLading', text: 'BOL', flex: 1, dataType: 'string' },
-                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
-                        {dataIndex: 'strOrderNumber', text: 'Order No', flex: 1, dataType: 'string' },
-                        {dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
-                        {dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblQtyToReceive', text: 'Qty Received', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' },
-                        {dataIndex: 'dblQtyVouchered', text: 'Qty Vouchered', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' },
-                        {dataIndex: 'dblQtyToVoucher', text: 'Qty To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblAmountToVoucher', text: 'Amount To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' }
+                        { dataIndex: 'strVendor', text: 'Vendor', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strLocationName', text: 'Destination', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string' },
+                        { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+                        { dataIndex: 'strBillOfLading', text: 'BOL', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strOrderNumber', text: 'Order No', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
+                        { dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblQtyToReceive', text: 'Qty Received', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
+                        { dataIndex: 'dblQtyVouchered', text: 'Qty Vouchered', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
+                        { dataIndex: 'dblQtyToVoucher', text: 'Qty To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblAmountToVoucher', text: 'Amount To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' }
                     ]
                 }
             ]
@@ -844,10 +844,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{vendor}'
                     }
                 },
-                 colChargeAmount: {
+                colChargeAmount: {
                     dataIndex: 'dblAmount',
-                    editor:{
-                        disabled:'{disableAmount}'
+                    editor: {
+                        disabled: '{disableAmount}'
                     }
                 },
                 colAllocateCostBy: {
@@ -867,12 +867,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             },
 
-//            txtCalculatedAmount: '{current.strMessage}',
+            //            txtCalculatedAmount: '{current.strMessage}',
             txtInvoiceAmount: {
                 value: '{current.dblInvoiceAmount}',
                 readOnly: '{isReceiptReadonly}'
             },
-//            txtDifference: '{current.strMessage}',
+            //            txtDifference: '{current.strMessage}',
             chkPrepaid: {
                 value: '{current.ysnPrepaid}',
                 readOnly: '{isReceiptReadonly}'
@@ -889,7 +889,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.dtmCheckDate}',
                 readOnly: '{checkHiddenInInvoicePaid}'
             },
-//            txtInvoiceMargin: '{current.strMessage}',
+            //            txtInvoiceMargin: '{current.strMessage}',
 
             // ---- EDI tab
             cboTrailerType: {
@@ -930,7 +930,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         "use strict";
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.Receipt', { pageSize: 1});
+            store = Ext.create('Inventory.store.Receipt', { pageSize: 1 });
 
         var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
             grdIncomingInspection = win.down('#grdIncomingInspection'),
@@ -942,26 +942,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
 
         // Update the summary fields whenever the receipt item data changed.
-        me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function(store) {
-            store.on('update', function(){
+        me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function (store) {
+            store.on('update', function () {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
 
-            store.on('datachanged', function(){
+            store.on('datachanged', function () {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
         });
 
         // Update the summary fields whenever the other charges data changed.
-        me.getViewModel().bind('{current.tblICInventoryReceiptCharges}', function(store) {
-            store.on('update', function(){
+        me.getViewModel().bind('{current.tblICInventoryReceiptCharges}', function (store) {
+            store.on('update', function () {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
 
-            store.on('datachanged', function(){
+            store.on('datachanged', function () {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
@@ -1031,7 +1031,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var cepItemLots = grdLotTracking.getPlugin('cepItemLots');
         if (cepItemLots) {
             cepItemLots.on({
-               // validateedit: me.onEditLots,
+                // validateedit: me.onEditLots,
                 edit: me.onEditLots,
                 scope: me
             });
@@ -1069,7 +1069,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return win.context;
     },
 
-    createTransaction: function(config, action) {
+    createTransaction: function (config, action) {
         var me = this,
             current = me.getViewModel().get('current');
 
@@ -1082,17 +1082,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     orgValueLocation: '',
 
-    onGridAfterLayout: function(grid) {
+    onGridAfterLayout: function (grid) {
         "use strict";
 
         //TODO: Remove this when we upgrade to Ext 6 - workaround for the flying combo
         var editor = grid.editingPlugin && grid.editingPlugin.activeEditor;
         if (editor && editor.field instanceof Ext.form.field.Text) {
-            var plugin  = editor.editingPlugin,
-                record  = plugin.activeRecord,
-                column  = plugin.activeColumn,
-                view    = grid.view,
-                row     = view.getRow(record);
+            var plugin = editor.editingPlugin,
+                record = plugin.activeRecord,
+                column = plugin.activeColumn,
+                view = grid.view,
+                row = view.getRow(record);
 
             if (row && record && column && editor.getXY().toString() !== '0,0') {
                 var cell = plugin.getCell(record, column);
@@ -1103,7 +1103,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    setupAdditionalBinding: function(win){
+    setupAdditionalBinding: function (win) {
         var column, editor;
 
         column = win.down('#colLotParentLotId');
@@ -1124,7 +1124,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext({window: win});
+            var context = me.setupContext({ window: win });
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -1145,18 +1145,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.setupAdditionalBinding(win);
         }
     },
-    onPageChange: function(pagingStatusBar, record, eOpts) {
+    onPageChange: function (pagingStatusBar, record, eOpts) {
         var win = pagingStatusBar.up('window');
         var grd = win.down('#grdLotTracking');
         grd.getStore().removeAll();
 
         var me = win.controller;
         var current = win.viewModel.data.current;
-        
 
-        if (current){
-            if(current.phantom === false) {
-                current.set('locationFromTransferOrder', current.strLocationName);    
+
+        if (current) {
+            if (current.phantom === false) {
+                current.set('locationFromTransferOrder', current.strLocationName);
             }
             var ReceiptItems = current.tblICInventoryReceiptItems();
 
@@ -1174,20 +1174,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
         var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intReceiptSourceType');
         var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
-        if(defaultReceiptType !== null) {
+        if (defaultReceiptType !== null) {
             record.set('strReceiptType', defaultReceiptType);
         }
-            else {
-                record.set('strReceiptType', 'Purchase Order');
-            }
-        
-        if(defaultSourceType !== null) {
+        else {
+            record.set('strReceiptType', 'Purchase Order');
+        }
+
+        if (defaultSourceType !== null) {
             record.set('intSourceType', defaultSourceType);
         }
-            else {
-                record.set('intSourceType', 0);
-            }
-        
+        else {
+            record.set('intSourceType', 0);
+        }
+
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         if (iRely.config.Security.EntityId > 0)
@@ -1241,18 +1241,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         // If there is a Gross/Net UOM, pre-calculate the lot gross and net
-        if (!iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))){
+        if (!iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
             // Get the current gross.
             var grossQty = record.get('dblGrossWeight');
             grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
 
             // If current gross is zero, do the pre-calculation.
-            if (grossQty == 0){
+            if (grossQty == 0) {
 
                 if (lotCF === weightCF) {
                     grossQty = qty;
                 }
-                else if (weightCF !== 0){
+                else if (weightCF !== 0) {
                     //grossQty = (lotCF * qty) / weightCF;
                     grossQty = me.convertQtyBetweenUOM(lotCF, weightCF, qty);
                 }
@@ -1380,7 +1380,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intVendorEntityId', records[0].get('intEntityVendorId'));
             current.set('intCurrencyId', records[0].get('intCurrencyId'));
 
-            var subCurrencyCents =  records[0].get('intSubCurrencyCent');
+            var subCurrencyCents = records[0].get('intSubCurrencyCent');
             subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
             current.set('intSubCurrencyCents', subCurrencyCents);
 
@@ -1430,7 +1430,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     isHidden = false;
                 }
                 break;
-            default :
+            default:
                 isHidden = true;
                 break;
         }
@@ -1444,80 +1444,80 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
         var me = this;
         var grdInventoryReceiptCount = 0;
-        
+
         if (current) {
             if (current.tblICInventoryReceiptItems()) {
-                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function(row) {
+                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (row) {
                     if (!row.dummy) {
                         grdInventoryReceiptCount++;
                     }
                 });
             }
-            
-            if(Inventory.view.InventoryReceiptViewController.orgValueLocation !== current.get('intLocationId')) {
-                        var buttonAction = function(button) {
-                            if (button === 'yes') {  
-                                //Remove all Sub and Storage Locations Receipt Grid                   
-                                var receiptItems = current['tblICInventoryReceiptItems'](),
-                                    receiptItemRecords = receiptItems ? receiptItems.getRange() : [];
 
-                                 var i = receiptItemRecords.length - 1;
+            if (Inventory.view.InventoryReceiptViewController.orgValueLocation !== current.get('intLocationId')) {
+                var buttonAction = function (button) {
+                    if (button === 'yes') {
+                        //Remove all Sub and Storage Locations Receipt Grid                   
+                        var receiptItems = current['tblICInventoryReceiptItems'](),
+                            receiptItemRecords = receiptItems ? receiptItems.getRange() : [];
 
-                                  for (; i >= 0; i--) {
-                                      if (!receiptItemRecords[i].dummy) {
-                                          receiptItemRecords[i].set('intStorageLocationId', null);
-                                          receiptItemRecords[i].set('strStorageLocationName', null);
-                                          receiptItemRecords[i].set('intSubLocationId', null);
-                                          receiptItemRecords[i].set('strSubLocationName', null);
-                                      }
+                        var i = receiptItemRecords.length - 1;
 
-                                    //Remove all Storage Locations in Lot Grid
-                                    var currentReceiptItem = receiptItemRecords[i];
-                                    var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots']();
-                                    if(receiptItemLots) {
-                                        var receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
-                                        var li = receiptItemLotRecords.length - 1;
+                        for (; i >= 0; i--) {
+                            if (!receiptItemRecords[i].dummy) {
+                                receiptItemRecords[i].set('intStorageLocationId', null);
+                                receiptItemRecords[i].set('strStorageLocationName', null);
+                                receiptItemRecords[i].set('intSubLocationId', null);
+                                receiptItemRecords[i].set('strSubLocationName', null);
+                            }
 
-                                      for (; li >= 0; li--) {
-                                          if (!receiptItemLotRecords[li].dummy)
-                                          receiptItemLotRecords[li].set('intStorageLocationId', null);
-                                          receiptItemLotRecords[li].set('strStorageLocation', null);
-                                      }
-                                    }
-        
-                                  }
-                                 current.set('strLocationName', records[0].get('strLocationName'));
-                                
-                                var valFOBPoint = current.get('strFobPoint').trim();
+                            //Remove all Storage Locations in Lot Grid
+                            var currentReceiptItem = receiptItemRecords[i];
+                            var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots']();
+                            if (receiptItemLots) {
+                                var receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
+                                var li = receiptItemLotRecords.length - 1;
 
-                                //Assign Tax Group Id from Location FOB Point is Destination
-                                if(valFOBPoint.toLowerCase() === 'destination') {
-                                   current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
-                                }
-                                
-                                //Calculate Item Taxes
-                                if (current.tblICInventoryReceiptItems()) {
-                                    Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
-                                        if(!item.dummy) {
-                                            win.viewModel.data.currentReceiptItem = item;
-                                            me.calculateItemTaxes();
-                                        }
-                                    });
+                                for (; li >= 0; li--) {
+                                    if (!receiptItemLotRecords[li].dummy)
+                                        receiptItemLotRecords[li].set('intStorageLocationId', null);
+                                    receiptItemLotRecords[li].set('strStorageLocation', null);
                                 }
                             }
-                            else {
-                               current.set('intLocationId', Inventory.view.InventoryReceiptViewController.orgValueLocation);
-                            }
-                        };
-                        
-                        if(grdInventoryReceiptCount > 0) {
-                                iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', buttonAction);
-                            }
-                        else {
-                            current.set('strLocationName', records[0].get('strLocationName'));
+
                         }
+                        current.set('strLocationName', records[0].get('strLocationName'));
+
+                        var valFOBPoint = current.get('strFobPoint').trim();
+
+                        //Assign Tax Group Id from Location FOB Point is Destination
+                        if (valFOBPoint.toLowerCase() === 'destination') {
+                            current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+                        }
+
+                        //Calculate Item Taxes
+                        if (current.tblICInventoryReceiptItems()) {
+                            Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
+                                if (!item.dummy) {
+                                    win.viewModel.data.currentReceiptItem = item;
+                                    me.calculateItemTaxes();
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        current.set('intLocationId', Inventory.view.InventoryReceiptViewController.orgValueLocation);
+                    }
+                };
+
+                if (grdInventoryReceiptCount > 0) {
+                    iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', buttonAction);
+                }
+                else {
+                    current.set('strLocationName', records[0].get('strLocationName'));
+                }
             }
-                
+
         }
     },
 
@@ -1537,7 +1537,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     isHidden = false;
                 }
                 break;
-            default :
+            default:
                 isHidden = true;
                 break;
         }
@@ -1565,17 +1565,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     method: 'post',
                     success: function (response) {
                         var jsonData = Ext.decode(response.responseText);
-                        if (jsonData.success) 
+                        if (jsonData.success)
                             //Set intTaxGroupId
                             current.set('intTaxGroupId', jsonData.message.taxGroupId);
 
                         if (current.tblICInventoryReceiptItems()) {
                             Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
-                                    if(!item.dummy) {
-                                        //Calculate Taxes
-                                        win.viewModel.data.currentReceiptItem = item;
-                                        me.calculateItemTaxes();
-                                    }
+                                if (!item.dummy) {
+                                    //Calculate Taxes
+                                    win.viewModel.data.currentReceiptItem = item;
+                                    me.calculateItemTaxes();
+                                }
                             });
                         }
                     },
@@ -1583,7 +1583,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var jsonData = Ext.decode(response.responseText);
                         iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                     }
-               });
+                });
             }
         });
     },
@@ -1666,41 +1666,40 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var lifetimeType = current.get('strLifeTimeType');
             var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
 
-          /*  switch (records[0].get('strLotTracking')) {
-                case 'Yes - Serial Number':
-                case 'Yes - Manual':
-                    var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                        intInventoryReceiptItemId: current.get('intInventoryReceiptItemId') || current.get('strClientId'),
-                        strLotId: '',
-                        strContainerNo: '',
-                        intItemUnitMeasureId: intUOM,
-                        strUnitMeasure: strUOM,
-                        strWeightUOM: strWeightUOM,
-                        dblLotUOMConvFactor: dblLotUOMConvFactor,
-                        dblQuantity: '',
-                        intUnitPallet: '',
-                        dblGrossWeight: '',
-                        dblTareWeight: '',
-                        dblStatedGrossPerUnit: '',
-                        dblStatedTarePerUnit: '',
-                        intStorageLocationId: current.get('intStorageLocationId'),
-                        strStorageLocation: current.get('strStorageLocationName'),
-                        dtmExpiryDate: expiryDate
-                    });
-                    //current.tblICInventoryReceiptItemLots().store.load();
-                    current.tblICInventoryReceiptItemLots().add(newLot);
-                    break;
-            }*/
+            /*  switch (records[0].get('strLotTracking')) {
+                  case 'Yes - Serial Number':
+                  case 'Yes - Manual':
+                      var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                          intInventoryReceiptItemId: current.get('intInventoryReceiptItemId') || current.get('strClientId'),
+                          strLotId: '',
+                          strContainerNo: '',
+                          intItemUnitMeasureId: intUOM,
+                          strUnitMeasure: strUOM,
+                          strWeightUOM: strWeightUOM,
+                          dblLotUOMConvFactor: dblLotUOMConvFactor,
+                          dblQuantity: '',
+                          intUnitPallet: '',
+                          dblGrossWeight: '',
+                          dblTareWeight: '',
+                          dblStatedGrossPerUnit: '',
+                          dblStatedTarePerUnit: '',
+                          intStorageLocationId: current.get('intStorageLocationId'),
+                          strStorageLocation: current.get('strStorageLocationName'),
+                          dtmExpiryDate: expiryDate
+                      });
+                      //current.tblICInventoryReceiptItemLots().store.load();
+                      current.tblICInventoryReceiptItemLots().add(newLot);
+                      break;
+              }*/
         }
         else if (combo.itemId === 'cboItemUOM') {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
             current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
             current.set('strUnitType', records[0].get('strUnitType'));
-            
-            if(current.get('dblWeightUOMConvFactor') === 0)
-                {
-                   current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty')); 
-                }
+
+            if (current.get('dblWeightUOMConvFactor') === 0) {
+                current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
+            }
 
             var origCF = current.get('dblOrderUOMConvFactor');
             var newCF = current.get('dblItemUOMConvFactor');
@@ -1719,11 +1718,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
                     if (!lot.dummy) {
                         //Set Default Value for Lot Wgt UOM 
-                        if(lot.get('strWeightUOM') === null || lot.get('strWeightUOM') === '')
-                            {
-                                lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
-                                lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
-                            }
+                        if (lot.get('strWeightUOM') === null || lot.get('strWeightUOM') === '') {
+                            lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
+                            lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
+                        }
                     }
                 });
             }
@@ -1749,14 +1747,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('dblUnitCost', dblCost);
                 current.set('dblUnitRetail', dblCost);
             }
-            
+
             //Set Default Value for Gross/Net UOM if Receipt Unit Type is Weight or Volume and Gross/Net UOM has no current value
-            if ((records[0].get('strUnitType') === 'Weight' || records[0].get('strUnitType') === 'Volume') && 
-                (current.get('strWeightUOM') === null || current.get('strWeightUOM') === ''))
-                {
-                    current.set('strWeightUOM', records[0].get('strUnitMeasure'));
-                    current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
-                }
+            if ((records[0].get('strUnitType') === 'Weight' || records[0].get('strUnitType') === 'Volume') &&
+                (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')) {
+                current.set('strWeightUOM', records[0].get('strUnitMeasure'));
+                current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+            }
         }
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
@@ -1796,17 +1793,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         // Calculate the Gross/Net 
-        if (combo.itemId !== 'cboStorageLocation'){
+        if (combo.itemId !== 'cboStorageLocation') {
             this.calculateGrossNet(current, 1);
         }
-        
+
         // Calculate the taxes
-       // win.viewModel.data.currentReceiptItem = current;
-       // this.calculateItemTaxes();
-        
+        // win.viewModel.data.currentReceiptItem = current;
+        // this.calculateItemTaxes();
+
         //Calculate Line Total        
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
-        var currentReceipt  = win.viewModel.data.current;
+        var currentReceipt = win.viewModel.data.current;
         currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
 
         // Show or hide the Lot Panel (or Grid)
@@ -1841,7 +1838,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 qtyOrdered = detailRecord.get('dblOpenReceive'),
                 unitCost = detailRecord.get('dblUnitCost');
 
-           // if (reset !== false) reset = true;
+            // if (reset !== false) reset = true;
 
             // Adjust the item price by the sub currency
             {
@@ -1858,22 +1855,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                 unitCost = unitCost / costCentsFactor;
             }
-        
+
             detailRecord.tblICInventoryReceiptItemTaxes().removeAll();
-            
+
             //Calculate Cost UOM Conversion Factor
             var costCF = detailRecord.get('dblCostUOMConvFactor'),
                 qtyCF = detailRecord.get('dblItemUOMConvFactor'),
                 netWgtCF = detailRecord.get('dblWeightUOMConvFactor'),
                 valueCostCF;
-            
+
             // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
             if (iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))) {
                 // Sanitize the cost conversion factor.
                 costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
                 costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
-                unitCost = unitCost * (qtyCF/costCF);
+                unitCost = unitCost * (qtyCF / costCF);
             }
 
             // Calculate Cost UOM Conversion Factor with respect to the Gross UOM..
@@ -1884,15 +1881,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 // Sanitize the cost conversion factor.
                 costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
                 costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-                
-                unitCost = unitCost * (netWgtCF/costCF);
+
+                unitCost = unitCost * (netWgtCF / costCF);
             }
 
 
             Ext.Array.each(itemTaxes, function (itemDetailTax) {
                 var taxableAmount,
                     taxAmount;
-                
+
                 masterRecord.set('intTaxGroupId', itemDetailTax.intTaxGroupId);
 
                 taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
@@ -1902,7 +1899,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     taxAmount = qtyOrdered * itemDetailTax.dblRate;
                 }
 
-                if (itemDetailTax.ysnCheckoffTax){
+                if (itemDetailTax.ysnCheckoffTax) {
                     taxAmount = taxAmount * -1;
                 }
 
@@ -1958,44 +1955,44 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             iRely.Functions.getItemTaxes(current, computeItemTax, me);
 
-           /* if (reset)
-                iRely.Functions.getItemTaxes(current, computeItemTax, me);
-            else {
-                var receiptItemTaxes = detailRecord.tblICInventoryReceiptItemTaxes();
-                if (receiptItemTaxes) {
-                    if (receiptItemTaxes.data.items.length > 0) {
-                        var ItemTaxes = new Array();
-                        Ext.Array.each(receiptItemTaxes.data.items, function (itemDetailTax) {
-                            var taxes = {
-                                intTaxGroupMasterId: itemDetailTax.get('intTaxGroupMasterId'),
-                                intTaxGroupId: itemDetailTax.get('intTaxGroupId'),
-                                intTaxCodeId: itemDetailTax.get('intTaxCodeId'),
-                                intTaxClassId: itemDetailTax.get('intTaxClassId'),
-                                strTaxCode: itemDetailTax.get('strTaxCode'),
-                                strTaxableByOtherTaxes: itemDetailTax.get('strTaxableByOtherTaxes'),
-                                strCalculationMethod: itemDetailTax.get('strCalculationMethod'),
-                                dblRate: itemDetailTax.get('dblRate'),
-                                dblTax: itemDetailTax.get('dblTax'),
-                                dblAdjustedTax: itemDetailTax.get('dblAdjustedTax'),
-                                intTaxAccountId: itemDetailTax.get('intTaxAccountId'),
-                                ysnTaxAdjusted: itemDetailTax.get('ysnTaxAdjusted'),
-                                ysnSeparateOnInvoice: itemDetailTax.get('ysnSeparateOnInvoice'),
-                                ysnCheckoffTax: itemDetailTax.get('ysnCheckoffTax')
-                            };
-                            ItemTaxes.push(taxes);
-                        });
-
-                        computeItemTax(ItemTaxes, me, reset);
-                    }
-                    else {
-                        iRely.Functions.getItemTaxes(current, computeItemTax, me);
-                    }
-                }
-            }*/
+            /* if (reset)
+                 iRely.Functions.getItemTaxes(current, computeItemTax, me);
+             else {
+                 var receiptItemTaxes = detailRecord.tblICInventoryReceiptItemTaxes();
+                 if (receiptItemTaxes) {
+                     if (receiptItemTaxes.data.items.length > 0) {
+                         var ItemTaxes = new Array();
+                         Ext.Array.each(receiptItemTaxes.data.items, function (itemDetailTax) {
+                             var taxes = {
+                                 intTaxGroupMasterId: itemDetailTax.get('intTaxGroupMasterId'),
+                                 intTaxGroupId: itemDetailTax.get('intTaxGroupId'),
+                                 intTaxCodeId: itemDetailTax.get('intTaxCodeId'),
+                                 intTaxClassId: itemDetailTax.get('intTaxClassId'),
+                                 strTaxCode: itemDetailTax.get('strTaxCode'),
+                                 strTaxableByOtherTaxes: itemDetailTax.get('strTaxableByOtherTaxes'),
+                                 strCalculationMethod: itemDetailTax.get('strCalculationMethod'),
+                                 dblRate: itemDetailTax.get('dblRate'),
+                                 dblTax: itemDetailTax.get('dblTax'),
+                                 dblAdjustedTax: itemDetailTax.get('dblAdjustedTax'),
+                                 intTaxAccountId: itemDetailTax.get('intTaxAccountId'),
+                                 ysnTaxAdjusted: itemDetailTax.get('ysnTaxAdjusted'),
+                                 ysnSeparateOnInvoice: itemDetailTax.get('ysnSeparateOnInvoice'),
+                                 ysnCheckoffTax: itemDetailTax.get('ysnCheckoffTax')
+                             };
+                             ItemTaxes.push(taxes);
+                         });
+ 
+                         computeItemTax(ItemTaxes, me, reset);
+                     }
+                     else {
+                         iRely.Functions.getItemTaxes(current, computeItemTax, me);
+                     }
+                 }
+             }*/
         }
     },
 
-    calculateLineTotal: function (currentReceipt, currentReceiptItem){
+    calculateLineTotal: function (currentReceipt, currentReceiptItem) {
         if (!currentReceipt || !currentReceiptItem)
             return;
 
@@ -2107,18 +2104,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return taxableAmount;
     },
 
-    calculateOtherCharges: function(win){
+    calculateOtherCharges: function (win) {
         var current = win.viewModel.data.current;
         var totalCharges = 0;
         var lblCharges = win.down('#lblCharges');
-        
+
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
                         var amount = charge.get('dblAmount');
-                                                
+
                         if (charge.get('ysnPrice') === true) {
                             totalCharges -= amount;
                         }
@@ -2144,26 +2141,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
     },
-/*
-    convertLotUOMToGross: function(lotCF, weightCF, lotQty){
-        var result = 0;
-        if (lotCF === weightCF) {
-            result = lotQty;
-        }
-        else if (weightCF !== 0){
-            result = (lotCF * lotQty) / weightCF;
-        }
+    /*
+        convertLotUOMToGross: function(lotCF, weightCF, lotQty){
+            var result = 0;
+            if (lotCF === weightCF) {
+                result = lotQty;
+            }
+            else if (weightCF !== 0){
+                result = (lotCF * lotQty) / weightCF;
+            }
+    
+            return result;
+        },*/
 
-        return result;
-    },*/
-
-    convertQtyBetweenUOM: function(sourceUOMConversionFactor, targetUOMConversionFactor, qty){
+    convertQtyBetweenUOM: function (sourceUOMConversionFactor, targetUOMConversionFactor, qty) {
         var result = 0;
 
         if (sourceUOMConversionFactor === targetUOMConversionFactor) {
             result = qty;
         }
-        else if (targetUOMConversionFactor !== 0){
+        else if (targetUOMConversionFactor !== 0) {
             result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
         }
 
@@ -2174,11 +2171,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (!record) return;
 
         var totalGross = 0
-            ,totalNet = 0
-            ,lotGross = 0
-            ,lotTare = 0
-            ,ysnCalculatedInLot = 0
-            ,me = this;
+            , totalNet = 0
+            , lotGross = 0
+            , lotTare = 0
+            , ysnCalculatedInLot = 0
+            , me = this;
 
         //Calculate based on Lot
         if (record.tblICInventoryReceiptItemLots()) {
@@ -2186,62 +2183,61 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (!lot.dummy) {
                     // If Gross/Net UOM is blank, do not calculate the lot Gross and Net.
                     if (!iRely.Functions.isEmpty(record.get('intWeightUOMId'))) {
-                        if(lot.get('dblQuantity') !== 0 )
-                            {
-                                //Calculate First Gross and Net for Lots
-                                    var lotQty = lot.get('dblQuantity');
-                                    var lotCF = lot.get('dblLotUOMConvFactor');
-                                    var itemUOMCF = record.get('dblItemUOMConvFactor');
-                                    var weightCF = record.get('dblWeightUOMConvFactor');
+                        if (lot.get('dblQuantity') !== 0) {
+                            //Calculate First Gross and Net for Lots
+                            var lotQty = lot.get('dblQuantity');
+                            var lotCF = lot.get('dblLotUOMConvFactor');
+                            var itemUOMCF = record.get('dblItemUOMConvFactor');
+                            var weightCF = record.get('dblWeightUOMConvFactor');
 
-                                    if (iRely.Functions.isEmpty(lotQty)) lotQty = 0.00;
-                                    if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
-                                    if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
-                                    if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
+                            if (iRely.Functions.isEmpty(lotQty)) lotQty = 0.00;
+                            if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
+                            if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
+                            if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
 
-                                    // If there is no Gross/Net UOM, do not calculate the lot gross and net.
-                                    if (record.get('intWeightUOMId') !== null) {
-                                        var grossQty;
-                                        //Convert Lot UOM to Gross
-                                                if (lotCF === weightCF) {
-                                                        grossQty = lotQty;
-                                                }
-                                                else if (weightCF !== 0){
-                                                        //grossQty = (lotCF * lotQty) / weightCF;
-                                                        grossQty = me.convertQtyBetweenUOM(lotCF, weightCF, lotQty);
-                                                }
-                                        
-                                        lot.set('dblGrossWeight', grossQty);
-                                        var tare = lot.get('dblTareWeight');
-                                        var netTotal = grossQty - tare;
-                                        lot.set('dblNetWeight', netTotal);
-                                    }
+                            // If there is no Gross/Net UOM, do not calculate the lot gross and net.
+                            if (record.get('intWeightUOMId') !== null) {
+                                var grossQty;
+                                //Convert Lot UOM to Gross
+                                if (lotCF === weightCF) {
+                                    grossQty = lotQty;
+                                }
+                                else if (weightCF !== 0) {
+                                    //grossQty = (lotCF * lotQty) / weightCF;
+                                    grossQty = me.convertQtyBetweenUOM(lotCF, weightCF, lotQty);
+                                }
 
-                                    //Set Default Value for Lot UOM
-                                    if(lot.get('strUnitMeasure') === null || lot.get('strUnitMeasure') === '') {
-                                            lot.set('strUnitMeasure', record.get('strUnitMeasure'));
-                                            lot.set('intItemUnitMeasureId', record.get('intUnitMeasureId'));
-                                        } 
-                                
-                                 // Get the Gross Qty
-                                lotGross = lot.get('dblGrossWeight');
-                                lotGross = Ext.isNumeric(lotGross) ? lotGross : 0.00;
-
-                                // Get the Tare Qty
-                                lotTare = lot.get('dblTareWeight');
-                                lotTare = Ext.isNumeric(lotTare) ? lotTare : 0.00;
-
-                                // Calculate the total Gross and total Net
-                                totalGross += lotGross;
-                                totalNet += (lotGross - lotTare);
-                                ysnCalculatedInLot = 1;
+                                lot.set('dblGrossWeight', grossQty);
+                                var tare = lot.get('dblTareWeight');
+                                var netTotal = grossQty - tare;
+                                lot.set('dblNetWeight', netTotal);
                             }
+
+                            //Set Default Value for Lot UOM
+                            if (lot.get('strUnitMeasure') === null || lot.get('strUnitMeasure') === '') {
+                                lot.set('strUnitMeasure', record.get('strUnitMeasure'));
+                                lot.set('intItemUnitMeasureId', record.get('intUnitMeasureId'));
+                            }
+
+                            // Get the Gross Qty
+                            lotGross = lot.get('dblGrossWeight');
+                            lotGross = Ext.isNumeric(lotGross) ? lotGross : 0.00;
+
+                            // Get the Tare Qty
+                            lotTare = lot.get('dblTareWeight');
+                            lotTare = Ext.isNumeric(lotTare) ? lotTare : 0.00;
+
+                            // Calculate the total Gross and total Net
+                            totalGross += lotGross;
+                            totalNet += (lotGross - lotTare);
+                            ysnCalculatedInLot = 1;
+                        }
                     }
                 }
             });
         }
-        
-        if(ysnCalculatedInLot === 1) {
+
+        if (ysnCalculatedInLot === 1) {
             if (record.get('dblGross') === 0 && record.get('dblNet') === 0) {
                 record.set('dblGross', totalGross);
                 record.set('dblNet', totalNet);
@@ -2251,43 +2247,59 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 ysnCalculatedInLot = 0;
             }
         }
-            
-        
+
+
         //Use this to calculate item's Gross/Net based on item grid
-        if(ysnCalculatedInLot === 0 && calculateItemGrossNet === 1)
-            {
-                 var receiptItemQty = record.get('dblOpenReceive');
-                 var receiptUOMCF = record.get('dblItemUOMConvFactor');
-                 var weightUOMCF = record.get('dblWeightUOMConvFactor');
+        if (ysnCalculatedInLot === 0 && calculateItemGrossNet === 1) {
+            var receiptItemQty = record.get('dblOpenReceive');
+            var receiptUOMCF = record.get('dblItemUOMConvFactor');
+            var weightUOMCF = record.get('dblWeightUOMConvFactor');
 
-                 if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
-                 if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
-                 if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
+            if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
+            if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
+            if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
 
-                 // If there is not Gross/Net UOM, do not calculate the lot gross and net.
-                 if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === '') {
-                    totalGross = 0;
-                 }
-                else {
-                    //totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; // TODO: fix this part
-                    totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
-                 }    
-                totalNet = totalGross;
-                
-                record.set('dblGross', totalGross);
-                record.set('dblNet', totalNet);
+            // If there is not Gross/Net UOM, do not calculate the lot gross and net.
+            if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === '') {
+                totalGross = 0;
             }
+            else {
+                //totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; // TODO: fix this part
+                totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
+            }
+            totalNet = totalGross;
+
+            record.set('dblGross', totalGross);
+            record.set('dblNet', totalNet);
+        }
     },
 
     onViewReceiptNo: function (value, record) {
         i21.ModuleMgr.Inventory.showScreen(value, 'ReceiptNo');
     },
 
-    onViewVoucher: function (value, record) {
+    onViewVoucher: function (value, record, dashboard) {                
         if (value === 'New Voucher') {
-            iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
-                action: 'new',
-                showAddReceipt: false
+            if(record.get('strReceiptType') === 'Transfer Order') {
+                iRely.Functions.showErrorDialog('Invalid receipt type. A voucher is not applicable to transfer orders.');
+                return;
+            }
+            this.processReceiptToVoucher(record.get('intInventoryReceiptId'), function(data) {
+                iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                    filters: [
+                        {
+                            column: 'intBillId',
+                            value: data.message.BillId
+                        }
+                    ],
+                    action: 'view',
+                    showAddReceipt: false,
+                    listeners: {
+                        close: function(e) {
+                            dashboard.$initParent.grid.controller.reload();  
+                        }
+                    }
+                });        
             });
         }
         else {
@@ -2317,9 +2329,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         i21.ModuleMgr.Inventory.showScreen(itemId, 'ItemId');
     },
 
-    onItemHeaderClick: function(menu, column) {
-       // var grid = column.initOwnerCt.grid; 
-         var grid = column.$initParent.grid;
+    onItemHeaderClick: function (menu, column) {
+        // var grid = column.initOwnerCt.grid; 
+        var grid = column.$initParent.grid;
 
         if (grid.itemId === 'grdInventoryReceipt') {
             i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
@@ -2330,59 +2342,53 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onVendorHeaderClick: function (menu, column) {
-       // var grid = column.initOwnerCt.grid;
+        // var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
-        if (grid.itemId === 'grdCharges') 
-            {
-                var selectedObj = grid.getSelectionModel().getSelection();
-                var vendorId = '';
 
-                if(selectedObj.length == 0)
-                    {
-                        iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new',  viewConfig: { modal: true }}); 
-                    }
-                
-                else
-                    {
-                        for (var x = 0; x < selectedObj.length; x++) {
-                            vendorId += selectedObj[x].data.intEntityVendorId + '|^|';
-                        } 
-                        
-                         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
-                            filters: [{
-                                column: 'intEntityId',
-                                value: vendorId
-                            }]
-                        });
-                    }
+        if (grid.itemId === 'grdCharges') {
+            var selectedObj = grid.getSelectionModel().getSelection();
+            var vendorId = '';
+
+            if (selectedObj.length == 0) {
+                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
             }
+
+            else {
+                for (var x = 0; x < selectedObj.length; x++) {
+                    vendorId += selectedObj[x].data.intEntityVendorId + '|^|';
+                }
+
+                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+                    filters: [{
+                        column: 'intEntityId',
+                        value: vendorId
+                    }]
+                });
+            }
+        }
 
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityVendor', grid, 'intEntityVendorId');
-        if (grid.itemId === 'grdCharges') 
-            {
-                var selectedObj = grid.getSelectionModel().getSelection();
-                var vendorId = '';
+        if (grid.itemId === 'grdCharges') {
+            var selectedObj = grid.getSelectionModel().getSelection();
+            var vendorId = '';
 
-                if(selectedObj.length == 0)
-                    {
-                        iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new',  viewConfig: { modal: true }}); 
-                    }
-                
-                else
-                    {
-                        for (var x = 0; x < selectedObj.length; x++) {
-                            vendorId += selectedObj[x].data.intEntityVendorId + '|^|';
-                        } 
-                        
-                         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
-                            filters: [{
-                                column: 'intEntityId',
-                                value: vendorId
-                            }]
-                        });
-                    }
+            if (selectedObj.length == 0) {
+                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
             }
+
+            else {
+                for (var x = 0; x < selectedObj.length; x++) {
+                    vendorId += selectedObj[x].data.intEntityVendorId + '|^|';
+                }
+
+                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+                    filters: [{
+                        column: 'intEntityId',
+                        value: vendorId
+                    }]
+                });
+            }
+        }
     },
 
     onViewTaxDetailsClick: function (ReceiptItemId) {
@@ -2392,12 +2398,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var vm = win.getViewModel();
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ callbackFn: function (batch, eOpts, success) {
-                iRely.Functions.openScreen(screenName, {
-                    id: grd.getSelection()[0].data.intInventoryReceiptItemId
-                });
-                return;
-            } });
+            win.context.data.saveRecord({
+                callbackFn: function (batch, eOpts, success) {
+                    iRely.Functions.openScreen(screenName, {
+                        id: grd.getSelection()[0].data.intInventoryReceiptItemId
+                    });
+                    return;
+                }
+            });
         }
         else if (win.context.data.hasChanges() !== true) {
             iRely.Functions.openScreen(screenName, {
@@ -2407,12 +2415,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else {
             win.context.data.validator.validateRecord({ window: win }, function (valid) {
                 if (valid) {
-                    win.context.data.saveRecord({ callbackFn: function (batch, eOpts, success) {
-                        iRely.Functions.openScreen(screenName, {
-                            id: grd.getSelection()[0].data.intInventoryReceiptItemId
-                        });
-                        return;
-                    } });
+                    win.context.data.saveRecord({
+                        callbackFn: function (batch, eOpts, success) {
+                            iRely.Functions.openScreen(screenName, {
+                                id: grd.getSelection()[0].data.intInventoryReceiptItemId
+                            });
+                            return;
+                        }
+                    });
                 }
             });
         }
@@ -2464,7 +2474,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var grd = win.down('#grdInventoryReceipt');
         var selected = grd.getSelectionModel().getSelection();
-        
+
         var win = button.up('window');
         var vm = win.viewModel;
         var currentReceiptItem = vm.data.current;
@@ -2473,31 +2483,29 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (selected.length > 0) {
                 var current = selected[0];
                 if (!current.dummy)
-                    if(currentReceiptItem.get('ysnPosted') === true)
-                        {
-                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', 
-                                { 
-                                    strSourceType: 'Inventory Receipt', 
-                                    intTicketFileId: current.get('intInventoryReceiptItemId'),
-                                    viewConfig:{
-                                        modal: true, 
-                                        listeners:
-                                        {
-                                            show: function(win) {
-                                                Ext.defer(function(){
-                                                    win.context.screenMgr.securityMgr.screen.setViewOnlyAccess();
-                                                }, 100);
-                                            }
+                    if (currentReceiptItem.get('ysnPosted') === true) {
+                        iRely.Functions.openScreen('Grain.view.QualityTicketDiscount',
+                            {
+                                strSourceType: 'Inventory Receipt',
+                                intTicketFileId: current.get('intInventoryReceiptItemId'),
+                                viewConfig: {
+                                    modal: true,
+                                    listeners:
+                                    {
+                                        show: function (win) {
+                                            Ext.defer(function () {
+                                                win.context.screenMgr.securityMgr.screen.setViewOnlyAccess();
+                                            }, 100);
                                         }
                                     }
                                 }
-                            );
-                            
-                        }
-                    else
-                        {
-                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Receipt', intTicketFileId: current.get('intInventoryReceiptItemId') });
-                        }
+                            }
+                        );
+
+                    }
+                    else {
+                        iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Receipt', intTicketFileId: current.get('intInventoryReceiptItemId') });
+                    }
             }
             else {
                 iRely.Functions.showErrorDialog('Please select an Item to view.');
@@ -2565,7 +2573,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         };
 
         // If there is no data change, do the post.
-        if (!context.data.hasChanges()){
+        if (!context.data.hasChanges()) {
             doPost();
             return;
         }
@@ -2585,40 +2593,50 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            Ext.Ajax.request({
-                timeout: 120000,
-                url: '../Inventory/api/InventoryReceipt/ProcessBill?id=' + current.get('intInventoryReceiptId'),
-                method: 'post',
-                success: function (response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    if (jsonData.success) {
-                        var buttonAction = function (button) {
-                            if (button === 'yes') {
-                                iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
-                                    filters: [
-                                        {
-                                            column: 'intBillId',
-                                            value: jsonData.message.BillId
-                                        }
-                                    ],
-                                    action: 'view',
-                                    showAddReceipt: false
-                                });
-                                win.close();
-                            }
-                        };
-                        iRely.Functions.showCustomDialog('question', 'yesno', 'Voucher successfully processed. Do you want to view this voucher?', buttonAction);
-                    }
-                    else {
-                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                    }
-                },
-                failure: function (response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-                }
-            });
+            this.receiptToVoucherClick(current, button, win);
         }
+    },
+
+    processReceiptToVoucher: function (receiptId, callback) {
+        Ext.Ajax.request({
+            timeout: 120000,
+            url: '../Inventory/api/InventoryReceipt/ProcessBill?id=' + receiptId,
+            method: 'post',
+            success: function (response) {
+                var jsonData = Ext.decode(response.responseText);
+                if (jsonData.success) {
+                    callback(jsonData);
+                }
+                else {
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                }
+            },
+            failure: function (response) {
+                var jsonData = Ext.decode(response.responseText);
+                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+            }
+        });
+    },
+
+    receiptToVoucherClick: function (receipt, button, win) {
+        this.processReceiptToVoucher(receipt.get('intInventoryReceiptId'), function (data) {
+            var buttonAction = function (button) {
+                if (button === 'yes') {
+                    iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                        filters: [
+                            {
+                                column: 'intBillId',
+                                value: data.message.BillId
+                            }
+                        ],
+                        action: 'view',
+                        showAddReceipt: false
+                    });
+                    win.close();
+                }
+            };
+            iRely.Functions.showCustomDialog('question', 'yesno', 'Voucher successfully processed. Do you want to view this voucher?', buttonAction);
+        });
     },
 
     onVendorClick: function (button, e, eOpts) {
@@ -2635,11 +2653,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 ]
             });
         }
-        
-        else
-            {
-                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new',  viewConfig: { modal: true }}); 
-            }
+
+        else {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
+        }
     },
 
     onReceiveClick: function (button, e, eOpts) {
@@ -2649,60 +2666,60 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
         var btnReceive = win.down('#btnReceive');
 
-        var postReceipt = function() {
+        var postReceipt = function () {
             var doPost = function () {
-                        var strReceiptNumber = current.get('strReceiptNumber');
-                        var posted = current.get('ysnPosted');
+                var strReceiptNumber = current.get('strReceiptNumber');
+                var posted = current.get('ysnPosted');
 
-                        var options = {
-                            postURL: '../Inventory/api/InventoryReceipt/Receive',
-                            strTransactionId: strReceiptNumber,
-                            isPost: !posted,
-                            isRecap: false,
-                            callback: me.onAfterReceive,
-                            scope: me
-                        };
+                var options = {
+                    postURL: '../Inventory/api/InventoryReceipt/Receive',
+                    strTransactionId: strReceiptNumber,
+                    isPost: !posted,
+                    isRecap: false,
+                    callback: me.onAfterReceive,
+                    scope: me
+                };
 
-                        CashManagement.common.BusinessRules.callPostRequest(options);
-                    };
+                CashManagement.common.BusinessRules.callPostRequest(options);
+            };
 
-                    var isValid = true;
-                    if (current) {
-                        if (current.tblICInventoryReceiptItems()) {
-                            if (current.tblICInventoryReceiptItems().data.items) {
+            var isValid = true;
+            if (current) {
+                if (current.tblICInventoryReceiptItems()) {
+                    if (current.tblICInventoryReceiptItems().data.items) {
 
-                            }
-                        }
                     }
-                    // If there is no data change, do the post.
-                    if (!context.data.hasChanges()) {
-                        doPost();
-                        return;
-                    }
+                }
+            }
+            // If there is no data change, do the post.
+            if (!context.data.hasChanges()) {
+                doPost();
+                return;
+            }
 
-                    // Save has data changes first before doing the post.
-                    context.data.saveRecord({
-                        successFn: function () {
-                            doPost();
-                        }
-                    });
+            // Save has data changes first before doing the post.
+            context.data.saveRecord({
+                successFn: function () {
+                    doPost();
+                }
+            });
         }
-        
+
         if (current) {
-					
-            var buttonAction = function(button) {
-                if (button === 'yes') {  
-				    postReceipt();
+
+            var buttonAction = function (button) {
+                if (button === 'yes') {
+                    postReceipt();
                 }
             }
 
             var ReceivedGrossDiscrepancyItems = '';
-            
+
             if (current.tblICInventoryReceiptItems()) {
-                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function(row) {
+                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (row) {
                     if (!row.dummy) {
                         //If there is Gross, check if the value is equivalent to Received Quantity
-                        if(row.get('intWeightUOMId') !== null) {
+                        if (row.get('intWeightUOMId') !== null) {
                             var receiptItemQty = row.get('dblOpenReceive');
                             var receiptUOMCF = row.get('dblItemUOMConvFactor');
                             var weightUOMCF = row.get('dblWeightUOMConvFactor');
@@ -2714,22 +2731,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             //var totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF;
                             var totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
 
-                            if(row.get('dblGross') !== totalGross) {                                
+                            if (row.get('dblGross') !== totalGross) {
                                 ReceivedGrossDiscrepancyItems = ReceivedGrossDiscrepancyItems + row.get('strItemNo') + '<br/>'
                             }
                         }
-                        
+
                     }
                 });
             }
 
-            if(ReceivedGrossDiscrepancyItems !== '' && btnReceive.text === 'Post') {
+            if (ReceivedGrossDiscrepancyItems !== '' && btnReceive.text === 'Post') {
                 iRely.Functions.showCustomDialog('question', 'yesno', 'Received and Gross quantities are not equal for the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?', buttonAction);
             }
             else {
                 postReceipt();
             }
-        }   
+        }
     },
 
     onRecapClick: function (button, e, eOpts) {
@@ -2986,16 +3003,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (context.record) {
                 context.record.set('dblUnitRetail', context.value);
                 context.record.set('dblGrossMargin', 0);
-            } 
+            }
         }
-        
+
         if (context.field === 'dblOpenReceive') {
-            if (context.record) { 
+            if (context.record) {
                 // Calculate the gross weight.
                 me.calculateGrossNet(context.record, 1);
             }
         }
-        
+
         // If editing the unit retail, update the gross margin too.
         else if (context.field === 'dblUnitRetail') {
             if (context.record) {
@@ -3004,12 +3021,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 context.record.set('dblGrossMargin', grossMargin);
             }
         }
-        
-        else if (context.field === 'strWeightUOM')
-            {
-                // Calculate the gross weight.
-                me.calculateGrossNet(context.record, 1);
-            }
+
+        else if (context.field === 'strWeightUOM') {
+            // Calculate the gross weight.
+            me.calculateGrossNet(context.record, 1);
+        }
 
         // Accept the data input.
         context.record.set(context.field, context.value);
@@ -3017,17 +3033,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Validate the gross and net variance.
         vw.data.currentReceiptItem = context.record;
         if (context.field === 'dblGross' || context.field === 'dblNet') {
-            me.validateWeightLoss(win) 
+            me.validateWeightLoss(win)
         }
 
         // Calculate the taxes and line totals.
-        
-            // Calculate the taxes
-            me.calculateItemTaxes();
 
-            // Calculate the line total
-            context.record.set('dblLineTotal', me.calculateLineTotal(currentReceipt, context.record));
-        
+        // Calculate the taxes
+        me.calculateItemTaxes();
+
+        // Calculate the line total
+        context.record.set('dblLineTotal', me.calculateLineTotal(currentReceipt, context.record));
+
 
         //// Update the summary totals
         //me.showSummaryTotals(win);
@@ -3062,10 +3078,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         //Calculate Line Total
-        var currentReceipt  = win.viewModel.data.current;
+        var currentReceipt = win.viewModel.data.current;
         receiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, receiptItem));
-        
-        if(context.field === 'dblQuantity') {
+
+        if (context.field === 'dblQuantity') {
             me.calculateGrossNet(receiptItem, 0);
         }
     },
@@ -3075,7 +3091,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var me = win.controller;
         if (context.field === 'dblAmount') {
             var amount = i21.ModuleMgr.Inventory.roundDecimalFormat(context.value, 2);
-            context.record.set('dblAmount', amount);           
+            context.record.set('dblAmount', amount);
             //me.showOtherCharges(win);
             //return false;
         }
@@ -3110,11 +3126,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             if (obj.combo.itemId === 'cboOrderNumber') {
                 var proxy = obj.combo.store.proxy;
-                proxy.setExtraParams({search: true, include: 'item'});
+                proxy.setExtraParams({ search: true, include: 'item' });
             }
             else if (obj.combo.itemId === 'cboVendor') {
                 var proxy = obj.combo.store.proxy;
-                proxy.setExtraParams({include: 'tblEntityLocations'});
+                proxy.setExtraParams({ include: 'tblEntityLocations' });
             }
             else if (obj.combo.itemId === 'cboLotUOM') {
                 obj.combo.defaultFilters = [
@@ -3177,7 +3193,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strCostUOM', po.get('strUOM'));
                 current.set('dblUnitCost', po.get('dblCost'));
                 current.set('dblCostUOMConvFactor', po.get('dblItemUOMCF'));
-               // current.set('dblLineTotal', po.get('dblTotal') + po.get('dblTax'));
+                // current.set('dblLineTotal', po.get('dblTotal') + po.get('dblTax'));
                 current.set('dblLineTotal', po.get('dblTotal'));
                 current.set('dblTax', po.get('dblTax'));
                 current.set('strLotTracking', po.get('strLotTracking'));
@@ -4000,34 +4016,34 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var columnId = column.itemId;
 
             switch (receiptType) {
-                case 'Purchase Order' :
+                case 'Purchase Order':
                     if (iRely.Functions.isEmpty(record.get('strOrderNumber'))) {
                         switch (columnId) {
-                            case 'colOrderNumber' :
+                            case 'colOrderNumber':
                                 //return controller.purchaseOrderDropdown(win);
                                 return false;
-                            case 'colSourceNumber' :
+                            case 'colSourceNumber':
                                 return false;
                         }
                     }
                     else {
                         switch (columnId) {
-                            case 'colOrderNumber' :
+                            case 'colOrderNumber':
                                 return false;
-                            case 'colSourceNumber' :
+                            case 'colSourceNumber':
                                 return false;
                         };
                     }
                     break;
-                case 'Purchase Contract' :
+                case 'Purchase Contract':
                     switch (columnId) {
-                        case 'colOrderNumber' :
+                        case 'colOrderNumber':
                             if (iRely.Functions.isEmpty(record.get('strOrderNumber')))
                                 //return controller.purchaseContractDropdown(win);
                                 return false;
                             else
                                 return false;
-                        case 'colSourceNumber' :
+                        case 'colSourceNumber':
                             switch (current.get('intSourceType')) {
                                 case 2:
                                     if (iRely.Functions.isEmpty(record.get('strSourceNumber')))
@@ -4039,21 +4055,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             }
                     }
                     break;
-                case 'Transfer Order' :
+                case 'Transfer Order':
                     if (iRely.Functions.isEmpty(record.get('strOrderNumber'))) {
                         switch (columnId) {
-                            case 'colOrderNumber' :
+                            case 'colOrderNumber':
                                 //return controller.transferOrderDropdown(win);
                                 return false;
-                            case 'colSourceNumber' :
+                            case 'colSourceNumber':
                                 return false;
                         }
                     }
                     else {
                         switch (columnId) {
-                            case 'colOrderNumber' :
+                            case 'colOrderNumber':
                                 return false;
-                            case 'colSourceNumber' :
+                            case 'colSourceNumber':
                                 return false;
                         };
                     }
@@ -4136,28 +4152,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
 
-          /*  switch (UOMType) {
-                case 'Weight':
-                    switch (columnId) {
-                        case 'colLotUOM' :
-                            return Ext.create('Ext.grid.CellEditor', {
-                                field: cboLotUOM
-                            });
-                            break;
-                    }
-                    break;
-                default:
-                    switch (columnId) {
-                        case 'colLotUOM' :
-                            return false;
-                            break;
-                    }
-                    break;
-            } */
+            /*  switch (UOMType) {
+                  case 'Weight':
+                      switch (columnId) {
+                          case 'colLotUOM' :
+                              return Ext.create('Ext.grid.CellEditor', {
+                                  field: cboLotUOM
+                              });
+                              break;
+                      }
+                      break;
+                  default:
+                      switch (columnId) {
+                          case 'colLotUOM' :
+                              return false;
+                              break;
+                      }
+                      break;
+              } */
 
-              if(columnId === 'colLotUOM') {
-                  return Ext.create('Ext.grid.CellEditor', {field: cboLotUOM});
-              }
+            if (columnId === 'colLotUOM') {
+                return Ext.create('Ext.grid.CellEditor', { field: cboLotUOM });
+            }
         };
     },
 
@@ -4251,12 +4267,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
             current.set('strUnitType', records[0].get('strUnitType'));
 
-			//Calculate the Line Gross Net Qty. 
-            me.calculateGrossNet(win.viewModel.data.currentReceiptItem, 0);		
-            
+            //Calculate the Line Gross Net Qty. 
+            me.calculateGrossNet(win.viewModel.data.currentReceiptItem, 0);
+
             //Calculate Line Total
             var currentReceiptItem = win.viewModel.data.currentReceiptItem;
-            var currentReceipt  = win.viewModel.data.current;
+            var currentReceipt = win.viewModel.data.current;
             currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
         }
     },
@@ -4371,7 +4387,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {
                     Name: 'strLotNo',
                     Type: 'string',
-                    Condition:'EQUAL TO',
+                    Condition: 'EQUAL TO',
                     From: strLotNo,
                     To: '',
                     Operator: ''
@@ -4380,12 +4396,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
-    onAddOrderClick: function(button, e, eOpts) {
+    onAddOrderClick: function (button, e, eOpts) {
         var win = button.up('window');
         this.showAddOrders(win);
     },
 
-    showAddOrders: function(win) {
+    showAddOrders: function (win) {
         var me = this;
         var currentRecord = win.viewModel.data.current;
         var VendorId = null;
@@ -4402,68 +4418,68 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             VendorId = currentRecord.get('intEntityVendorId').toString();
         }
 
-        var showAddScreen = function() {
+        var showAddScreen = function () {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
             search.url = '../Inventory/api/InventoryReceipt/GetAddOrders?VendorId=' + VendorId + '&ReceiptType=' + ReceiptType + '&SourceType=' + SourceType + '&CurrencyId=' + CurrencyId;
             search.columns = [
-                {dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
-                {dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string'},
-                { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
-                { xtype: 'numbercolumn', dataIndex: 'dblOrdered', text: 'Ordered Qty', width: 100, dataType: 'float'},
-                { xtype: 'numbercolumn', dataIndex: 'dblReceived', text: 'Received Qty', width: 100, dataType: 'float'},
-                {dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string'},
-                {dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string'},
-                {dataIndex: 'strItemDescription', text: 'Item Description', width: 100, dataType: 'string'},
-                { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', width: 100, dataType: 'float'},
-                { xtype: 'numbercolumn', dataIndex: 'intLoadToReceive', text: 'Load to Receive', width: 100, dataType: 'numeric'},
-                { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', width: 100, dataType: 'float'},
-                { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float'},
-                { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', width: 100, dataType: 'float'},
+                { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
+                { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string' },
+                { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblOrdered', text: 'Ordered Qty', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblReceived', text: 'Received Qty', width: 100, dataType: 'float' },
+                { dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string' },
+                { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
+                { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, dataType: 'string' },
+                { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'intLoadToReceive', text: 'Load to Receive', width: 100, dataType: 'numeric' },
+                { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', width: 100, dataType: 'float' },
 
-                {dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string'},
-                {dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order')},
-                {dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order')},
+                { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string' },
+                { dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order') },
+                { dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order') },
 
-                {dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string'},
-                {dataIndex: 'strUnitType', text: 'Item UOM Type', width: 100, dataType: 'string', hidden: true},
-                { xtype: 'numbercolumn', dataIndex: 'dblItemUOMConvFactor', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
-                {dataIndex: 'strWeightUOM', text: 'Weight UOM', width: 100, dataType: 'string'},
-                { xtype: 'numbercolumn', dataIndex: 'dblWeightUOMConvFactor', text: 'Weight UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
-                {dataIndex: 'strCostUOM', text: 'Cost UOM', width: 100, dataType: 'string'},
-                { xtype: 'numbercolumn', dataIndex: 'dblCostUOMConvFactor', text: 'Cost UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
-                {dataIndex: 'intLifeTime', text: 'Lifetime', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'strLifeTimeType', text: 'Lifetime Type', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'ysnLoad', text: 'Load Contract', width: 100, dataType: 'boolean', xtype: 'checkcolumn' },
-                { xtype: 'numbercolumn', dataIndex: 'dblAvailableQty', text: 'Available Qty', width: 100, dataType: 'float'},
-                {dataIndex: 'strBOL', text: 'BOL', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'intEntityVendorId', text: 'Vendor Id', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'strVendorId', text: 'Vendor', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'strVendorName', text: 'Vendor Name', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'strReceiptType', text: 'Transaction Type', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intLineNo', text: 'Line No', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'intOrderId', text: 'Order Id', defaultSort: true, sortOrder: 'DESC', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'intSourceType', text: 'Source Type', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'intSourceId', text: 'Source Id', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intContainerId', text: 'Container Id', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'intOrderUOMId', text: 'Order UOM Id', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intCostUOMId', text: 'Cost UOM Id', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'ysnSubCurrency', text: 'Cost Currency', width: 100, dataType: 'boolean', hidden: true},
-                {dataIndex: 'strSubCurrency', text: 'Cost Currency', width: 100, dataType: 'string', hidden: true},
-                { xtype: 'numbercolumn', dataIndex: 'dblFranchise', text: 'Franchise', width: 100, dataType: 'float', hidden: true},
-                { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true},
+                { dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string' },
+                { dataIndex: 'strUnitType', text: 'Item UOM Type', width: 100, dataType: 'string', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblItemUOMConvFactor', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
+                { dataIndex: 'strWeightUOM', text: 'Weight UOM', width: 100, dataType: 'string' },
+                { xtype: 'numbercolumn', dataIndex: 'dblWeightUOMConvFactor', text: 'Weight UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
+                { dataIndex: 'strCostUOM', text: 'Cost UOM', width: 100, dataType: 'string' },
+                { xtype: 'numbercolumn', dataIndex: 'dblCostUOMConvFactor', text: 'Cost UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
+                { dataIndex: 'intLifeTime', text: 'Lifetime', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'strLifeTimeType', text: 'Lifetime Type', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'ysnLoad', text: 'Load Contract', width: 100, dataType: 'boolean', xtype: 'checkcolumn' },
+                { xtype: 'numbercolumn', dataIndex: 'dblAvailableQty', text: 'Available Qty', width: 100, dataType: 'float' },
+                { dataIndex: 'strBOL', text: 'BOL', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intEntityVendorId', text: 'Vendor Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strVendorId', text: 'Vendor', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'strVendorName', text: 'Vendor Name', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'strReceiptType', text: 'Transaction Type', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'intLineNo', text: 'Line No', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intOrderId', text: 'Order Id', defaultSort: true, sortOrder: 'DESC', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intSourceType', text: 'Source Type', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intSourceId', text: 'Source Id', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'intContainerId', text: 'Container Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intOrderUOMId', text: 'Order UOM Id', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'string', hidden: true },
+                { dataIndex: 'intCostUOMId', text: 'Cost UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'ysnSubCurrency', text: 'Cost Currency', width: 100, dataType: 'boolean', hidden: true },
+                { dataIndex: 'strSubCurrency', text: 'Cost Currency', width: 100, dataType: 'string', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblFranchise', text: 'Franchise', width: 100, dataType: 'float', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true },
 
-                { xtype: 'numbercolumn', dataIndex: 'dblGross', text: 'Gross', width: 100, dataType: 'float'},
-                { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float'}
+                { xtype: 'numbercolumn', dataIndex: 'dblGross', text: 'Gross', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' }
 
             ];
             search.title = "Add Orders";
@@ -4531,18 +4547,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             dblNet: order.get('dblNet')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
-                        
-                        if(ReceiptType === 'Transfer Order') {
-                            if((me.getViewModel().data.locationFromTransferOrder === null && currentVM.phantom)|| (me.getViewModel().data.locationFromTransferOrder === null && 
-                                    currentVM.get('intLocationId') === null)) {
+
+                        if (ReceiptType === 'Transfer Order') {
+                            if ((me.getViewModel().data.locationFromTransferOrder === null && currentVM.phantom) || (me.getViewModel().data.locationFromTransferOrder === null &&
+                                currentVM.get('intLocationId') === null)) {
                                 currentVM.set('intLocationId', order.get('intEntityVendorId'));
                                 currentVM.set('strLocationName', order.get('strVendorName'));
                                 me.getViewModel().set('locationFromTransferOrder', order.get('strVendorName'));
                             } else {
-                                if(currentVM.get('intLocationId') === null) {
+                                if (currentVM.get('intLocationId') === null) {
                                     currentVM.set('intLocationId', order.get('intEntityVendorId'));
                                     currentVM.set('strLocationName', order.get('strVendorName'));
-                                    me.getViewModel().set('locationFromTransferOrder', order.get('strVendorName'));       
+                                    me.getViewModel().set('locationFromTransferOrder', order.get('strVendorName'));
                                 }
                             }
                         }
@@ -4621,33 +4637,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                             });
                         }
-                        
+
                         if (order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
-                                //Set default value for Gross/Net UOM
-                                newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
-                                newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
-                                newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
-                                newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
-                                newReceiptItem.set('dblWeightUOMConvFactor', order.get('dblItemUOMConvFactor'));
-                            
-                               //Calculate Line Total
-                                var currentReceipt  = win.viewModel.data.current;
-                                newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, newReceiptItem));
-                            }
-                        
+                            //Set default value for Gross/Net UOM
+                            newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
+                            newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
+                            newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
+                            newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
+                            newReceiptItem.set('dblWeightUOMConvFactor', order.get('dblItemUOMConvFactor'));
+
+                            //Calculate Line Total
+                            var currentReceipt = win.viewModel.data.current;
+                            newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, newReceiptItem));
+                        }
+
                         if (order.get('intWeightUOMId') !== null) {
-                             if (order.get('dblGross') === 0 && order.get('dblNet') !== 0) {
-                                 newReceiptItem.set('dblGross', order.get('dblNet'));
-                             }  
-                            
-                             else if (order.get('dblGross') !== 0 && order.get('dblNet') === 0) {
-                                 newReceiptItem.set('dblNet', order.get('dblGross'));
-                             }  
-                            
-                             else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
+                            if (order.get('dblGross') === 0 && order.get('dblNet') !== 0) {
+                                newReceiptItem.set('dblGross', order.get('dblNet'));
+                            }
+
+                            else if (order.get('dblGross') !== 0 && order.get('dblNet') === 0) {
+                                newReceiptItem.set('dblNet', order.get('dblGross'));
+                            }
+
+                            else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
                                 var currentReceiptItem = win.viewModel.data.currentReceiptItem;
                                 me.calculateGrossNet(currentReceiptItem, 1);
-                             }
+                            }
                         }
                     });
                     search.close();
@@ -4659,14 +4675,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
             search.show();
         };
-       
-         var task = new Ext.util.DelayedTask(function () {
-            showAddScreen();          
+
+        var task = new Ext.util.DelayedTask(function () {
+            showAddScreen();
         });
         task.delay(10);
     },
 
-    onReplicateBalanceLotClick: function(button) {
+    onReplicateBalanceLotClick: function (button) {
         var me = this;
         var win = button.up('window');
         var grdLotTracking = win.down('grdLotTracking');
@@ -4684,7 +4700,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var grdLotTracking = win.down('#grdLotTracking');
             var selectedLot = grdLotTracking.getSelectionModel().getSelection();
 
-            if (selectedLot.length <= 0){
+            if (selectedLot.length <= 0) {
                 iRely.Functions.showErrorDialog('Please select a lot to replicate.');
                 return;
             }
@@ -4726,34 +4742,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var addedTareWeight = 0.00;
 
             // If Unit-Type is a 'Packed' type, get the ceiling value. A packaging can't have a fractional value.
-            if (strUnitType == "Packed")
-            {
+            if (strUnitType == "Packed") {
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
                 lastQty = Math.ceil(lastQty);
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
-              // addedTareWeight = i21.ModuleMgr.Inventory.roundDecimalValue(addedTareWeight, 6);
+                // addedTareWeight = i21.ModuleMgr.Inventory.roundDecimalValue(addedTareWeight, 6);
             }
-           /* else {
-                lastQty = i21.ModuleMgr.Inventory.roundDecimalValue(lastQty, 6);
-            }*/
+            /* else {
+                 lastQty = i21.ModuleMgr.Inventory.roundDecimalValue(lastQty, 6);
+             }*/
 
             // Calculate how many times to loop.
             var replicaCount = (convertedItemQty - lastQty) / lotQty;
             replicaCount = Math.ceil(replicaCount);
 
             // Calculate the last Gross and Tare weights.
-            if ((replicaCount * lotQty) < convertedItemQty ) {
+            if ((replicaCount * lotQty) < convertedItemQty) {
                 // Compute the last gross qty.
                 if (lastGrossWgt > 0) {
                     lastGrossWgt = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
                 }
 
                 // Compute the last net weight.
-                
-                    lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
-                    lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt + addedTareWeight: addedTareWeight;
-                    lastNetWgt = lastGrossWgt - lastTareWgt;
-                
+
+                lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
+                lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt + addedTareWeight : addedTareWeight;
+                lastNetWgt = lastGrossWgt - lastTareWgt;
+
             }
             else {
                 replicaCount -= 1;
@@ -4762,7 +4777,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (replicaCount == 0) {
                 iRely.Msg.showQuestion('The lots for ' + currentReceiptItem.get('strItemNo') +
                     ' is fully replicated. Are you sure you want to continue?',
-                    function(p) {
+                    function (p) {
                         if (p === 'no') {
                             grdLotTracking.resumeEvents(true);
                             return;
@@ -4813,7 +4828,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             me.calculateGrossNet(currentReceiptItem, 1);
 
                             //Calculate Line Total
-                            var currentReceipt  = win.viewModel.data.current;
+                            var currentReceipt = win.viewModel.data.current;
                             currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
                         }
                     }, Ext.MessageBox.YESNO, win);
@@ -4821,31 +4836,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Show a progress message box.
             Ext.MessageBox.show({
-                    title: "Please wait.",
-                    msg: "Replicating as " + replicaCount + " copies of the lot.",
-                    progressText: "Initializing...",
-                    width: 300,
-                    progress: true,
-                    closable: false
-                }
+                title: "Please wait.",
+                msg: "Replicating as " + replicaCount + " copies of the lot.",
+                progressText: "Initializing...",
+                width: 300,
+                progress: true,
+                closable: false
+            }
             );
 
             // Function generator for the setTimeout.
             // Used to update the progress of the message box and hide it when done with the loop.
-            var f = function(ctr, replicaCount){
-                return function(){
-                    if(ctr === replicaCount - 1){
+            var f = function (ctr, replicaCount) {
+                return function () {
+                    if (ctr === replicaCount - 1) {
                         Ext.MessageBox.hide();
-                    }else{
+                    } else {
                         var progress = ctr / (replicaCount - 1);
-                        Ext.MessageBox.updateProgress(progress, Math.round(100 * progress)+ '% completed');
+                        Ext.MessageBox.updateProgress(progress, Math.round(100 * progress) + '% completed');
                     }
                 };
             };
 
             // This function will do a loop to replicate the lots.
 
-            var doReplicateLot = function (){
+            var doReplicateLot = function () {
                 for (var ctr = 0; ctr <= replicaCount - 1; ctr++) {
                     var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
                         strUnitMeasure: currentLot.get('strUnitMeasure'),
@@ -4890,7 +4905,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     var totalLotQty = 0;
 
-                    currentReceiptItem.tblICInventoryReceiptItemLots().each(function(lot) {
+                    currentReceiptItem.tblICInventoryReceiptItemLots().each(function (lot) {
                         totalLotQty += lot.get('dblQuantity');
                     });
 
@@ -4899,7 +4914,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (totalLotQty > lineItemQty) {
                         var itemNo = currentReceiptItem.get('strItemNo');
                         iRely.Msg.showQuestion('The lots for ' + itemNo + ' is fully replicated. Are you sure you want to continue?',
-                            function(p) {
+                            function (p) {
                                 if (p === 'no') {
                                     grdLotTracking.resumeEvents(true);
                                     return;
@@ -4914,13 +4929,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     // call f function from above within a setTimeout.
                     setTimeout(f(ctr, replicaCount), (ctr + 1) * 25);
 
-                    if ( ctr === replicaCount - 1){
+                    if (ctr === replicaCount - 1) {
                         grdLotTracking.resumeEvents(true);
                         //Calculate Gross/Net
                         me.calculateGrossNet(currentReceiptItem, 1);
 
                         //Calculate Line Total
-                        var currentReceipt  = win.viewModel.data.current;
+                        var currentReceipt = win.viewModel.data.current;
                         currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
                     }
                 }
@@ -4932,38 +4947,38 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onItemClick: function () {
-        iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true } });
     },
 
     onCategoryClick: function () {
-        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true } });
     },
 
     onCommodityClick: function () {
-        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true } });
     },
 
     onLocationClick: function () {
-        iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true } });
     },
 
     onStorageLocationClick: function () {
-        iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true } });
     },
 
     onBtnVendorClick: function () {
-         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
     },
 
-    onVendorDrilldown: function(combo) {
+    onVendorDrilldown: function (combo) {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-        
+
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
         }
         else {
-              iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
                 filters: [
                     {
                         column: 'intEntityId',
@@ -4974,88 +4989,84 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onLocationDrilldown: function(combo) {
+    onLocationDrilldown: function (combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true } });
         }
         else {
             i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'LocationName');
         }
     },
 
-    onTaxGroupDrilldown: function(combo) {
+    onTaxGroupDrilldown: function (combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('i21.view.TaxGroup', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('i21.view.TaxGroup', { action: 'new', viewConfig: { modal: true } });
         }
         else {
             i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'TaxGroup');
         }
     },
 
-    onCurrencyDrilldown: function(combo) {
-        iRely.Functions.openScreen('i21.view.Currency', {viewConfig: { modal: true }});
+    onCurrencyDrilldown: function (combo) {
+        iRely.Functions.openScreen('i21.view.Currency', { viewConfig: { modal: true } });
     },
 
-    getWeightLoss: function(ReceiptItems, sourceType, action)
-    {
+    getWeightLoss: function (ReceiptItems, sourceType, action) {
         var dblWeightLoss = 0;
         var dblNetShippedWt = 0;
         var dblNetReceivedWt = 0;
         var dblFranchise = 0;
 
-        Ext.Array.each(ReceiptItems, function (item)
-        {
+        Ext.Array.each(ReceiptItems, function (item) {
             if (item.dummy) {
 
             }
             else {
-              /*  dblFranchise = item.data.dblFranchise;
-                dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
-                dblNetReceivedWt = item.data.dblNet;
+                /*  dblFranchise = item.data.dblFranchise;
+                  dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
+                  dblNetReceivedWt = item.data.dblNet;
+  
+                  if (dblFranchise > 0)
+                      dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
+                  if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
+                      dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
 
-                if (dblFranchise > 0)
-                    dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
-                if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
-                    dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
-                
-                
+
                 // Check if item is Inbound Shipment
-                if(sourceType === 2)
-                    {
-                        dblNetReceivedWt = item.data.dblNet;
-                        dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;              
-                        dblWeightLoss = dblNetReceivedWt - dblNetShippedWt;
-                    }
-                else
-                    {
-                        dblWeightLoss = 0;
-                    }
-                
+                if (sourceType === 2) {
+                    dblNetReceivedWt = item.data.dblNet;
+                    dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
+                    dblWeightLoss = dblNetReceivedWt - dblNetShippedWt;
+                }
+                else {
+                    dblWeightLoss = 0;
+                }
+
             }
         });
 
         action(dblWeightLoss);
     },
 
-    validateWeightLoss: function(win, ReceiptItems) {
+    validateWeightLoss: function (win, ReceiptItems) {
         win.viewModel.data.weightLoss = 0;
-        var action = function(weightLoss) {
+        var action = function (weightLoss) {
             win.viewModel.set('weightLoss', weightLoss);
         };
 
         var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
-        
+
         var current = win.viewModel.data.current;
         var sourceType = current.get('intSourceType');
-            
+
         if (ReceiptItems) {
             this.getWeightLoss(ReceiptItems.data.items, sourceType, action);
         }
 
     },
 
-    doOtherChargeCalculate: function(context, current){
-        if (context && current ) {
+    doOtherChargeCalculate: function (context, current) {
+        if (context && current) {
             Ext.Ajax.request({
                 timeout: 120000,
                 url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
@@ -5084,7 +5095,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         // If there is no data change, do the ajax request.
-        if (!context.data.hasChanges()){
+        if (!context.data.hasChanges()) {
             me.doOtherChargeCalculate(context, current);
             return;
         }
@@ -5101,20 +5112,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var grid = obj.up('grid');
         var win = obj.up('window');
         var current = win.viewModel.data.current;
-        if (current && current.get('ysnPosted') === true){
-                return false;
+        if (current && current.get('ysnPosted') === true) {
+            return false;
         }
     },
-    
+
     onLocationBeforeSelect: function (combo, record, index, eOpts) {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-        
+
         Inventory.view.InventoryReceiptViewController.orgValueLocation = current.get('intLocationId');
     },
 
-    onReceiptTabChange: function(tabPanel, newCard, oldCard, eOpts) {
-        switch (newCard.itemId) { 
+    onReceiptTabChange: function (tabPanel, newCard, oldCard, eOpts) {
+        switch (newCard.itemId) {
             case 'pgeIncomingInspection':
                 var win = tabPanel.up('window');
                 var context = win.context;
@@ -5144,7 +5155,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 };
 
                 // If there is no data change, do the post.
-                if (!context.data.hasChanges()){
+                if (!context.data.hasChanges()) {
                     doPost();
                     return;
                 }
@@ -5155,7 +5166,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         doPost();
                     }
                 });
-            break;
+                break;
         }
     },
 
@@ -5163,30 +5174,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var current = win.viewModel.data.current;
 
-        if(button.itemId === 'btnSelectAll') {
+        if (button.itemId === 'btnSelectAll') {
             if (current.tblICInventoryReceiptInspections()) {
-                Ext.Array.each(current.tblICInventoryReceiptInspections().data.items, function(row) {
+                Ext.Array.each(current.tblICInventoryReceiptInspections().data.items, function (row) {
                     if (!row.dummy) {
-                            row.set('ysnSelected', true);
-                        }
-                    });
+                        row.set('ysnSelected', true);
+                    }
+                });
             }
         }
 
-        if(button.itemId === 'btnClearAll') {
+        if (button.itemId === 'btnClearAll') {
             if (current.tblICInventoryReceiptInspections()) {
-                Ext.Array.each(current.tblICInventoryReceiptInspections().data.items, function(row) {
+                Ext.Array.each(current.tblICInventoryReceiptInspections().data.items, function (row) {
                     if (!row.dummy) {
-                            row.set('ysnSelected', false);
-                        }
-                    });
+                        row.set('ysnSelected', false);
+                    }
+                });
             }
         }
     },
 
     onSelectTaxGroup: function (combo, records, eOpts) {
-		if (records.length <= 0)
-        return;
+        if (records.length <= 0)
+            return;
 
         var win = combo.up('window'),
             current = win.viewModel.data.current,
@@ -5195,7 +5206,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         //Calculate Taxes
         if (current.tblICInventoryReceiptItems()) {
             Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
-                if(!item.dummy) {
+                if (!item.dummy) {
                     win.viewModel.data.currentReceiptItem = item;
                     me.calculateItemTaxes();
                 }
