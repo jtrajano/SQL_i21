@@ -4393,6 +4393,8 @@
     <Build Include="dbo\Functions\fnSCCalculateDiscount.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceDiscount.sql" />
     <Build Include="dbo\Views\vyuCFDiscountSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
