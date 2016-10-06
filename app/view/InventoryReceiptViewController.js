@@ -1786,8 +1786,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         
         //Calculate Line Total
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
-        var currentReceipt  = win.viewModel.data.current;
-        currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
+
+        var currentReceipt = win.viewModel.data.current;
+        if(currentReceiptItem) {
+            currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
+        }
 
         var pnlLotTracking = win.down("#pnlLotTracking");
 
