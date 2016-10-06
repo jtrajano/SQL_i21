@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuTMBEExportContract]  
+﻿CREATE VIEW [dbo].[vyuETBEExportContract]  
 AS 
 	SELECT
 		account=C.strEntityNo 
