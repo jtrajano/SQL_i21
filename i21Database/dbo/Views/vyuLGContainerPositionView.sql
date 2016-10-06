@@ -37,7 +37,7 @@ SELECT * FROM (
 				AND Seq.intContractStatusId <> 5
 			)
 		,strRemarks = CH.strInternalComment
-		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, GETDATE()), 2)
+		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, CD.dtmEndDate), 2)
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
