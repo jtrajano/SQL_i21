@@ -4,9 +4,9 @@ AS
 		account=C.strEntityNo 
 		,productCode= E.strItemNo
 		,preBuyPrice= CAST(B.dblCashPrice AS NUMERIC(18,4))
-		,preBuyQty= CAST(B.dblBalance AS NUMERIC(18,4))
+		,preBuyQty= CAST(B.dblBalance AS NUMERIC(18,2))
 		,contractPrice= CAST(0.0 AS NUMERIC(18,4))
-		,contractQty= CAST(0.0 AS NUMERIC(18,4))	
+		,contractQty= CAST(0.0 AS NUMERIC(18,2))	
 	FROM tblCTContractHeader A
 	INNER JOIN vyuCTContractHeaderNotMapped H
 		ON A.intContractHeaderId = H.intContractHeaderId
