@@ -116,7 +116,7 @@ BEGIN
 		HAVING COUNT(Lot.intLotId) > 1
 	)
 	BEGIN
-		RAISERROR('Adjusting multiple lots with the same lot number is not allowed.', 11, 1)  
+		RAISERROR('You cannot adjust the same lot multiple times.', 11, 1)  
 		GOTO Post_Exit  
 	END
 END 
