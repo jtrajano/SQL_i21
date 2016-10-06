@@ -237,7 +237,7 @@ BEGIN
 	--										WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
 	--									END
 	,[ysnAccrue]						= 0
-	,[ysnPrice]							= 0
+	,[ysnPrice]							= 1
 	FROM @ShipmentStagingTable SE
 	INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
 	INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
