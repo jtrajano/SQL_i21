@@ -484,13 +484,14 @@ BEGIN
 		-----------------------------------------------------------------------------------------------------------------------------
 		DECLARE loopLotOut CURSOR LOCAL FAST_FORWARD
 		FOR 
-		SELECT  intId
-				,intInventoryLotId
-				,intInventoryTransactionId
-				,intRevalueLotId
-				,dblQty
-				,dblCostAdjustQty
-		FROM	dbo.tblICInventoryLotOut LotOut
+		SELECT  LotOut.intId
+				,LotOut.intInventoryLotId
+				,LotOut.intInventoryTransactionId
+				,LotOut.intRevalueLotId
+				,LotOut.dblQty
+				,LotOut.dblCostAdjustQty
+		FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN tblICInventoryTransaction t 
+					ON LotOut.intInventoryTransactionId = t.intInventoryTransactionId
 		WHERE	LotOut.intInventoryLotId = @CostBucketId
 				AND 1 = 
 					CASE WHEN	@dblNewValue IS NULL 
@@ -500,6 +501,7 @@ BEGIN
 						WHEN	@dblNewValue IS NOT NULL THEN 1
 						ELSE	0
 					END 
+				AND ISNULL(t.ysnIsUnposted, 0) = 0
 
 		OPEN loopLotOut;
 
@@ -729,16 +731,6 @@ BEGIN
 									, @INV_TRANS_TYPE_ADJ_Lot_Merge
 									, @INV_TRANS_TYPE_ADJ_Lot_Move
 								)
-								AND NOT EXISTS (
-									SELECT	TOP 1 1 
-									FROM	#tmpRevaluedInventoryTransaction x 
-									WHERE	x.intInventoryTransactionId = InvTran.intInventoryTransactionId
-								)
-
-						-- Insert the inventory transaction id into the x list. 
-						INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
-						SELECT @intInventoryTrnasactionId_EscalateValue 
-						WHERE @intInventoryTrnasactionId_EscalateValue IS NOT NULL
 					END
 
 					
