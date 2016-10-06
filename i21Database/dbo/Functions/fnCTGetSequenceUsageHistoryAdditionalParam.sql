@@ -86,6 +86,7 @@ BEGIN
 				@strHeaderIdColumn		=	'intTicketId'
 		FROM	tblSCTicket				HR
 		WHERE	HR.intTicketId			=	@intExternalId
+		AND		strTicketStatus <> 'V'
 	END
 	ELSE IF @strScreenName = 'Purchase Order'
 	BEGIN
@@ -129,7 +130,12 @@ BEGIN
 		FROM	tblCTContractAdjustment CA
 		WHERE	CA.intAdjustmentId	=	@intExternalId
 	END
-
+	
+	IF ISNULL(@strNumber,'')  = ''
+	BEGIN
+		SELECT TOP 1 @strNumber = strNumber FROM tblCTSequenceUsageHistory WHERE strScreenName = @strScreenName AND intExternalId = @intExternalId
+	END
+	
 	INSERT @returntable
 	(
 			intExternalHeaderId, 
