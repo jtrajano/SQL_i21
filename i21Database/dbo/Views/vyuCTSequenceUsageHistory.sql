@@ -7,14 +7,14 @@ AS
 			UH.intContractSeq,
 			UH.dtmTransactionDate,
 			UH.strScreenName,
-			UH.strNumber,
+			ISNULL(UH.strNumber,AP.strNumber) strNumber,
 			UH.strFieldName,
 			UH.dblOldValue,
 			UH.dblTransactionQuantity,
 			UH.dblNewValue,
 			UH.strUserName,
 			UH.intExternalHeaderId,
-			CAST(CASE WHEN ISNULL(AP.strNumber,'') = '' THEN 1 ELSE 0 END AS BIT) AS ysnDeleted,
+			CAST(CASE WHEN ISNULL(AP.intExternalHeaderId,0) = 0 THEN 1 ELSE 0 END AS BIT) AS ysnDeleted,
 			AP.strHeaderIdColumn
 			
 	FROM	tblCTSequenceUsageHistory	UH	CROSS

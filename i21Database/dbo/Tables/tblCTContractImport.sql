@@ -33,6 +33,7 @@
 	[strErrorMsg] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
 	[intContractHeaderId] [int] NULL,
 	[xmlInput] [xml] NULL,
- 
+	[strEntityNo] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
+
 	CONSTRAINT [PK_tblCTContractImport_intContractImportId] PRIMARY KEY CLUSTERED (intContractImportId ASC)
 )
