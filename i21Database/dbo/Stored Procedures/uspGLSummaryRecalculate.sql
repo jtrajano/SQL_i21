@@ -7,10 +7,13 @@ BEGIN
 		RETURN
 	END
 	DELETE [dbo].[tblGLSummary]
-
+	DECLARE @intCompanyId INT
+	SELECT TOP 1 @intCompanyId = intCompanySetupID FROM tblSMCompanySetup 
 	INSERT INTO tblGLSummary
+	(intCompanyId,intAccountId,dtmDate,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strCode,intConcurrencyId)
 	SELECT
-		 intAccountId
+		 @intCompanyId
+		,intAccountId
 		,dtmDate
 		,SUM(ISNULL(dblDebit,0)) as dblDebit
 		,SUM(ISNULL(dblCredit,0)) as dblCredit
