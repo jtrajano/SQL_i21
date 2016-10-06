@@ -195,10 +195,10 @@ BEGIN TRY
 												AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
 												AND	YEAR(MO.dtmFutureMonthsDate) = CI.intYear		LEFT
 		JOIN	(
-					SELECT	E.intEntityId,E.strName
+					SELECT	E.intEntityId,E.strName,E.strEntityNo
 					FROM	tblEMEntity			E
 					JOIN	tblEMEntityLocation	L	ON	E.intEntityId	=	L.intEntityId			
-				)EY	ON	EY.strName			=	CI.strEntityName									LEFT
+				)EY	ON	EY.strName			=	CI.strEntityName	AND ISNULL(EY.strEntityNo,'') = ISNULL(CI.strEntityNo,'')	LEFT
 		JOIN	(
 					SELECT	E.intEntityId,E.strName
 					FROM	tblEMEntity			E

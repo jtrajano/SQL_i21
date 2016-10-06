@@ -94,7 +94,7 @@ BEGIN TRY
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 								ELSE CAST(NULL AS NUMERIC(18,0)) 
 						END		AS dblValueInCCCurrency,
-						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,BD.intUnitOfMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) AS dblQuantity,
+						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,BU.intUnitMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) AS dblQuantity,
 						NUll AS intQuantityUOMId ,
 						@intCleanCostCurrencyId intCCCurrencyId,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
@@ -121,7 +121,8 @@ BEGIN TRY
 				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
 				JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
 				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	BD.intContractDetailId
-				JOIN	tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intPriceItemUOMId
+				JOIN	tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intPriceItemUOMId	LEFT			
+				JOIN	tblICItemUOM                BU  ON  BU.intItemUOMId					=   BD.intUnitOfMeasureId
 				WHERE	BD.intContractDetailId	=	@intContractDetailId AND BL.intTransactionType = 2
 		)t
 		GROUP BY	intItemId,
