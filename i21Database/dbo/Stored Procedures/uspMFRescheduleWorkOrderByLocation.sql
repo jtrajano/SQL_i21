@@ -112,7 +112,7 @@ BEGIN TRY
 		,intNoOfUnit
 		,dblConversionFactor
 		)
-	SELECT x.intManufacturingCellId
+	SELECT IsNULL(MC1.intManufacturingCellId,x.intManufacturingCellId)
 		,x.intWorkOrderId
 		,x.intItemId
 		,x.dblQuantity
