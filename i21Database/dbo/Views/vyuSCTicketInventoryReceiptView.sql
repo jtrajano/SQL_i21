@@ -22,7 +22,9 @@
 	ICRI.ysnPosted,
 	SC.strTicketNumber,
 	SC.strLoadNumber,
-	ICRI.strOrderNumber + '-' + CONVERT(varchar(20), SC.intContractSequence) AS strOrderNumber,
+	(CASE 
+		WHEN SC.intContractId > 0 THEN SC.strContractNumber + '-' + CONVERT(varchar(20), SC.intContractSequence)
+	END) AS strOrderNumber,
 	(CASE 
 		WHEN ISNULL(ICRI.strOrderNumber, '') = '' THEN GRSC.strStorageTypeDescription
 	END) AS strStorageTypeDescription,
