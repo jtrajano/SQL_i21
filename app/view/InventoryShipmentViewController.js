@@ -1930,6 +1930,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
         }
+
+        if (combo.itemId === 'cboChargeCurrency') { 
+            current.set('intCurrencyId', record.get('intCurrencyID'));
+            current.set('strCurrency', record.get('strCurrency'));
+        }
     },
 
     onQualityClick: function(button, e, eOpts) {
