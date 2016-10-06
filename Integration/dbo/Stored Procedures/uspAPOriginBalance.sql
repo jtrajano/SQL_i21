@@ -12,6 +12,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @key NVARCHAR(100) = NEWID()
 DECLARE @logDate DATETIME = GETDATE()
+DECLARE @originBalance DECIMAL(18,6) = 0;
 SET @logKey = @key;
 
 DECLARE @log TABLE
@@ -43,7 +44,11 @@ SELECT
 	'Account ' + A.strAccountId + ': ' + CAST(A.dblBalance AS NVARCHAR)
 FROM #tmpOriginAccountBalance A
 
-SELECT @balance = SUM(ISNULL(dblBalance,0)) FROM #tmpOriginAccountBalance
+SELECT @originBalance = SUM(ISNULL(dblBalance,0)) FROM #tmpOriginAccountBalance
+
+IF @originBalance IS NULL SET @originBalance = 0;
+
+SET @balance = @originBalance;
 
 INSERT INTO tblAPImportVoucherLog
 (
