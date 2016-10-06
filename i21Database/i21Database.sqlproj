@@ -4391,6 +4391,8 @@
     <Build Include="dbo\Views\vyuHDCustomerContactList.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetTaxGroupIdOnInventoryReceipt.sql" />
     <Build Include="dbo\Functions\fnSCCalculateDiscount.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceDiscount.sql" />
+    <Build Include="dbo\Views\vyuCFDiscountSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
