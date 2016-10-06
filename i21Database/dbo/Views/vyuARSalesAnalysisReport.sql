@@ -16,8 +16,8 @@ SELECT
 	  , intEntitySalespersonId	= SAR.intEntitySalespersonId
 	  , strTransactionType		= SAR.strTransactionType
 	  , strType					= SAR.strType
-	  , dblQtyOrdered			= ISNULL(SAR.dblQtyOrdered, 0)
-	  , dblQtyShipped			= ISNULL(SAR.dblQtyShipped, 0)
+	  , dblQtyOrdered			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyOrdered, 0) ELSE ISNULL(SAR.dblQtyOrdered, 0) END
+	  , dblQtyShipped			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 	  , dblUnitCost				= ISNULL(SAR.dblStandardCost, 0)
 	  , dblTotalCost			= ISNULL(SAR.dblStandardCost, 0) *
 									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
@@ -42,9 +42,9 @@ SELECT
 									ELSE 0 
 								  END
 	 , dblPrice					= ISNULL(SAR.dblPrice, 0)
-	 , dblTax					= ISNULL(SAR.dblTax, 0)
-	 , dblLineTotal				= ISNULL(SAR.dblLineTotal, 0)
-	 , dblTotal					= ISNULL(SAR.dblTotal, 0)
+	 , dblTax					= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblTax, 0) ELSE ISNULL(SAR.dblTax, 0) END
+	 , dblLineTotal				= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblLineTotal, 0) ELSE ISNULL(SAR.dblLineTotal, 0) END
+	 , dblTotal					= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblTotal, 0) ELSE ISNULL(SAR.dblTotal, 0) END
 	 , strCustomerNumber		= C.strCustomerNumber
 	 , intItemAccountId			= SAR.intItemAccountId
 	 , strAccountId				= GA.strAccountId
