@@ -16,6 +16,14 @@
 	[intPaycheckId] INT NULL, 
     [strNotes] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [ysnApproved] BIT NULL DEFAULT ((0)), 
+	[intApprovedUserId] INT NULL,
+	[dtmApproved] DATETIME NULL,
+	[intProcessedUserId] INT NULL,
+	[dtmProcessed] DATETIME NULL,
+	[intCreatedUserId] INT NULL,
+	[dtmCreated] DATETIME NULL,
+	[intLastModifiedUserId] INT NULL,
+	[dtmLastModified] DATETIME NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)),
 	CONSTRAINT [FK_tblPRTimecard_tblPRPayGroupDetail] FOREIGN KEY ([intPayGroupDetailId]) REFERENCES [tblPRPayGroupDetail]([intPayGroupDetailId]) ON DELETE SET NULL
 )
