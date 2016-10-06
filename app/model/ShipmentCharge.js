@@ -46,5 +46,40 @@ Ext.define('Inventory.model.ShipmentCharge', {
         {type: 'presence', field: 'strItemNo'},
         {type: 'presence', field: 'strAllocatePriceBy'},
         {type: 'presence', field: 'strCurrency'}
-    ]
+    ],
+
+      validate: function(options) {
+        var errors = this.callParent(arguments);
+        if (this.get('strCostMethod') === 'Per Unit') {
+            if (!this.get('intCostUOMId')) {
+                errors.add({
+                    field: 'strCostUOM',
+                    message: 'UOM is required for Per Unit Price Method.'
+                })
+            }
+        }
+
+        if (
+            this.get('dblRate') === 0 && 
+            this.get('strCostMethod') !== 'Amount'        
+        ) {
+            errors.add({
+                field: 'dblRate',
+                message: 'Rate must have a value.'
+            })
+        }
+
+        if (
+            this.get('strCostMethod') === 'Amount' && 
+            ( Ext.isNumeric(this.get('dblAmount')) ? this.get('dblAmount') === 0 : false )
+        ) {
+            errors.add({
+                field: 'dblAmount',
+                message: 'Amount must have a value.'
+            })
+        }
+
+        return errors;
+    }
+
 });
