@@ -152,3 +152,108 @@ BEGIN
 	UPDATE tblGRStorageSchedulePeriod SET strFeeType='Per Unit' WHERE strFeeType IN('Price','Weight')
 END
 GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode IN ('DEF','CNT','SPT','SPL','HLD','LOD'))
+BEGIN
+	SET IDENTITY_INSERT [dbo].[tblGRStorageType] ON
+
+	INSERT INTO tblGRStorageType
+	(
+	 intStorageScheduleTypeId
+	,strStorageTypeDescription
+	,strStorageTypeCode
+	,ysnReceiptedStorage
+	,intConcurrencyId
+	,strOwnedPhysicalStock
+	,ysnDPOwnedType
+	,ysnGrainBankType
+	,ysnActive
+	,ysnCustomerStorage
+	)
+	SELECT 
+	-1 AS intStorageScheduleTypeId
+	,'Default' AS strStorageTypeDescription
+	,'DEF'strStorageTypeCode
+	, 0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+	UNION
+
+	SELECT 
+	-2 AS intStorageScheduleTypeId
+	,'Contract' AS strStorageTypeDescription
+	,'CNT'strStorageTypeCode
+	, 0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+	UNION
+
+	SELECT 
+	-3 AS intStorageScheduleTypeId
+	,'Spot Sale' AS strStorageTypeDescription
+	,'SPT'strStorageTypeCode
+	,0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+	UNION
+
+	SELECT 
+	-4 AS intStorageScheduleTypeId
+	,'Split' AS strStorageTypeDescription
+	,'SPL'strStorageTypeCode
+	, 0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+	UNION
+
+	SELECT 
+	-5 AS intStorageScheduleTypeId
+	,'Hold' AS strStorageTypeDescription
+	,'HLD'strStorageTypeCode
+	, 0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+	UNION
+
+	SELECT 
+	-6 AS intStorageScheduleTypeId
+	,'Load' AS strStorageTypeDescription
+	,'LOD'strStorageTypeCode
+	, 0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+    SET IDENTITY_INSERT [dbo].[tblGRStorageType] OFF
+
+END
+
+GO

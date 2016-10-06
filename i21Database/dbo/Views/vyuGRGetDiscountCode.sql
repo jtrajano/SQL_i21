@@ -11,5 +11,4 @@ intItemId
 ,strCostType 
 FROM vyuICGetCompactItem 
 WHERE strType='Other Charge' 
-AND strStatus='Active' 
-AND strCostType='Discount'
+AND strStatus='Active'
