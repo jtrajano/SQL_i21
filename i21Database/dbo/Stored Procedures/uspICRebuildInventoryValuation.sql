@@ -1651,6 +1651,7 @@ BEGIN
 	DELETE [dbo].[tblGLSummary]
 
 	INSERT INTO tblGLSummary
+	(intAccountId,dtmDate,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strCode,intConcurrencyId)
 	SELECT
 			intAccountId
 			,dtmDate
