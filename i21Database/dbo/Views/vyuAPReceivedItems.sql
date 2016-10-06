@@ -734,16 +734,16 @@ FROM
 		,[strItemNo]								=	CV.strItemNo
 		,[strDescription]							=	CV.strItemDescription
 		,[intPurchaseTaxGroupId]					=	NULL
-		,[dblOrderQty]								=	CV.dblTotal
+		,[dblOrderQty]								=	ISNULL(CV.dblTotal,0)
 		,[dblPOOpenReceive]							=	0
-		,[dblOpenReceive]							=	CV.dblTotal
-		,[dblQuantityToBill]						=	CV.dblTotal
+		,[dblOpenReceive]							=	ISNULL(CV.dblTotal,0)
+		,[dblQuantityToBill]						=	ISNULL(CV.dblTotal,0)
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CV.intLoadDetailId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	CV.dblTotal
+		,[dblUnitCost]								=	ISNULL(CV.dblTotal,0)
 		,[dblTax]									=	0
 		,[dblRate]									=	0
 		,[ysnSubCurrency]							=	0
@@ -773,13 +773,13 @@ FROM
 		,[dblWeightUnitQty]							=	ISNULL(WIU.dblUnitQty,1)
 		,[dblCostUnitQty]							=	NULL
 		,[dblUnitQty]								=	NULL
-		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = CV.strCurrency)
-		,[strCurrency]								=	CV.strCurrency
-		,[intCostCurrencyId]						=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = CV.strCurrency)		
-		,[strCostCurrency]							=	CV.strCurrency
+		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE intCurrencyID = CV.intCurrencyId)
+		,[strCurrency]								=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CV.strCurrency,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))) 
+		,[intCostCurrencyId]						=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE intCurrencyID = CV.intCurrencyId)
+		,[strCostCurrency]							=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CV.strCurrency,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))) 
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	CV.str1099Form			 
-		,[str1099Type]								=	CV.str1099Type 	
+		,[str1099Form]								=	CV.str1099Form 
+		,[str1099Type]								=	CV.str1099Type 
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 
