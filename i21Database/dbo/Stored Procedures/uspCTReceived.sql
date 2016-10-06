@@ -23,7 +23,8 @@ BEGIN TRY
 				@dblSchQuantityToUpdate			NUMERIC(18,6),
 				@intSourceType					INT,
 				@ysnPO							BIT,
-				@ysnLoad						BIT
+				@ysnLoad						BIT,
+				@intPricingTypeId				INT
 
 	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 
@@ -77,6 +78,8 @@ BEGIN TRY
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
 
+		SELECT	@intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
 			RAISERROR('Contract does not exist.',16,1)
@@ -91,24 +94,37 @@ BEGIN TRY
 			RAISERROR('UOM does not exist.',16,1)
 		END
 
-		EXEC	uspCTUpdateSequenceBalance
-				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblConvertedQty,
-				@intUserId				=	@intUserId,
-				@intExternalId			=	@intInventoryReceiptDetailId,
-				@strScreenName			=	'Inventory Receipt' 
-
-		SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
-
-		IF @intSourceType IN (0,1,2,3) OR @ysnPO = 1
-		BEGIN					
-			EXEC	uspCTUpdateScheduleQuantity
+		IF @intSourceType = 1 AND @intPricingTypeId = 5
+		BEGIN
+			EXEC	uspCTUpdateSequenceQuantity 
 					@intContractDetailId	=	@intContractDetailId,
-					@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+					@dblQuantityToUpdate	=	@dblConvertedQty,
+					@intUserId				=	@intUserId,
+					@intExternalId			=	@intInventoryReceiptDetailId,
+					@strScreenName			=	'Inventory Receipt'
+		END
+		ELSE
+		BEGIN
+			EXEC	uspCTUpdateSequenceBalance
+					@intContractDetailId	=	@intContractDetailId,
+					@dblQuantityToUpdate	=	@dblConvertedQty,
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intInventoryReceiptDetailId,
 					@strScreenName			=	'Inventory Receipt' 
+
+			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
+
+			IF @intSourceType IN (0,1,2,3) OR @ysnPO = 1
+			BEGIN					
+				EXEC	uspCTUpdateScheduleQuantity
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInventoryReceiptDetailId,
+						@strScreenName			=	'Inventory Receipt' 
+			END
 		END
+		
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END

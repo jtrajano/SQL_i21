@@ -154,14 +154,14 @@ BEGIN TRY
 
 			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
 			
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost
 
-			EXEC	uspCTUpdateSequenceQuantity 
-					@intContractDetailId	=	@intContractDetailId,
-					@dblQuantityToUpdate	=	@dblNetUnits,
-					@intUserId				=	@intUserId,
-					@intExternalId			=	@intTicketId,
-					@strScreenName			=	'Scale'
+			--EXEC	uspCTUpdateSequenceQuantity 
+			--		@intContractDetailId	=	@intContractDetailId,
+			--		@dblQuantityToUpdate	=	@dblNetUnits,
+			--		@intUserId				=	@intUserId,
+			--		@intExternalId			=	@intTicketId,
+			--		@strScreenName			=	'Scale'
 
 			SELECT	@dblNetUnits = 0
 
