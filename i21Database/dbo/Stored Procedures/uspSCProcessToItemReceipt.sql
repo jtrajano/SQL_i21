@@ -403,9 +403,11 @@ BEGIN TRY
 						-- uses a PRINT statement as that action (not a very good
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
-							UPDATE tblSCTicket SET intContractId = @intDPContractId, strContractNumber = (SELECT strContractNumber FROM vyuCTContractDetailView WHERE intContractDetailId = @intDPContractId) 
-							WHERE intTicketId = @intTicketId
-
+							UPDATE tblSCTicket SET intContractId = @intDPContractId WHERE intTicketId = @intTicketId
+							UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
+							, intContractSequence = CT.intContractSeq
+							, strContractLocation = CT.strLocationName
+							FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 							INSERT INTO @ItemsForItemReceipt (
 							intItemId
 							,intItemLocationId
