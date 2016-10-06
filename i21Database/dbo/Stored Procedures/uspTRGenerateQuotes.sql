@@ -15,36 +15,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ErrorMessage NVARCHAR(4000);
-DECLARE @ErrorSeverity INT;
-DECLARE @ErrorState INT;
+DECLARE @ErrorMessage NVARCHAR(4000)
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @DataForQuote TABLE(
-		intId INT IDENTITY PRIMARY KEY CLUSTERED
-		, intCustomerId INT
-		, strQuoteNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	)
-
-	DECLARE @DataForDetailQuote TABLE(
-		intDetailId INT IDENTITY PRIMARY KEY CLUSTERED
-		, intQuoteDetailId INT
-		, intQuoteHeaderId INT
-	)
-
-	DECLARE @total INT
-		, @QuoteHeader INT
-		, @strMinQuote NVARCHAR(50)
-		, @strMaxQuote NVARCHAR(50)
-		, @QuoteNumber NVARCHAR(50)
-		, @incval INT
-
-	INSERT INTO @DataForQuote(
-		intCustomerId
-		, strQuoteNumber)
-	SELECT intEntityCustomerId
-		, NULL
+	SELECT intCustomerId = intEntityCustomerId
+		, strQuoteNumber = NULL
+	INTO #tmpQuotes
 	FROM tblARCustomerGroup CG
 	LEFT JOIN tblARCustomerGroupDetail CD ON CG.intCustomerGroupId = CD.intCustomerGroupId
 	LEFT JOIN tblEMEntityLocation EL ON CD.intEntityId = EL.intEntityId
@@ -55,194 +34,218 @@ BEGIN TRY
 		AND (ISNULL(@intCustomerId, 0) = 0 OR @intCustomerId = QS.intEntityCustomerId)
 	GROUP BY QS.intEntityCustomerId
 
-	SELECT @total = COUNT(*) FROM @DataForQuote
-	SET @incval = 1
-	
-	WHILE (@incval <= @total)
+	IF ((@ysnConfirm = 1) OR (@ysnVoid = 1))
 	BEGIN
 		IF @ysnConfirm = 1
 		BEGIN
 			UPDATE tblTRQuoteHeader
 			SET strQuoteStatus = 'Confirmed'
-			WHERE intEntityCustomerId = (SELECT TOP 1 intCustomerId FROM @DataForQuote WHERE intId = @incval) AND strQuoteStatus = 'UnConfirmed'
+			WHERE intEntityCustomerId IN (SELECT intCustomerId FROM #tmpQuotes) AND strQuoteStatus = 'UnConfirmed'
 		END
-		ELSE
+		ELSE IF @ysnVoid = 1
 		BEGIN
-			IF @ysnVoid = 1
-			BEGIN
-				UPDATE tblTRQuoteHeader
-				SET strQuoteStatus = 'Void'
-				WHERE intEntityCustomerId = (SELECT TOP 1 intCustomerId FROM @DataForQuote WHERE intId = @incval) AND strQuoteStatus = 'Confirmed'      
-			END
-			ELSE
-			BEGIN
-				EXEC dbo.uspSMGetStartingNumber 56, @QuoteNumber OUTPUT
-				UPDATE @DataForQuote
-				SET strQuoteNumber = @QuoteNumber
-				WHERE @incval = intId
-			END
+			UPDATE tblTRQuoteHeader
+			SET strQuoteStatus = 'Void'
+			WHERE intEntityCustomerId IN (SELECT intCustomerId FROM #tmpQuotes) AND strQuoteStatus = 'Confirmed'      
 		END
-		SET @incval = @incval + 1;
-	END
-	
-	IF ((@ysnConfirm = 1) OR (@ysnVoid = 1))
-	BEGIN
+
 		SET @intBegQuoteId = 0
 		SET @intEndQuoteId = 0
-		RETURN
 	END
-
-	INSERT INTO [dbo].[tblTRQuoteHeader] (
-		[strQuoteNumber]
-		, [strQuoteStatus]
-		, [dtmQuoteDate]
-		, [dtmQuoteEffectiveDate]
-		, [intEntityCustomerId]
-		, [strQuoteComments]
-		, [strCustomerComments]
-		, [intConcurrencyId])
-	SELECT
-		QS.strQuoteNumber
-		, 'UnConfirmed'
-		, @dtmQuoteDate	
-		, @dtmEffectiveDate	
-		, QS.intCustomerId	
-		, NULL
-		, NULL
-		, 1
-	FROM @DataForQuote QS
-
-	INSERT INTO [dbo].[tblTRQuoteDetail] (
-		[intQuoteHeaderId]
-		, [intItemId]
-		, [intTerminalId]
-		, [intSupplyPointId]
-		, [dblRackPrice]
-		, [dblDeviationAmount]
-		, [dblTempAdjustment]
-		, [dblFreightRate]
-		, [dblQuotePrice]
-		, [dblMargin]
-		, [dblQtyOrdered]
-		, [dblExtProfit]
-		, [dblTax]
-		, [intShipToLocationId]
-		, [intSpecialPriceId]
-		, [intConcurrencyId])
-	SELECT
-		QH.intQuoteHeaderId
-		, QD.intItemId
-		, SP.intEntityVendorId
-		, QD.intSupplyPointId
-		, NULL
-		, NULL
-		, NULL
-		, NULL
-		, NULL
-		, NULL
-		, 1
-		, NULL
-		, NULL
-		, EL.intEntityLocationId
-		, SpecialPrice.intSpecialPriceId
-		, 1
-	FROM @DataForQuote QS
-	LEFT JOIN tblTRQuoteHeader QH ON QS.strQuoteNumber = QH.strQuoteNumber
-	LEFT JOIN tblEMEntityLocation EL ON QS.intCustomerId = EL.intEntityId
-	LEFT JOIN vyuTRQuoteSelection QD ON QD.intEntityCustomerId = QS.intCustomerId AND QD.intEntityCustomerLocationId = EL.intEntityLocationId
-	LEFT JOIN vyuTRSupplyPointView SP ON QD.intSupplyPointId = SP.intSupplyPointId
-	CROSS APPLY(
-		SELECT TOP 1 intSpecialPriceId FROM tblARCustomerSpecialPrice ARPrice
-		WHERE ARPrice.intItemId = QD.intItemId AND ARPrice.intEntityCustomerId = QS.intCustomerId AND ARPrice.intCustomerLocationId = EL.intEntityLocationId
-			AND (
-				(ARPrice.strPriceBasis = 'O' AND ARPrice.intEntityVendorId = SP.intEntityVendorId AND ARPrice.intEntityLocationId = SP.intEntityLocationId)
-				OR
-				(ARPrice.strPriceBasis = 'R' AND ARPrice.intRackVendorId = SP.intEntityVendorId AND ARPrice.intRackLocationId = SP.intEntityLocationId)
-			)) SpecialPrice
-	WHERE QD.ysnQuote = 1
-
-	INSERT INTO @DataForDetailQuote
-	SELECT QD.intQuoteDetailId
-		,QH.intQuoteHeaderId
-	FROM @DataForQuote QT
-	LEFT JOIN tblTRQuoteHeader QH ON QH.strQuoteNumber = QT.strQuoteNumber
-	LEFT JOIN tblTRQuoteDetail QD on QH.intQuoteHeaderId = QD.intQuoteHeaderId
-	
-	DECLARE @detailId INT
-		, @intSpecialPriceId INT
-		, @dblRackPrice DECIMAL(18, 6)
-		, @dblDeviationAmount DECIMAL(18, 6);
-
-	SELECT @total = COUNT(*) FROM @DataForQuote
-	SET @incval = 1
-
-	WHILE (@incval <= @total)
+	ELSE
 	BEGIN
-		SELECT @QuoteHeader = intQuoteHeaderId
-		FROM @DataForQuote QS
-		LEFT JOIN tblTRQuoteHeader QH ON QS.strQuoteNumber = QH.strQuoteNumber
-		WHERE @incval = intId
+		DECLARE @CustomerId INT
+			, @QuoteNumber NVARCHAR(50)
+			, @QuoteId INT
+			, @MinQuote NVARCHAR(50)
+			, @MaxQuote NVARCHAR(50)
 
-		WHILE ((SELECT TOP 1 intQuoteDetailId FROM @DataForDetailQuote WHERE intQuoteHeaderId = @QuoteHeader) IS NOT NULL)
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpQuotes)
 		BEGIN
-			SELECT TOP 1 @detailId = intQuoteDetailId
-			FROM @DataForDetailQuote
-			WHERE intQuoteHeaderId = @QuoteHeader
-			
-			SELECT @intSpecialPriceId = intSpecialPriceId
-			FROM tblTRQuoteDetail
-			WHERE intQuoteDetailId = @detailId
-						
-			UPDATE tblTRQuoteDetail
-			SET dblRackPrice = ISNULL((SELECT ISNULL((CASE WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice]    -- Update Using Origin Rack
-														( @dtmEffectiveDate
-														, (SELECT intSupplyPointId FROM vyuTRSupplyPointView WHERE intEntityVendorId = SP.intEntityVendorId AND intEntityLocationId = SP.intEntityLocationId)
-														, SP.intItemId )
-													WHEN SP.strPriceBasis = 'R' THEN [dbo].[fnTRGetRackPrice]    -- Update using Fixed Rack
-														( @dtmEffectiveDate
-														, (SELECT intSupplyPointId FROM vyuTRSupplyPointView WHERE intEntityVendorId = SP.intRackVendorId AND intEntityLocationId = SP.intRackLocationId)
-														, SP.intRackItemId )
-													END), dblRackPrice)
-								FROM tblARCustomerSpecialPrice SP
-								WHERE SP.intSpecialPriceId = @intSpecialPriceId), dblRackPrice)
-			WHERE intQuoteDetailId = @detailId
-			
-			UPDATE tblTRQuoteDetail 
-			SET dblDeviationAmount = (SELECT TOP 1 SP.dblDeviation FROM tblARCustomerSpecialPrice SP WHERE SP.intSpecialPriceId = @intSpecialPriceId)
-			WHERE intQuoteDetailId = @detailId
+			SELECT TOP 1 @CustomerId = intCustomerId FROM #tmpQuotes
 
-			SELECT @dblDeviationAmount = dblDeviationAmount
-				, @dblRackPrice=dblRackPrice
-			FROM tblTRQuoteDetail
-			WHERE intQuoteDetailId = @detailId
+			EXEC dbo.uspSMGetStartingNumber 56, @QuoteNumber OUTPUT
+
+			INSERT INTO tblTRQuoteHeader (strQuoteNumber
+				, strQuoteStatus
+				, dtmQuoteDate
+				, dtmQuoteEffectiveDate
+				, intEntityCustomerId
+				, strQuoteComments
+				, strCustomerComments
+				, intConcurrencyId)
+			VALUES (@QuoteNumber
+				, 'UnConfirmed'
+				, @dtmQuoteDate	
+				, @dtmEffectiveDate	
+				, @CustomerId
+				, NULL
+				, NULL
+				, 1)
+
+			IF (ISNULL(@MinQuote, '') = '')
+			BEGIN
+				SET @MinQuote = @QuoteNumber
+			END
+			SET @MaxQuote = @QuoteNumber
+			SET @QuoteId = SCOPE_IDENTITY()
+
+			INSERT INTO tblTRQuoteDetail (intQuoteHeaderId
+				, intItemId
+				, intTerminalId
+				, intSupplyPointId
+				, dblRackPrice
+				, dblDeviationAmount
+				, dblTempAdjustment
+				, dblFreightRate
+				, dblQuotePrice
+				, dblMargin
+				, dblQtyOrdered
+				, dblExtProfit
+				, dblTax
+				, intShipToLocationId
+				, intSpecialPriceId
+				, intConcurrencyId
+				, intShipViaId
+				, intTaxGroupId)
+			SELECT @QuoteId
+				, QD.intItemId
+				, SP.intEntityVendorId
+				, QD.intSupplyPointId
+				, NULL
+				, NULL
+				, NULL
+				, NULL
+				, NULL
+				, NULL
+				, 1
+				, NULL
+				, NULL
+				, EL.intEntityLocationId
+				, SpecialPrice.intSpecialPriceId
+				, 1
+				, EL.intShipViaId
+				, EL.intTaxGroupId
+			FROM tblEMEntityLocation EL
+			LEFT JOIN vyuTRQuoteSelection QD ON QD.intEntityCustomerId = @CustomerId
+				AND QD.intEntityCustomerLocationId = EL.intEntityLocationId
+			LEFT JOIN vyuTRSupplyPointView SP ON QD.intSupplyPointId = SP.intSupplyPointId
+			CROSS APPLY(
+				SELECT TOP 1 intSpecialPriceId
+				FROM tblARCustomerSpecialPrice ARPrice
+				WHERE ARPrice.intItemId = QD.intItemId
+					AND ARPrice.intEntityCustomerId = @CustomerId
+					AND ARPrice.intCustomerLocationId = EL.intEntityLocationId
+					AND ((ARPrice.strPriceBasis = 'O'
+							AND ARPrice.intEntityVendorId = SP.intEntityVendorId
+							AND ARPrice.intEntityLocationId = SP.intEntityLocationId)
+						OR (ARPrice.strPriceBasis = 'R'
+							AND ARPrice.intRackVendorId = SP.intEntityVendorId
+							AND ARPrice.intRackLocationId = SP.intEntityLocationId)
+					)) SpecialPrice
+			WHERE QD.ysnQuote = 1
+				AND EL.intEntityId = @CustomerId
+
+			SELECT QD.intQuoteDetailId
+				, QD.intQuoteHeaderId
+			INTO #tmpQuoteDetail
+			FROM tblTRQuoteDetail QD
+			WHERE intQuoteHeaderId = @QuoteId
+	
+			DECLARE @QuoteDetailId INT
+				, @ItemId INT
+				, @LocationId INT
+				, @TaxGroupId INT
+				, @TransactionDate DATETIME
+				, @Amount NUMERIC(18,6)
+				, @Price NUMERIC(18,6)
+				, @IsReversal BIT
+				, @LineItems LineItemTaxDetailStagingTable
+				, @TaxTotal NUMERIC(18,6)
+				, @PriceType NVARCHAR(20)
+			
+			WHILE EXISTS (SELECT TOP 1 1 FROM #tmpQuoteDetail)
+			BEGIN
+				SELECT TOP 1 @QuoteDetailId = intQuoteDetailId FROM #tmpQuoteDetail
 				
-			UPDATE tblTRQuoteDetail
-			SET dblQuotePrice = @dblDeviationAmount + @dblRackPrice
-				, dblMargin = @dblDeviationAmount
-			WHERE intQuoteDetailId = @detailId
-				
-			DELETE FROM @DataForDetailQuote WHERE intQuoteDetailId = @detailId
+				UPDATE tblTRQuoteDetail
+				SET dblRackPrice = ISNULL(tblPatch.dblRackPrice, tblTRQuoteDetail.dblRackPrice)
+					, dblDeviationAmount = ISNULL(tblPatch.dblDeviation, 0.000000)
+					, dblFreightRate = 0
+					, dblQuotePrice = ISNULL(tblPatch.dblDeviation, 0.000000) + ISNULL(tblPatch.dblRackPrice, tblTRQuoteDetail.dblRackPrice)
+					, dblMargin = ISNULL(tblPatch.dblDeviation, 0.000000)
+					, dblTempAdjustment = 0.000000
+					, dblQtyOrdered = 0
+					, dblExtProfit = 0
+					, dblTax = 0
+				FROM (
+					SELECT SP.intSpecialPriceId
+						, SP.dblDeviation
+						, dblRackPrice = (CASE WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, OriginRack.intSupplyPointId, SP.intItemId)
+											WHEN SP.strPriceBasis = 'R' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, FixedRack.intSupplyPointId, SP.intRackItemId) END)
+					FROM tblARCustomerSpecialPrice SP
+					LEFT JOIN vyuTRSupplyPointView OriginRack ON OriginRack.intEntityVendorId = SP.intEntityVendorId
+						AND OriginRack.intEntityLocationId = SP.intEntityLocationId
+					LEFT JOIN vyuTRSupplyPointView FixedRack ON FixedRack.intEntityVendorId = SP.intRackVendorId
+						AND FixedRack.intEntityLocationId = SP.intRackLocationId
+				) tblPatch 
+				WHERE tblPatch.intSpecialPriceId = tblTRQuoteDetail.intSpecialPriceId
+					AND tblTRQuoteDetail.intQuoteDetailId = @QuoteDetailId
+
+				SELECT TOP 1 @ItemId = intItemId
+				, @LocationId = intShipToLocationId
+				, @TaxGroupId = intTaxGroupId
+				, @Amount = dblQuotePrice
+				, @Price = dblQuotePrice
+				FROM tblTRQuoteDetail
+				WHERE intQuoteDetailId = @QuoteDetailId
+
+				SELECT *
+				INTO #tmpTaxes
+				FROM dbo.fnConstructLineItemTaxDetail (
+					1
+					, @Amount
+					, @LineItems
+					, 0
+					, @ItemId
+					, @CustomerId
+					, @LocationId
+					, @TaxGroupId
+					, @Price
+					, @dtmEffectiveDate
+					, NULL
+					, 1
+					, NULL
+					, NULL
+					, NULL
+					, NULL
+				)
+
+				SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
+				FROM #tmpTaxes
+
+				UPDATE tblTRQuoteDetail
+				SET dblTax = @TaxTotal
+				WHERE intQuoteDetailId = @QuoteDetailId
+
+				DELETE FROM #tmpQuoteDetail WHERE intQuoteDetailId = @QuoteDetailId
+
+				DROP TABLE #tmpTaxes
+			END
 		END
-		
-		SET @incval = @incval + 1;
+
+		SELECT @intBegQuoteId = intQuoteHeaderId FROM tblTRQuoteHeader WHERE @MinQuote = strQuoteNumber
+		SELECT @intEndQuoteId = intQuoteHeaderId FROM tblTRQuoteHeader WHERE @MaxQuote = strQuoteNumber
+
+		IF @intBegQuoteId IS NULL
+		BEGIN
+			SET @intBegQuoteId = 0
+		END
+		IF @intEndQuoteId IS NULL
+		BEGIN
+			SET @intEndQuoteId = 0
+		END
 	END
-
-	SELECT @strMinQuote = MIN(strQuoteNumber)
-		, @strMaxQuote = MAX(strQuoteNumber)
-	FROM @DataForQuote
-
-	SELECT @intBegQuoteId = intQuoteHeaderId FROM tblTRQuoteHeader WHERE @strMinQuote = strQuoteNumber
-	SELECT @intEndQuoteId = intQuoteHeaderId FROM tblTRQuoteHeader WHERE @strMaxQuote = strQuoteNumber
-
-	IF @intBegQuoteId IS NULL
-	BEGIN
-		SET @intBegQuoteId = 0
-	END
-	IF @intEndQuoteId IS NULL
-	BEGIN
-		SET @intEndQuoteId = 0
-	END
-
 END TRY
 BEGIN CATCH
 	SELECT 
