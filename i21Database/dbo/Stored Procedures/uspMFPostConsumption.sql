@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@intEntityId INT = NULL
 	,@strRetBatchId NVARCHAR(40) = NULL OUT
 	,@intBatchId INT = NULL
+	,@ysnPostGL BIT=1
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -318,8 +319,11 @@ BEGIN
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 		,@intUserId
 
-	EXEC dbo.uspGLBookEntries @GLEntries
-		,@ysnPost
+	IF @ysnPostGL=1
+	BEGIN
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,@ysnPost
+	END
 
 	IF @dblOtherCharges IS NOT NULL
 		AND @dblOtherCharges > 0 
