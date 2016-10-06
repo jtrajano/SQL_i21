@@ -9,7 +9,14 @@
 			a.strName,  
 			d.strBankName,
 			d.strAccountNumber,
-			c.intRank
+			c.intRank,
+
+			d.strAccountType,
+			d.dtmEffectiveDate,
+			d.strDistributionType,
+			d.dblAmount,
+			d.intOrder,
+			d.ysnActive
 		FROM 		
 				tblEMEntity a
 			join [tblEMEntityType] b
