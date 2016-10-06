@@ -601,6 +601,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var win = config.window;
         this.validateRecord(config, function (result) {
             var lineItems = config.viewModel.data.current.tblICInventoryAdjustmentDetails();
+            var lotIds = [];
+            _.each(lineItems.data.items, function (value, key, list) {
+                if(!value.dummy)
+                    lotIds.push(value.data.intLotId);
+            });
+            if(_.size(lotIds) !== _.size(_.uniq(lotIds))) {
+                iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
+                return;
+            }
+
             var zeroCost = false;
             zeroCost = Ext.Array.each(lineItems.data.items, function (detail) {
                 if (!detail.dummy) {
