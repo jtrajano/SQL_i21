@@ -53,7 +53,7 @@ BEGIN
 					SOD.intContractDetailId = CD.intContractDetailId AND SOD.intContractHeaderId = CD.intContractHeaderId 
 				WHERE SOD.intSalesOrderId = @intSalesOrderId					
 			END
-			
+		DELETE FROM tblARTransactionDetail WHERE strTransactionType = 'Order' AND intTransactionId = @intSalesOrderId
 		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId
 	END
 
