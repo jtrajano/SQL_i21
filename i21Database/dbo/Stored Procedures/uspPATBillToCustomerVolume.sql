@@ -40,28 +40,39 @@ BEGIN
 		END
 		
 		-- CHECK IF ITEM IS LINKED TO PATRONAGE CATEGORY
-		SELECT AB.intEntityVendorId,
-			   IC.intPatronageCategoryId,
-			   AB.ysnPosted,
-			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ABD.dblQtyReceived <= 0 THEN 0 ELSE (ABD.dblQtyReceived * ABD.dblCost) END) 
-						   ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ABD.dblQtyReceived ELSE (ABD.dblQtyReceived * ICU.dblUnitQty) END ) END),
-			   @intFiscalYear as fiscalYear
-		  INTO #tempItem
-		  FROM tblAPBill AB
-	INNER JOIN tblAPBillDetail ABD
-			ON ABD.intBillId = AB.intBillId
-	INNER JOIN tblICItem IC
-			ON IC.intItemId = ABD.intItemId
-	INNER JOIN tblICItemUOM ICU
-			ON ICU.intItemId = IC.intItemId
-	INNER JOIN tblPATPatronageCategory PC
-			ON PC.intPatronageCategoryId = IC.intPatronageCategoryId
-		   AND PC.strPurchaseSale = 'Purchase'
-		 WHERE AB.intBillId = @intBillId
-		   AND IC.intPatronageCategoryId IS NOT NULL
-		   group by AB.intEntityVendorId,
-			   IC.intPatronageCategoryId,
-			   AB.ysnPosted
+		SELECT	AB.intEntityVendorId,
+			IC.intPatronageCategoryId,
+			AB.ysnPosted,
+			dblVolume = SUM(CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ABD.dblQtyReceived <= 0 THEN 0 ELSE (ABD.dblQtyReceived * ABD.dblCost) END) 
+						ELSE ABD.dblQtyReceived * UOM.dblUnitQty END),
+			@intFiscalYear as fiscalYear
+			INTO #tempItem
+			FROM tblAPBill AB
+		INNER JOIN tblAPBillDetail ABD
+				ON ABD.intBillId = AB.intBillId
+		INNER JOIN tblICItem IC
+				ON IC.intItemId = ABD.intItemId
+		INNER JOIN (SELECT	dblUnitQty = CASE WHEN dblUnitQty <= 0 THEN 1 ELSE dblUnitQty END,
+							intItemId,
+							intItemUOMId,
+							ysnStockUnit
+							FROM tblICItemUOM WHERE ysnStockUnit = 1
+							UNION
+					SELECT	dblUnitQty = CASE WHEN A.dblUnitQty <= 0 THEN 1 ELSE A.dblUnitQty END,
+							A.intItemId,
+							A.intItemUOMId,
+							A.ysnStockUnit
+							FROM tblICItemUOM A
+							INNER JOIN tblAPBillDetail B ON B.intUnitOfMeasureId = A.intItemUOMId) UOM
+				ON UOM.intItemId = ABD.intItemId
+		INNER JOIN tblPATPatronageCategory PC
+				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId
+				AND PC.strPurchaseSale = 'Purchase'
+				WHERE AB.intBillId = @intBillId
+				AND IC.intPatronageCategoryId IS NOT NULL
+				GROUP BY AB.intEntityVendorId,
+					IC.intPatronageCategoryId,
+					AB.ysnPosted
 
 		IF NOT EXISTS(SELECT * FROM #tempItem)
 		BEGIN
@@ -72,7 +83,6 @@ BEGIN
 		ELSE
 		BEGIN
 			
-
 			--select * from #tempItem
 			MERGE tblPATCustomerVolume AS PAT
 			USING #tempItem AS B
