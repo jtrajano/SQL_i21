@@ -44,6 +44,7 @@ Ext.define('Inventory.TestUtils', {
                 idProperty = config.idProperty,
                 fieldList = config.fields,
                 referenceList = config.references,
+                base = config.base,
                 callbacks = config.callbacks,
                 dontCheckFields = config.dontCheckFields;
 
@@ -54,8 +55,8 @@ Ext.define('Inventory.TestUtils', {
                     should.exist(model, "Adjustment Note model is not initialized.");
                 });
 
-                it('should be derived from iRely.BaseEntity', function () {
-                    model.should.be.an.instanceof(iRely.BaseEntity, "Not derived from iRely.BaseEntity");
+                it('should be derived from ' + base, function () {
+                    should.equal(Ext.getClass(model).superclass.self.getName(), base);
                 });
 
                 it('should have idProperty', function () {
