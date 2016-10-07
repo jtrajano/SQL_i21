@@ -3,18 +3,21 @@ AS
 	SELECT
 		account=C.strEntityNo 
 		,productCode= E.strItemNo
-		,preBuyPrice= CAST(B.dblCashPrice AS NUMERIC(18,4))
-		,preBuyQty= CAST(B.dblBalance AS NUMERIC(18,2))
+		,preBuyPrice= CAST(ISNULL(B.dblCashPrice,0.0) AS NUMERIC(18,4))
+		,preBuyQty= CAST(ISNULL(B.dblBalance,0.0) AS NUMERIC(18,2))
 		,contractPrice= CAST(0.0 AS NUMERIC(18,4))
-		,contractQty= CAST(0.0 AS NUMERIC(18,2))	
+		,contractQty= CAST(0.0 AS NUMERIC(18,2))
 	FROM tblCTContractHeader A
-	INNER JOIN vyuCTContractHeaderNotMapped H
-		ON A.intContractHeaderId = H.intContractHeaderId
 	INNER JOIN tblCTContractDetail B
 		ON A.intContractHeaderId = B.intContractHeaderId
 	INNER JOIN tblEMEntity C
 		ON A.intEntityId = C.intEntityId
 	LEFT JOIN tblICItem E
 		ON B.intItemId = E.intItemId	
+	WHERE DATEADD(dd, DATEDIFF(dd, 0, B.dtmStartDate), 0) <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
+		AND DATEADD(dd, DATEDIFF(dd, 0, B.dtmEndDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
+		AND B.dblBalance > 0
+		AND B.intContractDetailId IN (SELECT MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = A.intContractHeaderId)
+		AND B.intContractHeaderId IN (SELECT MIN(intContractHeaderId) FROM tblCTContractHeader WHERE intEntityId = A.intEntityId)
 
 GO
