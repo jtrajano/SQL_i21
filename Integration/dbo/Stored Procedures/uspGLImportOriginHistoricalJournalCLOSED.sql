@@ -49,11 +49,13 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
 																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'') END))
 	
 		INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intEntityId,dtmDate,strMachineName,strJournalType,intConcurrencyId)
-			VALUES(''Import Origin Historical Journal'',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intEntityId,GETDATE(),'','',1)
+			VALUES(''Import Origin Historical Journal'',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intEntityId,GETDATE(),'''',''Origin Journal'',1)
 
-		DECLARE @intImportLogId INT
+		DECLARE @intImportLogId INT, @intCompanyId INT
 
+		SELECT TOP 1 @intCompanyId = intCompanySetupID FROM tblSMCompanySetup
 		SELECT @intImportLogId  =SCOPE_IDENTITY()
+
 		;WITH ORIGINHEADER AS
 		(
 				SELECT 
@@ -100,11 +102,27 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
 			FROM ORIGINHEADER
 		)
 		INSERT tblGLJournal (
-			dtmReverseDate,strJournalId,strTransactionType, 
-		dtmDate,
-		strReverseLink,intCurrencyId,dblExchangeRate,dtmPosted,strDescription,
-							ysnPosted,intConcurrencyId,dtmDateEntered,intEntityId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
-		SELECT  dtmReverseDate,
+			intCompanyId,
+			dtmReverseDate,
+			strJournalId,
+			strTransactionType, 
+			dtmDate,
+			strReverseLink,
+			intCurrencyId,
+			dblExchangeRate,
+			dtmPosted,
+			strDescription,
+			ysnPosted,
+			intConcurrencyId,
+			dtmDateEntered,
+			intEntityId,
+			strSourceId,
+			strJournalType,
+			strRecurringStatus,
+			strSourceType)
+		SELECT  
+			@intCompanyId,
+			dtmReverseDate,
 			strJournalId,
 			strTransactionType, 
 			dtmDate,
@@ -146,10 +164,10 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
 			0 AS DebitUnitsInlbs,
 			''N'' AS strCorrecting,
 			glarc_source_pgm AS strSourcePgm,																	-- aptrxu
-			'' AS strCheckbookNo,																				-- 01
-			'' AS strWorkArea,
+			'''' AS strCheckbookNo,																				-- 01
+			'''' AS strWorkArea,
 			glarc_period,
-			CONVERT(VARCHAR(3),glarc_src_id ) + CONVERT(VARCHAR(5),glarc_src_seq) + CONVERT(VARCHAR(6),(glarc_period)) AS glarc_jrnl_no  ,
+			CONVERT(VARCHAR(3),glarc_src_id ) + CONVERT(VARCHAR(5),glarc_src_seq) + CONVERT(VARCHAR(6),(glarc_period)) AS glarc_jrnl_no,
 			glarc_src_id,
 			glarc_src_seq,    
 			CASE WHEN 
@@ -159,7 +177,7 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
 					+substring(convert(varchar(10),glarc_trans_dt),5,2)
 					+substring(convert(varchar(10),glarc_trans_dt),7,2) AS DATETIME)
 			ELSE
-				cast( substring(replace(convert(varchar(20),tblGLJournal.dtmDate,102),''.'',''),1,6) + ''01''  as datetime )
+				cast( substring(replace(convert(varchar(20),tblGLJournal.dtmDate,102),''.'',''''),1,6) + ''01''  as datetime )
 			END
 			AS dtmDate,
 			A4GLIdentity
@@ -188,15 +206,62 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
 		 
 		
 		
-		INSERT INTO tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyId,
-								dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea,strSourceKey)
-						SELECT intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,DebitRate,dblCredit,CreditRate,DebitUnits,CreditUnits,strDescription,1,
-								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea,A4GLIdentity
-						FROM  #iRelyImptblGLJournalDetail
+		INSERT INTO tblGLJournalDetail (
+			intCompanyId, 
+			intLineNo,
+			intJournalId,
+			dtmDate,
+			intAccountId,
+			dblDebit,
+			dblDebitRate,
+			dblCredit,
+			dblCreditRate,
+			dblDebitUnit,
+			dblCreditUnit,
+			strDescription,
+			intConcurrencyId,
+			dblUnitsInLBS,
+			strDocument,
+			strComments,
+			strReference,
+			dblDebitUnitsInLBS,
+			strCorrecting,
+			strSourcePgm,
+			strCheckBookNo,
+			strWorkArea,
+			strSourceKey)
+		SELECT 
+			@intCompanyId, 
+			intLineNo,
+			intJournalId,
+			dtmDate,
+			intAccountId,
+			dblDebit,
+			DebitRate,
+			dblCredit,
+			CreditRate,
+			DebitUnits,
+			CreditUnits,
+			strDescription,
+			1,
+			dblUnitsInlbs,
+			strDocument,
+			strComments,
+			strReference,
+			DebitUnitsInlbs,
+			strCorrecting,
+			strSourcePgm,
+			strCheckbookNo,
+			strWorkArea,
+			A4GLIdentity
+		FROM  #iRelyImptblGLJournalDetail
 
 
-		UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +''/01/''+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
-                                        WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
-										WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)'
+		UPDATE tblGLJournal 
+		SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +''/01/''+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate 
+		FROM tblGLJournalDetail 
+		WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
+		WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)'
+
 	EXEC sp_executesql @sql, @ParmDefinition,@intEntityId = @intEntityId, @resultOut = @result OUTPUT
 END

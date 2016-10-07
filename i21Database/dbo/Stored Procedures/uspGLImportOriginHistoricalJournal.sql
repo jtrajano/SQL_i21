@@ -21,9 +21,11 @@ BEGIN
 	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intEntityId,dtmDate,strMachineName,strJournalType,intConcurrencyId)
 		VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intEntityId,GETDATE(),'','',1)
 
-	DECLARE @intImportLogId INT
+	DECLARE @intImportLogId INT, @intCompanyId INT
 
+	SELECT TOP 1 @intCompanyId = intCompanySetupID FROM tblSMCompanySetup
 	SELECT @intImportLogId  =SCOPE_IDENTITY()
+
 		;WITH ORIGINHEADER AS
 		(
 				SELECT 
@@ -70,11 +72,27 @@ BEGIN
 			FROM ORIGINHEADER
 		)
 		INSERT tblGLJournal (
-			dtmReverseDate,strJournalId,strTransactionType, 
-		dtmDate,
-		strReverseLink,intCurrencyId,dblExchangeRate,dtmPosted,strDescription,
-							ysnPosted,intConcurrencyId,dtmDateEntered,intEntityId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
-		SELECT  dtmReverseDate,
+			intCompanyId,
+			dtmReverseDate,
+			strJournalId,
+			strTransactionType, 
+			dtmDate,
+			strReverseLink,
+			intCurrencyId,
+			dblExchangeRate,
+			dtmPosted,
+			strDescription,
+			ysnPosted,
+			intConcurrencyId,
+			dtmDateEntered,
+			intEntityId,
+			strSourceId,
+			strJournalType,
+			strRecurringStatus,
+			strSourceType)
+		SELECT  
+			@intCompanyId,
+			dtmReverseDate,
 			strJournalId,
 			strTransactionType, 
 			dtmDate,
@@ -155,19 +173,68 @@ BEGIN
 		SELECT TOP 1 @invalidDatesUpdated = '1' FROM #iRelyImptblGLJournalDetail WHERE 
 		ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) 
 			+ substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 0
-		 
+		                     
+       
+
 		
 		
-		INSERT INTO tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyId,
-								dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea,strSourceKey)
-						SELECT intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,DebitRate,dblCredit,CreditRate,DebitUnits,CreditUnits,strDescription,1,
-								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea,A4GLIdentity
-						FROM  #iRelyImptblGLJournalDetail
+		INSERT INTO tblGLJournalDetail (
+			intCompanyId, 
+			intLineNo,
+			intJournalId,
+			dtmDate,
+			intAccountId,
+			dblDebit,
+			dblDebitRate,
+			dblCredit,
+			dblCreditRate,
+			dblDebitUnit,
+			dblCreditUnit,
+			strDescription,
+			intConcurrencyId,
+			dblUnitsInLBS,
+			strDocument,
+			strComments,
+			strReference,
+			dblDebitUnitsInLBS,
+			strCorrecting,
+			strSourcePgm,
+			strCheckBookNo,
+			strWorkArea,
+			strSourceKey)
+		SELECT 
+			@intCompanyId, 
+			intLineNo,
+			intJournalId,
+			dtmDate,
+			intAccountId,
+			dblDebit,
+			DebitRate,
+			dblCredit,
+			CreditRate,
+			DebitUnits,
+			CreditUnits,
+			strDescription,
+			1,
+			dblUnitsInlbs,
+			strDocument,
+			strComments,
+			strReference,
+			DebitUnitsInlbs,
+			strCorrecting,
+			strSourcePgm,
+			strCheckbookNo,
+			strWorkArea,
+			A4GLIdentity
+		FROM  #iRelyImptblGLJournalDetail
 
 
-		UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
-                                        WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
-										WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
+		UPDATE tblGLJournal 
+		SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate 
+		FROM tblGLJournalDetail 
+        WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
+		WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
+
 		UPDATE tblSMPreferences set strValue = 'true' where strPreference = 'isHistoricalJournalImported'
 		SELECT 'SUCCESS:'+  @result +':' + @invalidDatesUpdated 
 		
