@@ -123,7 +123,7 @@ BEGIN
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
 	BillDtl.dblTotal
-	,(SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL) AS dblTotalDiscount
+	,ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS dblTotalDiscount
 	, BillDtl.intBillId
 	FROM tblCMBankTransaction BNKTRN
 	INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -177,7 +177,7 @@ BEGIN
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
 	BillDtl.dblTotal
-	,(SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL) AS dblTotalDiscount
+	,ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS dblTotalDiscount
 	, BillDtl.intBillId
 	FROM tblCMBankTransaction BNKTRN
 	--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
