@@ -153,7 +153,7 @@ Inventory.TestUtils.testModel({
         afterInit: function (model) {
             describe('validations', function () {
                 it('should validate properly', function () {
-                    
+
                 })
             });
         }
