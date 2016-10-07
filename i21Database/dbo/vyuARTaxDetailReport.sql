@@ -6,6 +6,7 @@ FROM (
 	SELECT intTransactionDetailTaxId	=  IDT.intInvoiceDetailTaxId
 		 , intTransactionDetailId		= IDT.intInvoiceDetailId
 		 , IDT.dblAdjustedTax
+		 , IDT.dblRate 
 		 , IDT.intTaxCodeId
 		 , strTaxTransactionType		= 'Invoice'
 	FROM tblARInvoiceDetailTax IDT 
@@ -18,6 +19,7 @@ FROM (
 	SELECT intTransactionDetailTaxId	= SDT.intSalesOrderDetailTaxId
 		 , intTransactionDetailId		= SDT.intSalesOrderDetailId
 		 , SDT.dblAdjustedTax
+		 , SDT.dblRate 
 		 , SDT.intTaxCodeId
 		 , strTaxTransactionType   = 'Sales Order'
 	FROM tblSOSalesOrderDetailTax SDT
