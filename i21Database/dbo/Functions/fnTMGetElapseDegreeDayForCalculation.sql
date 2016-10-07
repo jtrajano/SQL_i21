@@ -90,7 +90,7 @@ BEGIN
 	END
 	
 	SET @dblElapseDDForCalc =  @intElapseDDBetweenDelivery - @dblElapseDDDuringHold
-	
+	SET @dblReturnValue = @dblElapseDDForCalc
 	RETURN @dblReturnValue
 END
 GO

@@ -714,7 +714,7 @@ BEGIN
 						,dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,null)
 						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,0,null)
 						,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
-						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intTopInvoiceDetailId,null)
+						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intClockReadingId,null)
 						,intElapsedDaysBetweenDeliveries = @intElapseDays
 						,strSeason = H.strCurrentSeason
 						,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse

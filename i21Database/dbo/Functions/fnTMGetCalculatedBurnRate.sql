@@ -23,7 +23,7 @@ BEGIN
 	DECLARE @dblInvoiceItemTotal NUMERIC(18,6)
 	DECLARE @dblInvoiceQuantity NUMERIC(18,6)
 	DECLARE @dblMeterReading NUMERIC(18,6)
-	DECLARE @dblEstimatedGallonsLeft NUMERIC(18,6)
+	DECLARE @dblLastGallonsInTank NUMERIC(18,6)
 	DECLARE @dblPercentAfterDelivery NUMERIC(18,6)
 	DECLARE @dblTotalCapacity NUMERIC(18,6)
 	DECLARE @dblSummerDailyUse NUMERIC(18,6)
@@ -47,10 +47,11 @@ BEGIN
 			,@intLastDeliveryDegreeDay = intLastDeliveryDegreeDay
 			,@strBillingBy = strBillingBy
 			,@dblLastMeterReading = dblLastMeterReading
-			,@dblEstimatedGallonsLeft = dblEstimatedGallonsLeft
+			,@dblLastGallonsInTank = dblLastGalsInTank
 			,@dblSummerDailyUse = dblSummerDailyUse
 			,@dblWinterDailyUse = dblWinterDailyUse
 			,@dtmLastDeliveryDate = dtmLastDeliveryDate
+			,@dblTotalCapacity = dblTotalCapacity
 		FROM tblTMSite
 		WHERE intSiteID = @intSiteId
 	END
@@ -64,14 +65,16 @@ BEGIN
 			,@intLastDeliveryDegreeDay = A.intDegreeDayOnLastDeliveryDate
 			,@strBillingBy = B.strBillingBy
 			,@dblLastMeterReading = A.dblLastMeterReading
-			,@dblEstimatedGallonsLeft = A.dblGallonsInTankbeforeDelivery
+			,@dblLastGallonsInTank = A.dblSiteLastGalsInTank
 			,@dblSummerDailyUse = A.dblSummerDailyUsageBetweenDeliveries
 			,@dblWinterDailyUse = A.dblWinterDailyUsageBetweenDeliveries
 			,@dtmLastDeliveryDate = A.dtmSiteLastDelivery
+			,@dblTotalCapacity = B.dblTotalCapacity
 		FROM tblTMDeliveryHistory A
 		INNER JOIN tblTMSite B
 			ON A.intSiteID = B.intSiteID
 		WHERE A.intDeliveryHistoryID = @intDeliveryHistoryId
+	
 	END
 	
 	--- Get Degree Day reading
@@ -84,6 +87,9 @@ BEGIN
 	---	 get ellapse Degree Day between delivery
 	SET @dblElapseDDBetweenDelivery = ROUND((ISNULL(@dblAccumulatedDD,0) - ISNULL(@intLastDeliveryDegreeDay,0)),0)
 	
+	--get percent after deliver
+	SELECT TOP 1 @dblPercentAfterDelivery = dblPercentFull FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId 
+
 	--- get Invoice detail total
 	-------CHECK if multiple Invoice scenario
 	IF(@ysnMultipleInvoice <> 1)
@@ -125,7 +131,7 @@ BEGIN
 	ELSE
 	BEGIN
 		---Set Gallons Used
-		SET @dblGallonsUsed = @dblEstimatedGallonsLeft + @dblInvoiceQuantity - ((ISNULL(@dblPercentAfterDelivery,0)/100) * @dblTotalCapacity)
+		SET @dblGallonsUsed = @dblLastGallonsInTank + @dblInvoiceQuantity - ((ISNULL(@dblPercentAfterDelivery,0)/100) * @dblTotalCapacity)
 	END
 	
 	
@@ -142,14 +148,14 @@ BEGIN
 	---Get Elapse days 
 	IF(@dtmLastDeliveryDate IS NOT NULL AND @dtmDeliveryDate > @dtmLastDeliveryDate)
 	BEGIN
-		SET @intElapseDays = DATEDIFF(DAY,@dtmDeliveryDate,@dtmLastDeliveryDate)
+		SET @intElapseDays = ABS(DATEDIFF(DAY,@dtmDeliveryDate,@dtmLastDeliveryDate))
 	END
 	ELSE
 	BEGIN
 		SET @intElapseDays = 0
 	END
 
-	SET @dblElapseDDForCalc =  dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intInvoiceDetailId,@intDeliveryHistoryId)
+	SET @dblElapseDDForCalc =  dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intDDReadingId,@intDeliveryHistoryId)
 	
 	IF (ISNULL(@dblGallonsUsed,0) <> 0 AND ((@dblGallonsUsed - (@intElapseDays * @dblDailyGalsUsed)) <> 0))
 	BEGIN
