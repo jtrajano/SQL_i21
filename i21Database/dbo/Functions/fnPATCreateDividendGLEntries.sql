@@ -99,7 +99,7 @@ BEGIN
 		[strBatchID]					=	'',
 		[intAccountId]					=	@apClearing, 
 		[dblDebit]						=	0,
-		[dblCredit]						=	C.dblDividendAmount,
+		[dblCredit]						=	B.dblDividendAmount - (B.dblDividendAmount * (A.dblFederalTaxWithholding/100)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strDividendNo,
@@ -129,19 +129,15 @@ BEGIN
 	FROM	[dbo].tblPATDividends A
 	INNER JOIN tblPATDividendsCustomer B
 			ON A.intDividendId = B.intDividendId
-	INNER JOIN tblPATDividendsStock C
-			ON B.intDividendCustomerId = C.intDividendCustomerId
-	INNER JOIN tblPATStockClassification D
-			ON D.intStockId = C.intStockId
 	WHERE	A.intDividendId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL
 	--FWT Liability
-	SELECT	
+	SELECT 
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
 		[strBatchID]					=	'',
 		[intAccountId]					=	(SELECT DISTINCT intFWTLiabilityAccountId FROM tblPATCompanyPreference), 
 		[dblDebit]						=	0,
-		[dblCredit]						=	C.dblDividendAmount,
+		[dblCredit]						=	B.dblDividendAmount - (B.dblDividendAmount - (B.dblDividendAmount * (A.dblFederalTaxWithholding/100))),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strDividendNo,
@@ -171,13 +167,7 @@ BEGIN
 	FROM	[dbo].tblPATDividends A
 	INNER JOIN tblPATDividendsCustomer B
 			ON A.intDividendId = B.intDividendId
-	INNER JOIN tblPATDividendsStock C
-			ON B.intDividendCustomerId = C.intDividendCustomerId
-	INNER JOIN tblPATStockClassification D
-			ON D.intStockId = C.intStockId
-	WHERE	A.intDividendId IN (SELECT intTransactionId FROM @tmpTransacions)
-
-	
+	WHERE	A.intDividendId IN (SELECT intTransactionId FROM @tmpTransacions)	
 	
 	RETURN 
 END
