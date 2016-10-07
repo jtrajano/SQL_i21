@@ -21,7 +21,8 @@ BEGIN
 	DECLARE @intJulianCalendarFillId INT
 	DECLARE @intDeliveryHistoryIdOfPreviousDelivery INT
 	DECLARE @strBillingBy NVARCHAR(15)
-	
+	DECLARE @dblSeasonResetAccumulated NUMERIC(18,6)
+	DECLARE @intSeasonResetArchiveID INT
 	
 	PRINT 'Get invoice header detail'
 	-----Get invoice header detail
@@ -125,12 +126,32 @@ BEGIN
 		
 		
 		----GET clock reading for last delivery
-		SELECT TOP 1
-			@intLastDegreeDays = intDegreeDays
-			,@dblLastAccumulatedDegreeDay = dblAccumulatedDegreeDay
-			,@intLastClockReadingId = intDegreeDayReadingID
-		FROM tblTMDegreeDayReading
-		WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmPreviousLastDelivery), 0) 
+		IF EXISTS(SELECT TOP 1 1 FROM tblTMDegreeDayReading WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmPreviousLastDelivery), 0))
+		BEGIN
+			SELECT TOP 1
+				@intLastDegreeDays = intDegreeDays
+				,@dblLastAccumulatedDegreeDay = dblAccumulatedDegreeDay
+				,@intLastClockReadingId = intDegreeDayReadingID
+			FROM tblTMDegreeDayReading
+			WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmPreviousLastDelivery), 0) 
+		END
+		ELSE
+		BEGIN
+		---Check on Season Reset Archive
+			SELECT TOP 1
+				@intLastDegreeDays = intDegreeDays
+				,@dblLastAccumulatedDegreeDay = dblAccumulatedDD
+				,@intLastClockReadingId = intDDReadingID
+				,@intSeasonResetArchiveID = intSeasonResetArchiveID
+			FROM tblTMDDReadingSeasonResetArchive
+			WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmPreviousLastDelivery), 0) 
+
+			SELECT TOP 1 @dblSeasonResetAccumulated = dblAccumulatedDD FROM tblTMDDReadingSeasonResetArchive 
+			WHERE intSeasonResetArchiveID = @intSeasonResetArchiveID 
+			ORDER BY dtmDate DESC
+
+			SET @dblLastAccumulatedDegreeDay = @dblLastAccumulatedDegreeDay - @dblSeasonResetAccumulated
+		END
 		
 		
 		---CHECK each delivery history header if it has some delivery details left
