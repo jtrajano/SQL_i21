@@ -1,30 +1,41 @@
 /**
  * Created by WEstrada on 10/7/2016.
  */
-describe('Inventory.view.CategoryViewController', function() {
-    var vc;
-
-    beforeEach(function () {
-        vc = Ext.create('Inventory.view.CategoryViewController');
-    });
-
-    afterEach(function () {
-        vc.destroy();
-    });
-
-    it('should exist', function() {
-        should.exist(vc);
-    });
-
-    it('should have a config', function() {
-        should.exist(vc.config);
-
-        describe("config", function() {
-           it('should have a search config', function () {
-               //var searchConfig = vc.config.searchConfig;
-
-
-           })
+Inventory.TestUtils.testViewController({
+    name: 'Inventory.view.CategoryViewController',
+    init: function(viewController) {
+        it('should have a setupContext method', function () {
+            should.exist(viewController.setupContext);
         });
-    })
+
+        it('should have a show method', function () {
+            should.exist(viewController.show);
+        });
+
+        describe("functional viewcontroller", function () {
+            it('should be created successfully', function () {
+
+            });
+        })
+    },
+    callbacks: {
+        searchConfig: function(search) {
+            it('should have a search title "Search Category"', function () {
+                search.title.should.be.equal("Search Category");
+            });
+
+            it('should have a search type of Inventory.Category', function() {
+                search.type.should.be.equal("Inventory.Category");
+            });
+
+            it('should have a read API of ../Inventory/api/Category/Search', function () {
+                search.api.read.should.be.equal("../Inventory/api/Category/Search");
+            });
+        },
+        bindConfig: function(binding) {
+            it('should have a title binding', function () {
+                binding.bind.title.should.be.equal('Category - {current.strCategoryCode}');
+            })
+        }
+    }
 });

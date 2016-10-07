@@ -50,7 +50,7 @@ var references = [
     }
 ];
 
-Inventory.TestUtils.checkModelProperties({
+Inventory.TestUtils.testModel({
     model: 'Inventory.model.AdjustmentDetail',
     idProperty: 'intInventoryAdjustmentDetailId',
     fields: fields,

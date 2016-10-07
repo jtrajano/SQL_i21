@@ -39,13 +39,14 @@ var fields = [
     { name: 'ysnYieldAdjustment', type: 'boolean' },
     { name: 'ysnWarehouseTracked', type: 'boolean' }
 ];
-Ext.require('AccountsPayable.common.validators.NotZero');
 
-Inventory.TestUtils.checkModelProperties({
+//Ext.require('AccountsPayable.common.validators.NotZero');
+
+Inventory.TestUtils.testModel({
     model: 'Inventory.model.Category',
     idProperty: 'intCategoryId',
     fields: fields,
-    listeners: {
+    callbacks: {
         afterInit: function(model) {
             it('should return model when properties are correct', function() {
                 should.exist(model, "Model does not exists.");

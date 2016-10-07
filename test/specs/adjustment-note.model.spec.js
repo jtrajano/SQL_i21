@@ -13,7 +13,7 @@ var references = [
     { name: 'intInventoryAdjustmentId', type: 'Inventory.model.Adjustment', role: 'tblICInventoryAdjustmentNotes' }
 ];
 
-Inventory.TestUtils.checkModelProperties({
+Inventory.TestUtils.testModel({
     model: 'Inventory.model.AdjustmentNote',
     idProperty: 'intInventoryAdjustmentNoteId',
     fields: fields,

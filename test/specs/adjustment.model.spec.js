@@ -12,8 +12,9 @@ var fields = [
     { name: 'intSort', type: 'int', allowNull: true }
 ];
 
-Inventory.TestUtils.checkModelProperties({
+Inventory.TestUtils.testModel({
     model: 'Inventory.model.Adjustment',
     idProperty: 'intInventoryAdjustmentId',
+    checkFields: true,
     fields: fields
 });
