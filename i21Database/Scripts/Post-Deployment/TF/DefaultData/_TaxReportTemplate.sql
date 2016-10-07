@@ -268,7 +268,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, intTemplateItemNumber = 23, strDescription = '7. Gallons of gasoline sold to taxable marina' WHERE strTemplateItemId = 'MF-360-Summary-023'
+			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, intTemplateItemNumber = 23, strDescription = '7. Gallons of gasoline sold to taxable marina', strScheduleCode = '0' WHERE strTemplateItemId = 'MF-360-Summary-023'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Detail-001')
