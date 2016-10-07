@@ -497,7 +497,7 @@ BEGIN TRY
 
 		IF @strInputQuantityReadOnly = 'True'
 		BEGIN
-			SELECT @dblInputWeight = ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)
+			SELECT @dblInputWeight = ri.dblCalculatedQuantity * ((Case When r.intItemUOMId=@intProduceUnitMeasureId Then @dblProduceQty Else @dblPhysicalCount End)/ r.dblQuantity)
 			FROM dbo.tblMFRecipeItem ri
 			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			LEFT JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
