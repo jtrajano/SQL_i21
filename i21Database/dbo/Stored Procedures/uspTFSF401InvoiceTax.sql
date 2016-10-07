@@ -314,7 +314,7 @@ DECLARE @tblTempTransaction TABLE (
 							DECLARE @GasoholConfig NUMERIC(18, 6)
 
 							-- GASOLINE USE TAX COLLECTED
-							SET @ConfigGUTRate = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-2DGasoline') 
+							SET @ConfigGUTRate = (SELECT TOP 1 CASE WHEN strConfiguration IS NOT NULL THEN strConfiguration ELSE 0 END FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-2DGasoline') 
 							SET @TaxAmountInvTransfer = (SELECT dblQtyShipped FROM @tblTempTransaction WHERE intId = @Count)
 							SET @TaxAmountInvTransferTotal = @TaxAmountInvTransfer * @ConfigGUTRate
 							UPDATE @tblTempTransaction SET dblTax = ISNULL(@TaxAmountInvTransferTotal, 0) WHERE strInvoiceNumber IS NULL AND intInvoiceDetailId = @InvoiceDetailId
