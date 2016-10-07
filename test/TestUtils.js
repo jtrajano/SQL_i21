@@ -52,15 +52,17 @@ Ext.define('Inventory.TestUtils', {
 
             describe(modelName, function () {
                 it('should exists', function () {
-                    should.exist(model, "Adjustment Note model is not initialized.");
+                    should.exist(model, "Adjustment Note model might not have been initialized.");
                 });
 
-                it('should be derived from ' + base, function () {
-                    should.equal(Ext.getClass(model).superclass.self.getName(), base);
-                });
+                if(base) {
+                    it('should be derived from ' + base, function () {
+                        should.equal(Ext.getClass(model).superclass.self.getName(), base);
+                    });
+                }
 
-                it('should have idProperty', function () {
-                    if (model.idProperty)
+                it('should have an idProperty', function () {
+                    if(model.idProperty && !(model.idProperty === 'id' && (_.isUndefined(idProperty) || _.isEmpty(idProperty))))
                         model.idProperty.should.equal(idProperty);
                 });
 
