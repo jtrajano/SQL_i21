@@ -428,7 +428,7 @@ SET @strmessage = 'Line item and Lot storage location is not under %s.'
 EXEC sp_addmessage 80087,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80088) EXEC sp_dropmessage 80088, 'us_english'	
-SET @strmessage = 'Other Vendor for Other Charge item %s is required to accrue.'
+SET @strmessage = 'Vendor for Other Charge item %s is required to accrue.'
 EXEC sp_addmessage 80088,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80089) EXEC sp_dropmessage 80089, 'us_english'	
@@ -454,3 +454,7 @@ EXEC sp_addmessage 80093,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80094) EXEC sp_dropmessage 80094, 'us_english'	
 SET @strmessage = 'Costing method mismatch. %s is set to use Ave Costing. %s is going to use Actual costing. It can''t be used together. You can fix it by changing the costing method to FIFO or LIFO.'
 EXEC sp_addmessage 80094,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80095) EXEC sp_dropmessage 80095, 'us_english'	
+SET @strmessage = 'The %s cannot be accrued to the same Shipment Customer.'
+EXEC sp_addmessage 80095,11,@strmessage,'us_english','False'

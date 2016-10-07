@@ -62,7 +62,7 @@ END
 	
 -- Validate 
 BEGIN 
-	-- Price cannot be checked if Accrue is checked for Shipment vendor.
+	-- Other Charges cannot be Accrued to the Same Shipment Customer
 	SELECT TOP 1 
 			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
 			,@intItemId = Item.intItemId
@@ -71,14 +71,13 @@ BEGIN
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = OtherCharge.intChargeId
 	WHERE	OtherCharge.ysnAccrue = 1
-			AND OtherCharge.ysnPrice = 1
-			AND ISNULL(OtherCharge.intEntityVendorId, Shipment.intEntityId) = Shipment.intEntityId
+			AND OtherCharge.intEntityVendorId = Shipment.intEntityCustomerId
 			AND Shipment.intInventoryShipmentId = @intInventoryShipmentId
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- The {Other Charge} is both a payable and deductible to the invoice of the same vendor. Please correct the Accrue or Price checkbox.
-		RAISERROR(80064, 11, 1, @strItemNo)
+		-- The {Other Charge} cannot be accrued to the same Shipment Customer.
+		RAISERROR(80095, 11, 1, @strItemNo)
 		GOTO _Exit
 	END 
 END 
@@ -94,12 +93,12 @@ BEGIN
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = OtherCharge.intChargeId
 	WHERE	OtherCharge.ysnAccrue = 1
-			AND (OtherCharge.intEntityVendorId IS NULL OR OtherCharge.intEntityVendorId = Shipment.intEntityId)
+			AND OtherCharge.intEntityVendorId IS NULL
 			AND Shipment.intInventoryShipmentId = @intInventoryShipmentId
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- Other Vendor for {Other Charge Item} is required to accrue.
+		-- Vendor for {Other Charge Item} is required to accrue.
 		RAISERROR(80088, 11, 1, @strItemNo)
 		GOTO _Exit
 	END 
@@ -487,6 +486,8 @@ BEGIN
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
 
+-- Removed this part for the new specs of IS Other Charges Posting
+/*
 	-------------------------------------------------------------------------------------------
 	-- Accrue: Yes
 	-- Vendor: Specified
@@ -676,6 +677,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 1
+*/
 END
 
 -- Exit point
