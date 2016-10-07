@@ -2,6 +2,8 @@
   "name": "inventory",
   "version": "0.0.1",
   "devDependencies": {
+    "child_process": "^1.0.2",
+    "event-stream": "^3.3.4",
     "fs": "0.0.1-security",
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
@@ -12,9 +14,11 @@
     "grunt-template": "^1.0.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
+    "gulp-js-prettify": "^0.1.0",
     "gulp-livereload": "^3.8.1",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.0.0",
+    "gulp-util": "^3.0.7",
     "karma": "^1.2.0",
     "karma-chai": "^0.1.0",
     "karma-mocha": "^1.1.1",
@@ -22,6 +26,10 @@
     "merge-stream": "^1.0.0",
     "mocha": "^3.0.2",
     "path": "^0.12.7",
-    "sinon": "^1.17.6"
+    "sinon": "^1.17.6",
+    "through": "^2.3.8",
+    "through2": "^2.0.1",
+    "topo-sort": "^1.0.0",
+    "transform": "^1.1.2"
   }
 }
