@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspTRLogTransactionDetail]
 	@TransactionType NVARCHAR(50),
-	@TransactionId int,
+	@TransactionId INT,
+	@UserId INT,
 	@ForDelete BIT = 0
 AS
 	SET QUOTED_IDENTIFIER OFF  
@@ -44,7 +45,7 @@ BEGIN
 			LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = LR.intInventoryReceiptId
 			LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
 		WHERE LH.intLoadHeaderId = @TransactionId
-			AND ISNULL(LR.intInventoryReceiptId, '') <> ''
+			AND LR.strOrigin = 'Terminal'
 		UNION ALL
 		SELECT strTransactionType = @TransactionType_TransportLoad
 			, intTransactionId = LR.intLoadHeaderId
@@ -59,8 +60,13 @@ BEGIN
 			LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
 			LEFT JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = LR.intInventoryTransferId
 			LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
+			LEFT JOIN tblTRLoadDistributionHeader DH ON LH.intLoadHeaderId = DH.intLoadHeaderId		
+			LEFT JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
 		WHERE LH.intLoadHeaderId = @TransactionId
-			AND ISNULL(LR.intInventoryTransferId, '') <> ''
+			AND ((LR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
+				OR (LR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND LR.intCompanyLocationId != DH.intCompanyLocationId)
+				OR (LR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND LR.intCompanyLocationId != DH.intCompanyLocationId)
+				OR (LR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND LR.intCompanyLocationId != DH.intCompanyLocationId AND (ISNULL(LR.dblUnitCost, 0) <> 0 OR ISNULL(LR.dblFreightRate, 0) <> 0 OR ISNULL(LR.dblPurSurcharge, 0) <> 0)))
 		UNION ALL
 		SELECT strTransactionType = @TransactionType_TransportLoad
 			, intTransactionId = DH.intLoadHeaderId
@@ -74,7 +80,7 @@ BEGIN
 		FROM tblTRLoadDistributionHeader DH
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 		WHERE DH.intLoadHeaderId = @TransactionId
-			AND ISNULL(DH.intInvoiceId, '') <> ''
+			AND DH.strDestination = 'Customer'
 
 		IF (@ForDelete = 1)
 		BEGIN
@@ -95,6 +101,8 @@ BEGIN
 												FROM tblTRLoadDistributionHeader
 												WHERE intLoadHeaderId = @TransactionId)
 
+			EXEC uspTRLoadProcessContracts @TransactionId, 'Delete', @UserId
+			EXEC uspTRLoadProcessLogisticsLoad @TransactionId, 'Delete', @UserId
 		END
 	END
 
