@@ -3309,10 +3309,10 @@ IF @recap = 1
 			SELECT [dtmDate]  
 			  ,@batchId  
 			  ,[intAccountId]  
-			  ,[dblDebit]  
-			  ,[dblCredit]  
-			  ,[dblDebitUnit]  
-			  ,[dblCreditUnit]  
+			  ,[dblDebit]		= Debit.Value
+			  ,[dblCredit]		= Credit.Value 
+			  ,[dblDebit]		= DebitUnit.Value
+			  ,[dblCredit]		= CreditUnit.Value  
 			  ,[strDescription]  
 			  ,[strCode]  
 			  ,[strReference]  
@@ -3332,7 +3332,11 @@ IF @recap = 1
 			  ,[strModuleName]  
 			  ,[intConcurrencyId]  
 			FROM 
-				@GLEntries
+				@GLEntries GLEntries
+			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Credit
+			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditunit, 0)) CreditUnit
 				
 		END TRY
 		BEGIN CATCH
