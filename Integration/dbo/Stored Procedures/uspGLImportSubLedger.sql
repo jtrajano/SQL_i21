@@ -150,22 +150,22 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		BEGIN
 
 
-			SELECT @year = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),1,4), @period = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),5,2)
-    			SELECT TOP 1 @intFiscalYearId= intFiscalYearId,@ysnStatus = ysnStatus FROM tblGLFiscalYear WHERE strFiscalYear = @year
+				SELECT @year = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),1,4), @period = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),5,2)
+    				SELECT TOP 1 @intFiscalYearId= intFiscalYearId,@ysnStatus = ysnStatus FROM tblGLFiscalYear WHERE strFiscalYear = @year
     		
-    				SELECT @intFiscalPeriodId = dbo.fnGeti21FiscalPeriodIdFromOriginPeriod(@intFiscalYearId,@period)
-    				IF @intFiscalPeriodId IS NOT NULL
-    					BEGIN
+    					SELECT @intFiscalPeriodId = dbo.fnGeti21FiscalPeriodIdFromOriginPeriod(@intFiscalYearId,@period)
+    					IF @intFiscalPeriodId IS NOT NULL
+    						BEGIN
 
-    						SELECT @dateStart = dtmStartDate, @dateEnd = dtmEndDate, @ysnStatus = ysnOpen from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalPeriodId
-    						IF @ysnStatus = 1
-    							BEGIN
-    							-- CHANGES THE POST DATE TO PERIOD ENDDATE IF THE glije_date IS NOT WITHIN THE FISCAL PERIOD
-    								IF  @dte < @dateStart OR @dte > @dateEnd
-    									UPDATE tblGLIjemst SET glije_postdate = @dateEnd  WHERE
-    									glije_uid=@uid and glije_period = @period and glije_dte = @dte
-    							END
-    					END
+    							SELECT @dateStart = dtmStartDate, @dateEnd = dtmEndDate, @ysnStatus = ysnOpen from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalPeriodId
+    							IF @ysnStatus = 1
+    								BEGIN
+    								-- CHANGES THE POST DATE TO PERIOD ENDDATE IF THE glije_date IS NOT WITHIN THE FISCAL PERIOD
+    									IF  @dte < @dateStart OR @dte > @dateEnd
+    										UPDATE tblGLIjemst SET glije_postdate = @dateEnd  WHERE
+    										glije_uid=@uid and glije_period = @period and glije_dte = @dte
+    								END
+    						END
     			FETCH NEXT FROM cursor_tbl INTO @dte,@glije_period
     		END
     		CLOSE cursor_tbl
@@ -177,7 +177,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),
 					--@totalDebit DECIMAL(18,2),
 					--@totalCredit DECIMAL(18,2),
-    				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT,@journalCount INT = 0
+    				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT,@journalCount INT = 0,
+					@intCompanyId INT
+			SELECT TOP 1 @intCompanyId = intCompanySetupID FROM tblSMCompanySetup
 
     		-- INSERTS INTO THE tblGLJournal GROUPED BY glije_postdate COLUMN in tblGLIjemst
     		DECLARE cursor_postdate CURSOR LOCAL FOR  SELECT glije_postdate,glije_src_sys,glije_src_no FROM tblGLIjemst WHERE glije_uid =@uid
@@ -189,9 +191,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     			EXEC  dbo.uspGLGetNewID 2, @strJournalId  OUTPUT
 				SET @headerDescription = ''Imported from '' + REPLACE(@glije_src_sys,'' '','''') +  '' '' + REPLACE(@glije_src_no,'' '' ,'''') + '' on '' + CONVERT (varchar(10), GETDATE(), 101) 
-				INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted,
+				INSERT INTO tblGLJournal(intCompanyId, strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted,
     			strSourceId, strSourceType)
-    			SELECT @strJournalId,@postdate
+    			SELECT @intCompanyId, @strJournalId,@postdate
     				,@headerDescription
     				,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0,@glije_src_no,@glije_src_sys
 
@@ -286,9 +288,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     				--SELECT @totalCredit += @credit, @totalDebit +=@debit
 
-    				INSERT INTO tblGLJournalDetail (intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,
+    				INSERT INTO tblGLJournalDetail (intCompanyId, intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,
     				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument, strSourceKey)
-    				SELECT @intAccountId,@headerDescription,@dtmDate,@intJournalId,ROUND(@debit,2),ROUND(@credit,2),@debitUnit,@creditUnit,
+    				SELECT @intCompanyId, @intAccountId,@headerDescription,@dtmDate,@intJournalId,ROUND(@debit,2),ROUND(@credit,2),@debitUnit,@creditUnit,
     				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc, A4GLIdentity
     				 FROM tblGLIjemst WHERE glije_id=@id
 
