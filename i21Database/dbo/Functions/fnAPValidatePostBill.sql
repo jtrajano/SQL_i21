@@ -212,7 +212,7 @@ BEGIN
 		--VALIDATE EXPENSE ACCOUNT USED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
-			'Account used for item ''' + ISNULL(C.strItemNo, B.strMiscDescription) + ''' is invalid.',
+			'Account used for item ''' + ISNULL(ISNULL(C.strItemNo, B.strMiscDescription),'') + ''' is invalid.',
 			'Bill',
 			A.strBillId,
 			A.intBillId
