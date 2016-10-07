@@ -93,6 +93,6 @@ SELECT * FROM (
 	GROUP BY CD.intItemId,I.strItemNo,I.strDescription,CH.strContractNumber,CH.intContractHeaderId
 		,CH.strCustomerContract,Pos.strPosition,EY.strName,CB.strDescription,PT.strPricingType
 		,U2.strUnitMeasure,CU.strCurrency,CH.dblQuantity,UM.strUnitMeasure,CD.intNetWeightUOMId
-		,CD.dblNetWeight,Samp.intApprovalCount,RSamp.intApprovalCount,CH.strInternalComment
+		,CD.dblNetWeight,Samp.intApprovalCount,RSamp.intApprovalCount,CH.strInternalComment,CD.dtmEndDate
 	) tbl
 WHERE intTrucksRemaining > 0
