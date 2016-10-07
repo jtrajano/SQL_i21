@@ -183,6 +183,7 @@ BEGIN
 		WHERE
 			previousSnapshot.strSourceType = @SourceType_InventoryReceipt
 			AND previousSnapshot.intTransactionId IS NOT NULL
+			AND ISNULL(previousSnapshot.intSourceId, '') <> ''
 			AND previousSnapshot.intSourceId NOT IN (SELECT DISTINCT intInventoryReceiptId
 													FROM tblTRLoadReceipt 
 													WHERE intLoadHeaderId = @LoadHeaderId
@@ -201,6 +202,7 @@ BEGIN
 		WHERE
 			previousSnapshot.strSourceType = @SourceType_InventoryTransfer
 			AND previousSnapshot.intTransactionId IS NOT NULL
+			AND ISNULL(previousSnapshot.intSourceId, '') <> ''
 			AND previousSnapshot.intSourceId NOT IN (SELECT DISTINCT intInventoryTransferId
 													FROM tblTRLoadReceipt 
 													WHERE intLoadHeaderId = @LoadHeaderId
@@ -219,6 +221,7 @@ BEGIN
 		WHERE
 			previousSnapshot.strSourceType = @SourceType_Invoice
 			AND previousSnapshot.intTransactionId IS NOT NULL
+			AND ISNULL(previousSnapshot.intSourceId, '') <> ''
 			AND previousSnapshot.intSourceId NOT IN (SELECT DISTINCT intInvoiceId
 													FROM tblTRLoadDistributionHeader
 													WHERE intLoadHeaderId = @LoadHeaderId
@@ -273,7 +276,7 @@ BEGIN
 			, previousSnapshot.intTransactionDetailId
 			, previousSnapshot.strSourceType
 			, 2 --Update
-			, CASE WHEN (currentSnapshot.intContractDetailId = previousSnapshot.intContractDetailId) THEN (previousSnapshot.dblQuantity - currentSnapshot.dblQuantity)
+			, CASE WHEN (currentSnapshot.intContractDetailId = previousSnapshot.intContractDetailId) THEN (currentSnapshot.dblQuantity - previousSnapshot.dblQuantity)
 					ELSE (previousSnapshot.dblQuantity * -1) END -- Check if there was a change on Contract Detail Id used, insert record negating previous Contract Detail Id
 			, previousSnapshot.intContractDetailId
 		FROM @tmpCurrentSnapshot currentSnapshot
@@ -296,6 +299,22 @@ BEGIN
 			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
 		WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' AND ISNULL(previousSnapshot.intContractDetailId, '') <> '')
 			AND currentSnapshot.intContractDetailId != previousSnapshot.intContractDetailId
+
+
+		-- Check first instance of Load Schedule processed load
+		IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intLoadId, '') <> '' AND intConcurrencyId <= 1)
+		BEGIN
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRLoadReceipt WHERE intLoadHeaderId = @LoadHeaderId AND intConcurrencyId > 1)
+			BEGIN
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRLoadDistributionHeader WHERE intLoadHeaderId = @LoadHeaderId AND intConcurrencyId > 1)
+				BEGIN
+					IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRLoadDistributionDetail WHERE intLoadDistributionHeaderId IN (SELECT intLoadDistributionHeaderId FROM tblTRLoadDistributionHeader WHERE intLoadHeaderId = @LoadHeaderId) AND intConcurrencyId > 1)
+					BEGIN
+						EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Added', @UserId
+					END
+				END
+			END
+		END			
 
 	END
 
@@ -391,5 +410,7 @@ BEGIN
 		UPDATE tblLGLoad
 		SET intLoadHeaderId = NULL
 		WHERE intLoadHeaderId = @LoadHeaderId
+
+		EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Delete', @UserId
 	END
 END
