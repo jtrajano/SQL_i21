@@ -1,7 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerItemPricing]
-	AS 
-	
-
+AS 
 SELECT
 	 [strTransactionNumber]		= ARI.[strInvoiceNumber]									--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[intTransactionId]			= ARI.[intInvoiceId]										--CAST(NULL AS INT)
@@ -9,7 +7,7 @@ SELECT
 	,[intEntityCustomerId]		= ARI.[intEntityCustomerId]									--CAST(NULL AS INT)
 	,[intItemId]				= ARID.[intItemId]											--CAST(NULL AS INT)
 	,[dblPrice]					= ARPH.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
-	,[dblOriginalPrice]			= ARPH.[dblOriginalPrice]									--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= ISNULL(ARPH.[dblOriginalPrice],0)									--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[strTermDiscountBy]		= CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= ARPH.[strPricing]            COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
@@ -104,18 +102,19 @@ CROSS APPLY
 		,ARI.[intTermId]			--@TermId
 		,1							--@GetAllAvailablePricing
 		) AS IP
---WHERE
---	NOT EXISTS(	SELECT NULL 
---				FROM tblARPricingHistory ARPH 
---				WHERE
---					ARID.[intInvoiceDetailId] = ARPH.[intTransactionDetailId] 
---					AND ARI.[intInvoiceId] = ARPH.[intTransactionId]
---					AND ARID.[dblPrice] = ARPH.[dblPrice] 
---					AND ARID.[strPricing] = ARPH.[strPricing] 
---					AND ARPH.[intSourceTransactionId] = 2
---					AND ARPH.[ysnApplied] = 1
---					AND ARPH.[ysnDeleted] = 0)
-		
+WHERE
+	NOT EXISTS(	SELECT TOP 1 NULL 
+				FROM tblARPricingHistory ARPH 
+				WHERE
+					ARID.[intInvoiceDetailId] = ARPH.[intTransactionDetailId] 
+					AND ARI.[intInvoiceId] = ARPH.[intTransactionId]
+					AND ARID.[dblPrice] = ARPH.[dblPrice] 
+					AND ARID.[strPricing] = ARPH.[strPricing] 
+					AND ARPH.[intSourceTransactionId] = 2
+					AND ARPH.[ysnApplied] = 1
+					AND ARPH.[ysnDeleted] = 0 
+					AND strPricing NOT IN ('MANUAL OVERRIDE') ORDER BY dtmDate DESC)
+
 UNION ALL
 
 SELECT
@@ -125,7 +124,7 @@ SELECT
 	,[intEntityCustomerId]		= SO.[intEntityCustomerId]									--CAST(NULL AS INT)
 	,[intItemId]				= SOSOD.[intItemId]											--CAST(NULL AS INT)
 	,[dblPrice]					= ARPH.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
-	,[dblOriginalPrice]			= ARPH.[dblOriginalPrice]									--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= ISNULL(ARPH.[dblOriginalPrice],0)									--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[strTermDiscountBy]		= CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= ARPH.[strPricing]			   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
@@ -220,15 +219,16 @@ CROSS APPLY
 		,SO.[intTermId]				--@TermId
 		,1							--@GetAllAvailablePricing
 		) AS IP
---WHERE
---	NOT EXISTS(	SELECT NULL 
---				FROM tblARPricingHistory ARPH 
---				WHERE
---					SOSOD.[intSalesOrderDetailId] = ARPH.[intTransactionDetailId] 
---					AND SO.[intSalesOrderId] = ARPH.[intTransactionId]
---					AND SOSOD.[dblPrice] = ARPH.[dblPrice] 
---					AND SOSOD.[strPricing] = ARPH.[strPricing] 
---					AND ARPH.[intSourceTransactionId] = 2
---					AND ARPH.[ysnApplied] = 1
---					AND ARPH.[ysnDeleted] = 0)
+WHERE
+	NOT EXISTS(	SELECT TOP 1 NULL 
+				FROM tblARPricingHistory ARPH 
+				WHERE
+					SOSOD.[intSalesOrderDetailId] = ARPH.[intTransactionDetailId] 
+					AND SO.[intSalesOrderId] = ARPH.[intTransactionId]
+					AND SOSOD.[dblPrice] = ARPH.[dblPrice] 
+					AND SOSOD.[strPricing] = ARPH.[strPricing] 
+					AND ARPH.[intSourceTransactionId] = 1
+					AND ARPH.[ysnApplied] = 1
+					AND ARPH.[ysnDeleted] = 0
+					AND strPricing NOT IN ('MANUAL OVERRIDE') ORDER BY dtmDate DESC)
 
