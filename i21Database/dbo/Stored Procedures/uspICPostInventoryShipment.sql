@@ -169,7 +169,7 @@ BEGIN
 			IF ISNULL(@strBillNumber, '') <> ''
 			BEGIN 
 				-- 'Unable to unpost the Inventory Shipment. The {Other Charge} was billed.'
-				RAISERROR(80090, 11, 1, @strChargeItem)  
+				RAISERROR(80091, 11, 1, @strChargeItem)  
 				GOTO Post_Exit    
 			END 
 

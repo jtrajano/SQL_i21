@@ -428,7 +428,7 @@ SET @strmessage = 'Line item and Lot storage location is not under %s.'
 EXEC sp_addmessage 80087,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80088) EXEC sp_dropmessage 80088, 'us_english'	
-SET @strmessage = 'Other Vendor for Other Charge item %s is required to accrue.'
+SET @strmessage = 'Vendor for Other Charge item %s is required to accrue.'
 EXEC sp_addmessage 80088,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80089) EXEC sp_dropmessage 80089, 'us_english'	
@@ -436,5 +436,25 @@ SET @strmessage = 'Unable to Unship. The inventory shipment has already an invoi
 EXEC sp_addmessage 80089,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80090) EXEC sp_dropmessage 80090, 'us_english'	
-SET @strmessage = 'Unable to unpost the Inventory Shipment. The %s was billed.'
+SET @strmessage = 'Lotted item %s should have lot(s) specified.'
 EXEC sp_addmessage 80090,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80091) EXEC sp_dropmessage 80091, 'us_english'	
+SET @strmessage = 'Unable to unpost the Inventory Shipment. The %s was billed.'
+EXEC sp_addmessage 80091,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80092) EXEC sp_dropmessage 80092, 'us_english'	
+SET @strmessage = 'The transaction you are trying to delete was processed to Invoice (%s). Delete the associated invoice before the shipment transaction can be deleted.'
+EXEC sp_addmessage 80092,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80093) EXEC sp_dropmessage 80093, 'us_english'	
+SET @strmessage = 'Stock quantity is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
+EXEC sp_addmessage 80093,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80094) EXEC sp_dropmessage 80094, 'us_english'	
+SET @strmessage = 'Costing method mismatch. %s is set to use Ave Costing. %s is going to use Actual costing. It can''t be used together. You can fix it by changing the costing method to FIFO or LIFO.'
+EXEC sp_addmessage 80094,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80095) EXEC sp_dropmessage 80095, 'us_english'	
+SET @strmessage = 'The %s cannot be accrued to the same Shipment Customer.'
+EXEC sp_addmessage 80095,11,@strmessage,'us_english','False'
