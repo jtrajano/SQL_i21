@@ -67,7 +67,7 @@ SELECT
 	,vwcus_ptd_sls = ISNULL(CI.dblYTDSales,0.0)
 	,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
 	,vwcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId)
-	,dblFutureCurrent = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl0Days,0.0) + ISNULL(CI.dbl0Days,0.0)
+	,dblFutureCurrent = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl0Days,0.0)
 	,intConcurrencyId = 0
 	,strFullLocation =  ISNULL(Loc.strLocationName ,'')
 	,intTaxId = CAST(NULL AS INT)
