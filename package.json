@@ -4,6 +4,9 @@
   "author": "Wendell Wayne H. Estrada",
   "license": "ISC",
   "keywords": [],
+  "scripts": {
+    "preinstall": "npm install -g karma-cli"
+  },
   "dependencies": {
     "karma-cli": "*"
   },
