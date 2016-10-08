@@ -46,7 +46,7 @@ Ext.define('Inventory.TestUtils', {
                 referenceList = config.references,
                 base = config.base,
                 callbacks = config.callbacks,
-                dontCheckFields = config.dontCheckFields;
+                excludeFields = config.excludeFields;
 
             var model = Ext.create(modelName);
 
@@ -66,7 +66,7 @@ Ext.define('Inventory.TestUtils', {
                         model.idProperty.should.equal(idProperty);
                 });
 
-                if(fieldList && !dontCheckFields) {
+                if(fieldList && !excludeFields) {
                     describe('should have fields', function () {
                         model.should.have.property('fields');
                         var fields = model.fields;
