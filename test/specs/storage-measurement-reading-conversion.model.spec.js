@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.StorageMeasurementReadingConversion",
-    base: "iRely.BaseEntity",
-    idProperty: "intStorageMeasurementReadingConversionId",
+    name: 'Inventory.model.StorageMeasurementReadingConversion',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intStorageMeasurementReadingConversionId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intStorageMeasurementReadingConversionId",

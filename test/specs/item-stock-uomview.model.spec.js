@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.ItemStockUOMView",
-    base: "Ext.data.Model",
-    idProperty: "intItemStockUOMId",
+    name: 'Inventory.model.ItemStockUOMView',
+    base: 'Ext.data.Model',
+    idProperty: 'intItemStockUOMId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intItemStockUOMId",

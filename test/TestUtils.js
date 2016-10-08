@@ -158,6 +158,12 @@ Ext.define('Inventory.TestUtils', {
             });
         },
 
+        testStore: function(config) {
+            describe(config.name, function() {
+                it('should be okay');
+            });
+        },
+
         outputFields: function (modelName) {
             var model = Ext.create(modelName);
             var ff = [];

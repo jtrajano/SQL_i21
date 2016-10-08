@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.ReadingPoint",
-    base: "iRely.BaseEntity",
-    idProperty: "intReadingPointId",
+    name: 'Inventory.model.ReadingPoint',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intReadingPointId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intReadingPointId",

@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.FuelTaxClassProductCode",
-    base: "iRely.BaseEntity",
-    idProperty: "intFuelTaxClassProductCodeId",
+    name: 'Inventory.model.FuelTaxClassProductCode',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intFuelTaxClassProductCodeId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intFuelTaxClassProductCodeId",

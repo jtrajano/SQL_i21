@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.TransferNote",
-    base: "iRely.BaseEntity",
-    idProperty: "intInventoryTransferNoteId",
+    name: 'Inventory.model.TransferNote',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intInventoryTransferNoteId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intInventoryTransferNoteId",

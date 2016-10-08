@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.CompanyPreference",
-    base: "iRely.BaseEntity",
-    idProperty: "intCompanyPreferenceId",
+    name: 'Inventory.model.CompanyPreference',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intCompanyPreferenceId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intCompanyPreferenceId",

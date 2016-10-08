@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.StockReservation",
-    base: "iRely.BaseEntity",
-    idProperty: "intStockReservationId",
+    name: 'Inventory.model.StockReservation',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intStockReservationId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intStockReservationId",

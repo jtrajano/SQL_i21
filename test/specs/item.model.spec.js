@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.Item",
-    base: "iRely.BaseEntity",
-    idProperty: "intItemId",
+    name: 'Inventory.model.Item',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intItemId',
     dependencies: ["Inventory.model.ItemUOM", "Inventory.model.ItemLocation", "Inventory.model.ItemVendorXref", "Inventory.model.ItemCustomerXref", "Inventory.model.ItemContract", "Inventory.model.ItemCertification", "Inventory.model.ItemPOSSLA", "Inventory.model.ItemPOSCategory", "Inventory.model.ItemManufacturingUOM", "Inventory.model.ItemAccount", "Inventory.model.ItemCommodityCost", "Inventory.model.ItemStock", "Inventory.model.ItemPricing", "Inventory.model.ItemPricingLevel", "Inventory.model.ItemSpecialPricing", "Inventory.model.ItemAssembly", "Inventory.model.ItemBundle", "Inventory.model.ItemKit", "Inventory.model.ItemNote", "Inventory.model.ItemOwner", "Inventory.model.ItemFactory", "Inventory.model.ItemMotorFuelTax", "Ext.data.Field"],
     fields: [{
         "name": "intItemId",

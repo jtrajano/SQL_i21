@@ -1,7 +1,6 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.PackedUOM",
-    base: "Ext.data.Model",
-    idProperty: "undefined",
+    name: 'Inventory.model.PackedUOM',
+    base: 'Ext.data.Model',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intUnitMeasureConversionId",

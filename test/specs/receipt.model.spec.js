@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.Receipt",
-    base: "iRely.BaseEntity",
-    idProperty: "intInventoryReceiptId",
+    name: 'Inventory.model.Receipt',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intInventoryReceiptId',
     dependencies: ["Inventory.model.ReceiptItem", "Inventory.model.ReceiptCharge", "Inventory.model.ReceiptInspection", "Ext.data.Field"],
     fields: [{
         "name": "intInventoryReceiptId",

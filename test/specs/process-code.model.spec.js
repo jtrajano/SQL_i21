@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.ProcessCode",
-    base: "iRely.BaseEntity",
-    idProperty: "intRinProcessId",
+    name: 'Inventory.model.ProcessCode',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intRinProcessId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intRinProcessId",

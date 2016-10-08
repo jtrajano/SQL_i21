@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.CategoryAccount",
-    base: "iRely.BaseEntity",
-    idProperty: "intCategoryAccountId",
+    name: 'Inventory.model.CategoryAccount',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intCategoryAccountId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intCategoryAccountId",

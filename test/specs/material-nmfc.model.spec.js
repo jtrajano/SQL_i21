@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.MaterialNMFC",
-    base: "iRely.BaseEntity",
-    idProperty: "intMaterialNMFCId",
+    name: 'Inventory.model.MaterialNMFC',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intMaterialNMFCId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intMaterialNMFCId",

@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.Measurement",
-    base: "iRely.BaseEntity",
-    idProperty: "intMeasurementId",
+    name: 'Inventory.model.Measurement',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intMeasurementId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intMeasurementId",

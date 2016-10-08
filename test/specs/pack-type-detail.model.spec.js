@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.PackTypeDetail",
-    base: "iRely.BaseEntity",
-    idProperty: "intPackTypeDetailId",
+    name: 'Inventory.model.PackTypeDetail',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intPackTypeDetailId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intPackTypeDetailId",

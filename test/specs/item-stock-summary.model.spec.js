@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.ItemStockSummary",
-    base: "Ext.data.Model",
-    idProperty: "intKey",
+    name: 'Inventory.model.ItemStockSummary',
+    base: 'Ext.data.Model',
+    idProperty: 'intKey',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intKey",

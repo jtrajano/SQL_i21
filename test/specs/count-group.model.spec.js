@@ -1,7 +1,7 @@
 Inventory.TestUtils.testModel({
-    name: "Inventory.model.CountGroup",
-    base: "iRely.BaseEntity",
-    idProperty: "intCountGroupId",
+    name: 'Inventory.model.CountGroup',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intCountGroupId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intCountGroupId",

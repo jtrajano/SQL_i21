@@ -38,6 +38,17 @@ gulp.task('generate-specs-model', function () {
         .pipe(gulp.dest('test/specs'));
 });
 
+gulp.task('generate-specs-store', function () {
+    gulp.src('app/store/*.js')
+        .pipe(genSpec2({
+            type: "store",
+            moduleName: "Inventory",
+            destDir: "test/specs"
+        }))
+        .pipe(prettify({collapseWhitespace: true}))
+        .pipe(gulp.dest('test/specs'));
+});
+
 gulp.task('test', function(done) {
     new Server({
         configFile: __dirname + '/karma.conf.js',
