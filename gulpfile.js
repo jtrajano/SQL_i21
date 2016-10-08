@@ -11,21 +11,12 @@ var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 var genSpec = require('./lib/gulp-plugins/i21-gen-spec');
+var genSpec2 = require('./lib/gulp-plugins/i21-gen-spec2');
 var prettify = require('gulp-js-prettify');
 var os = require('os');
 var open = require('gulp-open');
 
 var Server = require('karma').Server;
-
-var scriptsPath = 'src/scripts';
-
-// var fs = require('fs');
-// function getFolders(dir) {
-//     return fs.readdirSync(dir)
-//         .filter(function (file) {
-//             return fs.statSync(path.join(dir, file)).isDirectory();
-//         });
-// }
 
 gulp.task('publish', function () {
     gulp.src(['app/**/*.js'])
@@ -38,7 +29,11 @@ gulp.task('watch', function () {
 
 gulp.task('generate-specs-model', function () {
     gulp.src('app/model/*.js')
-        .pipe(genSpec())
+        .pipe(genSpec2({
+            type: "model",
+            moduleName: "Inventory",
+            destDir: "test/specs"
+        }))
         .pipe(prettify({collapseWhitespace: true}))
         .pipe(gulp.dest('test/specs'));
 });

@@ -40,7 +40,7 @@ Ext.define('Inventory.TestUtils', {
          *      Events: afterInit
          */
         testModel: function (config) {
-            var modelName = config.model,
+            var modelName = config.name,
                 idProperty = config.idProperty,
                 fieldList = config.fields,
                 referenceList = config.references,
