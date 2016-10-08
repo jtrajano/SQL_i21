@@ -10,8 +10,8 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
-var genSpec = require('./lib/gulp-plugins/i21-gen-spec');
-var genSpec2 = require('./lib/gulp-plugins/i21-gen-spec2');
+//var genSpec = require('./lib/gulp-plugins/i21-gen-spec');
+var genSpec2 = require('./lib/gulp-plugins/i21-gen-spec');
 var prettify = require('gulp-js-prettify');
 var os = require('os');
 var open = require('gulp-open');
@@ -75,3 +75,5 @@ gulp.task('test-report', ['test'], function(done) {
 });
 
 gulp.task('default', ['publish', 'watch']);
+
+gulp.task('generate-specs', ['generate-specs-model', 'generate-specs-store']);

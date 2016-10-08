@@ -37,6 +37,7 @@
     "through": "^2.3.8",
     "through2": "^2.0.1",
     "topo-sort": "^1.0.0",
-    "transform": "^1.1.2"
+    "transform": "^1.1.2",
+    "underscore": "^1.8.3"
   }
 }

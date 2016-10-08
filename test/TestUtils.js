@@ -18,7 +18,7 @@ Ext.define('Inventory.TestUtils', {
 
         shouldHaveReference: function (fields, name, reference, inverse) {
             var field = _.find(fields, function (field) {
-                return field.name === 'intInventoryAdjustmentId'
+                return field.name === name
                     && field.reference
                     && field.reference.type === reference;
             });
