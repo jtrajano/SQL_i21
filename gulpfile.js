@@ -88,4 +88,4 @@ gulp.task('test-report', ['test'], function(done) {
 
 gulp.task('default', ['publish', 'watch']);
 
-gulp.task('generate-specs', ['generate-specs-model', 'generate-specs-store', 'generate-specs-controller']);
+gulp.task('generate-specs', ['generate-specs-model', 'generate-specs-store', 'generate-specs-viewcontroller']);
