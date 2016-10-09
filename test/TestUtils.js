@@ -160,8 +160,14 @@ Ext.define('Inventory.TestUtils', {
 
         testStore: function(config) {
             describe(config.name, function() {
-                it('should be okay');
+                it('should be a valid store.');
             });
+        },
+
+        testViewModel: function(cfg) {
+            describe(cfg.name, function() {
+                it('should be a valid view model class.');
+            })
         },
 
         outputFields: function (modelName) {

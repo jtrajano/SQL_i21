@@ -49,6 +49,18 @@ gulp.task('generate-specs-store', function () {
         .pipe(gulp.dest('test/specs'));
 });
 
+gulp.task('generate-specs-controller', function () {
+    gulp.src(['app/view/*.js'])
+        .pipe(genSpec2({
+            type: "viewcontroller",
+            moduleName: "Inventory",
+            destDir: "test/specs",
+            dependencyDestDir: "test/mock"
+        }))
+        .pipe(prettify({collapseWhitespace: true}))
+        .pipe(gulp.dest('test/specs'));
+});
+
 gulp.task('test', function(done) {
     new Server({
         configFile: __dirname + '/karma.conf.js',
@@ -76,4 +88,4 @@ gulp.task('test-report', ['test'], function(done) {
 
 gulp.task('default', ['publish', 'watch']);
 
-gulp.task('generate-specs', ['generate-specs-model', 'generate-specs-store']);
+gulp.task('generate-specs', ['generate-specs-model', 'generate-specs-store', 'generate-specs-controller']);
