@@ -32,7 +32,8 @@ gulp.task('generate-specs-model', function () {
         .pipe(genSpec2({
             type: "model",
             moduleName: "Inventory",
-            destDir: "test/specs"
+            destDir: "test/specs",
+            dependencyDestDir: "test/mock"
         }))
         .pipe(prettify({collapseWhitespace: true}))
         .pipe(gulp.dest('test/specs'));
@@ -43,7 +44,8 @@ gulp.task('generate-specs-store', function () {
         .pipe(genSpec2({
             type: "store",
             moduleName: "Inventory",
-            destDir: "test/specs"
+            destDir: "test/specs",
+            dependencyDestDir: "test/mock"
         }))
         .pipe(prettify({collapseWhitespace: true}))
         .pipe(gulp.dest('test/specs'));
