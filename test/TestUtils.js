@@ -112,7 +112,7 @@ Ext.define('Inventory.TestUtils', {
          */
         testViewController: function (cfg) {
             var name = cfg.name,
-                callbacks = cfg.callbacks,
+                callbacks = cfg.callbacks, base = cfg.base,
                 controller, config, search, binding;
 
             controller = Ext.create(name);
@@ -132,18 +132,28 @@ Ext.define('Inventory.TestUtils', {
                     should.exist(controller);
                 });
 
+                if(base) {
+                    it('should be derived from ' + base, function () {
+                        should.equal(Ext.getClass(controller).superclass.self.getName(), base);
+                    });
+                }
+
                 it('should have a config', function () {
                     should.exist(config);
                 });
 
                 describe('config', function () {
-                    it('should have a search config', function () {
-                        should.exist(search);
-                    });
+                    if(cfg.checkSearch) {
+                        it('should have a search config', function () {
+                            should.exist(search);
+                        });
+                    }
 
-                    it('should have a binding config', function () {
-                        should.exist(binding);
-                    });
+                    if(cfg.checkBinding) {
+                        it('should have a binding config', function () {
+                            should.exist(binding);
+                        });
+                    }
 
                     if (callbacks) {
                         describe("search config", function () {

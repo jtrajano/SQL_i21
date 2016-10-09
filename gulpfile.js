@@ -49,7 +49,7 @@ gulp.task('generate-specs-store', function () {
         .pipe(gulp.dest('test/specs'));
 });
 
-gulp.task('generate-specs-controller', function () {
+gulp.task('generate-specs-viewcontroller', function () {
     gulp.src(['app/view/*.js'])
         .pipe(genSpec2({
             type: "viewcontroller",

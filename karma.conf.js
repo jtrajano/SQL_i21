@@ -211,8 +211,8 @@ var inventoryFiles = [
 ];
 
 var testFiles = [
-    { pattern: 'test/mock/**/*.js', watched: false },
-    { pattern: 'test/TestUtils.js', watched: false },
+    { pattern: 'test/mock/**/*.js', watched: true },
+    { pattern: 'test/TestUtils.js', watched: true },
     { pattern: 'test/specs/**/*.js', watched: true }
 ];
 
