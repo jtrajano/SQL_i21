@@ -118,7 +118,7 @@ Ext.define('Inventory.TestUtils', {
                     }
                 });
                 if(isValid) {
-                    describe("after initialization", function () {
+                    describe("behaviors", function () {
                         if (callbacks) {
                             if (callbacks.afterInit) {
                                 callbacks.afterInit(model);
