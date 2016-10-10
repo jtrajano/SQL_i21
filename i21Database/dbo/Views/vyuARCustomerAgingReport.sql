@@ -134,8 +134,8 @@ WHERE P.ysnPosted = 1
 UNION ALL      
       
 SELECT I.dtmPostDate      
-     , I.intInvoiceId
-	 , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) END
+     , I.intInvoiceId	 
+	 , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) END
      , dblInvoiceTotal		= 0    
 	 , I.dblAmountDue     
 	 , dblDiscount			= ISNULL(I.dblDiscount, 0)
@@ -160,6 +160,7 @@ FROM tblARInvoice I
 	 INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId    
 	 INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) <= GETDATE()) ON I.intInvoiceId = PD.intInvoiceId
+	 LEFT JOIN (tblAPPaymentDetail APPD INNER JOIN tblAPPayment APP ON APPD.intPaymentId = APP.intPaymentId AND APP.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), APP.dtmDatePaid ))) <= GETDATE()) ON I.intInvoiceId = APPD.intInvoiceId
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE() 
@@ -261,11 +262,11 @@ WHERE P.ysnPosted = 1
 UNION ALL      
       
 SELECT I.intInvoiceId
-  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) END
+  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) END
   , dblInvoiceTotal			= 0
   , dblAmountDue			= 0
-  , dblDiscount				= ISNULL(PD.dblDiscount, 0)
-  , dblInterest				= ISNULL(PD.dblInterest, 0)
+  , dblDiscount				= ISNULL(PD.dblDiscount, 0) + ISNULL(APPD.dblDiscount, 0)
+  , dblInterest				= ISNULL(PD.dblInterest, 0) + ISNULL(APPD.dblInterest, 0)
   , dtmDueDate				= ISNULL(I.dtmDueDate, GETDATE())
   , I.intEntityCustomerId
   , dblAvailableCredit		= 0
@@ -274,6 +275,7 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()) ON I.intInvoiceId = PD.intInvoiceId
+	LEFT JOIN (tblAPPaymentDetail APPD INNER JOIN tblAPPayment APP ON APPD.intPaymentId = APP.intPaymentId AND APP.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), APP.dtmDatePaid ))) <= GETDATE()) ON I.intInvoiceId = APPD.intInvoiceId
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE() 
