@@ -7,7 +7,7 @@ SELECT DISTINCT
 	, A.intEntityCustomerId 
 	, A.strCustomerAddress
 	, A.strCustomerPhone
-	, A.intTermsId
+	, A.intTermId
 	, Term.strTerm 
 FROM vyuARCollectionOverdueReport A
-LEFT JOIN (SELECT intTermID, strTerm  FROM tblSMTerm) Term ON A.intTermsId = Term.intTermID 
+LEFT JOIN (SELECT intTermID, strTerm  FROM tblSMTerm) Term ON A.intTermId = Term.intTermID 
