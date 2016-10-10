@@ -2,28 +2,18 @@
 AS
 SELECT        ISNULL(cfTransPrice.dblCalculatedAmount, 0) AS dblTotalAmount, smTerm.intTermID, smTerm.strTerm, smTerm.strType, smTerm.dblDiscountEP, smTerm.intBalanceDue, smTerm.intDiscountDay, 
                          smTerm.dblAPR, smTerm.strTermCode, smTerm.ysnAllowEFT, smTerm.intDayofMonthDue, smTerm.intDueNextMonth, smTerm.dtmDiscountDate, smTerm.dtmDueDate, smTerm.ysnActive, 
-                         smTerm.ysnEnergyTrac, smTerm.intSort, smTerm.intConcurrencyId, cfTrans.dblQuantity, cfCardAccount.intAccountId, 
-                         CASE WHEN cfSiteItem.ysnIncludeInQuantityDiscount = 1 THEN CASE WHEN cfTrans.strTransactionType = 'Local/Network' THEN ISNULL
-                             ((SELECT        TOP 1 ISNULL(dblRate, 0)
-                                 FROM            tblCFDiscountSchedule AS cfDs INNER JOIN
-                                                          tblCFDiscountScheduleDetail AS cfDsd ON cfDs.intDiscountScheduleId = cfDsd.intDiscountScheduleId
-                                 WHERE        (cfTrans.dblQuantity >= cfDsd.intFromQty AND cfTrans.dblQuantity < cfDsd.intThruQty) AND cfDs.intDiscountScheduleId = cfCardAccount.intDiscountScheduleId), 0) 
-                         ELSE CASE WHEN cfTrans.strTransactionType = 'Remote' THEN ISNULL
-                             ((SELECT        TOP 1 ISNULL(dblRate, 0)
-                                 FROM            tblCFDiscountSchedule AS cfDs INNER JOIN
-                                                          tblCFDiscountScheduleDetail AS cfDsd ON cfDs.intDiscountScheduleId = cfDsd.intDiscountScheduleId
-                                 WHERE        (cfTrans.dblQuantity >= cfDsd.intFromQty AND cfTrans.dblQuantity < cfDsd.intThruQty) AND cfDs.intDiscountScheduleId = cfCardAccount.intDiscountScheduleId AND 
-                                                          cfDs.ysnDiscountOnRemotes = 1), 0) ELSE ISNULL
-                             ((SELECT        TOP 1 ISNULL(dblRate, 0)
-                                 FROM            tblCFDiscountSchedule AS cfDs INNER JOIN
-                                                          tblCFDiscountScheduleDetail AS cfDsd ON cfDs.intDiscountScheduleId = cfDsd.intDiscountScheduleId
-                                 WHERE        (cfTrans.dblQuantity >= cfDsd.intFromQty AND cfTrans.dblQuantity < cfDsd.intThruQty) AND cfDs.intDiscountScheduleId = cfCardAccount.intDiscountScheduleId AND 
-                                                          cfDs.ysnDiscountOnExtRemotes = 1), 0) END END ELSE 0 END AS dblDiscountRate, cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.strNetwork, arInv.dtmPostDate, 
-                         cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate
+                         smTerm.ysnEnergyTrac, smTerm.intSort, smTerm.intConcurrencyId, cfTrans.dblQuantity, cfCardAccount.intAccountId, cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.strNetwork, 
+                         arInv.dtmPostDate AS dtmPostedDate, cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, cfTrans.strTransactionType, cfCardAccount.intDiscountScheduleId, cfCardAccount.intCustomerId, 
+                         ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName
 FROM            dbo.vyuCFInvoice AS arInv INNER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
-                         dbo.vyuCFCardAccount AS cfCardAccount ON cfTrans.intCardId = cfCardAccount.intCardId INNER JOIN
+                         dbo.vyuCFCardAccount AS cfCardAccount ON cfTrans.intCardId = cfCardAccount.intCardId LEFT OUTER JOIN
+                             (SELECT        arCustGroupDetail.intCustomerGroupDetailId, arCustGroupDetail.intCustomerGroupId, arCustGroupDetail.intEntityId, arCustGroupDetail.ysnSpecialPricing, arCustGroupDetail.ysnContract, 
+                                                         arCustGroupDetail.ysnBuyback, arCustGroupDetail.ysnQuote, arCustGroupDetail.ysnVolumeDiscount, arCustGroupDetail.intConcurrencyId, arCustGroup.strGroupName
+                               FROM            dbo.tblARCustomerGroup AS arCustGroup INNER JOIN
+                                                         dbo.tblARCustomerGroupDetail AS arCustGroupDetail ON arCustGroup.intCustomerGroupId = arCustGroupDetail.intCustomerGroupId) AS emGroup ON 
+                         emGroup.intEntityId = cfCardAccount.intCustomerId AND emGroup.ysnVolumeDiscount = 1 INNER JOIN
                          dbo.tblSMTerm AS smTerm ON cfCardAccount.intTermsCode = smTerm.intTermID INNER JOIN
                          dbo.vyuCFSiteItem AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId AND cfSiteItem.intARItemId = cfTrans.intARItemId AND cfSiteItem.intItemId = cfTrans.intProductId LEFT OUTER JOIN
                              (SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
@@ -71,3 +61,4 @@ FROM            dbo.vyuCFInvoice AS arInv INNER JOIN
                                                          dbo.tblSMTaxCode AS ismTaxCode ON icfTramsactionTax.intTaxCodeId = ismTaxCode.intTaxCodeId INNER JOIN
                                                          dbo.tblSMTaxClass AS ismTaxClass ON ismTaxCode.intTaxClassId = ismTaxClass.intTaxClassId
                                GROUP BY icfTramsactionTax.intTransactionId) AS TotalTaxes ON cfTrans.intTransactionId = TotalTaxes.intTransactionId
+WHERE        (cfSiteItem.ysnIncludeInQuantityDiscount = 1)

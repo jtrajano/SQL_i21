@@ -7,7 +7,8 @@ BEGIN
 	IF (ISNULL(@xmlParam,'') = '')
 	BEGIN 
 	SELECT 
-		 intTransactionId		   = 0
+		 intCustomerGroupId		   = 0
+		,intTransactionId		   = 0
 		,intInvoiceId			   = 0
 		,intProductId			   = 0
 		,intCardId				   = 0
@@ -16,6 +17,7 @@ BEGIN
 		,intAccountId			   = 0
 		,intInvoiceCycle		   = 0
 		,intOdometerAging		   = 0
+		,strGroupName			   = ''
 		,strCustomerNumber		   = ''
 		,strDepartment			   = ''
 		,strShipTo				   = ''

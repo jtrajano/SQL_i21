@@ -1,6 +1,6 @@
 ﻿CREATE VIEW dbo.vyuCFInvoiceReport
 AS
-SELECT        arInv.intTransactionId, arInv.strCustomerNumber, cfTrans.dtmTransactionDate, cfTrans.intOdometer, ISNULL
+SELECT        ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, arInv.intTransactionId, arInv.strCustomerNumber, cfTrans.dtmTransactionDate, cfTrans.intOdometer, ISNULL
                              ((SELECT        TOP (1) intOdometer
                                  FROM            dbo.tblCFTransaction
                                  WHERE        (dtmTransactionDate < cfTrans.dtmTransactionDate) AND (intCardId = cfTrans.intCardId) AND (intVehicleId = cfTrans.intVehicleId) AND (intProductId = cfTrans.intProductId)
@@ -43,7 +43,12 @@ SELECT        arInv.intTransactionId, arInv.strCustomerNumber, cfTrans.dtmTransa
 FROM            dbo.vyuCFInvoice AS arInv INNER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
-                         dbo.vyuCFCardAccount AS cfCardAccount ON arInv.intEntityCustomerId = cfCardAccount.intCustomerId AND cfTrans.intCardId = cfCardAccount.intCardId INNER JOIN
+                         dbo.vyuCFCardAccount AS cfCardAccount ON arInv.intEntityCustomerId = cfCardAccount.intCustomerId AND cfTrans.intCardId = cfCardAccount.intCardId LEFT OUTER JOIN
+                             (SELECT        arCustGroupDetail.intCustomerGroupDetailId, arCustGroupDetail.intCustomerGroupId, arCustGroupDetail.intEntityId, arCustGroupDetail.ysnSpecialPricing, arCustGroupDetail.ysnContract, 
+                                                         arCustGroupDetail.ysnBuyback, arCustGroupDetail.ysnQuote, arCustGroupDetail.ysnVolumeDiscount, arCustGroupDetail.intConcurrencyId, arCustGroup.strGroupName
+                               FROM            dbo.tblARCustomerGroup AS arCustGroup INNER JOIN
+                                                         dbo.tblARCustomerGroupDetail AS arCustGroupDetail ON arCustGroup.intCustomerGroupId = arCustGroupDetail.intCustomerGroupId) AS emGroup ON 
+                         emGroup.intEntityId = cfCardAccount.intCustomerId AND emGroup.ysnVolumeDiscount = 1 INNER JOIN
                          dbo.vyuCFSiteItem AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId AND cfSiteItem.intARItemId = cfTrans.intARItemId AND cfSiteItem.intItemId = cfTrans.intProductId INNER JOIN
                              (SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                FROM            dbo.tblCFTransactionPrice
