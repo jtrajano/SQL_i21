@@ -8,6 +8,7 @@ BEGIN
 	BEGIN 
 	SELECT 
 		 intAccountId				 = 0
+		,intInvoiceId				 = 0
 		,intTransactionId			 = 0
 		,intCustomerGroupId			 = 0
 		,intTermID					 = 0
@@ -30,6 +31,7 @@ BEGIN
 		,dblAccountTotalLessDiscount = 0.0
 		,dblDiscountEP				 = 0.0
 		,dblAPR						 = 0.0
+		,strInvoiceNumber			 = ''
 		,strTerm					 = ''
 		,strType					 = ''
 		,strTermCode				 = ''
@@ -194,6 +196,7 @@ BEGIN
 		DECLARE @tblCFGroupVolumeTemp	TABLE
 		(
 			  intAccountId			INT
+			 ,intInvoiceId			INT
 			 ,intTransactionId		INT
 			 ,intCustomerGroupId	INT
 			 ,intTermID				INT
@@ -221,6 +224,7 @@ BEGIN
 			 ,strCustomerName		NVARCHAR(MAX)
 			 ,strInvoiceCycle		NVARCHAR(MAX)
 			 ,strGroupName			NVARCHAR(MAX)
+			 ,strInvoiceNumber		NVARCHAR(MAX)
 			 ,dtmDiscountDate		DATETIME
 			 ,dtmDueDate			DATETIME
 			 ,dtmTransactionDate	DATETIME
@@ -230,6 +234,7 @@ BEGIN
 		DECLARE @tblCFAccountVolumeTemp TABLE
 		(
 			  intAccountId			INT
+			 ,intInvoiceId			INT
 			 ,intTransactionId		INT
 			 ,intCustomerGroupId	INT
 			 ,intTermID				INT
@@ -257,6 +262,7 @@ BEGIN
 			 ,strCustomerName		NVARCHAR(MAX)
 			 ,strInvoiceCycle		NVARCHAR(MAX)
 			 ,strGroupName			NVARCHAR(MAX)
+			 ,strInvoiceNumber		NVARCHAR(MAX)
 			 ,dtmDiscountDate		DATETIME
 			 ,dtmDueDate			DATETIME
 			 ,dtmTransactionDate	DATETIME
@@ -266,6 +272,7 @@ BEGIN
 		CREATE TABLE ##tblCFInvoiceDiscount	
 		(
 			  intAccountId					INT
+			 ,intInvoiceId			INT
 			 ,intTransactionId				INT
 			 ,intCustomerGroupId			INT
 			 ,intTermID						INT
@@ -295,6 +302,7 @@ BEGIN
 			 ,strCustomerName				NVARCHAR(MAX)
 			 ,strInvoiceCycle				NVARCHAR(MAX)
 			 ,strGroupName					NVARCHAR(MAX)
+			 ,strInvoiceNumber		NVARCHAR(MAX)
 			 ,dtmDiscountDate				DATETIME
 			 ,dtmDueDate					DATETIME
 			 ,dtmTransactionDate			DATETIME
@@ -344,6 +352,7 @@ BEGIN
 
 			INSERT @tblCFGroupVolumeTemp(
 				 intAccountId		
+				,intInvoiceId			
 				,intTransactionId	
 				,intCustomerGroupId
 				,intTermID			
@@ -370,13 +379,15 @@ BEGIN
 				,strCustomerName	
 				,strInvoiceCycle	
 				,strGroupName
+				,strInvoiceNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
 				,dtmPostedDate		
 			)
 			SELECT 
-				 intAccountId		
+				 intAccountId	
+				,intInvoiceId				
 				,intTransactionId	
 				,intCustomerGroupId
 				,intTermID			
@@ -409,6 +420,7 @@ BEGIN
 				,strCustomerName	
 				,strInvoiceCycle	
 				,strGroupName
+				,strInvoiceNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -442,7 +454,8 @@ BEGIN
 			GROUP BY intAccountId
 
 			INSERT @tblCFAccountVolumeTemp(
-				 intAccountId		
+				 intAccountId	
+				,intInvoiceId		
 				,intTransactionId	
 				,intCustomerGroupId
 				,intTermID			
@@ -469,13 +482,15 @@ BEGIN
 				,strCustomerName	
 				,strInvoiceCycle	
 				,strGroupName
+				,strInvoiceNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
 				,dtmPostedDate		
 			)
 			SELECT 
-				 intAccountId		
+				 intAccountId
+				,intInvoiceId			
 				,intTransactionId	
 				,intCustomerGroupId
 				,intTermID			
@@ -508,6 +523,7 @@ BEGIN
 				,strCustomerName	
 				,strInvoiceCycle	
 				,strGroupName
+				,strInvoiceNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -547,7 +563,8 @@ BEGIN
 			WHERE intAccountId = @intDistinctDiscountLoop
 
 			INSERT INTO ##tblCFInvoiceDiscount(
-				 intAccountId		
+				 intAccountId
+				,intInvoiceId			
 				,intTransactionId	
 				,intCustomerGroupId
 				,intTermID			
@@ -574,6 +591,7 @@ BEGIN
 				,strCustomerName	
 				,strInvoiceCycle	
 				,strGroupName
+				,strInvoiceNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -583,7 +601,8 @@ BEGIN
 				,dblAccountTotalLessDiscount	
 			)
 			SELECT 
-				 intAccountId		
+				 intAccountId
+				,intInvoiceId			
 				,intTransactionId	
 				,intCustomerGroupId
 				,intTermID			
@@ -610,6 +629,7 @@ BEGIN
 				,strCustomerName	
 				,strInvoiceCycle	
 				,strGroupName
+				,strInvoiceNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -647,7 +667,8 @@ BEGIN
 			WHERE intAccountId = @intDistinctDiscountLoop
 
 			INSERT INTO ##tblCFInvoiceDiscount(
-				 intAccountId		
+				 intAccountId
+				,intInvoiceId			
 				,intTransactionId	
 				,intCustomerGroupId
 				,intTermID			
@@ -674,6 +695,7 @@ BEGIN
 				,strCustomerName	
 				,strInvoiceCycle	
 				,strGroupName
+				,strInvoiceNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -683,7 +705,8 @@ BEGIN
 				,dblAccountTotalLessDiscount	
 			)
 			SELECT 
-				 intAccountId		
+				 intAccountId
+				,intInvoiceId			
 				,intTransactionId	
 				,intCustomerGroupId
 				,intTermID			
@@ -710,6 +733,7 @@ BEGIN
 				,strCustomerName	
 				,strInvoiceCycle	
 				,strGroupName
+				,strInvoiceNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
