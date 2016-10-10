@@ -77,6 +77,8 @@ DECLARE @tblTempTransaction TABLE (
 			strTransportationMode NVARCHAR(50),
 			strTransporterName NVARCHAR(250),
 			strTransporterFEIN NVARCHAR(50),
+			strConsignorName NVARCHAR(250),
+			strConsignorFEIN NVARCHAR(50),
 			strTaxCategory NVARCHAR(200),
 			strTerminalControlNumber NVARCHAR(50),
 			strVendorName NVARCHAR(50),
@@ -254,8 +256,10 @@ DECLARE @tblTempTransaction TABLE (
 						 tblSMShipVia.strShipVia,
 						 tblSMShipVia.strTransporterLicense, 
                          tblSMShipVia.strTransportationMode,
-						 tblEMEntity.strName AS strTransporterName,
-						 tblEMEntity.strFederalTaxId AS strTransporterFEIN,
+						 NULL,
+						 NULL,
+                         tblEMEntity.strName AS strConsignorName, 
+						 tblEMEntity.strFederalTaxId AS strConsignorFEIN, 
 						 NULL,
 						 tblTFTerminalControlNumber.strTerminalControlNumber,
                          EntityAPVendor.strName AS strVendorName,
@@ -289,7 +293,7 @@ DECLARE @tblTempTransaction TABLE (
                          tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId CROSS JOIN
                          tblSMCompanySetup
 					WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + ')) 
-					AND (tblSMCompanyLocation.ysnTrackMFTActivity = 0)
+					AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 					AND (tblARInvoice.strBOLNumber IS NULL)
 					AND (tblTRLoadHeader.dtmLoadDateTime BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
 					AND (tblICInventoryTransfer.ysnPosted = 1)'
@@ -361,6 +365,8 @@ DECLARE @tblTempTransaction TABLE (
 																	   strTransportationMode,
 																	   strTransporterName,
 																	   strTransporterFederalTaxId,
+																	   strConsignorName,
+																	   strConsignorFederalTaxId,
 																	   strType,
 																	   strTerminalControlNumber,
 																	   strVendorName,
@@ -409,6 +415,8 @@ DECLARE @tblTempTransaction TABLE (
 																		strTransportationMode,
 																		strTransporterName,
 																		strTransporterFEIN,
+																		strConsignorName,
+																	    strConsignorFEIN,
 																		strType,
 																		strTerminalControlNumber,
 																	    strVendorName,
