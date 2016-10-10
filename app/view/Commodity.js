@@ -135,6 +135,7 @@ Ext.define('Inventory.view.Commodity', {
                                 items: [
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeDetails',
                                         bodyPadding: 10,
                                         title: 'Details',
                                         layout: {
@@ -622,6 +623,7 @@ Ext.define('Inventory.view.Commodity', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeAttributes',
                                         bodyPadding: 5,
                                         title: 'Attribute',
                                         layout: {

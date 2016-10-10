@@ -4019,6 +4019,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 hidden: true,
                                                                 itemId: 'btnInsertPricing',
+                                                                arrowVisible: false,
                                                                 iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },

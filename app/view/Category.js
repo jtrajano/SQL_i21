@@ -134,6 +134,7 @@ Ext.define('Inventory.view.Category', {
                                 items: [
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeDetails',
                                         bodyPadding: 10,
                                         title: 'Detail',
                                         layout: {
@@ -618,6 +619,7 @@ Ext.define('Inventory.view.Category', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeLocations',
                                         layout: 'fit',
                                         title: 'Locations',
                                         items: [
@@ -715,6 +717,7 @@ Ext.define('Inventory.view.Category', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgGLAccounts',
                                         layout: 'fit',
                                         title: 'GL Accounts',
                                         items: [
@@ -822,6 +825,7 @@ Ext.define('Inventory.view.Category', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeVendorCategory',
                                         layout: 'fit',
                                         title: 'Vendor Category Xref',
                                         items: [
@@ -1091,6 +1095,7 @@ Ext.define('Inventory.view.Category', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeManufacturing',
                                         bodyPadding: '10 10 0 10',
                                         title: 'Manufacturing',
                                         layout: {
