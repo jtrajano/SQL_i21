@@ -29,7 +29,7 @@ RETURN (
 					JOIN tblGLAccountCategory C
 					ON B.intAccountCategoryId = C.intAccountCategoryId
 					WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds)	
-					AND ISNULL(C.strAccountCategory,'') in ('AR Account','Cash Account','AP Account')  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
+					AND ISNULL(C.strAccountCategory,'') in ('AR Account','Cash Account','AP Account')  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal','Historical Journal')
 					GROUP BY A.intJournalId	,B.strAccountId,C.strAccountCategory
 				--REGION @ysnPost = 1
 				UNION
