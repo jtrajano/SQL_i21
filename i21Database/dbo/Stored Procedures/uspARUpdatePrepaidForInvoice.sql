@@ -124,7 +124,10 @@ BEGIN TRY
 		AND (ISNULL(ARPAC.[ysnRestricted],0) = 0
 			OR
 			(ISNULL(ARPAC.[ysnRestricted],0) = 1 AND EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intContractDetailId] = ARPAC.[intContractDetailId] AND ARID.[intInvoiceId] = @InvoiceId))
+			OR
+			(ISNULL(ARPAC.[ysnRestricted],0) = 1 AND ISNULL(ARPAC.[intContractDetailId],0) = 0 AND EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intItemId] = ARPAC.[intItemId] AND ARID.[intInvoiceId] = @InvoiceId))
 			)
+		
 		
 
 END TRY
