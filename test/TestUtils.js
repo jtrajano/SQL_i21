@@ -29,6 +29,15 @@ Ext.define('Inventory.TestUtils', {
             }
         },
 
+        isValidExtObject: function(className) {
+            try {
+                var object = Ext.create(className);
+                return { valid: true, obj: object };
+            } catch(e) {
+                return { valid: false, obj: null };
+            }
+        },
+
         /**
          * Unit test for a odel
          * @param config Contains all the configurations of the Model
@@ -46,60 +55,77 @@ Ext.define('Inventory.TestUtils', {
                 referenceList = config.references,
                 base = config.base,
                 callbacks = config.callbacks,
-                excludeFields = config.excludeFields;
+                excludeFields = config.excludeFields,
+                model = null;
+            var obj = this.isValidExtObject(modelName);
+            isValid = obj.valid;
+            model = obj.obj;
 
-            var model = Ext.create(modelName);
-
-            describe(modelName, function () {
-                it('should exists', function () {
-                    should.exist(model, "Adjustment Note model might not have been initialized.");
-                });
-
-                if(base) {
-                    it('should be derived from ' + base, function () {
-                        should.equal(Ext.getClass(model).superclass.self.getName(), base);
+            describe(modelName, function() {
+                describe("Ext object", function() {
+                    it('should be a valid Ext object', function() {
+                        isValid.should.equal(true);
                     });
-                }
-
-                it('should have an idProperty', function () {
-                    if(model.idProperty && !(model.idProperty === 'id' && (_.isUndefined(idProperty) || _.isEmpty(idProperty))))
-                        model.idProperty.should.equal(idProperty);
                 });
+                describe("config", function() {
+                    it('should exists', function () {
+                        if(isValid)
+                            should.exist(model, "Adjustment Note model might not have been initialized.");
+                        else
+                            should.exist(model, "Model does not exists.");
+                    });
 
-                if(fieldList && !excludeFields) {
-                    describe('should have fields', function () {
-                        model.should.have.property('fields');
-                        var fields = model.fields;
-                        should.exist(fields, 'No fields');
+                    if(base) {
+                        it('should be derived from ' + base, function () {
+                            if(isValid)
+                                should.equal(Ext.getClass(model).superclass.self.getName(), base);
+                            else
+                                should.exist(model, "Model does not exists.");
+                        });
+                    }
 
-                        it('should have the correct fields', function () {
-                            _.isEmpty(fields).should.be.false;
-                            _.each(fieldList, function (field) {
-                                Inventory.TestUtils.shouldHaveField(fields, field.name, field.type);
+                    it('should have an idProperty', function () {
+                        if(isValid) {
+                            if(model.idProperty && !(model.idProperty === 'id' && (_.isUndefined(idProperty) || _.isEmpty(idProperty))))
+                                model.idProperty.should.equal(idProperty);
+                        } else 
+                            should.exist(model, "Model does not exists.");
+                    });
+
+                    if(fieldList && !excludeFields) {
+                        describe('fields', function () {
+                            it('should have the correct fields', function () {
+                                if(isValid) {
+                                    var fields = model.fields;
+                                    should.exist(fields, 'No fields');
+                                    _.isEmpty(fields).should.be.false;
+                                    _.each(fieldList, function (field) {
+                                        Inventory.TestUtils.shouldHaveField(fields, field.name, field.type);
+                                    });
+                                } else
+                                    should.exist(model, "Model does not exists.");
+                            });
+
+                            it('should have reference model(s)', function () {
+                                if(isValid) {
+                                    _.each(referenceList, function (ref) {
+                                        Inventory.TestUtils.shouldHaveReference(fields, ref.name, ref.type, ref.role);
+                                    })
+                                } else
+                                    should.exist(model, "Model does not exists.");
                             });
                         });
-
-                        it('should have reference model(s)', function () {
-                            _.each(referenceList, function (ref) {
-                                Inventory.TestUtils.shouldHaveReference(fields, ref.name, ref.type, ref.role);
-                            })
-                        });
-
-                        /*if (callbacks) {
-                         if (callbacks.afterInit) {
-                         callbacks.afterInit(model);
-                         }
-                         }*/
+                    }
+                });
+                if(isValid) {
+                    describe("after initialization", function () {
+                        if (callbacks) {
+                            if (callbacks.afterInit) {
+                                callbacks.afterInit(model);
+                            }
+                        }
                     });
                 }
-
-                describe("after initialization", function () {
-                    if (callbacks) {
-                        if (callbacks.afterInit) {
-                            callbacks.afterInit(model);
-                        }
-                    }
-                })
             });
         },
 
