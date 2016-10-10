@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspQMSampleCreate]
-     @strXml NVARCHAR(Max)
+﻿CREATE PROCEDURE uspQMSampleCreate
+	 @strXml NVARCHAR(Max)
 	,@strSampleNumber NVARCHAR(30) OUTPUT
 	,@intSampleId INT OUTPUT
 AS
@@ -24,18 +24,22 @@ BEGIN TRY
 	DECLARE @intInventoryReceiptId INT
 	DECLARE @intWorkOrderId INT
 	DECLARE @ysnEnableParentLot BIT
+	DECLARE @strMarks NVARCHAR(100)
+	DECLARE @intShipperEntityId INT
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
 		,@intLocationId = intLocationId
 		,@intInventoryReceiptId = intInventoryReceiptId
 		,@intWorkOrderId = intWorkOrderId
+		,@strMarks = strMarks
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
 			,intLocationId INT
 			,intInventoryReceiptId INT
 			,intWorkOrderId INT
+			,strMarks NVARCHAR(100)
 			)
 
 	IF (
@@ -163,6 +167,34 @@ BEGIN TRY
 		END
 	END
 
+	-- Shipper Entity Id
+	IF ISNULL(@strMarks, '') <> ''
+	BEGIN
+		DECLARE @strShipperCode NVARCHAR(MAX)
+		DECLARE @intFirstIndex INT
+		DECLARE @intSecondIndex INT
+
+		SELECT @intFirstIndex = ISNULL(CHARINDEX('/', @strMarks), 0)
+
+		SELECT @intSecondIndex = ISNULL(CHARINDEX('/', @strMarks, @intFirstIndex + 1), 0)
+
+		IF (
+				@intFirstIndex > 0
+				AND @intSecondIndex > 0
+				)
+		BEGIN
+			SELECT @strShipperCode = SUBSTRING(@strMarks, @intFirstIndex + 1, (@intSecondIndex - @intFirstIndex - 1))
+
+			SELECT TOP 1 @intShipperEntityId = intEntityId
+			FROM tblEMEntity
+			WHERE strEntityNo = @strShipperCode
+		END
+		ELSE
+		BEGIN
+			SELECT @intShipperEntityId = NULL
+		END
+	END
+
 	BEGIN TRAN
 
 	INSERT INTO dbo.tblQMSample (
@@ -188,6 +220,7 @@ BEGIN TRY
 		,ysnIsContractCompleted
 		,intLotStatusId
 		,intEntityId
+		,intShipperEntityId
 		,strShipmentNumber
 		,strLotNumber
 		,strSampleNote
@@ -240,6 +273,7 @@ BEGIN TRY
 		,ysnIsContractCompleted
 		,intLotStatusId
 		,intEntityId
+		,@intShipperEntityId
 		,strShipmentNumber
 		,strLotNumber
 		,strSampleNote

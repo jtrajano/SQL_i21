@@ -19,6 +19,7 @@
 	[ysnIsContractCompleted] BIT NOT NULL CONSTRAINT [DF_tblQMSample_ysnIsContractCompleted] DEFAULT 0, 
 	[intLotStatusId] INT, 
 	[intEntityId] INT, -- Party Id
+	[intShipperEntityId] INT, -- Shipper Id
 	[strShipmentNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS,
 	[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	[strSampleNote] NVARCHAR(512) COLLATE Latin1_General_CI_AS, 
@@ -71,6 +72,7 @@
 	CONSTRAINT [FK_tblQMSample_tblICUnitMeasure_intRepresentingUOMId] FOREIGN KEY ([intRepresentingUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 	CONSTRAINT [FK_tblQMSample_tblICLotStatus] FOREIGN KEY ([intLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]), 
 	CONSTRAINT [FK_tblQMSample_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]), 
+	CONSTRAINT [FK_tblQMSample_tblEMEntity_intShipperEntityId] FOREIGN KEY ([intShipperEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
     CONSTRAINT [FK_tblQMSample_tblICItem_intItemBundleId] FOREIGN KEY ([intItemBundleId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblQMSample_tblLGLoadContainer] FOREIGN KEY ([intLoadContainerId]) REFERENCES [tblLGLoadContainer]([intLoadContainerId]), 

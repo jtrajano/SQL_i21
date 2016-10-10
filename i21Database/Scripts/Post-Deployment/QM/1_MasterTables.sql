@@ -832,3 +832,62 @@ BEGIN
 	VALUES('ArrivalForm',10,1)
 END
 GO
+
+/*
+-- Shipper Entity Id for Existing Data
+GO
+DECLARE @allSamples TABLE (intSampleId INT)
+DECLARE @intSampleId INT
+
+INSERT INTO @allSamples
+SELECT intSampleId
+FROM tblQMSample
+WHERE LEN(strMarks) > 0
+	AND intShipperEntityId IS NULL
+ORDER BY intSampleId
+
+SELECT @intSampleId = MIN(intSampleId)
+FROM @allSamples
+
+WHILE @intSampleId IS NOT NULL
+BEGIN
+	DECLARE @strMarks NVARCHAR(100) = ''
+	DECLARE @intShipperEntityId INT = NULL
+	DECLARE @strShipperCode NVARCHAR(MAX) = ''
+	DECLARE @intFirstIndex INT = NULL
+	DECLARE @intSecondIndex INT = NULL
+
+	SELECT @strMarks = strMarks
+	FROM tblQMSample
+	WHERE intSampleId = @intSampleId
+
+	SELECT @intFirstIndex = ISNULL(CHARINDEX('/', @strMarks), 0)
+
+	SELECT @intSecondIndex = ISNULL(CHARINDEX('/', @strMarks, @intFirstIndex + 1), 0)
+
+	IF (
+			@intFirstIndex > 0
+			AND @intSecondIndex > 0
+			)
+	BEGIN
+		SELECT @strShipperCode = SUBSTRING(@strMarks, @intFirstIndex + 1, (@intSecondIndex - @intFirstIndex - 1))
+
+		SELECT TOP 1 @intShipperEntityId = intEntityId
+		FROM tblEMEntity
+		WHERE strEntityNo = @strShipperCode
+	END
+	ELSE
+	BEGIN
+		SELECT @intShipperEntityId = NULL
+	END
+
+	UPDATE tblQMSample
+	SET intShipperEntityId = @intShipperEntityId
+	WHERE intSampleId = @intSampleId
+
+	SELECT @intSampleId = MIN(intSampleId)
+	FROM @allSamples
+	WHERE intSampleId > @intSampleId
+END
+GO
+*/

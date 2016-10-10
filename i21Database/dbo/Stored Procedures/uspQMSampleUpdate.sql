@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspQMSampleUpdate]
-     @strXml NVARCHAR(Max)
+﻿CREATE PROCEDURE uspQMSampleUpdate
+	 @strXml NVARCHAR(Max)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -15,9 +15,15 @@ BEGIN TRY
 		,@strXml
 
 	DECLARE @intSampleId INT
+	DECLARE @strMarks NVARCHAR(100)
+	DECLARE @intShipperEntityId INT
 
 	SELECT @intSampleId = intSampleId
-	FROM OPENXML(@idoc, 'root', 2) WITH (intSampleId INT)
+		,@strMarks = strMarks
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intSampleId INT
+			,strMarks NVARCHAR(100)
+			)
 
 	IF NOT EXISTS (
 			SELECT *
@@ -32,11 +38,39 @@ BEGIN TRY
 				)
 	END
 
+	-- Shipper Entity Id
+	IF ISNULL(@strMarks, '') <> ''
+	BEGIN
+		DECLARE @strShipperCode NVARCHAR(MAX)
+		DECLARE @intFirstIndex INT
+		DECLARE @intSecondIndex INT
+
+		SELECT @intFirstIndex = ISNULL(CHARINDEX('/', @strMarks), 0)
+
+		SELECT @intSecondIndex = ISNULL(CHARINDEX('/', @strMarks, @intFirstIndex + 1), 0)
+
+		IF (
+				@intFirstIndex > 0
+				AND @intSecondIndex > 0
+				)
+		BEGIN
+			SELECT @strShipperCode = SUBSTRING(@strMarks, @intFirstIndex + 1, (@intSecondIndex - @intFirstIndex - 1))
+
+			SELECT TOP 1 @intShipperEntityId = intEntityId
+			FROM tblEMEntity
+			WHERE strEntityNo = @strShipperCode
+		END
+		ELSE
+		BEGIN
+			SELECT @intShipperEntityId = NULL
+		END
+	END
+
 	BEGIN TRAN
 
 	-- Sample Header Update
 	UPDATE tblQMSample
-	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
+	SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 		,intSampleTypeId = x.intSampleTypeId
 		,intProductTypeId = x.intProductTypeId
 		,intProductValueId = x.intProductValueId
@@ -57,6 +91,7 @@ BEGIN TRY
 		,ysnIsContractCompleted = x.ysnIsContractCompleted
 		,intLotStatusId = x.intLotStatusId
 		,intEntityId = x.intEntityId
+		,intShipperEntityId = @intShipperEntityId
 		,strShipmentNumber = x.strShipmentNumber
 		,strLotNumber = x.strLotNumber
 		,strSampleNote = x.strSampleNote
