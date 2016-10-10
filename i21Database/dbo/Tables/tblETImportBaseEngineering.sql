@@ -44,6 +44,10 @@
     [dtmDateSession] DATETIME NOT NULL, 
     [ysnProcessed] BIT NOT NULL DEFAULT 0, 
     [strInvoiceNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [dblPrebuyPrice] NUMERIC(18, 6) NULL DEFAULT 0, 
+    [dblPrebuyQuantity] NUMERIC(18, 6) NULL DEFAULT 0, 
+    [dblContractPrice] NUMERIC(18, 6) NULL DEFAULT 0, 
+    [dblContractQuantity] NUMERIC(18, 6) NULL DEFAULT 0, 
     CONSTRAINT [PK_tblETImportBaseEngineering] PRIMARY KEY ([intImportBaseEngineeringId]),
 )
 GO

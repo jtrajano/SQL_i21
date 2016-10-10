@@ -4394,7 +4394,9 @@
     <Build Include="dbo\Stored Procedures\uspTFSF401InvoiceTax.sql" />
     <Build Include="dbo\Views\vyuETBEExportContract.sql" />
     <Build Include="dbo\Views\vyuARLetterCustomerSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTax.sql" />
     <Build Include="dbo\Views\vyuETBEContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTaxById.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

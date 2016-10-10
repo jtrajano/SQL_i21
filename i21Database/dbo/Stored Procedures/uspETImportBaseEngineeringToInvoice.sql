@@ -47,6 +47,10 @@ BEGIN
 	DECLARE @dblTaxCategory29 NUMERIC(18, 6)  
 	DECLARE @dblTaxCategory30 NUMERIC(18, 6)
 	DECLARE @strOriginInvoiceNumber NVARCHAR(50) 
+	DECLARE @dblPrebuyPrice NUMERIC(18, 6)
+    DECLARE @dblPrebuyQuantity NUMERIC(18, 6)
+    DECLARE @dblContractPrice NUMERIC(18, 6)
+    DECLARE @dblContractQuantity NUMERIC(18, 6)
 
 	DECLARE @intTaxCategory1 INT 
 	DECLARE @intTaxCategory2 INT
@@ -89,6 +93,8 @@ BEGIN
 	DECLARE @strSiteBillingBy						NVARCHAR(10)
 	DECLARE @intNewInvoiceDetailId					INT
 	DECLARE @strNewInvoiceNumber					NVARCHAR(25)
+	DECLARE @dblNonContractQuantity					NUMERIC(18, 6)
+	DECLARE @intContractDetailId					INT
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -133,6 +139,7 @@ BEGIN
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpBaseToInvoice)
 	BEGIN
 		SET @strErrorMessage = ''
+		SET @intContractDetailId = NULL
 		--SET @ysnProcessNextAsHeader = 0
 		--Get the first Record and create Invoice
 		SELECT TOP 1 
@@ -178,6 +185,10 @@ BEGIN
 			 ,@dblTaxCategory29 = dblTaxCategory29  
 			 ,@dblTaxCategory30 = dblTaxCategory30 
 			 ,@strOriginInvoiceNumber = strInvoiceNumber
+			 ,@dblPrebuyPrice = dblPrebuyPrice
+			 ,@dblPrebuyQuantity = dblPrebuyQuantity
+			 ,@dblContractPrice = dblContractPrice
+			 ,@dblContractQuantity = dblContractQuantity
 		FROM #tmpBaseToInvoice
 		ORDER BY intImportBaseEngineeringId ASC
 			 
@@ -211,27 +222,123 @@ BEGIN
 			@strSiteBillingBy = strBillingBy
 		FROM tblTMSite
 		WHERE intSiteID = @intSiteId
-		
-		---Insert/Create Invoice 
-		EXEC [dbo].[uspARCreateCustomerInvoice]
-			@EntityCustomerId          = @intCustomerEntityId
-			,@InvoiceDate              = @dtmDate
-			,@CompanyLocationId        = @intLocationId
-			,@EntityId                 = @EntityUserId
-			,@NewInvoiceId             = @intNewInvoiceId OUTPUT
-			,@ErrorMessage             = @strErrorMessage OUTPUT
-			,@ItemId                   = @intItemId
-			,@ItemQtyShipped           = @dblQuantity
-			,@ItemPrice                = @dblPrice
-			,@ItemSiteId               = @intSiteId
-			,@TransactionType	       = @strTransactionType
-			,@Type					   = 'Tank Delivery'
-			,@ShipDate				   = @dtmDate
-			,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-			,@ItemTaxGroupId		   = @intTaxGroupId	
-			,@RaiseError			   = 1 
-			,@UseOriginIdAsInvoiceNumber = 1
-			,@InvoiceOriginId         = @strOriginInvoiceNumber
+
+		---Check Contracts
+		IF(@dblPrebuyQuantity > 0 OR @dblContractQuantity > 0)
+		BEGIN
+			--IF Contract is used
+			SET @dblNonContractQuantity = 0
+			IF(@dblPrebuyQuantity > 0)
+			BEGIN
+				SET @dblNonContractQuantity = @dblQuantity - @dblPrebuyQuantity
+
+				--GEt Contracts				
+				SELECT TOP 1 @intContractDetailId = intContractDetailId 
+				FROM vyuETBEContract
+				WHERE intEntityId = @intCustomerEntityId
+					AND intItemId = @intItemId
+
+				
+				---Insert/Create Invoice 
+				BEGIN TRANSACTION
+				EXEC [dbo].[uspARCreateCustomerInvoice]
+					@EntityCustomerId          = @intCustomerEntityId
+					,@InvoiceDate              = @dtmDate
+					,@CompanyLocationId        = @intLocationId
+					,@EntityId                 = @EntityUserId
+					,@NewInvoiceId             = @intNewInvoiceId OUTPUT
+					,@ErrorMessage             = @strErrorMessage OUTPUT
+					,@ItemId                   = @intItemId
+					,@ItemQtyShipped           = @dblPrebuyQuantity
+					,@ItemPrice                = @dblPrebuyPrice
+					,@ItemSiteId               = @intSiteId
+					,@TransactionType	       = @strTransactionType
+					,@Type					   = 'Tank Delivery'
+					,@ShipDate				   = @dtmDate
+					,@ItemPercentFull		   = @dblPercentFullAfterDelivery
+					,@ItemTaxGroupId		   = @intTaxGroupId	
+					,@RaiseError			   = 1 
+					,@UseOriginIdAsInvoiceNumber = 1
+					,@InvoiceOriginId         = @strOriginInvoiceNumber
+					,@ItemContractDetailId		= @intContractDetailId
+
+
+				--GEt the created invoice number
+				SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
+				SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
+
+
+				----Update Tax Details
+				EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId
+				
+				IF 	LTRIM(@strErrorMessage) != ''
+				BEGIN		
+					ROLLBACK TRANSACTION
+					GOTO LOGERROR
+				END
+
+				IF(@dblNonContractQuantity > 0)
+				BEGIN
+					---- Add as line Item to Existing Invoice
+					EXEC [dbo].[uspARAddInventoryItemToInvoice]
+							@InvoiceId = @intNewInvoiceId
+							,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
+							,@ErrorMessage = @strErrorMessage OUTPUT
+							,@ItemId                   = @intItemId
+							,@ItemQtyShipped           = @dblNonContractQuantity
+							,@ItemPrice                = @dblPrice
+							,@ItemSiteId               = @intSiteId
+							,@ItemPercentFull		   = 0
+							,@ItemTaxGroupId		   = @intTaxGroupId	
+							,@ItemContractDetailId     = @intContractDetailId
+							,@RecomputeTax			   = 0
+							,@RaiseError			   = 1 
+				END
+				IF 	LTRIM(@strErrorMessage) != ''
+				BEGIN		
+					ROLLBACK TRANSACTION
+					GOTO LOGERROR
+				END
+
+				----Update Tax Details
+				EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId
+
+				EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
+				COMMIT TRANSACTION
+				GOTO LOGSUCCESS
+
+
+			END
+			ELSE
+			BEGIN
+				SET @strErrorMessage = 'Non-Prebuy contracts are not implemented yet'
+				GOTO LOGERROR
+			END
+			
+		END
+		ELSE
+		BEGIN
+			---Insert/Create Invoice 
+			EXEC [dbo].[uspARCreateCustomerInvoice]
+				@EntityCustomerId          = @intCustomerEntityId
+				,@InvoiceDate              = @dtmDate
+				,@CompanyLocationId        = @intLocationId
+				,@EntityId                 = @EntityUserId
+				,@NewInvoiceId             = @intNewInvoiceId OUTPUT
+				,@ErrorMessage             = @strErrorMessage OUTPUT
+				,@ItemId                   = @intItemId
+				,@ItemQtyShipped           = @dblQuantity
+				,@ItemPrice                = @dblPrice
+				,@ItemSiteId               = @intSiteId
+				,@TransactionType	       = @strTransactionType
+				,@Type					   = 'Tank Delivery'
+				,@ShipDate				   = @dtmDate
+				,@ItemPercentFull		   = @dblPercentFullAfterDelivery
+				,@ItemTaxGroupId		   = @intTaxGroupId	
+				,@RaiseError			   = 1 
+				,@UseOriginIdAsInvoiceNumber = 1
+				,@InvoiceOriginId         = @strOriginInvoiceNumber
+		END
 		--GEt the created invoice number
 		SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
 		SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
@@ -271,225 +378,13 @@ BEGIN
 					,strItemNumber = @strItemNumber
 					,intInvoiceId = @intNewInvoiceId
 
+			
+			----Update Tax Details
+			EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId
+			EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
 
 			GOTO CONTINUELOOP
 		END
-
-		----Update Tax Details
-		SELECT TOP 1 
-			@intTaxCategory1	=   category01
-			,@intTaxCategory2	=   category02
-			,@intTaxCategory3	=   category03
-			,@intTaxCategory4	=   category04
-			,@intTaxCategory5	=   category05
-			,@intTaxCategory6	=   category06
-			,@intTaxCategory7	=   category07
-			,@intTaxCategory8	=   category08
-			,@intTaxCategory9	=   category09
-			,@intTaxCategory10	=  category10
-			,@intTaxCategory11	=  category11
-			,@intTaxCategory12	=  category12
-			,@intTaxCategory13	=  category13
-			,@intTaxCategory14	=  category14
-			,@intTaxCategory15	=  category15
-			,@intTaxCategory16	=  category16
-			,@intTaxCategory17	=  category17
-			,@intTaxCategory18	=  category18
-			,@intTaxCategory19	=  category19
-			,@intTaxCategory20	=  category20
-			,@intTaxCategory21	=  category21
-			,@intTaxCategory22	=  category22
-			,@intTaxCategory23	=  category23
-			,@intTaxCategory24	=  category24
-			,@intTaxCategory25	=  category25
-			,@intTaxCategory26	=  category26
-			,@intTaxCategory27	=  category27
-			,@intTaxCategory28	=  category28
-			,@intTaxCategory29	=  category29
-			,@intTaxCategory30	=  category30
-		FROM vyuSMBEExportTax
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory1
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory1,0)
-			AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory2
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory2,0)
-			AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory3
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory3,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory4
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory4,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory5
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory5,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory6
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory6,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory7
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory7,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory8
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory8,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory9
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory9,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory10
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory10,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory11
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory11,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory12
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory12,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory13
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory13,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory14
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory14,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory15
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory15,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory16
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory16,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory17
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory17,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory18
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory18,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory19
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory19,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory20
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory20,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory21
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory21,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory22
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory22,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory23
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory23,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory24
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory24,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory25
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory25,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory26
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory26,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory27
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory27,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory28
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory28,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory29
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory29,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		UPDATE tblARInvoiceDetailTax
-		SET dblAdjustedTax = @dblTaxCategory30
-			,ysnTaxAdjusted = 1
-		WHERE intTaxCodeId = ISNULL(@intTaxCategory30,0)
-		AND intInvoiceDetailId = @intNewInvoiceDetailId
-
-		EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
 
 		LOGERROR:		 
 		INSERT INTO @ResultTableLog (
