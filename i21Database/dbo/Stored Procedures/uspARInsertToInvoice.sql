@@ -544,9 +544,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				SET @SoftwareInvoiceDetailId = SCOPE_IDENTITY()
 				
 				DELETE FROM @tblSODSoftware WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
-			END
-
-		EXEC dbo.uspARReComputeInvoiceTaxes @SoftwareInvoiceId
+			END		
 	END
 
 --CHECK IF THERE IS NON STOCK ITEMS
@@ -843,7 +841,7 @@ IF ISNULL(@RaiseError,0) = 0
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-		EXEC dbo.[uspARReComputeInvoiceAmounts] @NewInvoiceId
+		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId		
 		
 		UPDATE
 			tblSOSalesOrder
