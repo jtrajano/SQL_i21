@@ -35,9 +35,10 @@ SELECT	NEWID() AS id,
 		INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 		CROSS APPLY ComPref
-			WHERE B.intCustomerPatronId = CV.intCustomerPatronId
+			WHERE B.intCustomerPatronId = CV.intCustomerPatronId AND B.ysnRefundProcessed <> 1
 		GROUP BY B.intCustomerPatronId, PC.strPurchaseSale, RR.dblCashPayout, ComPref.dblMinimumRefund
 	) Total
+	WHERE CV.ysnRefundProcessed <> 1
 	GROUP BY CV.intCustomerPatronId, 
 		ENT.strName, 
 		AC.strStockStatus, 

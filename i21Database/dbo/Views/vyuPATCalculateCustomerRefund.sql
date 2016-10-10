@@ -48,6 +48,7 @@ SELECT	intCustomerId = CV.intCustomerPatronId,
 			INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 			CROSS APPLY ComPref
+			WHERE B.ysnRefundProcessed <> 1
 		) Total
 	INNER JOIN tblPATCustomerVolume CV
 		ON CV.intCustomerPatronId = Total.intCustomerId AND CV.intFiscalYear = Total.intFiscalYear
@@ -64,4 +65,4 @@ SELECT	intCustomerId = CV.intCustomerPatronId,
 	INNER JOIN tblPATPatronageCategory PC
 			ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 	CROSS APPLY ComPref
-	WHERE CV.dblVolume <> 0.00
+	WHERE CV.dblVolume <> 0.00 AND CV.ysnRefundProcessed <> 1

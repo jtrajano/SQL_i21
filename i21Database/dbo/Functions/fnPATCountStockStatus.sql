@@ -12,7 +12,7 @@ BEGIN
 		SELECT @stockStatusCount = ISNULL(Count(*),0) FROM tblPATCustomerVolume CVV
 		INNER JOIN tblARCustomer ARR
 			ON ARR.intEntityCustomerId = CVV.intCustomerPatronId
-		WHERE ARR.strStockStatus = @strStockStatus
+		WHERE ARR.strStockStatus = @strStockStatus AND CVV.ysnRefundProcessed <> 1
 	ELSE
 		SELECT @stockStatusCount = ISNULL(Count(*),0) FROM tblPATRefundCustomer RC
 		WHERE strStockStatus = @strStockStatus AND intRefundId = @intRefundId

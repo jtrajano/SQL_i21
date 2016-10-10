@@ -46,8 +46,10 @@ SELECT DISTINCT CV.intFiscalYear,
 			INNER JOIN tblARCustomer AC
 					ON AC.intEntityCustomerId = B.intCustomerPatronId
 			CROSS APPLY ComPref
+			WHERE B.ysnRefundProcessed <> 1
 	 ) Total
-	ON Total.intFiscalYear = CV.intFiscalYear
+		ON Total.intFiscalYear = CV.intFiscalYear
+	WHERE CV.ysnRefundProcessed <> 1 
 )
 
 SELECT	intFiscalYear AS intFiscalYearId,

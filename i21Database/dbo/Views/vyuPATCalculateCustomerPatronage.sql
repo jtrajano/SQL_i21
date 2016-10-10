@@ -14,4 +14,4 @@ INNER JOIN tblPATRefundRateDetail RRD
 INNER JOIN tblPATPatronageCategory PC
 	ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 INNER JOIN tblPATCustomerVolume CV
-	ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId
+	ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId AND CV.ysnRefundProcessed <> 1

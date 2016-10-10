@@ -39,9 +39,10 @@ SELECT	NEWID() AS id,
 					INNER JOIN tblARCustomer AC
 							ON AC.intEntityCustomerId = CV.intCustomerPatronId
 					CROSS APPLY ComPref
-					WHERE B.intCustomerPatronId = CV.intCustomerPatronId AND B.intFiscalYear = CV.intFiscalYear
+					WHERE B.intCustomerPatronId = CV.intCustomerPatronId AND B.intFiscalYear = CV.intFiscalYear AND B.ysnRefundProcessed <> 1
 					GROUP BY B.intCustomerPatronId, B.dblVolume, AC.strStockStatus, RR.dblCashPayout, RRD.dblRate, ComPref.dblMinimumRefund
 					) Total
+		WHERE CV.ysnRefundProcessed <> 1
 		GROUP BY CV.intCustomerPatronId, 
 				AC.strStockStatus, 
 				CV.intFiscalYear,

@@ -33,6 +33,7 @@ SELECT	NEWID() AS id,
 			INNER JOIN tblPATRefundRate RR
 					ON RR.intRefundTypeId = RRD.intRefundTypeId
 			CROSS APPLY ComPref
+			WHERE B.ysnRefundProcessed <> 1
 		) Total
 		INNER JOIN tblPATCustomerVolume CV
 			ON CV.intCustomerPatronId = Total.intCustomerId AND CV.intPatronageCategoryId = Total.intPatronageCategoryId AND CV.intFiscalYear = Total.intFiscalYear
@@ -49,7 +50,7 @@ SELECT	NEWID() AS id,
 		INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 		CROSS JOIN ComPref
-			WHERE CV.dblVolume <> 0.00
+			WHERE CV.dblVolume <> 0.00 AND CV.ysnRefundProcessed <> 1
 		GROUP BY CV.intCustomerPatronId,
 				ENT.strName,
 				AC.strStockStatus,

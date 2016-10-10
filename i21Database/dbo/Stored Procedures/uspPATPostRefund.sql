@@ -19,15 +19,6 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRANSACTION -- START TRANSACTION
 
---=====================================================================================================================================
--- 	DECLARE TEMPORARY TABLES
----------------------------------------------------------------------------------------------------------------------------------------
-CREATE TABLE #tmpRefundPostData (
-	[intRefundId] [int] PRIMARY KEY,
-	UNIQUE (intRefundId)
-);
-
-
 --DECLARE VARIABLES
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
@@ -42,108 +33,125 @@ DECLARE @error NVARCHAR(200)
 --=====================================================================================================================================
 --  GET REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
-SELECT	Ref.intRefundId, 
-		Ref.intFiscalYearId, 
-		Ref.dtmRefundDate, 
-		Ref.strRefund,
-		Ref.dblMinimumRefund, 
-		Ref.dblServiceFee,		   
-		Ref.dblCashCutoffAmount, 
-		Ref.dblFedWithholdingPercentage, 
-		Total.dblPurchaseVolume, 
-		Total.dblSaleVolume, 
-		dblLessFWT = CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) END, 
-		dblLessService = Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblServiceFee/100),
-		dblCheckAmount = (Total.dblVolume * (Total.dblCashPayout/100)) - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) END) -  (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblServiceFee/100)),
-		dblNoRefund = (CASE WHEN Total.dblVolume > Ref.dblMinimumRefund THEN 0 ELSE Total.dblVolume END),
-		Ref.ysnPosted,
+SELECT	R.intRefundId, 
+		R.intFiscalYearId, 
+		R.dtmRefundDate, 
+		R.strRefund,
+		R.dblMinimumRefund, 
+		R.dblServiceFee,		   
+		R.dblCashCutoffAmount, 
+		R.dblFedWithholdingPercentage, 
+		dblPurchaseVolume = (CASE WHEN RCatPCat.strPurchaseSale = 'Purchase' THEN RCatPCat.dblVolume ELSE 0 END), 
+		dblSaleVolume = (CASE WHEN RCatPCat.strPurchaseSale = 'Sale' THEN RCatPCat.dblVolume ELSE 0 END), 
+		dblLessFWT = CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
+		dblLessService = RCus.dblCashRefund * (R.dblServiceFee/100),
+		dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RCus.dblCashRefund - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) END,
+		R.ysnPosted,
 		RCus.intRefundCustomerId,
 		RCus.intCustomerId,
 		RCus.strStockStatus,
 		RCus.ysnEligibleRefund,
 		RCus.intRefundTypeId,
-		dblCashPayout = (RCus.dblCashPayout/100),
+		RCatPCat.dblCashPayout,
 		RCus.ysnQualified, 
-		dblRefundAmount = (CASE WHEN Total.dblVolume <= Ref.dblMinimumRefund THEN 0 ELSE Total.dblVolume END),
-		dblCashRefund = Total.dblVolume * (Total.dblCashPayout/100),
-		RCus.dblEquityRefund,
-		RCat.intRefundCategoryId,
-		RCat.dblRefundRate, 
-		Total.dblVolume
-INTO #tmpRefundData
-FROM tblPATRefund Ref
-LEFT JOIN tblPATRefundCustomer RCus
-ON Ref.intRefundId = RCus.intRefundId
-LEFT JOIN tblPATRefundCategory RCat
-ON RCus.intRefundCustomerId = RCat.intRefundCustomerId
-INNER JOIN tblPATCustomerVolume CVol
-ON CVol.intCustomerPatronId = RCus.intCustomerId
-INNER JOIN tblARCustomer ARC
-ON RCus.intCustomerId = ARC.intEntityCustomerId
-INNER JOIN
-(
-	SELECT
-		Cus.intCustomerId,
-		Cus.dblPurchaseVolume,
-		Cus.dblSaleVolume,
-		Cus.dblRate,
-		dblVolume = Cus.dblPurchaseVolume + Cus.dblSaleVolume,
+		RCus.dblRefundAmount,
 		RCus.dblCashRefund,
 		RCus.dblEquityRefund,
-		RCus.dblCashPayout,
-		RCus.dblRefundAmount,
-		Cus.intRefundCategoryId
-	FROM tblPATRefundCustomer RCus
-	INNER JOIN
+		RCatPCat.intRefundCategoryId,
+		RCatPCat.dblRefundRate, 
+		RCatPCat.dblVolume
+INTO #tmpRefundData
+FROM tblPATRefundCustomer RCus
+INNER JOIN tblPATRefund R
+	ON R.intRefundId = RCus.intRefundId
+INNER JOIN tblARCustomer ARC
+	ON RCus.intCustomerId = ARC.intEntityCustomerId
+INNER JOIN
 	(
-		SELECT	CVol.intCustomerPatronId AS intCustomerId,
-				dblPurchaseVolume = CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN (CVol.dblVolume * (CASE WHEN RRD.strPurchaseSale = 'Purchase' THEN RRD.dblRate ELSE 0.00 END))ELSE 0 END,
-				dblSaleVolume = CASE WHEN PCat.strPurchaseSale = 'Sale' THEN (CVol.dblVolume * (CASE WHEN RRD.strPurchaseSale = 'Sale' THEN RRD.dblRate ELSE 0.00 END)) ELSE 0 END,
-				dblRate = RRD.dblRate,
-				intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END) THEN RCat.intRefundCategoryId ELSE NULL END),
-				intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END),
-				CVol.intFiscalYear
-		FROM tblPATCustomerVolume CVol
+		SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
+				intPatronageCategoryId = RCat.intPatronageCategoryId,
+				RCat.intRefundCategoryId,
+				dblRefundRate = RCat.dblRefundRate,
+				strPurchaseSale = PCat.strPurchaseSale,
+				intRefundTypeId = RRD.intRefundTypeId,
+				strRefundType = RR.strRefundType,
+				strRefundDescription = RR.strRefundDescription,
+				dblCashPayout = RR.dblCashPayout,
+				ysnQualified = RR.ysnQualified,
+				dblVolume = RCat.dblVolume
+		FROM tblPATRefundCategory RCat
 		INNER JOIN tblPATPatronageCategory PCat
-		ON CVol.intPatronageCategoryId = PCat.intPatronageCategoryId
+			ON RCat.intPatronageCategoryId	 = PCat.intPatronageCategoryId
 		INNER JOIN tblPATRefundRateDetail RRD
-		ON PCat.intPatronageCategoryId = RRD.intPatronageCategoryId
-		INNER JOIN tblPATRefundCustomer RCus
-		ON RCus.intCustomerId = CVol.intCustomerPatronId
-		INNER JOIN tblPATRefundCategory RCat
-		ON RCus.intRefundCustomerId = RCat.intRefundCustomerId
-		WHERE intRefundCategoryId IS NOT NULL AND CVol.intFiscalYear = @intFiscalYearId
-	) Cus
-	ON RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId IS NOT NULL
-) Total
-ON CVol.intCustomerPatronId = Total.intCustomerId AND Total.intRefundCategoryId IS NOT NULL AND RCat.intRefundCategoryId = Total.intRefundCategoryId
-WHERE Ref.intRefundId = @intRefundId AND CVol.intFiscalYear = @intFiscalYearId
+			ON RRD.intPatronageCategoryId = RCat.intPatronageCategoryId
+		INNER JOIN tblPATRefundRate RR
+			ON RR.intRefundTypeId = RRD.intRefundTypeId
+	) RCatPCat
+		ON RCatPCat.intRefundCustomerId = RCus.intRefundCustomerId
+WHERE R.intRefundId = @intRefundId
+--INNER JOIN
+--(
+--	SELECT
+--		Cus.intCustomerId,
+--		Cus.dblPurchaseVolume,
+--		Cus.dblSaleVolume,
+--		Cus.dblRate,
+--		dblVolume = Cus.dblPurchaseVolume + Cus.dblSaleVolume,
+--		RCus.dblCashRefund,
+--		RCus.dblEquityRefund,
+--		RCus.dblCashPayout,
+--		RCus.dblRefundAmount,
+--		Cus.intRefundCategoryId
+--	FROM tblPATRefundCustomer RCus
+--	INNER JOIN
+--	(
+--		SELECT	CVol.intCustomerPatronId AS intCustomerId,
+--				dblPurchaseVolume = CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN (CVol.dblVolume * (CASE WHEN RRD.strPurchaseSale = 'Purchase' THEN RRD.dblRate ELSE 0.00 END))ELSE 0 END,
+--				dblSaleVolume = CASE WHEN PCat.strPurchaseSale = 'Sale' THEN (CVol.dblVolume * (CASE WHEN RRD.strPurchaseSale = 'Sale' THEN RRD.dblRate ELSE 0.00 END)) ELSE 0 END,
+--				dblRate = RRD.dblRate,
+--				intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END) THEN RCat.intRefundCategoryId ELSE NULL END),
+--				intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END),
+--				CVol.intFiscalYear
+--		FROM tblPATCustomerVolume CVol
+--		INNER JOIN tblPATPatronageCategory PCat
+--		ON CVol.intPatronageCategoryId = PCat.intPatronageCategoryId
+--		INNER JOIN tblPATRefundRateDetail RRD
+--		ON PCat.intPatronageCategoryId = RRD.intPatronageCategoryId
+--		INNER JOIN tblPATRefundCustomer RCus
+--		ON RCus.intCustomerId = CVol.intCustomerPatronId
+--		INNER JOIN tblPATRefundCategory RCat
+--		ON RCus.intRefundCustomerId = RCat.intRefundCustomerId
+--		WHERE intRefundCategoryId IS NOT NULL AND CVol.intFiscalYear = @intFiscalYearId AND CVol.ysnRefundProcessed <> 1
+--	) Cus
+--	ON RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId IS NOT NULL
+--) Total
+--ON CVol.intCustomerPatronId = Total.intCustomerId AND Total.intRefundCategoryId IS NOT NULL AND RCat.intRefundCategoryId = Total.intRefundCategoryId
+--WHERE Ref.intRefundId = @intRefundId AND CVol.intFiscalYear = @intFiscalYearId AND CVol.ysnRefundProcessed <> 1
 GROUP BY
-		Ref.intRefundId, 
-		Ref.intFiscalYearId, 
-		Ref.dtmRefundDate, 
-		Ref.strRefund,
-		Ref.dblMinimumRefund, 
-		Ref.dblServiceFee,		   
-		Ref.dblCashCutoffAmount, 
-		Ref.dblFedWithholdingPercentage, 
-		Total.dblPurchaseVolume, 
-		Total.dblSaleVolume, 
-		Total.dblRate,
-		Ref.ysnPosted,
+		R.intRefundId, 
+		R.intFiscalYearId, 
+		R.dtmRefundDate, 
+		R.strRefund,
+		R.dblMinimumRefund, 
+		R.dblServiceFee,		   
+		R.dblCashCutoffAmount, 
+		R.dblFedWithholdingPercentage, 
+		RCatPCat.strPurchaseSale,
+		RCus.dblRefundAmount,
+		R.ysnPosted,
 		RCus.intRefundCustomerId,
 		RCus.intCustomerId,
 		RCus.strStockStatus,
 		RCus.ysnEligibleRefund,
 		RCus.intRefundTypeId,
-		RCus.dblCashPayout,
+		RCatPCat.dblCashPayout,
 		RCus.ysnQualified, 
 		RCus.dblCashRefund, 
 		RCus.dblEquityRefund,
-		RCat.intRefundCategoryId,
-		RCat.dblRefundRate, 
-		Total.dblVolume,
-		Total.dblCashPayout,
+		RCatPCat.intRefundCategoryId,
+		RCatPCat.dblRefundRate, 
+		RCatPCat.dblVolume,
+		RCatPCat.dblCashPayout,
 		ARC.ysnSubjectToFWT
 
 SELECT	intRefundId, 
@@ -159,7 +167,6 @@ SELECT	intRefundId,
 		dblLessFWT = SUM(dblLessFWT), 
 		dblLessService = SUM(dblLessService),
 		dblCheckAmount = SUM(dblCheckAmount),
-		dblNoRefund = SUM(dblNoRefund),
 		ysnPosted,
 		intCustomerId,
 		strStockStatus,
@@ -235,60 +242,60 @@ BEGIN
 	-- 	UPDATE REFUND CATEGORY TABLE
 	---------------------------------------------------------------------------------------------------------------------------------------
 
-	UPDATE RCat
-	SET RCat.intPatronageCategoryId = CVol.intPatronageCategoryId,
-	RCat.dblVolume = CVol.dblVolume,
-	RCat.dblRefundRate = CVol.dblRate
-	FROM tblPATRefundCategory RCat
-	INNER JOIN 
-	(
-		select
-			Cus.intCustomerId,
-			dblVolume = Cus.dblPurchaseVolume + Cus.dblSaleVolume,
-			Cus.dblRate,
-			Cus.intPatronageCategoryId,
-			Cus.intRefundCategoryId,
-			Cus.intRefundCustomerId
-		from tblPATRefundCustomer RCus
-		inner join
-		(
-			select distinct CVol.intCustomerPatronId AS intCustomerId,
-							intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END) THEN RCat.intRefundCategoryId ELSE null END),
-							intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END),
-							PCat.intPatronageCategoryId,
-							dblRate = SUM(RRD.dblRate),
-							dblPurchaseVolume = (CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN CVol.dblVolume ELSE 0 END),
-							dblSaleVolume = (CASE WHEN PCat.strPurchaseSale = 'Sale' THEN CVol.dblVolume ELSE 0 END)
-			from tblPATCustomerVolume CVol
-			inner join tblPATPatronageCategory PCat
-			on CVol.intPatronageCategoryId = PCat.intPatronageCategoryId
-			inner join tblPATRefundRateDetail RRD
-			on PCat.intPatronageCategoryId = RRD.intPatronageCategoryId
-			inner join tblPATRefundCustomer RCus
-			on RCus.intCustomerId = CVol.intCustomerPatronId
-			inner join tblPATRefundCategory RCat
-			on RCus.intRefundCustomerId = RCat.intRefundCustomerId
-			inner join tblPATRefund Ref
-			on RCus.intRefundId = Ref.intRefundId AND CVol.intFiscalYear = Ref.intFiscalYearId
-			where intRefundCategoryId is not null
-			GROUP BY	CVol.intCustomerPatronId, 
-						PCat.strPurchaseSale,
-						RCat.dblRefundAmount,
-						CVol.dblVolume,
-						RCus.intRefundCustomerId,RCus.intRefundTypeId,RRD.intRefundTypeId,RCat.intRefundCategoryId,RCat.intRefundCustomerId,PCat.intPatronageCategoryId
-		) Cus
-		on RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId is not null
-	) CVol
-	ON RCat.intRefundCategoryId = CVol.intRefundCategoryId
+	--UPDATE RCat
+	--SET RCat.intPatronageCategoryId = CVol.intPatronageCategoryId,
+	--RCat.dblVolume = CVol.dblVolume,
+	--RCat.dblRefundRate = CVol.dblRate
+	--FROM tblPATRefundCategory RCat
+	--INNER JOIN 
+	--(
+	--	select
+	--		Cus.intCustomerId,
+	--		dblVolume = Cus.dblPurchaseVolume + Cus.dblSaleVolume,
+	--		Cus.dblRate,
+	--		Cus.intPatronageCategoryId,
+	--		Cus.intRefundCategoryId,
+	--		Cus.intRefundCustomerId
+	--	from tblPATRefundCustomer RCus
+	--	inner join
+	--	(
+	--		select distinct CVol.intCustomerPatronId AS intCustomerId,
+	--						intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END) THEN RCat.intRefundCategoryId ELSE null END),
+	--						intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END),
+	--						PCat.intPatronageCategoryId,
+	--						dblRate = SUM(RRD.dblRate),
+	--						dblPurchaseVolume = (CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN CVol.dblVolume ELSE 0 END),
+	--						dblSaleVolume = (CASE WHEN PCat.strPurchaseSale = 'Sale' THEN CVol.dblVolume ELSE 0 END)
+	--		from tblPATCustomerVolume CVol
+	--		inner join tblPATPatronageCategory PCat
+	--		on CVol.intPatronageCategoryId = PCat.intPatronageCategoryId
+	--		inner join tblPATRefundRateDetail RRD
+	--		on PCat.intPatronageCategoryId = RRD.intPatronageCategoryId
+	--		inner join tblPATRefundCustomer RCus
+	--		on RCus.intCustomerId = CVol.intCustomerPatronId
+	--		inner join tblPATRefundCategory RCat
+	--		on RCus.intRefundCustomerId = RCat.intRefundCustomerId
+	--		inner join tblPATRefund Ref
+	--		on RCus.intRefundId = Ref.intRefundId AND CVol.intFiscalYear = Ref.intFiscalYearId
+	--		where intRefundCategoryId is not null
+	--		GROUP BY	CVol.intCustomerPatronId, 
+	--					PCat.strPurchaseSale,
+	--					RCat.dblRefundAmount,
+	--					CVol.dblVolume,
+	--					RCus.intRefundCustomerId,RCus.intRefundTypeId,RRD.intRefundTypeId,RCat.intRefundCategoryId,RCat.intRefundCustomerId,PCat.intPatronageCategoryId
+	--	) Cus
+	--	on RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId is not null
+	--) CVol
+	--ON RCat.intRefundCategoryId = CVol.intRefundCategoryId
 
 	--=====================================================================================================================================
 	-- 	UPDATE CUSTOMER VOLUME TABLE
 	---------------------------------------------------------------------------------------------------------------------------------------
 
 	UPDATE CVol
-	SET CVol.dtmLastActivityDate = GETDATE()
+	SET CVol.dtmLastActivityDate = GETDATE(), CVol.ysnRefundProcessed = ISNULL(@ysnPosted,1)
 	FROM tblPATCustomerVolume CVol
-	WHERE CVol.dblVolume <> 0.00 AND CVol.intFiscalYear = @intFiscalYearId
+	WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId = (SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined)
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -302,7 +309,7 @@ BEGIN TRANSACTION
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 	UPDATE tblPATRefund 
-	   SET ysnPosted = ISNULL(@ysnPosted,0)
+	   SET ysnPosted = ISNULL(@ysnPosted,1)
 	  FROM tblPATRefund R
 	 WHERE R.intRefundId = @intRefundId
 
@@ -417,9 +424,7 @@ END CATCH
 -- 	UPDATE CUSTOMER EQUITY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 BEGIN TRY
-
-	DECLARE @strCutoffTo NVARCHAR(50) = (SELECT TOP 1 strCutoffTo from tblPATCompanyPreference)
-
+SELECT * FROM #tmpRefundData WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)
 	MERGE tblPATCustomerEquity AS EQ
 	USING (SELECT * FROM #tmpRefundData WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)) AS B
 		ON (EQ.intCustomerId = B.intCustomerId AND EQ.intFiscalYearId = B.intFiscalYearId AND EQ.intRefundTypeId = B.intRefundTypeId)
@@ -434,7 +439,12 @@ BEGIN TRY
 
 	IF (@ysnPosted = 0)
 	BEGIN
-		----------------------------------RECREATE VOLUME---------------------------------------------------------------------
+		----------------------------------REVERSE VOLUME---------------------------------------------------------------------
+
+		UPDATE CVol
+		SET CVol.dtmLastActivityDate = GETDATE(), CVol.ysnRefundProcessed = ISNULL(@ysnPosted, 0)
+		FROM tblPATCustomerVolume CVol
+		WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId = (SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined)
 		--SELECT	RCus.intCustomerId,
 		--RCat.intPatronageCategoryId,
 		--Ref.intFiscalYearId, 
@@ -471,25 +481,25 @@ BEGIN TRY
 
 		----------------------------------------------------------------------------------------------------------------------------
 
-		DELETE RCat
-		FROM tblPATRefund Ref
-		INNER JOIN tblPATRefundCustomer RCus
-		ON Ref.intRefundId = RCus.intRefundId
-		INNER JOIN tblPATRefundCategory RCat
-		ON RCus.intRefundCustomerId	 = RCat.intRefundCustomerId
-		INNER JOIN tblPATPatronageCategory PCat
-		ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
-		WHERE Ref.intRefundId = @intRefundId
+		--DELETE RCat
+		--FROM tblPATRefund Ref
+		--INNER JOIN tblPATRefundCustomer RCus
+		--ON Ref.intRefundId = RCus.intRefundId
+		--INNER JOIN tblPATRefundCategory RCat
+		--ON RCus.intRefundCustomerId	 = RCat.intRefundCustomerId
+		--INNER JOIN tblPATPatronageCategory PCat
+		--ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
+		--WHERE Ref.intRefundId = @intRefundId
 
-		DELETE RCus
-		FROM tblPATRefund Ref
-		INNER JOIN tblPATRefundCustomer RCus
-		ON Ref.intRefundId = RCus.intRefundId
-		WHERE Ref.intRefundId = @intRefundId
+		--DELETE RCus
+		--FROM tblPATRefund Ref
+		--INNER JOIN tblPATRefundCustomer RCus
+		--ON Ref.intRefundId = RCus.intRefundId
+		--WHERE Ref.intRefundId = @intRefundId
 
-		DELETE Ref
-		FROM tblPATRefund Ref
-		WHERE Ref.intRefundId = @intRefundId
+		--DELETE Ref
+		--FROM tblPATRefund Ref
+		--WHERE Ref.intRefundId = @intRefundId
 	END
 
 END TRY
@@ -526,8 +536,7 @@ Post_Cleanup:
 	--INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundDataCombined
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundPostData')) DROP TABLE #tmpRefundPostData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundDataCombined')) DROP TABLE #tmpRefundDataCombined
 	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCurrentData')) DROP TABLE #tmpCurrentData
 END
 ---------------------------------------------------------------------------------------------------------------------------------------
