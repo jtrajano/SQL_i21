@@ -206,13 +206,13 @@ BEGIN
 			,[dblRate]					= grainCharge.dblCharge
 			,[intCostUOMId]				= charge.intCostUOMId
 			,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a currency id. Use the default functional currency. 
-			,[dblAmount]				= grainCharge.dblCharge
+			,[dblAmount]				= grainCharge.dblCharge * grainCharge.dblOpenBalance
 			,[ysnAccrue]				= charge.ysnAccrue
 			,[intEntityVendorId]		= NULL -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a vendor id. So I assume all storage charges are meant to increase the receivable from shipment customer. 
 			,[ysnPrice]					= charge.ysnPrice
 		FROM @StorageTicketInfoByFIFO grainCharge INNER JOIN tblICItem charge
 				ON grainCharge.intItemId = charge.intItemId
-		WHERE grainCharge.[strItemType] <> 'Inventory' 
+		WHERE grainCharge.[strItemType] ='Storage Charge' 
 
 	END 
 END 
