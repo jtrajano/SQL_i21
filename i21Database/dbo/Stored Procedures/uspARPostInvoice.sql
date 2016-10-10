@@ -1511,6 +1511,36 @@ END CATCH
 						ON PID.intInvoiceId = ARI.intInvoiceId
 				WHERE  
 					ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.dtmPostDate, ARI.dtmDate)), 0) = 0
+
+
+				--Invalid Consumption Site
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT 
+					'Site # ' + CONVERT(NVARCHAR(100),TMS.intSiteID) + ' is not a valid site for customer ' + ARC.strCustomerNumber,
+					ARI.strTransactionType,
+					ARI.strInvoiceNumber,
+					@batchId,
+					ARI.intInvoiceId
+				FROM 
+					tblARInvoiceDetail ARID
+				INNER JOIN
+					tblARInvoice ARI
+						ON ARID.intInvoiceId = ARI.intInvoiceId
+				INNER JOIN
+					@PostInvoiceData PID
+						ON ARI.intInvoiceId = PID.intInvoiceId
+				INNER JOIN
+					tblARCustomer ARC
+						ON ARI.intEntityCustomerId = ARC.intEntityCustomerId 
+				LEFT OUTER JOIN
+					tblTMSite TMS
+						ON ARID.intSiteId = TMS.intSiteID
+				INNER JOIN
+					tblTMCustomer TMC
+						ON TMS.intCustomerID = TMC.intCustomerID						 						
+				WHERE 
+					ARID.intSiteId IS NOT NULL
+					AND ARI.intEntityCustomerId <> TMC.intCustomerNumber 
 					
 					
 				BEGIN TRY
