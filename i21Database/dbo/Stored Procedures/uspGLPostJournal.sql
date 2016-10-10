@@ -118,7 +118,9 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM @tmpValidJournals)
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Transaction:
 
-DECLARE @intCurrencyId	INT
+DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+
 DECLARE @dblDailyRate	NUMERIC (18,6)
 
 IF ISNULL(@ysnRecap, 0) = 0
@@ -126,10 +128,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		DECLARE @GLEntries RecapTableType
 		
-		SET @intCurrencyId		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
-																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
-																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
-		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId);
+		
 		
 		DELETE FROM @GLEntries
 		INSERT INTO @GLEntries (
@@ -191,15 +190,15 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblCreditReport]		= CASE	WHEN [dblDebitReport] < 0 THEN ABS([dblDebitReport])
 											WHEN [dblCreditReport] < 0 THEN 0
 											ELSE [dblCreditReport] END
-			,[dblReportingRate]		= B.dblExchangeRate
-			,[dblForeignRate]		= B.dblExchangeRate
+			,[dblReportingRate]		= dblDebitRate
+			,[dblForeignRate]		= dblDebitRate
 			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
 			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= B.intCurrencyId
-			,[dblExchangeRate]		= @dblDailyRate
+			,[dblExchangeRate]		= dblDebitRate
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -228,10 +227,6 @@ ELSE
 		-- DELETE Results 1 DAYS OLDER	
 		DELETE FROM tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
 		
-		SET @intCurrencyId		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
-																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
-																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
-		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId);
 		
 		WITH Accounts 
 		AS 
@@ -285,7 +280,7 @@ ELSE
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[dblExchangeRate]		= @dblDailyRate
+			,[dblExchangeRate]		= dblDebitRate
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -417,6 +412,7 @@ BEGIN
 	WHILE EXISTS(SELECT 1 FROM @tmpReverseJournals)
 	BEGIN
 		DECLARE @intJournalId INT = (SELECT TOP 1 intJournalId FROM @tmpReverseJournals)
+		
 		DECLARE @strJournalId NVARCHAR(100) = ''
 				
 		EXEC [dbo].uspGLGetNewID 5, @strJournalId OUTPUT 		
@@ -501,9 +497,9 @@ BEGIN
 				,@intJournalId_NEW
 				,@dtmDate_NEW
 				,[intAccountId]			
-				,[dblCredit] = (dblCredit * B.dblRate)
+				,[dblCredit]  =CASE WHEN @intDefaultCurrencyId <> C.intCurrencyId THEN (dblCreditForeign * B.dblRate) else dblCredit end
 				,[dblCreditRate] = B.dblRate
-				,[dblDebit] =  (dblDebit * B.dblRate)
+				,[dblDebit] =   CASE WHEN @intDefaultCurrencyId <> C.intCurrencyId THEN (dblDebitForeign * B.dblRate) else dblDebit end
 				,[dblDebitRate]	 = B.dblRate
 				,[dblCreditUnit]
 				,[dblDebitUnit]
@@ -511,8 +507,8 @@ BEGIN
 				,[dblDebitForeign]	
 				,[dblDebitReport]
 				,[dblCreditReport]
-				,[strDescription]
-				,[intConcurrencyId]
+				,A.[strDescription]
+				,A.[intConcurrencyId]
 				,[dblUnitsInLBS]
 				,[strDocument]
 				,[strComments]
@@ -524,6 +520,7 @@ BEGIN
 				,[strWorkArea]
 				,[intCurrencyExchangeRateTypeId]
 			FROM [dbo].tblGLJournalDetail A
+			INNER join tblGLJournal C on A. intJournalId = C.intJournalId
 			OUTER APPLY dbo.fnGLGetExchangeRate(@intCurrencylId,A.intCurrencyExchangeRateTypeId,@dtmDate_NEW) B
 			WHERE A.intJournalId = @intJournalId
 							
@@ -549,4 +546,3 @@ Post_Rollback:
 	GOTO Post_Exit
 
 Post_Exit:
-

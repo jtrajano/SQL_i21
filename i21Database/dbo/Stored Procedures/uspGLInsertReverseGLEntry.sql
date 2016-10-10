@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspGLInsertReverseGLEntry
+CREATE PROCEDURE [dbo].[uspGLInsertReverseGLEntry]
 (
 	@strTransactionId NVARCHAR(100),
 	@intEntityId INT,
@@ -17,9 +17,10 @@ BEGIN
 				,[dblCredit]
 				,[dblDebitUnit]
 				,[dblCreditUnit]
-				--,[dblDebitForeign]
-				--,[dblCreditForeign]
-				--,[dblForeignRate]
+				,[dblDebitForeign]
+				,[dblCreditForeign]
+				,[dblForeignRate]
+				,dblReportingRate
 				,[strDescription]
 				,[strCode]
 				,[strReference]
@@ -42,13 +43,14 @@ BEGIN
 				,dtmDate			= ISNULL(@dtmDateReverse, [dtmDate]) -- If date is provided, use date reverse as the date for unposting the transaction.
 				,[strBatchId]
 				,[intAccountId]
-				,dblDebit			= [dblCredit]		-- (Debit -> Credit)
-				,dblCredit			= [dblDebit]		-- (Debit <- Credit)
-				,dblDebitUnit		= [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
-				,dblCreditUnit		= [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
-				--,dblDebitForeign	= [dblCreditForeign]
-				--,dblCreditForeign	= [dblDebitForeign]
-				--,dblForeignRate
+				,[dblCredit]
+				,[dblDebit]
+				,[dblCreditUnit]
+				,[dblDebitUnit]
+				,[dblCreditForeign]
+				,[dblDebitForeign]
+				,dblForeignRate
+				,dblReportingRate
 				,[strDescription]
 				,[strCode]
 				,[strReference]
