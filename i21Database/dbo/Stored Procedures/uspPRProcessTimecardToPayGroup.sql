@@ -157,6 +157,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		SET dblRegularHours = Y.dblRegularHours
 			,dblOvertimeHours = Y.dblOvertimeHours
 			,intPayGroupDetailId = @intPayGroupDetailId
+			,intProcessedUserId = @intUserId
+			,dtmProcessed = GETDATE()
 		FROM
 		(SELECT
 			intTimecardId
