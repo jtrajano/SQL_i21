@@ -5,7 +5,7 @@ SELECT
 	,priceID			= ''
 	,balance			= CAST(ROUND(ISNULL(ARC.[dblARBalance], 0.00), 2) AS NUMERIC(18, 2))
 	,pastDue30			= CAST(ROUND(ISNULL(ARCI.[dbl60Days], 0.00) + ISNULL(ARCI.[dbl90Days], 0.00) + ISNULL(ARCI.[dbl91Days], 0.00), 2) AS NUMERIC(18, 2))
-	,creditRating		= ISNULL(ARC.strCreditCode, '')
+	,creditRating        = ISNULL(ARCI.strTerm, '')
 FROM
 	vyuARCustomerInquiry ARCI
 INNER JOIN
