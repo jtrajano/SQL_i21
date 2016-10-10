@@ -70,14 +70,8 @@ BEGIN TRY
 			,S.intSampleId
 			,IC.strContractItemName
 			,S.strMarks
-			,(
-				SELECT strShipperCode
-				FROM dbo.fnQMGetShipperName(S.strMarks)
-				) AS strShipperCode
-			,(
-				SELECT strShipperName
-				FROM dbo.fnQMGetShipperName(S.strMarks)
-				) AS strShipperName
+			,E1.strEntityNo AS strShipperCode
+			,E1.strName AS strShipperName
 			,CS.strSubLocationName
 			,L.strLoadNumber
 			,S.dtmSampleReceivedDate
@@ -89,22 +83,32 @@ BEGIN TRY
 		JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId
 		JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
 			AND S.intLocationId = ' 
-	+ @strLocationId + '
+		+ @strLocationId + '
 		JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 		LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 		LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 		LEFT JOIN dbo.tblLGLoad L ON L.intLoadId = S.intLoadId
-		LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId'
-		
+		LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
+		LEFT JOIN dbo.tblEMEntity AS E1 ON E1.intEntityId = S.intShipperEntityId'
+
 	IF (LEN(@strFilterCriteria) > 0)
-		SET @SQL = @SQL + 'WHERE ' + @strFilterCriteria
+	BEGIN
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strContractNumber]', 'CH.strContractNumber + '' - '' + LTRIM(CD.intContractSeq)')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strName]', 'E.strName')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strBundleItemNo]', 'I1.strItemNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strStatus]', 'SS.strStatus')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strMarks]', 'S.strMarks')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strShipperCode]', 'E1.strEntityNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strShipperName]', 'E1.strName')
+		SET @SQL = @SQL + ' WHERE ' + @strFilterCriteria
+	END
 
 	SET @SQL = @SQL + ') t '
-
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
-
 	SET @SQL = @SQL + ' SELECT   
   intTotalCount
   ,strContractNumber  
@@ -154,8 +158,7 @@ BEGIN TRY
 	JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId
   ) t  
  PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @str + ')) pvt'
-
- SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
+	SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
 
 	EXEC sp_executesql @SQL
 END TRY
