@@ -301,8 +301,9 @@ BEGIN
 		-- Call the uspICUnpostFIFOOut
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'InvShip-0000001'
 		DECLARE @intTransactionId AS INT = 1
+		DECLARE @ysnRecap AS BIT = 0
 		
-		EXEC dbo.uspICUnpostFIFOOut @strTransactionId, @intTransactionId
+		EXEC dbo.uspICUnpostFIFOOut @strTransactionId, @intTransactionId, @ysnRecap
 
 		INSERT INTO actualTransactionToReverse 
 		SELECT * FROM #tmpInventoryTransactionStockToReverse

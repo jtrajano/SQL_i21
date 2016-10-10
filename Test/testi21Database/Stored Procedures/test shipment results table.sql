@@ -44,7 +44,7 @@ BEGIN
 		intEntityCustomerId = 8, -- Apple Spice Sales
 		dtmShipDate = GETDATE(), -- Today
 		intShipFromLocationId = 2, -- Fort Wayne
-		intShipToLocationId = 638, -- Apple Spice
+		intShipToLocationId = 4, -- Apple Spice
 		intFreightTermId = 3, -- Pickup
 		strBOLNumber = 'BOL-1',
 		strSourceScreenName = 'Inventory Shipment',

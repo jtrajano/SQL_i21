@@ -82,8 +82,9 @@ BEGIN
 		-- Call the uspICUnpostLIFOOut
 		DECLARE @strTransactionId AS NVARCHAR(20) = 'InvShip-0000001'
 		DECLARE @intTransactionId AS INT = 1
+		DECLARE @ysnRecap AS BIT = 0
 		
-		EXEC dbo.uspICUnpostLIFOIn @strTransactionId, @intTransactionId
+		EXEC dbo.uspICUnpostLIFOIn @strTransactionId, @intTransactionId, @ysnRecap
 
 		INSERT INTO actualTransactionToReverse
 		SELECT * FROM #tmpInventoryTransactionStockToReverse

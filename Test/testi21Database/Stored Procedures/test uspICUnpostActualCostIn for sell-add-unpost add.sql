@@ -28,6 +28,7 @@ BEGIN
 
 		DECLARE @strTransactionId AS NVARCHAR(20)
 		DECLARE @intTransactionId AS INT
+		DECLARE @ysnRecap AS BIT
 
 		CREATE TABLE actualActualCost (
 			strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -256,8 +257,9 @@ BEGIN
 		-- Call the uspICUnpostActualCostOut
 		SET @strTransactionId = 'InvRcpt-0000001'
 		SET @intTransactionId = 1
+		SET @ysnRecap = 0
 		
-		EXEC dbo.uspICUnpostActualCostIn @strTransactionId, @intTransactionId
+		EXEC dbo.uspICUnpostActualCostIn @strTransactionId, @intTransactionId, @ysnRecap
 
 		INSERT INTO actualTransactionToReverse
 		SELECT * FROM #tmpInventoryTransactionStockToReverse

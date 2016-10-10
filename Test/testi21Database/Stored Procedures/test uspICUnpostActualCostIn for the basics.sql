@@ -76,8 +76,9 @@ BEGIN
 		-- Call the uspICUnpostActualCostOut
 		DECLARE @strTransactionId AS NVARCHAR(20) = 'InvShip-0000001'
 		DECLARE @intTransactionId AS INT = 1
+		DECLARE @ysnRecap AS BIT = 0
 		
-		EXEC dbo.uspICUnpostActualCostIn @strTransactionId, @intTransactionId
+		EXEC dbo.uspICUnpostActualCostIn @strTransactionId, @intTransactionId, @ysnRecap
 
 		INSERT INTO actualTransactionToReverse
 		SELECT * FROM #tmpInventoryTransactionStockToReverse

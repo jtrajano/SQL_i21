@@ -110,7 +110,7 @@ BEGIN
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Unable to calculate the Other Charges per unit. Please check if UOM Pound is assigned to item MANUAL LOT GRAINS.'
+			@ExpectedMessage = 'Unable to calculate Other Charges as the UOM Pound is not setup for item MANUAL LOT GRAINS.'
 			,@ExpectedErrorNumber = 80050
 	END
 	
