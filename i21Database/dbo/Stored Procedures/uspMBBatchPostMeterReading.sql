@@ -75,6 +75,7 @@ BEGIN
 			,[intEntityId]
 			,[ysnResetDetails]
 			,[ysnPost]
+			,[ysnRecap]
 			,[intInvoiceDetailId]
 			,[intItemId]
 			,[ysnInventory]
@@ -153,7 +154,7 @@ BEGIN
 			,[intEntityId]							= @UserEntityId
 			,[ysnResetDetails]						= 0
 			,[ysnPost]								= @Post
-	
+			,[ysnRecap]								= @Recap
 			,[intInvoiceDetailId]					= NULL
 			,[intItemId]							= MRDetail.intItemId
 			,[ysnInventory]							= 1
