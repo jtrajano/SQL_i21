@@ -16,7 +16,7 @@
 	[ysnHold] [bit] null,
 	[ysnActive] [bit] null,
 	[intEntityId] [int] NOT NULL,
-	[strRetrospective] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+	[strRetrospective] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strImageId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDOpportunityCampaign] PRIMARY KEY CLUSTERED ([intOpportunityCampaignId] ASC),
