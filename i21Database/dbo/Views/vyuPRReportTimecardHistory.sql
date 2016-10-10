@@ -15,10 +15,10 @@ SELECT
 	,TC.dblRegularHours
 	,TC.dblOvertimeHours
 	,TC.ysnApproved
-	,strApprovedUserId = EMA.strEntityNo
+	,strApprovedUserId = USA.strUserName
 	,TC.dtmApproved
 	,ysnProcessed = CASE WHEN (TC.intPaycheckId IS NOT NULL OR TC.intPayGroupDetailId IS NOT NULL) THEN 1 ELSE 0 END
-	,strProcessedUserId = EMP.strEntityNo
+	,strProcessedUserId = USP.strUserName
 	,TC.dtmProcessed
 	,dblRegularRate = CASE WHEN (TC.intPaycheckId IS NOT NULL) THEN ISNULL(PE.dblAmount, EE.dblRateAmount)
 						   WHEN (TC.intPayGroupDetailId IS NOT NULL) THEN ISNULL(PGD.dblAmount, EE.dblRateAmount)
@@ -53,10 +53,10 @@ FROM
 	tblPRTimecard TC
 	LEFT JOIN tblEMEntity EM 
 		ON EM.intEntityId = TC.intEntityEmployeeId
-	LEFT JOIN tblEMEntity EMA
-		ON EMA.intEntityId = TC.intApprovedUserId
-	LEFT JOIN tblEMEntity EMP
-		ON EMP.intEntityId = TC.intProcessedUserId
+	LEFT JOIN tblSMUserSecurity USA
+		ON USA.intEntityUserSecurityId = TC.intApprovedUserId
+	LEFT JOIN tblSMUserSecurity USP
+		ON USP.intEntityUserSecurityId = TC.intProcessedUserId
 	LEFT JOIN tblPRPaycheck PC
 		ON TC.intPaycheckId = PC.intPaycheckId
 	LEFT JOIN tblPRPayGroupDetail PGD
