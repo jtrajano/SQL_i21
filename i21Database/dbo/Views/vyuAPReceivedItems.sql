@@ -351,7 +351,7 @@ FROM
 	,[intStorageLocationId]		=	B.intStorageLocationId	 
 	,[strStorageLocationName]	=	ISL.strName
 	,[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0)
-	,[dblWeightLoss]			=	ISNULL(B.dblGross - B.dblNet,0)
+	,[dblWeightLoss]			=	ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0)
 	,[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END
 	,[intLocationId]			=	A.intLocationId
 	,[intInventoryShipmentItemId]				=   NULL
@@ -390,10 +390,10 @@ FROM
 	) Billed
 	OUTER APPLY (
 		SELECT 
-			K.dblNet
-		FROM tblLGLoadDetail K
+			K.dblNetWt AS dblNet
+		FROM tblLGLoadContainer K
 		WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
-							AND K.intLoadDetailId = B.intSourceId AND K.intPContractDetailId = B.intLineNo AND B.intItemId = K.intItemId
+							AND K.intLoadContainerId = B.intContainerId 
 						THEN 1
 						ELSE 0 END)
 	) Loads
@@ -777,7 +777,7 @@ FROM
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	ISNULL(CV.dblTotal,0)
+		,[dblUnitCost]								=	CAST(ISNULL(CV.dblTotal,0) AS DECIMAL(18,6))
 		,[dblTax]									=	0
 		,[dblRate]									=	0
 		,[ysnSubCurrency]							=	0
