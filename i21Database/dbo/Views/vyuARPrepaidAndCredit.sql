@@ -9,9 +9,10 @@ SELECT
 	,[intPrepaymentDetailId]			= ARID.[intInvoiceDetailId]	
 	,[strPrepaymentNumber]				= ARI.[strInvoiceNumber]
 	,[intEntityCustomerId]				= ARI.[intEntityCustomerId] 
-	,[strPrepayType]					= (	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN 'Standard'
-												WHEN ARID.[intPrepayTypeId] =  2 THEN 'Unit'
-												WHEN ARID.[intPrepayTypeId] =  3 THEN 'Percentage'
+	,[strPrepayType]					= (	CASE WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] = 1 THEN 'Standard'
+												WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] =  2 THEN 'Unit'
+												WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] =  3 THEN 'Percentage'
+												WHEN ARI.[strTransactionType] = 'Credit Memo' THEN 'Credit Memo'
 												ELSE ''
 											END
 										  )
@@ -28,9 +29,10 @@ SELECT
 	,[dblPrepayRate]					= ARID.[dblPrepayRate]
 	,[dblLineItemTotal]					= ARID.[dblTotal]
 	,[dblInvoiceTotal]					= ARI.[dblInvoiceTotal]
-	,[dblPrepaidAmount]					= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
-														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
-														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+	,[dblPrepaidAmount]					= ISNULL((	CASE WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
+														WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
+														WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+														WHEN ARI.[strTransactionType] = 'Credit Memo' THEN ARI.[dblInvoiceTotal]
 														ELSE 0.000000
 													END
 										  ), 0.000000)
@@ -95,11 +97,11 @@ FROM
 INNER JOIN
 	tblARInvoice ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-		AND ARI.[strTransactionType] = 'Customer Prepayment'
+		AND ARI.[strTransactionType] IN ('Customer Prepayment', 'Credit Memo')
 		AND ARI.[ysnPaid] = 0
 INNER JOIN
 	tblARPayment ARP
-		ON ARI.[intPaymentId] = ARP.[intPaymentId]
+		ON (ARI.[intPaymentId] = ARP.[intPaymentId] OR ARI.[strTransactionType] = 'Credit Memo')
 		AND ARP.[ysnPosted] = 1
 LEFT OUTER JOIN
 	vyuCTContractHeaderView CTCHV
@@ -112,6 +114,7 @@ LEFT OUTER JOIN
 		ON ARID.[intItemId] = ICI.[intItemId]
 WHERE
 	ISNULL(ARID.[intPrepayTypeId],0) IN (1,2,3)
+	OR ARI.[strTransactionType] = 'Credit Memo'
 	
 	
 UNION
@@ -125,9 +128,10 @@ SELECT
 	,[intPrepaymentDetailId]			= ARPAC.[intPrepaymentDetailId]
 	,[strPrepaymentNumber]				= ARI.[strInvoiceNumber]
 	,[intEntityCustomerId]				= ARI.[intEntityCustomerId] 
-	,[strPrepayType]					= (	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN 'Standard'
-												WHEN ARID.[intPrepayTypeId] =  2 THEN 'Unit'
-												WHEN ARID.[intPrepayTypeId] =  3 THEN 'Percentage'
+	,[strPrepayType]					= (	CASE WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] = 1 THEN 'Standard'
+												WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] =  2 THEN 'Unit'
+												WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] =  3 THEN 'Percentage'
+												WHEN ARI.[strTransactionType] = 'Credit Memo' THEN 'Credit Memo'
 												ELSE ''
 											END
 										  )
@@ -144,9 +148,10 @@ SELECT
 	,[dblPrepayRate]					= ARID.[dblPrepayRate]
 	,[dblLineItemTotal]					= ARID.[dblTotal]
 	,[dblInvoiceTotal]					= ARI.[dblInvoiceTotal]
-	,[dblPrepaidAmount]					= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
-														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
-														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+	,[dblPrepaidAmount]					= ISNULL((	CASE WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
+														WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
+														WHEN ARI.[strTransactionType] <> 'Credit Memo' AND ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+														WHEN ARI.[strTransactionType] = 'Credit Memo' THEN ARI.[dblInvoiceTotal]
 														ELSE 0.000000
 													END
 										  ), 0.000000)
@@ -215,11 +220,11 @@ INNER JOIN
 INNER JOIN
 	tblARInvoice ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-		AND ARI.[strTransactionType] = 'Customer Prepayment'
+		AND ARI.[strTransactionType] IN ('Customer Prepayment', 'Credit Memo')
 		AND ARI.[ysnPaid] = 0
 INNER JOIN
 	tblARPayment ARP
-		ON ARI.[intPaymentId] = ARP.[intPaymentId]
+		ON (ARI.[intPaymentId] = ARP.[intPaymentId] OR ARI.[strTransactionType] = 'Credit Memo')
 		AND ARP.[ysnPosted] = 1
 LEFT OUTER JOIN
 	vyuCTContractHeaderView CTCHV
@@ -232,3 +237,4 @@ LEFT OUTER JOIN
 		ON ARID.[intItemId] = ICI.[intItemId]
 WHERE
 	ISNULL(ARID.[intPrepayTypeId],0) IN (1,2,3)
+	OR ARI.[strTransactionType] = 'Credit Memo'
