@@ -49,7 +49,7 @@ FROM (
 		strAccountDesc
 	FROM (
 		SELECT 
-			Loads.dblNetShippedWeight
+			LGC.dblNetWt AS dblNetShippedWeight
 			,Receipts.dblNetQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
 			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
@@ -98,6 +98,7 @@ FROM (
 		INNER JOIN tblCTWeightGrade I ON H.intWeightId = I.intWeightGradeId
 		INNER JOIN tblICItem G ON B.intItemId = G.intItemId
 		INNER JOIN tblAPAppliedPrepaidAndDebit J ON J.intContractHeaderId = E.intContractHeaderId AND B.intBillDetailId = J.intBillDetailApplied
+		INNER JOIN tblLGLoadContainer LGC ON LGC.intLoadContainerId = C2.intContainerId
 		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
 		LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
@@ -109,11 +110,11 @@ FROM (
 					AND B.intItemId = L.intItemId 
 					AND E.intContractDetailId = L.intContractDetailId
 					AND E.intContractHeaderId = L.intContractHeaderId
-		CROSS APPLY (
-			SELECT SUM(F.dblGross) AS dblNetShippedWeight
-			FROM tblLGLoadDetail F
-			WHERE C2.intSourceId = F.intLoadDetailId
-			) Loads
+		--CROSS APPLY (
+		--	SELECT SUM(F.dblGross) AS dblNetShippedWeight
+		--	FROM tblLGLoadDetail F
+		--	WHERE C2.intSourceId = F.intLoadDetailId
+		--	) Loads
 		CROSS APPLY (
 			SELECT 
 				SUM(C.dblNet) AS dblNetQtyReceived

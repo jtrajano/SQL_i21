@@ -66,8 +66,8 @@ FROM (
 	FROM (
 		SELECT
 			 BillClaim.intBillId 
-			,Receipts.dblNetQtyReceived
-			,Receipts.dblGrossQtyReceived
+			,IRI.dblNet AS dblNetQtyReceived--Receipts.dblNetQtyReceived
+			,IRI.dblGross AS dblGrossQtyReceived--Receipts.dblGrossQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
 			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
 					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty / B.dblCostUnitQty) ELSE B.dblCost END AS dblCost
@@ -92,7 +92,7 @@ FROM (
 			,A.intShipToId
 			,A.intCurrencyId
 			,L.dblTotal + L.dblTax AS dblPrepaidTotal
-			,Loads.dblNetShippedWeight
+			,LGC.dblNetWt AS dblNetShippedWeight--Loads.dblNetShippedWeight
 			,Container.strContainerNumber
 			,M.strVendorId
 			,M.intGLAccountExpenseId AS intAccountId
@@ -125,6 +125,7 @@ FROM (
 		INNER JOIN tblICItem G ON B.intItemId = G.intItemId
 		INNER JOIN tblAPAppliedPrepaidAndDebit J ON J.intContractHeaderId = E.intContractHeaderId AND B.intBillDetailId = J.intBillDetailApplied
 		INNER JOIN tblAPBill K ON J.intTransactionId = K.intBillId
+		INNER JOIN tblLGLoadContainer LGC ON LGC.intLoadContainerId = IRI.intContainerId
 		LEFT JOIN dbo.tblSMCurrency N ON A.intCurrencyId = N.intCurrencyID
 		INNER JOIN tblAPBillDetail L ON K.intBillId = L.intBillId 
 					AND B.intItemId = L.intItemId 
@@ -132,11 +133,11 @@ FROM (
 					AND E.intContractHeaderId = L.intContractHeaderId
 		INNER JOIN dbo.tblAPBillDetail P ON P.intContractHeaderId = H.intContractHeaderId
 		INNER JOIN dbo.tblAPBill BillClaim ON BillClaim.intBillId = P.intBillId
-		CROSS APPLY (
-			SELECT SUM(F.dblGross) AS dblNetShippedWeight
-			FROM tblLGLoadDetail F
-			WHERE IRI.intSourceId = F.intLoadDetailId
-			) Loads
+		--CROSS APPLY (
+		--	SELECT SUM(F.dblGross) AS dblNetShippedWeight
+		--	FROM tblLGLoadDetail F
+		--	WHERE IRI.intSourceId = F.intLoadDetailId
+		--	) Loads
 		CROSS APPLY (
 			SELECT TOP 1 GLC.strContainerNumber
 			FROM tblLGLoadDetail F
@@ -144,13 +145,13 @@ FROM (
 			INNER JOIN tblLGLoadContainer GLC ON GLC.intLoadContainerId = GLCL.intLoadContainerId
 			WHERE IRI.intSourceId = F.intLoadDetailId
 		) Container
-		CROSS APPLY (
-			SELECT 
-				SUM(C.dblNet) AS dblNetQtyReceived,
-				SUM(C.dblGross) AS dblGrossQtyReceived
-			FROM tblICInventoryReceiptItem C 
-			WHERE C.intLineNo = IRI.intLineNo AND C.intOrderId = IRI.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
-		) Receipts
+		--CROSS APPLY (
+		--	SELECT 
+		--		SUM(C.dblNet) AS dblNetQtyReceived,
+		--		SUM(C.dblGross) AS dblGrossQtyReceived
+		--	FROM tblICInventoryReceiptItem C 
+		--	WHERE C.intLineNo = IRI.intLineNo AND C.intOrderId = IRI.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+		--) Receipts
 		/*CROSS APPLY (
 			SELECT 
 				TOP 1 strBankAccountNo,

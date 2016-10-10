@@ -291,10 +291,10 @@ BEGIN
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	OUTER APPLY (
 		SELECT 
-			K.dblNet
-		FROM tblLGLoadDetail K
+			K.dblNetWt AS dblNet
+		FROM tblLGLoadContainer K
 		WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
-							AND K.intLoadDetailId = B.intSourceId AND K.intPContractDetailId = B.intLineNo AND B.intItemId = K.intItemId
+							AND K.intLoadContainerId = B.intContainerId 
 						THEN 1
 						ELSE 0 END)
 	) Loads
