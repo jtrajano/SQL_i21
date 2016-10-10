@@ -126,11 +126,11 @@ BEGIN
 		SELECT	TOP 1 
 				@intId = intId
 				,@intItemId = intItemId
-				,@dblUnits = dbo.fnCalculateQtyBetweenUOM(
+				,@dblUnits =  ABS(dbo.fnCalculateQtyBetweenUOM(
 								storageItem.intItemUOMId
 								,dbo.fnGetItemStockUOM(storageItem.intItemId)
 								,storageItem.dblQty
-							)
+							))
 				,@intInventoryShipmentItemId = storageItem.intInventoryShipmentItemId		
 		FROM	@StorageItems storageItem 
 
@@ -140,6 +140,7 @@ BEGIN
 					ON gcs.intCustomerStorageId = shipItem.intCustomerStorageId					
 		WHERE	shipItem.intInventoryShipmentItemId = @intInventoryShipmentItemId
 
+		SELECT @intCustomerEntityId=intEntityCustomerId FROM tblICInventoryShipment Where intInventoryShipmentId=@intInventoryShipmentId
 		-- Call the Grain sp. 
 		BEGIN TRY 
 			-- Get the charges created by the Grain sp. 
@@ -162,7 +163,7 @@ BEGIN
 				, @intItemId
 				, @intStorageTypeId
 				, @dblUnits
-				, @intTicketId 
+				, @intInventoryShipmentId
 				, @intEntityUserSecurityId
 
 			-- Populate the link ids for the shipment and shipment detail id. 
@@ -211,6 +212,7 @@ BEGIN
 			,[ysnPrice]					= charge.ysnPrice
 		FROM @StorageTicketInfoByFIFO grainCharge INNER JOIN tblICItem charge
 				ON grainCharge.intItemId = charge.intItemId
+		WHERE grainCharge.[strItemType] <> 'Inventory' 
 
 	END 
 END 
