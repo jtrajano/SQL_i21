@@ -4393,6 +4393,7 @@
     <Build Include="dbo\Functions\fnSCCalculateDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspTFSF401InvoiceTax.sql" />
     <Build Include="dbo\Views\vyuETBEExportContract.sql" />
+    <Build Include="dbo\Views\vyuARLetterCustomerSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

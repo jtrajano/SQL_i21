@@ -5,7 +5,8 @@ SELECT
 	 , strCompanyName			= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress		= (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
 	 , strCompanyPhone			= (SELECT TOP 1 strPhone FROM tblSMCompanySetup)
-	 , A.intEntityCustomerId     
+	 , A.intEntityCustomerId    
+	 , Cus.strCustomerNumber	  
 	 , A.strCustomerName
 	 , strCustomerAddress		= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, E.strName, NULL)
 	 , strCustomerPhone			= EnPhoneNo.strPhone 
@@ -29,8 +30,7 @@ SELECT
 	 , dblPrepaids
 	 , dtmDate
 	 , dtmDueDate
-	 , strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
-	 
+	 , strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId) 
 FROM 
 (
 SELECT A.strInvoiceNumber
@@ -344,4 +344,4 @@ INNER JOIN (SELECT intEntityId, strName FROM tblEMEntity) E ON A.intEntityCustom
 INNER JOIN (SELECT intCompanyLocationId, strUseLocationAddress, strAddress, strCity, strStateProvince, strZipPostalCode, strCountry, strPhone FROM tblSMCompanyLocation) L ON A.intCompanyLocationId = L.intCompanyLocationId
 INNER JOIN (SELECT intEntityId, [intEntityContactId], ysnDefaultContact FROM [tblEMEntityToContact]) as CusToCon ON A.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
 LEFT JOIN (SELECT intEntityId, strPhone FROM tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
-INNER JOIN (SELECT intEntityCustomerId, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId FROM vyuARCustomer) Cus ON A.intEntityCustomerId = Cus.intEntityCustomerId
+INNER JOIN (SELECT intEntityCustomerId, strCustomerNumber, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId FROM vyuARCustomer) Cus ON A.intEntityCustomerId = Cus.intEntityCustomerId
