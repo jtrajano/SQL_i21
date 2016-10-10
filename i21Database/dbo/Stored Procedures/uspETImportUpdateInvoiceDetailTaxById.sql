@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspETImportUpdateInvoiceDetailTaxById]
 	@intInvoiceDetailId INT
+	,@intImportBaseEngineeringId INT
+	,@intTaxGroupId INT
 AS
 BEGIN
 	DECLARE @dblTaxCategory1 NUMERIC(18, 6) 
@@ -65,6 +67,75 @@ BEGIN
 	DECLARE @intTaxCategory30 INT  
 
 	DECLARE @intNewInvoiceId INT
+    SELECT TOP 1 
+		@intTaxCategory1    =   category01
+		,@intTaxCategory2    =   category02
+		,@intTaxCategory3    =   category03
+		,@intTaxCategory4    =   category04
+		,@intTaxCategory5    =   category05
+		,@intTaxCategory6    =   category06
+		,@intTaxCategory7    =   category07
+		,@intTaxCategory8    =   category08
+		,@intTaxCategory9    =   category09
+		,@intTaxCategory10    =  category10
+		,@intTaxCategory11    =  category11
+		,@intTaxCategory12    =  category12
+		,@intTaxCategory13    =  category13
+		,@intTaxCategory14    =  category14
+		,@intTaxCategory15    =  category15
+		,@intTaxCategory16    =  category16
+		,@intTaxCategory17    =  category17
+		,@intTaxCategory18    =  category18
+		,@intTaxCategory19    =  category19
+		,@intTaxCategory20    =  category20
+		,@intTaxCategory21    =  category21
+		,@intTaxCategory22    =  category22
+		,@intTaxCategory23    =  category23
+		,@intTaxCategory24    =  category24
+		,@intTaxCategory25    =  category25
+		,@intTaxCategory26    =  category26
+		,@intTaxCategory27    =  category27
+		,@intTaxCategory28    =  category28
+		,@intTaxCategory29    =  category29
+		,@intTaxCategory30    =  category30
+    FROM vyuSMBEExportTax
+	WHERE code = @intTaxGroupId
+
+
+	SELECT TOP 1 
+		@dblTaxCategory1 = dblTaxCategory1
+		,@dblTaxCategory2 = dblTaxCategory2
+		,@dblTaxCategory3 = dblTaxCategory3
+		,@dblTaxCategory4 = dblTaxCategory4
+		,@dblTaxCategory5 = dblTaxCategory5
+		,@dblTaxCategory6 = dblTaxCategory6
+		,@dblTaxCategory7 = dblTaxCategory7  
+		,@dblTaxCategory8 = dblTaxCategory8  
+		,@dblTaxCategory9 = dblTaxCategory9  
+		,@dblTaxCategory10 = dblTaxCategory10  
+		,@dblTaxCategory11 = dblTaxCategory11  
+		,@dblTaxCategory12 = dblTaxCategory12  
+		,@dblTaxCategory13 = dblTaxCategory13  
+		,@dblTaxCategory14 = dblTaxCategory14  
+		,@dblTaxCategory15 = dblTaxCategory15  
+		,@dblTaxCategory16 = dblTaxCategory16  
+		,@dblTaxCategory17 = dblTaxCategory17  
+		,@dblTaxCategory18 = dblTaxCategory18  
+		,@dblTaxCategory19 = dblTaxCategory19  
+		,@dblTaxCategory20 = dblTaxCategory20  
+		,@dblTaxCategory21 = dblTaxCategory21  
+		,@dblTaxCategory22 = dblTaxCategory22  
+		,@dblTaxCategory23 = dblTaxCategory23  
+		,@dblTaxCategory24 = dblTaxCategory24  
+		,@dblTaxCategory25 = dblTaxCategory25  
+		,@dblTaxCategory26 = dblTaxCategory26  
+		,@dblTaxCategory27 = dblTaxCategory27  
+		,@dblTaxCategory28 = dblTaxCategory28  
+		,@dblTaxCategory29 = dblTaxCategory29  
+		,@dblTaxCategory30 = dblTaxCategory30 
+	FROM tblETImportBaseEngineering
+	WHERE intImportBaseEngineeringId = @intImportBaseEngineeringId
+
 
 	EXEC uspETImportUpdateInvoiceDetailTax
 		@intInvoiceDetailId = @intInvoiceDetailId
