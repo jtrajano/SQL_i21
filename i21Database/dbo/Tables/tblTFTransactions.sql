@@ -54,6 +54,8 @@
 	[strVendorName] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorFederalTaxId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorLicenseNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strConsignorName] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
+	[strConsignorFederalTaxId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strDestinationState] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strDestinationCity] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strDestinationTCN] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
