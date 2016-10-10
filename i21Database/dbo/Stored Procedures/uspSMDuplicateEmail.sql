@@ -64,6 +64,8 @@ BEGIN
 
 	-- LOOP THROUGH ATTACHMENTS
 
+	SET @screen = 'GlobalComponentEngine.view.ActivityEmail'
+
 	DECLARE @currentRow1 INT
 	DECLARE @totalRows1 INT
 	DECLARE @newFileIdentifier NVARCHAR(50)	
