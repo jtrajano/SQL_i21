@@ -70,6 +70,22 @@ gulp.task('test', function(done) {
     }, done).start();
 });
 
+gulp.task('test-mocha', function(done) {
+    new Server({
+        configFile: __dirname + '/karma.conf.js',
+        singleRun: false,
+        reporters: 'mocha'
+    }, done).start();
+});
+
+gulp.task('test-single', function(done) {
+    new Server({
+        configFile: __dirname + '/karma.single.conf.js',
+        singleRun: false,
+        reporters: 'mocha'
+    }, done).start();
+});
+
 gulp.task('open', function(){
   gulp.src('karma_html/report-summary-filename/index.html')
   .pipe(open());
@@ -78,6 +94,7 @@ gulp.task('open', function(){
 var browser = os.platform() === 'linux' ? 'google-chrome' : (
   os.platform() === 'darwin' ? 'google chrome' : (
   os.platform() === 'win32' ? 'chrome' : 'firefox'));
+  
 
 gulp.task('browser', function(){
   gulp.src('karma_html/report-summary-filename/index.html')

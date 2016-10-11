@@ -149,7 +149,7 @@ Ext.define('Inventory.TestUtils', {
             describe(name, function () {
                 // Initialize controller
                 if (cfg.init) {
-                    describe("initialize view controller", function () {
+                    describe("view controller behaviors", function () {
                         cfg.init(controller);
                     });
                 }
@@ -195,8 +195,82 @@ Ext.define('Inventory.TestUtils', {
         },
 
         testStore: function(config) {
+            var store = null, obj = null;
+            var isValidExt = false;
+            obj = this.isValidExtObject(config.name);
+            store = obj.obj;
+            isValidExt = obj.valid;            
+
             describe(config.name, function() {
-                it('should be a valid store.');
+                describe('Ext object', function() {
+                    it('should be a valid Ext object', function() {
+                        isValidExt.should.be.true;
+                    });
+
+                    if(!_.isUndefined(config.alias) && !_.isNull(config.alias)) {
+                        it('should have an alias of "'.concat(config.alias).concat('"'), function() {
+                            store.alias[0].should.be.equal(config.alias);
+                        });
+                    }
+
+                    describe("config", function() {
+                        if(config.config.model) {
+                            describe('model', function() {
+                                var model;
+                                beforeEach(function() {
+                                    model = store.getModel();
+                                });
+
+                                it('should exists', function() {
+                                    should.exist(model);
+                                });
+
+                                it('should have a model named "'.concat(config.config.model).concat('"'), function() {
+                                    model.getName().should.be.equal(config.config.model);
+                                });
+                            });
+                        }
+                        
+                        it('should have a storeId of "'.concat(config.config.storeId), function() {
+                            store.getStoreId().should.be.equal(config.config.storeId);    
+                        });
+
+                        if(config.config.proxy) {
+                            describe('proxy', function() {
+                                it('should have a proxy', function() {
+                                    should.exist(store.proxy);
+                                });
+                                it('should be of type "'.concat(config.config.proxy.type.concat('"')), function() {
+                                    store.proxy.type.should.be.equal(config.config.proxy.type);    
+                                });
+                                describe('api', function() {
+                                    var expectedApi = config.config.proxy.api;
+                                    var api = store.proxy.api;
+                                    it('should have the correct api URIs', function() {
+                                        should.exist(api);
+                                    });
+
+                                    if(expectedApi.create)
+                                        it('"create" URI should be "'.concat(expectedApi.create).concat('"'), function() {
+                                            api.create.should.be.equal(expectedApi.create);
+                                        });
+                                    if(expectedApi.read)
+                                        it('"read" URI should be "'.concat(expectedApi.read).concat('"'), function() {
+                                            api.read.should.be.equal(expectedApi.read);
+                                        });
+                                    if(expectedApi.update)
+                                        it('"update" URI should be "'.concat(expectedApi.update).concat('"'), function() {
+                                            api.update.should.be.equal(expectedApi.update);
+                                        });
+                                    if(expectedApi.destroy)
+                                        it('"destroy" URI should be "'.concat(expectedApi.destroy).concat('"'), function() {
+                                            api.destroy.should.be.equal(expectedApi.destroy);
+                                        });
+                                });
+                            });
+                        }
+                    });
+                });
             });
         },
 
@@ -215,4 +289,4 @@ Ext.define('Inventory.TestUtils', {
             console.log(ff);
         }
     }
-})
+});
