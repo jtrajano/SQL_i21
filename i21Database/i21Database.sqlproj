@@ -4399,6 +4399,8 @@
     <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTaxById.sql" />
     <Build Include="dbo\Tables\tblICFOBPoint.sql" />
     <None Include="Scripts\Post-Deployment\IC\18_FOBPointTypes.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemInTransitLocation.sql" />
+    <Build Include="dbo\Views\vyuICItemLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
