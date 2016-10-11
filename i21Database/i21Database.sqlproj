@@ -4397,10 +4397,11 @@
     <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTax.sql" />
     <Build Include="dbo\Views\vyuETBEContract.sql" />
     <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTaxById.sql" />
-    <Build Include="dbo\Tables\tblICFOBPoint.sql" />
+    <Build Include="dbo\Tables\tblICFobPoint.sql" />
     <None Include="Scripts\Post-Deployment\IC\18_FOBPointTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemInTransitLocation.sql" />
     <Build Include="dbo\Views\vyuICItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInTransitCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
