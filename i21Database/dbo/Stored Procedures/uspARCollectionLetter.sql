@@ -6,6 +6,7 @@ BEGIN
 			, @strCustomerIds			NVARCHAR(MAX)		
 			, @intLetterId				INT
 			, @strLetterId				NVARCHAR(10)  
+			 ,@LetterName				NVARCHAR(MAX)				
 			, @query					NVARCHAR(MAX)
 			, @intEntityCustomerId		INT
 			, @blb						VARBINARY(MAX)
@@ -72,6 +73,8 @@ BEGIN
 		
 	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
 
+	SELECT @LetterName = strName FROM tblSMLetter WHERE intLetterId = @intLetterId	
+
 	DECLARE @strMessage VARCHAR(MAX)
 	SELECT
 		@strMessage = CONVERT(VARCHAR(MAX), blbMessage)
@@ -125,7 +128,24 @@ BEGIN
 		@originalMsgInHTML = msgAsHTML 
 	FROM 
 		@OriginalMsgInHTMLTable
- 
+
+	IF @LetterName = 'Recent Overdue Collection Letter'
+	BEGIN
+		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl0Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+	END
+	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
+	BEGIN
+		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl30Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+	END
+	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
+	BEGIN
+		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl60Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+	END
+	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
+	BEGIN
+		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl90Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+	END
+	 
 	INSERT INTO @SelectedPlaceHolderTable
 	(
 		intPlaceHolderId
@@ -240,7 +260,7 @@ BEGIN
 						,@InsertQueryTable	VARCHAR(MAX)
 						,@HTMLTable			VARCHAR(MAX)
 						,@ColumnCount		INT
-						,@ColumnCounter		INT											
+						,@ColumnCounter		INT														
 
 				IF OBJECT_ID('tempdb..#TempTableColumnHeaders') IS NOT NULL DROP TABLE #TempTableColumnHeaders
 				SELECT 
@@ -479,6 +499,8 @@ BEGIN
  
  
 				EXEC sp_sqlexec @InsertQueryTable 	
+
+			
 			END
 				
 			DELETE 
@@ -557,6 +579,3 @@ BEGIN
 			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
 
 END
- 
-
-
