@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intItemLocationId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
-		[intLocationId] INT NOT NULL, 
+		[intLocationId] INT NULL, -- Change this to nullable.  
 		[intVendorId] INT NULL, 
 		[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intCostingMethod] INT NULL, 
