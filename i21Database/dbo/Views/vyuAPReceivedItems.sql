@@ -274,7 +274,7 @@ FROM
 	--DIRECT TYPE
 	SELECT
 	[intEntityVendorId]			=	A.intEntityVendorId
-	,[dtmDate]					=	A.dtmReceiptDate
+	,[dtmDate]					=	CASE WHEN (A.intSourceType = 1 AND G.intTicketId IS NOT NULL) THEN G.dtmTicketDateTime ELSE A.dtmReceiptDate END
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
 	,[strPurchaseOrderNumber]	=	NULL--A.strReceiptNumber
