@@ -14,6 +14,8 @@ SELECT
 	,REQ.dblRequest
 	,strApprovalStatus = ISNULL(TRANS.strApprovalStatus, 'No Need for Approval')
 	,REQ.ysnPostedToCalendar
+	,strCalendarInfo = ENT.strName + ' : ' + CAST(CAST(dblRequest AS FLOAT) AS VARCHAR(20)) 
+						+ ' Hour' + CASE WHEN (dblRequest > 0) THEN 's ' ELSE ' ' END + TOFF.strTimeOff
 FROM 
 	tblPRTimeOffRequest REQ
 	LEFT JOIN tblEMEntity ENT ON REQ.intEntityEmployeeId = ENT.intEntityId
