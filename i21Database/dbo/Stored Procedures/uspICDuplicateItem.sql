@@ -604,7 +604,7 @@ BEGIN
 		intBundleItemId,
 		strDescription,
 		dblQuantity,
-		dbo.fnICGetItemUOMIdFromDuplicateItem(intItemUnitMeasureId, @NewItemId),
+		intItemUnitMeasureId,--dbo.fnICGetItemUOMIdFromDuplicateItem(intItemUnitMeasureId, @NewItemId),
 		intSort 
 	FROM tblICItemBundle
 	WHERE intItemId = @ItemId
