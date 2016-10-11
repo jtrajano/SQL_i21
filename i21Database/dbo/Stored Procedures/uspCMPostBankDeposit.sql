@@ -359,7 +359,7 @@ BEGIN
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= B.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= ISNULL(Entity.strName, A.strMemo)
+			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
@@ -377,7 +377,7 @@ BEGIN
 			INNER JOIN vyuGLAccountDetail GLAccnt
 				ON B.intGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
-				ON B.intEntityId = Entity.intEntityId
+				ON A.intPayeeId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
