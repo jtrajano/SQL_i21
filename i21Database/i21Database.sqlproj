@@ -4405,6 +4405,8 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetChargeTaxDetails.sql" />
+    <Build Include="dbo\Tables\tblICFOBPoint.sql" />
+    <None Include="Scripts\Post-Deployment\IC\18_FOBPointTypes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
