@@ -34,8 +34,8 @@ BEGIN
     SET NOCOUNT ON;
 
     UPDATE tblCMBank SET
-    --strBankName           = i.strBankName
-    strContact              = i.strContact
+    strBankName           = i.strBankName
+    ,strContact              = i.strContact
     ,strAddress              = i.strAddress
     ,strZipCode              = i.strZipCode
     ,strCity              = i.strCity
