@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedProductTypeAttribute',
-    alias: 'store.icbufferedproducttypeattribute',
+    alias: "store.icbufferedproducttypeattribute",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CommodityProductType"],
-    config: [{
+    config: {
         "model": "Inventory.model.CommodityProductType",
         "storeId": "BufferedProductTypeAttribute",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CommodityAttribute/GetProductTypeAttributes"
             }
         }
-    }]
+    }
 });

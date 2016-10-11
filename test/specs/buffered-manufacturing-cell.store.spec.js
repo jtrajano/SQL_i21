@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedManufacturingCell',
-    alias: 'store.icbufferedmanufacturingcell',
+    alias: "store.icbufferedmanufacturingcell",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ManufacturingCell"],
-    config: [{
+    config: {
         "model": "Inventory.model.ManufacturingCell",
         "storeId": "BufferedManufacturingCell",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/ManufacturingCell/Search"
             }
         }
-    }]
+    }
 });

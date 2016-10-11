@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.PackType',
-    alias: 'store.icpacktype',
+    alias: "store.icpacktype",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.PackType"],
-    config: [{
+    config: {
         "model": "Inventory.model.PackType",
         "storeId": "PackType",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/PackType/PostPackTypes"
             }
         }
-    }]
+    }
 });

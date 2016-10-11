@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedStorageUnitType',
-    alias: 'store.icbufferedstorageunittype',
+    alias: "store.icbufferedstorageunittype",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.StorageUnitType"],
-    config: [{
+    config: {
         "model": "Inventory.model.StorageUnitType",
         "storeId": "BufferedStorageUnitType",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/StorageUnitType/Search"
             }
         }
-    }]
+    }
 });

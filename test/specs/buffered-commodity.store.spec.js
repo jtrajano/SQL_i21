@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedCommodity',
-    alias: 'store.icbufferedcommodity',
+    alias: "store.icbufferedcommodity",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CompactCommodity"],
-    config: [{
+    config: {
         "model": "Inventory.model.CompactCommodity",
         "storeId": "BufferedCommodity",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Commodity/Search"
             }
         }
-    }]
+    }
 });

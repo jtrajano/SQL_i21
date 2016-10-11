@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.Transfer',
-    alias: 'store.ictransfer',
+    alias: "store.ictransfer",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.Transfer"],
-    config: [{
+    config: {
         "model": "Inventory.model.Transfer",
         "storeId": "Transfer",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/InventoryTransfer/Post"
             }
         }
-    }]
+    }
 });

@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedCompactItem',
-    alias: 'store.icbufferedcompactitem',
+    alias: "store.icbufferedcompactitem",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CompactItem"],
-    config: [{
+    config: {
         "model": "Inventory.model.CompactItem",
         "storeId": "BufferedCompactItem",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Item/GetCompactItems"
             }
         }
-    }]
+    }
 });

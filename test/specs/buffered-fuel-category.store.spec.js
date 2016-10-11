@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedFuelCategory',
-    alias: 'store.icbufferedfuelcategory',
+    alias: "store.icbufferedfuelcategory",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.FuelCategory"],
-    config: [{
+    config: {
         "model": "Inventory.model.FuelCategory",
         "storeId": "BufferedFuelCategory",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/FuelCategory/Search"
             }
         }
-    }]
+    }
 });

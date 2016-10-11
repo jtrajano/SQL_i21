@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.ItemStockView',
-    alias: 'store.icitemstockview',
+    alias: "store.icitemstockview",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ItemStockView"],
-    config: [{
+    config: {
         "model": "Inventory.model.ItemStockView",
         "storeId": "ItemStockView",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Item/GetItemStocks"
             }
         }
-    }]
+    }
 });

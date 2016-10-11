@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.CompanyPreference',
-    alias: 'store.iccompanypreference',
+    alias: "store.iccompanypreference",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.CompanyPreference"],
-    config: [{
+    config: {
         "model": "Inventory.model.CompanyPreference",
         "storeId": "CompanyPreference",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/CompanyPreference/Post"
             }
         }
-    }]
+    }
 });

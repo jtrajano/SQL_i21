@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedLineOfBusiness',
-    alias: 'store.icbufferedlineofbusiness',
+    alias: "store.icbufferedlineofbusiness",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.LineOfBusiness"],
-    config: [{
+    config: {
         "model": "Inventory.model.LineOfBusiness",
         "storeId": "BufferedLineOfBusiness",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/LineOfBusiness/Search"
             }
         }
-    }]
+    }
 });

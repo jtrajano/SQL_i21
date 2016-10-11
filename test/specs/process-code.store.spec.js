@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.ProcessCode',
-    alias: 'store.icprocesscode',
+    alias: "store.icprocesscode",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ProcessCode"],
-    config: [{
+    config: {
         "model": "Inventory.model.ProcessCode",
         "storeId": "ProcessCode",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/ProcessCode/Post"
             }
         }
-    }]
+    }
 });

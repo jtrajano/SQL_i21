@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedProductLineAttribute',
-    alias: 'store.icbufferedproductlineattribute',
+    alias: "store.icbufferedproductlineattribute",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CommodityProductLine"],
-    config: [{
+    config: {
         "model": "Inventory.model.CommodityProductLine",
         "storeId": "CommodityProductLine",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CommodityAttribute/GetProductLineAttributes"
             }
         }
-    }]
+    }
 });

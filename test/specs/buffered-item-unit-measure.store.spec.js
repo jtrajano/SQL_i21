@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedItemUnitMeasure',
-    alias: 'store.icbuffereditemunitmeasure',
+    alias: "store.icbuffereditemunitmeasure",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ItemUOM"],
-    config: [{
+    config: {
         "model": "Inventory.model.ItemUOM",
         "storeId": "BufferedItemUnitMeasure",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/ItemUOM/Search"
             }
         }
-    }]
+    }
 });

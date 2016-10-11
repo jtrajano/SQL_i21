@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedBundleComponent',
-    alias: 'store.icbufferedbundlecomponent',
+    alias: "store.icbufferedbundlecomponent",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.BundleComponent"],
-    config: [{
+    config: {
         "model": "Inventory.model.BundleComponent",
         "storeId": "BufferedBundleComponent",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Item/GetBundleComponents"
             }
         }
-    }]
+    }
 });

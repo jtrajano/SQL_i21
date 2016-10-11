@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedEquipmentLength',
-    alias: 'store.icbufferedequipmentlength',
+    alias: "store.icbufferedequipmentlength",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.EquipmentLength"],
-    config: [{
+    config: {
         "model": "Inventory.model.EquipmentLength",
         "storeId": "BufferedEquipmentLength",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/EquipmentLength/Search"
             }
         }
-    }]
+    }
 });

@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedClassAttribute',
-    alias: 'store.icbufferedclassattribute',
+    alias: "store.icbufferedclassattribute",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CommodityClass"],
-    config: [{
+    config: {
         "model": "Inventory.model.CommodityClass",
         "storeId": "BufferedClassAttribute",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CommodityAttribute/GetClassAttributes"
             }
         }
-    }]
+    }
 });

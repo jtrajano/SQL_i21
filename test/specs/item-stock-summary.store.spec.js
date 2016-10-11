@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.ItemStockSummary',
-    alias: 'store.icitemstocksummary',
+    alias: "store.icitemstocksummary",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ItemStockSummary"],
-    config: [{
+    config: {
         "model": "Inventory.model.ItemStockSummary",
         "storeId": "ItemStockSummary",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/InventoryCount/GetItemStockSummary"
             }
         }
-    }]
+    }
 });

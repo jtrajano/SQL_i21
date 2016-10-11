@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.LotStatus',
-    alias: 'store.iclotstatus',
+    alias: "store.iclotstatus",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.LotStatus"],
-    config: [{
+    config: {
         "model": "Inventory.model.LotStatus",
         "storeId": "LotStatus",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/LotStatus/Post"
             }
         }
-    }]
+    }
 });

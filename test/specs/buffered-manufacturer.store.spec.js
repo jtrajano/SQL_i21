@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedManufacturer',
-    alias: 'store.icbufferedmanufacturer',
+    alias: "store.icbufferedmanufacturer",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Manufacturer"],
-    config: [{
+    config: {
         "model": "Inventory.model.Manufacturer",
         "storeId": "BufferedManufacturer",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Manufacturer/Search"
             }
         }
-    }]
+    }
 });

@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedStatus',
-    alias: 'store.icbufferedstatus',
+    alias: "store.icbufferedstatus",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Status"],
-    config: [{
+    config: {
         "model": "Inventory.model.Status",
         "storeId": "BufferedStatus",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Status/Search"
             }
         }
-    }]
+    }
 });

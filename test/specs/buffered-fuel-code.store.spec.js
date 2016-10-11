@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedFuelCode',
-    alias: 'store.icbufferedfuelcode',
+    alias: "store.icbufferedfuelcode",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.FuelCode"],
-    config: [{
+    config: {
         "model": "Inventory.model.FuelCode",
         "storeId": "BufferedFuelCode",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/FuelCode/Search"
             }
         }
-    }]
+    }
 });

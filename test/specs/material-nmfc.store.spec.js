@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.MaterialNMFC',
-    alias: 'store.icmaterialnmfc',
+    alias: "store.icmaterialnmfc",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.MaterialNMFC"],
-    config: [{
+    config: {
         "model": "Inventory.model.MaterialNMFC",
         "storeId": "MaterialNMFC",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/MaterialNMFC/PostMaterialNMFCs"
             }
         }
-    }]
+    }
 });

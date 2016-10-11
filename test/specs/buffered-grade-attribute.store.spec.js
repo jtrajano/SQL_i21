@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedGradeAttribute',
-    alias: 'store.icbufferedgradeattribute',
+    alias: "store.icbufferedgradeattribute",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CommodityGrade"],
-    config: [{
+    config: {
         "model": "Inventory.model.CommodityGrade",
         "storeId": "BufferedGradeAttribute",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CommodityAttribute/GetGradeAttributes"
             }
         }
-    }]
+    }
 });

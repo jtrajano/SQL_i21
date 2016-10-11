@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedOriginAttribute',
-    alias: 'store.icbufferedoriginattribute',
+    alias: "store.icbufferedoriginattribute",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CommodityOrigin"],
-    config: [{
+    config: {
         "model": "Inventory.model.CommodityOrigin",
         "storeId": "BufferedOriginAttribute",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CommodityAttribute/GetOriginAttributes"
             }
         }
-    }]
+    }
 });

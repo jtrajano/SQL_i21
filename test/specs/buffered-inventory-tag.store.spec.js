@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedInventoryTag',
-    alias: 'store.icbufferedtag',
+    alias: "store.icbufferedtag",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.InventoryTag"],
-    config: [{
+    config: {
         "model": "Inventory.model.InventoryTag",
         "storeId": "BufferedTag",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Tag/Search"
             }
         }
-    }]
+    }
 });

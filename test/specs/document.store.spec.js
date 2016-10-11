@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.Document',
-    alias: 'store.icdocument',
+    alias: "store.icdocument",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.Document"],
-    config: [{
+    config: {
         "model": "Inventory.model.Document",
         "storeId": "Document",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/Document/Post"
             }
         }
-    }]
+    }
 });

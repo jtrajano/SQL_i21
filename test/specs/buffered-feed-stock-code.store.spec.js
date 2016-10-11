@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedFeedStockCode',
-    alias: 'store.icbufferedfeedstockcode',
+    alias: "store.icbufferedfeedstockcode",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.FeedStockCode"],
-    config: [{
+    config: {
         "model": "Inventory.model.FeedStockCode",
         "storeId": "BufferedFeedStockCode",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/FeedStock/Search"
             }
         }
-    }]
+    }
 });

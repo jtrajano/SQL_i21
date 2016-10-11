@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BuildAssembly',
-    alias: 'store.icbuildassembly',
+    alias: "store.icbuildassembly",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.BuildAssembly"],
-    config: [{
+    config: {
         "model": "Inventory.model.BuildAssembly",
         "storeId": "BuildAssembly",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/BuildAssembly/Post"
             }
         }
-    }]
+    }
 });

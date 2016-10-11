@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.PaidOut',
-    alias: 'store.storepaidout',
+    alias: "store.storepaidout",
     base: 'Ext.data.BufferedStore',
     dependencies: [],
-    config: [{
+    config: {
         "storeId": "PaidOut",
         "pageSize": 50,
         "remoteFilter": true,
@@ -14,5 +14,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/PaidOut/GetPaidOuts"
             }
         }
-    }]
+    }
 });

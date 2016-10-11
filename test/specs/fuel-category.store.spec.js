@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.FuelCategory',
-    alias: 'store.icfuelcategory',
+    alias: "store.icfuelcategory",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.FuelCategory"],
-    config: [{
+    config: {
         "model": "Inventory.model.FuelCategory",
         "storeId": "FuelCategory",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/FuelCategory/Post"
             }
         }
-    }]
+    }
 });

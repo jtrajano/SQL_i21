@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedCategoryAccount',
-    alias: 'store.icbufferedcategoryaccount',
+    alias: "store.icbufferedcategoryaccount",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CategoryAccount"],
-    config: [{
+    config: {
         "model": "Inventory.model.CategoryAccount",
         "storeId": "BufferedCategoryAccount",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CategoryAccount/Search"
             }
         }
-    }]
+    }
 });

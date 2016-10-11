@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.LineOfBusiness',
-    alias: 'store.iclineofbusiness',
+    alias: "store.iclineofbusiness",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.LineOfBusiness"],
-    config: [{
+    config: {
         "model": "Inventory.model.LineOfBusiness",
         "storeId": "LineOfBusiness",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/LineOfBusiness/Post"
             }
         }
-    }]
+    }
 });

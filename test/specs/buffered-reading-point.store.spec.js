@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedReadingPoint',
-    alias: 'store.icbufferedreadingpoint',
+    alias: "store.icbufferedreadingpoint",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ReadingPoint"],
-    config: [{
+    config: {
         "model": "Inventory.model.ReadingPoint",
         "storeId": "BufferedReadingPoint",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/ReadingPoint/Search"
             }
         }
-    }]
+    }
 });

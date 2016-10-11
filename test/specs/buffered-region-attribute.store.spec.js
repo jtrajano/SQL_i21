@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedRegionAttribute',
-    alias: 'store.icbufferedregionattribute',
+    alias: "store.icbufferedregionattribute",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CommodityRegion"],
-    config: [{
+    config: {
         "model": "Inventory.model.CommodityRegion",
         "storeId": "BufferedRegionAttribute",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CommodityAttribute/GetRegionAttributes"
             }
         }
-    }]
+    }
 });

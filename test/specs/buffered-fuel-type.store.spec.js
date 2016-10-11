@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedFuelType',
-    alias: 'store.icbufferedfueltype',
+    alias: "store.icbufferedfueltype",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.FuelType"],
-    config: [{
+    config: {
         "model": "Inventory.model.FuelType",
         "storeId": "BufferedFuelType",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/FuelType/Search"
             }
         }
-    }]
+    }
 });

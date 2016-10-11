@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedPostedLot',
-    alias: 'store.icbufferedpostedlot',
+    alias: "store.icbufferedpostedlot",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Lot"],
-    config: [{
+    config: {
         "model": "Inventory.model.Lot",
         "storeId": "BufferedPostedLot",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/InventoryAdjustment/GetPostedLots"
             }
         }
-    }]
+    }
 });

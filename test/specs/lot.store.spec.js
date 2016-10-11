@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.Lot',
-    alias: 'store.iclot',
+    alias: "store.iclot",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.Lot"],
-    config: [{
+    config: {
         "model": "Inventory.model.Lot",
         "storeId": "Lot",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Lot/Search"
             }
         }
-    }]
+    }
 });

@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedItemFactoryManufacturingCell',
-    alias: 'store.icbuffereditemfactorymanufacturingcell',
+    alias: "store.icbuffereditemfactorymanufacturingcell",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CompactItemFactoryManufacturingCell"],
-    config: [{
+    config: {
         "model": "Inventory.model.CompactItemFactoryManufacturingCell",
         "storeId": "BufferedItemFactoryManufacturingCell",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/ItemFactory/GetItemFactoryManufacturingCells"
             }
         }
-    }]
+    }
 });

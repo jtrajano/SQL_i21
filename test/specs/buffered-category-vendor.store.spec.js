@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedCategoryVendor',
-    alias: 'store.icbufferedcategoryvendor',
+    alias: "store.icbufferedcategoryvendor",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CategoryVendor"],
-    config: [{
+    config: {
         "model": "Inventory.model.CategoryVendor",
         "storeId": "BufferedCategoryVendor",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CategoryVendor/Search"
             }
         }
-    }]
+    }
 });

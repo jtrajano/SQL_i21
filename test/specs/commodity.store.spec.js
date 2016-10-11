@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.Commodity',
-    alias: 'store.iccommodity',
+    alias: "store.iccommodity",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.Commodity"],
-    config: [{
+    config: {
         "model": "Inventory.model.Commodity",
         "storeId": "Commodity",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/Commodity/Post"
             }
         }
-    }]
+    }
 });

@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedOtherCharges',
-    alias: 'store.icbufferedothercharges',
+    alias: "store.icbufferedothercharges",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CompactItem"],
-    config: [{
+    config: {
         "model": "Inventory.model.CompactItem",
         "storeId": "BufferedOtherCharges",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Item/GetOtherCharges"
             }
         }
-    }]
+    }
 });

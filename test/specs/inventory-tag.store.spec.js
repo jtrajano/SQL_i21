@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.InventoryTag',
-    alias: 'store.ictag',
+    alias: "store.ictag",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.InventoryTag"],
-    config: [{
+    config: {
         "model": "Inventory.model.InventoryTag",
         "storeId": "Tag",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/Tag/Post"
             }
         }
-    }]
+    }
 });

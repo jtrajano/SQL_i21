@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.StorageMeasurementReading',
-    alias: 'store.icstoragemeasurementreading',
+    alias: "store.icstoragemeasurementreading",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.StorageMeasurementReading"],
-    config: [{
+    config: {
         "model": "Inventory.model.StorageMeasurementReading",
         "storeId": "StorageMeasurementReading",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/StorageMeasurementReading/Post"
             }
         }
-    }]
+    }
 });

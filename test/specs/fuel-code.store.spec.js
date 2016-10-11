@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.FuelCode',
-    alias: 'store.icfuelcode',
+    alias: "store.icfuelcode",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.FuelCode"],
-    config: [{
+    config: {
         "model": "Inventory.model.FuelCode",
         "storeId": "FuelCode",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/FuelCode/Post"
             }
         }
-    }]
+    }
 });

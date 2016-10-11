@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.StorageUnitType',
-    alias: 'undefined',
+    alias: null,
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.StorageUnitType"],
-    config: [{
+    config: {
         "model": "Inventory.model.StorageUnitType",
         "storeId": "StorageUnitType",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/StorageUnitType/Post"
             }
         }
-    }]
+    }
 });

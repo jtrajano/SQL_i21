@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedMaterialNMFC',
-    alias: 'store.icbufferedmaterialnmfc',
+    alias: "store.icbufferedmaterialnmfc",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.MaterialNMFC"],
-    config: [{
+    config: {
         "model": "Inventory.model.MaterialNMFC",
         "storeId": "BufferedMaterialNMFC",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/MaterialNMFC/Search"
             }
         }
-    }]
+    }
 });

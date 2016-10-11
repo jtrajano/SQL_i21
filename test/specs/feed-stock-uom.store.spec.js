@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.FeedStockUom',
-    alias: 'store.icfeedstockuom',
+    alias: "store.icfeedstockuom",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.FeedStockUom"],
-    config: [{
+    config: {
         "model": "Inventory.model.FeedStockUom",
         "storeId": "FeedStockUom",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/FeedStockUOM/Post"
             }
         }
-    }]
+    }
 });

@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedCommodityUnitMeasure',
-    alias: 'store.icbufferedcommodityunitmeasure',
+    alias: "store.icbufferedcommodityunitmeasure",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CommodityUnitMeasure"],
-    config: [{
+    config: {
         "model": "Inventory.model.CommodityUnitMeasure",
         "storeId": "BufferedCommodityUnitMeasure",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CommodityUOM/Search"
             }
         }
-    }]
+    }
 });

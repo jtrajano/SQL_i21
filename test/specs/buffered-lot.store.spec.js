@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedLot',
-    alias: 'store.icbufferedlot',
+    alias: "store.icbufferedlot",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Lot"],
-    config: [{
+    config: {
         "model": "Inventory.model.Lot",
         "storeId": "BufferedLot",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Lot/Search"
             }
         }
-    }]
+    }
 });

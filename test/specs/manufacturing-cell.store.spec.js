@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.ManufacturingCell',
-    alias: 'store.icmanufacturingcell',
+    alias: "store.icmanufacturingcell",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ManufacturingCell"],
-    config: [{
+    config: {
         "model": "Inventory.model.ManufacturingCell",
         "storeId": "ManufacturingCell",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/ManufacturingCell/PostManufacturingCells"
             }
         }
-    }]
+    }
 });

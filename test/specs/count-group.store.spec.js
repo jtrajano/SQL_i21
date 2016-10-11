@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.CountGroup',
-    alias: 'store.iccountgroup',
+    alias: "store.iccountgroup",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.CountGroup"],
-    config: [{
+    config: {
         "model": "Inventory.model.CountGroup",
         "storeId": "CountGroup",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/CountGroup/Post"
             }
         }
-    }]
+    }
 });

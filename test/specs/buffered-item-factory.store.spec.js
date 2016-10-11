@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedItemFactory',
-    alias: 'store.icbuffereditemfactory',
+    alias: "store.icbuffereditemfactory",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CompactItemFactory"],
-    config: [{
+    config: {
         "model": "Inventory.model.CompactItemFactory",
         "storeId": "BufferedItemFactory",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/ItemFactory/Search"
             }
         }
-    }]
+    }
 });

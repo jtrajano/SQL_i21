@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedItemPricingView',
-    alias: 'store.icbuffereditempricingview',
+    alias: "store.icbuffereditempricingview",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ItemStockDetailPricing"],
-    config: [{
+    config: {
         "model": "Inventory.model.ItemStockDetailPricing",
         "storeId": "BufferedItemPricingView",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/ItemPricing/GetItemPricingViews"
             }
         }
-    }]
+    }
 });

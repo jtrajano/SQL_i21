@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedInventoryValuation',
-    alias: 'store.icbufferedinventoryvaluation',
+    alias: "store.icbufferedinventoryvaluation",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.InventoryValuation"],
-    config: [{
+    config: {
         "model": "Inventory.model.InventoryValuation",
         "storeId": "BufferedInventoryValuation",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Item/GetInventoryValuation"
             }
         }
-    }]
+    }
 });

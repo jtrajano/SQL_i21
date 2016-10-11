@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.UnitMeasure',
-    alias: 'store.icuom',
+    alias: "store.icuom",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.UnitMeasure"],
-    config: [{
+    config: {
         "model": "Inventory.model.UnitMeasure",
         "storeId": "UnitMeasure",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/UnitMeasure/Post"
             }
         }
-    }]
+    }
 });

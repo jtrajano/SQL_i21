@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedSeasonAttribute',
-    alias: 'store.icbufferedseasonattribute',
+    alias: "store.icbufferedseasonattribute",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CommoditySeason"],
-    config: [{
+    config: {
         "model": "Inventory.model.CommoditySeason",
         "storeId": "BufferedSeasonAttribute",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CommodityAttribute/GetSeasonAttributes"
             }
         }
-    }]
+    }
 });

@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedStorageLocation',
-    alias: 'store.icbufferedstoragelocation',
+    alias: "store.icbufferedstoragelocation",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.StorageLocation"],
-    config: [{
+    config: {
         "model": "Inventory.model.StorageLocation",
         "storeId": "BufferedStorageLocation",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/StorageLocation/Search"
             }
         }
-    }]
+    }
 });

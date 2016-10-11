@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedBrand',
-    alias: 'store.icbufferedbrand',
+    alias: "store.icbufferedbrand",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Brand"],
-    config: [{
+    config: {
         "model": "Inventory.model.Brand",
         "storeId": "BufferedBrand",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Brand/Search"
             }
         }
-    }]
+    }
 });

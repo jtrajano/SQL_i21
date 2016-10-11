@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.CategoryLocation',
-    alias: 'store.iccategorylocation',
+    alias: "store.iccategorylocation",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.CategoryLocation"],
-    config: [{
+    config: {
         "model": "Inventory.model.CategoryLocation",
         "storeId": "CategoryLocation",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/CategoryLocation/Post"
             }
         }
-    }]
+    }
 });

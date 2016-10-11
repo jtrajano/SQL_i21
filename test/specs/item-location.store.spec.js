@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.ItemLocation',
-    alias: 'store.icitemlocation',
+    alias: "store.icitemlocation",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ItemLocation"],
-    config: [{
+    config: {
         "model": "Inventory.model.ItemLocation",
         "storeId": "ItemLocation",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/ItemLocation/Post"
             }
         }
-    }]
+    }
 });

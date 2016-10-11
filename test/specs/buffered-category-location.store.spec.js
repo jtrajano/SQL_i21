@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedCategoryLocation',
-    alias: 'store.icbufferedcategorylocation',
+    alias: "store.icbufferedcategorylocation",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CategoryLocation"],
-    config: [{
+    config: {
         "model": "Inventory.model.CategoryLocation",
         "storeId": "BufferedCategoryLocation",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CategoryLocation/Search"
             }
         }
-    }]
+    }
 });

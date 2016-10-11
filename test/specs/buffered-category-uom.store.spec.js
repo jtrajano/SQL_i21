@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedCategoryUOM',
-    alias: 'store.icbufferedcategoryuom',
+    alias: "store.icbufferedcategoryuom",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CategoryUOM"],
-    config: [{
+    config: {
         "model": "Inventory.model.CategoryUOM",
         "storeId": "BufferedCategoryUOM",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CategoryUOM/Search"
             }
         }
-    }]
+    }
 });

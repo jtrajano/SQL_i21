@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.ReceiptItemTax',
-    alias: 'store.icreceiptitemtax',
+    alias: "store.icreceiptitemtax",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ReceiptItemTax"],
-    config: [{
+    config: {
         "model": "Inventory.model.ReceiptItemTax",
         "storeId": "ReceiptItemTax",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/InventoryReceiptItemTax/Post"
             }
         }
-    }]
+    }
 });

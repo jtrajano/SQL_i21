@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedCountGroup',
-    alias: 'store.icbufferedcountgroup',
+    alias: "store.icbufferedcountgroup",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CountGroup"],
-    config: [{
+    config: {
         "model": "Inventory.model.CountGroup",
         "storeId": "BufferedCountGroup",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/CountGroup/Search"
             }
         }
-    }]
+    }
 });

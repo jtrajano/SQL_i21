@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedAssemblyItem',
-    alias: 'store.icbufferedassemblyitem',
+    alias: "store.icbufferedassemblyitem",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.CompactItem"],
-    config: [{
+    config: {
         "model": "Inventory.model.CompactItem",
         "storeId": "BufferedAssemblyItem",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Item/GetAssemblyItems"
             }
         }
-    }]
+    }
 });

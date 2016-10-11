@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.Adjustment',
-    alias: 'store.icadjustment',
+    alias: "store.icadjustment",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.Adjustment"],
-    config: [{
+    config: {
         "model": "Inventory.model.Adjustment",
         "storeId": "Adjustment",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/InventoryAdjustment/Post"
             }
         }
-    }]
+    }
 });

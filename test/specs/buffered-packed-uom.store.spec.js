@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedPackedUOM',
-    alias: 'store.icbufferedpackeduom',
+    alias: "store.icbufferedpackeduom",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.PackedUOM"],
-    config: [{
+    config: {
         "model": "Inventory.model.PackedUOM",
         "storeId": "BufferedPackedUOM",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/UnitMeasure/GetPackedUOMs"
             }
         }
-    }]
+    }
 });

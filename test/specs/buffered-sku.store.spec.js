@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedSku',
-    alias: 'store.icbufferedsku',
+    alias: "store.icbufferedsku",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Sku"],
-    config: [{
+    config: {
         "model": "Inventory.model.Sku",
         "storeId": "BufferedSku",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Sku/Search"
             }
         }
-    }]
+    }
 });

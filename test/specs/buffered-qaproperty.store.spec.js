@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedQAProperty',
-    alias: 'store.icbufferedqaproperty',
+    alias: "store.icbufferedqaproperty",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.QAProperty"],
-    config: [{
+    config: {
         "model": "Inventory.model.QAProperty",
         "storeId": "BufferedQAProperty",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/QAProperty/Search"
             }
         }
-    }]
+    }
 });

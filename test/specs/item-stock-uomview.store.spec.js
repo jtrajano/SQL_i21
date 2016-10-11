@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.ItemStockUOMView',
-    alias: 'store.icitemstockuomview',
+    alias: "store.icitemstockuomview",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ItemStockUOMView"],
-    config: [{
+    config: {
         "model": "Inventory.model.ItemStockUOMView",
         "storeId": "ItemStockUOMView",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/ItemStock/GetItemStockUOMs"
             }
         }
-    }]
+    }
 });

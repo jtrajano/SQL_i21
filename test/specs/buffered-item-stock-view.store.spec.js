@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedItemStockView',
-    alias: 'store.icbuffereditemstockview',
+    alias: "store.icbuffereditemstockview",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ItemStockView"],
-    config: [{
+    config: {
         "model": "Inventory.model.ItemStockView",
         "storeId": "BufferedItemStockView",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Item/GetItemStocks"
             }
         }
-    }]
+    }
 });

@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.Store',
-    alias: 'store.storestore',
+    alias: "store.storestore",
     base: 'Ext.data.BufferedStore',
     dependencies: [],
-    config: [{
+    config: {
         "storeId": "Store",
         "pageSize": 50,
         "remoteFilter": true,
@@ -14,5 +14,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Store/GetStores"
             }
         }
-    }]
+    }
 });

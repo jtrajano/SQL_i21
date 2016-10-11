@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.Brand',
-    alias: 'store.icbrand',
+    alias: "store.icbrand",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.Brand"],
-    config: [{
+    config: {
         "model": "Inventory.model.Brand",
         "storeId": "Brand",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/Brand/Post"
             }
         }
-    }]
+    }
 });

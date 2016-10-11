@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedParentLot',
-    alias: 'store.icbufferedparentlot',
+    alias: "store.icbufferedparentlot",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ParentLot"],
-    config: [{
+    config: {
         "model": "Inventory.model.ParentLot",
         "storeId": "BufferedParentLot",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/ParentLot/Search"
             }
         }
-    }]
+    }
 });

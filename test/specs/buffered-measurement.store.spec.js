@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedMeasurement',
-    alias: 'store.icbufferedmeasurement',
+    alias: "store.icbufferedmeasurement",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Measurement"],
-    config: [{
+    config: {
         "model": "Inventory.model.Measurement",
         "storeId": "BufferedMeasurement",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Measurement/Search"
             }
         }
-    }]
+    }
 });

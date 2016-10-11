@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.InventoryCount',
-    alias: 'store.icinventorycount',
+    alias: "store.icinventorycount",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.InventoryCount"],
-    config: [{
+    config: {
         "model": "Inventory.model.InventoryCount",
         "storeId": "InventoryCount",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/InventoryCount/Post"
             }
         }
-    }]
+    }
 });

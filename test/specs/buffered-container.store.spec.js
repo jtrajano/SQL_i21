@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedContainer',
-    alias: 'store.icbufferedcontainer',
+    alias: "store.icbufferedcontainer",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Container"],
-    config: [{
+    config: {
         "model": "Inventory.model.Container",
         "storeId": "BufferedContainer",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Container/Search"
             }
         }
-    }]
+    }
 });

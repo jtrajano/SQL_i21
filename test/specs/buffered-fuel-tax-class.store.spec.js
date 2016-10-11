@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedFuelTaxClass',
-    alias: 'store.icbufferedfueltaxclass',
+    alias: "store.icbufferedfueltaxclass",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.FuelTaxClass"],
-    config: [{
+    config: {
         "model": "Inventory.model.FuelTaxClass",
         "storeId": "BufferedFuelTaxClass",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/FuelTaxClass/Search"
             }
         }
-    }]
+    }
 });

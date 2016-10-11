@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.Certification',
-    alias: 'store.iccertification',
+    alias: "store.iccertification",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.Certification"],
-    config: [{
+    config: {
         "model": "Inventory.model.Certification",
         "storeId": "Certification",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "create": "../Inventory/api/Certification/Post"
             }
         }
-    }]
+    }
 });

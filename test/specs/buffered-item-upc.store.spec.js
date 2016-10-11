@@ -1,9 +1,9 @@
 Inventory.TestUtils.testStore({
     name: 'Inventory.store.BufferedItemUPC',
-    alias: 'store.icbuffereditemupc',
+    alias: "store.icbuffereditemupc",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ItemUOM"],
-    config: [{
+    config: {
         "model": "Inventory.model.ItemUOM",
         "storeId": "BufferedItemUPC",
         "pageSize": 50,
@@ -15,5 +15,5 @@ Inventory.TestUtils.testStore({
                 "read": "../Inventory/api/Item/GetItemUPCs"
             }
         }
-    }]
+    }
 });
