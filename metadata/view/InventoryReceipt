@@ -5343,6 +5343,22 @@
                                                     "codeClass": null,
                                                     "name": "MyCheckboxSelectionModel12",
                                                     "designerId": "e87981ce-4c10-408f-86a5-0ad0052c0bb2"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Number",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "dataIndex": "dblChargeTax",
+                                                        "itemId": "colChargeTax",
+                                                        "text": "Tax",
+                                                        "width": 85
+                                                    },
+                                                    "name": "MyNumberColumn58",
+                                                    "designerId": "cb6f6cd3-a68a-40db-8faf-6b51cd8294e7"
                                                 }
                                             ]
                                         },
@@ -6656,7 +6672,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging110",
+                    "name": "statusbarpaging18",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -2484,6 +2484,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 editor: {
                                                                     xtype: 'checkboxfield'
                                                                 }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                itemId: 'colChargeTax',
+                                                                width: 85,
+                                                                dataIndex: 'dblChargeTax',
+                                                                text: 'Tax'
                                                             }
                                                         ],
                                                         viewConfig: {
