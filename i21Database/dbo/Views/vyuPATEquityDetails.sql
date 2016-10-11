@@ -23,6 +23,7 @@ INNER JOIN tblARCustomer AR
 		ON AR.intEntityCustomerId = CE.intCustomerId
 LEFT JOIN tblSMTaxCode TC
 		ON TC.intTaxCodeId = AR.intTaxCodeId
+WHERE CE.dblEquity <> 0
 		GROUP BY	CE.intCustomerId,
 				ENT.strName,
 				CE.intFiscalYearId,
