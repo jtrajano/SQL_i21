@@ -524,8 +524,10 @@ BEGIN
 		  ,[agord_user_id]				 =	 A.[agord_user_id]
 		  ,[agord_user_rev_dt]			 =   A.[agord_user_rev_dt]
 		  ,[agord_user_time]			 =	 A.[agord_user_time]
-		  ,[agord_no_of_months]		     =   A.[agord_no_of_months]
-		  ,[agord_final_due_dt]			 =	 A.[agord_final_due_dt]
+		  --,[agord_no_of_months]		     =   A.[agord_no_of_months]
+		  --,[agord_final_due_dt]			 =	 A.[agord_final_due_dt]
+		  ,[agord_no_of_months]		     =   NULL
+		  ,[agord_final_due_dt]			 =	 NULL
           ,[A4GLIdentity]				 =   A.[A4GLIdentity]			
 	FROM agordmst A
 	WHERE A.agord_type <> 'O'
@@ -858,8 +860,10 @@ BEGIN
 		  ,[agord_user_id]				 =	 A.[agord_user_id]
 		  ,[agord_user_rev_dt]			 =   A.[agord_user_rev_dt]
 		  ,[agord_user_time]			 =	 A.[agord_user_time]
-		  ,[agord_no_of_months]		     =   A.[agord_no_of_months]
-		  ,[agord_final_due_dt]			 =	 A.[agord_final_due_dt]
+		  --,[agord_no_of_months]		     =   A.[agord_no_of_months]
+		  --,[agord_final_due_dt]			 =	 A.[agord_final_due_dt]
+		  ,[agord_no_of_months]		     =   NULL
+		  ,[agord_final_due_dt]			 =	 NULL
           ,[A4GLIdentity]				 =   A.[A4GLIdentity]			
 	FROM agordmst A
 	WHERE A.agord_type <> 'O'
