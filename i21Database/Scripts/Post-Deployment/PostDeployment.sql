@@ -245,6 +245,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\16_Fix_Allow_Negative_Stock_Option.sql
 :r .\IC\17_Update_Blank_Description_tblICItem.sql
 :r .\IC\1620_to_1630.sql
+:r .\IC\18_FOBPointTypes.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
