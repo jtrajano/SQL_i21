@@ -385,7 +385,7 @@ SELECT DISTINCT
   , I.intInvoiceId
   , P.intPaymentId
   , I.strBOLNumber
-  , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(AP.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) + ISNULL(AP.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) END
+  , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) END
   , dblInvoiceTotal		= 0
   , dblAmountDue		= 0
   , dblDiscount			= ISNULL(PD.dblDiscount, 0) + ISNULL(APPD.dblDiscount, 0)
