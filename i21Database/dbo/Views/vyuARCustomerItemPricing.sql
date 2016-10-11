@@ -6,7 +6,7 @@ SELECT
 	,[intTransactionDetailId]	= ARID.[intInvoiceDetailId]									--CAST(NULL AS INT)
 	,[intEntityCustomerId]		= ARI.[intEntityCustomerId]									--CAST(NULL AS INT)
 	,[intItemId]				= ARID.[intItemId]											--CAST(NULL AS INT)
-	,[dblPrice]					= ARPH.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
+	,[dblPrice]					= ARID.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
 	,[dblOriginalPrice]			= ISNULL(ARPH.[dblOriginalPrice],0)									--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[strTermDiscountBy]		= CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
@@ -48,7 +48,7 @@ SELECT
 	,[intEntityCustomerId]		= ARI.[intEntityCustomerId]	--CAST(NULL AS INT)
 	,[intItemId]				= ARID.[intItemId]			--CAST(NULL AS INT)
 	,[dblPrice]					= IP.[dblPrice]				--CAST(0 AS NUMERIC(18,6))
-	,[dblOriginalPrice]			= CAST(0 AS NUMERIC(18,6))	--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= ISNULL(ARID.[dblPrice],0)	--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= IP.[dblTermDiscount]		--CAST(0 AS NUMERIC(18,6))
 	,[strTermDiscountBy]		= IP.[strTermDiscountBy] 	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= IP.[strPricing]			--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
@@ -123,7 +123,7 @@ SELECT
 	,[intTransactionDetailId]	= SOSOD.[intSalesOrderDetailId]								--CAST(NULL AS INT)
 	,[intEntityCustomerId]		= SO.[intEntityCustomerId]									--CAST(NULL AS INT)
 	,[intItemId]				= SOSOD.[intItemId]											--CAST(NULL AS INT)
-	,[dblPrice]					= ARPH.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
+	,[dblPrice]					= SOSOD.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
 	,[dblOriginalPrice]			= ISNULL(ARPH.[dblOriginalPrice],0)									--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[strTermDiscountBy]		= CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
@@ -165,7 +165,7 @@ SELECT
 	,[intEntityCustomerId]		= SO.[intEntityCustomerId]		--CAST(NULL AS INT)
 	,[intItemId]				= SOSOD.[intItemId]				--CAST(NULL AS INT)
 	,[dblPrice]					= IP.[dblPrice]					--CAST(0 AS NUMERIC(18,6))
-	,[dblOriginalPrice]			= CAST(0 AS NUMERIC(18,6))		--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= ISNULL(SOSOD.[dblPrice],0)		--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= IP.[dblTermDiscount]			--CAST(0 AS NUMERIC(18,6))
 	,[strTermDiscountBy]		= IP.[strTermDiscountBy] 	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= IP.[strPricing]				--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS

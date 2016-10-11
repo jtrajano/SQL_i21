@@ -1331,6 +1331,8 @@ BEGIN TRY
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
 						,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
 						,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
+						,@ItemTermDiscount				= [dblItemTermDiscount]
+						,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1401,6 +1403,8 @@ BEGIN TRY
 							,@ItemWeightUOMId				= @ItemWeightUOMId
 							,@ItemWeight					= @ItemWeight
 							,@StorageScheduleTypeId			= @StorageScheduleTypeId
+							,@ItemTermDiscount				= @ItemTermDiscount
+							,@ItemTermDiscountBy			= @ItemTermDiscountBy
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
@@ -1578,6 +1582,8 @@ BEGIN TRY
 					,@ItemSubCurrencyId				= [intSubCurrencyId]
 					,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
 					,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
+					,@ItemTermDiscount				= [dblItemTermDiscount]
+					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 				FROM
 					@InvoiceEntries
 				WHERE
