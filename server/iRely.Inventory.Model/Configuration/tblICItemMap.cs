@@ -166,12 +166,13 @@ namespace iRely.Inventory.Model
                 .HasForeignKey(p => p.intCommodityId);
 
             this.HasMany(p => p.tblICItemUOMs)
-                .WithRequired(p => p.tblICItem)
+                .WithRequired(p => p.tblICItem) 
                 .HasForeignKey(p => p.intItemId);
+
             this.HasMany(p => p.tblICItemLocations)
                 .WithRequired(p => p.tblICItem)
-                .HasForeignKey(p => p.intItemId);
-            
+                .HasForeignKey(p => p.intItemId);                              
+
             this.HasMany(p => p.tblICItemPOSCategories)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
