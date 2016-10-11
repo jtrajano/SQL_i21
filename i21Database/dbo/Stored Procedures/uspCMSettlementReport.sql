@@ -112,7 +112,7 @@ BEGIN
 
 	--Vendor Address
 	strEntityName = ENTITY.strName,
-	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState,Bill.strShipFromZipCode),
+	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	TICKET.intTicketId,
 	INVRCPT.strReceiptNumber,
 	TICKET.strTicketNumber,
@@ -166,7 +166,7 @@ BEGIN
 
 	--Vendor Address
 	strEntityName = ENTITY.strName,
-	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState,Bill.strShipFromZipCode),
+	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	TICKET.intTicketId,
 	INVRCPT.strReceiptNumber,
 	TICKET.strTicketNumber,
