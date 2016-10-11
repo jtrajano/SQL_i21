@@ -13,6 +13,7 @@
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnInventoryCost] BIT NULL DEFAULT ((0)),
 	[ysnPrice] BIT NULL DEFAULT ((0)),
+	[dblChargeTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
 	--[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), -- Removed these field. Use tblICInventoryReceiptCharge.dblAmountBilled
 	--[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), -- Removed these field. Use tblICInventoryReceiptCharge.dblAmountBilled
 	CONSTRAINT [PK_tblICInventoryReceiptChargePerItem] PRIMARY KEY ([intInventoryReceiptChargePerItemId]), 
