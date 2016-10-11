@@ -203,8 +203,8 @@ BEGIN
 						,@InsertQuery	VARCHAR(MAX)
 						,@NotTableQuery	VARCHAR(MAX)
 
-				SET @NotTableQuery = 'DECLARE @SetQuery			VARCHAR(MAX)
-												,@InsertQuery	VARCHAR(MAX)
+				SET @NotTableQuery = 'DECLARE @SetQuery				VARCHAR(MAX)
+												,@InsertQuery		VARCHAR(MAX)							 
 
 										IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
 										CREATE TABLE #Records(
@@ -212,15 +212,45 @@ BEGIN
 											intEntityCustomerId		INT,
 											strValues		VARCHAR(MAX),
 											strDataType		VARCHAR(MAX)								
-										)																	
-										INSERT INTO #Records (RowId, intEntityCustomerId, strValues, strDataType)
-										SELECT TOP 1
-											RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL)), intEntityCustomerId = ' + CAST(@CustomerId AS VARCHAR(200)) + ', strValues =' + @SourceColumn + ', strDataType = ''' + @DataType + '''										
-										FROM 
-											' + @SourceTable + ' 
+										)								 
+
+										DECLARE @TermTable TABLE
+										(
+											intEntityCustomerId INT
+											, ' + @SourceColumn + ' nvarchar(max)
+										)
+
+										INSERT INTO 
+											@TermTable
+										(
+											intEntityCustomerId
+											, ' + @SourceColumn + '
+										) 
+										SELECT DISTINCT
+											intEntityCustomerId
+											, ' + @SourceColumn + ' 
+										FROM ' + @SourceTable + '  
 										WHERE 
 											[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))	+ '  
-											
+
+										INSERT INTO #Records (RowId, intEntityCustomerId, strValues, strDataType)
+
+										SELECT TOP 1 
+											RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
+											, intEntityCustomerId
+											, strValues = STUFF((SELECT '', '' + ' + @SourceColumn + ' 												
+																FROM 
+																	@TermTable 
+																WHERE 
+																	intEntityCustomerId = t.intEntityCustomerId
+																FOR XML PATH(''''), TYPE)
+																.value(''.'',''NVARCHAR(MAX)''),1,2,'' '') 
+											, strDataType = ''' + @DataType + '''
+										FROM 
+											@TermTable t
+										GROUP BY 
+											intEntityCustomerId						 
+ 				
 						 				UPDATE 
 											#Records
 										SET strValues = 
@@ -252,6 +282,8 @@ BEGIN
 											,[strPlaceHolder]		= ''' + @PlaceHolder + '''
 											,[intEntityCustomerId]	= ' + CAST(@CustomerId AS VARCHAR(200)) + ' 
 											,[strValue]				= '''' +  @SetQuery  + '''''
+
+											PRINT @NotTableQuery
 				EXEC sp_sqlexec @NotTableQuery 			 
 			END
 		ELSE
@@ -260,7 +292,8 @@ BEGIN
 						,@InsertQueryTable	VARCHAR(MAX)
 						,@HTMLTable			VARCHAR(MAX)
 						,@ColumnCount		INT
-						,@ColumnCounter		INT														
+						,@ColumnCounter		INT							
+ 										
 
 				IF OBJECT_ID('tempdb..#TempTableColumnHeaders') IS NOT NULL DROP TABLE #TempTableColumnHeaders
 				SELECT 
