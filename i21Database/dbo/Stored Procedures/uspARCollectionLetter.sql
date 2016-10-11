@@ -282,8 +282,7 @@ BEGIN
 											,[strPlaceHolder]		= ''' + @PlaceHolder + '''
 											,[intEntityCustomerId]	= ' + CAST(@CustomerId AS VARCHAR(200)) + ' 
 											,[strValue]				= '''' +  @SetQuery  + '''''
-
-											PRINT @NotTableQuery
+											
 				EXEC sp_sqlexec @NotTableQuery 			 
 			END
 		ELSE
