@@ -40,7 +40,7 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 					(
 						SOSOD.intItemId = ARTD.intItemId		
 						AND
-						SOSOD.dblPrice <> ARTD.dblPrice 
+						(SOSOD.dblPrice <> ARTD.dblPrice OR SOSOD.strPricing <> ARTD.strPricing) 
 					)
 				--OR
 				--	()
@@ -136,7 +136,7 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 				AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
 		WHERE 
 			SO.intSalesOrderId = @TransactionId
-			AND SOSOD.intItemId <> ARTD.intItemId		
+			AND (SOSOD.intItemId <> ARTD.intItemId OR SOSOD.strPricing <> ARTD.strPricing)
 
 		UNION ALL
 
@@ -190,7 +190,7 @@ IF @SourceTransactionId = 2 -- INVOICE
 					(
 						ARID.intItemId = ARTD.intItemId		
 						AND
-						ARID.dblPrice <> ARTD.dblPrice 
+						(ARID.dblPrice <> ARTD.dblPrice OR ARID.strPricing <> ARTD.strPricing)
 					)
 				--OR
 				--	()
@@ -256,7 +256,7 @@ IF @SourceTransactionId = 2 -- INVOICE
 		WHERE 
 			ARI.intInvoiceId = @TransactionId
 			AND ARID.intItemId = ARTD.intItemId		
-			AND ARID.dblPrice <> ARTD.dblPrice 
+			AND (ARID.dblPrice <> ARTD.dblPrice OR ARID.[strPricing] <> ARTD.[strPricing])
 						
 		UNION ALL	
 

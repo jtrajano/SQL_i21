@@ -108,12 +108,12 @@ WHERE
 				WHERE
 					ARID.[intInvoiceDetailId] = ARPH.[intTransactionDetailId] 
 					AND ARI.[intInvoiceId] = ARPH.[intTransactionId]
-					AND ARID.[dblPrice] = ARPH.[dblPrice] 
-					AND ARID.[strPricing] = ARPH.[strPricing] 
+					AND ARID.[dblPrice] = IP.[dblPrice] 
+					AND ARID.[strPricing] = IP.[strPricing] COLLATE Latin1_General_CI_AS
 					AND ARPH.[intSourceTransactionId] = 2
 					AND ARPH.[ysnApplied] = 1
 					AND ARPH.[ysnDeleted] = 0 
-					AND strPricing NOT IN ('MANUAL OVERRIDE') ORDER BY dtmDate DESC)
+				ORDER BY ARPH.[ysnApplied] DESC)
 
 UNION ALL
 
@@ -225,10 +225,10 @@ WHERE
 				WHERE
 					SOSOD.[intSalesOrderDetailId] = ARPH.[intTransactionDetailId] 
 					AND SO.[intSalesOrderId] = ARPH.[intTransactionId]
-					AND SOSOD.[dblPrice] = ARPH.[dblPrice] 
-					AND SOSOD.[strPricing] = ARPH.[strPricing] 
+					AND SOSOD.[dblPrice] = IP.[dblPrice] 
+					AND SOSOD.[strPricing] = IP.[strPricing] COLLATE Latin1_General_CI_AS
 					AND ARPH.[intSourceTransactionId] = 1
 					AND ARPH.[ysnApplied] = 1
 					AND ARPH.[ysnDeleted] = 0
-					AND strPricing NOT IN ('MANUAL OVERRIDE') ORDER BY dtmDate DESC)
+				ORDER BY ARPH.[ysnApplied] DESC)
 
