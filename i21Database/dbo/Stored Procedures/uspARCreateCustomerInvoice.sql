@@ -2,7 +2,6 @@
 	 @EntityCustomerId				INT
 	,@CompanyLocationId				INT
 	,@CurrencyId					INT				= NULL
-	,@SubCurrencyCents				INT				= NULL
 	,@TermId						INT				= NULL
 	,@AccountId						INT				= NULL
 	,@EntityId						INT
@@ -55,6 +54,8 @@
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
@@ -103,8 +104,12 @@
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
-	,@SubCurrency					BIT				= 0
+	,@ItemConversionAccountId		INT				= NULL
+	,@ItemSubCurrencyId				INT				= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@DocumentMaintenanceId			INT				= NULL
+	,@StorageScheduleTypeId			INT				= NULL
+	,@UseOriginIdAsInvoiceNumber    BIT				= 0
 AS
 
 BEGIN
@@ -280,13 +285,13 @@ DECLARE  @NewId INT
 
 BEGIN TRY
 	INSERT INTO [tblARInvoice]
-		([strTransactionType]
+		([strInvoiceNumber]
+		,[strTransactionType]
 		,[strType]
 		,[intEntityCustomerId]
 		,[intCompanyLocationId]
 		,[intAccountId]
 		,[intCurrencyId]
-		,[intSubCurrencyCents]
 		,[intTermId]
 		,[intSourceId]
 		,[intPeriodsToAccrue] 
@@ -345,14 +350,13 @@ BEGIN TRY
 		,[intLoadId]
 		,[intEntityId]
 		,[intConcurrencyId])
-	SELECT
-		 [strTransactionType]			= @TransactionType
+	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
+		,[strTransactionType]			= @TransactionType
 		,[strType]						= @Type
 		,[intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= @DefaultCurrency
-		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = @DefaultCurrency),1) ELSE @SubCurrencyCents END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[intSourceId]					= @SourceId
 		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
@@ -372,7 +376,7 @@ BEGIN TRY
 		,[intEntityContactId]			= @EntityContactId
 		,[intFreightTermId]				= @FreightTermId
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
-		,[intPaymentMethodId]			= @PaymentMethodId
+		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
 		,[strInvoiceOriginId]			= @InvoiceOriginId
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
@@ -511,6 +515,8 @@ BEGIN TRY
 		,@ItemUOMId						= @ItemUOMId
 		,@ItemQtyShipped				= @ItemQtyShipped
 		,@ItemDiscount					= @ItemDiscount
+		,@ItemTermDiscount				= @ItemTermDiscount
+		,@ItemTermDiscountBy			= @ItemTermDiscountBy
 		,@ItemPrice						= @ItemPrice
 		,@RefreshPrice					= @RefreshPrice
 		,@ItemMaintenanceType			= @ItemMaintenanceType
@@ -560,7 +566,9 @@ BEGIN TRY
 		,@ItemPerformerId				= @ItemPerformerId
 		,@ItemLeaseBilling				= @ItemLeaseBilling
 		,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
-		,@SubCurrency					= @SubCurrency
+		,@ItemConversionAccountId		= @ItemConversionAccountId
+		,@ItemSubCurrencyId				= @ItemSubCurrencyId
+		,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

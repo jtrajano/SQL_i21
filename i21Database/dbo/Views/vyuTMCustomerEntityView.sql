@@ -12,7 +12,7 @@ SELECT
 	,vwcus_city = SUBSTRING(Loc.strCity,1,20)
 	,vwcus_state = SUBSTRING(Loc.strState,1,2)
 	,vwcus_zip = SUBSTRING(Loc.strZipCode,1,10)  
-	,vwcus_phone = (CASE WHEN CHARINDEX('x', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX('x',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END)
+	,vwcus_phone = E.strPhone
 	,vwcus_phone_ext = (CASE WHEN CHARINDEX('x', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX('x',Con.strPhone) + 1, LEN(Con.strPhone))END)
 	,vwcus_bill_to = ''  
 	,vwcus_contact = SUBSTRING((Con.strName),1,20) 
@@ -62,7 +62,7 @@ SELECT
 	,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN 'Y' ELSE 'N' END   
 	,vwcus_tax_state = ''  
 	,A4GLIdentity = Ent.intEntityId
-	,vwcus_phone2 =  (CASE WHEN CHARINDEX('x', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX('x',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END)
+	,vwcus_phone2 =  F.strPhone
 	,vwcus_balance = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0) 
 	,vwcus_ptd_sls = ISNULL(CI.dblYTDSales,0.0)
 	,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
@@ -87,6 +87,10 @@ INNER JOIN tblEMEntityLocation Loc
 	ON Ent.intEntityId = Loc.intEntityId 
 		and Loc.ysnDefaultLocation = 1
 LEFT JOIN [vyuARCustomerInquiryReport] CI
-	ON Ent.intEntityId = CI.intEntityCustomerId   
+	ON Ent.intEntityId = CI.intEntityCustomerId
+LEFT JOIN tblEMEntityPhoneNumber E
+	ON Con.intEntityId = E.intEntityId   
+LEFT JOIN tblEMEntityMobileNumber F
+	ON Con.intEntityId = F.intEntityId   
 
 GO

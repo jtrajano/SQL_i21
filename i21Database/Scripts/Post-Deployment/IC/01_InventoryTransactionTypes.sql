@@ -120,11 +120,11 @@ USING	(
 				,form = 'Bill'
 		UNION ALL 
 		SELECT	id = 28
-				,name = 'Revalue WIP'
+				,name = 'Revalue Consume'
 				,form = NULL
 		UNION ALL 
 		SELECT	id = 29
-				,name = 'Revalue Produced'
+				,name = 'Revalue Produce'
 				,form = NULL
 		UNION ALL 
 		SELECT	id = 30
@@ -150,6 +150,22 @@ USING	(
 		SELECT	id = 35
 				,name = 'Inventory Auto Variance on Negatively Sold or Used Stock'
 				,form = NULL
+		UNION ALL 
+		SELECT	id = 36
+				,name = 'Revalue Item Change'
+				,form = NULL 
+		UNION ALL 
+		SELECT	id = 37
+				,name = 'Revalue Split Lot'
+				,form = NULL 
+		UNION ALL 
+		SELECT	id = 38
+				,name = 'Revalue Lot Merge'
+				,form = NULL 
+		UNION ALL 
+		SELECT	id = 39
+				,name = 'Revalue Lot Move'
+				,form = NULL 
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

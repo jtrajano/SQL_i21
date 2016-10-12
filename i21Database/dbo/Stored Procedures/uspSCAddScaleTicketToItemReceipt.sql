@@ -100,7 +100,7 @@ SELECT
 										WHEN LI.strSourceTransactionId = 'SPT' THEN 'Purchase Contract'
 										WHEN LI.strSourceTransactionId = 'CNT' THEN 'Purchase Contract'
 										WHEN LI.strSourceTransactionId = 'LOD' THEN 'Purchase Contract'
-										--WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
+										WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
 										ELSE 'Direct'
 									  END
 		,intEntityVendorId			= @intEntityId
@@ -220,8 +220,8 @@ WHERE SCTicket.intTicketId = @intTicketId
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN 
 												CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-													WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+													WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId) * -1)
+													WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId)
 												END
 											END
 		,[strAllocateCostBy]				= NULL

@@ -25,7 +25,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						WHERE EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId AND EE.intPayGroupId IS NOT NULL)
 		BEGIN
 			UPDATE tblPREmployeeTimeOff 
-				SET dblHoursUsed = dblHoursUsed - tblTimeOffRequest.dblRequest
+				SET dblHoursUsed = CASE WHEN ((dblHoursUsed - tblTimeOffRequest.dblRequest) > 0) THEN dblHoursUsed - tblTimeOffRequest.dblRequest ELSE 0 END
 			FROM 
 			(SELECT TOR.intTimeOffRequestId, 
 					ET.intTypeTimeOffId, 

@@ -127,7 +127,7 @@ BEGIN
 			,dblAverageQtyDelivered =  AVG(ISNULL(A.dblQuantityDelivered,0.0))
 			,dblAverageSales =  AVG(ISNULL(A.dblExtendedAmount,0.0))
 			,dblEfficiency = CAST(((CASE WHEN ISNULL(AVG(B.dblTotalCapacity),0) = 0 THEN 1 ELSE (AVG(ISNULL(A.dblQuantityDelivered,0.0))/ AVG(ISNULL(B.dblTotalCapacity, 0.0))) END) * 100) AS NUMERIC(18,6))
-			,dblAverageBurnRate =  CAST(CASE WHEN SUM(ISNULL(A.dblQuantityDelivered,0)) = 0 THEN 0.0 ELSE @dblDegreeTotal/SUM(ISNULL(A.dblQuantityDelivered,0)) END AS NUMERIC(18,6))
+			,dblAverageBurnRate =  AVG(A.dblBurnRateAfterDelivery) --CAST(CASE WHEN SUM(ISNULL(A.dblQuantityDelivered,0)) = 0 THEN 0.0 ELSE @dblDegreeTotal/SUM(ISNULL(A.dblQuantityDelivered,0)) END AS NUMERIC(18,6))
 		FROM tblTMDeliveryHistory A
 		INNER JOIN tblTMSite B
 			ON A.intSiteID = B.intSiteID
@@ -156,7 +156,7 @@ BEGIN
 				,dblLastAverageQtyDelivered = AVG(ISNULL(A.dblQuantityDelivered,0.0))
 				,dblLastAverageSales = AVG(ISNULL(A.dblExtendedAmount,0.0))
 				,dblLastEfficiency = CAST(((CASE WHEN ISNULL(AVG(B.dblTotalCapacity),0) = 0 THEN 1 ELSE (AVG(ISNULL(A.dblQuantityDelivered,0.0))/ AVG(ISNULL(B.dblTotalCapacity, 0.0))) END) * 100) AS NUMERIC(18,6))
-				,dblLastAverageBurnRate =  CAST(CASE WHEN SUM(ISNULL(A.dblQuantityDelivered,0)) = 0 THEN 0.0 ELSE @dblDegreeTotal/SUM(ISNULL(A.dblQuantityDelivered,0)) END AS NUMERIC(18,6))
+				,dblLastAverageBurnRate =  AVG(A.dblBurnRateAfterDelivery) --CAST(CASE WHEN SUM(ISNULL(A.dblQuantityDelivered,0)) = 0 THEN 0.0 ELSE @dblDegreeTotal/SUM(ISNULL(A.dblQuantityDelivered,0)) END AS NUMERIC(18,6))
 			FROM tblTMDeliveryHistory A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -185,7 +185,7 @@ BEGIN
 					,dblLast2AverageQtyDelivered = AVG(ISNULL(A.dblQuantityDelivered,0.0))
 					,dblLast2AverageSales = AVG(ISNULL(A.dblExtendedAmount,0.0))
 					,dblLast2Efficiency = CAST(((CASE WHEN ISNULL(AVG(B.dblTotalCapacity),0) = 0 THEN 1 ELSE (AVG(ISNULL(A.dblQuantityDelivered,0.0))/ AVG(ISNULL(B.dblTotalCapacity, 0.0))) END) * 100) AS NUMERIC(18,6))
-					,dblLast2AverageBurnRate =  CAST(CASE WHEN SUM(ISNULL(A.dblQuantityDelivered,0)) = 0 THEN 0.0 ELSE @dblDegreeTotal/SUM(ISNULL(A.dblQuantityDelivered,0)) END AS NUMERIC(18,6))
+					,dblLast2AverageBurnRate =  AVG(A.dblBurnRateAfterDelivery) --CAST(CASE WHEN SUM(ISNULL(A.dblQuantityDelivered,0)) = 0 THEN 0.0 ELSE @dblDegreeTotal/SUM(ISNULL(A.dblQuantityDelivered,0)) END AS NUMERIC(18,6))
 				FROM tblTMDeliveryHistory A
 				INNER JOIN tblTMSite B
 					ON A.intSiteID = B.intSiteID
@@ -222,34 +222,94 @@ BEGIN
 				,dblLastChangePercent
 			)
 			SELECT 
-				intDeliveries 
-				,dblSales
-				,dblQuantityDelivered
-				,dblAverageQtyDelivered
-				,dblAverageSales
-				,dblEfficiency
-				,dblAverageBurnRate
-				,intLastDeliveries 
-				,dblLastSales
-				,dblLastQuantityDelivered
-				,dblLastAverageQtyDelivered
-				,dblLastAverageSales
-				,dblLastEfficiency
-				,dblLastAverageBurnRate
-				,intLast2Deliveries 
-				,dblLast2Sales
-				,dblLast2QuantityDelivered
-				,dblLast2AverageQtyDelivered
-				,dblLast2AverageSales
-				,dblLast2Efficiency
-				,dblLast2AverageBurnRate
-				,dblChangePercent = CAST(((CASE WHEN ISNULL(dblLastQuantityDelivered,0.0) = 0 THEN 0 ELSE (ISNULL(dblQuantityDelivered,0.0) - ISNULL(dblLastQuantityDelivered,0.0))/ISNULL(dblLastQuantityDelivered,0.0) END) * 100) AS NUMERIC(18,6))
-				,dblLastChangePercent = CAST(((CASE WHEN ISNULL(dblLast2QuantityDelivered,0.0) = 0 THEN 0 ELSE (ISNULL(dblLastQuantityDelivered,0.0) - ISNULL(dblLast2QuantityDelivered,0.0))/ISNULL(dblLast2QuantityDelivered,0.0) END) * 100) AS NUMERIC(18,6))
+				intDeliveries = 0
+				,dblSales = 0
+				,dblQuantityDelivered = 0
+				,dblAverageQtyDelivered =0
+				,dblAverageSales =0
+				,dblEfficiency= 0
+				,dblAverageBurnRate = 0
+				,intLastDeliveries = 0
+				,dblLastSales = 0
+				,dblLastQuantityDelivered = 0
+				,dblLastAverageQtyDelivered = 0
+				,dblLastAverageSales = 0
+				,dblLastEfficiency = 0
+				,dblLastAverageBurnRate = 0
+				,intLast2Deliveries = 0 
+				,dblLast2Sales = 0
+				,dblLast2QuantityDelivered = 0
+				,dblLast2AverageQtyDelivered = 0
+				,dblLast2AverageSales = 0
+				,dblLast2Efficiency = 0
+				,dblLast2AverageBurnRate = 0
+				,dblChangePercent = 0
+				,dblLastChangePercent =0
+			
+			
+			UPDATE @tblTableReturn
+			SET intDeliveries = A.intDeliveries
+				,dblSales = A.dblSales
+				,dblQuantityDelivered = A.dblQuantityDelivered
+				,dblAverageQtyDelivered = A.dblAverageQtyDelivered
+				,dblAverageSales = A.dblAverageSales
+				,dblEfficiency= A.dblEfficiency
+				,dblAverageBurnRate = A.dblAverageBurnRate
 			FROM @tblCurrentSeason A
-			FULL OUTER JOIN @tblLastSeason B 
-				ON A.intSiteId = B.intSiteId
-			FULL OUTER JOIN @tblLast2Season
-				ON A.intSiteId = B.intSiteId
+
+			UPDATE @tblTableReturn
+			SET intLastDeliveries = A.intLastDeliveries
+				,dblLastSales = A.dblLastSales
+				,dblLastQuantityDelivered = A.dblLastQuantityDelivered
+				,dblLastAverageQtyDelivered = A.dblLastAverageQtyDelivered
+				,dblLastAverageSales = A.dblLastAverageSales
+				,dblLastEfficiency = A.dblLastEfficiency
+				,dblLastAverageBurnRate = A.dblLastAverageBurnRate
+			FROM @tblLastSeason A
+			
+			UPDATE @tblTableReturn
+			SET intLast2Deliveries = A.intLast2Deliveries
+				,dblLast2Sales = A.dblLast2Sales
+				,dblLast2QuantityDelivered = A.dblLast2QuantityDelivered
+				,dblLast2AverageQtyDelivered = A.dblLast2AverageQtyDelivered
+				,dblLast2AverageSales = A.dblLast2AverageSales
+				,dblLast2Efficiency = A.dblLast2Efficiency
+				,dblLast2AverageBurnRate = A.dblLast2AverageBurnRate
+			FROM @tblLast2Season A
+
+			UPDATE @tblTableReturn
+			SET dblChangePercent = CAST(((CASE WHEN ISNULL(dblLastQuantityDelivered,0.0) = 0 THEN 0 ELSE (ISNULL(dblQuantityDelivered,0.0) - ISNULL(dblLastQuantityDelivered,0.0))/ISNULL(dblLastQuantityDelivered,0.0) END) * 100) AS NUMERIC(18,6))
+				,dblLastChangePercent = CAST(((CASE WHEN ISNULL(dblLast2QuantityDelivered,0.0) = 0 THEN 0 ELSE (ISNULL(dblLastQuantityDelivered,0.0) - ISNULL(dblLast2QuantityDelivered,0.0))/ISNULL(dblLast2QuantityDelivered,0.0) END) * 100) AS NUMERIC(18,6))
+
+			--SELECT 
+			--	intDeliveries 
+			--	,dblSales
+			--	,dblQuantityDelivered
+			--	,dblAverageQtyDelivered
+			--	,dblAverageSales
+			--	,dblEfficiency
+			--	,dblAverageBurnRate
+			--	,intLastDeliveries 
+			--	,dblLastSales
+			--	,dblLastQuantityDelivered
+			--	,dblLastAverageQtyDelivered
+			--	,dblLastAverageSales
+			--	,dblLastEfficiency
+			--	,dblLastAverageBurnRate
+			--	,intLast2Deliveries 
+			--	,dblLast2Sales
+			--	,dblLast2QuantityDelivered
+			--	,dblLast2AverageQtyDelivered
+			--	,dblLast2AverageSales
+			--	,dblLast2Efficiency
+			--	,dblLast2AverageBurnRate
+			--	,dblChangePercent = CAST(((CASE WHEN ISNULL(dblLastQuantityDelivered,0.0) = 0 THEN 0 ELSE (ISNULL(dblQuantityDelivered,0.0) - ISNULL(dblLastQuantityDelivered,0.0))/ISNULL(dblLastQuantityDelivered,0.0) END) * 100) AS NUMERIC(18,6))
+			--	,dblLastChangePercent = CAST(((CASE WHEN ISNULL(dblLast2QuantityDelivered,0.0) = 0 THEN 0 ELSE (ISNULL(dblLastQuantityDelivered,0.0) - ISNULL(dblLast2QuantityDelivered,0.0))/ISNULL(dblLast2QuantityDelivered,0.0) END) * 100) AS NUMERIC(18,6))
+			--FROM @tblCurrentSeason A
+			--FULL OUTER JOIN @tblLastSeason B 
+			--	ON A.intSiteId = B.intSiteId
+			--FULL OUTER JOIN @tblLast2Season
+			--	ON A.intSiteId = B.intSiteId
 		END
 	END
 RETURN

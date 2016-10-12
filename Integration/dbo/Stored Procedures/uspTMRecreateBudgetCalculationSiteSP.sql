@@ -245,7 +245,8 @@ BEGIN
 												A.intSiteItemId --@ItemId 				
 											,A.intEntityCustomerId	--@CustomerId	
 											,A.intLocationId	--@LocationId		
-											,NULL	--@ItemUOMId		 
+											,NULL	--@ItemUOMId		
+											,NULL	--@CurrencyId	 
 											,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)	 --@TransactionDate	
 											,A.dblRequiredQuantity	--@Quantity			
 											,NULL --@ContractHeaderId		
@@ -253,7 +254,8 @@ BEGIN
 											,NULL --@ContractNumber		
 											,NULL --@ContractSeq			
 											,NULL --@OriginalQuantity		
-											,NULL --@CustomerPricingOnly	
+											,NULL --@CustomerPricingOnly
+											,NULL --@ItemPricingOnly
 											,NULL --@ExcludeContractPricing	
 											,NULL --@VendorId			
 											,NULL --@SupplyPointId		
@@ -261,6 +263,7 @@ BEGIN
 											,NULL --@ShipToLocationId  
 											,NULL --@VendorLocationId
 											,NULL --@InvoiceType
+											,0	  --@GetAllAvailablePricing
 											)
 									ELSE
 										B.dblPrice

@@ -15,7 +15,7 @@ SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory';
-DECLARE @AccountCategory_AutoNegative AS NVARCHAR(30) = 'Auto-Variance';
+DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Auto-Variance';
 
 -- Get the default currency ID
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -45,7 +45,7 @@ SELECT	Query.intItemId
 		,Query.intItemLocationId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
 		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
-		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_AutoNegative) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
@@ -127,7 +127,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_AutoNegative) 	
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Auto_Variance) 	
 		RETURN -1;
 	END 
 END 

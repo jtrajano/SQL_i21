@@ -99,7 +99,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, intLoadToReceive = intNoOfLoad - intLoadReceived
 		, dblSeqPrice
 		, dblTax = 0
-		, dblLineTotal = 0
+		, dblLineTotal = CAST((dblDetailQuantity - (dblDetailQuantity - dblBalance)) * dblSeqPrice AS NUMERIC(18, 6))
 		, strLotTracking
 		, intCommodityId
 		, intContainerId = NULL
@@ -235,12 +235,12 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 	SELECT
 		intLocationId = TransferView.intFromLocationId
 		, intEntityVendorId = TransferView.intToLocationId
-		, NULL
-		, NULL
+		, strVendorId = Loc.strLocationName
+		, strVendorName = Loc.strLocationName
 		, strReceiptType = 'Transfer Order'
-		, intLineNo = intInventoryTransferDetailId
-		, intOrderId = intInventoryTransferId
-		, strOrderNumber = strTransferNo
+		, intLineNo = TransferView.intInventoryTransferDetailId
+		, intOrderId = TransferView.intInventoryTransferId
+		, strOrderNumber = TransferView.strTransferNo
 		, dblOrdered = dblQuantity
 		, dblReceived = NULL
 		, intSourceType = 0
@@ -292,6 +292,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from transfer
 
 	FROM	vyuICGetInventoryTransferDetail TransferView
+			LEFT JOIN dbo.tblICInventoryTransfer TransferViewHeader
+				ON TransferViewHeader.intInventoryTransferId = TransferView.intInventoryTransferId
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON TransferView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -306,8 +308,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(TransferView.intItemId, TransferView.intItemUOMId)
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-
+			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = TransferView.intToLocationId
 			,tblSMCompanyPreference
 
-	WHERE TransferView.ysnPosted = 1)
+	WHERE TransferView.ysnPosted = 1
+		AND TransferViewHeader.ysnShipmentRequired = 1
+		AND (TransferViewHeader.intStatusId = 1 OR TransferViewHeader.intStatusId = 2))
 tblAddOrders

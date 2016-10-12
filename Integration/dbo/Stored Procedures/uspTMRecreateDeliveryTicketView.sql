@@ -1,4 +1,4 @@
-﻿GO
+GO
 	PRINT 'START OF CREATING [uspTMRecreateDeliveryTicketView] SP'
 GO
 
@@ -64,7 +64,7 @@ BEGIN
 				,intConcurrencyId = J.intConcurrencyId
 				,strCustomerPhone = ISNULL(vwcus_phone,'''')
 				,strOrderNumber = ISNULL(J.strOrderNumber,'''')
-				,dblSiteEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
+				,dblSiteEstimatedPercentLeft = ISNULL(J.dblPercentLeft,0.0)
 				,H.strFillMethod
 				,A.dtmLastDeliveryDate
 				,J.dtmCallInDate
@@ -72,6 +72,8 @@ BEGIN
 				,strSerialNumber = Q.strSerialNumber
 				,strTaxGroup = R.vwlcl_tax_state
 				,A.dblYTDGalsThisSeason
+				,ysnTaxable = ISNULL(A.ysnTaxable,0)
+				,strSiteDescription = ISNULL(A.strDescription,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -160,7 +162,7 @@ BEGIN
 				,intConcurrencyId = J.intConcurrencyId
 				,strCustomerPhone = ISNULL(ConPhone.strPhone,'''')
 				,strOrderNumber = ISNULL(J.strOrderNumber,'''')
-				,dblSiteEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
+				,dblSiteEstimatedPercentLeft = ISNULL(J.dblPercentLeft,0.0)
 				,H.strFillMethod
 				,A.dtmLastDeliveryDate
 				,J.dtmCallInDate
@@ -168,6 +170,8 @@ BEGIN
 				,strSerialNumber = Q.strSerialNumber
 				,R.strTaxGroup
 				,A.dblYTDGalsThisSeason
+				,ysnTaxable = ISNULL(A.ysnTaxable,0)
+				,strSiteDescription = ISNULL(A.strDescription,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID

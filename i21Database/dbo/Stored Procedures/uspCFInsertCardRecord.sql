@@ -31,6 +31,9 @@
 	,@intCardLimitedCode			INT				 =	 0
 	,@intCardFuelCode				INT				 =	 0
 	---------------------------------------------------------
+	,@intEntryCode					INT				 =	 0
+	,@strProductAuthorization		NVARCHAR(MAX)	 =	 ''
+	,@strComment					NVARCHAR(MAX)	 =	 ''
 
 AS
 BEGIN
@@ -47,6 +50,7 @@ BEGIN
 	DECLARE @intDepartmentId						  INT = 0
 	DECLARE @intCardTypeId							  INT = 0
 	DECLARE @intCardId								  INT = 0
+	DECLARE @intProductAuthId						  INT = 0
 	---------------------------------------------------------
 
 
@@ -54,7 +58,18 @@ BEGIN
 	---------------------------------------------------------
 	----				    VALIDATION		   			 ----
 	---------------------------------------------------------
-	
+
+	IF(@intEntryCode < 0 OR @intEntryCode > 7)
+	BEGIN
+		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+		VALUES (@strCardNumber,'Invalid entry code')
+		SET @ysnHasError = 1
+	END
+
+	IF(@ysnHasError = 1)
+	BEGIN
+		RETURN
+	END
 	---------------------------------------------------------
 	--					 REQUIRED FIELDS				   --
 	---------------------------------------------------------
@@ -185,6 +200,25 @@ BEGIN
 	ELSE
 	BEGIN
 		SET @intDefaultFixVehicleNumber = NULL
+	END
+
+	--Product Authorization
+	IF (@strProductAuthorization != '')
+	BEGIN 
+		SELECT @intProductAuthId = intProductAuthId 
+		FROM tblCFProductAuth 
+		WHERE strNetworkGroupNumber = @strProductAuthorization
+		IF (@intProductAuthId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Unable to find match for '+ @strProductAuthorization +' on product authorization list')
+			--SET @ysnHasError = 1
+			SET @intProductAuthId = NULL
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intProductAuthId = NULL
 	END
 
 	--Department
@@ -332,7 +366,11 @@ BEGIN
 			 ,ysnCardLocked					
 			 ,intNumberOfCardsIssued		
 			 ,intCardLimitedCode			
-			 ,intCardFuelCode)
+			 ,intCardFuelCode
+			 ,intEntryCode
+			 ,strComment
+			 ,intProductAuthId
+			 )
 			VALUES(
 			  @intNetworkId					
 			 ,@intAccountId					
@@ -356,7 +394,11 @@ BEGIN
 			 ,@ysnCardLocked					
 			 ,@intNumberOfCardsIssued		
 			 ,@intCardLimitedCode			
-			 ,@intCardFuelCode)
+			 ,@intCardFuelCode
+			 ,@intEntryCode
+			 ,@strComment
+			 ,@intProductAuthId
+			 )
 
 			COMMIT TRANSACTION
 			RETURN 1

@@ -1,4 +1,4 @@
-﻿CREATE VIEW dbo.vyuARInvoiceCompact
+﻿CREATE VIEW [dbo].[vyuARInvoiceCompact]
 AS
 SELECT     
 	 intInvoiceId					= ARI.intInvoiceId
@@ -46,7 +46,13 @@ SELECT
 	,dtmTermDueDate					= SMT.dtmDueDate
 	,dblTermAPR						= SMT.dblAPR	
 	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = ARI.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + ARI.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
-	,dblItemTermDiscountTotal		= (SELECT SUM(ISNULL(dblItemTermDiscount,0)) FROM tblARInvoiceDetail ARID WHERE ARID.intInvoiceId = ARI.intInvoiceId)
+	,dblTotalTermDiscount			= ARI.dblTotalTermDiscount
+	,ysnExcludeForPayment			= CASE WHEN ARI.strTransactionType = 'Customer Prepayment' 
+										AND (EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intInvoiceId = ARI.intInvoiceId AND (ISNULL(ysnRestricted, 0) = 1 OR ISNULL(intContractDetailId, 0) <> 0)) 
+										OR NOT EXISTS(SELECT NULL FROM tblARInvoice ARI1 INNER JOIN tblARPayment ARP ON ARI1.intPaymentId  = ARP.intPaymentId AND ARP.ysnPosted = 1 AND ARI1.strTransactionType = 'Customer Prepayment'
+INNER JOIN
+	tblARPaymentDetail ARPD
+		ON ARI1.intInvoiceId = ARPD.intInvoiceId)) THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM         
 	dbo.tblARInvoice AS ARI 
 INNER JOIN
@@ -73,5 +79,7 @@ LEFT OUTER JOIN
 		ON ARI.intCurrencyId = SMC.intCurrencyID
 LEFT OUTER JOIN
 	dbo.tblGLAccount GLA
-		ON ARI.intAccountId = GLA.intAccountId 
-				 
+		ON ARI.intAccountId = GLA.intAccountId
+GO
+
+

@@ -6,7 +6,7 @@ SELECT TOP 100 PERCENT strCompanyName = CompanySetup.strCompanyName
 	, QH.strQuoteNumber
 	, GETDATE() AS dtmGeneratedDate
 	, QH.dtmQuoteDate
-	, strCustomer = dbo.fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName, 0)
+	, strCustomer = dbo.fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName, Customer.ysnIncludeEntityName)
 	, strSalesperson = dbo.fnARFormatCustomerAddress(SP.strName, SP.strPhone, SP.strEmail, NULL, NULL, NULL, NULL, NULL, NULL, 0)
 	, EL.strLocationName
 	, strItemNo = IC.strDescription
@@ -29,6 +29,7 @@ FROM tblTRQuoteHeader QH
 CROSS APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
 LEFT JOIN tblTRQuoteDetail QD ON QD.intQuoteHeaderId = QH.intQuoteHeaderId
 LEFT JOIN vyuARCustomer AR ON QH.intEntityCustomerId = AR.intEntityCustomerId
+LEFT JOIN tblARCustomer Customer ON Customer.intEntityCustomerId = AR.intEntityCustomerId
 LEFT JOIN vyuEMSalesperson SP ON SP.intEntitySalespersonId = AR.intSalespersonId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = QD.intShipToLocationId
 	AND EL.intEntityId = QH.intEntityCustomerId

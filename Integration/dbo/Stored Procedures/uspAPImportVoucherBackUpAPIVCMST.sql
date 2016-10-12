@@ -159,8 +159,7 @@ BEGIN
 			AND G.apchk_cbk_no = A.apivc_cbk_no
 			AND G.apchk_alt_trx_ind != 'O'
 	) PaymentInfo
-	WHERE A.apivc_orig_amt != 0
-	AND A.apivc_trans_type IN ('I', 'C', 'A')
+	WHERE A.apivc_trans_type IN ('I', 'C', 'A')
 END
 ELSE
 BEGIN
@@ -243,8 +242,7 @@ BEGIN
 			AND G.apchk_cbk_no = A.apivc_cbk_no
 			--AND G.apchk_chk_amt <> 0
 	) PaymentInfo
-	WHERE A.apivc_orig_amt != 0
-	AND 1 = CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+	WHERE 1 = CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 	AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U'
 	AND A.apivc_trans_type IN ('I', 'C', 'A')
 END

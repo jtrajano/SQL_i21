@@ -16,7 +16,7 @@
 		D.strTitle,
 		ysnContactActive = D.ysnActive,  	
 		C.ysnDefaultContact,
-		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(D.intEntityId)
+		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(B.intEntityId)
 	FROM dbo.tblEMEntity AS B 			
 		INNER JOIN dbo.[tblEMEntityToContact] AS C 
 				ON B.[intEntityId] = C.[intEntityId] 

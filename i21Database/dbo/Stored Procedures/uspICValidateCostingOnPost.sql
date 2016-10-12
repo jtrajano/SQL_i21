@@ -30,6 +30,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
 		,@strLocationName AS NVARCHAR(MAX)
+		,@strTransactionId AS NVARCHAR(50) 
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
@@ -183,4 +184,26 @@ BEGIN
 	RAISERROR(80066, 11, 1, @strItemNo, @strLocationName)
 	RETURN -1
 END 
-GO
+
+-- Check if the item is using Average Costing and the transaction is Actual Costing 
+SELECT @strItemNo = NULL
+		, @intItemId = NULL 
+		, @strTransactionId = NULL 
+
+SELECT TOP 1 
+		@strTransactionId = strTransactionId
+		,@strItemNo = i.strItemNo
+		,@intItemId = iv.intItemId
+FROM	@ItemsToValidate iv INNER JOIN tblICItem i ON iv.intItemId = i.intItemId
+		CROSS APPLY dbo.fnGetCostingMethodAsTable(iv.intItemId, iv.intItemLocationId) icm
+		INNER JOIN tblICCostingMethod cm
+			ON cm.intCostingMethodId = icm.CostingMethod
+WHERE	strActualCostId IS NOT NULL 
+		AND cm.strCostingMethod = 'AVERAGE COST'
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- 'Costing method mismatch. {Item No} is set to use Ave Costing. {Trans Id} is going to use Actual costing. It can''t be used together. You can fix it by changing the costing method to FIFO or LIFO.'
+	RAISERROR(80094, 11, 1, @strItemNo, @strTransactionId)
+	RETURN -1
+END 

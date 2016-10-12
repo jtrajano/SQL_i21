@@ -1,11 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspARImportTransactionsCSV]
-	 @ImportLogId		INT
-	,@ImportFormat      NVARCHAR(50)
-	,@ImportItemId		INT = NULL
-	,@ImportLocationId  INT = NULL
-	,@IsTank			BIT = 0
-	,@IsFromOldVersion	BIT = 0	
-	,@UserEntityId		INT	= NULL
+	 @ImportLogId			INT
+	,@ImportFormat			NVARCHAR(50)
+	,@ImportItemId			INT = NULL
+	,@ImportLocationId		INT = NULL
+	,@ConversionAccountId	INT = NULL
+	,@IsTank				BIT = 0
+	,@IsFromOldVersion		BIT = 0	
+	,@UserEntityId			INT	= NULL
 AS
 
 BEGIN
@@ -56,6 +57,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@ErrorMessage					NVARCHAR(250)	= NULL
 			,@TermId						INT				= NULL
 			,@EntitySalespersonId			INT				= NULL
+			,@EntityContactId				INT				= NULL
 			,@DueDate						DATETIME		= NULL		
 			,@ShipDate						DATETIME		= NULL
 			,@PostDate						DATETIME		= NULL
@@ -354,6 +356,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s location costing method should be either FIFO or LIFO.'
 			END
 
+		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityCustomerId = @EntityCustomerId
+
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
 			BEGIN TRY
 				IF @TransactionType <> 'Sales Order'
@@ -371,6 +375,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dtmDate]
 							,[dtmDueDate]
 							,[dtmShipDate]
+							,[dtmPostDate]
 							,[intEntitySalespersonId]
 							,[intFreightTermId]
 							,[intShipViaId]
@@ -436,6 +441,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[strImportFormat]
 							,[dblCOGSAmount]
 							,[intTempDetailIdForTaxes]
+							,[intConversionAccountId]
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
@@ -450,6 +456,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dtmDate]					= @Date
 							,[dtmDueDate]				= @DueDate
 							,[dtmShipDate]				= @ShipDate
+							,[dtmPostDate]				= @PostDate
 							,[intEntitySalespersonId]	= @EntitySalespersonId
 							,[intFreightTermId]			= @FreightTermId
 							,[intShipViaId]				= @ShipViaId
@@ -520,6 +527,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[strImportFormat]			= @ImportFormat
 							,[dblCOGSAmount]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @COGSAmount ELSE NULL END
 							,[intTempDetailIdForTaxes]  = @ImportLogDetailId
+							,[intConversionAccountId]	= @ConversionAccountId
 				
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
@@ -625,6 +633,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intCurrencyId]
 							,[intCompanyLocationId]
 							,[intEntitySalespersonId]
+							,[intEntityContactId]
+							,[intOrderedById]
 							,[intShipViaId]
 							,[strPONumber]
 							,[intTermId]
@@ -663,6 +673,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							, @DefaultCurrencyId
 							, @CompanyLocationId
 							, @EntitySalespersonId
+							, @EntityContactId
+							, @UserEntityId
 							, @ShipViaId
 							, @PONumber
 							, @TermId
@@ -765,6 +777,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						WHERE [intImportLogDetailId] = @ImportLogDetailId
 					END			
 			END
+
+		UPDATE tblARImportLogDetail SET [intConversionAccountId] = @ConversionAccountId  WHERE intImportLogDetailId = @ImportLogDetailId
 		
 		DELETE FROM @InvoicesForImport WHERE [intImportLogDetailId] = @ImportLogDetailId
 

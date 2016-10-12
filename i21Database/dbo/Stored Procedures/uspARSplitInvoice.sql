@@ -90,7 +90,6 @@ BEGIN
 		,dtmDate
 		,dtmDueDate
 		,intCurrencyId
-		,intSubCurrencyCents
 		,intCompanyLocationId
 		,intEntitySalespersonId
 		,dtmShipDate
@@ -140,7 +139,6 @@ BEGIN
 		,@InvoiceDate
 		,dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, intTermId)
 		,intCurrencyId
-		,(CASE WHEN ISNULL(intSubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = intCurrencyId),1) ELSE 1 END)
 		,intCompanyLocationId
 		,[intEntitySalespersonId]
 		,@InvoiceDate
@@ -238,7 +236,8 @@ BEGIN
 					,@ItemSalesOrderNumber			NVARCHAR(50)
 					,@ItemWeight					NUMERIC(18,6)
 					,@EntitySalespersonId			INT
-					,@SubCurrency					INT
+					,@ItemSubCurrencyId				INT
+					,@ItemSubCurrencyRate			NUMERIC(18,8)
 
 			SELECT TOP 1 @InvoiceDetailId = [intInvoiceDetailId] FROM @InvoiceDetails ORDER BY [intInvoiceDetailId]
 			
@@ -255,7 +254,6 @@ BEGIN
 								,[dblPrice]
 								,[dblTotalTax]
 								,[dblTotal]
-								,[ysnSubCurrency]
 								,[intAccountId]
 								,[intCOGSAccountId]
 								,[intSalesAccountId]
@@ -281,7 +279,9 @@ BEGIN
 								,[intContractDetailId]
 								,[intTicketId]
 								,[ysnLeaseBilling]
-								,[intTaxGroupId] 
+								,[intTaxGroupId]
+								,[intSubCurrencyId]
+								,[dblSubCurrencyRate]
 								,[intConcurrencyId])
 							SELECT
 								 @NewInvoiceId
@@ -294,7 +294,6 @@ BEGIN
 								,[dblPrice]      --* @dblSplitPercent -- AR-2505
 								,[dblTotalTax]   * @dblSplitPercent
 								,[dblTotal]      * @dblSplitPercent
-								,@SubCurrency
 								,[intAccountId] 
 								,[intCOGSAccountId] 
 								,[intSalesAccountId]
@@ -321,6 +320,8 @@ BEGIN
 								,[intTicketId]
 								,[ysnLeaseBilling]
 								,[intTaxGroupId]
+								,[intSubCurrencyId]
+								,[dblSubCurrencyRate]
 								,1
 							FROM
 								tblARInvoiceDetail
@@ -397,7 +398,8 @@ BEGIN
 						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 						,@ItemWeight					= [dblItemWeight]
 						,@EntitySalespersonId			= [intEntitySalespersonId]
-						,@SubCurrency					= [ysnSubCurrency]
+						,@ItemSubCurrencyId				= [intSubCurrencyId]
+						,@ItemSubCurrencyId				= [dblSubCurrencyRate]
 					FROM
 						tblARInvoiceDetail
 					WHERE
@@ -430,7 +432,8 @@ BEGIN
 						,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 						,@ItemLicenseAmount				= @ItemLicenseAmount
 						,@ItemTaxGroupId				= @ItemTaxGroupId		
-						,@SubCurrency					= @SubCurrency		
+						,@ItemSubCurrencyId				= @ItemSubCurrencyId
+						,@ItemSubCurrencyRate			= @ItemSubCurrencyRate	
 						IF LEN(ISNULL(@ErrorMessage,'')) > 0
 							BEGIN
 								RAISERROR(@ErrorMessage, 11, 1);

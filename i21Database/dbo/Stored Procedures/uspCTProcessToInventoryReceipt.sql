@@ -84,7 +84,7 @@ AS
 				dblGross					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblNet						=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblCost						=	ISNULL(AD.dblSeqPrice,0),
-				intCostUOMId				=	AD.intSeqPriceUOMId,
+				intCostUOMId				=	ISNULL(AD.intSeqPriceUOMId, CD.intItemUOMId), -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SubCurrency.intCent, 1), 
 				dblExchangeRate				=	1,

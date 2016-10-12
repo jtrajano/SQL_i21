@@ -29,7 +29,8 @@
 			null,
 			b.intShipToId,
 			null,
-			'Standard'			
+			'Standard',
+			0	
 		) c
 	where a.intItemId is not null and a.intItemId > 0
 	
@@ -62,6 +63,7 @@
 			b.intEntityCustomerId,
 			d.intWarehouseId,
 			g.intItemUOMId,
+			NULL,
 			cast(GetDate() as date),
 			1,
 			null,		
@@ -82,7 +84,8 @@
 			null,		
 			null,	
 			'Standard',
-			null				
+			null,
+			0			
 		) c
  
 	 WHERE g.strItemNo is not null

@@ -42,7 +42,7 @@ BEGIN
 		DECLARE @ysnPost Bit, @ysnRecap Bit, @isSuccessful Bit, @message_id int
 		SET @ysnPost = 0 --for Unpost	1 Post, 
 		SET @ysnRecap = 0 -- Recap
-		EXEC dbo.uspCMPostBankDeposit @ysnPost, @ysnRecap, @strTransactionId, @userId, @intEntityId, @isSuccessful, @message_id
+		EXEC dbo.uspCMPostBankDeposit @ysnPost, @ysnRecap, @strTransactionId, NULL, @userId, @intEntityId, @isSuccessful, @message_id
 	
 		SET @I = @I + 1
 

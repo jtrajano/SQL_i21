@@ -14,7 +14,7 @@ BEGIN
 	SET NOCOUNT ON;
 	DECLARE @journalIDS varchar(max)
 	DECLARE	@IntegerTable TABLE (intID int ,intValue INT)
-	DECLARE @id INT, @intNumber INT, @strPrefix VARCHAR(10),@smID varchar(10),@intJournalID INT
+	DECLARE @id INT, @smID varchar(20),@intJournalID INT
 	DECLARE @dateNow DATE = CONVERT(DATE, GETDATE(),101)
 	
 	INSERT INTO @IntegerTable SELECT * FROM fnCreateTableFromDelimitedValues(@delimitedIds,@delimiter)	
@@ -25,10 +25,7 @@ BEGIN
 		FETCH NEXT FROM cursor_id INTO @id
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			SELECT  @intNumber = intNumber, @strPrefix = strPrefix FROM tblSMStartingNumber WHERE intStartingNumberId = 4
-			SET @smID = @strPrefix + CONVERT(VARCHAR(5),@intNumber)
-			UPDATE tblSMStartingNumber SET intNumber = @intNumber + 1 WHERE intStartingNumberId = 4
-					
+			EXEC dbo.uspSMGetStartingNumber  2,@smID OUTPUT,NULL
 			INSERT INTO tblGLJournal(strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,strSourceType,intEntityId,ysnPosted,strRecurringStatus)
 			SELECT strReference,intCurrencyId,@dateNow,dtmReverseDate,@smID,'Recurring Journal','General Journal','GJ',@entityid,0,strMode FROM tblGLJournalRecurring
 			WHERE intJournalRecurringId = @id

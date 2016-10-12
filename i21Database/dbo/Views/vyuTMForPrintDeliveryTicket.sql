@@ -15,8 +15,9 @@ SELECT
 	,intLocationId = A.intLocationId
 	,intItemId = CASE WHEN M.intItemId IS NULL THEN F.intItemId ELSE M.intItemId END
 	,intRouteId = A.intRouteId
-	,intDriverID = E.intDriverID
+	,intDriverId = E.intDriverID
 	,intConcurrencyId = E.intConcurrencyId
+	,intClockId = K.intClockID
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID

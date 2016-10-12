@@ -21,6 +21,7 @@ SELECT
 	,[strContractNumber]				= CTCHV.[strContractNumber]
 	,[intContractDetailId]				= CTCDV.[intContractDetailId]
 	,[strSequenceNumber]				= CTCDV.[strSequenceNumber]
+	,[intContractSeq]					= CTCDV.[intContractSeq]
 	,[intItemId]						= ICI.[intItemId]
 	,[strItemNo]						= ICI.[strItemNo]
 	,[strItemDescription]				= ARID.[strItemDescription]
@@ -95,6 +96,7 @@ INNER JOIN
 	tblARInvoice ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 		AND ARI.[strTransactionType] = 'Customer Prepayment'
+		AND ARI.[ysnPaid] = 0
 INNER JOIN
 	tblARPayment ARP
 		ON ARI.[intPaymentId] = ARP.[intPaymentId]
@@ -135,6 +137,7 @@ SELECT
 	,[strContractNumber]				= CTCHV.[strContractNumber]
 	,[intContractDetailId]				= CTCDV.[intContractDetailId]
 	,[strSequenceNumber]				= CTCDV.[strSequenceNumber]
+	,[intContractSeq]					= CTCDV.[intContractSeq]
 	,[intItemId]						= ICI.[intItemId]
 	,[strItemNo]						= ICI.[strItemNo]
 	,[strItemDescription]				= ARID.[strItemDescription]
@@ -213,6 +216,7 @@ INNER JOIN
 	tblARInvoice ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 		AND ARI.[strTransactionType] = 'Customer Prepayment'
+		AND ARI.[ysnPaid] = 0
 INNER JOIN
 	tblARPayment ARP
 		ON ARI.[intPaymentId] = ARP.[intPaymentId]

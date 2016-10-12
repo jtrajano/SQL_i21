@@ -185,50 +185,6 @@ BEGIN
 
 	END 
 
-	-------------------------------------------------------------------------------------
-	-- Note: Need to change this validation as a settable configuration in IC. 
-	-- Dallmayr seems to use Item Net weight as the "received weight". 
-	-- They clean the coffee per lot. Net wgt at Lot is the actual wgt. 
-	-- See IC-2176 for more info. 
-	-------------------------------------------------------------------------------------
-	-- Do not allow post if there is Gross/Net UOM and there is a Net Qty mismatch between the line item and its lot. 
-	--IF @ysnPost = 1 AND @ysnRecap = 0 
-	--BEGIN 
-	--	SET @intItemId = NULL 
-	--	SET @strItemNo = NULL 
-
-	--	DECLARE @strNetQty AS NVARCHAR(50)
-	--			,@strLotNetQty AS NVARCHAR(50)
-
-	--	SELECT	TOP 1 
-	--			@intItemId = Item.intItemId
-	--			,@strItemNo = Item.strItemNo
-	--			,@strNetQty = CONVERT(NVARCHAR, CAST(ReceiptItem.dblNet AS MONEY), 2)
-	--			,@strLotNetQty = CONVERT(NVARCHAR, CAST(ReceiptItemLot.dblTotalLotNet AS MONEY), 2)
-	--	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-	--				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
-	--			INNER JOIN dbo.tblICItem Item
-	--				ON Item.intItemId = ReceiptItem.intItemId
-	--			INNER JOIN (
-	--				SELECT	dblTotalLotNet = SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0))
-	--						,intInventoryReceiptItemId
-	--				FROM	dbo.tblICInventoryReceiptItemLot 
-	--				GROUP BY intInventoryReceiptItemId					
-	--			) ReceiptItemLot 
-	--				ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-	--	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
-	--			AND ReceiptItem.intWeightUOMId IS NOT NULL 
-	--			AND dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (1, 2)  
-	--			AND ReceiptItem.dblNet <> ReceiptItemLot.dblTotalLotNet
-
-	--	IF @intItemId IS NOT NULL 
-	--	BEGIN 
-	--		-- 'Net quantity mistmatch. It is {Net Qty} on item {Item} but the total net from the lot(s) is {Lot total Net Qty}.'
-	--		RAISERROR(80081, 11, 1, @strNetQty, @strItemNo, @strLotNetQty)  
-	--		GOTO Post_Exit    
-	--	END 
-	--END 
-
 	-- Do not allow post if there is Gross/Net UOM and net qty is zero. 
 	IF @ysnPost = 1 AND @ysnRecap = 0 
 	BEGIN 
@@ -254,6 +210,23 @@ BEGIN
 		END 
 	END 
 
+	-- Do not allow post if no lot entry in a lotted item
+	SET @strItemNo = NULL
+	SELECT TOP 1 @strItemNo = item.strItemNo
+	FROM tblICInventoryReceipt receipt
+		INNER JOIN tblICInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
+		INNER JOIN tblICItem item ON item.intItemId = receiptItem.intItemId
+		LEFT JOIN tblICInventoryReceiptItemLot itemLot ON itemLot.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+	WHERE dbo.fnGetItemLotType(item.intItemId) <> 0
+		AND itemLot.intInventoryReceiptItemLotId IS NULL
+		AND receipt.intInventoryReceiptId = @intTransactionId
+
+	IF @strItemNo IS NOT NULL
+	BEGIN
+		-- 'Lotted item {Item No} should should have lot(s) specified.'
+		RAISERROR(80090, 11, 1, @strItemNo)  
+		GOTO Post_Exit  
+	END
 END
 
 -- Check if locations are valid
@@ -1188,6 +1161,15 @@ BEGIN
 	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
 	
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
+END
+
+IF @ysnPost = 1
+BEGIN
+	EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 3 -- Set status of the transfer order to 'Closed'
+END
+ELSE
+BEGIN
+	EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 1 -- Set status of the transfer order to 'Open'
 END
 
 --------------------------------------------------------------------------------------------  

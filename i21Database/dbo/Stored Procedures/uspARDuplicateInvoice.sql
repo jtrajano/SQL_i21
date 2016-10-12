@@ -35,7 +35,6 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@EntityCustomerId			INT
 		,@CompanyLocationId			INT
 		,@CurrencyId				INT
-		,@SubCurrencyCents			INT
 		,@TermId					INT
 		,@Date						DATETIME
 		,@DueDate					DATETIME
@@ -70,6 +69,9 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@TotalWeight				NUMERIC(18,6)
 		,@EntityContactId			INT
 		,@TotalTermDiscount			NUMERIC(18,6)
+		,@StorageScheduleTypeId		INT
+		,@ItemSubCurrencyId			INT
+		,@ItemSubCurrencyRate		NUMERIC(18,6)
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -78,7 +80,6 @@ SELECT
 	,@EntityCustomerId				= [intEntityCustomerId]
 	,@CompanyLocationId				= [intCompanyLocationId]
 	,@CurrencyId					= [intCurrencyId]
-	,@SubCurrencyCents				= [intSubCurrencyCents]
 	,@TermId						= [intTermId]
 	,@Date							= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
 	,@DueDate						= NULL	--[dtmDueDate]
@@ -116,7 +117,7 @@ SELECT
 	,@IsImpactInventory				= [ysnImpactInventory]
 	,@TotalWeight					= [dblTotalWeight]
 	,@EntityContactId				= [intEntityContactId]
-	,@TotalTermDiscount				= [dblTotalTermDiscount]
+	,@TotalTermDiscount				= [dblTotalTermDiscount]	
 FROM
 	tblARInvoice
 WHERE
@@ -201,7 +202,6 @@ BEGIN TRY
 		 @EntityCustomerId						= @EntityCustomerId
 		,@CompanyLocationId						= @CompanyLocationId
 		,@CurrencyId							= @CurrencyId
-		,@SubCurrencyCents						= @SubCurrencyCents
 		,@TermId								= @TermId
 		,@EntityId								= @EntityId
 		,@InvoiceDate							= @Date
@@ -279,8 +279,10 @@ BEGIN TRY
 		,@ItemPerformerId						= NULL
 		,@ItemLeaseBilling						= 0
 		,@ItemVirtualMeterReading				= 0
-		,@SubCurrency							= 0
+		,@ItemSubCurrencyId						= @ItemSubCurrencyId
+		,@ItemSubCurrencyRate					= @ItemSubCurrencyRate
 		,@EntityContactId						= @EntityContactId
+		,@StorageScheduleTypeId					= @StorageScheduleTypeId
 
 END TRY
 BEGIN CATCH
@@ -313,7 +315,8 @@ BEGIN TRY
 		,[strPricing]
 		,[dblTotalTax]
 		,[dblTotal]
-		,[ysnSubCurrency]
+		,[intSubCurrencyId]
+		,[dblSubCurrencyRate]
 		,[intAccountId]
 		,[intCOGSAccountId]
 		,[intSalesAccountId]
@@ -357,7 +360,8 @@ BEGIN TRY
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
 		,[intConcurrencyId]
-		,[dblOriginalItemWeight])
+		,[dblOriginalItemWeight]
+		,[intStorageScheduleTypeId])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= ''
@@ -380,7 +384,8 @@ BEGIN TRY
 		,[strPricing]					= ARID.[strPricing]
 		,[dblTotalTax]					= ARID.[dblTotalTax]
 		,[dblTotal]						= ARID.[dblTotal]
-		,[ysnSubCurrency]				= ARID.[ysnSubCurrency]
+		,[intSubCurrencyId]				= ARID.[intSubCurrencyId]
+		,[dblSubCurrencyRate]			= ARID.[dblSubCurrencyRate]
 		,[intAccountId]					= ARID.[intAccountId]
 		,[intCOGSAccountId]				= ARID.[intCOGSAccountId]
 		,[intSalesAccountId]			= ARID.[intSalesAccountId]
@@ -425,6 +430,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]		= 0
 		,[intConcurrencyId]				= 1
 		,[dblOriginalItemWeight]		= ARID.dblOriginalItemWeight
+		,[intStorageScheduleTypeId]		= ARID.intStorageScheduleTypeId
 	FROM
 		tblARInvoiceDetail ARID
 	LEFT OUTER JOIN

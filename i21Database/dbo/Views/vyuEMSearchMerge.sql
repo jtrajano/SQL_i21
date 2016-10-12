@@ -6,7 +6,7 @@ select
 	strEntityNo = A.strEntityNo,
 	strEntityName = A.strName,
 	strEmail = B.strEmail,
-	strPhone =	B.strPhone,
+	strPhone =	E.strPhone,
 	strContactName = B.strName,
 	strAddress = C.strAddress,
 	strZipCode = C.strZipCode,
@@ -22,3 +22,5 @@ select
 		ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 	JOIN [tblEMEntityType] D
 		ON A.intEntityId = D.intEntityId -- and D.strType in ('Vendor', 'Customer')
+	left join tblEMEntityPhoneNumber E
+		on E.intEntityId = B.intEntityId

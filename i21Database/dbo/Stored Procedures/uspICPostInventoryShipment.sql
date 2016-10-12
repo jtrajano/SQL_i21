@@ -249,6 +249,14 @@ IF @@ERROR <> 0 GOTO Post_Exit
 BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
 
+-- Call any integration sp before doing the post/unpost. 
+BEGIN 
+	EXEC dbo.uspICBeforePostInventoryShipmentIntegration
+			@ysnPost
+			,@intTransactionId 
+			,@intEntityUserSecurityId
+END 
+
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
@@ -731,7 +739,7 @@ BEGIN
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strShipmentNumber = @strTransactionId  
 
-	EXEC dbo.uspICPostInventoryShipmentIntegrations
+	EXEC dbo.uspICAfterPostInventoryShipmentIntegration
 			@ysnPost
 			,@intTransactionId 
 			,@intEntityUserSecurityId

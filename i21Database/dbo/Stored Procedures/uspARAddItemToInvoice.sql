@@ -15,6 +15,8 @@
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@RefreshPrice					BIT				= 0
@@ -53,9 +55,11 @@
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL	
 	,@ItemCustomerStorageId			INT				= NULL		
+	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL			
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
+	,@ItemConversionAccountId		INT				= NULL
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
 	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
@@ -66,7 +70,9 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
-	,@SubCurrency					BIT				= 0
+	,@ItemSubCurrencyId				INT				= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
+	,@StorageScheduleTypeId			INT				= NULL
 AS
 
 BEGIN
@@ -78,16 +84,18 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 	
-DECLARE  @ZeroDecimal NUMERIC(18, 6)
-		,@NewDetailId INT
-		,@AddDetailError NVARCHAR(MAX)
-		,@CompanyLocationId		INT	
+DECLARE  @ZeroDecimal			NUMERIC(18, 6)
+		,@NewDetailId			INT
+		,@AddDetailError		NVARCHAR(MAX)
+		,@CompanyLocationId		INT
+		,@CurrencyId			INT
 
 		 
 SET @ZeroDecimal = 0.000000
 
 SELECT 
-	 @CompanyLocationId = [intCompanyLocationId]	
+	 @CompanyLocationId = [intCompanyLocationId]
+	 ,@CurrencyId		= [intCurrencyId]	
 FROM
 	tblARInvoice
 WHERE
@@ -95,10 +103,12 @@ WHERE
 
 IF ISNULL(@RaiseError,0) = 0
 	BEGIN TRANSACTION
+	
 
 IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 1
 	BEGIN
-		BEGIN TRY
+		BEGIN TRY		
+
 		EXEC [dbo].[uspARAddInventoryItemToInvoice]
 			 @InvoiceId						= @InvoiceId	
 			,@ItemId						= @ItemId
@@ -114,6 +124,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
+			,@ItemTermDiscount				= @ItemTermDiscount
+			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@ItemPrice						= @ItemPrice
 			,@ItemPricing					= @ItemPricing
 			,@RefreshPrice					= @RefreshPrice
@@ -165,8 +177,10 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
-			,@SubCurrency					= @SubCurrency
+			,@ItemSubCurrencyId				= @ItemSubCurrencyId
+			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemIsBlended					= @ItemIsBlended
+			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -204,6 +218,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
 				,[dblDiscount]
+				,[dblItemTermDiscount]
+				,[strItemTermDiscountBy]
+				,[dblLicenseAmount]
 				,[dblPrice]
 				,[strPricing]
 				,[intSiteId]
@@ -220,7 +237,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strMaintenanceType]
 				,[strFrequency]
 				,[dtmMaintenanceDate]
-				,[ysnSubCurrency]
+				,[intSubCurrencyId]
+				,[dblSubCurrencyRate]
 				,[ysnBlended]
 				,[intRecipeId]
 				,[intSubLocationId]
@@ -228,7 +246,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intMarginById]
 				,[intCommentTypeId]
 				,[dblMargin]
-				,[dblRecipeQuantity])
+				,[dblRecipeQuantity]
+				,[intStorageScheduleTypeId])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -243,6 +262,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemDiscount
+				,@ItemTermDiscount
+				,@ItemTermDiscountBy
+				,@ItemLicenseAmount
 				,@ItemPrice
 				,@ItemPricing
 				,@ItemSiteId
@@ -259,7 +281,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemMaintenanceType
 				,@ItemFrequency
 				,@ItemMaintenanceDate
-				,@SubCurrency
+				,ISNULL(@ItemSubCurrencyId, @CurrencyId)
+				,CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 				,@ItemIsBlended
 				,@ItemRecipeId
 				,@ItemSublocationId
@@ -268,6 +291,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemCommentTypeId
 				,@ItemMargin
 				,@ItemRecipeQty
+				,@ItemStorageScheduleTypeId
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -317,7 +341,8 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			,@EntitySalespersonId			= @EntitySalespersonId
-			,@SubCurrency					= @SubCurrency
+			,@ItemSubCurrencyId				= @ItemSubCurrencyId
+			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemRecipeId					= @ItemRecipeId
 			,@ItemSublocationId				= @ItemSublocationId
@@ -326,6 +351,8 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemCommentTypeId				= @ItemCommentTypeId
 			,@ItemMargin					= @ItemMargin
 			,@ItemRecipeQty					= @ItemRecipeQty
+			,@ItemConversionAccountId		= @ItemConversionAccountId
+			,@StorageScheduleTypeId			= @StorageScheduleTypeId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -349,6 +376,20 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 	
 		
 SET @NewInvoiceDetailId = @NewDetailId
+
+UPDATE tblARInvoiceDetail SET intStorageScheduleTypeId = ABC.intStorageScheduleTypeId
+FROM tblARInvoiceDetail
+INNER JOIN
+(
+SELECT intInvoiceId, intStorageScheduleTypeId FROM tblICInventoryShipment  ICIS
+INNER JOIN (SELECT intInventoryShipmentId, intItemId, intItemUOMId, intOrderId FROM tblICInventoryShipmentItem) ICISI ON ICIS.intInventoryShipmentId = ICISI.intInventoryShipmentId
+INNER JOIN (SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, intStorageScheduleTypeId, intItemId, intItemUOMId FROM tblSOSalesOrder SO 
+			INNER JOIN (SELECT intSalesOrderId, intStorageScheduleTypeId, intItemId, intItemUOMId  FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId) SO ON ICIS.strReferenceNumber = SO.strSalesOrderNumber AND ICISI.intItemId = SO.intItemId AND ICISI.intItemUOMId = SO.intItemUOMId
+INNER JOIN (SELECT ARI.intInvoiceId, ARID.strDocumentNumber, strInvoiceNumber, intItemId, intItemUOMId FROM tblARInvoice ARI  
+			INNER JOIN (SELECT intInvoiceId, strDocumentNumber, intItemId, intItemUOMId FROM tblARInvoiceDetail) ARID ON ARI.intInvoiceId = ARID.intInvoiceId 
+						WHERE strDocumentNumber IS NOT NULL AND ISNULL(strDocumentNumber,'') <> '' AND ARI.intInvoiceId = @InvoiceId ) ARI ON ICIS.strShipmentNumber = ARI.strDocumentNumber AND ICISI.intItemId = ARI.intItemId AND ICISI.intItemUOMId = ARI.intItemUOMId
+) ABC ON tblARInvoiceDetail.intInvoiceId = ABC.intInvoiceId
+WHERE tblARInvoiceDetail.intInvoiceId = @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION

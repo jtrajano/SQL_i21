@@ -22,6 +22,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
 	,@intCurrencyId AS INT 
 	,@dblExchangeRate AS NUMERIC(38,20)	
 	,@intEntityUserSecurityId AS INT
+	,@intRelatedInventoryTransactionId AS INT = NULL 
 	,@strTransactionForm AS NVARCHAR(50) = 'Bill'
 AS
 
@@ -57,6 +58,7 @@ BEGIN
 		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. The integer id of INVRCT-10001 is 1934). 
 		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
+		,[intRelatedInventoryTransactionId] INT NULL 
 	)
 END 
 
@@ -143,7 +145,6 @@ BEGIN
 				ON tblICInventoryFIFO.intItemUOMId = tblICItemUOM.intItemUOMId
 	WHERE	tblICInventoryFIFO.intItemId = @intItemId
 			AND tblICInventoryFIFO.intItemLocationId = @intItemLocationId
-			--AND tblICInventoryFIFO.intItemUOMId = @intItemUOMId
 			AND tblICInventoryFIFO.intTransactionId = @intSourceTransactionId
 			AND tblICInventoryFIFO.intTransactionDetailId = @intSourceTransactionDetailId
 			AND tblICInventoryFIFO.strTransactionId = @strSourceTransactionId
@@ -512,7 +513,8 @@ BEGIN
 						,[strActualCostId] 
 						,[intSourceTransactionId] 
 						,[intSourceTransactionDetailId] 
-						,[strSourceTransactionId] 				
+						,[strSourceTransactionId]
+						,[intRelatedInventoryTransactionId]				
 				)
 				SELECT 
 						[intItemId]						= InvTran.intItemId
@@ -539,6 +541,7 @@ BEGIN
 						,[intSourceTransactionId]		= InvTran.intTransactionId
 						,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
 						,[strSourceTransactionId]		= InvTran.strTransactionId
+						,[intRelatedInventoryTransactionId] = InvTran.intInventoryTransactionId
 				FROM	dbo.tblICInventoryTransaction InvTran
 				WHERE	InvTran.strBatchId = @InvTranBatchId
 						AND InvTran.intTransactionId = @InvTranIntTransactionId

@@ -70,7 +70,7 @@ SELECT
 	,[intCostUnitMeasureId]                     = ItemCostUOM.intItemUOMId
 	,[intScaleTicketId]							= ScaleTicket.intScaleTicketId
 	,[strScaleTicketNumber]						= ScaleTicket.strScaleTicketNumber
-
+	,[intLocationId]							= Receipt.intLocationId
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt
@@ -190,7 +190,7 @@ SELECT
 	,[intCostUnitMeasureId]                     = ItemCostUOM.intItemUOMId
 	,[intScaleTicketId]							= ScaleTicket.intScaleTicketId
 	,[strScaleTicketNumber]						= ScaleTicket.strScaleTicketNumber
-
+	,[intLocationId]							= Receipt.intLocationId
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt

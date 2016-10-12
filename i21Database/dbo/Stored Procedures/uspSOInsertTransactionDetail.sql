@@ -15,6 +15,7 @@ BEGIN
 		,[dblQtyOrdered]
 		,[dblQtyShipped]
 		,[dblPrice]
+		,[strPricing]
 		,[intInventoryShipmentItemId]
 		,[intSalesOrderDetailId]
 		,[intContractHeaderId]
@@ -30,6 +31,7 @@ BEGIN
 		,[dblQtyOrdered]					= SOD.[dblQtyOrdered] 
 		,[dblQtyShipped]					= SOD.[dblQtyShipped] 
 		,[dblPrice]							= SOD.[dblPrice]
+		,[strPricing]						= SOD.[strPricing]
 		,[intInventoryShipmentItemId]		= NULL
 		,[intSalesOrderDetailId]			= NULL
 		,[intContractHeaderId]				= SOD.[intContractHeaderId]

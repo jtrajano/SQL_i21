@@ -7,8 +7,8 @@ CREATE PROCEDURE uspARImportInvoice
 	@UserId INT = 0,
 	@Total INT = 0 OUTPUT,
 	@StartDate DATETIME = NULL,
-	@EndDate DATETIME = NULL
-
+	@EndDate DATETIME = NULL,
+	@Posted INT = 0
 	AS
 BEGIN
 	--================================================
@@ -34,9 +34,28 @@ BEGIN
 	SELECT TOP 1 @ysnAG = CASE WHEN ISNULL(coctl_ag, '') = 'Y' THEN 1 ELSE 0 END
 			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
 	FROM coctlmst	
-
 	
-	IF(@Checking = 0) 
+	IF(@Checking = 0 and @Posted = 0)
+	BEGIN
+		IF @ysnAG		= 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agordmst')
+		DECLARE @totalDetailImported int
+		BEGIN
+			DECLARE @totalagordmst int
+			EXEC [uspARImportInvoiceBackupAGORDMST] @StartDate ,@EndDate ,@totalagordmst OUTPUT
+			EXEC [uspARImportInvoiceFromAGORDMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT 			
+		END
+		
+		IF @ysnPT		= 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst')
+		BEGIN
+			DECLARE @totalptticmst int
+			EXEC [uspARImportInvoiceBackupPTTICMST] @StartDate ,@EndDate ,@totalptticmst OUTPUT
+			EXEC [uspARImportInvoiceFromPTTICMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT 			
+		END
+		
+	END
+	
+	
+	IF(@Checking = 0 and @Posted = 1)
 	BEGIN
 		
 		DECLARE @Sucess BIT
@@ -199,7 +218,11 @@ BEGIN
 				ptivc_sold_by_tot,--[dblInvoiceTotal]
 				ptivc_disc_amt,--[dblDiscount]
 				ptivc_bal_due,--[dblAmountDue]
-				ptivc_amt_applied,--[dblPayment]
+				(CASE 
+					WHEN ptivc_type = 'C' 
+					THEN ptivc_amt_applied * -1
+					ELSE ptivc_amt_applied
+				 END),--[dblPayment]
 				(CASE 
 					WHEN ptivc_type = 'I' 
 						THEN 'Invoice' 
@@ -254,13 +277,23 @@ BEGIN
 				ITM.intItemId,
 				ITM.strDescription,
 				NULL,
-				agstm_un,
+				(CASE 
+					WHEN INV.strTransactionType = 'Credit Memo' 
+					THEN agstm_un * -1
+					ELSE agstm_un
+				 END),
 				agstm_un_prc,
-				agstm_sls 
+				(CASE 
+					WHEN INV.strTransactionType = 'Credit Memo' 
+					THEN agstm_sls * -1
+					ELSE agstm_sls
+				 END)								
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(agstm_itm_no  COLLATE Latin1_General_CI_AS)
 			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL	
+
+			EXEC [dbo].[uspARImportAGTax] 
 		 end 
 
 			--==========================================================
@@ -281,13 +314,24 @@ BEGIN
 				ITM.intItemId,
 				ITM.strDescription,
 				NULL,
-				ptstm_un,
+				(CASE 
+					WHEN INV.strTransactionType = 'Credit Memo' 
+					THEN ptstm_un * -1
+					ELSE ptstm_un
+				 END),
 				ptstm_un_prc,
-				ptstm_net 
+				(CASE 
+					WHEN INV.strTransactionType = 'Credit Memo' 
+					THEN ptstm_net * -1
+					ELSE ptstm_net
+				 END) 
 			FROM ptstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(ptstm_itm_no  COLLATE Latin1_General_CI_AS)
 			WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL	
+
+			EXEC [dbo].[uspARImportPTTax] 
+
 		 end
 
 		 			
@@ -326,7 +370,7 @@ BEGIN
 	--     GET TO BE IMPORTED RECORDS
 	--	This is checking if there are still records need to be import	
 	--================================================
-	IF(@Checking = 1) 
+	IF(@Checking = 1 AND @Posted = 1)
 	BEGIN
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN

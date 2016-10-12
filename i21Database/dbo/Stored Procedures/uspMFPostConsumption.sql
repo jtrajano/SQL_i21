@@ -555,6 +555,236 @@ BEGIN
 			,@ysnPost
 	END
 
+	IF @dblOtherCharges IS NOT NULL
+		AND @dblOtherCharges > 0 
+		AND @strInstantConsumption = 'False'
+		AND @intAttributeTypeId = 5
+	BEGIN
+		SELECT @intItemLocationId = intItemLocationId
+		FROM tblICItemLocation
+		WHERE intLocationId = @intLocationId
+			AND intItemId = @intItemId
+
+		INSERT INTO @OtherChargesGLAccounts (
+			intChargeId
+			,intItemLocationId
+			,intOtherChargeExpense
+			,intOtherChargeIncome
+			,intTransactionTypeId
+			)
+		SELECT intChargeId = @intItemId
+			,intItemLocationId = @intItemLocationId
+			,intOtherChargeExpense = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense)
+			,intOtherChargeIncome = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Inventory)
+			,intTransactionTypeId = @INVENTORY_CONSUME
+
+		SELECT TOP 1 @intItemId1 = Item.intItemId
+			,@strItemNo1 = Item.strItemNo
+		FROM dbo.tblICItem Item
+		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
+		WHERE ChargesGLAccounts.intOtherChargeExpense IS NULL
+
+		IF @intItemId1 IS NOT NULL
+		BEGIN
+			-- {Item} is missing a GL account setup for {Account Category} account category.
+			RAISERROR (
+					80008
+					,11
+					,1
+					,@strItemNo1
+					,@ACCOUNT_CATEGORY_OtherChargeExpense
+					)
+
+			RETURN;
+		END
+
+		--SELECT TOP 1 @intItemId1 = Item.intItemId
+		--	,@strItemNo1 = Item.strItemNo
+		--FROM dbo.tblICItem Item
+		--INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
+		--WHERE ChargesGLAccounts.intOtherChargeIncome IS NULL
+		--IF @intItemId1 IS NOT NULL
+		--BEGIN
+		--	-- {Item} is missing a GL account setup for {Account Category} account category.
+		--	RAISERROR (
+		--			80008
+		--			,11
+		--			,1
+		--			,@strItemNo1
+		--			,@ACCOUNT_CATEGORY_OtherChargeIncome
+		--			)
+		--	RETURN;
+		--END
+		SELECT @intRecipeItemUOMId = intItemUOMId
+		FROM tblMFWorkOrderRecipe
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @dblProduceQty = SUM(dblQuantity)
+			,@intProduceUOMKey = MIN(intItemUOMId)
+			,@dblWeight = SUM(dblPhysicalCount)
+		FROM dbo.tblMFWorkOrderProducedLot WP
+		WHERE WP.intWorkOrderId = @intWorkOrderId
+			AND WP.ysnProductionReversed = 0
+			AND WP.intItemId IN (
+				SELECT intItemId
+				FROM dbo.tblMFWorkOrderRecipeItem
+				WHERE intRecipeItemTypeId = 2
+					AND ysnConsumptionRequired = 1
+					AND intWorkOrderId = @intWorkOrderId
+				)
+
+		INSERT INTO @GLEntriesForOtherCost
+		SELECT dtmDate = @dtmDate
+			,intItemId = @intItemId
+			,intChargeId = @intItemId
+			,intItemLocationId = @intItemLocationId
+			,intChargeItemLocation = @intItemLocationId
+			,intTransactionId = @intBatchId
+			,strTransactionId = @strTransactionId
+			,dblCost = (
+				CASE 
+					WHEN @intRecipeItemUOMId = @intProduceUOMKey
+						THEN @dblOtherCharges * @dblProduceQty
+					ELSE @dblOtherCharges * @dblWeight
+					END
+				)
+			,intTransactionTypeId = @INVENTORY_CONSUME
+			,intCurrencyId = (
+				SELECT TOP 1 intDefaultReportingCurrencyId
+				FROM tblSMCompanyPreference
+				)
+			,dblExchangeRate = 1
+			,intTransactionDetailId = @intWorkOrderId
+			,strInventoryTransactionTypeName = 'Consume'
+			,strTransactionForm = 'Consume'
+			,ysnAccrue = 0
+			,ysnPrice = 0
+			,ysnInventoryCost = 0
+
+		DELETE
+		FROM @GLEntries
+
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			)
+		SELECT dtmDate = GLEntriesForOtherCost.dtmDate
+			,strBatchId = @strBatchId
+			,intAccountId = GLAccount.intAccountId
+			,dblDebit = Credit.Value
+			,dblCredit = Debit.Value
+			,dblDebitUnit = 0
+			,dblCreditUnit = 0
+			,strDescription = GLAccount.strDescription
+			,strCode = 'IC'
+			,strReference = ''
+			,intCurrencyId = GLEntriesForOtherCost.intCurrencyId
+			,dblExchangeRate = GLEntriesForOtherCost.dblExchangeRate
+			,dtmDateEntered = GETDATE()
+			,dtmTransactionDate = GLEntriesForOtherCost.dtmDate
+			,strJournalLineDescription = ''
+			,intJournalLineNo = GLEntriesForOtherCost.intTransactionDetailId
+			,ysnIsUnposted = 0
+			,intUserId = NULL
+			,intEntityId = @intUserId
+			,strTransactionId = GLEntriesForOtherCost.strTransactionId
+			,intTransactionId = GLEntriesForOtherCost.intTransactionId
+			,strTransactionType = GLEntriesForOtherCost.strInventoryTransactionTypeName
+			,strTransactionForm = GLEntriesForOtherCost.strTransactionForm
+			,strModuleName = 'Inventory'
+			,intConcurrencyId = 1
+			,dblDebitForeign = NULL
+			,dblDebitReport = NULL
+			,dblCreditForeign = NULL
+			,dblCreditReport = NULL
+			,dblReportingRate = NULL
+			,dblForeignRate = NULL
+		FROM @GLEntriesForOtherCost GLEntriesForOtherCost
+		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON GLEntriesForOtherCost.intChargeId = OtherChargesGLAccounts.intChargeId
+			AND GLEntriesForOtherCost.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
+		CROSS APPLY dbo.fnGetDebit(GLEntriesForOtherCost.dblCost) Debit
+		CROSS APPLY dbo.fnGetCredit(GLEntriesForOtherCost.dblCost) Credit
+		WHERE ISNULL(GLEntriesForOtherCost.ysnAccrue, 0) = 0
+			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
+			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
+		
+		UNION ALL
+		
+		SELECT dtmDate = GLEntriesForOtherCost.dtmDate
+			,strBatchId = @strBatchId
+			,intAccountId = GLAccount.intAccountId
+			,dblDebit = Debit.Value
+			,dblCredit = Credit.Value
+			,dblDebitUnit = 0
+			,dblCreditUnit = 0
+			,strDescription = GLAccount.strDescription
+			,strCode = 'IC'
+			,strReference = ''
+			,intCurrencyId = GLEntriesForOtherCost.intCurrencyId
+			,dblExchangeRate = GLEntriesForOtherCost.dblExchangeRate
+			,dtmDateEntered = GETDATE()
+			,dtmTransactionDate = GLEntriesForOtherCost.dtmDate
+			,strJournalLineDescription = ''
+			,intJournalLineNo = GLEntriesForOtherCost.intTransactionDetailId
+			,ysnIsUnposted = 0
+			,intUserId = NULL
+			,intEntityId = @intUserId
+			,strTransactionId = GLEntriesForOtherCost.strTransactionId
+			,intTransactionId = GLEntriesForOtherCost.intTransactionId
+			,strTransactionType = GLEntriesForOtherCost.strInventoryTransactionTypeName
+			,strTransactionForm = GLEntriesForOtherCost.strTransactionForm
+			,strModuleName = 'Inventory'
+			,intConcurrencyId = 1
+			,dblDebitForeign = NULL
+			,dblDebitReport = NULL
+			,dblCreditForeign = NULL
+			,dblCreditReport = NULL
+			,dblReportingRate = NULL
+			,dblForeignRate = NULL
+		FROM @GLEntriesForOtherCost GLEntriesForOtherCost
+		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON GLEntriesForOtherCost.intChargeId = OtherChargesGLAccounts.intChargeId
+			AND GLEntriesForOtherCost.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
+		CROSS APPLY dbo.fnGetDebit(GLEntriesForOtherCost.dblCost) Debit
+		CROSS APPLY dbo.fnGetCredit(GLEntriesForOtherCost.dblCost) Credit
+		WHERE ISNULL(GLEntriesForOtherCost.ysnAccrue, 0) = 0
+			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
+			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
+
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,@ysnPost
+	END
+
 	UPDATE dbo.tblMFWorkOrder
 	SET strBatchId = @strBatchId
 		,intBatchID = @intBatchId

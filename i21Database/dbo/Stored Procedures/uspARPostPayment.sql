@@ -16,6 +16,7 @@
 	,@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@raiseError		AS BIT				= 0
+	,@bankAccountId	AS INT				= NULL
 AS
   
 SET QUOTED_IDENTIFIER OFF  
@@ -66,7 +67,7 @@ DECLARE @ZeroPayment TABLE (
 );
 
 DECLARE @PostDate AS DATETIME
-SET @PostDate = CAST(GETDATE() AS DATE)
+SET @PostDate = GETDATE()
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
@@ -1132,17 +1133,18 @@ IF @post = 1
 	BEGIN TRY
 
 	SET @intWriteOff = (SELECT TOP 1 intPaymentMethodId FROM tblARPayment WHERE intPaymentMethodId IN (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Write Off') AND intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData) )		
-	
+		
 	IF (@intWriteOff IS NOT NULL)
 		BEGIN 
 			SELECT TOP 1 @intWriteOffAccount = intWriteOffAccountId FROM tblARPayment WHERE intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData)	
 
-			IF (@intWriteOffAccount IS NOT NULL)
+			IF (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0)
 				BEGIN
 					UPDATE 
 						tblARPayment
 					SET 
-						intAccountId = @intWriteOffAccount
+						intAccountId = @ARAccount
+						,intWriteOffAccountId = @intWriteOffAccount
 					FROM
 						tblARPayment P								
 					INNER JOIN 
@@ -1157,7 +1159,8 @@ IF @post = 1
 					UPDATE 
 						tblARPayment
 					SET 
-						intAccountId = @WriteOffAccount
+						intAccountId = @ARAccount
+						,intWriteOffAccountId = @WriteOffAccount
 					FROM
 						tblARPayment P								
 					INNER JOIN 
@@ -1169,6 +1172,8 @@ IF @post = 1
 				END
 		END 
 	ELSE
+		BEGIN
+		IF (@bankAccountId IS NULL)
 		BEGIN
 			UPDATE 
 				tblARPayment
@@ -1182,6 +1187,25 @@ IF @post = 1
 			WHERE
 				P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 				AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+		END
+		ELSE
+		BEGIN
+			DECLARE @intNewAccountID INT 
+			SELECT @intNewAccountID = intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccountId
+
+				UPDATE 
+					tblARPayment
+				SET 
+					intAccountId = @intNewAccountID
+				FROM
+					tblARPayment P								
+				INNER JOIN 
+					tblSMCompanyLocation C
+						ON P.intLocationId = C.intCompanyLocationId
+				WHERE
+					P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+					AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+			END
 		END
 					
 	END TRY
@@ -1223,7 +1247,7 @@ IF @post = 1
 		SELECT
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId			
-			,intAccountId			=	CASE WHEN @intWriteOff IS NOT NULL THEN 
+			,intAccountId			=	CASE WHEN (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0) THEN 
 											CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
 										ELSE A.intAccountId END
 			,dblDebit					= A.dblAmountPaid
@@ -1791,15 +1815,14 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) - P.dblPayment 
-				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount
-				,tblARInvoice.dblDiscountAvailable = 0
+				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount			
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) - P.dblInterest				
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblPayment
 						, SUM(A.dblDiscount) dblDiscount
-						, SUM(A.dblInterest) dblInterest
+						, SUM(A.dblInterest) dblInterest						
 						,A.intInvoiceId 
 					FROM
 						tblARPaymentDetail A
@@ -1809,6 +1832,7 @@ IF @recap = 0
 						ON A.intInvoiceId = C.intInvoiceId
 					WHERE
 						A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+						AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARID.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 					GROUP BY
 						A.intInvoiceId
 				) P
@@ -1828,6 +1852,7 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 				
 			UPDATE 
 				tblARInvoice
@@ -1842,6 +1867,7 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId				
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 				
 				
 			UPDATE 
@@ -2044,15 +2070,13 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
-				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount
-				,tblARInvoice.dblDiscountAvailable = ISNULL(tblARInvoice.dblDiscountAvailable,0.00) + P.dblDiscountAvailable
+				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount				
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) + P.dblInterest
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblPayment
 						,SUM(A.dblDiscount) dblDiscount
-						,SUM(A.dblDiscountAvailable) dblDiscountAvailable
 						,SUM(A.dblInterest) dblInterest
 						,A.intInvoiceId 
 					FROM
@@ -2063,11 +2087,12 @@ IF @recap = 0
 						ON A.intInvoiceId = C.intInvoiceId
 					WHERE
 						A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+						AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 					GROUP BY
 						A.intInvoiceId
 				) P
 			WHERE
-				tblARInvoice.intInvoiceId = P.intInvoiceId
+				tblARInvoice.intInvoiceId = P.intInvoiceId				
 				
 				
 			UPDATE 
@@ -2081,7 +2106,8 @@ IF @recap = 0
 			INNER JOIN tblARInvoice C
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
-				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
+				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 					
 				
 			UPDATE 
@@ -2096,7 +2122,8 @@ IF @recap = 0
 			INNER JOIN tblARInvoice C
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
-				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)							
+				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 								
 
 			UPDATE 

@@ -65,6 +65,27 @@ DECLARE @temp_aging_table TABLE(
     ,[strSalespersonName]		NVARCHAR(100)
 )
 
+DECLARE @temp_balanceforward_table TABLE(
+     [strCustomerName]          NVARCHAR(100)
+    ,[strEntityNo]              NVARCHAR(100)
+    ,[intEntityCustomerId]      INT
+    ,[dblCreditLimit]			NUMERIC(18,6)
+    ,[dblTotalAR]               NUMERIC(18,6)
+    ,[dblFuture]                NUMERIC(18,6)
+    ,[dbl0Days]                 NUMERIC(18,6)
+    ,[dbl10Days]                NUMERIC(18,6)
+    ,[dbl30Days]                NUMERIC(18,6)
+    ,[dbl60Days]                NUMERIC(18,6)
+    ,[dbl90Days]                NUMERIC(18,6)
+    ,[dbl91Days]                NUMERIC(18,6)
+    ,[dblTotalDue]              NUMERIC(18,6)
+    ,[dblAmountPaid]            NUMERIC(18,6)
+    ,[dblCredits]               NUMERIC(18,6)
+    ,[dblPrepaids]              NUMERIC(18,6)
+    ,[dtmAsOfDate]              DATETIME
+    ,[strSalespersonName]		NVARCHAR(100)
+)
+
 DECLARE @temp_statement_table TABLE(
      [intEntityCustomerId]  INT
     ,[strCustomerNumber]	NVARCHAR(100)
@@ -147,7 +168,10 @@ BEGIN
 END
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo
+
+INSERT INTO @temp_balanceforward_table
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateFrom
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -196,13 +220,38 @@ FROM vyuARCustomer C
 
 IF ISNULL(@filter,'') != ''
 BEGIN
-	SET @query = @query + ' WHERE dblBalance IS NOT NULL AND ' + @filter
+	SET @query = @query + ' WHERE ' + @filter
 END
 
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
+INSERT INTO @temp_statement_table(
+	  intEntityCustomerId
+	, strCustomerName
+	, strCustomerNumber
+	, strTransactionType
+	, dblCreditLimit
+	, dtmDate
+	, intInvoiceId
+	, dblBalance
+	, dblPayment
+)
+SELECT
+	  B.intEntityCustomerId
+	, B.strCustomerName
+	, B.strEntityNo
+	, 'Balance Forward'
+	, B.dblCreditLimit
+	, @dtmDateFrom
+	, 0
+	, B.dblTotalAR
+	, 0
+FROM @temp_balanceforward_table B
+	WHERE B.intEntityCustomerId IN (SELECT DISTINCT intEntityCustomerId FROM @temp_statement_table)
+
 SELECT STATEMENTREPORT.*
+	  ,dblTotalAR			= ISNULL(AGINGREPORT.dblTotalAR, 0)
       ,dblCreditAvailable   = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
       ,dbl0Days             = ISNULL(AGINGREPORT.dbl0Days, 0)
       ,dbl10Days            = ISNULL(AGINGREPORT.dbl10Days, 0)
@@ -214,6 +263,6 @@ SELECT STATEMENTREPORT.*
       ,dtmAsOfDate          = @dtmDateTo
       ,blbLogo              = dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
-LEFT JOIN @temp_aging_table AS AGINGREPORT 
+LEFT JOIN @temp_aging_table AS AGINGREPORT
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-WHERE ISNULL(dblTotalAR, 0) <> 0
+WHERE ISNULL(AGINGREPORT.dblTotalAR, 0) <> 0

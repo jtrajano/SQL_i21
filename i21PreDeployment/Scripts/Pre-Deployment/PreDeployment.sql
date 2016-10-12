@@ -62,6 +62,7 @@
 :r .\7_AR\2_DropTableScript.sql
 :r .\7_AR\3_FixARTransactionsAccounts.sql
 :r .\7_AR\4_InvoicePaymentMethodCleanUp.sql
+:r .\7_AR\5_InvoiceCurrencyCleanUp.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql
@@ -93,7 +94,6 @@
 :r .\10_RPT\1_1430_to_1430.sql
 
 -- IC
-:r .\11_IC\1610_to_1620.sql
 :r .\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql
 :r .\11_IC\01_Delete_Charges_No_Shipment.sql
 
@@ -156,6 +156,9 @@
 :r .\21_PAT\1_StaticTable.sql
 :r .\21_PAT\2_AddTransferType.sql
 :r .\21_PAT\3_MigrateDataChanges.sql
+
+--PR
+:r .\21_PR\1_1620_to_1630.sql
 
 --EM
 

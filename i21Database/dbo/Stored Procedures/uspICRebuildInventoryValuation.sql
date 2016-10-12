@@ -165,6 +165,22 @@ BEGIN
 			AND ActualCostCostBucket.intItemId = ISNULL(@intItemId, ActualCostCostBucket.intItemId) 
 END 
 
+-- Restore the original costs
+BEGIN 
+	UPDATE	CostBucket
+	SET		dblCost = CostAdjustment.dblCost
+	FROM	dbo.tblICInventoryLotCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+			INNER JOIN dbo.tblICInventoryLot CostBucket
+				ON CostBucket.intInventoryLotId = CostAdjustment.intInventoryLotId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
+			AND CostAdjustment.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+END 
+
 -- Clear the cost adjustments
 BEGIN 
 	DELETE	CostAdjustment
@@ -290,6 +306,30 @@ BEGIN
 				, @dtmStartDate
 			) = 1
 			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	-- Backup the created dates. 
+	BEGIN 
+		IF OBJECT_ID('tblICInventoryTransaction_BackupCreatedDate') IS NOT NULL 
+		BEGIN 
+			DROP TABLE tblICInventoryTransaction_BackupCreatedDate
+		END 	
+
+		SELECT	DISTINCT 
+				t.strBatchId 
+				,t.dtmCreated
+		INTO	tblICInventoryTransaction_BackupCreatedDate
+		FROM	tblICInventoryTransaction t 
+				CROSS APPLY (
+					SELECT	TOP 1 *
+					FROM	tblICInventoryTransaction 
+					WHERE	strBatchId = t.strBatchId
+				) result
+		WHERE	dbo.fnDateGreaterThanEquals(
+					CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
+					, @dtmStartDate
+				) = 1
+				AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+	END 
 
 	-- Intialize #tmpICInventoryTransaction
 	SELECT	id = CAST(0 AS INT) 
@@ -606,7 +646,7 @@ BEGIN
 			-- Process the cost adjustments
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment'))
 			BEGIN 
-				PRINT 'Reposting Cost Adjustments'
+				PRINT 'Reposting Cost Adjustments: ' + @strTransactionId
 				
 				-- uspICRepostCostAdjustment creates and posts it own g/l entries 
 				EXEC dbo.uspICRepostCostAdjustment
@@ -1666,6 +1706,18 @@ BEGIN
 	WHERE ysnIsUnposted = 0	
 	GROUP BY intAccountId, dtmDate, strCode
 END
+
+-- Restore the created dates
+BEGIN 
+	IF OBJECT_ID('tblICInventoryTransaction_BackupCreatedDate') IS NOT NULL 
+	BEGIN 
+		UPDATE	t
+		SET		t.dtmCreated = t_CreatedDate.dtmCreated
+		FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransaction_BackupCreatedDate t_CreatedDate
+					ON t.strBatchId = t_CreatedDate.strBatchId				
+	END 
+END 
+
 
 -- Compare the snapshot of the gl entries 
 BEGIN

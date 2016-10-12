@@ -64,7 +64,9 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 		AND [dtmStartDate] = @dtmStartDate AND [dtmEndDate] = @dtmEndDate) 
 			BEGIN
 				SELECT @strCommissionSchedule = strCommissionScheduleName FROM tblARCommissionSchedule WHERE intCommissionScheduleId IN (SELECT intCommissionScheduleId FROM @tmpCommissionSchedule) 
-				RAISERROR(120074, 16, 1, @strCommissionSchedule)
+				DECLARE @formatMessage AS NVARCHAR(200)				
+				SET @formatMessage = 'Commission Schedule ''' + @strCommissionSchedule  + ''' was already calculated for this date.'
+				RAISERROR(@formatMessage, 16, 1);	
 				RETURN 0;
 			END
 	END

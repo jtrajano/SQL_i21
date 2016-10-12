@@ -14,13 +14,12 @@ AS
 		AND tblPatch.intItemLocationId = tblICItemLocation.intItemLocationId
 		AND ysnLockedInventory <> @ysnLock*/
 
-	UPDATE tblICItemLocation
-	SET ysnLockedInventory = @ysnLock
-	FROM tblICItemLocation ItemLocation
-	LEFT JOIN tblICInventoryCount InvCount
-	ON InvCount.intInventoryCountId = @intInventoryCountId AND InvCount.intLocationId = ItemLocation.intLocationId
-	LEFT JOIN tblICInventoryCountDetail InvCountDetail
-	ON InvCountDetail.intItemId = ItemLocation.intItemId
+	UPDATE il SET il.ysnLockedInventory = @ysnLock
+	FROM tblICItemLocation il
+		INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
+		INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
+			AND il.intItemId = icd.intItemId
+	WHERE ic.intInventoryCountId = @intInventoryCountId
 
 
 	UPDATE tblICInventoryCount

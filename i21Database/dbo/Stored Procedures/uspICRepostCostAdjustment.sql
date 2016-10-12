@@ -63,15 +63,48 @@ END
 
 -- Generate a new cost adjustment 
 BEGIN 		
-	DELETE FROM @adjustedEntries
+	-- CLEAR THE G/L ENTRIES ON THE BILL
+	DELETE	FROM tblGLDetail 
+	WHERE	strBatchId = @strBatchId
+			AND strTransactionId = @strBillId
+			AND strCode <> 'AP'
+
+	-- Delete the inventory transaction records
+	DELETE	t 
+	FROM	tblICInventoryTransaction t 
+	WHERE	t.strTransactionId = @strBillId
+			AND t.strBatchId = @strBatchId
 		
-	INSERT INTO @adjustedEntries
+	INSERT INTO @adjustedEntries (
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[intCostUOMId] 
+		,[dblVoucherCost] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[intSourceTransactionDetailId]
+		,[strSourceTransactionId]	
+	)
 	SELECT
 			[intItemId]							=	B.intItemId
 			,[intItemLocationId]				=	D.intItemLocationId
 			,[intItemUOMId]						=   itemUOM.intItemUOMId
 			,[dtmDate] 							=	A.dtmDate
-			,[dblQty] 							=	B.dblQtyReceived
+			,[dblQty] 							=	CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 			,[dblUOMQty] 						=	itemUOM.dblUnitQty
 			,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
 			,[dblVoucherCost] 					=	B.dblCost 
@@ -115,7 +148,7 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustedEntries)
 	BEGIN
-		INSERT INTO @billGLEntries
+		INSERT INTO @billGLEntries 
 		EXEC uspICPostCostAdjustment 
 			@adjustedEntries
 			, @strBatchId

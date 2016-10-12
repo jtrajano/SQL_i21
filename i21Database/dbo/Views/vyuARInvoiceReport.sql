@@ -49,9 +49,10 @@ SELECT INV.intInvoiceId
 	 , strItemNo				= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN I.strItemNo ELSE NULL END
 	 , ID.intInvoiceDetailId
 	 , dblContractBalance		= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
-									CASE WHEN ID.dblContractBalance = 0 THEN NULL ELSE ID.dblContractBalance END
+									CASE WHEN ID.dblContractBalance = 0 THEN CD.dblBalance ELSE ID.dblContractBalance END
 								  ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END				
+	 , strItem					= CASE WHEN ISNULL(I.strItemNo, '') = '' THEN ID.strItemDescription ELSE LTRIM(RTRIM(I.strItemNo)) + ' - ' + ISNULL(ID.strItemDescription, '') END
 	 , strItemDescription		= ID.strItemDescription
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped			= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
@@ -88,10 +89,11 @@ LEFT JOIN (tblARInvoiceDetail ID
 	LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 	LEFT JOIN tblARInvoiceDetailTax IDT ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId 
 									   AND ID.intItemId <> ISNULL((SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference), 0)
-									   AND IDT.dblAdjustedTax <> 0.000000
+									   AND IDT.dblAdjustedTax <> 0
 	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
-	LEFT JOIN tblMFRecipe MFR ON ID.intRecipeId = MFR.intRecipeId) ON INV.intInvoiceId = ID.intInvoiceId
+	LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMFRecipe MFR ON ID.intRecipeId = MFR.intRecipeId) ON INV.intInvoiceId = ID.intInvoiceId	
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId

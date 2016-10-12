@@ -97,7 +97,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, dblUnitPrice = ISNULL(dblSeqPrice, 0)
 		, dblDiscount = 0
 		, dblTotal = 0
-		, dblQtyToShip = ISNULL(dblDetailQuantity, 0)
+		, dblQtyToShip = ISNULL(dblAvailableQty, 0)
 		, dblPrice = ISNULL(dblSeqPrice, 0)
 		, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblSeqPrice, 0)
 		, intGradeId = NULL
@@ -105,6 +105,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 	FROM vyuCTContractDetailView ContractView
 	WHERE ysnAllowedToShow = 1
 		AND strContractType = 'Sale'
+		AND dblAvailableQty > 0
 		
 	UNION ALL 
 
@@ -145,7 +146,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, dblUnitPrice = ISNULL(dblCashPrice, 0)
 		, dblDiscount = 0
 		, dblTotal = 0
-		, dblQtyToShip = ISNULL(dblDetailQuantity, 0)
+		, dblQtyToShip = ISNULL(dblAvailableQty, 0)
 		, dblPrice = ISNULL(dblCashPrice, 0)
 		, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblCashPrice, 0)
 		, intGradeId = NULL

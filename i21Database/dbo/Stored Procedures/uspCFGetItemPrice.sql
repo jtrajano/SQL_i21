@@ -1186,7 +1186,9 @@ BEGIN
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
 										AND IPH.intSiteGroupId = @CFSiteGroupId
-										AND IPD.intARItemID = @CFItemId)
+										AND IPD.intARItemID = @CFItemId
+										AND IPH.dtmDate <= @CFTransactionDate 
+										ORDER BY IPH.dtmDate DESC)
 
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
@@ -1218,7 +1220,9 @@ BEGIN
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
 										AND IPH.intSiteGroupId = @CFSiteGroupId
-										AND IPD.intARItemID = @CFItemId)
+										AND IPD.intARItemID = @CFItemId
+										AND IPH.dtmDate <= @CFTransactionDate 
+										ORDER BY IPH.dtmDate DESC)
 
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
@@ -1284,7 +1288,9 @@ BEGIN
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
 										AND IPH.intSiteGroupId = @CFSiteGroupId
-										AND IPD.intARItemID = @CFItemId)
+										AND IPD.intARItemID = @CFItemId
+										AND IPH.dtmDate <= @CFTransactionDate 
+										ORDER BY IPH.dtmDate DESC)
 
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN

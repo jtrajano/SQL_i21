@@ -36,7 +36,7 @@ BEGIN
 
 		SELECT @strTransactionId = strTransactionId FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
 
-		EXEC uspCMPostBankDeposit @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId, @isSuccessful OUTPUT
+		EXEC uspCMPostBankDeposit @ysnPost, @ysnRecap, @strTransactionId, @BatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN
@@ -65,7 +65,7 @@ BEGIN
 
 		SELECT @strTransactionId = strTransactionId FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
 
-		EXEC uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, '', @intUserId, @intEntityId, @isSuccessful OUTPUT
+		EXEC uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @BatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN
@@ -94,7 +94,7 @@ BEGIN
 
 		SELECT @strTransactionId = strTransactionId FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
 
-		EXEC uspCMPostMiscChecks @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId, @isSuccessful OUTPUT
+		EXEC uspCMPostMiscChecks @ysnPost, @ysnRecap, @strTransactionId, @BatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN
@@ -123,7 +123,7 @@ BEGIN
 
 		SELECT @strTransactionId = strTransactionId FROM tblCMBankTransfer WHERE intTransactionId = @intTransactionId
 
-		EXEC uspCMPostBankTransfer @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId, @isSuccessful OUTPUT
+		EXEC uspCMPostBankTransfer @ysnPost, @ysnRecap, @strTransactionId, @BatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN

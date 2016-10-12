@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspCMAddPayment
+﻿CREATE PROCEDURE uspCMAddPayment
 	@intBankAccountId INT
 	,@dtmDate DATETIME 
 	,@intGLAccountId INT	
@@ -88,7 +87,9 @@ INSERT INTO tblCMBankTransaction(
 	,strLink
 	,ysnClr
 	,dtmDateReconciled
+	,intEntityId
 	,intCreatedUserId
+	,intCompanyLocationId
 	,dtmCreated
 	,intLastModifiedUserId
 	,dtmLastModified
@@ -97,7 +98,7 @@ INSERT INTO tblCMBankTransaction(
 SELECT	strTransactionId			= @strTransactionId
 		,intBankTransactionTypeId	= @BANK_TRANSACTION
 		,intBankAccountId			= @intBankAccountId
-		,intCurrencyId				= NULL
+		,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId)
 		,dblExchangeRate			= 1
 		,dtmDate					= @dtmDate
 		,strPayee					= ''
@@ -118,7 +119,9 @@ SELECT	strTransactionId			= @strTransactionId
 		,strLink					= ''
 		,ysnClr						= 0
 		,dtmDateReconciled			= NULL
+		,intEntityId				= @intUserId
 		,intCreatedUserId			= @intUserId
+		,intCompanyLocationId		= (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId)
 		,dtmCreated					= GETDATE()
 		,intLastModifiedUserId		= @intUserId
 		,dtmLastModified			= GETDATE()
@@ -172,6 +175,8 @@ BEGIN TRY
 	GOTO uspCMAddPayment_Commit
 END TRY
 BEGIN CATCH
+	DECLARE @ErrorMessage NVARCHAR(MAX), @ErrorSeverity INT, @ErrorState INT;
+    SELECT @ErrorMessage = ERROR_MESSAGE(), @ErrorSeverity = ERROR_SEVERITY(), @ErrorState = ERROR_STATE();
 	GOTO uspCMAddPayment_Rollback
 END CATCH
 
@@ -186,5 +191,6 @@ uspCMAddPayment_Commit:
 uspCMAddPayment_Rollback:
 	SET @isAddSuccessful = 0
 	ROLLBACK TRANSACTION 
+	RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
 
 uspCMAddPayment_Exit:

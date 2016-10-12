@@ -67,9 +67,7 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@ACTUALCOST AS INT = 5	
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @AUTO_NEGATIVE AS INT = 1
-		,@WRITE_OFF_SOLD AS INT = 2
-		,@REVALUE_SOLD AS INT = 3
+DECLARE @AUTO_VARIANCE AS INT = 1
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
@@ -652,7 +650,7 @@ BEGIN
 				,[intTransactionId]						= @intTransactionId
 				,[strTransactionId]						= @strTransactionId
 				,[strBatchId]							= @strBatchId
-				,[intTransactionTypeId]					= @AUTO_NEGATIVE
+				,[intTransactionTypeId]					= @AUTO_VARIANCE
 				,[intLotId]								= NULL 
 				,[ysnIsUnposted]						= 0
 				,[intRelatedInventoryTransactionId]		= NULL 
@@ -685,6 +683,128 @@ BEGIN
 	END 
 END
 
+---------------------------------------------------------------------------------------
+-- Make sure valuation is zero if stock is going to be zero. 
+---------------------------------------------------------------------------------------
+BEGIN 
+	DECLARE @ItemsWithZeroStock AS ItemCostingZeroStockTableType
+			,@currentItemValue AS NUMERIC(38, 20)
+
+	-- Get the qualified items for auto-negative. 
+	INSERT INTO @ItemsWithZeroStock (
+			intItemId
+			,intItemLocationId
+	)
+	SELECT	DISTINCT 
+			i2p.intItemId
+			,i2p.intItemLocationId
+	FROM	@ItemsToPost i2p INNER JOIN tblICItemStock i
+				on i2p.intItemId = i.intItemId
+				AND i2p.intItemLocationId = i.intItemLocationId			
+	WHERE	dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @AVERAGECOST
+			AND i.dblUnitOnHand = 0 
+
+	SELECT	TOP 1 
+			@intInventoryTransactionId	= intInventoryTransactionId
+			,@intCurrencyId				= intCurrencyId
+			,@dtmDate					= dtmDate
+			,@dblExchangeRate			= dblExchangeRate
+			,@intTransactionId			= intTransactionId
+			,@strTransactionId			= strTransactionId
+			,@strTransactionForm		= strTransactionForm
+			,@intCostingMethod			= intCostingMethod
+	FROM	dbo.tblICInventoryTransaction
+	WHERE	strBatchId = @strBatchId
+			AND ISNULL(ysnIsUnposted, 0) = 0 
+
+	IF EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
+	BEGIN 
+		INSERT INTO dbo.tblICInventoryTransaction (
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[dtmDate]
+					,[dblQty]
+					,[dblUOMQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[ysnIsUnposted]
+					,[intRelatedInventoryTransactionId]
+					,[intRelatedTransactionId]
+					,[strRelatedTransactionId]
+					,[strTransactionForm]
+					,[dtmCreated]
+					,[intCreatedEntityId]
+					,[intConcurrencyId]
+					,[intCostingMethod]
+					,[strDescription]
+			)			
+		SELECT	
+				[intItemId]								= iWithZeroStock.intItemId
+				,[intItemLocationId]					= iWithZeroStock.intItemLocationId
+				,[intItemUOMId]							= NULL 
+				,[intSubLocationId]						= NULL 
+				,[intStorageLocationId]					= NULL 
+				,[dtmDate]								= @dtmDate
+				,[dblQty]								= 0
+				,[dblUOMQty]							= 0
+				,[dblCost]								= 0
+				,[dblValue]								= -currentValuation.floatingValue
+				,[dblSalesPrice]						= 0
+				,[intCurrencyId]						= @intCurrencyId
+				,[dblExchangeRate]						= @dblExchangeRate
+				,[intTransactionId]						= @intTransactionId
+				,[strTransactionId]						= @strTransactionId
+				,[strBatchId]							= @strBatchId
+				,[intTransactionTypeId]					= @AUTO_VARIANCE
+				,[intLotId]								= NULL 
+				,[ysnIsUnposted]						= 0
+				,[intRelatedInventoryTransactionId]		= NULL 
+				,[intRelatedTransactionId]				= NULL 
+				,[strRelatedTransactionId]				= NULL 
+				,[strTransactionForm]					= @strTransactionForm
+				,[dtmCreated]							= GETDATE()
+				,[intCreatedEntityId]					= @intEntityUserSecurityId
+				,[intConcurrencyId]						= 1
+				,[intCostingMethod]						= @intCostingMethod
+				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
+															FORMATMESSAGE(
+															80093
+															,i.strItemNo
+															,cl.strLocationName														
+														)
+		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
+					ON iWithZeroStock.intItemId = iStock.intItemId
+					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId
+				INNER JOIN tblICItem i
+					ON i.intItemId = iWithZeroStock.intItemId
+				INNER JOIN tblICItemLocation il
+					ON il.intItemId = iWithZeroStock.intItemId
+					AND il.intItemLocationId = iWithZeroStock.intItemLocationId
+				INNER JOIN tblSMCompanyLocation cl
+					ON cl.intCompanyLocationId = il.intLocationId
+				OUTER APPLY (
+					SELECT	floatingValue = SUM(
+								ROUND(t.dblQty * t.dblCost + t.dblValue, 2)
+							)
+					FROM	tblICInventoryTransaction t
+					WHERE	t.intItemId = iWithZeroStock.intItemId
+							AND t.intItemLocationId = iWithZeroStock.intItemLocationId
+				) currentValuation
+		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
+	END 
+END 
+
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
@@ -699,11 +819,15 @@ BEGIN
 		WHERE intInTransitSourceLocationId IS NOT NULL 
 	END 
 
-	EXEC dbo.uspICCreateGLEntries 
+	DECLARE @intReturnValue INT
+
+	EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 		@strBatchId
 		,@strAccountToCounterInventory
 		,@intEntityUserSecurityId
 		,@strGLDescription
 		,@intContraInventory_ItemLocationId
+
+	IF @intReturnValue < 0 RETURN -1
 END 
 

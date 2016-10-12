@@ -25,9 +25,12 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @returnValue AS INT 
 
--- Clean-up for the temp table. 
+-- Clean-up for the temp tables. 
 IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
 	DROP TABLE #tmpRevalueProducedItems  
+
+IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevaluedInventoryTransaction')) 
+	DROP TABLE #tmpRevaluedInventoryTransaction
 
 -- Create the temp table if it does not exists. 
 BEGIN 
@@ -39,7 +42,8 @@ BEGIN
 		,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
 		,[dblQty] NUMERIC(38,20) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
 		,[dblUOMQty] NUMERIC(38,20) NOT NULL DEFAULT 1			-- The quantity of an item per UOM. For example, a box can contain 12 individual pieces of an item. 
-		,[dblNewCost] NUMERIC(38,20) NOT NULL DEFAULT 0			-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
+		,[dblNewCost] NUMERIC(38,20) NULL DEFAULT 0				-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
+		,[dblNewValue] NUMERIC(38,20) NULL						-- 
 		,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
 		,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 		,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
@@ -54,6 +58,15 @@ BEGIN
 		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. The integer id of INVRCT-10001 is 1934). 
 		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
+		,[intRelatedInventoryTransactionId] INT NULL 
+	)
+END 
+
+-- Create the temp table if it does not exists. 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevaluedInventoryTransaction')) 
+BEGIN 
+	CREATE TABLE #tmpRevaluedInventoryTransaction (
+		[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED 
 	)
 END 
 
@@ -75,6 +88,7 @@ DECLARE @intId AS INT
 		,@dblQty AS NUMERIC(38,20)
 		,@intCostUOMId AS INT 
 		,@dblVoucherCost AS NUMERIC(38,20)
+		,@dblNewValue AS NUMERIC(38,20)
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT
 		,@strTransactionId AS NVARCHAR(40) 
@@ -85,6 +99,8 @@ DECLARE @intId AS INT
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS NUMERIC(38,20)
 		,@strActualCostId NVARCHAR(50)
+		,@intRelatedInventoryTransactionId INT 
+		,@intLotId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionTypeName AS NVARCHAR(200) 
@@ -121,6 +137,7 @@ BEGIN
 			,[dblUOMQty] 
 			,[intCostUOMId]
 			,[dblVoucherCost] 
+			,[dblNewValue]
 			,[intCurrencyId] 
 			,[dblExchangeRate] 
 			,[intTransactionId]
@@ -134,7 +151,8 @@ BEGIN
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 	
+			,[strSourceTransactionId]
+			,[intRelatedInventoryTransactionId]	
 	)
 	SELECT 
 			[intItemId] 
@@ -145,6 +163,7 @@ BEGIN
 			,[dblUOMQty] 
 			,[intCostUOMId]
 			,[dblVoucherCost] 
+			,[dblNewValue]
 			,[intCurrencyId] 
 			,[dblExchangeRate] 
 			,[intTransactionId]
@@ -158,7 +177,8 @@ BEGIN
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 	 
+			,[strSourceTransactionId] 
+			,[intRelatedInventoryTransactionId]
 	FROM	@ItemsToAdjust
 END 
 
@@ -182,6 +202,7 @@ SELECT  intId
 		,dblQty 
 		,intCostUOMId
 		,dblVoucherCost
+		,dblNewValue
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
@@ -192,6 +213,8 @@ SELECT  intId
 		,intCurrencyId
 		,dblExchangeRate
 		,strActualCostId
+		,intRelatedInventoryTransactionId
+		,intLotId
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -208,6 +231,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@dblQty
 	,@intCostUOMId
 	,@dblVoucherCost
+	,@dblNewValue
 	,@intTransactionId
 	,@intTransactionDetailId
 	,@strTransactionId
@@ -218,6 +242,8 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intCurrencyId
 	,@dblExchangeRate
 	,@strActualCostId
+	,@intRelatedInventoryTransactionId
+	,@intLotId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -257,8 +283,9 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@intCurrencyId
-			,@dblExchangeRate			
+			,@dblExchangeRate
 			,@intEntityUserSecurityId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -287,6 +314,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -315,6 +343,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -332,6 +361,7 @@ BEGIN
 			,@dblQty
 			,@intCostUOMId			
 			,@dblVoucherCost 
+			,@dblNewValue
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -343,6 +373,8 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
+			,@intRelatedInventoryTransactionId
+			,@intLotId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -372,6 +404,7 @@ BEGIN
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
 			,@strActualCostId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -388,6 +421,7 @@ BEGIN
 		,@dblQty
 		,@intCostUOMId
 		,@dblVoucherCost
+		,@dblNewValue
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -398,6 +432,8 @@ BEGIN
 		,@intCurrencyId
 		,@dblExchangeRate
 		,@strActualCostId
+		,@intRelatedInventoryTransactionId
+		,@intLotId
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -431,6 +467,7 @@ BEGIN
 			,strTransactionId
 			,intTransactionTypeId
 			,strActualCostId
+			,intRelatedInventoryTransactionId
 	FROM	@Internal_ItemsToAdjust
 
 	OPEN loopItemsToAdjustForAutoNegative;
@@ -451,6 +488,7 @@ BEGIN
 		,@strTransactionId
 		,@intTransactionTypeId
 		,@strActualCostId
+		,@intRelatedInventoryTransactionId
 	;
 
 	DECLARE @AutoNegativeAmount AS NUMERIC(38, 20)
@@ -504,8 +542,8 @@ BEGIN
 						,@strBatchId							= @strBatchId
 						,@intTransactionTypeId					= @INVENTORY_AUTO_NEGATIVE
 						,@intLotId								= NULL
-						,@intRelatedInventoryTransactionId		= NULL
-						,@intRelatedTransactionId				= NULL
+						,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId
+						,@intRelatedTransactionId				= NULL 
 						,@strRelatedTransactionId				= NULL						
 						,@strTransactionForm					= @TransactionTypeName
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
@@ -529,6 +567,7 @@ BEGIN
 			,@strTransactionId
 			,@intTransactionTypeId
 			,@strActualCostId
+			,@intRelatedInventoryTransactionId
 		;
 	END 
 
@@ -547,7 +586,8 @@ BEGIN
 	-- Clear the contents of the @Internal_ItemsToAdjust table variable. 
 	DELETE FROM @Internal_ItemsToAdjust
 
-	-- Transfer the data from the temp table into @Internal_ItemsToAdjust. These are the 'Produced' items inserted into #tmpRevalueProducedItems by the costing SP's above. (ex: uspICPostCostAdjustmentOnAverageCosting)
+	-- Transfer the data from the temp table into @Internal_ItemsToAdjust. 
+	-- These are the 'Produced' items inserted into #tmpRevalueProducedItems by the costing SP's above. (ex: uspICPostCostAdjustmentOnAverageCosting)
 	INSERT INTO @Internal_ItemsToAdjust (
 			[intItemId] 
 			,[intItemLocationId] 
@@ -557,6 +597,7 @@ BEGIN
 			,[dblUOMQty] 
 			,[intCostUOMId]
 			,[dblVoucherCost] 
+			,[dblNewValue]
 			,[intCurrencyId] 
 			,[dblExchangeRate] 
 			,[intTransactionId]
@@ -570,7 +611,8 @@ BEGIN
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 		
+			,[strSourceTransactionId]
+			,[intRelatedInventoryTransactionId]
 	)
 	SELECT 
 			[intItemId] 
@@ -581,6 +623,7 @@ BEGIN
 			,[dblUOMQty] 
 			,[intItemUOMId] -- Use the cost bucket item uom id as the Cost UOM id. 
 			,[dblNewCost] 
+			,[dblNewValue]
 			,[intCurrencyId] 
 			,[dblExchangeRate] 
 			,[intTransactionId]
@@ -594,7 +637,8 @@ BEGIN
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 	
+			,[strSourceTransactionId] 
+			,[intRelatedInventoryTransactionId]
 	FROM	#tmpRevalueProducedItems
 
 	-- Clear the contents of the temp table.
@@ -610,3 +654,4 @@ END
 EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 	@strBatchId
 	,@intEntityUserSecurityId
+

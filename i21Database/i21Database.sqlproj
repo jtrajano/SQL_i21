@@ -2066,7 +2066,7 @@
     <Build Include="dbo\Stored Procedures\uspSTInventoryMassUpdate.sql" />
     <Build Include="dbo\Tables\tblAROriginCompanies.sql" />
     <Build Include="dbo\User Defined Types\ReceiptOtherChargesTableType.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Views\vyuMFInventoryView.sql" />
     <Build Include="dbo\Views\vyuAPChargesForBilling.sql" />
     <Build Include="dbo\Functions\fnCTGetContractStatuses.sql" />
@@ -2450,7 +2450,9 @@
     <Build Include="dbo\Tables\tblICInventoryCostAdjustmentType.sql" />
     <None Include="Scripts\Post-Deployment\IC\15_InventoryCostAdjustmentTypes.sql" />
     <Build Include="dbo\Functions\fnCalculateAverageCostAfterCostAdj.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustment.sql">
+      <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Functions\fnICGetRunningBalance.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
@@ -3167,7 +3169,6 @@
     <Build Include="dbo\Functions\fnPOIsProcessed.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
     <Build Include="dbo\Views\vyuARBatchPostingTransaction.sql" />
-    <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDuplicateDevice.sql" />
     <Build Include="dbo\Views\vyuCFSiteItem.sql" />
     <Build Include="dbo\Views\vyuCFInvoice.sql" />
@@ -4361,6 +4362,64 @@
     <Build Include="dbo\Views\vyuRKGetBrokerList.sql" />
     <Build Include="dbo\Tables\tblVTVeterinary.sql" />
     <Build Include="dbo\Stored Procedures\uspMBOnDeleteMeterReading.sql" />
+    <Build Include="dbo\Views\vyuAPRptWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRShipped.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBeforePostInventoryShipmentIntegration.sql" />
+    <Build Include="dbo\Views\vyuARCustomerItemPricing.sql" />
+    <Build Include="dbo\Views\vyuARBEExportCustomerAccounting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICTMExportProducts.sql" />
+    <Build Include="dbo\Views\vyuARCommissionRecap.sql" />
+    <Build Include="dbo\Views\vyuARCommissionDetailRecap.sql" />
+    <Build Include="dbo\Views\vyuTMBEExportAssetAct.sql" />
+    <Build Include="dbo\Views\vyuSMBEExportTax.sql" />
+    <Build Include="dbo\Views\vyuSMBEExportTaxCode.sql" />
+    <Build Include="dbo\Tables\tblARPricingHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateTransferOrderStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePricingHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnshipInventoryItem.sql" />
+    <Build Include="dbo\Views\vyuARImportLog.sql" />
+    <Build Include="dbo\User Defined Types\TMGPSUpdateTable.sql" />
+    <Build Include="dbo\Tables\tblETImportBaseEngineering.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPS.sql" />
+    <Build Include="dbo\Stored Procedures\uspETImportBaseEngineeringToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMBEExportPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPaymentCSV.sql" />
+    <Build Include="dbo\Views\vyuICTMProductPricing.sql" />
+    <Build Include="dbo\Views\vyuTMBEExportPrice.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
+    <Build Include="dbo\Views\vyuLGStockSaleSearch.sql" />
+    <Build Include="dbo\Views\vyuLGStockSalesAllocation.sql" />
+    <Build Include="dbo\Views\vyuEMEntityVendorApproval.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
+    <Build Include="dbo\Views\vyuLGDeliveredNotInvoiced.sql" />
+    <Build Include="dbo\Views\vyuLGStockSaleSamples.sql" />
+    <Build Include="dbo\vyuARTaxDetailReport.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentChargePerItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentSurchargeOnOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblARLetterPlaceHolder.sql" />
+    <Build Include="dbo\User Defined Types\PlaceHolderTable.sql" />
+    <Build Include="dbo\Functions\fnARRemoveWhiteSpace.sql" />
+    <Build Include="dbo\Functions\fnARConvertLetterMessage.sql" />
+    <Build Include="dbo\Functions\fnARGetRowsFromDelimitedValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCollectionLetter.sql" />
+    <Build Include="dbo\Views\vyuARCollectionCreditViewReport.sql" />
+    <Build Include="dbo\Views\vyuARCollectionOverdueReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\23_AddDefaultCollectionLetters.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
+    <Build Include="dbo\Views\vyuARCustomerContract.sql" />
+    <Build Include="dbo\Functions\fnARRemoveSpecialChars.sql" />
+    <Build Include="dbo\Functions\fnARSplitValues.sql" />
+    <Build Include="dbo\User Defined Types\ItemCostingZeroStockTableType.sql" />
+    <None Include="Scripts\Post-Deployment\IC\1620_to_1630.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMInspectionDeleteResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentAndCreditMemo.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetContractQualityColumns.sql" />
+    <Build Include="dbo\Views\vyuHDCustomerContactList.sql" />
+    <Build Include="dbo\Functions\fnSCCalculateDiscount.sql" />
     <Build Include="dbo\Views\vyuCTInventoryItem.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -4488,6 +4547,8 @@
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\2_ElectronicFileFormats.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
+    <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

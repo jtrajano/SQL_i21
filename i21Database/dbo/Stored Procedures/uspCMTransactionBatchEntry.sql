@@ -32,6 +32,8 @@ DECLARE @intTransactionId INT
 		,@dblCredit DECIMAL(18,6)
 		,@strRowState NVARCHAR(20)
 		,@intConcurrencyId INT
+		,@detailCount INT
+
 
 SELECT  *
 INTO	#tmpBankTransactionBatchDetailEntries
@@ -41,6 +43,23 @@ FROM @BankTransactionBatchDetailEntries
 
 	IF @transactionType <> 'Bank Transfer'
 	BEGIN 
+		
+		--Update transaction header if the changes happens in batch header only (meaning no detail was sent upon request)
+		SELECT @detailCount = COUNT(intTransactionId) FROM #tmpBankTransactionBatchDetailEntries
+		IF @detailCount = 0
+		BEGIN
+			UPDATE [dbo].[tblCMBankTransaction]
+					SET [intBankAccountId] = @intBankAccountId
+						,[intCurrencyId] = @intCurrencyId
+						,[dtmDate] = @dtmBatchDate
+						,[strMemo] = @strDescription
+						,[intCompanyLocationId] = @intCompanyLocationId
+						,[intLastModifiedUserId] = @intEntityUserId
+						,[dtmLastModified] = GETDATE()
+						,[intConcurrencyId] = intConcurrencyId + 1
+					WHERE intTransactionId IN (SELECT intTransactionId FROM tblCMBankTransaction WHERE strLink = @strBankTransactionBatchId AND intBankTransactionTypeId = @intBankTransactionTypeId)
+		END
+
 	
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpBankTransactionBatchDetailEntries) -- ORDER BY intTransactionId DESC)
 		BEGIN
@@ -238,6 +257,7 @@ FROM @BankTransactionBatchDetailEntries
 			DELETE FROM #tmpBankTransactionBatchDetailEntries WHERE intTransactionId =  @intTransactionId
 
 		END
+
 	END
 	--ELSE
 	--BEGIN
@@ -297,3 +317,5 @@ FROM @BankTransactionBatchDetailEntries
 -- 	EXIT ROUTINES 
 ---------------------------------------------------------------------------------------------------------------------------------------
 Exit_Procedure:
+
+

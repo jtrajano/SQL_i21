@@ -114,6 +114,8 @@ BEGIN
 			,intDockDoorId
 			,strNotes
 			,intSort
+			,intOwnershipType 
+			,intCustomerStorageId
 			,intConcurrencyId
 	)
 	SELECT			
@@ -129,6 +131,8 @@ BEGIN
 			,intDockDoorId			= NULL
 			,strNotes				= SODetail.strComments
 			,intSort				= SODetail.intSalesOrderDetailId
+			,intOwnershipType		= CASE WHEN SODetail.intStorageScheduleTypeId = NULL THEN 1 ELSE 2 END
+			,intCustomerStorageId	= SODetail.intCustomerStorageId
 			,intConcurrencyId		= 1
 	FROM	dbo.tblSOSalesOrderDetail SODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
 				ON ItemUOM.intItemId = SODetail.intItemId
@@ -142,3 +146,8 @@ BEGIN
 			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
 			AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0
 END 
+
+-- Increase Item Stock Reservation
+BEGIN
+	EXEC dbo.uspICReserveStockForInventoryShipment @intTransactionId = @InventoryShipmentId
+END

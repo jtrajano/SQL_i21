@@ -13,6 +13,8 @@
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@RefreshPrice					BIT				= 0
@@ -51,6 +53,7 @@
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL	
 	,@ItemCustomerStorageId			INT				= NULL		
+	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
@@ -64,8 +67,9 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
-	,@SubCurrency					BIT				= 0
-	,@ItemIsBlended					BIT				= 0
+	,@ItemSubCurrencyId				INT				= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
+	,@ItemIsBlended					BIT				= 0	
 AS
 
 BEGIN
@@ -80,9 +84,8 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@EntityCustomerId		INT
 		,@CompanyLocationId		INT
 		,@InvoiceDate			DATETIME
-		,@TermDiscount			NUMERIC(18, 6)
-		,@SubCurrencyCents		INT
 		,@existingInvoiceDetail INT
+		,@CurrencyId			INT
 
 SET @ZeroDecimal = 0.000000
 
@@ -97,7 +100,7 @@ SELECT
 	 @EntityCustomerId	= [intEntityCustomerId]
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
-	,@SubCurrencyCents	= ISNULL([intSubCurrencyCents], 1)
+	,@CurrencyId		= [intCurrencyId]
 FROM
 	tblARInvoice
 WHERE
@@ -153,7 +156,8 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			,@ContractDetailId			= @ItemContractDetailId	OUTPUT
 			,@ContractNumber			= @ContractNumber		OUTPUT
 			,@ContractSeq				= @ContractSeq			OUTPUT
-			,@TermDiscount				= @TermDiscount			OUTPUT
+			,@TermDiscount				= @ItemTermDiscount		OUTPUT
+			,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT
 			--,@AvailableQuantity			= NULL OUTPUT
 			--,@UnlimitedQuantity			= 0    OUTPUT
 			--,@OriginalQuantity			= NULL
@@ -192,7 +196,7 @@ BEGIN TRY
 			WHERE intInvoiceDetailId = @existingInvoiceDetail
 		END
 	ELSE
-		BEGIN
+		BEGIN		
 			INSERT INTO [tblARInvoiceDetail]
 				([intInvoiceId]
 				,[intItemId]
@@ -206,11 +210,13 @@ BEGIN TRY
 				,[dblQtyShipped]
 				,[dblDiscount]
 				,[dblItemTermDiscount]
+				,[strItemTermDiscountBy]
 				,[dblPrice]
 				,[strPricing]
 				,[dblTotalTax]
 				,[dblTotal]
-				,[ysnSubCurrency]
+				,[intSubCurrencyId]
+				,[dblSubCurrencyRate]
 				,[ysnBlended]
 				,[intAccountId]
 				,[intCOGSAccountId]
@@ -263,7 +269,8 @@ BEGIN TRY
 				,[intPerformerId]
 				,[ysnLeaseBilling]
 				,[ysnVirtualMeterReading]
-				,[intEntitySalespersonId]				
+				,[intEntitySalespersonId]
+				,[intStorageScheduleTypeId]				
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -277,12 +284,14 @@ BEGIN TRY
 				,[intItemUOMId]						= ISNULL(ISNULL(@ItemUOMId, IL.intIssueUOMId), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = IC.[intItemId] ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
-				,[dblItemTermDiscount]				= ISNULL(@TermDiscount, @ZeroDecimal)
-				,[dblPrice]							= (CASE WHEN (ISNULL(@SubCurrency,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @SubCurrency ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
+				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
+				,[strItemTermDiscountBy]			= @ItemTermDiscountBy
+				,[dblPrice]							= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
 				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
-				,[ysnSubCurrency]					= @SubCurrency
+				,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
+				,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 				,[ysnBlended]						= @ItemIsBlended
 				,[intAccountId]						= Acct.[intAccountId] 
 				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
@@ -336,6 +345,7 @@ BEGIN TRY
 				,[ysnLeaseBilling]					= @ItemLeaseBilling
 				,[ysnVirtualMeterReading]			= @ItemVirtualMeterReading
 				,[intEntitySalespersonId]			= @EntitySalespersonId
+				,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
 				,[intConcurrencyId]					= 0
 			FROM
 				tblICItem IC
