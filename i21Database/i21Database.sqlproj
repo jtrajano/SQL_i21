@@ -4402,6 +4402,10 @@
     <Build Include="dbo\Stored Procedures\uspICGetItemInTransitLocation.sql" />
     <Build Include="dbo\Views\vyuICItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInTransitCosting.sql" />
+    <Build Include="dbo\User Defined Types\ItemInTransitCostingTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLotInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostActualCostInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForInTransitCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

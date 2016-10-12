@@ -21,7 +21,7 @@
 	@intEntityUserSecurityId - The user who is initiating the post. 
 */
 CREATE PROCEDURE [dbo].[uspICPostInTransitCosting]
-	@ItemsToPost AS ItemCostingTableType READONLY
+	@ItemsToPost AS ItemInTransitCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
@@ -52,10 +52,11 @@ DECLARE @intId AS INT
 		,@strTransactionId AS NVARCHAR(40) 
 		,@intTransactionTypeId AS INT 
 		,@intLotId AS INT
-		,@intSubLocationId AS INT
-		,@intStorageLocationId AS INT 
-		,@strActualCostId AS NVARCHAR(50)
-
+		,@intSourceTransactionId AS INT
+		,@intSourceTransactionDetailId AS INT 
+		,@strSourceTransactionId AS NVARCHAR(40)
+		,@intFobPointId AS INT 
+		
 		,@intInventoryTransactionId INT 
 		,@strTransactionForm AS NVARCHAR(255)
 
@@ -75,14 +76,14 @@ DECLARE @AUTO_VARIANCE AS INT = 1
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	DECLARE @returnValue AS INT 
+--BEGIN 
+--	DECLARE @returnValue AS INT 
 
-	EXEC @returnValue = dbo.uspICValidateCostingOnPost
-		@ItemsToValidate = @ItemsToPost
+--	EXEC @returnValue = dbo.uspICValidateCostingOnPost
+--		@ItemsToValidate = @ItemsToPost
 
-	IF @returnValue < 0 RETURN -1;
-END
+--	IF @returnValue < 0 RETURN -1;
+--END
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor
@@ -108,9 +109,10 @@ SELECT  intId
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		,strActualCostId
+		,intSourceTransactionId
+		,intSourceTransactionDetailId
+		,strSourceTransactionId
+		,intFobPointId
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -125,7 +127,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblQty
 	,@dblUOMQty
 	,@dblCost
-	,@dblSalesPrice
+	,@dblSalesPrice 
 	,@intCurrencyId
 	,@dblExchangeRate
 	,@intTransactionId
@@ -133,9 +135,11 @@ FETCH NEXT FROM loopItems INTO
 	,@strTransactionId
 	,@intTransactionTypeId
 	,@intLotId
-	,@intSubLocationId
-	,@intStorageLocationId
-	,@strActualCostId;
+	,@intSourceTransactionId
+	,@intSourceTransactionDetailId
+	,@strSourceTransactionId
+	,@intFobPointId
+;
 	
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -149,11 +153,8 @@ BEGIN
 	WHERE	intTransactionTypeId = @intTransactionTypeId
 			AND strTransactionForm IS NOT NULL 
 
-	-- Initialize the dblUOMQty
-	SELECT	@dblUOMQty = dblUnitQty
-	FROM	dbo.tblICItemUOM
-	WHERE	intItemId = @intItemId
-			AND intItemUOMId = @intItemUOMId
+	-- Get the correct item location 
+	EXEC uspICGetItemInTransitLocation @intItemId, NULL, @intItemLocationId OUTPUT 
 
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the In-Transit Costing 
@@ -161,12 +162,10 @@ BEGIN
 	-- LOT 
 	IF @intLotId IS NOT NULL 
 	BEGIN 
-		EXEC dbo.uspICPostLot
+		EXEC dbo.uspICPostLotInTransit
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
-			,@intSubLocationId
-			,@intStorageLocationId
 			,@dtmDate
 			,@intLotId
 			,@dblQty
@@ -181,19 +180,19 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intEntityUserSecurityId;
+			,@intEntityUserSecurityId
+			,@intFobPointId
+			;
 	END
 
 	-- ACTUAL COST 
 	ELSE 
 	BEGIN 
-		EXEC dbo.uspICPostActualCost
-			@strActualCostId 
+		EXEC dbo.uspICPostActualCostInTransit
+			@strSourceTransactionId -- @strActualCostId 
 			,@intItemId 
 			,@intItemLocationId 
 			,@intItemUOMId 
-			,@intSubLocationId 
-			,@intStorageLocationId 
 			,@dtmDate 
 			,@dblQty 
 			,@dblUOMQty 
@@ -208,9 +207,9 @@ BEGIN
 			,@intTransactionTypeId 
 			,@strTransactionForm 
 			,@intEntityUserSecurityId 
+			,@intFobPointId
 			;
 	END 
-
 
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO 
@@ -222,7 +221,7 @@ BEGIN
 		,@dblQty
 		,@dblUOMQty
 		,@dblCost
-		,@dblSalesPrice
+		,@dblSalesPrice 
 		,@intCurrencyId
 		,@dblExchangeRate
 		,@intTransactionId
@@ -230,9 +229,10 @@ BEGIN
 		,@strTransactionId
 		,@intTransactionTypeId
 		,@intLotId
-		,@intSubLocationId
-		,@intStorageLocationId
-		,@strActualCostId 
+		,@intSourceTransactionId
+		,@intSourceTransactionDetailId
+		,@strSourceTransactionId
+		,@intFobPointId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
@@ -367,25 +367,16 @@ END
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
-IF @strAccountToCounterInventory IS NOT NULL 
+--IF @strAccountToCounterInventory IS NOT NULL 
 BEGIN 
-	DECLARE @intContraInventory_ItemLocationId AS INT
-
-	IF @strAccountToCounterInventory = 'Inventory In-Transit'
-	BEGIN 
-		SELECT TOP 1 @intContraInventory_ItemLocationId = intInTransitSourceLocationId
-		FROM @ItemsToPost 
-		WHERE intInTransitSourceLocationId IS NOT NULL 
-	END 
-
 	DECLARE @intReturnValue INT
 
-	EXEC @intReturnValue = dbo.uspICCreateGLEntries 
+	EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 		@strBatchId
 		,@strAccountToCounterInventory
 		,@intEntityUserSecurityId
 		,@strGLDescription
-		,@intContraInventory_ItemLocationId
+		--,@intContraInventory_ItemLocationId
 
 	IF @intReturnValue < 0 RETURN -1
 END 

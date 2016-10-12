@@ -20,11 +20,15 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Shipment Transaction' + CA
 -- Constants  
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
-DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
+
+DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
 		,@OWNERSHIP_TYPE_OWN AS INT = 1
 		,@OWNERSHIP_TYPE_STORAGE AS INT = 2
 		,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
 		,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
+
+		,@FOB_ORIGIN AS INT = 1
+		,@FOB_DESTINATION AS INT = 2
 
 -- Get the default currency ID
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -48,18 +52,27 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
-	DECLARE @intTransactionId AS INT  
-	DECLARE @intCreatedEntityId AS INT  
-	DECLARE @ysnAllowUserSelfPost AS BIT   
-	DECLARE @ysnTransactionPostedFlag AS BIT  
+			,@intTransactionId AS INT  
+			,@intCreatedEntityId AS INT  
+			,@ysnAllowUserSelfPost AS BIT   
+			,@ysnTransactionPostedFlag AS BIT  
+			,@intFobPointId AS INT 
   
 	SELECT TOP 1   
-			@intTransactionId = intInventoryShipmentId
-			,@ysnTransactionPostedFlag = ysnPosted  
-			,@dtmDate = dtmShipDate
-			,@intCreatedEntityId = intEntityId  
-	FROM	dbo.tblICInventoryShipment
+			@intTransactionId = s.intInventoryShipmentId
+			,@ysnTransactionPostedFlag = s.ysnPosted  
+			,@dtmDate = s.dtmShipDate
+			,@intCreatedEntityId = s.intEntityId  
+			,@intFobPointId = fp.intFobPointId
+	FROM	dbo.tblICInventoryShipment s LEFT JOIN tblSMFreightTerms ft
+				ON s.intFreightTermId = ft.intFreightTermId
+			LEFT JOIN tblICFobPoint fp
+				ON fp.strFobPoint = ft.strFobPoint
 	WHERE	strShipmentNumber = @strTransactionId  
+
+	-- Initialize the account to counter inventory 
+	SELECT	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = NULL 
+	WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
 END  
 
 --------------------------------------------------------------------------------------------  
@@ -264,6 +277,7 @@ IF @ysnPost = 1
 BEGIN  
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
+	DECLARE @ItemsForInTransitCosting AS ItemInTransitCostingTableType
 	DECLARE @StorageItemsForPost AS ItemCostingTableType  
 
 	-- Process the Other Charges
@@ -398,7 +412,16 @@ BEGIN
 		BEGIN 
 			SET @ysnAllowBlankGLEntries = 0
 
-			-- Call the post routine 
+			-- Call the Costing routine. 
+			EXEC	@intReturnValue = dbo.uspICPostCosting  
+					@ItemsForPost  
+					,@strBatchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@intEntityUserSecurityId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+			-- Generate the GL entries
 			INSERT INTO @GLEntries (
 					[dtmDate] 
 					,[strBatchId]
@@ -432,13 +455,107 @@ BEGIN
 					,[dblReportingRate]	
 					,[dblForeignRate]
 			)
-			EXEC	@intReturnValue = dbo.uspICPostCosting  
-					@ItemsForPost  
-					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@intEntityUserSecurityId
+			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
+				@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intEntityUserSecurityId
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+			-- Get values for the In-Transit Costing 
+			INSERT INTO @ItemsForInTransitCosting (
+					[intItemId] 
+					,[intItemLocationId] 
+					,[intItemUOMId] 
+					,[dtmDate] 
+					,[dblQty] 
+					,[dblUOMQty] 
+					,[dblCost] 
+					,[dblValue] 
+					,[dblSalesPrice] 
+					,[intCurrencyId] 
+					,[dblExchangeRate] 
+					,[intTransactionId] 
+					,[intTransactionDetailId] 
+					,[strTransactionId] 
+					,[intTransactionTypeId] 
+					,[intLotId] 
+					,[intSourceTransactionId] 
+					,[strSourceTransactionId] 
+					,[intSourceTransactionDetailId]
+					,[intFobPointId]
+			)
+			SELECT
+					[intItemId] 
+					,[intItemLocationId] 
+					,[intItemUOMId] 
+					,[dtmDate] 
+					,-[dblQty] 
+					,[dblUOMQty] 
+					,[dblCost] 
+					,[dblValue] 
+					,[dblSalesPrice] 
+					,[intCurrencyId] 
+					,[dblExchangeRate] 
+					,[intTransactionId] 
+					,[intTransactionDetailId] 
+					,[strTransactionId] 
+					,[intTransactionTypeId] 
+					,[intLotId] 
+					,[intTransactionId] 
+					,[strTransactionId] 
+					,[intTransactionDetailId] 
+					,[intFobPointId] = @intFobPointId
+			FROM	tblICInventoryTransaction t 
+			WHERE	t.strTransactionId = @strTransactionId
+					AND t.ysnIsUnposted = 0 
+					AND t.strBatchId = @strBatchId
+					AND @intFobPointId = @FOB_DESTINATION
+
+			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
+			BEGIN 
+				-- Call the post routine for the In-Transit costing. 
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]	
+						,[dblDebitReport]	
+						,[dblCreditForeign]	
+						,[dblCreditReport]	
+						,[dblReportingRate]	
+						,[dblForeignRate]
+				)
+				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
+						@ItemsForInTransitCosting  
+						,@strBatchId  
+						,NULL 
+						,@intEntityUserSecurityId
+			END 
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit						
 		END
 	END 
 
