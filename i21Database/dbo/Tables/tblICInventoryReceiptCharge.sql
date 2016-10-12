@@ -22,6 +22,7 @@
 	[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblAmountPriced] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
+	[dblTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryReceiptCharge] PRIMARY KEY ([intInventoryReceiptChargeId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
