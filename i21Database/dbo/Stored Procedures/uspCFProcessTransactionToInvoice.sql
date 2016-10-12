@@ -1,14 +1,16 @@
 ﻿
 
 CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
-	 @TransactionId		INT
-	,@UserId			INT	
-	,@Post				BIT	= NULL
-	,@Recap				BIT	= NULL
-	,@InvoiceId			INT = NULL
-	,@ErrorMessage		NVARCHAR(250) OUTPUT
-	,@CreatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
-	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
+	 @TransactionId				INT
+	,@UserId					INT	
+	,@Post						BIT	= NULL
+	,@Recap						BIT	= NULL
+	,@InvoiceId					INT = NULL
+	,@ErrorMessage				NVARCHAR(250) OUTPUT
+	,@CreatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
+	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
+	,@UpdateAvailableDiscount	BIT = NULL
+	,@Discount					NUMERIC(18,6) = 0.0
 AS	
 
 SET QUOTED_IDENTIFIER OFF
@@ -22,16 +24,27 @@ SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecur
 
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 DECLARE @ysnRemoteTransaction INT
+DECLARE @strItemTermDiscountBy NVARCHAR(MAX)
 
-SELECT 
-@ysnRemoteTransaction = (CASE 
-							WHEN strTransactionType = 'Extended Remote' OR strTransactionType = 'Remote'
-							THEN 1
-							ELSE 0
-						END
-						)
-from tblCFTransaction 
-where intTransactionId = @TransactionId
+IF (@UpdateAvailableDiscount = 1)
+BEGIN
+	SET @ysnRemoteTransaction = 0
+	SET @Post = NULL
+	SET @strItemTermDiscountBy = 'Amount'
+END
+ELSE
+BEGIN
+	SELECT @ysnRemoteTransaction = (CASE 
+								WHEN strTransactionType = 'Extended Remote' OR strTransactionType = 'Remote'
+								THEN 1
+								ELSE 0
+							END
+							)
+	from tblCFTransaction 
+	where intTransactionId = @TransactionId
+
+	SET @Discount = 0.0
+END
 
 BEGIN TRANSACTION
 INSERT INTO @EntriesForInvoice(
@@ -110,6 +123,9 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnClearDetailTaxes]					
 	,[intTempDetailIdForTaxes]
 	,[strType]
+	,[ysnUpdateAvailableDiscount]
+	,[strItemTermDiscountBy]
+	,[dblItemTermDiscount]
 )
 SELECT
 	 [strSourceTransaction]					= 'Card Fueling Transaction'
@@ -121,7 +137,7 @@ SELECT
 												else cfCardAccount.intCustomerId
 											  end)
 	,[intCompanyLocationId]					= cfSiteItem.intARLocationId
-	,[intCurrencyId]						= 1
+	,[intCurrencyId]						= NULL
 	,[intTermId]							= cfCardAccount.intTermsCode
 	,[dtmDate]								= cfTrans.dtmTransactionDate
 	,[dtmDueDate]							= NULL
@@ -170,7 +186,7 @@ SELECT
     ,[dblLicenseAmount]						= NULL
 	,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
 	,[ysnRecomputeTax]						= (CASE 
-													WHEN @ysnRemoteTransaction = 1
+													WHEN @ysnRemoteTransaction = 1 OR @UpdateAvailableDiscount = 1
 													THEN 0
 													ELSE 1
 											   END)
@@ -197,6 +213,10 @@ SELECT
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @TransactionId
 	,[strType]								= 'Card Fueling'
+	,[ysnUpdateAvailableDiscount]			= @UpdateAvailableDiscount
+	,[strItemTermDiscountBy]				= @strItemTermDiscountBy
+	,[dblItemTermDiscount]					= @Discount
+	
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
 ON cfTrans.intNetworkId = cfNetwork.intNetworkId

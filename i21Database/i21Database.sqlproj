@@ -4397,6 +4397,10 @@
     <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTax.sql" />
     <Build Include="dbo\Views\vyuETBEContract.sql" />
     <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTaxById.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceDiscount.sql" />
+    <Build Include="dbo\Views\vyuCFDiscountSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
