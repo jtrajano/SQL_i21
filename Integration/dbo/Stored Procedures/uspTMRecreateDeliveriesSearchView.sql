@@ -102,7 +102,7 @@ BEGIN
 					,strSiteNumber = RIGHT(''0000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
 					,F.dtmInvoiceDate
 					,F.strBulkPlantNumber
-					,strProductDelivered = I.strItemNo
+					,strProductDelivered = F.strItemNo
 					,F.strSalesPersonID
 					,C.dblTotalCapacity
 					,F.dblQuantityDelivered
