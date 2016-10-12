@@ -5,7 +5,8 @@ SELECT
 CAST(ROW_NUMBER() OVER(ORDER BY intContractDetailId) AS INT) AS intClaimId,
 (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName,
 (SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress,
-(dblWeightLoss - dblFranchiseWeight) * dblCost AS dblClaim,
+CASE WHEN ysnSubCurrency > 0 THEN (dblWeightLoss - dblFranchiseWeight) * dblCost / ISNULL(intCent,1)  ELSE (dblWeightLoss - dblFranchiseWeight) * dblCost END AS dblClaim,
+((dblWeightLoss - dblFranchiseWeight) * dblCost  - dblTotalClaimAmount) * -1 AS  dblFranchiseAmount,
 (dblWeightLoss - dblFranchiseWeight) AS dblQtyToBill ,
 * 
 FROM (
@@ -15,9 +16,13 @@ FROM (
 		SUM(dblNetQtyReceived) AS dblNetShippedWeight,
 		SUM(dblNetShippedWeight) AS dblGrossShippedWeight,
 		SUM(dblNetShippedWeight) - SUM(dblNetQtyReceived) AS dblWeightLoss,
+		SUM(dblTareShippedWeight) AS dblShipmentWeightLoss,
 		dblAmountPaid,
 		SUM(dblAppliedPrepayment) AS dblAppliedPrepayment,
 		SUM(dblQtyBillCreated) AS dblQtyBillCreated,
+		SUM(dblNetQtyReceived) AS dblNetQtyReceived,
+		SUM(dblGrossQtyReceived) AS dblGrossQtyReceived,
+		SUM(dblGrossQtyReceived) - SUM(dblNetQtyReceived) AS dblIRWeightLoss,
 		CASE 
 		WHEN dblFranchise > 0
 			THEN SUM(dblNetShippedWeight) * (dblFranchise / 100)
@@ -58,13 +63,19 @@ FROM (
 		--strNotes,
 		strContainerNumber,
 		strWeightGradeDesc,
-		strComment
+		strComment,
+		intCent,
+		intCurrencyId,
+		strCostCurrency,
+		ysnSubCurrency
 	FROM (
 		SELECT
 			 BillClaim.intBillId 
-			,Receipts.dblNetQtyReceived
+			,IRI.dblNet AS dblNetQtyReceived--Receipts.dblNetQtyReceived
+			,IRI.dblGross AS dblGrossQtyReceived--Receipts.dblGrossQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
-			,B.dblCost
+			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
+					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty / B.dblCostUnitQty) ELSE B.dblCost END AS dblCost
 			,B.dblQtyReceived
 			,B.dblQtyOrdered AS dblQtyBillCreated
 			,B.intCostUOMId AS intUnitOfMeasureId
@@ -84,9 +95,9 @@ FROM (
 			,I.dblFranchise
 			,A.intEntityVendorId
 			,A.intShipToId
-			,A.intCurrencyId
 			,L.dblTotal + L.dblTax AS dblPrepaidTotal
-			,Loads.dblNetShippedWeight
+			,LGC.dblNetWt AS dblNetShippedWeight--Loads.dblNetShippedWeight
+			,LGC.dblTareWt AS dblTareShippedWeight
 			,Container.strContainerNumber
 			,M.strVendorId
 			,M.intGLAccountExpenseId AS intAccountId
@@ -103,6 +114,10 @@ FROM (
 			,D.strBillOfLading
 			,N.strCurrency
 			,I.strWeightGradeDesc
+			,ISNULL(H1.intCent,1) AS intCent
+			,ISNULL(E.intCurrencyId,ISNULL(H1.intMainCurrencyId,A.intCurrencyId)) AS intCurrencyId
+			,ISNULL(H1.strCurrency,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)) AS strCostCurrency
+			,ISNULL(H1.ysnSubCurrency,0) AS ysnSubCurrency
 			--,Payments.strBankAccountNo
 			--,Payments.strBankName
 			--,Payments.strBankAddress
@@ -119,6 +134,7 @@ FROM (
 		INNER JOIN tblICItem G ON B.intItemId = G.intItemId
 		INNER JOIN tblAPAppliedPrepaidAndDebit J ON J.intContractHeaderId = E.intContractHeaderId AND B.intBillDetailId = J.intBillDetailApplied
 		INNER JOIN tblAPBill K ON J.intTransactionId = K.intBillId
+		INNER JOIN tblLGLoadContainer LGC ON LGC.intLoadContainerId = IRI.intContainerId
 		LEFT JOIN dbo.tblSMCurrency N ON A.intCurrencyId = N.intCurrencyID
 		INNER JOIN tblAPBillDetail L ON K.intBillId = L.intBillId 
 					AND B.intItemId = L.intItemId 
@@ -126,11 +142,12 @@ FROM (
 					AND E.intContractHeaderId = L.intContractHeaderId
 		INNER JOIN dbo.tblAPBillDetail P ON P.intContractHeaderId = H.intContractHeaderId
 		INNER JOIN dbo.tblAPBill BillClaim ON BillClaim.intBillId = P.intBillId
-		CROSS APPLY (
-			SELECT SUM(F.dblGross) AS dblNetShippedWeight
-			FROM tblLGLoadDetail F
-			WHERE IRI.intSourceId = F.intLoadDetailId
-			) Loads
+		LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = E.intCurrencyId
+		--CROSS APPLY (
+		--	SELECT SUM(F.dblGross) AS dblNetShippedWeight
+		--	FROM tblLGLoadDetail F
+		--	WHERE IRI.intSourceId = F.intLoadDetailId
+		--	) Loads
 		CROSS APPLY (
 			SELECT TOP 1 GLC.strContainerNumber
 			FROM tblLGLoadDetail F
@@ -138,12 +155,13 @@ FROM (
 			INNER JOIN tblLGLoadContainer GLC ON GLC.intLoadContainerId = GLCL.intLoadContainerId
 			WHERE IRI.intSourceId = F.intLoadDetailId
 		) Container
-		CROSS APPLY (
-			SELECT 
-				SUM(C.dblNet) AS dblNetQtyReceived
-			FROM tblICInventoryReceiptItem C 
-			WHERE C.intLineNo = IRI.intLineNo AND C.intOrderId = IRI.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
-		) Receipts
+		--CROSS APPLY (
+		--	SELECT 
+		--		SUM(C.dblNet) AS dblNetQtyReceived,
+		--		SUM(C.dblGross) AS dblGrossQtyReceived
+		--	FROM tblICInventoryReceiptItem C 
+		--	WHERE C.intLineNo = IRI.intLineNo AND C.intOrderId = IRI.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+		--) Receipts
 		/*CROSS APPLY (
 			SELECT 
 				TOP 1 strBankAccountNo,
@@ -202,7 +220,10 @@ FROM (
 		--strNotes,
 		strContainerNumber,
 		strWeightGradeDesc,
-		strComment
+		strComment,
+		intCent,
+		strCostCurrency,
+		ysnSubCurrency
 ) Claim
 WHERE dblQtyBillCreated = dblContractItemQty --make sure we fully billed the contract item
 AND dblWeightLoss > dblFranchiseWeight -- Make sure the weight loss is greater then the tolerance

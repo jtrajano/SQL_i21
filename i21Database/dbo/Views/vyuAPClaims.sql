@@ -4,7 +4,7 @@ AS
 SELECT 
 CAST(ROW_NUMBER() OVER(ORDER BY intContractDetailId) AS INT) AS intClaimId,
 * ,
-(dblWeightLoss - dblFranchiseWeight) * dblCost AS dblClaim,
+CASE WHEN ysnSubCurrency > 0 THEN (dblWeightLoss - dblFranchiseWeight) * dblCost / ISNULL(intCent,1)  ELSE (dblWeightLoss - dblFranchiseWeight) * dblCost END AS dblClaim,
 (dblWeightLoss - dblFranchiseWeight) AS dblQtyToBill 
 FROM (
 	SELECT
@@ -46,10 +46,14 @@ FROM (
 		dblPrepaidTotal,
 		intAccountId,
 		strAccountId,
-		strAccountDesc
+		strAccountDesc,
+		intCent,
+		intCurrencyId,
+		strCostCurrency,
+		ysnSubCurrency
 	FROM (
 		SELECT 
-			Loads.dblNetShippedWeight
+            LGC.dblNetWt AS dblNetShippedWeight
 			,Receipts.dblNetQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
 			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
@@ -77,7 +81,6 @@ FROM (
 			,I.dblFranchise
 			,A.intEntityVendorId
 			,A.intShipToId
-			,A.intCurrencyId
 			,L.dblTotal + L.dblTax AS dblPrepaidTotal
 			,M.strVendorId
 			,M.intGLAccountExpenseId AS intAccountId
@@ -87,6 +90,10 @@ FROM (
 			,M2.str1099Form
 			,M2.str1099Type
 			,G.strDescription
+			,ISNULL(H1.intCent,1) AS intCent
+			,ISNULL(E.intCurrencyId,ISNULL(H1.intMainCurrencyId,A.intCurrencyId)) AS intCurrencyId
+			,ISNULL(H1.strCurrency,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)) AS strCostCurrency
+			,ISNULL(H1.ysnSubCurrency,0) AS ysnSubCurrency
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN (tblICItemUOM B2 INNER JOIN tblICUnitMeasure B3 ON B2.intUnitMeasureId = B3.intUnitMeasureId) ON (CASE WHEN B.dblNetWeight > 0 THEN B.intWeightUOMId WHEN B.intCostUOMId > 0 THEN B.intCostUOMId ELSE B.intUnitOfMeasureId END) = B2.intItemUOMId
@@ -98,22 +105,24 @@ FROM (
 		INNER JOIN tblCTWeightGrade I ON H.intWeightId = I.intWeightGradeId
 		INNER JOIN tblICItem G ON B.intItemId = G.intItemId
 		INNER JOIN tblAPAppliedPrepaidAndDebit J ON J.intContractHeaderId = E.intContractHeaderId AND B.intBillDetailId = J.intBillDetailApplied
+		INNER JOIN tblLGLoadContainer LGC ON LGC.intLoadContainerId = C2.intContainerId
 		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
 		LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 		LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = C2.intUnitMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = E.intCurrencyId
 		INNER JOIN tblAPBill K ON J.intTransactionId = K.intBillId
 		INNER JOIN tblAPBillDetail L ON K.intBillId = L.intBillId 
 					AND B.intItemId = L.intItemId 
 					AND E.intContractDetailId = L.intContractDetailId
 					AND E.intContractHeaderId = L.intContractHeaderId
-		CROSS APPLY (
-			SELECT SUM(F.dblGross) AS dblNetShippedWeight
-			FROM tblLGLoadDetail F
-			WHERE C2.intSourceId = F.intLoadDetailId
-			) Loads
+		--CROSS APPLY (
+		--	SELECT SUM(F.dblGross) AS dblNetShippedWeight
+		--	FROM tblLGLoadDetail F
+		--	WHERE C2.intSourceId = F.intLoadDetailId
+		--	) Loads
 		CROSS APPLY (
 			SELECT 
 				SUM(C.dblNet) AS dblNetQtyReceived
@@ -155,7 +164,10 @@ FROM (
 		strName,
 		str1099Form,
 		str1099Type,
-		strDescription
+		strDescription,
+		ysnSubCurrency,
+		intCent,
+		strCostCurrency
 ) Claim
 WHERE dblQtyBillCreated = dblContractItemQty --make sure we fully billed the contract item
 AND dblWeightLoss > dblFranchiseWeight -- Make sure the weight loss is greater then the tolerance
