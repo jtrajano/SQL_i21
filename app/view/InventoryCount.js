@@ -1001,7 +1001,7 @@ Ext.define('Inventory.view.InventoryCount', {
                             ]
                         },
                         {
-                            xtype: 'panel',
+                            xtype: 'attachmentgrid',
                             itemId: 'pgeAttachments',
                             layout: 'fit',
                             title: 'Attachments'
