@@ -4401,6 +4401,7 @@
     <Build Include="dbo\Views\vyuCFDiscountSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportDiscount.sql" />
+    <Build Include="dbo\Views\vyuCTInventoryItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
