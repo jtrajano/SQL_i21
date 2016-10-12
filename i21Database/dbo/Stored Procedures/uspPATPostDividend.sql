@@ -54,6 +54,7 @@ BEGIN
 END
 
 BEGIN TRY
+
 EXEC uspGLBookEntries @GLEntries, @ysnPosted
 END TRY
 BEGIN CATCH
@@ -61,6 +62,15 @@ BEGIN CATCH
 	RAISERROR(@error, 16, 1);
 	GOTO Post_Rollback
 END CATCH
+
+IF ISNULL(@ysnPosted,0) = 0
+BEGIN
+	
+	UPDATE tblGLDetail SET ysnIsUnposted = 1
+		WHERE intTransactionId = @intDividendId 
+			AND strCode=N'PAT' 
+			AND strTransactionForm=N'Dividend'
+END
 
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
