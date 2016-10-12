@@ -380,7 +380,7 @@ BEGIN
 		FROM tblAPBill A
 		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
-		GOTO Audit_Log_Invoke
+		--GOTO Audit_Log_Invoke
 	END
 	ELSE
 	BEGIN
@@ -505,7 +505,7 @@ BEGIN
 		GOTO Post_Rollback
 	END CATCH
 
-	GOTO Audit_Log_Invoke
+	--GOTO Audit_Log_Invoke
 	IF @@ERROR <> 0	GOTO Post_Rollback;
 
 END
