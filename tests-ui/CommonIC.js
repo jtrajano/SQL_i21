@@ -7,6 +7,10 @@
  *
  * @param {Integer} lottrack - Lot Tracking( Yes Manual - '0' , Yes Serial - '1' and No - '2'
  *
+ *@param {String} saleuom - Location Setup Sale UOM
+ *
+ * *@param {String} receiveuom - Location Receive Sale UOM
+ *
  * @param {String} priceLC - Item Last Cost
  *
  * @param {String} priceLC - Item Standard Cost
@@ -18,7 +22,7 @@
 
 Ext.define('i21.test.Inventory.CommonIC', {
 
-    addInventoryItem: function (t,next, item, itemdesc, lottrack,category,commodity, priceLC, priceSC, priceAC) {
+    addInventoryItem: function (t,next, item, itemdesc, lottrack, category, commodity,saleuom, receiveuom, priceLC, priceSC, priceAC) {
         var engine = new iRely.TestEngine();
         engine.start(t, next)
 
@@ -72,6 +76,8 @@ Ext.define('i21.test.Inventory.CommonIC', {
             .clickTab('#cfgLocation').wait(300)
             .clickButton('#btnAddLocation').wait(100)
             .waitTillVisible('icitemlocation', 'Add Item Location Screen Displayed', 60000).wait(500)
+            .selectComboRowByFilter('#cboIssueUom', saleuom, 600, 'strUnitMeasure').wait(500)
+            .selectComboRowByFilter('#cboReceiveUom', receiveuom, 600, 'strUnitMeasure').wait(500)
             .selectComboRowByIndex('#cboNegativeInventory', 1).wait(500)
             .clickButton('#btnSave').wait(300)
             .checkStatusMessage('Saved').wait(300)
