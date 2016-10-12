@@ -5,7 +5,7 @@ SELECT
 CAST(ROW_NUMBER() OVER(ORDER BY intContractDetailId) AS INT) AS intClaimId,
 (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName,
 (SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress,
-(dblWeightLoss - dblFranchiseWeight) * dblCost AS dblClaim,
+CASE WHEN ysnSubCurrency > 0 THEN (dblWeightLoss - dblFranchiseWeight) * dblCost / ISNULL(intCent,1)  ELSE (dblWeightLoss - dblFranchiseWeight) * dblCost END AS dblClaim,
 ((dblWeightLoss - dblFranchiseWeight) * dblCost  - dblTotalClaimAmount) * -1 AS  dblFranchiseAmount,
 (dblWeightLoss - dblFranchiseWeight) AS dblQtyToBill ,
 * 
@@ -16,6 +16,7 @@ FROM (
 		SUM(dblNetQtyReceived) AS dblNetShippedWeight,
 		SUM(dblNetShippedWeight) AS dblGrossShippedWeight,
 		SUM(dblNetShippedWeight) - SUM(dblNetQtyReceived) AS dblWeightLoss,
+		SUM(dblTareShippedWeight) AS dblShipmentWeightLoss,
 		dblAmountPaid,
 		SUM(dblAppliedPrepayment) AS dblAppliedPrepayment,
 		SUM(dblQtyBillCreated) AS dblQtyBillCreated,
@@ -62,7 +63,11 @@ FROM (
 		--strNotes,
 		strContainerNumber,
 		strWeightGradeDesc,
-		strComment
+		strComment,
+		intCent,
+		intCurrencyId,
+		strCostCurrency,
+		ysnSubCurrency
 	FROM (
 		SELECT
 			 BillClaim.intBillId 
@@ -90,9 +95,9 @@ FROM (
 			,I.dblFranchise
 			,A.intEntityVendorId
 			,A.intShipToId
-			,A.intCurrencyId
 			,L.dblTotal + L.dblTax AS dblPrepaidTotal
 			,LGC.dblNetWt AS dblNetShippedWeight--Loads.dblNetShippedWeight
+			,LGC.dblTareWt AS dblTareShippedWeight
 			,Container.strContainerNumber
 			,M.strVendorId
 			,M.intGLAccountExpenseId AS intAccountId
@@ -109,6 +114,10 @@ FROM (
 			,D.strBillOfLading
 			,N.strCurrency
 			,I.strWeightGradeDesc
+			,ISNULL(H1.intCent,1) AS intCent
+			,ISNULL(E.intCurrencyId,ISNULL(H1.intMainCurrencyId,A.intCurrencyId)) AS intCurrencyId
+			,ISNULL(H1.strCurrency,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)) AS strCostCurrency
+			,ISNULL(H1.ysnSubCurrency,0) AS ysnSubCurrency
 			--,Payments.strBankAccountNo
 			--,Payments.strBankName
 			--,Payments.strBankAddress
@@ -133,6 +142,7 @@ FROM (
 					AND E.intContractHeaderId = L.intContractHeaderId
 		INNER JOIN dbo.tblAPBillDetail P ON P.intContractHeaderId = H.intContractHeaderId
 		INNER JOIN dbo.tblAPBill BillClaim ON BillClaim.intBillId = P.intBillId
+		LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = E.intCurrencyId
 		--CROSS APPLY (
 		--	SELECT SUM(F.dblGross) AS dblNetShippedWeight
 		--	FROM tblLGLoadDetail F
@@ -210,7 +220,10 @@ FROM (
 		--strNotes,
 		strContainerNumber,
 		strWeightGradeDesc,
-		strComment
+		strComment,
+		intCent,
+		strCostCurrency,
+		ysnSubCurrency
 ) Claim
 WHERE dblQtyBillCreated = dblContractItemQty --make sure we fully billed the contract item
 AND dblWeightLoss > dblFranchiseWeight -- Make sure the weight loss is greater then the tolerance
