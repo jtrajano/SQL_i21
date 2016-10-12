@@ -1,25 +1,29 @@
-/**
- * Created by CCallado on 1/21/2016.
- */
-
-
-StartTest (function (t) {
+StartTest(function (t) {
 
     var engine = new iRely.TestEngine();
+    var commonSM = Ext.create('SystemManager.CommonSM');
+    var commonIC = Ext.create('i21.test.Inventory.CommonIC');
+
     engine.start(t)
 
-        .login('irelyadmin', 'i21by2015', '01')
-        .addFunction(function(next){t.diag("Scenario 1. Open screen and check default controls' state"); next();}).wait(100)
-        .expandMenu('Inventory').wait(200)
-        .openScreen('Commodities').wait(3000)
-        .checkScreenWindow({alias: 'icitems',title: 'Category',collapse: true,maximize: true,minimize: false,restore: false,close: true}).wait(1000)
-        .checkSearchToolbarButton({new: true, view: true, openselected: false, openall: false, refresh: true, export: false, close: true}).wait(100)
-        .clickButton('#btnNew').wait(200)
-        .checkScreenShown('iccommodity')
+        // LOG IN
+        .displayText('Log In').wait(500)
+        .addFunction(function (next) {
+            commonSM.commonLogin(t, next); }).wait(100)
+        .waitTillMainMenuLoaded('Login Successful').wait(500)
 
 
-        /*Add Commodity with no UOM Setup and Attributes*/
-        .addFunction(function(next){t.diag("Scenario 2. Add Commodity with no UOM Setup and Attributes"); next();}).wait(100)
+        .expandMenu('Inventory').wait(500)
+        .markSuccess('Inventory successfully expanded').wait(300)
+        .openScreen('Commodities').wait(500)
+        .waitTillLoaded('Open Commodity  Search Screen Successful').wait(200)
+
+
+
+        //#1 Add Commodity with no UOM Setup and Attributes
+        .displayText('====== Scenario 1. Add Commodity with no UOM Setup and Attributes ======').wait(300)
+        .clickButton('#btnNew').wait(300)
+        .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
         .enterData('#txtCommodityCode','Test Commodity 1').wait(100)
         .enterData('#txtDescription','Test Commodity 1').wait(100)
         .clickCheckBox('#chkExchangeTraded',true).wait(100)
@@ -27,14 +31,16 @@ StartTest (function (t) {
         .enterData('#txtConsolidateFactor','6.00').wait(100)
         .clickButton('#btnSave').wait(100)
         .checkStatusMessage('Saved').wait(100)
+        .markSuccess('Add Commodity with no UOM Setup and Attributes Successful')
         .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('iccommodity')
+        .checkIfScreenClosed('iccommodity').wait(300)
 
 
 
-        /*Add Commodity with UOM*/
-        .addFunction(function(next){t.diag("Scenario 3. Add Commodity with UOM"); next();}).wait(100)
-        .clickButton('#btnNew')
+        //#2 Add Commodity with UOM
+        .displayText('====== Scenario 2. Add Commodity with no UOM Setup and Attributes ======').wait(300)
+        .clickButton('#btnNew').wait(300)
+        .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
         .enterData('#txtCommodityCode','Test Commodity 2').wait(100)
         .enterData('#txtDescription','Test Commodity 2').wait(100)
         .clickCheckBox('#chkExchangeTraded',true).wait(100)
@@ -47,22 +53,25 @@ StartTest (function (t) {
         .clickGridCheckBox('#grdUom', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
         .clickButton('#btnSave').wait(100)
         .checkStatusMessage('Saved').wait(100)
+        .markSuccess('Add Commodity with no UOM Setup and Attributes Successful')
         .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('iccommodity')
+        .checkIfScreenClosed('iccommodity').wait(300)
 
 
-        /*Add Duplicate Commodity*/
-        .addFunction(function(next){t.diag("Scenario 4. Add Duplicate commodity"); next();}).wait(100)
+        //#3 Add Duplicate Commodity
+        .displayText('====== Scenario 2. Add Duplicate commodity ======').wait(300)
         .clickButton('#btnNew')
+        .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
         .enterData('#txtCommodityCode','Test Commodity 2').wait(100)
         .enterData('#txtDescription','Test Commodity 2').wait(100)
         .clickButton('#btnSave').wait(100)
         .checkMessageBox('iRely i21', 'Commodity Code must be unique.', 'ok', 'error').wait(100)
-        .clickMessageBoxButton('ok')
-        .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('iccommodity')
+        .clickMessageBoxButton('ok').wait(200)
+        .clickButton('#btnClose').wait(200)
+        .checkIfScreenClosed('iccommodity').wait(300)
+        .markSuccess('Was not able to add duplicate commodity!')
 
 
-        .done()
+        .done();
 });
 

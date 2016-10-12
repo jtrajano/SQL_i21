@@ -1891,15 +1891,17 @@ Ext.define('iRely.TestEngine', {
                                                 next();
                                             }
                                         } else {
-                                            var filterRec = store1.findExact(comboColumn, filter),
-                                                record = store1.getAt(filterRec);
+                                            t.waitForStoresToLoad(store1, function () {
+                                                var filterRec = store1.findExact(comboColumn, filter),
+                                                    record = store1.getAt(filterRec);
 
-                                            if (typeof(comboGrid.getView) == "function") {
-                                                var node1 = comboGrid.getView().getNode(record);
-                                                t.click(node1, next);
-                                            } else {
-                                                next();
-                                            }
+                                                if (typeof(comboGrid.getView) == "function") {
+                                                    var node1 = comboGrid.getView().getNode(record);
+                                                    t.click(node1, next);
+                                                } else {
+                                                    next();
+                                                }
+                                            })
                                         }
                                     } else {
                                         next();
