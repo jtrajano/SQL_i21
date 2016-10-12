@@ -15,7 +15,7 @@ Type the overview for the table here.
 		[intItemContractId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
-		[strContractItemName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[strContractItemName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intCountryId] INT NULL, 
 		[strGrade] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strGradeType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
