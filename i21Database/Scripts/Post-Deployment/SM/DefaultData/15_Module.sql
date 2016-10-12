@@ -1023,6 +1023,15 @@ GO
 		   [ysnSupported]					=		1,
 	       [intSort]						=		110
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'CRM')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		111,
+		   [strApplicationName]				=		N'i21',		  
+		   [strModule]						=		N'CRM',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+           [intSort]						=		111
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO
