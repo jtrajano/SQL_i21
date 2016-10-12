@@ -367,6 +367,7 @@
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUOMController.cs" />
     <Compile Include="Controllers\CompanyPreferenceController.cs" />
+    <Compile Include="Controllers\InventoryReceiptChargeTaxController.cs" />
     <Compile Include="Controllers\ImportDataController.cs" />
     <Compile Include="Controllers\InventoryReceiptItemLotController.cs" />
     <Compile Include="Controllers\MeasurementController.cs" />

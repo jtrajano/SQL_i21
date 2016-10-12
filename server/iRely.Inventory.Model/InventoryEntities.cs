@@ -238,7 +238,10 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryCountDetailMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryCountMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryCountDetailMap());
-            modelBuilder.Configurations.Add(new vyuICGetCountSheetMap());            
+            modelBuilder.Configurations.Add(new vyuICGetCountSheetMap());
+
+            modelBuilder.Configurations.Add(new tblICInventoryReceiptChargeTaxMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeTaxMap());
         }
     }
 }

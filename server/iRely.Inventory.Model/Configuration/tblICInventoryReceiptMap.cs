@@ -380,8 +380,6 @@ namespace iRely.Inventory.Model
         }
     }
 
-
-
     public class tblICInventoryReceiptChargeMap : EntityTypeConfiguration<tblICInventoryReceiptCharge>
     {
         public tblICInventoryReceiptChargeMap()
@@ -408,6 +406,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
+            this.Property(t => t.dblTax).HasColumnName("dblTax");
            // this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
            // this.Property(t => t.dblExchangeRate).HasColumnName("dblExchangeRate");
            // this.Property(t => t.intCent).HasColumnName("intCent");
@@ -648,7 +647,6 @@ namespace iRely.Inventory.Model
                 .HasForeignKey(t => t.intQAPropertyId);*/
         }
     }
-
 
     public class vyuICGetReceiptAddOrderMap : EntityTypeConfiguration<vyuICGetReceiptAddOrder>
     {
@@ -1017,5 +1015,64 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblICInventoryReceiptChargeTaxMap : EntityTypeConfiguration<tblICInventoryReceiptChargeTax>
+    {
+        public tblICInventoryReceiptChargeTaxMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryReceiptChargeTaxId);
 
+            // Table & Column Mappings
+            this.ToTable("tblICInventoryReceiptChargeTax");
+            this.Property(t => t.intInventoryReceiptChargeTaxId).HasColumnName("intInventoryReceiptChargeTaxId");
+            this.Property(t => t.intInventoryReceiptChargeId).HasColumnName("intInventoryReceiptChargeId");
+            this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
+            this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
+            this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
+            this.Property(t => t.strTaxableByOtherTaxes).HasColumnName("strTaxableByOtherTaxes");
+            this.Property(t => t.strCalculationMethod).HasColumnName("strCalculationMethod");
+            this.Property(t => t.dblRate).HasColumnName("dblRate").HasPrecision(18, 6);
+            this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
+            this.Property(t => t.dblAdjustedTax).HasColumnName("dblAdjustedTax").HasPrecision(18, 6);
+            this.Property(t => t.intTaxAccountId).HasColumnName("intTaxAccountId");
+            this.Property(t => t.ysnTaxAdjusted).HasColumnName("ysnTaxAdjusted");
+            this.Property(t => t.ysnCheckoffTax).HasColumnName("ysnCheckoffTax");
+            this.Property(t => t.strTaxCode).HasColumnName("strTaxCode");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+                
+        }
+    }
+
+    public class vyuICGetInventoryReceiptChargeTaxMap : EntityTypeConfiguration<vyuICGetInventoryReceiptChargeTax>
+    {
+        public vyuICGetInventoryReceiptChargeTaxMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryReceiptChargeTaxId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryReceiptChargeTax");
+            this.Property(t => t.intInventoryReceiptChargeTaxId).HasColumnName("intInventoryReceiptChargeTaxId");
+            this.Property(t => t.intInventoryReceiptChargeId).HasColumnName("intInventoryReceiptChargeId");
+            this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
+            this.Property(t => t.intChargeId).HasColumnName("intChargeId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
+            this.Property(t => t.strTaxGroup).HasColumnName("strTaxGroup");
+            this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
+            this.Property(t => t.strTaxClass).HasColumnName("strTaxClass");
+            this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
+            this.Property(t => t.strTaxCode).HasColumnName("strTaxCode");
+            this.Property(t => t.strTaxableByOtherTaxes).HasColumnName("strTaxableByOtherTaxes");
+            this.Property(t => t.strCalculationMethod).HasColumnName("strCalculationMethod");
+            this.Property(t => t.dblRate).HasColumnName("dblRate").HasPrecision(18, 6);
+            this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
+            this.Property(t => t.dblAdjustedTax).HasColumnName("dblAdjustedTax").HasPrecision(18, 6);
+            this.Property(t => t.intTaxAccountId).HasColumnName("intTaxAccountId");
+            this.Property(t => t.ysnTaxAdjusted).HasColumnName("ysnTaxAdjusted");
+            this.Property(t => t.ysnCheckoffTax).HasColumnName("ysnCheckoffTax");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+        }
+    }
 }
