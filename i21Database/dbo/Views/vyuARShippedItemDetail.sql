@@ -6,14 +6,14 @@ SELECT
 	,[strShippedItemDetailId]				= 'lgis:' + CAST(LGSPS.[intShipmentPurchaseSalesContractId] AS NVARCHAR(250))
 	,[intShipmentId]						= LGSPS.[intShipmentId]
 	,[intShipmentPurchaseSalesContractId]	= LGSPS.[intShipmentPurchaseSalesContractId] 
-	,[intCurrencyId]						= ISNULL(CTCD.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
+	,[intCurrencyId]						= ISNULL(ARCC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderDetailId]				= NULL
 	,[intInventoryShipmentId]				= NULL	
 	,[intInventoryShipmentItemId]			= NULL	
-	,[intContractHeaderId]					= CTCD.[intContractHeaderId]
-	,[strContractNumber]					= CTCD.[strContractNumber] 
-	,[intContractDetailId]					= CTCD.[intContractDetailId] 
-	,[intContractSeq]						= CTCD.[intContractSeq] 
+	,[intContractHeaderId]					= ARCC.[intContractHeaderId]
+	,[strContractNumber]					= ARCC.[strContractNumber] 
+	,[intContractDetailId]					= ARCC.[intContractDetailId] 
+	,[intContractSeq]						= ARCC.[intContractSeq] 
 	,[intItemId]							= LGSPS.[intSItemId]
 	,[strItemNo]							= ICI.[strItemNo]
 	,[strItemDescription]					= ICI.[strDescription]
@@ -27,10 +27,10 @@ SELECT
 	,[dblShipmentQtyShippedTotal]			= LGSPS.[dblSAllocatedQty]
 	,[dblQtyRemaining]						= LGSPS.[dblSAllocatedQty]
 	,[dblDiscount]							= 0.00
-	,[dblPrice]								= [dbo].[fnCalculateQtyBetweenUOM](ICUOM.[intItemUOMId],CTCD.[intPriceItemUOMId],1) * CTCD.[dblCashPrice]
-	,[dblShipmentUnitPrice]					= CTCD.[dblCashPrice]
+	,[dblPrice]								= ARCC.[dblCashPrice]
+	,[dblShipmentUnitPrice]					= ARCC.[dblCashPrice]
 	,[dblTotalTax]							= 0.00
-	,[dblTotal]								= [dbo].[fnCalculateQtyBetweenUOM](ICUOM.[intItemUOMId],CTCD.[intPriceItemUOMId],LGSPS.[dblSAllocatedQty]) * CTCD.[dblCashPrice]
+	,[dblTotal]								= LGSPS.[dblSAllocatedQty] * ARCC.[dblCashPrice]
 	,[intAccountId]							= ARIA.[intAccountId]
 	,[intCOGSAccountId]						= ARIA.[intCOGSAccountId]
 	,[intSalesAccountId]					= ARIA.[intSalesAccountId]
@@ -44,12 +44,15 @@ SELECT
 	,[strWeightUnitMeasure]					= LGSPS.[strWeightUOM] 
 	,[dblGrossWt]							= LGSPS.[dblGrossWt] 
 	,[dblTareWt]							= LGSPS.[dblTareWt] 
-	,[dblNetWt]								= LGSPS.[dblNetWt] 
+	,[dblNetWt]								= LGSPS.[dblNetWt]
+	,[intSubCurrencyId]						= ARCC.[intSubCurrencyId]
+	,[dblSubCurrencyRate]					= ARCC.[dblSubCurrencyRate]
+	,[strSubCurrency]						= ARCC.[strSubCurrency]
 FROM
 	vyuLGDropShipmentDetails LGSPS
 INNER JOIN
-	vyuCTContractDetailView CTCD
-		ON LGSPS.intSContractDetailId = CTCD.intContractDetailId
+	vyuARCustomerContract ARCC
+		ON LGSPS.intSContractDetailId = ARCC.intContractDetailId
 INNER JOIN
 	tblICItem ICI
 		ON LGSPS.[intSItemId] = ICI.[intItemId]
@@ -62,7 +65,7 @@ LEFT OUTER JOIN
 		AND LGSPS.[intSUnitMeasureId] = ICUOM.[intUnitMeasureId] 
 LEFT JOIN
 	tblICItemUOM ICIU1
-		ON CTCD.[intPriceItemUOMId] = ICIU1.[intItemUOMId]	
+		ON ARCC.[intPriceItemUOMId] = ICIU1.[intItemUOMId]	
 LEFT OUTER JOIN
 	tblICItemUOM ICUOM2
 		ON 	LGSPS.[intSItemId] = ICUOM2.[intItemId] 
@@ -70,10 +73,10 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	vyuARGetItemAccount ARIA
 		ON LGSPS.[intSItemId] = ARIA.[intItemId]
-		AND CTCD.[intCompanyLocationId] = ARIA.[intLocationId]
+		AND ARCC.[intCompanyLocationId] = ARIA.[intLocationId]
 LEFT OUTER JOIN
 	tblSMTerm SMT
-		ON CTCD.[intTermId] = SMT.[intTermID]	
+		ON ARCC.[intTermId] = SMT.[intTermID]	
 LEFT OUTER JOIN
 	tblSMShipVia SMSV
-		ON CTCD.[intShipViaId] = SMSV.[intEntityShipViaId]
+		ON ARCC.[intShipViaId] = SMSV.[intEntityShipViaId]

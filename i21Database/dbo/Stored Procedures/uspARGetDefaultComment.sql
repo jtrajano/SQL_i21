@@ -176,6 +176,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId = @intCompanyLocationId
+				AND intEntityCustomerId IS NULL
 				AND strType = @strType
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -192,6 +193,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId = @intCompanyLocationId
+				AND intEntityCustomerId IS NULL
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
@@ -206,6 +208,7 @@ BEGIN
 				INNER JOIN (SELECT intDocumentMaintenanceId, strMessage 
 							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
+				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId = @intEntityCustomerId
 				AND strType = @strType
 				AND [strSource] <> 'Statement Footer'
@@ -221,7 +224,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId, strMessage 
 							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
-				WHERE [strSource] = @strTransactionType	
+				WHERE [strSource] = @strTransactionType
+				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId = @intEntityCustomerId
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -236,7 +240,9 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId, strMessage 
 							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
-				WHERE [strSource] = @strTransactionType		
+				WHERE [strSource] = @strTransactionType
+				AND intCompanyLocationId IS NULL
+				AND intEntityCustomerId IS NULL		
 				AND strType = @strType
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -252,6 +258,8 @@ BEGIN
 				INNER JOIN (SELECT intDocumentMaintenanceId, strMessage 
 							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
+				AND intCompanyLocationId IS NULL
+				AND intEntityCustomerId IS NULL		
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END

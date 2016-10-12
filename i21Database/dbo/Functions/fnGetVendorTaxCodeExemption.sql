@@ -2,6 +2,7 @@
 ( 
 	 @VendorId			INT
 	,@TransactionDate	DATETIME
+	,@TaxGroupId		INT
 	,@TaxCodeId			INT
 	,@TaxClassId		INT
 	,@TaxState			NVARCHAR(100)
@@ -47,6 +48,7 @@ BEGIN
 	WHERE 
 		SMTGCE.intCategoryId = @ItemCategoryId
 		AND SMTGC.[intTaxCodeId] = @TaxCodeId
+		AND SMTGC.[intTaxGroupId] = @TaxGroupId
 
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN

@@ -14,11 +14,13 @@
 	[intItemWeightUOMId]					INT												NULL,    
 	[dblDiscount]							NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblItemTermDiscount]					NUMERIC(18, 6)									NULL DEFAULT 0,	
+	[strItemTermDiscountBy]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
     [dblPrice]								NUMERIC(18, 6)									NULL DEFAULT 0,
 	[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblTotalTax]							NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblTotal]								NUMERIC(18, 6)									NULL DEFAULT 0,
-	[ysnSubCurrency]						BIT												NULL DEFAULT 0,	
+	[intSubCurrencyId]						INT												NULL,
+	[dblSubCurrencyRate]					NUMERIC(18, 6)									NULL DEFAULT 1,
 	[ysnRestricted]							BIT												NULL DEFAULT 0,
 	[ysnBlended]							BIT												NULL DEFAULT 0,	
 	[intAccountId]							INT												NULL,
@@ -59,6 +61,7 @@
 	[intSiteDetailId]						INT												NULL,
 	[intLoadDetailId]						INT												NULL,
 	[intOriginalInvoiceDetailId]			INT												NULL,
+	[intConversionAccountId]				INT												NULL,
 	[intEntitySalespersonId]				INT												NULL,
 	[intSiteId]								INT												NULL,
 	[strBillingBy]							NVARCHAR(100)   COLLATE Latin1_General_CI_AS	NULL,
@@ -78,12 +81,14 @@
 	[intCommentTypeId]						INT												NULL,
 	[dblMargin]								NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblRecipeQuantity]						NUMERIC(18, 6)									NULL DEFAULT 0,
+	[intStorageScheduleTypeId]						INT												NULL,
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intCOGSAccountId] FOREIGN KEY ([intCOGSAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intSalesAccountId] FOREIGN KEY ([intSalesAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intInventoryAccountId] FOREIGN KEY ([intInventoryAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intConversionAccountId] FOREIGN KEY ([intConversionAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblICInventoryShipmentItem_intInventoryShipmentItemId] FOREIGN KEY ([intInventoryShipmentItemId]) REFERENCES [dbo].[tblICInventoryShipmentItem] ([intInventoryShipmentItemId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblICInventoryShipmentCharge_intInventoryShipmentChargeId] FOREIGN KEY ([intInventoryShipmentChargeId]) REFERENCES [dbo].[tblICInventoryShipmentCharge] ([intInventoryShipmentChargeId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [dbo].[tblSOSalesOrderDetail] ([intSalesOrderDetailId]),	
@@ -101,7 +106,9 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [tblGRCustomerStorage]([intCustomerStorageId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblCCSiteDetail_intSiteDetailId] FOREIGN KEY ([intSiteDetailId]) REFERENCES [tblCCSiteDetail]([intSiteDetailId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId]),
-	CONSTRAINT [FK_tblARInvoiceDetail_tblMFRecipeItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId])
+	CONSTRAINT [FK_tblARInvoiceDetail_tblMFRecipeItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
+	CONSTRAINT [FK_tblARInvoice_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 );
 
 GO

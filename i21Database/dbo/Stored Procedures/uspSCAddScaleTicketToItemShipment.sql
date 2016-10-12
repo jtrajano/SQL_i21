@@ -69,7 +69,15 @@ DECLARE @ShipmentStagingTable AS ShipmentStagingTable,
         @total as int,
 		@intSurchargeItemId as int,
 		@intFreightItemId as int;
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
+BEGIN 
+	CREATE TABLE #tmpAddItemShipmentResult (
+		intSourceId INT
+		,intInventoryShipmentId INT
+	)
+END 
 
+-- Insert Entries to Stagging table that needs to processed to Shipment Load
 BEGIN 
 	INSERT INTO @ShipmentStagingTable(
 		intOrderType
@@ -101,7 +109,7 @@ BEGIN
 		)
 		SELECT
 		intOrderType				= @intOrderType
-		,intEntityCustomerId		= SC.intEntityId
+		,intEntityCustomerId		= @intEntityId
 		,intCurrencyId				= SC.intCurrencyId
 		,intShipFromLocationId		= SC.intProcessingLocationId
 		,intShipToLocationId		= (select top 1 intShipToId from tblARCustomer where intEntityCustomerId = @intEntityId)
@@ -138,66 +146,6 @@ BEGIN
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
---		INSERT INTO dbo.tblICInventoryShipment (
---				strShipmentNumber
---				,dtmShipDate
---				,intOrderType
---				,strReferenceNumber
---				,dtmRequestedArrivalDate
---				,intShipFromLocationId
---				,intEntityCustomerId
---				,intShipToLocationId
---				,intFreightTermId
---				,strBOLNumber
---				,intShipViaId
---				,strVessel
---				,strProNumber
---				,strDriverId
---				,strSealNumber
---				,strDeliveryInstruction
---				,dtmAppointmentTime
---				,dtmDepartureTime
---				,dtmArrivalTime
---				,dtmDeliveredDate
---				,dtmFreeTime
---				,strReceivedBy
---				,strComment
---				,ysnPosted
---				,intEntityId
---				,intCreatedUserId
---				,intConcurrencyId
---				,intSourceType
---		)
---		SELECT	strShipmentNumber			= @ShipmentNumber
---				,dtmShipDate				= SC.dtmTicketDateTime
---				,intOrderType				= @intOrderType
---				,strReferenceNumber			= SC.strCustomerReference
---				,dtmRequestedArrivalDate	= NULL -- TODO
---				,intShipFromLocationId		= SC.intProcessingLocationId
---				,intEntityCustomerId		= SC.intEntityId
---				,intShipToLocationId		= NULL -- TODO
---				,intFreightTermId			= 1 -- TODO
---				,strBOLNumber				= SC.strTicketNumber -- TODO
---				,intShipViaId				= NULL
---				,strVessel					= SC.strTruckName -- TODO
---				,strProNumber				= NULL 
---				,strDriverId				= SC.strDriverName
---				,strSealNumber				= NULL 
---				,strDeliveryInstruction		= NULL 
---				,dtmAppointmentTime			= NULL 
---				,dtmDepartureTime			= NULL 
---				,dtmArrivalTime				= NULL 
---				,dtmDeliveredDate			= NULL 
---				,dtmFreeTime				= NULL 
---				,strReceivedBy				= NULL 
---				,strComment					= SC.strTicketComment
---				,ysnPosted					= 0 
---				,intEntityId				= dbo.fnGetUserEntityId(@intUserId) 
---				,intCreatedUserId			= @intUserId
---				,intConcurrencyId			= 1
---				,intSourceType				= 1
---FROM	dbo.tblSCTicket SC
---WHERE	SC.intTicketId = @intTicketId
 END 
 
 -- Get the identity value from tblICInventoryShipment
@@ -253,31 +201,43 @@ BEGIN
 	,[intChargeId]						= IC.intItemId
 	,[strCostMethod]					= IC.strCostMethod
 	,[dblRate]							= CASE
-											WHEN IC.strCostMethod = 'Per Unit' THEN 
-											CASE 
-												WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-												WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
-											END
+											WHEN IC.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount
 											WHEN IC.strCostMethod = 'Amount' THEN 0
 										END
+	--Comment this line for temporary fixes in Inventory Shipment Cost
+	--,[dblRate]							= CASE
+	--										WHEN IC.strCostMethod = 'Per Unit' THEN 
+	--										CASE 
+	--											WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+	--											WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+	--										END
+	--										WHEN IC.strCostMethod = 'Amount' THEN 0
+	--									END
 	,[intCostUOMId]						= @intTicketItemUOMId
 	,[intOtherChargeEntityVendorId]		= NULL
 	,[dblAmount]						= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 0
-											WHEN IC.strCostMethod = 'Amount' THEN 
-											CASE 
-												WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-												WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
-											END
+											WHEN IC.strCostMethod = 'Amount' THEN dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId)
+											--CASE 
+											--	WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId) * -1)
+											--	WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId)
+											--END
 										END
-	,[ysnAccrue]						= CASE
-											WHEN QM.dblDiscountAmount < 0 THEN 1
-											WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
-										END
-	,[ysnPrice]							= CASE
-											WHEN QM.dblDiscountAmount < 0 THEN 1
-											WHEN QM.dblDiscountAmount > 0 THEN IC.ysnPrice
-										END
+	--Comment this line for temporary fixes in Inventory Shipment Cost
+	--,[dblAmount]						= CASE
+	--										WHEN IC.strCostMethod = 'Per Unit' THEN 0
+	--										WHEN IC.strCostMethod = 'Amount' THEN 
+	--										CASE 
+	--											WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+	--											WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+	--										END
+	--									END
+	--,[ysnAccrue]						= CASE
+	--										WHEN QM.dblDiscountAmount < 0 THEN 1
+	--										WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
+	--									END
+	,[ysnAccrue]						= 0
+	,[ysnPrice]							= 1
 	FROM @ShipmentStagingTable SE
 	INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
 	INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
@@ -405,54 +365,6 @@ ELSE
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 		WHERE SE.intSourceId = @intTicketId AND SC.dblFreightRate > 0
 	END
-	--INSERT INTO dbo.tblICInventoryShipmentItem (
-	--		intInventoryShipmentId
-	--		,intSourceId
-	--		,intLineNo
-	--		,intOrderId
-	--		,intItemId
-	--		,intSubLocationId
-	--		,dblQuantity
-	--		,intItemUOMId
-	--		,intWeightUOMId
-	--		,dblUnitPrice
-	--		,intDockDoorId
-	--		,strNotes
-	--		,intSort
-	--		,intConcurrencyId
-	--		,intOwnershipType
-	--		,intStorageLocationId
-	--		,intDiscountSchedule
-	--)
-	--SELECT			
-	--		intInventoryShipmentId	= @InventoryShipmentId
-	--		,intSourceId			= @intTicketId
-	--		,intLineNo				= ISNULL (LI.intTransactionDetailId, 1)
-	--		,intOrderId				= CNT.intContractHeaderId
-	--		,intItemId				= SC.intItemId
-	--		,intSubLocationId		= SC.intSubLocationId
-	--		,dblQuantity			= LI.dblQty
-	--		,intItemUOMId			= LI.intItemUOMId
-	--		,intWeightUOMId			= (SELECT intUnitMeasureId from tblSCScaleSetup WHERE intScaleSetupId = SC.intScaleSetupId)
-	--		--,dblUnitPrice			= LI.dblCost
-	--		,dblUnitPrice			= SC.dblUnitPrice + SC.dblUnitBasis
-	--		,intDockDoorId			= NULL
-	--		,strNotes				= SC.strTicketComment
-	--		,intSort				= 1
-	--		,intConcurrencyId		= 1
-	--		,intOwnershipType       = CASE
-	--								  WHEN LI.ysnIsStorage = 0
-	--								  THEN 1
-	--								  WHEN LI.ysnIsStorage = 1
-	--								  THEN 2
-	--								  END
-	--		,intStorageLocationId	= SC.intStorageLocationId
-	--		,intDiscountSchedule	= SC.intDiscountId
-	--FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
-	--		INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId
-	--		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-	--		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
-	--WHERE	SC.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 END
 SELECT @checkContract = COUNT(intTransactionDetailId) FROM @Items WHERE intTransactionDetailId > 0;
 IF(@checkContract > 0)
@@ -513,14 +425,27 @@ EXEC dbo.uspICAddItemShipment
 --    EXEC uspICReserveStockForInventoryShipment
 --        @InventoryShipmentId
 --END 
-SELECT @InventoryShipmentId = intInventoryShipmentId  FROM tblICInventoryShipmentItem
-where intSourceId = @intTicketId
-ORDER BY intInventoryShipmentId DESC
+DECLARE @ShipmentId INT
+		,@strTransactionId NVARCHAR(50);
+WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddItemShipmentResult) 
+BEGIN
+	SELECT TOP 1 
+			@ShipmentId = intInventoryShipmentId  
+	FROM	#tmpAddItemShipmentResult 
+
+	SET @InventoryShipmentId = @ShipmentId
+
+	DELETE FROM #tmpAddItemShipmentResult 
+	WHERE intInventoryShipmentId = @ShipmentId
+END 
+
+--SELECT @InventoryShipmentId = MAX(intInventoryShipmentId) from tblICInventoryShipmentItem
+--WHERE intSourceId = @intTicketId
 
 UPDATE	SC
 SET		SC.intInventoryShipmentId = addResult.intInventoryShipmentId
 FROM	dbo.tblSCTicket SC INNER JOIN tblICInventoryShipmentItem addResult
-			ON SC.intTicketId = addResult.intSourceId
+		ON SC.intTicketId = addResult.intSourceId
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]

@@ -24,8 +24,8 @@ FROM (
 		, dblQtyToReceive			= dblDetailQuantity - (dblDetailQuantity - dblBalance)
 		, intLoadToReceive			= intNoOfLoad - intLoadReceived
 		, dblUnitCost				= dblSeqPrice
-		, dblTax					= CAST(0 AS NUMERIC(18, 6)) 
-		, dblLineTotal				= CAST(0 AS NUMERIC(18, 6)) 
+		, dblTax					= CAST(0 AS NUMERIC(18, 6))
+		, dblLineTotal				= CAST((dblDetailQuantity - (dblDetailQuantity - dblBalance)) * dblSeqPrice AS NUMERIC(18, 6))
 		, strLotTracking			= strLotTracking
 		, intCommodityId			= intCommodityId
 		, intContainerId			= CAST(NULL AS INT) 

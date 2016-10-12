@@ -150,6 +150,7 @@
     <None Include="dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql" />
     <None Include="Scripts\AP\UpdateImportedBills1099.sql" />
     <None Include="Scripts\PAT\DropStoredProcedures.sql" />
+    <None Include="Scripts\SM\InsertOriginTaxClassXRef.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -351,5 +352,12 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateCategoryFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDYMOCustomerLabelReportView.sql" />
+    <Build Include="dbo\Tables\tblSMTaxClassXref.sql" />
+    <Build Include="dbo\Tables\tblSMTaxXRef.sql" />
+    <Build Include="dbo\Tables\tblARImportInvoiceLog.sql" />
+    <Build Include="dbo\Tables\tblARptticmst.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceFromPTTICMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceBackupPTTICMST.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateForPrintDeliveryTicketView.sql" />
   </ItemGroup>
 </Project>

@@ -34,4 +34,4 @@ FROM         dbo.tblCFTransaction AS cfTrans INNER JOIN
                                 FROM         dbo.tblCFTransactionPrice
                                 WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId
-WHERE     (cfTrans.ysnPosted = 0)
+WHERE     NOT ((1 = cfTrans.[ysnPosted]) AND (cfTrans.[ysnPosted] IS NOT NULL))

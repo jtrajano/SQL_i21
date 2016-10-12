@@ -47,7 +47,7 @@ SELECT
 	,intConcurrencyId = J.intConcurrencyId
 	,strCustomerPhone = ISNULL(ConPhone.strPhone,'')
 	,strOrderNumber = ISNULL(J.strOrderNumber,'')
-	,dblSiteEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
+	,dblSiteEstimatedPercentLeft = ISNULL(J.dblPercentLeft,0.0)
 	,H.strFillMethod
 	,A.dtmLastDeliveryDate
 	,J.dtmCallInDate
@@ -55,6 +55,8 @@ SELECT
 	,strSerialNumber = Q.strSerialNumber
 	,R.strTaxGroup
 	,A.dblYTDGalsThisSeason
+	,ysnTaxable = ISNULL(A.ysnTaxable,0)
+	,strSiteDescription = ISNULL(A.strDescription,'')
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID

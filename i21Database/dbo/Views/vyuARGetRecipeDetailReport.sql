@@ -4,6 +4,11 @@ SELECT RECIPEITEMS.*
 	 , intOneLinePrintId			= ISNULL(R.intOneLinePrintId, 1)
 	 , R.strName
 	 , R.ysnActive
+	 , strItem						= CASE WHEN ISNULL(RECIPEITEMS.intCommentTypeId, 0) = 0 THEN 
+												CASE WHEN ISNULL(I.strItemNo, '') = '' THEN RECIPEITEMS.strItemDescription ELSE LTRIM(RTRIM(I.strItemNo)) + ' - ' + ISNULL(RECIPEITEMS.strItemDescription, '') END 
+										   ELSE 
+												RECIPEITEMS.strItemDescription 
+									  END
 	 , strItemNo					= CASE WHEN ISNULL(RECIPEITEMS.intCommentTypeId, 0) = 0 THEN I.strItemNo ELSE NULL END
 	 , I.strInvoiceComments
 	 , UOM.strUnitMeasure 
@@ -18,7 +23,7 @@ FROM
 		  , strItemDescription
 		  , dblQtyOrdered			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyOrdered ELSE NULL END
 		  , dblQtyShipped			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyShipped ELSE NULL END
-		  , dblDiscount				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblDiscount ELSE NULL END
+		  , dblDiscount				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN ISNULL(dblDiscount, 0) / 100 ELSE NULL END
 		  , dblTotalTax				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotalTax ELSE NULL END
 		  , dblPrice				= NULL
 		  , dblTotal				= NULL
@@ -37,7 +42,7 @@ FROM
 		 , strItemDescription
 		 , dblQtyOrdered			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyOrdered ELSE NULL END
 		 , dblQtyShipped			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyShipped ELSE NULL END
-		 , dblDiscount				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblDiscount ELSE NULL END
+		 , dblDiscount				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN ISNULL(dblDiscount, 0) / 100 ELSE NULL END
 		 , dblTotalTax				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotalTax ELSE NULL END
 		 , dblPrice					= NULL
 		 , dblTotal					= NULL

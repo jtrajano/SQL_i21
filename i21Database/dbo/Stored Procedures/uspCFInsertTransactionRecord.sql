@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -723,9 +722,23 @@ BEGIN
 		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid quantity - ' + @dblQuantity)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid quantity - ' + Str(@dblQuantity, 16, 8))
 
-			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid quantity - ' + @dblQuantity)
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid quantity - ' + Str(@dblQuantity, 16, 8))
+
+			INSERT INTO tblCFTransactionPrice
+			(
+				 intTransactionId
+				,strTransactionPriceId
+				,dblOriginalAmount
+				,dblCalculatedAmount
+			)
+			VALUES 
+			 (@Pk,'Gross Price',@dblOriginalGrossPrice,0.0)
+			,(@Pk,'Net Price',0.0,0.0)
+			,(@Pk,'Total Amount',0.0,0.0)
+
+			RETURN;
 		END
 		
 		

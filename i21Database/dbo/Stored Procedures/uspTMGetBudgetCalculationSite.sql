@@ -98,7 +98,8 @@ BEGIN
 									A.intSiteItemId --@ItemId 				
 								,A.intEntityCustomerId	--@CustomerId	
 								,A.intLocationId	--@LocationId		
-								,NULL	--@ItemUOMId		 
+								,NULL	--@ItemUOMId
+								,NULL	--@CurrencyId		 
 								,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)	 --@TransactionDate	
 								,A.dblRequiredQuantity	--@Quantity			
 								,NULL --@ContractHeaderId		
@@ -115,6 +116,7 @@ BEGIN
 								,NULL --@ShipToLocationId  
 								,NULL --@VendorLocationId
 								,NULL --@InvoiceType
+								,0	  --@GetAllAvailablePricing
 								)
 						ELSE
 							B.dblPrice

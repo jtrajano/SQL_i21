@@ -36,6 +36,8 @@ BEGIN
 	SET @shipToId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation)
 END
 
+EXEC uspSMGetStartingNumber 7, @generatedBillBatchRecordId OUT
+
 INSERT INTO tblAPBillBatch(
 	[intAccountId],
     [ysnPosted],

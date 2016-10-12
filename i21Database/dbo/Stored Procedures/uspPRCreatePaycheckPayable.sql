@@ -63,6 +63,18 @@ DECLARE @intBillIds AS Id;
 DECLARE @billRecordNumber NVARCHAR(50)
 DECLARE @intStartingNumberId INT
 
+/* Check if valid AP Account */
+DECLARE @intAPAccount INT = NULL
+SELECT @intAPAccount = intAPAccount FROM tblSMCompanyLocation 
+WHERE intCompanyLocationId = (SELECT TOP 1 intCompanyLocationId 
+								FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId)
+
+IF (@intAPAccount IS NULL)
+BEGIN
+	RAISERROR('No default AP Account setup for this Location.', 11, 1)
+	GOTO Process_Exit
+END
+
 /* Loop through each vendor and create Vouchers */
 WHILE EXISTS (SELECT TOP 1 1 FROM #tmpVendors)
 BEGIN
@@ -101,7 +113,7 @@ BEGIN
 		[intOrderById]			=	A.[intOrderById],
 		[intCurrencyId]			=	A.[intCurrencyId]
 	INTO #tmpBillData
-	FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, CASE WHEN (@ysnVoid = 1) THEN 3 ELSE 1 END, DEFAULT, DEFAULT, DEFAULT, DEFAULT, NULL) A
+	FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, CASE WHEN (@ysnVoid = 1) THEN 3 ELSE 1 END, DEFAULT, DEFAULT, @intAPAccount, DEFAULT, NULL) A
 
 	/* Insert Voucher Header */
 	INSERT INTO tblAPBill

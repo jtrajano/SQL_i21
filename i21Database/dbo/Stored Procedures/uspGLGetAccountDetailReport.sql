@@ -1,7 +1,7 @@
 ﻿CREATE  PROCEDURE [dbo].[uspGLGetAccountDetailReport]
        (@xmlParam NVARCHAR(MAX)= '')
 AS
-   BEGIN
+BEGIN
    SET NOCOUNT ON;
    IF (ISNULL(@xmlParam,'')  = '')
    BEGIN

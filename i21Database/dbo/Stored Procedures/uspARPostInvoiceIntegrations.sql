@@ -82,6 +82,9 @@ END
 --Contracts
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 
+--Prepaids
+
+EXEC dbo.[uspARUpdatePrepaymentAndCreditMemo] @TransactionId, @post
 
 UPDATE ARID
 SET

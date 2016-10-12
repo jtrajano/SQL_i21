@@ -44,6 +44,7 @@ BEGIN
 			AND vwtax_auth_id1 = @strTaxLocale1
 			AND vwtax_auth_id2 = @strTaxLocale2
 			AND dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
+			AND vwtax_itm_no = ''''
 		ORDER BY dtmEffectiveDate ASC
 	END
 	

@@ -689,7 +689,7 @@ INSERT INTO #TempCannedPanels VALUES (139, 0, 10, 100, 250, 0, NULL, NULL, NULL,
 	vwcusmst.vwcus_key as ''Cust Number'',
 	CASE 
 		WHEN vwcusmst.vwcus_co_per_ind_cp = ''C''
-			THEN (RTRIM(ISNULL(vwcusmst.vwcus_last_name,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_first_name,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_mid_init,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_name_suffix,'''')))
+			THEN (RTRIM(ISNULL(vwcusmst.vwcus_last_name COLLATE SQL_Latin1_General_CP1_CS_AS,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_first_name COLLATE SQL_Latin1_General_CP1_CS_AS,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_mid_init COLLATE SQL_Latin1_General_CP1_CS_AS,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_name_suffix COLLATE SQL_Latin1_General_CP1_CS_AS,'''')))
 		ELSE
 		    CASE 
 				WHEN vwcusmst.vwcus_first_name IS NULL OR RTRIM(vwcusmst.vwcus_first_name) = ''''

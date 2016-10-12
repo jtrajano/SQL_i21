@@ -46,13 +46,13 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
 	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer (tblARCustomer.intEntityCustomerId)	
 	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
-	,[intCurrencyId]						INT												NULL		-- Currency Id	
-	,[intSubCurrencyCents]					INT												NULL		-- Subcurrency Rate
+	,[intCurrencyId]						INT												NULL		-- Currency Id (tblSMCurrency.intCurrencyID)
 	,[intTermId]							INT												NULL		-- Term Id(If NULL, customer's default will be used)	
 	,[intPeriodsToAccrue]					INT												NULL		-- Default(1) Period to Accrue	
 	,[dtmDate]								DATETIME										NOT NULL	-- Invoice Date
 	,[dtmDueDate]							DATETIME										NULL		-- Due Date(If NULL will be computed base on Term) 	
 	,[dtmShipDate]							DATETIME										NULL		-- Ship Date
+	,[dtmPostDate]							DATETIME										NULL		-- Post Date
 	,[intEntitySalespersonId]				INT												NULL		-- Entity Id of SalesPerson(If NULL, customer's default will be used)	
 	,[intFreightTermId]						INT												NULL		-- Freight Term Id
 	,[intShipViaId]							INT												NULL		-- Entity Id of ShipVia
@@ -84,6 +84,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Invoices will be posted
 																										-- If [ysnPost] = 0 > Existing posted Invoices will be unposted
 																										-- If [ysnPost] IS NULL > No action will be made
+	,[ysnUpdateAvailableDiscount]			BIT												NULL		-- If [ysnUpdateAvailableDiscount] = 1 > Updates existing Posted/Unposted Invoice Available Discount Amount
+
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)
     ,[intItemId]							INT												NULL		-- The Item Id 
@@ -101,6 +103,10 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intItemUOMId]							INT												NULL		-- The UOM Id
     ,[dblQtyShipped]						NUMERIC(18, 6)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
+	,[dblItemTermDiscount]					NUMERIC(18, 6)									NULL		-- The Term discount to apply to a line item upon payment
+	,[strItemTermDiscountBy]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values(Term Discount Calculation Method) 
+																											-- 1. "Amount"
+																											-- 2. "Percentage"	
 	,[dblItemWeight]						NUMERIC(18, 6)									NULL
 	,[intItemWeightUOMId]					INT												NULL	
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
@@ -153,8 +159,12 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnVirtualMeterReading]				BIT												NULL
 	,[ysnClearDetailTaxes]					BIT												NULL		-- Indicate whether to clear tax details before inserting tax details from LineItemTaxDetailStagingTable
 	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id for linking line item detail taxes (LineItemTaxDetailStagingTable) which are also fro processing
-	,[ysnSubCurrency]						BIT												NULL		-- Indicates whether the line item price is on sub currency
+	,[intSubCurrencyId]						INT												NULL		-- SubCurrency Id (tblSMCurrency.intCurrencyID) == tblARInvoice.[intCurrencyId] || tblSMCurrency.[intCurrencyID] WHERE tblSMCurrency.[intMainCurrencyId] = tblARInvoice.[intCurrencyId]
+	,[dblSubCurrencyRate]					NUMERIC(18, 6)									NULL		-- SubCurrency Rate
 	,[ysnBlended]							BIT												NULL		-- Indicates if a Finished Good item is already blended
 	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
 	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
+    ,[intConversionAccountId]                INT                                            NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
+
+	,[intStorageScheduleTypeId]				INT												NULL		-- Indicates the Grain Bank of an Item
 )

@@ -98,7 +98,7 @@ WHERE	 A.intBankAccountId = @intBankAccountId
 		AND A.ysnPosted = 1
 		AND A.ysnCheckVoid = 0
 		AND A.ysnClr = 0
-		AND A.dtmDate <= @dtmStatementDate
+		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= @dtmStatementDate
 		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry
 					SELECT strLink FROM [dbo].[fnGetDepositEntry]()
 			)
@@ -137,11 +137,11 @@ BEGIN
 
 	IF @dblAmount < 1
 	BEGIN
-		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE ABS(dblAmount) = ABS(@dblAmount) AND intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@BANK_TRANSACTION,@ORIGIN_WITHDRAWAL, @BANK_TRANSFER_WD)
+		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE ABS(dblAmount) = ABS(@dblAmount) AND intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@BANK_TRANSACTION,@ORIGIN_WITHDRAWAL, @BANK_TRANSFER_WD,  @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT,  @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
 	END
 	ELSE
 	BEGIN
-		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE dblAmount = @dblAmount AND intBankTransactionTypeId IN (@BANK_TRANSACTION,@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT,  @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
+		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE dblAmount = @dblAmount AND intBankTransactionTypeId IN (@BANK_TRANSACTION,@BANK_DEPOSIT, @BANK_TRANSFER_DEP)
 	END
 
 	IF (@strPayee IS NULL OR @strPayee = '') AND (@strReferenceNumber IS NULL OR @strReferenceNumber = '') AND @Count > 1
@@ -191,12 +191,12 @@ BEGIN
 				--				ELSE 0
 				--		END 
 							 --WITHDRAWAL ENTRY
-				AND 1 = CASE WHEN @dblAmount < 0 AND A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@BANK_TRANSACTION,@ORIGIN_WITHDRAWAL, @BANK_TRANSFER_WD)THEN
-							CASE WHEN A.intBankTransactionTypeId = @BANK_TRANSFER_WD AND ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 --Bank Transfer WD has a (+) value so need to make it absolute
+				AND 1 = CASE WHEN @dblAmount < 0 AND A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@BANK_TRANSACTION,@ORIGIN_WITHDRAWAL, @BANK_TRANSFER_WD,  @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)THEN
+							CASE WHEN A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @BANK_TRANSACTION, @BANK_TRANSFER_WD, @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT,  @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK) AND ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 --Bank Transfer WD has a (+) value so need to make it absolute
 								 WHEN A.dblAmount = @dblAmount THEN 1 
 								 ELSE 0 END
 							--DEPOSIT ENTRY
-							WHEN  @dblAmount > 0 AND  A.intBankTransactionTypeId IN (@BANK_TRANSACTION,@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT,  @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK) THEN
+							WHEN  @dblAmount > 0 AND  A.intBankTransactionTypeId IN (@BANK_TRANSACTION,@BANK_DEPOSIT, @BANK_TRANSFER_DEP) THEN
 									CASE WHEN A.dblAmount = @dblAmount THEN 1 ELSE 0 END 	
 						ELSE 0
 						END

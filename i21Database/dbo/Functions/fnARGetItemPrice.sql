@@ -4,6 +4,7 @@
 	,@CustomerId				INT	
 	,@LocationId				INT
 	,@ItemUOMId					INT
+	,@CurrencyId				INT
 	,@TransactionDate			DATETIME
 	,@Quantity					NUMERIC(18,6)
 	,@ContractHeaderId			INT
@@ -20,6 +21,7 @@
 	,@ShipToLocationId			INT
 	,@VendorLocationId			INT
 	,@InvoiceType				NVARCHAR(200)
+	,@GetAllAvailablePricing	BIT
 )
 RETURNS NUMERIC(18,6)
 AS
@@ -34,6 +36,7 @@ BEGIN
 			,@CustomerId
 			,@LocationId
 			,@ItemUOMId
+			,@CurrencyId
 			,@TransactionDate
 			,@Quantity
 			,@ContractHeaderId
@@ -55,6 +58,7 @@ BEGIN
 			,NULL
 			,@InvoiceType
 			,NULL
+			,@GetAllAvailablePricing
 		)
 
 	RETURN @ItemPrice

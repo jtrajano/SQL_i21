@@ -49,7 +49,8 @@ DECLARE @EntityCustomerId		INT,
 		@ShipToLocationId		INT,
 		@BillToLocationId		INT,
 		@SplitId				INT,
-		@EntityContactId		INT
+		@EntityContactId		INT,
+		@StorageScheduleTypeId	INT
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
@@ -61,8 +62,11 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intContractDetailId			INT,
 							dblQtyOrdered				NUMERIC(18,6),
 							dblQtyRemaining				NUMERIC(18,6),
+							dblLicenseAmount			NUMERIC(18,6),
 							dblMaintenanceAmount		NUMERIC(18,6),
 							dblDiscount					NUMERIC(18,6),
+							dblItemTermDiscount			NUMERIC(18,6),
+							strItemTermDiscountBy		NVARCHAR(50),
 							dblPrice					NUMERIC(18,6),
 							strPricing					NVARCHAR(250),
 							intTaxGroupId				INT,
@@ -84,7 +88,10 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							strShipmentNumber			NVARCHAR(100),
 							dblContractBalance			INT,
 							dblContractAvailable		INT,
-							intEntityContactId			INT)
+							intEntityContactId			INT,
+							intStorageScheduleTypeId	INT,
+							[intSubCurrencyId]			INT,
+							[dblSubCurrencyRate]		NUMERIC(18,6))
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -107,8 +114,11 @@ SELECT intItemId					= SI.intItemId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= SI.dblQtyOrdered
 	 , dblQtyRemaining				= CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
+	 , dblLicenseAmount				= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
 	 , dblMaintenanceAmount			= CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
 	 , dblDiscount					= SI.dblDiscount
+	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
+	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
 	 , strPricing					= SOD.strPricing 
 	 , intTaxGroupId				= SI.intTaxGroupId
@@ -131,6 +141,9 @@ SELECT intItemId					= SI.intItemId
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
+	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId				= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -153,8 +166,11 @@ SELECT intItemId					= SOD.intItemId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= 0
 	 , dblQtyRemaining				= 0
+	 , dblLicenseAmount				= 0
 	 , dblMaintenanceAmount			= 0
 	 , dblDiscount					= 0
+	 , dblItemTermDiscount			= 0
+	 , strItemTermDiscountBy		= 0
 	 , dblPrice						= 0
 	 , strPricing					= NULL 
 	 , intTaxGroupId				= NULL
@@ -177,6 +193,9 @@ SELECT intItemId					= SOD.intItemId
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
+	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId				= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -193,8 +212,11 @@ SELECT intItemId					= ICSI.intItemId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyRemaining				= ICSI.dblQuantity
+	 , dblLicenseAmount				= @dblZeroAmount
 	 , dblMaintenanceAmount			= @dblZeroAmount
 	 , dblDiscount					= SOD.dblDiscount
+	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
+	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= ICSI.dblUnitPrice
 	 , strPricing					= SOD.strPricing 
 	 , intTaxGroupId				= SOD.intTaxGroupId
@@ -217,6 +239,9 @@ SELECT intItemId					= ICSI.intItemId
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
+	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId				= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 FROM tblICInventoryShipmentItem ICSI 
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
@@ -235,9 +260,12 @@ SELECT intItemId					= ARSI.intItemId
 	 , intContractHeaderId			= ARSI.intContractHeaderId
 	 , intContractDetailId			= ARSI.intContractDetailId
 	 , dblQtyOrdered				= 0
-	 , dblQtyRemaining				= ARSI.dblQtyRemaining  
+	 , dblQtyRemaining				= ARSI.dblQtyRemaining
+	 , dblLicenseAmount				= 0  
 	 , dblMaintenanceAmount			= 0 
 	 , dblDiscount					= ARSI.dblDiscount
+	 , dblItemTermDiscount			= 0
+	 , strItemTermDiscountBy		= NULL
 	 , dblPrice						= ARSI.dblPrice 
 	 , strPricing					= ''
 	 , intTaxGroupId				= NULL
@@ -260,7 +288,9 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblContractBalance			= 0
 	 , dblContractAvailable			= 0
 	 , intEntityCustomerId			= NULL
-	
+	 , intStorageScheduleTypeId		= ARSI.intStorageScheduleTypeId
+	 , intSubCurrencyId				= NULL
+	 , dblSubCurrencyRate			= 1
 FROM vyuARShippedItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -411,7 +441,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblPayment]
 					,'Invoice'
 					,'Software'
-					,0 --Payment Method
+					,NULL --Payment Method
 					,[intAccountId]
 					,[intFreightTermId]
 					,@UserId
@@ -473,7 +503,10 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblLicenseAmount]
 					,[dtmMaintenanceDate]
 					,[intTaxGroupId]
-					,[intConcurrencyId])
+					,[intConcurrencyId]
+					,[intStorageScheduleTypeId]
+					,[intSubCurrencyId]
+					,[dblSubCurrencyRate])
 				SELECT 	
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
@@ -496,10 +529,13 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strMaintenanceType]		--[strMaintenanceType]
 					,[strFrequency]		        --[strFrequency]
 					,[dblMaintenanceAmount]		--[dblMaintenanceAmount]
-					,0							--[dblLicenseAmount]
+					,CASE WHEN strMaintenanceType IN ('License Only', 'License/Maintenance') THEN [dblLicenseAmount] ELSE 0 END	--[dblLicenseAmount]
 					,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
 					,[intTaxGroupId]			--[intTaxGroupId]
 					,0
+					,[intStorageScheduleTypeId]
+					,[intSubCurrencyId]
+					,[dblSubCurrencyRate]
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -585,6 +621,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemQtyOrdered			NUMERIC(18,6),
 						@ItemQtyShipped			NUMERIC(18,6),
 						@ItemDiscount			NUMERIC(18,6),
+						@ItemTermDiscount		NUMERIC(18,6),
+						@ItemTermDiscountBy		NVARCHAR(50),
+						@ItemLicenseAmount		NUMERIC(18,6),
 						@ItemPrice				NUMERIC(18,6),
 						@ItemPricing			NVARCHAR(250),
 						@ItemTaxGroupId			INT,		
@@ -604,7 +643,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemMargin				NUMERIC(18,6),
 						@ItemRecipeQty			NUMERIC(18,6),
 						@ContractBalance		INT,
-						@ContractAvailable		INT
+						@ContractAvailable		INT,
+						@ItemSubCurrencyId		INT,
+						@ItemSubCurrencyRate	NUMERIC(18,6)					
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -619,6 +660,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemQtyOrdered			= dblQtyOrdered,
 						@ItemQtyShipped			= dblQtyRemaining,
 						@ItemDiscount			= dblDiscount,
+						@ItemTermDiscount		= dblItemTermDiscount,
+						@ItemTermDiscountBy		= strItemTermDiscountBy,
+						@ItemLicenseAmount      = dblLicenseAmount,
 						@ItemPrice				= dblPrice,
 						@ItemPricing			= strPricing,
 						@ItemTaxGroupId			= intTaxGroupId,
@@ -639,7 +683,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemMaintenanceDate	= dtmMaintenanceDate,
 						@ContractBalance		= dblContractBalance,
 						@ContractAvailable		= dblContractAvailable,	
-						@EntityContactId		= intEntityContactId											
+						@EntityContactId		= intEntityContactId,	
+						@StorageScheduleTypeId	= intStorageScheduleTypeId,
+						@ItemSubCurrencyId		= intSubCurrencyId,
+						@ItemSubCurrencyRate	= dblSubCurrencyRate 
 				FROM @tblItemsToInvoice ORDER BY intSalesOrderDetailId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -659,6 +706,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemQtyOrdered				= @ItemQtyOrdered
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
+							,@ItemTermDiscount				= @ItemTermDiscount
+							,@ItemTermDiscountBy			= @ItemTermDiscountBy
+							,@ItemLicenseAmount				= @ItemLicenseAmount
 							,@ItemPrice						= @ItemPrice
 							,@ItemPricing					= @ItemPricing
 							,@RefreshPrice					= 0
@@ -680,6 +730,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemMaintenanceType			= @ItemMaintenanceType
 							,@ItemFrequency					= @ItemFrequency
 							,@ItemMaintenanceDate			= @ItemMaintenanceDate
+							,@ItemSubCurrencyId				= @ItemSubCurrencyId
+							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 
 				UPDATE tblARInvoiceDetail SET dblContractBalance = @ContractBalance, dblContractAvailable = @ContractAvailable
 				FROM @tblItemsToInvoice 
@@ -805,6 +857,26 @@ IF ISNULL(@RaiseError,0) = 0
 --INSERT TO RECURRING TRANSACTION
 IF ISNULL(@SoftwareInvoiceId, 0) > 0
 	BEGIN
+		DECLARE @ysnHasMaintenanceItem  BIT = 0
+		      , @strFrequency			NVARCHAR(50)
+
+		IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceDetail WHERE intInvoiceId = @SoftwareInvoiceId AND strMaintenanceType <> 'License Only' ORDER BY intInvoiceDetailId DESC)
+			BEGIN
+				SET @ysnHasMaintenanceItem = 1
+				SET @strFrequency = (SELECT TOP 1 strFrequency FROM tblARInvoiceDetail WHERE intInvoiceId = @SoftwareInvoiceId AND strMaintenanceType <> 'License Only' ORDER BY intInvoiceDetailId DESC)
+			END			
+			
+		UPDATE tblARInvoice
+		SET intPeriodsToAccrue = CASE WHEN @ysnHasMaintenanceItem = 1 THEN
+									CASE WHEN @strFrequency = 'Monthly' THEN 1
+										 WHEN @strFrequency = 'Bi-Monthly' THEN 2
+										 WHEN @strFrequency = 'Quarterly' THEN 3
+										 WHEN @strFrequency = 'Semi-Annually' THEN 6
+										 WHEN @strFrequency = 'Annually' THEN 12
+									ELSE 1 END
+								 ELSE 1 END
+		WHERE intInvoiceId = @SoftwareInvoiceId
+
 		IF NOT EXISTS (SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @SoftwareInvoiceId AND strTransactionType = 'Invoice')
 			BEGIN
 				EXEC dbo.uspARInsertRecurringInvoice @SoftwareInvoiceId, @UserId
@@ -814,7 +886,7 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 			BEGIN
 				DECLARE @invoiceToPost NVARCHAR(MAX)
 				SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewInvoiceId)
-				UPDATE tblARInvoice SET strType = 'Software' WHERE intInvoiceId = @NewInvoiceId
+				UPDATE tblARInvoice SET strType = (SELECT TOP 1 strType FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId) WHERE intInvoiceId = @NewInvoiceId
 
 				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice'
 			END
@@ -842,12 +914,12 @@ BEGIN
 	WHERE intInvoiceId = @NewInvoiceId
 
 	UPDATE tblARInvoiceDetail SET intItemWeightUOMId = CopySO.intItemWeightUOMId, dblItemWeight = CopySO.dblItemWeight, dblOriginalItemWeight = CopySO.dblOriginalItemWeight,
-		dblItemTermDiscount = CopySO.dblItemTermDiscount
+		dblItemTermDiscount = CopySO.dblItemTermDiscount, intStorageScheduleTypeId = CopySO.intStorageScheduleTypeId
 	FROM(
 		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight,
-			SOD.dblItemTermDiscount
+			SOD.dblItemTermDiscount, SOD.intStorageScheduleTypeId
 		FROM tblSOSalesOrder SO 
-		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount
+		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount, intStorageScheduleTypeId
 					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
 		WHERE strSalesOrderNumber = @SalesOrderNumber
@@ -855,7 +927,8 @@ BEGIN
 	WHERE intInvoiceId = @NewInvoiceId AND tblARInvoiceDetail.intItemId = CopySO.intItemId AND tblARInvoiceDetail.intItemUOMId = CopySO.intItemUOMId AND tblARInvoiceDetail.strSalesOrderNumber = CopySO.strSalesOrderNumber
 END
 
- 
+IF ISNULL(@NewInvoiceId, 0) > 0
+	UPDATE tblARInvoice SET strType = (SELECT TOP 1 strType FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId) WHERE intInvoiceId = @NewInvoiceId
 
 --COMMIT TRANSACTION
 IF ISNULL(@RaiseError,0) = 0

@@ -6,9 +6,9 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 FROM (
 	SELECT
 		intLocationId				= h.intFromLocationId
-		, intEntityVendorId			= CAST(NULL AS INT) 
-		, strVendorId				= CAST(NULL AS NVARCHAR(50))
-		, strVendorName				= CAST(NULL AS NVARCHAR(50))
+		, intEntityVendorId			= CAST(h.intToLocationId AS INT) 
+		, strVendorId				= CAST(Loc.strLocationName AS NVARCHAR(50))
+		, strVendorName				= CAST(Loc.strLocationName AS NVARCHAR(50))
 		, strReceiptType			= 'Transfer Order'
 		, intLineNo					= d.intInventoryTransferDetailId
 		, intOrderId				= h.intInventoryTransferId
@@ -113,7 +113,9 @@ FROM (
 
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-
+			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = toLocation.intLocationId
 	WHERE h.ysnPosted = 1
+		AND h.ysnShipmentRequired = 1
+		AND (h.intStatusId = 1 OR h.intStatusId = 2)
 	
 ) tblAddOrders

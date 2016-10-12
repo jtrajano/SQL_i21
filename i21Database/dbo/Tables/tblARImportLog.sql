@@ -10,6 +10,7 @@
 	[intCompanyLocationId]	INT NULL,
 	[intSuccessCount]		INT NULL,
 	[intFailedCount]		INT NULL,
+	[ysnRecap]				BIT NULL DEFAULT((0)),
     [intConcurrencyId]		INT NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblARImportLog_intImportLogId] PRIMARY KEY CLUSTERED ([intImportLogId] ASC)
 )

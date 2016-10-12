@@ -114,7 +114,6 @@ SELECT TOP 1
 	 @EntityCustomerId					= ARC.[intEntityCustomerId]
 	,@CompanyLocationId					= ARP.[intLocationId]
 	,@CurrencyId						= ARP.[intCurrencyId]
-	,@SubCurrencyCents					= NULL
 	,@TermId							= NULL
 	,@EntityId							= @UserId
 	,@InvoiceDate						= ARP.dtmDatePaid
@@ -196,7 +195,6 @@ SELECT TOP 1
 	,@ItemPerformerId					= NULL
 	,@ItemLeaseBilling					= 0
 	,@ItemVirtualMeterReading			= 0
-	,@SubCurrency						= 0	
 FROM
 	[tblARPayment] ARP
 INNER JOIN
@@ -210,7 +208,6 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	 @EntityCustomerId					= @EntityCustomerId
 	,@CompanyLocationId					= @CompanyLocationId
 	,@CurrencyId						= @CurrencyId
-	,@SubCurrencyCents					= @SubCurrencyCents
 	,@TermId							= @TermId
 	,@EntityId							= @EntityId
 	,@InvoiceDate						= @InvoiceDate
@@ -296,7 +293,6 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemPerformerId					= @ItemPerformerId
 	,@ItemLeaseBilling					= @ItemLeaseBilling
 	,@ItemVirtualMeterReading			= @ItemVirtualMeterReading
-	,@SubCurrency						= @SubCurrency
 	      
 		  
 SET @NewInvoiceId = @NewId		                 

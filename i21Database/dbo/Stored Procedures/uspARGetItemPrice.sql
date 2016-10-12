@@ -15,6 +15,7 @@
 	,@UnlimitedQuantity			BIT             = 0    OUTPUT
 	,@Deviation					NUMERIC(18,6)	= NULL OUTPUT
 	,@TermDiscount				NUMERIC(18,6)	= NULL OUTPUT
+	,@TermDiscountBy			NVARCHAR(50)	= NULL OUTPUT	
 	,@OriginalQuantity			NUMERIC(18,6)	= NULL
 	,@CustomerPricingOnly		BIT				= 0
 	,@ItemPricingOnly			BIT				= 0
@@ -28,7 +29,12 @@
 	,@AllowQtyToExceedContract	BIT				= 0
 	,@InvoiceType				NVARCHAR(200)	= NULL
 	,@TermId					INT				= NULL
+	,@CurrencyId				INT				= NULL
+	,@SubCurrencyId				INT				= NULL OUTPUT
+	,@SubCurrency				NVARCHAR(250)	= NULL OUTPUT
+	,@SubCurrencyRate			NUMERIC(18,6)	= NULL OUTPUT
 	,@PricingType				NVARCHAR(50)	= NULL OUTPUT
+	,@GetAllAvailablePricing	BIT				= 0
 AS	
 
 	SELECT
@@ -43,12 +49,17 @@ AS
 		,@Deviation			= dblDeviation
 		,@TermDiscount		= dblTermDiscount  
 		,@PricingType		= strPricingType
+		,@TermDiscountBy	= strTermDiscountBy
+		,@SubCurrencyId		= intSubCurrencyId
+		,@SubCurrency		= strSubCurrency
+		,@SubCurrencyRate	= dblSubCurrencyRate
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId
 			,@CustomerId
 			,@LocationId
 			,@ItemUOMId
+			,@CurrencyId
 			,@TransactionDate
 			,@Quantity
 			,@ContractHeaderId
@@ -70,6 +81,7 @@ AS
 			,@AllowQtyToExceedContract
 			,@InvoiceType
 			,@TermId
+			,@GetAllAvailablePricing
 		)
 
 RETURN 0

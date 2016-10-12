@@ -15,7 +15,8 @@
 	,@ItemSalesOrderDetailId		INT				= NULL	
 	,@ItemTaxGroupId				INT				= NULL
 	,@EntitySalespersonId			INT				= NULL	
-	,@SubCurrency					BIT				= 0
+	,@ItemSubCurrencyId				INT				= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
@@ -25,6 +26,8 @@
 	,@ItemMargin					NUMERIC(18,6)	= NULL
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@RecomputeTax					BIT				= 1
+	,@ItemConversionAccountId		INT				= NULL
+	,@StorageScheduleTypeId			INT				= NULL
 AS
 
 BEGIN
@@ -36,12 +39,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal NUMERIC(18, 6)
-		,@EntityCustomerId INT
-		,@CompanyLocationId INT
-		,@InvoiceDate DATETIME
-		,@ServiceChargesAccountId INT
-		
+DECLARE @ZeroDecimal				NUMERIC(18, 6)
+		,@EntityCustomerId			INT
+		,@CompanyLocationId			INT
+		,@InvoiceDate				DATETIME
+		,@ServiceChargesAccountId	INT
+		,@CurrencyId				INT
+
 SET @ZeroDecimal = 0.000000
 
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
@@ -55,6 +59,7 @@ SELECT
 	 @EntityCustomerId	= [intEntityCustomerId]
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
+	,@CurrencyId		= [intCurrencyId]
 FROM
 	tblARInvoice
 WHERE
@@ -66,8 +71,17 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 			RAISERROR(120003, 16, 1);
 		RETURN 0;
 	END	
-	
-SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
+
+IF ISNULL(@ItemConversionAccountId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'General' AND [strAccountType] = 'Asset' AND [intAccountId] = @ItemConversionAccountId)
+	BEGIN
+		SET @ErrorMessage = 'Invalid Conversion Account Id! Must be of type ''Asset'' and of category ''General'''
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+
+
+SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)
 --IF ISNULL(@ServiceChargesAccountId,0) = 0
 --	BEGIN
 --		SET @ErrorMessage = 'The Service Charge account in the Company Preferences was not set.'
@@ -92,7 +106,8 @@ BEGIN TRY
 		,[dblPrice]
 		,[dblTotalTax]
 		,[dblTotal]
-		,[ysnSubCurrency]
+		,[intSubCurrencyId]
+		,[dblSubCurrencyRate]
 		,[intAccountId]
 		,[intCOGSAccountId]
 		,[intSalesAccountId]
@@ -134,7 +149,9 @@ BEGIN TRY
 		,[intCommentTypeId]
 		,[dblMargin]
 		,[dblRecipeQuantity]
-		,[intConcurrencyId])
+		,[intConversionAccountId]
+		,[intConcurrencyId]
+		,[intStorageScheduleTypeId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -149,7 +166,8 @@ BEGIN TRY
 		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
 		,[dblTotalTax]						= @ZeroDecimal
 		,[dblTotal]							= @ZeroDecimal
-		,[ysnSubCurrency]					= @SubCurrency
+		,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
+		,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 		,[intAccountId]						= NULL 
 		,[intCOGSAccountId]					= NULL
 		,[intSalesAccountId]				= NULL
@@ -191,8 +209,10 @@ BEGIN TRY
 		,[intCommentTypeId]					= @ItemCommentTypeId
 		,[dblMargin]						= @ItemMargin
 		,[dblRecipeQuantity]				= @ItemRecipeQty
+		,[intConversionAccountId]			= @ItemConversionAccountId
 		,[intConcurrencyId]					= 0
-			
+		,[intStorageScheduleTypeId]			= @StorageScheduleTypeId
+
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0	

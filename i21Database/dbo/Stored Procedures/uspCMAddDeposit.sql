@@ -17,7 +17,6 @@ SET ANSI_WARNINGS OFF
 DECLARE @TransactionName AS VARCHAR(500) = 'CM Add Deposit' + CAST(NEWID() AS NVARCHAR(100));
 
 BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
 
 DECLARE @BANK_DEPOSIT INT = 1
 		,@BANK_WITHDRAWAL INT = 2
@@ -104,7 +103,9 @@ INSERT INTO tblCMBankTransaction(
 	,strLink
 	,ysnClr
 	,dtmDateReconciled
+	,intEntityId
 	,intCreatedUserId
+	,intCompanyLocationId
 	,dtmCreated
 	,intLastModifiedUserId
 	,dtmLastModified
@@ -113,7 +114,7 @@ INSERT INTO tblCMBankTransaction(
 SELECT	strTransactionId			= @strTransactionId
 		,intBankTransactionTypeId	= @BANK_TRANSACTION
 		,intBankAccountId			= @intBankAccountId
-		,intCurrencyId				= NULL
+		,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId)
 		,dblExchangeRate			= 1
 		,dtmDate					= @dtmDate
 		,strPayee					= ''
@@ -134,7 +135,9 @@ SELECT	strTransactionId			= @strTransactionId
 		,strLink					= ''
 		,ysnClr						= 0
 		,dtmDateReconciled			= NULL
+		,intEntityId				= @intUserId
 		,intCreatedUserId			= @intUserId
+		,intCompanyLocationId		= (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId)
 		,dtmCreated					= GETDATE()
 		,intLastModifiedUserId		= @intUserId
 		,dtmLastModified			= GETDATE()
@@ -176,6 +179,7 @@ WHERE	intAccountId = @intGLAccountId
 IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Post the transaction 
+BEGIN TRY
 EXEC dbo.uspCMPostBankTransaction
 		@ysnPost = 1
 		,@ysnRecap = 0
@@ -183,19 +187,26 @@ EXEC dbo.uspCMPostBankTransaction
 		,@isSuccessful = @isAddSuccessful OUTPUT
 		,@message_id = @msg_id OUTPUT
 
-IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback	
-GOTO uspCMAddDeposit_Commit
+	IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback	
+	GOTO uspCMAddDeposit_Commit
+END TRY
+BEGIN CATCH
+	DECLARE @ErrorMessage NVARCHAR(MAX), @ErrorSeverity INT, @ErrorState INT;
+    SELECT @ErrorMessage = ERROR_MESSAGE(), @ErrorSeverity = ERROR_SEVERITY(), @ErrorState = ERROR_STATE();
+	GOTO uspCMAddDeposit_Rollback
+END CATCH
 
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
 ---------------------------------------------------------------------------------------------------------------------------------------
 uspCMAddDeposit_Commit:
-	SET @isAddSuccessful = 1	
+	SET @isAddSuccessful = 1
+	COMMIT TRAN @TransactionName	
 	GOTO uspCMAddDeposit_Exit
 	
 uspCMAddDeposit_Rollback:
 	SET @isAddSuccessful = 0
 	ROLLBACK TRAN @TransactionName
+	RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
 	
 uspCMAddDeposit_Exit:
-COMMIT TRAN @TransactionName

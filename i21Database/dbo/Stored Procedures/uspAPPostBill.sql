@@ -180,7 +180,30 @@ ORDER BY intBillId
 --CREATE DATA FOR COST ADJUSTMENT
 DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
 
-INSERT INTO @adjustedEntries
+INSERT INTO @adjustedEntries (
+	[intItemId] 
+	,[intItemLocationId] 
+	,[intItemUOMId] 
+	,[dtmDate] 
+	,[dblQty] 
+	,[dblUOMQty] 
+	,[intCostUOMId] 
+	,[dblVoucherCost] 
+	,[intCurrencyId] 
+	,[dblExchangeRate] 
+	,[intTransactionId] 
+	,[intTransactionDetailId] 
+	,[strTransactionId] 
+	,[intTransactionTypeId] 
+	,[intLotId] 
+	,[intSubLocationId] 
+	,[intStorageLocationId] 
+	,[ysnIsStorage] 
+	,[strActualCostId] 
+	,[intSourceTransactionId] 
+	,[intSourceTransactionDetailId] 
+	,[strSourceTransactionId] 
+)
 SELECT
 		[intItemId]							=	B.intItemId
 		,[intItemLocationId]				=	D.intItemLocationId
@@ -216,7 +239,7 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 		INNER JOIN tblICItemLocation D
 			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
 		LEFT JOIN tblICItemUOM itemUOM
-			ON itemUOM.intItemUOMId = ISNULL(B.intWeightUOMId, B.intUnitOfMeasureId)
+			ON itemUOM.intItemUOMId = B.intUnitOfMeasureId
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		LEFT JOIN tblICItemUOM receiptCostUOM

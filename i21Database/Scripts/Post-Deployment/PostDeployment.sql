@@ -203,6 +203,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
 :r .\AR\DefaultData\19_UpdateUsedCustomerBudget.sql
 :r .\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql
+:r .\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql
+:r .\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql
+:r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
+:r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -229,27 +233,19 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\MigratePOForApprovals.sql
 
 -- Inventory 
---:r .\IC\00_RequiredDataFix.sql 
 :r .\IC\01_InventoryTransactionTypes.sql 
 :r .\IC\02_MaterialNMFC.sql 
 :r .\IC\03_DefaultData.sql 
 :r .\IC\04_CostingMethods.sql 
 :r .\IC\05_LotStatus.sql
---:r .\IC\06_FixBlankLotNumber.sql
 :r .\IC\07_Status.sql
 :r .\IC\08_InventoryTransactionPostingIntegration.sql
 :r .\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql
---:r .\IC\10_RemoveCommodityItems.sql
---:r .\IC\11_RemoveOtherChargesAsset.sql
---:r .\IC\12_UpdateExistingInventoryTransactionForm.sql
---:r .\IC\13_MoveCommodityAttributes.sql
 :r .\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql
---:r .\IC\PatchFor_1510_to_1520.sql
---:r .\GL\InventoryCategoryFix.sql
 :r .\IC\15_InventoryCostAdjustmentTypes.sql
---:r .\IC\PopulateTransDetailIdOnCostBuckets.sql
 :r .\IC\16_Fix_Allow_Negative_Stock_Option.sql
 :r .\IC\17_Update_Blank_Description_tblICItem.sql
+:r .\IC\1620_to_1630.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
@@ -352,7 +348,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_Frequency.sql
 :r .\TF\DefaultData\_ReportingComponent.sql
 :r .\TF\DefaultData\_ProductCode.sql
-:r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_ConfigurationType.sql
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
 :r .\TF\DefaultData\_OriginDestinationState.sql
@@ -360,6 +355,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_ScheduleFieldTemplate.sql
 :r .\TF\DefaultData\_TaxReportSProc.sql
 :r .\TF\DefaultData\_TaxReportTemplate.sql
+:r .\TF\DefaultData\_TerminalControlNumber.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql

@@ -17,25 +17,39 @@ DECLARE @intPaycheckId INT
 		,@dtmPayDate DATETIME
 		,@strTransactionId NVARCHAR(50) = ''
 		,@intBankTransactionTypeId INT = 21
+		,@intCreatedEntityId AS INT
+		,@intBankAccountId AS INT
+		,@strBatchNo AS NVARCHAR(50) = @strBatchId
+		,@PAYCHECK INT = 21
+		,@DIRECT_DEPOSIT INT = 23
+		,@BankTransactionTable BankTransactionTable
+		,@BankTransactionDetail BankTransactionDetailTable
 
 /* Get Paycheck Details */
 SELECT @intPaycheckId = intPaycheckId
 	  ,@intEmployeeId = [intEntityEmployeeId]
 	  ,@strTransactionId = strPaycheckId
 	  ,@dtmPayDate = dtmPayDate
+	  ,@intCreatedEntityId = intCreatedUserId
+	  ,@intBankAccountId = intBankAccountId
+	  ,@intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END
 FROM tblPRPaycheck 
 WHERE strPaycheckId = @strPaycheckId
 
 /****************************************
 	CREATING BANK TRANSACTION RECORD
 *****************************************/
-DECLARE @PAYCHECK INT = 21,
-		@DIRECT_DEPOSIT INT = 23,
-		@BankTransactionTable BankTransactionTable,
-		@BankTransactionDetail BankTransactionDetailTable
 
-SELECT @intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END 
-FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId
+-- Check if transaction has Bank Account
+IF @ysnPost = 1
+BEGIN 
+	IF (@intBankAccountId IS NULL)
+	BEGIN
+		-- Bank Account is required to post the transaction
+		RAISERROR('Bank Account is required to post the transaction.', 11, 1)
+		GOTO Post_Exit
+	END
+END 
 
 IF (@ysnPost = 1)
 BEGIN
@@ -117,7 +131,6 @@ END
 
 IF (@ysnPost = 1)
 BEGIN
-
 	--Insert Earning Distribution to Temporary Table
 	CREATE TABLE #tmpEarning (
 		intPaycheckId			INT
@@ -257,7 +270,7 @@ BEGIN
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -286,7 +299,7 @@ BEGIN
 		,[dblCredit]				= D.dblTotal
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -318,7 +331,7 @@ BEGIN
 		,[dblCredit]				= D.dblTotal
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -336,7 +349,7 @@ BEGIN
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -368,7 +381,7 @@ BEGIN
 		,[dblCredit]				= T.dblTotal
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -400,7 +413,7 @@ BEGIN
 		,[dblCredit]				= T.dblTotal
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -418,7 +431,7 @@ BEGIN
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -436,20 +449,86 @@ BEGIN
 		   @dblCurrentAmount = dblAmount
 		FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
 
-	IF EXISTS (SELECT 1 FROM @BankTransactionTable WHERE strTransactionId = @strTransactionId AND dblAmount <> @dblCurrentAmount)
+	IF (@intTransactionId IS NULL) 
 	BEGIN
-		DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
-		SELECT @intTransactionId = NULL
-	END
-
-	IF (@intTransactionId IS NULL)
 		EXEC uspCMCreateBankTransactionEntries @BankTransactionTable, @BankTransactionDetail, @intTransactionId
-
-	IF (@@ERROR <> 0)
+		IF (@@ERROR <> 0)
 		BEGIN
 			RAISERROR('Failed to Generate Bank Transaction entries.', 11, 1)
 			GOTO Post_Rollback
 		END
+	END
+	ELSE
+	BEGIN
+		UPDATE tblCMBankTransaction
+		SET 
+			[strTransactionId] = BT.strTransactionId	
+			,[intBankTransactionTypeId] = BT.intBankTransactionTypeId
+			,[intBankAccountId] = BT.intBankAccountId
+			,[dtmDate] = BT.dtmDate
+			,[strPayee] = BT.strPayee
+			,[intPayeeId] = BT.intPayeeId
+			,[strAddress] = BT.strAddress
+			,[strZipCode] = BT.strZipCode
+			,[strCity] = BT.strCity
+			,[strState] = BT.strState
+			,[strCountry] = BT.strCountry
+			,[dblAmount] = BT.dblAmount
+			,[strAmountInWords] = BT.strAmountInWords
+			,[strMemo] = BT.strMemo
+			,[strReferenceNo] = BT.strReferenceNo
+			,[dtmCheckPrinted] = BT.dtmCheckPrinted
+			,[ysnCheckToBePrinted] = BT.ysnCheckToBePrinted
+			,[ysnCheckVoid] = BT.ysnCheckVoid
+			,[ysnPosted] = BT.ysnPosted
+			,[strLink] = BT.strLink			
+			,[ysnClr] = BT.ysnClr			
+			,[dtmDateReconciled] = BT.dtmDateReconciled
+			,[intBankStatementImportId]	= BT.intBankStatementImportId
+			,[intBankFileAuditId] = BT.intBankFileAuditId
+			,[strSourceSystem] = BT.strSourceSystem
+			,[intEntityId] = BT.intEntityId	
+			,[intCreatedUserId] = BT.intCreatedUserId	
+			,[intCompanyLocationId] = BT.intCompanyLocationId
+			,[dtmCreated] = BT.dtmCreated	
+			,[intLastModifiedUserId] = BT.intLastModifiedUserId
+			,[dtmLastModified] = BT.dtmLastModified
+		FROM @BankTransactionTable BT
+		WHERE tblCMBankTransaction.intTransactionId = @intTransactionId
+
+		/* Reinsert Bank Transaction Detail */
+		DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
+		
+		INSERT INTO [dbo].[tblCMBankTransactionDetail]
+			([intTransactionId]
+			,[dtmDate]
+			,[intGLAccountId]
+			,[strDescription]
+			,[dblDebit]
+			,[dblCredit]
+			,[intUndepositedFundId]
+			,[intEntityId]
+			,[intCreatedUserId]
+			,[dtmCreated]
+			,[intLastModifiedUserId]
+			,[dtmLastModified]
+			,[intConcurrencyId])
+		SELECT
+			@intTransactionId
+			,[dtmDate]
+			,[intGLAccountId]
+			,[strDescription]
+			,[dblDebit]
+			,[dblCredit]
+			,[intUndepositedFundId]
+			,[intEntityId]
+			,[intCreatedUserId]
+			,[dtmCreated]
+			,[intLastModifiedUserId]
+			,[dtmLastModified]
+			,[intConcurrencyId]
+		FROM @BankTransactionDetail
+	END
 END
 
 
@@ -503,10 +582,8 @@ DECLARE
 	,@dblAmountDetailTotal AS NUMERIC(18,6)
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT	
-	,@intBankAccountId AS INT
 	,@ysnBankAccountIdInactive AS BIT
 	,@ysnCheckVoid AS BIT	
-	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
 	
 	-- Table Variables
@@ -528,7 +605,7 @@ SELECT	TOP 1
 		,@ysnTransactionClearedFlag = ysnClr
 		,@ysnCheckVoid = ysnCheckVoid		
 		,@intBankAccountId = intBankAccountId
-		,@intCreatedEntityId = intEntityId
+		,@intCreatedEntityId = intCreatedUserId
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
 		AND intBankTransactionTypeId = @intBankTransactionTypeId
@@ -576,7 +653,7 @@ BEGIN
 END 
 
 -- Check if the transaction is already posted
-IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
+IF @ysnPost = 1 AND @ysnRecap = 0 AND @ysnTransactionPostedFlag = 1
 BEGIN 
 	-- The transaction is already posted.
 	RAISERROR(50007, 11, 1)
@@ -584,7 +661,7 @@ BEGIN
 END 
 
 -- Check if the transaction is already unposted
-IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
+IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN 
 	-- The transaction is already unposted.
 	RAISERROR(50008, 11, 1)
@@ -624,7 +701,7 @@ BEGIN
 END 
 
 -- Check Company preference: Allow User Self Post
-IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0 
+IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedEntityId AND @ysnRecap = 0 
 BEGIN 
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
@@ -695,15 +772,15 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Get the batch post id. 
-IF (@ysnPost = 1 AND @strBatchId IS NULL)
+IF (@ysnPost = 1 AND @strBatchNo IS NULL)
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchNo OUTPUT 
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
 IF @ysnPost = 1
 BEGIN
-	-- Create the G/L Entries for Misc Checks. 	
+	-- Create the G/L Entries for Paychecks. 	
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
@@ -734,7 +811,7 @@ BEGIN
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= @intTransactionId
 			,[dtmDate]				= @dtmDate
-			,[strBatchId]			= @strBatchId
+			,[strBatchId]			= @strBatchNo
 			,[intAccountId]			= BankAccnt.intGLAccountId
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblAmount
@@ -768,7 +845,7 @@ BEGIN
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= @intTransactionId
 			,[dtmDate]				= @dtmDate
-			,[strBatchId]			= @strBatchId
+			,[strBatchId]			= @strBatchNo
 			,[intAccountId]			= B.intGLAccountId
 			,[dblDebit]				= B.dblDebit
 			,[dblCredit]			= B.dblCredit
@@ -903,6 +980,12 @@ Post_Commit:
 	SELECT @actionType = CASE WHEN (@ysnPost = 1) THEN 'Posted' ELSE 'Unposted' END
 	EXEC uspSMAuditLog 'Payroll.view.Paycheck', @intPaycheckId, @intUserId, @actionType, '', '', ''
 
+	IF (@ysnPost = 1 AND @strBatchId IS NOT NULL)
+	BEGIN
+		UPDATE	tblSMStartingNumber
+		SET		intNumber = ISNULL(intNumber, 0) + 1
+		WHERE	intStartingNumberId = @STARTING_NUM_TRANSACTION_TYPE_Id
+	END
 	GOTO Post_Exit
 
 -- If error occured, undo changes to all tables affected
@@ -928,99 +1011,90 @@ Post_Exit:
 	AFTER POSTING PROCEDURES
 *****************************************/
 IF (@isSuccessful <> 0)
+BEGIN
+	IF (@ysnPost = 1) 
 	BEGIN
-		IF (@ysnPost = 1) 
-			BEGIN
-				IF (@ysnRecap = 0) 
-					BEGIN
-						/* If Posting succeeds, mark transaction as posted */
-						UPDATE tblPRPaycheck SET 
-							ysnPosted = 1
-							,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
-						WHERE strPaycheckId = @strTransactionId
-						SET @isSuccessful = 1
-
-						/* Update the Employee Time Off Hours Used */
-						UPDATE tblPREmployeeTimeOff
-							SET	dblHoursUsed = dblHoursUsed + A.dblHours
-							FROM tblPRPaycheckEarning A
-							WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
-								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
-								AND A.intPaycheckId = @intPaycheckId
-
-						/* Update Paycheck Direct Deposit Distribution */
-						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
-							EXEC uspPRPaycheckEFTDistribution @intPaycheckId
-					END
-			END
-		ELSE
-			BEGIN 
-				IF (@ysnRecap = 0) 
-					BEGIN
-					/* If Unposting succeeds, mark transaction as unposted and delete the corresponding bank transaction */
-						UPDATE tblPRPaycheck SET 
-							ysnPosted = 0
-							,dtmPosted = NULL 
-						WHERE strPaycheckId = @strTransactionId
-
-						/* Update the Employee Time Off Hours Used */
-						UPDATE tblPREmployeeTimeOff
-							SET	dblHoursUsed = dblHoursUsed - A.dblHours
-							FROM tblPRPaycheckEarning A
-							WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
-								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
-								AND A.intPaycheckId = @intPaycheckId
-
-						SELECT @intTransactionId = intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
-						DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
-						DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
-
-						/* Delete Any Direct Deposit Entry */
-						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
-							DELETE FROM tblPRPaycheckDirectDeposit WHERE intPaycheckId = @intPaycheckId
-
-						SET @isSuccessful = 1
-					END
-			END
-
-		/* Update the Employee Time Off Tiers and Accrued Hours */
-		SELECT DISTINCT EE.intEmployeeAccrueTimeOffId
-		INTO #tmpAccrueTimeOff
-		FROM tblPRPaycheckEarning PE
-			INNER JOIN tblPREmployeeEarning EE
-				ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
-				WHERE EE.intEmployeeAccrueTimeOffId IS NOT NULL
-					AND PE.intPaycheckId = @intPaycheckId
-					AND EE.intEntityEmployeeId = @intEmployeeId
-		
-		DECLARE @intAccrueTimeOffId INT
-		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAccrueTimeOff)
+		IF (@ysnRecap = 0) 
 		BEGIN
-			SELECT TOP 1 @intAccrueTimeOffId = intEmployeeAccrueTimeOffId FROM #tmpAccrueTimeOff
+			/* If Posting succeeds, mark transaction as posted */
+			UPDATE tblPRPaycheck SET 
+				ysnPosted = 1
+				,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
+			WHERE strPaycheckId = @strTransactionId
+			SET @isSuccessful = 1
 
-			EXEC uspPRUpdateEmployeeTimeOff @intAccrueTimeOffId, @intEmployeeId
-			EXEC uspPRUpdateEmployeeTimeOffHours @intAccrueTimeOffId, @intEmployeeId
+			/* Update the Employee Time Off Hours Used */
+			UPDATE tblPREmployeeTimeOff
+				SET	dblHoursUsed = dblHoursUsed + A.dblHours
+				FROM (SELECT 
+						intPaycheckId
+						,intEmployeeTimeOffId
+						,dblHours = SUM(dblHours)
+						FROM tblPRPaycheckEarning
+						WHERE intPaycheckId = @intPaycheckId
+						GROUP BY intPaycheckId, intEmployeeTimeOffId) A
+				WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
+					AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
 
-			DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
+			/* Update Paycheck Direct Deposit Distribution */
+			IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
+				EXEC uspPRPaycheckEFTDistribution @intPaycheckId
 		END
-
-		EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 	END
-ELSE
+	ELSE
+	BEGIN 
+		IF (@ysnRecap = 0) 
+		BEGIN
+			/* If Unposting succeeds, mark transaction as unposted */
+			UPDATE tblPRPaycheck SET 
+				ysnPosted = 0
+				,dtmPosted = NULL 
+			WHERE strPaycheckId = @strTransactionId
+
+			/* Update the Employee Time Off Hours Used */
+			UPDATE tblPREmployeeTimeOff
+				SET	dblHoursUsed = dblHoursUsed - A.dblHours
+				FROM (SELECT 
+						intPaycheckId
+						,intEmployeeTimeOffId
+						,dblHours = SUM(dblHours)
+						FROM tblPRPaycheckEarning
+						WHERE intPaycheckId = @intPaycheckId
+						GROUP BY intPaycheckId, intEmployeeTimeOffId) A
+				WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
+					AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
+
+			/* Delete Any Direct Deposit Entry */
+			IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
+				DELETE FROM tblPRPaycheckDirectDeposit WHERE intPaycheckId = @intPaycheckId
+
+			SET @isSuccessful = 1
+		END
+	END
+
+	/* Update the Employee Time Off Tiers and Accrued Hours */
+	SELECT DISTINCT EE.intEmployeeAccrueTimeOffId
+	INTO #tmpAccrueTimeOff
+	FROM tblPRPaycheckEarning PE
+		INNER JOIN tblPREmployeeEarning EE
+			ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
+			WHERE EE.intEmployeeAccrueTimeOffId IS NOT NULL
+				AND PE.intPaycheckId = @intPaycheckId
+				AND EE.intEntityEmployeeId = @intEmployeeId
+		
+	DECLARE @intAccrueTimeOffId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAccrueTimeOff)
 	BEGIN
-		IF (@ysnPost = 1) 
-			BEGIN
-				/* If Posting fails, delete the created bank transaction */
-				DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
-				DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
-				SET @isSuccessful = 0
-			END
-		ELSE
-			BEGIN
-				SET @isSuccessful = 0
-			END
+		SELECT TOP 1 @intAccrueTimeOffId = intEmployeeAccrueTimeOffId FROM #tmpAccrueTimeOff
+
+		EXEC uspPRUpdateEmployeeTimeOff @intAccrueTimeOffId, @intEmployeeId
+		EXEC uspPRUpdateEmployeeTimeOffHours @intAccrueTimeOffId, @intEmployeeId
+
+		DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
 	END
 
+	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
+END
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAccrueTimeOff')) DROP TABLE #tmpAccrueTimeOff

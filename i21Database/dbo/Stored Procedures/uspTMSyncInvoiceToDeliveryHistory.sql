@@ -515,6 +515,7 @@ BEGIN
 							,intWillCallRouteId
 							,intWillCallDispatchId
 							,ysnWillCallLeakCheckRequired
+							,intInvoiceId
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
@@ -564,7 +565,8 @@ BEGIN
 							,intWillCallContractId = NULL
 							,intWillCallRouteId = G.intRouteId
 							,intWillCallDispatchId = G.intDispatchID
-							,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
+							,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
+							,intInvoiceId = B.intInvoiceId
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -699,6 +701,7 @@ BEGIN
 						,intWillCallRouteId
 						,intWillCallDispatchId
 						,ysnWillCallLeakCheckRequired
+						,intInvoiceId
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -711,7 +714,7 @@ BEGIN
 						,dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,null)
 						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,0,null)
 						,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
-						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intTopInvoiceDetailId,null)
+						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intClockReadingId,null)
 						,intElapsedDaysBetweenDeliveries = @intElapseDays
 						,strSeason = H.strCurrentSeason
 						,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
@@ -762,7 +765,8 @@ BEGIN
 						,dtmSiteLastReadingUpdate = ISNULL(A.dtmLastReadingUpdate,DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))
 						,intWillCallRouteId = G.intRouteId
 						,intWillCallDispatchId = G.intDispatchID
-						,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
+						,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
+						,intInvoiceId = B.intInvoiceId
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -954,6 +958,7 @@ BEGIN
 			,intWillCallRouteId
 			,intWillCallDispatchId
 			,ysnWillCallLeakCheckRequired
+			,intInvoiceId
 		)
 		SELECT TOP 1
 			strInvoiceNumber = C.strInvoiceNumber
@@ -1006,7 +1011,8 @@ BEGIN
 			,intInvoiceDetailId = B.intInvoiceDetailId
 			,intWillCallRouteId = G.intRouteId
 			,intWillCallDispatchId = G.intDispatchID
-			,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
+			,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
+			,intInvoiceId = B.intInvoiceId
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId
