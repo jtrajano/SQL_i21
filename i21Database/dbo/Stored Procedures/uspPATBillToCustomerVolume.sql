@@ -83,15 +83,14 @@ BEGIN
 		ELSE
 		BEGIN
 			
-			--select * from #tempItem
 			MERGE tblPATCustomerVolume AS PAT
 			USING #tempItem AS B
-			   ON (PAT.intCustomerPatronId = B.intEntityVendorId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.fiscalYear)
-			 WHEN MATCHED AND B.ysnPosted = 0 AND PAT.dblVolume = B.dblVolume
-				  THEN DELETE
+			   ON (PAT.intCustomerPatronId = B.intEntityVendorId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.fiscalYear AND PAT.ysnRefundProcessed <> 1)
+			 --WHEN MATCHED AND B.ysnPosted = 0 AND PAT.dblVolume = B.dblVolume
+				--THEN DELETE
 			 WHEN MATCHED
 				  THEN UPDATE SET PAT.dblVolume = CASE WHEN B.ysnPosted = 1 THEN (PAT.dblVolume + B.dblVolume) 
-													   ELSE (PAT.dblVolume - B.dblVolume) END
+													   ELSE (PAT.dblVolume - B.dblVolume) END, PAT.dtmLastActivityDate = GETDATE()
 			 WHEN NOT MATCHED BY TARGET
 				  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
 					   VALUES (B.intEntityVendorId, B.intPatronageCategoryId, @intFiscalYear, GETDATE(),  B.dblVolume, 1);
