@@ -5,7 +5,8 @@
   "license": "ISC",
   "keywords": [],
   "scripts": {
-    "preinstall": "npm install -g karma-cli"
+    "preinstall": "npm install -g karma-cli",
+    "postinstall": "npm install -g gulp-cli"
   },
   "dependencies": {
     "karma-cli": "*"
