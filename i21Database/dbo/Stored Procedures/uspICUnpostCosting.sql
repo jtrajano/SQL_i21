@@ -40,6 +40,9 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4
 		,@ACTUALCOST AS INT = 5
 
+		,@FOB_ORIGIN AS INT = 1
+		,@FOB_DESTINATION AS INT = 2
+
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
 DECLARE @intItemId AS INT
@@ -56,6 +59,7 @@ DECLARE @intItemId AS INT
 		,@dblExchangeRate AS DECIMAL (38, 20) 
 		,@strTransactionForm AS NVARCHAR(255)
 		,@intCostingMethod AS INT
+		,@intFobPointId AS TINYINT
 
 -- Get the list of items to unpost
 BEGIN 
@@ -72,23 +76,25 @@ BEGIN
 			,intStorageLocationId
 			,intInventoryTransactionId
 			,intCostingMethod
+			,intFobPointId
 	)
-	SELECT	ItemTrans.intItemId
-			,ItemTrans.intItemLocationId
-			,ItemTrans.intItemUOMId
-			,ItemTrans.intLotId
-			,ISNULL(-ItemTrans.dblQty, 0)
-			,ItemTrans.dblCost
-			,ItemTrans.dblUOMQty		
-			,ItemTrans.intSubLocationId
-			,ItemTrans.intStorageLocationId
-			,ItemTrans.intInventoryTransactionId
-			,ItemTrans.intCostingMethod
-	FROM	dbo.tblICInventoryTransaction ItemTrans
+	SELECT	t.intItemId
+			,t.intItemLocationId
+			,t.intItemUOMId
+			,t.intLotId
+			,ISNULL(-t.dblQty, 0)
+			,t.dblCost
+			,t.dblUOMQty		
+			,t.intSubLocationId
+			,t.intStorageLocationId
+			,t.intInventoryTransactionId
+			,t.intCostingMethod
+			,t.intFobPointId
+	FROM	dbo.tblICInventoryTransaction t
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
-			AND ISNULL(ItemTrans.dblQty, 0) <> 0 
+			AND ISNULL(t.dblQty, 0) <> 0 
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -118,6 +124,7 @@ BEGIN
 			,intStorageLocationId
 			,intInventoryTransactionId
 	FROM	@ItemsToUnpost
+	WHERE	ISNULL(intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 	GROUP BY 
 		intItemId
 		, intItemLocationId
@@ -246,6 +253,7 @@ BEGIN
 			,[intConcurrencyId]
 			,[intCostingMethod]
 			,[strDescription]
+			,[intFobPointId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -268,7 +276,7 @@ BEGIN
 			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
 			,[intLotId]								= ActualTransaction.intLotId
 			,[ysnIsUnposted]						= 1
-			,[intRelatedInventoryTransactionId]		= ItemTransactionsToReverse.intInventoryTransactionId
+			,[intRelatedInventoryTransactionId]		= tactionsToReverse.intInventoryTransactionId
 			,[intRelatedTransactionId]				= ActualTransaction.intRelatedTransactionId
 			,[strRelatedTransactionId]				= ActualTransaction.strRelatedTransactionId
 			,[strTransactionForm]					= ActualTransaction.strTransactionForm
@@ -277,8 +285,9 @@ BEGIN
 			,[intConcurrencyId]						= 1
 			,[intCostingMethod]						= ActualTransaction.intCostingMethod
 			,[strDescription]						= ActualTransaction.strDescription
-	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
-				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
+			,[intFobPointId]						= ActualTransaction.intFobPointId
+	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
+				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
 	----------------------------------------------------
 	-- Create reversal of the inventory LOT transactions
@@ -326,8 +335,8 @@ BEGIN
 			,[dtmCreated]				= GETDATE()
 			,[intCreatedEntityId]			= @intEntityUserSecurityId
 			,[intConcurrencyId]			= 1
-	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
-				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
+	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
+				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 				AND ActualTransaction.intLotId IS NOT NULL 
 				AND ActualTransaction.intItemUOMId IS NOT NULL
 			INNER JOIN tblICItemLocation ItemLocation
@@ -336,12 +345,12 @@ BEGIN
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for related transactions 
 	--------------------------------------------------------------
-	UPDATE	RelatedItemTransactions
+	UPDATE	Relatedtactions
 	SET		ysnIsUnposted = 1
-	FROM	dbo.tblICInventoryTransaction RelatedItemTransactions 
-	WHERE	RelatedItemTransactions.intRelatedTransactionId = @intTransactionId
-			AND RelatedItemTransactions.strRelatedTransactionId = @strTransactionId
-			AND RelatedItemTransactions.ysnIsUnposted = 0
+	FROM	dbo.tblICInventoryTransaction Relatedtactions 
+	WHERE	Relatedtactions.intRelatedTransactionId = @intTransactionId
+			AND Relatedtactions.strRelatedTransactionId = @strTransactionId
+			AND Relatedtactions.ysnIsUnposted = 0
 
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for related LOT transactions 
@@ -370,7 +379,8 @@ BEGIN
 					,dblCost
 					,intLotId 
 					,intCostingMethod
-			FROM	@ItemsToUnpost
+					,intFobPointId
+			FROM	@ItemsToUnpost 
 
 			OPEN loopItemsToUnpost;	
 
@@ -385,7 +395,9 @@ BEGIN
 				,@dblUOMQty 
 				,@dblCost
 				,@intLotId
-				,@intCostingMethod;
+				,@intCostingMethod
+				,@intFobPointId
+				;
 
 			-----------------------------------------------------------------------------------------------------------------------------
 			-- Start of the loop
@@ -414,6 +426,7 @@ BEGIN
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intItemLocationId = @intItemLocationId
 						AND Lot.intLotId = @intLotId
+						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
 
 				-- Recalculate the average cost from the inventory transaction table. 
@@ -427,6 +440,7 @@ BEGIN
 				WHERE	ItemPricing.intItemId = @intItemId
 						AND ItemPricing.intItemLocationId = @intItemLocationId
 						AND ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) <> @ACTUALCOST
+						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
 				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
 				EXEC [dbo].[uspICPostStockQuantity]
@@ -449,7 +463,9 @@ BEGIN
 					,@dblUOMQty 
 					,@dblCost
 					,@intLotId
-					,@intCostingMethod;
+					,@intCostingMethod
+					,@intFobPointId					
+					;
 			END;
 
 			-----------------------------------------------------------------------------------------------------------------------------
@@ -489,6 +505,7 @@ BEGIN
 		FROM	@ItemsToUnpost
 		WHERE	ISNULL(intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) = @AVERAGECOST
 				AND dblQty > 0 
+				AND ISNULL(intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
 		SELECT	TOP 1 
 				@intCurrencyId				= intCurrencyId
@@ -597,9 +614,11 @@ END
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
-EXEC dbo.uspICCreateReversalGLEntries 
-	@strBatchId
-	,@intTransactionId
-	,@strTransactionId
-	,@intEntityUserSecurityId
-;
+BEGIN 
+	EXEC dbo.uspICCreateReversalGLEntries 
+		@strBatchId
+		,@intTransactionId
+		,@strTransactionId
+		,@intEntityUserSecurityId
+	;
+END 

@@ -17,4 +17,5 @@ CREATE TYPE [dbo].[UnpostItemsTableType] AS TABLE
 	,[intTransactionTypeId] INT NULL
 	,[intInventoryTransactionId] INT NOT NULL 	
 	,[intCostingMethod] INT NULL 	
+	,[intFobPointId] TINYINT NULL 
 )

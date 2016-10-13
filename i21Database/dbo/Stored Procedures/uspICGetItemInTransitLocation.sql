@@ -4,6 +4,8 @@
 	,@intItemLocationId INT = NULL OUTPUT 
 AS
 
+DECLARE @validItemLocationId AS INT 
+
 -- Counter check the item id from the item table. 
 SELECT	@intItemId = i.intItemId	 
 FROM	tblICItem i
@@ -33,7 +35,7 @@ USING	(
 	
 WHEN MATCHED THEN 
 	UPDATE	
-	SET		@intItemLocationId = ItemLocation.intItemLocationId 
+	SET		@validItemLocationId = ItemLocation.intItemLocationId 
 
 WHEN NOT MATCHED THEN 
 	INSERT (
@@ -46,6 +48,6 @@ WHEN NOT MATCHED THEN
 	)
 ;
 
-SET @intItemLocationId = ISNULL(@intItemLocationId, @@IDENTITY)
+SET @intItemLocationId = ISNULL(@validItemLocationId, SCOPE_IDENTITY())
 
 RETURN 0

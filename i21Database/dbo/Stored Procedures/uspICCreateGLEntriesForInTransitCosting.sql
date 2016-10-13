@@ -40,14 +40,14 @@ INSERT INTO @GLAccounts (
 	,intItemLocationId 
 	,intInventoryId 
 	,intContraInventoryId 
-	--,intAutoNegativeId 
+	,intAutoNegativeId 
 	,intTransactionTypeId
 )
 SELECT	Query.intItemId
 		,Query.intItemLocationId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory_In_Transit) 
 		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
-		--,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
@@ -104,36 +104,36 @@ BEGIN
 END 
 ;
 
----- Check for missing Auto Variance Account Id
---BEGIN 
---	SET @strItemNo = NULL
---	SET @intItemId = NULL
+-- Check for missing Auto Variance Account Id
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
 
---	SELECT	TOP 1 
---			@intItemId = Item.intItemId 
---			,@strItemNo = Item.strItemNo
---	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
---				ON Item.intItemId = ItemGLAccount.intItemId
---	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
---			AND EXISTS (
---				SELECT	TOP 1 1 
---				FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
---							ON t.intTransactionTypeId = TransType.intTransactionTypeId
---				WHERE	t.strBatchId = @strBatchId
---						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
---						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
---						AND t.intItemId = Item.intItemId
---						AND t.dblQty * t.dblCost + t.dblValue <> 0
---			)
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
+			AND EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+							ON t.intTransactionTypeId = TransType.intTransactionTypeId
+				WHERE	t.strBatchId = @strBatchId
+						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative)
+						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+						AND t.intItemId = Item.intItemId
+						AND t.dblQty * t.dblCost + t.dblValue <> 0
+			)
 	
---	IF @intItemId IS NOT NULL 
---	BEGIN 
---		-- {Item} is missing a GL account setup for {Account Category} account category.
---		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Auto_Variance) 	
---		RETURN -1;
---	END 
---END 
---;
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} is missing a GL account setup for {Account Category} account category.
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Auto_Variance) 	
+		RETURN -1;
+	END 
+END 
+;
 
 -- Log the g/l account used in this batch. 
 INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
@@ -324,3 +324,104 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				, @InventoryTransactionTypeId_AutoNegative
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
+
+-----------------------------------------------------------------------------------
+-- This part is for the Auto Variance 
+-----------------------------------------------------------------------------------
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'IC' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= NULL 
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= NULL 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= NULL 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= NULL 
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
+				@InventoryTransactionTypeId_AutoNegative
+			)
+
+UNION ALL  
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'IAV'
+		,strReference				= ''
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= NULL 
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= NULL 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= NULL 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= NULL 
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
