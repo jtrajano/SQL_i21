@@ -6,7 +6,7 @@ CAST(ROW_NUMBER() OVER(ORDER BY intContractDetailId) AS INT) AS intClaimId,
 (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName,
 (SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress,
 CASE WHEN ysnSubCurrency > 0 THEN (dblWeightLoss - dblFranchiseWeight) * dblCost / ISNULL(intCent,1)  ELSE (dblWeightLoss - dblFranchiseWeight) * dblCost END AS dblClaim,
-((dblWeightLoss - dblFranchiseWeight) * dblCost  - dblTotalClaimAmount) * -1 AS  dblFranchiseAmount,
+((dblWeightLoss - dblFranchiseWeight) * (dblCost / ISNULL(intCent,1))  - dblTotalClaimAmount) * -1 AS  dblFranchiseAmount,
 (dblWeightLoss - dblFranchiseWeight) AS dblQtyToBill ,
 * 
 FROM (
