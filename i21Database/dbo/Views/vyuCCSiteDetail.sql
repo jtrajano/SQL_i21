@@ -1,30 +1,25 @@
 ﻿CREATE VIEW [dbo].[vyuCCSiteDetail]
-WITH SCHEMABINDING
+
 AS 
-SELECT
-	A.intSiteDetailId, 
-	A.intSiteHeaderId, 
-	A.intSiteId,
-	A.dblGross,
-	A.dblFees,
-	A.dblNet,
-	B.strApType,
-	B.strCcdReference,
-	B.strReference,
-	B.ysnPosted,
-	C.strCustomerName,
-	C.strSite,
-	C.strSiteDescription,
-	C.strSiteType,
-	D.strLocationName,
-	D.strName AS strVendorName,
-	B.dtmDate
-FROM dbo.tblCCSiteDetail AS A
-	INNER JOIN dbo.tblCCSiteHeader AS B
-		ON A.intSiteHeaderId = B.intSiteHeaderId
-	LEFT JOIN dbo.vyuCCSite AS C
-		ON C.intSiteId = A.intSiteId
-	LEFT JOIN dbo.vyuCCVendor AS D
-		ON D.intVendorDefaultId = B.intVendorDefaultId
 
-
+SELECT SiteDetail.intSiteDetailId
+	, SiteDetail.intSiteHeaderId
+	, SiteDetail.intSiteId
+	, SiteDetail.dblGross
+	, SiteDetail.dblFees
+	, SiteDetail.dblNet
+	, SiteHeader.strApType
+	, SiteHeader.strCcdReference
+	, SiteHeader.strReference
+	, SiteHeader.ysnPosted
+	, [Site].strCustomerName
+	, [Site].strSite
+	, [Site].strSiteDescription
+	, [Site].strSiteType
+	, Vendor.strLocationName
+	, strVendorName = Vendor.strName
+	, SiteHeader.dtmDate
+FROM tblCCSiteDetail SiteDetail
+INNER JOIN tblCCSiteHeader SiteHeader ON SiteDetail.intSiteHeaderId = SiteHeader.intSiteHeaderId
+LEFT JOIN vyuCCSite [Site] ON [Site].intSiteId = SiteDetail.intSiteId
+LEFT JOIN vyuCCVendor Vendor ON Vendor.intVendorDefaultId = SiteHeader.intVendorDefaultId

@@ -1,48 +1,36 @@
-﻿
-CREATE VIEW [dbo].[vyuCCVendor]
-WITH SCHEMABINDING
-	AS 
-SELECT DISTINCT
-    A.intVendorDefaultId,
-	B.intEntityVendorId intEntityId,	
-	B.intEntityVendorId intVendorId,
-	G.intCompanyLocationId,
-	G.strLocationName,
-	B.intPaymentMethodId,
-    F.strPaymentMethod,
-	B.strVendorId,	
-	C.strName, 
-	E.strTerm,
-    E.intTermID,
-	A.intBankAccountId,
-	H.strCbkNo,
-	A.strApType,
-	A.strEnterTotalsAsGrossOrNet,
-	A.strImportFilePath,
-	A.strImportFileName,
-	A.strImportAuxiliaryFileName,
-	A.intImportFileHeaderId,
-	D.strAddress,
-	B.intCurrencyId
-FROM
-     dbo.tblCCVendorDefault A
-	INNER JOIN dbo.tblCCDealerSite AS I
-	    ON I.intVendorDefaultId = A.intVendorDefaultId
-	INNER JOIN dbo.tblAPVendor B
-		ON A.intVendorId = B.intEntityVendorId
-	INNER JOIN dbo.tblEMEntity C
-		ON B.intEntityVendorId = C.intEntityId
-	LEFT JOIN dbo.[tblEMEntityLocation] D
-		ON D.intEntityId = C.intEntityId  and D.ysnActive = 1 and D.ysnDefaultLocation = 1
-    LEFT Join dbo.tblSMTerm E
-	    on E.intTermID = D.intTermsId
-    LEFT Join dbo.tblSMPaymentMethod F
-	    on F.intPaymentMethodID = B.intPaymentMethodId
-	LEFT JOIN dbo.tblSMCompanyLocation G
-		ON G.intCompanyLocationId = A.intCompanyLocationId
-    LEFT JOIN dbo.tblCMBankAccount H
-		ON A.intBankAccountId = H.intBankAccountId
-	
-	
-	
+﻿CREATE VIEW [dbo].[vyuCCVendor]
 
+AS
+
+SELECT DISTINCT VendorDefault.intVendorDefaultId
+	, VendorDefault.intVendorId
+	, intEntityId = Vendor.intEntityVendorId
+	, Vendor.strVendorId
+	, Entity.strName
+	, EntityLocation.strAddress
+	, Vendor.intCurrencyId
+	, VendorDefault.intBankAccountId
+	, BankAccount.strCbkNo
+	, BankAccount.strBankAccountNo
+	, VendorDefault.intCompanyLocationId
+	, Location.strLocationName
+	, Term.intTermID
+	, Term.strTerm
+	, Vendor.intPaymentMethodId
+	, F.strPaymentMethod
+	, VendorDefault.strApType
+	, VendorDefault.strEnterTotalsAsGrossOrNet
+	, VendorDefault.strFileType
+	, VendorDefault.strImportFileName
+	, VendorDefault.strImportAuxiliaryFileName
+	, VendorDefault.strImportFilePath
+	, VendorDefault.intImportFileHeaderId
+FROM tblCCVendorDefault VendorDefault
+INNER JOIN tblCCDealerSite DealerSite ON DealerSite.intVendorDefaultId = VendorDefault.intVendorDefaultId
+INNER JOIN tblAPVendor Vendor ON VendorDefault.intVendorId = Vendor.intEntityVendorId
+INNER JOIN tblEMEntity Entity ON Vendor.intEntityVendorId = Entity.intEntityId
+LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityId = Entity.intEntityId AND EntityLocation.ysnActive = 1 AND EntityLocation.ysnDefaultLocation = 1
+LEFT JOIN tblSMTerm Term ON Term.intTermID = EntityLocation.intTermsId
+LEFT JOIN tblSMPaymentMethod F ON F.intPaymentMethodID = Vendor.intPaymentMethodId
+LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = VendorDefault.intCompanyLocationId
+LEFT JOIN tblCMBankAccount BankAccount ON VendorDefault.intBankAccountId = BankAccount.intBankAccountId
