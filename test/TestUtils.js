@@ -139,9 +139,11 @@ Ext.define('Inventory.TestUtils', {
         testViewController: function (cfg) {
             var name = cfg.name,
                 callbacks = cfg.callbacks, base = cfg.base,
-                controller, config, search, binding;
+                controller, config, search, binding, isValidExt = false, obj = null;
 
-            controller = Ext.create(name);
+            obj = this.isValidExtObject(name);
+            controller = obj.obj;
+            isValidExt = obj.valid; 
             config = controller.config;
             search = config.searchConfig;
             binding = config.binding;
@@ -272,6 +274,12 @@ Ext.define('Inventory.TestUtils', {
                     });
                 });
             });
+
+            if(isValidExt) {
+                if(config.init) {
+                    config.init(store);
+                }
+            }
         },
 
         testViewModel: function(cfg) {
