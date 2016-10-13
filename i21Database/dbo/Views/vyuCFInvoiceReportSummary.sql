@@ -4,14 +4,17 @@ SELECT   CASE WHEN cfVehicle.strVehicleNumber = '' OR
                          cfVehicle.strVehicleNumber IS NULL OR
                          cfVehicle.strVehicleNumber = 0 THEN 'Unknown' ELSE cfVehicle.strVehicleNumber END AS strVehicleNumber, CASE WHEN cfTrans.strMiscellaneous = '' OR
                          cfTrans.strMiscellaneous IS NULL THEN 'Unknown' ELSE cfTrans.strMiscellaneous END AS strMiscellaneous, CASE WHEN cfCardAccount.strDepartment = '' OR
-                         cfCardAccount.strDepartment IS NULL THEN 'Unknown' ELSE cfCardAccount.strDepartment END AS strDepartment, cfVehicle.strVehicleDescription, cfSiteItem.strTaxState, 
-                         cfCardAccount.intAccountId, cfTrans.intCardId, cfCardAccount.strCardNumber, cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.strProductNumber, 
-                         cfSiteItem.strProductDescription, cfCardAccount.strCardDescription, ISNULL(SUM(cfTrans.dblQuantity), 0) AS dblTotalQuantity, 
+                         cfCardAccount.strDepartment IS NULL THEN 'Unknown' ELSE cfCardAccount.strDepartment END AS strDepartment, cfCardAccount.intDiscountScheduleId, 
+                         cfCardAccount.intTermsCode, cfCardAccount.intTermsId, cfVehicle.strVehicleDescription, cfSiteItem.strTaxState, cfCardAccount.intAccountId, cfTrans.intCardId, 
+                         cfCardAccount.strCardNumber, cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.strProductNumber, cfSiteItem.strProductDescription, 
+                         cfCardAccount.strCardDescription, ISNULL(SUM(cfTrans.dblQuantity), 0) AS dblTotalQuantity, cfSiteItem.ysnIncludeInQuantityDiscount, 
                          ISNULL(SUM(cfTransGrossPrice.dblCalculatedAmount), 0) AS dblTotalGrossAmount, ISNULL(SUM(cfTransPrice.dblCalculatedAmount), 0) AS dblTotalAmount, 
                          ISNULL(SUM(FETTaxes.dblTaxCalculatedAmount), 0) AS TotalFET, ISNULL(SUM(SETTaxes.dblTaxCalculatedAmount), 0) AS TotalSET, 
                          ISNULL(SUM(SSTTaxes.dblTaxCalculatedAmount), 0) AS TotalSST, ISNULL(SUM(LCTaxes.dblTaxCalculatedAmount), 0) AS TotalLC, 
                          ISNULL(SUM(cfTransPrice.dblCalculatedAmount), 0) - (ISNULL(SUM(FETTaxes.dblTaxCalculatedAmount), 0) + ISNULL(SUM(SETTaxes.dblTaxCalculatedAmount), 0) 
-                         + ISNULL(SUM(SSTTaxes.dblTaxCalculatedAmount), 0) + ISNULL(SUM(LCTaxes.dblTaxCalculatedAmount), 0)) AS dblTotalNetAmount
+                         + ISNULL(SUM(SSTTaxes.dblTaxCalculatedAmount), 0) + ISNULL(SUM(LCTaxes.dblTaxCalculatedAmount), 0)) AS dblTotalNetAmount, cfTrans.intTransactionId, 
+                         arInv.strCustomerName, cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, 
+                         cfTrans.strInvoiceReportNumber, cfTrans.strPrintTimeStamp
 FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
@@ -65,4 +68,7 @@ FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                                 GROUP BY icfTramsactionTax.intTransactionId) AS TotalTaxes ON cfTrans.intTransactionId = TotalTaxes.intTransactionId
 GROUP BY cfCardAccount.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId, cfTrans.intProductId, cfCardAccount.strCardNumber, cfCardAccount.strCardDescription, 
                          cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.strProductNumber, cfSiteItem.strProductDescription, cfCardAccount.strDepartment, cfSiteItem.strTaxState, 
-                         cfVehicle.strVehicleNumber, cfVehicle.strVehicleDescription
+                         cfSiteItem.ysnIncludeInQuantityDiscount, cfVehicle.strVehicleNumber, cfVehicle.strVehicleDescription, cfCardAccount.intDiscountScheduleId, cfCardAccount.intTermsCode, 
+                         cfCardAccount.intTermsId, cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.strNetwork, arInv.dtmPostDate, cfCardAccount.strInvoiceCycle, 
+                         cfTrans.dtmTransactionDate, cfTrans.strInvoiceReportNumber, cfTrans.strPrintTimeStamp
+

@@ -7,7 +7,8 @@ BEGIN
 	IF (ISNULL(@xmlParam,'') = '')
 	BEGIN 
 	SELECT 
-		 intTransactionId		   = 0
+		 intCustomerGroupId		   = 0
+		,intTransactionId		   = 0
 		,intInvoiceId			   = 0
 		,intProductId			   = 0
 		,intCardId				   = 0
@@ -16,6 +17,7 @@ BEGIN
 		,intAccountId			   = 0
 		,intInvoiceCycle		   = 0
 		,intOdometerAging		   = 0
+		,strGroupName			   = ''
 		,strCustomerNumber		   = ''
 		,strDepartment			   = ''
 		,strShipTo				   = ''
@@ -100,7 +102,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -168,11 +170,16 @@ BEGIN
 		SET @Condition = ''
 		SET @Fieldname = ''
 
+
 		--MAIN LOOP
 
 			DELETE FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
 		END
 
+		DECLARE @strPrintTimeStamp NVARCHAR(MAX)
+		SELECT TOP 1
+			 @strPrintTimeStamp = [from]
+		FROM @temp_params WHERE [fieldname] = 'strPrintTimeStamp'
 
 		--INCLUDE PRINTED TRANSACTION
 		SELECT TOP 1
@@ -267,6 +274,8 @@ BEGIN
 				BEGIN
 				
 					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 
@@ -300,6 +309,8 @@ BEGIN
 				BEGIN
 				
 					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 
