@@ -192,6 +192,15 @@ GO
 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMPaymentMethod') 
 	BEGIN
+		
+		EXEC
+		('
+			IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tmpSMPaymentMethod'')
+			BEGIN
+				DROP TABLE tmpSMPaymentMethod
+			END
+		')
+
 		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMPaymentMethod' AND [COLUMN_NAME] = 'intOriginalId') 
 		BEGIN
 
@@ -201,10 +210,7 @@ GO
 			ALTER TABLE tblAPPayment DROP CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId]
 			ALTER TABLE tblCCSite DROP CONSTRAINT FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId
 
-			IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tmpSMPaymentMethod'')
-			BEGIN
-				DROP TABLE tmpSMPaymentMethod
-			END
+			
 
 			SELECT * INTO tmpSMPaymentMethod FROM tblSMPaymentMethod
 
@@ -271,12 +277,7 @@ GO
 			('
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Prepay'' AND intPaymentMethodID = 8)
 				BEGIN
-
-					IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tmpSMPaymentMethod'')
-					BEGIN
-						DROP TABLE tmpSMPaymentMethod
-					END
-
+									
 					SELECT * INTO tmpSMPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID > 7
 
 					DELETE FROM tblSMPaymentMethod WHERE intPaymentMethodID > 7
