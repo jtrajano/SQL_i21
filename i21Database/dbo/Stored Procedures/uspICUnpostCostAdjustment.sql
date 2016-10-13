@@ -47,7 +47,11 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
-		,@INV_TRANS_TYPE_Inventory_Auto_Variance AS INT = 35
+		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 35
+		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 36
+		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 37
+		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 38
+
 
 DECLARE	@intItemId AS INT
 		,@intItemLocationId AS INT 
@@ -88,47 +92,50 @@ SELECT	Changes.intInventoryTransactionId
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
-				INTO	dbo.tblICInventoryTransaction 
-				WITH	(HOLDLOCK) 
-				AS		inventory_transaction	
-				USING (
-					SELECT	strTransactionId = @strTransactionId
-							,intTransactionId = @intTransactionId
-				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
-					AND inventory_transaction.intTransactionTypeId IN (
-							@INV_TRANS_TYPE_Cost_Adjustment
-							, @INV_TRANS_TYPE_Revalue_Sold
-							, @INV_TRANS_TYPE_Revalue_WIP
-							, @INV_TRANS_TYPE_Revalue_Produced
-							, @INV_TRANS_TYPE_Revalue_Transfer
-							, @INV_TRANS_TYPE_Revalue_Build_Assembly
-							, @INV_TRANS_TYPE_Inventory_Auto_Variance
-					)
-					AND 1 = 
-						CASE	WHEN	inventory_transaction.strTransactionId = Source_Query.strTransactionId 
-										AND inventory_transaction.intTransactionId = Source_Query.intTransactionId THEN 
-											1
-								WHEN	inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId 
-										AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId THEN	
-											1
-								ELSE 
-											0
-						END 					
+			INTO	dbo.tblICInventoryTransaction 
+			WITH	(HOLDLOCK) 
+			AS		inventory_transaction	
+			USING (
+				SELECT	strTransactionId = @strTransactionId
+						,intTransactionId = @intTransactionId
+			) AS Source_Query  
+				ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
+				AND inventory_transaction.intTransactionTypeId IN (
+						@INV_TRANS_TYPE_Cost_Adjustment
+						, @INV_TRANS_TYPE_Revalue_Sold
+						, @INV_TRANS_TYPE_Revalue_WIP
+						, @INV_TRANS_TYPE_Revalue_Produced
+						, @INV_TRANS_TYPE_Revalue_Transfer
+						, @INV_TRANS_TYPE_Revalue_Build_Assembly
+						, @INV_TRANS_TYPE_Revalue_Item_Change 
+						, @INV_TRANS_TYPE_Revalue_Split_Lot 
+						, @INV_TRANS_TYPE_Revalue_Lot_Merge 
+						, @INV_TRANS_TYPE_Revalue_Lot_Move 
+				)
+				AND 1 = 
+					CASE	WHEN	inventory_transaction.strTransactionId = Source_Query.strTransactionId 
+									AND inventory_transaction.intTransactionId = Source_Query.intTransactionId THEN 
+										1
+							WHEN	inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId 
+									AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId THEN	
+										1
+							ELSE 
+										0
+					END 					
 
-				-- If matched, update the ysnIsUnposted and set it to true (1) 
-				WHEN MATCHED THEN 
-					UPDATE 
-					SET		ysnIsUnposted = 1
+			-- If matched, update the ysnIsUnposted and set it to true (1) 
+			WHEN MATCHED THEN 
+				UPDATE 
+				SET		ysnIsUnposted = 1
 
-				OUTPUT	$action
-						, Inserted.intInventoryTransactionId
-						, Inserted.intTransactionId
-						, Inserted.strTransactionId
-						, Inserted.intRelatedTransactionId
-						, Inserted.strRelatedTransactionId
-						, Inserted.intTransactionTypeId
-						, Inserted.intCostingMethod
+			OUTPUT	$action
+					, Inserted.intInventoryTransactionId
+					, Inserted.intTransactionId
+					, Inserted.strTransactionId
+					, Inserted.intRelatedTransactionId
+					, Inserted.strRelatedTransactionId
+					, Inserted.intTransactionTypeId
+					, Inserted.intCostingMethod
 		) AS Changes (
 			Action
 			, intInventoryTransactionId
@@ -202,10 +209,10 @@ BEGIN
 			,[intSubLocationId]						= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
 			,[dtmDate]								= ActualTransaction.dtmDate
-			,[dblQty]								= ActualTransaction.dblQty * -1
+			,[dblQty]								= -ActualTransaction.dblQty
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
-			,[dblValue]								= ActualTransaction.dblValue * -1
+			,[dblValue]								= -ActualTransaction.dblValue
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
@@ -260,7 +267,7 @@ BEGIN
 			,[intSubLocationId]			= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]		= ActualTransaction.intStorageLocationId
 			,[dtmDate]					= ActualTransaction.dtmDate
-			,[dblQty]					= ActualTransaction.dblQty * -1
+			,[dblQty]					= -ActualTransaction.dblQty
 			,[intItemUOMId]				= ActualTransaction.intItemUOMId
 			,[dblCost]					= ActualTransaction.dblCost
 			,[intTransactionId]			= ActualTransaction.intTransactionId
