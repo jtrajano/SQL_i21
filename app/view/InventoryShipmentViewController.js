@@ -78,7 +78,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {
                     text: 'Customer',
                     itemId: 'btnCustomer',
-                    clickHandler: 'onCustomerClick',
+                    clickHandler: 'onViewCustomerClick',
                     width: 80
                 }
             ],
@@ -100,6 +100,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
                         {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+
                         {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string'},
                         {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string'},
                         {dataIndex: 'strUnitMeasure', text: 'Ship UOM', flex: 1, dataType: 'string'},
@@ -198,7 +199,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             cboCustomer: {
                 value: '{current.intEntityCustomerId}',
                 store: '{customer}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{current.ysnPosted}',
+                defaultFilters: [{
+                    column: 'ysnActive',
+                    value: true
+                }]
             },
             cboShipFromAddress: {
                 value: '{current.intShipFromLocationId}',
@@ -300,22 +305,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnCalculateCharges: {
                 hidden: '{current.ysnPosted}'
             },
-            btnQuality: {
-                hidden: '{current.ysnPosted}'
-            },
             grdInventoryShipment: {
                 readOnly: '{readOnlyOnPickLots}',
                 colOrderNumber: {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderNumber'
-                    //editor: {
-                    //    store: '{soDetails}',
-                    //    defaultFilters: [{
-                    //        column: 'intEntityCustomerId',
-                    //        value: '{current.intEntityCustomerId}',
-                    //        conjunction: 'and'
-                    //    }]
-                    //}
                 },
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
@@ -334,6 +328,24 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colDescription: 'strItemDescription',
+                colCustomerStorage: {
+                    dataIndex: 'strStorageTypeDescription',
+                    editor: {
+                        store: '{customerStorage}',
+                        defaultFilters: [
+                            {
+                                column: 'intEntityId',
+                                value: '{current.intEntityCustomerId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryShipment.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
@@ -405,8 +417,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        origValueField: 'intItemUOMId',
-                        origUpdateField: 'intItemUOMId',
                         store: '{itemUOM}',
                         defaultFilters: [
                             {
@@ -610,7 +620,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
-            enableComment: true,
+            enableActivity: true,
+            createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             include: 'vyuICGetInventoryShipment, ' +
             'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
@@ -655,9 +666,43 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             currentrecordchanged: me.currentRecordChanged,
             scope: win
         });
-
+        
+        var colShipQty = grdLotTracking.columns[2];
+        var txtShipQty = colShipQty.getEditor();
+        if (txtShipQty) {
+            txtShipQty.on('change', me.onCalculateGrossWeight);
+        }
         return win.context;
     },
+
+    onCalculateGrossWeight: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var grid = win.down('#grdLotTracking');
+        var plugin = grid.getPlugin('cepLotTracking');
+        var current = plugin.getActiveRecord();
+
+        if (!current) return;
+        
+        var record = grid.selection;
+        var availQty = record.get('dblAvailableQty');
+        var shipQty = newValue;
+        var lotDefaultQty = shipQty > availQty ? availQty : shipQty;
+        var wgtPerQty = record.get('dblWeightPerQty');
+        grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
+        current.set('dblGrossWeight', grossWgt);
+    },
+
+    createTransaction: function(config, action) {
+        var me = this,
+            current = me.getViewModel().get('current');
+
+        action({
+            strTransactionNo: current.get('strShipmentNumber'), //Unique field
+            intEntityId: current.get('intEntityId'), //Entity Associated
+            dtmDate: current.get('dtmDate') // Date
+        })
+    },
+
     
     orgValueShipFrom: '',
 
@@ -1025,6 +1070,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                       }
             }
         }
+
+        else if (combo.itemId === 'cboCustomerStorage') {
+            current.set('intCustomerStorageId', records[0].get('intCustomerStorageId'));
+
+        }
     },
 
     onLotSelect: function(combo, records, eOpts) {
@@ -1058,11 +1108,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('dblQuantityShipped', lotDefaultQty);
                 
                 // Calculate the Gross Wgt based on the default lot qty.
-                //var wgtPerQty = records[0].get('dblWeightPerQty');
-                //var grossWgt;
+                var wgtPerQty = records[0].get('dblWeightPerQty');
+                var grossWgt;
                 //
-                //grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
-                //current.set('dblGrossWeight', grossWgt);
+                grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
+                current.set('dblGrossWeight', grossWgt);
             }
             
                 var grdInventoryShipment = win.down('#grdInventoryShipment');
@@ -1083,6 +1133,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onItemSelectionChange: function(selModel, selected, eOpts) {
         if (selModel) {
+            if (!selModel.view)
+                return;
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
             var grdLotTracking = win.down('#grdLotTracking');
@@ -1402,7 +1454,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 itemId: 'cboOrderNumber',
                 displayField: 'strSalesOrderNumber',
                 valueField: 'strSalesOrderNumber',
-                itemId: 'cboOrderNumber',
                 store: win.viewModel.storeInfo.soDetails,
                 defaultFilters: [{
                     column: 'intEntityCustomerId',
@@ -1789,20 +1840,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             case 'colOrderNumber' :
                                 //return controller.salesOrderDropdown(win);
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         };
                     }
                     break;
@@ -1813,34 +1860,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             case 'colOrderNumber' :
                                 //return controller.salesContractDropdown(win);
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 switch (current.get('intSourceType')) {
                                     case 2:
                                         return false;
-                                        break;
                                     default:
                                         return false;
-                                        break;
                                 }
-                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 switch (current.get('intSourceType')) {
                                     case 2:
                                         return false;
-                                        break;
                                     default:
                                         return false;
-                                        break;
                                 }
-                                break;
                         };
                     }
                     break;
@@ -1851,20 +1890,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             case 'colOrderNumber' :
                                 //return controller.transferOrderDropdown(win);
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         };
                     }
                     break;
@@ -1904,14 +1939,41 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onQualityClick: function(button, e, eOpts) {
         var grid = button.up('grid');
-
         var selected = grid.getSelectionModel().getSelection();
+        
+        var win = button.up('window');
+        var vm = win.viewModel;
+        var currentShipmentItem = vm.data.current;
 
         if (selected) {
             if (selected.length > 0){
                 var current = selected[0];
                 if (!current.dummy)
-                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Shipment', intTicketFileId: current.get('intInventoryShipmentItemId') });
+                    if(currentShipmentItem.get('ysnPosted') === true)
+                        {
+                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', 
+                                { 
+                                    strSourceType: 'Inventory Shipment', 
+                                    intTicketFileId: current.get('intInventoryShipmentItemId'),
+                                    viewConfig:{
+                                        modal: true, 
+                                        listeners:
+                                        {
+                                            show: function(win) {
+                                                Ext.defer(function(){
+                                                    win.context.screenMgr.securityMgr.screen.setViewOnlyAccess();
+                                                }, 100);
+                                            }
+                                        }
+                                    }
+                                }
+                            );
+                            
+                        }
+                    else
+                        {
+                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Shipment', intTicketFileId: current.get('intInventoryShipmentItemId') });
+                        }
             }
             else {
                 iRely.Functions.showErrorDialog('Please select an Item to view.');
@@ -2061,7 +2123,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
     },
 
-    onCustomerClick: function () {
+    onViewCustomerClick: function () {
         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer',{ action: 'view' });
     },
 
@@ -2549,6 +2611,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onItemNoSelect
             },
             "#cboStorageLocation": {
+                select: this.onItemNoSelect
+            },
+            "#cboCustomerStorage": {
                 select: this.onItemNoSelect
             },
             "#btnCalculateCharges": {

@@ -9,6 +9,8 @@
     "grunt-open": "^0.2.3",
     "grunt-strip-code": "^1.0.4",
     "grunt-template": "^1.0.0",
+    "gulp": "^3.9.1",
+    "gulp-livereload": "^3.8.1",
     "karma": "^1.2.0",
     "karma-chai": "^0.1.0",
     "karma-mocha": "^1.1.1",

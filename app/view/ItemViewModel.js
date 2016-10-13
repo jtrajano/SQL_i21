@@ -853,6 +853,15 @@ Ext.define('Inventory.view.ItemViewModel', {
     
 
     formulas: {
+        otherChargeAcct: function(get) {
+            var category = get('grdGlAccounts.selection.strAccountCategory');
+            /** If selected category is Other Charge Income or Other Charge Expenses,
+             * display accounts under General category **/
+            if (category == 'Other Charge Expense' || // Other Charge Expenses
+                category == 'Other Charge Income')   // Other Charge Income
+                return 'General'; // General
+            return '';
+        },
         checkLotTracking: function (get) {
             if (get('current.strLotTracking') === 'No') {
                 this.data.current.set('strInventoryTracking', 'Item Level');
@@ -916,7 +925,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                     case 'Non-Inventory':
                     case 'Service':
                     case 'Software':
-                    case 'Bundle':
+                    //case 'Bundle':
                     case 'Comment':
                         this.data.current.set('intCommodityId', null);
                         return true;

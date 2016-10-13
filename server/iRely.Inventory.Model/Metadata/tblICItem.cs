@@ -700,6 +700,10 @@ namespace iRely.Inventory.Model
         public string strStockUOM { get; set; }
         public decimal? dblQuantityInStockUOM { get; set; }
         public decimal? dblCostInStockUOM { get; set; }
+        public string strBOLNumber { get; set; }
+        public string strEntity { get; set; }
+        public string strLotNumber { get; set; }
+        public string strAdjustedTransaction { get; set; }
     }
 
     public class vyuICGetInventoryValuationSummary

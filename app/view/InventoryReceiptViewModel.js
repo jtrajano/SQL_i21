@@ -37,7 +37,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
 
     data: {
         forceSelection: false,
-        weightLoss: 0
+        weightLoss: 0,
+        locationFromTransferOrder: null
     },
 
     stores: {
@@ -317,6 +318,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 },
                 {
                     strDescription: 'Damaged'
+                },
+                {
+                    strDescription: 'Clean Wgt'
                 }
             ],
             fields: {
@@ -326,6 +330,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     },
 
     formulas: {
+        receiptTitle: function(get) {
+            if(get('current.ysnOrigin')) {
+                return get('current.strReceiptNumber') + ' (Origin)';
+            }
+            return get('current.strReceiptNumber');
+        },
         checkTransportPosting: function(get) {
             if (get('current.intSourceType') === 3) {
                 return true;
@@ -412,6 +422,30 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             else {
                 var isDirect = (get('current.strReceiptType') === 'Direct')
                 return isDirect;
+            }
+        },
+        locationCheckReadOnlyWithOrder: function (get) {
+            if (get('current.ysnPosted') === true) {
+                return true
+            }
+            else {
+                if (get('current.strReceiptType') !== 'Direct' && get('current.strReceiptType') !== 'Transfer Order') {
+                    if (get('current.tblICInventoryReceiptItems').data.items.length > 0) {
+                        var current = get('current.tblICInventoryReceiptItems').data.items[0];
+                        if (current.get('intOrderId') !== null) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
             }
         },
         checkReadOnlyWithOrder: function (get) {

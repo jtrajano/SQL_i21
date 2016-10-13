@@ -1,5 +1,5 @@
 
-var Harness = Siesta.Harness.Browser.ExtJS,
+var Harness = new Siesta.Harness.Browser.ExtJS (),
     testEnginePath = '../../TestEngine/TestEngine.js',
     commonSM =  '../../i21/test-ui/CommonSM.js';
 
@@ -22,6 +22,27 @@ Harness.configure({
     //autoRun: true
 });
 Harness.start(
+
+    { group: 'SmokeTesting',
+        items: [
+            {
+                url: 'SmokeTesting/OpenICScreens.js',
+                preload: [
+                    testEnginePath,
+                    commonSM
+
+                ]
+            },
+            {
+                url: 'SmokeTesting/AddInventoryItem.js',
+                preload: [
+                    testEnginePath,
+                    commonSM
+
+                ]
+            }
+        ]
+    },
     { group: 'Item',
         items: [
             {

@@ -185,6 +185,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                 items: [
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeDetails',
                                         bodyPadding: 5,
                                         title: 'Details',
                                         layout: {
@@ -559,6 +560,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'tabShippingCompany',
                                                         title: 'Shipping Company',
                                                         layout: {
                                                             type: 'vbox',
@@ -659,6 +661,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'tabDelivery',
                                                         title: 'Delivery',
                                                         layout: {
                                                             type: 'vbox',
@@ -1046,6 +1049,41 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         width: 100,
                                                                         dataIndex: 'strDescription',
                                                                         text: 'Order UOM'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerStorage',
+                                                                        width: 110,
+                                                                        dataIndex: 'strStorageTypeDescription',
+                                                                        text: 'Customer Storage',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCustomerStorageId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Customer Storage Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStorageTypeDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Storage Type Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    xtype: 'numbercolumn',
+                                                                                    dataIndex: 'dblOpenBalance',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Open Balance',
+                                                                                    format: '0,000.##',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboCustomerStorage',
+                                                                            displayField: 'strStorageTypeDescription',
+                                                                            valueField: 'strStorageTypeDescription'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
@@ -2019,19 +2057,20 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         xtype: 'panel',
                                         itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Comments',
+                                        title: 'Activities',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgComments'
                                         },
                                         items: [
                                             {
-                                                xtype: 'commentbox'
+                                                xtype: 'activitygrid'
                                             }
                                         ]
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeAttachments',
                                         layout: 'fit',
                                         title: 'Attachments',
                                         items: [

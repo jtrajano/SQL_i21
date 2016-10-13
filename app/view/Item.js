@@ -4017,6 +4017,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                hidden: true,
                                                                 itemId: 'btnInsertPricing',
                                                                 iconCls: 'small-insert',
                                                                 text: 'Insert'
@@ -4024,6 +4025,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                hidden: true,
                                                                 itemId: 'btnDeletePricing',
                                                                 iconCls: 'small-remove',
                                                                 text: 'Remove'
@@ -6304,14 +6306,14 @@ Ext.define('Inventory.view.Item', {
                                         xtype: 'panel',
                                         itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Comments',
+                                        title: 'Activities',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgComments'
                                         },
                                         items: [
                                             {
-                                                xtype: 'commentbox'
+                                                xtype: 'activitygrid'
                                             }
                                         ]
                                     },

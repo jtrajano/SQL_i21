@@ -23,7 +23,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
         'i21.store.CurrencyBuffered',
-        'Logistics.store.PickedLots'
+        'Logistics.store.PickedLots',
+        'Grain.store.BufferedStorageTransferTicket'
     ],
 
     data: {
@@ -48,10 +49,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     strOrderType: 'Direct'
                 }
             ],
-            fields: {
-                name: 'intOrderType',
-                name: 'strOrderType'
-            }
+            fields: [
+                {name: 'intOrderType'},
+                {name: 'strOrderType'}
+            ]
         },
         sourceTypes: {
             data: [
@@ -72,10 +73,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     strSourceType: 'Pick Lot'
                 }
             ],
-            fields: {
-                name: 'intSourceType',
-                name: 'strSourceType'
-            }
+            fields: [
+                {name: 'intSourceType'},
+                {name: 'strSourceType'}
+            ]
         },
         ownershipTypes: {
             autoLoad: true,
@@ -93,16 +94,20 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     strOwnershipType: 'Consigned Purchase'
                 }
             ],
-            fields: {
-                name: 'intOwnershipType',
-                name: 'strOwnershipType'
-            }
+            fields: [
+                {name: 'intOwnershipType'},
+                {name: 'strOwnershipType'}
+            ]
         },
         freightTerm: {
             type: 'FreightTermsBuffered'
         },
         customer: {
-            type: 'customerbuffered'
+            type: 'customerbuffered',
+            sorters: {
+                direction: 'ASC',
+                property: 'strCustomerNumber'
+            }
         },
         shipFromLocation: {
             type: 'companylocationbuffered'
@@ -204,6 +209,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         pickedLotList: {
             type: 'lgpickedlots'
+        },
+        customerStorage: {
+            type: 'bufferedstoragetransferticket',
+            pageSize: 25 // Override the pageSize of the Grain store.
         }
     },
 
@@ -253,7 +262,6 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             switch (orderType) {
                 case 4:
                     return false;
-                    break;
                 default:
                     if (iRely.Functions.isEmpty(get('grdInventoryShipment.selection.strOrderNumber'))) {
                         return false;
@@ -261,7 +269,6 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     else {
                         return true;
                     }
-                    break;
             };
         },
         hasItemCommodity: function (get) {
@@ -277,10 +284,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             switch (orderType) {
                 case 1:
                     return false;
-                    break;
                 default:
                     return true;
-                    break;
             };
         },
         readOnlyCostMethod: function (get) {
@@ -311,11 +316,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     case 3:
                         grid.gridMgr.newRow.disable();
                         return true;
-                        break;
                     default:
                         grid.gridMgr.newRow.enable();
                         return false;
-                        break;
                 };
             }
         },
@@ -323,14 +326,12 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             switch (get('current.intOrderType')) {
                 case 1:
                     return [];
-                    break;
                 default:
                     return [{
                         column: 'intSourceType',
                         value: 3,
                         condition: 'noteq'
                     }];
-                    break;
             }
         },
         checkReadOnlyWithLineItem: function (get) {

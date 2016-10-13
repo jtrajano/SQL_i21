@@ -1971,7 +1971,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "layout": "fit",
-                                "title": "Comments"
+                                "title": "Activities"
                             },
                             "name": "MyPanel34",
                             "designerId": "a21c6047-e07e-40f8-aed7-395cb9b04f74",
@@ -1994,7 +1994,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "designer|createAlias": "commentbox",
+                                        "designer|createAlias": "activitygrid",
                                         "designer|displayName": "comments"
                                     },
                                     "name": "MyContainer14",

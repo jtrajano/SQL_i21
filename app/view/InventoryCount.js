@@ -991,10 +991,10 @@ Ext.define('Inventory.view.InventoryCount', {
                         {
                             xtype: 'panel',
                             layout: 'fit',
-                            title: 'Comments',
+                            title: 'Activities',
                             items: [
                                 {
-                                    xtype: 'commentbox'
+                                    xtype: 'activitygrid'
                                 }
                             ]
                         },

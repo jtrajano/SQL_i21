@@ -394,6 +394,18 @@ Ext.define('Inventory.view.ItemViewController', {
                         defaultFilters: [{
                             column: 'strAccountCategoryGroupCode',
                             value: 'INV'
+                        },
+                        {
+                            column: 'strAccountCategory',
+                            value: 'Write-Off Sold',
+                            conjunction: 'and',
+                            condition: 'noteq'    
+                        },
+                        {
+                            column: 'strAccountCategory',
+                            value: 'Revalue Sold',
+                            conjunction: 'and',
+                            condition: 'noteq'    
                         }]
                     }
                 },
@@ -401,11 +413,18 @@ Ext.define('Inventory.view.ItemViewController', {
                     dataIndex: 'strAccountId',
                     editor: {
                         store: '{accountId}',
-                        defaultFilters: [{
-                            column: 'intAccountCategoryId',
-                            value: '{grdGlAccounts.selection.intAccountCategoryId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intAccountCategoryId',
+                                value: '{grdGlAccounts.selection.intAccountCategoryId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strAccountCategory',
+                                value: '{otherChargeAcct}',
+                                conjunction: 'or'
+                            }
+                        ]
                     }
                 },
                 colDescription: 'strDescription'
@@ -810,6 +829,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
+                        readOnly: true,
                         store: '{pricingLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -1077,6 +1097,10 @@ Ext.define('Inventory.view.ItemViewController', {
                             column: 'strType',
                             value: 'Inventory',
                             conjunction: 'and'
+                        }, {
+                            column: 'intCommodityId',
+                            value: '{current.intCommodityId}',
+                            conjunction: 'and'
                         }]
                     }
                 },
@@ -1229,7 +1253,8 @@ Ext.define('Inventory.view.ItemViewController', {
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
             enableAudit: true,
-            enableComment: true,
+            enableActivity: true,
+            createTransaction: Ext.bind(me.createTransaction, me),
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -1456,6 +1481,18 @@ Ext.define('Inventory.view.ItemViewController', {
     StockSummaryRenderer: function (value, params, data) {
         return i21.ModuleMgr.Inventory.roundDecimalFormat(value, 2);
     },
+
+    createTransaction: function(config, action) {
+        var me = this,
+            current = me.getViewModel().get('current');
+
+        action({
+            strTransactionNo: current.get('strItemNo'), //Unique field
+            intEntityId: current.get('intEntityId'), //Entity Associated
+            dtmDate: current.get('dtmDate') // Date
+        })
+    },
+
 
     createRecord: function(config, action) {
         var me = this;
@@ -1774,7 +1811,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onUOMUnitMeasureSelect: function(combo, records, eOpts) {
+    onUOMUnitMeasureSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -1783,7 +1820,6 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepDetailUOM');
         var currentItem = win.viewModel.data.current;
         var current = plugin.getActiveRecord();
-        var uomConversion = win.viewModel.storeInfo.uomConversion;
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
@@ -1796,34 +1832,30 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);
 
-            var uoms = grid.store.data.items;
-            var exists = Ext.Array.findBy(uoms, function (row) {
-                if (row.get('ysnStockUnit') === true) {
-                    return true;
-                }
-            });
-            if (exists) {
-                if (uomConversion) {
-                    var index = uomConversion.data.findIndexBy(function (row) {
-                        if (row.get('intUnitMeasureId') === exists.get('intUnitMeasureId')) {
-                            return true;
+            var itemStore = grid.store;
+            var stockUnit = itemStore.findRecord('ysnStockUnit', true);
+            if (stockUnit) {
+                var unitMeasureId = stockUnit.get('intUnitMeasureId');
+
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/UnitMeasure/Search',
+                    method: 'get',
+                    success: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: 9});
+                        if (stockUnitConversions) {
+                            var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
+                                { intUnitMeasureId: current.get('intUnitMeasureId'), intStockUnitMeasureId: unitMeasureId })
+                            var dblConversionToStock = stockConversion.dblConversionToStock;
+                            current.set('dblUnitQty', dblConversionToStock);
                         }
-                    });
-                    if (index >= 0) {
-                        var stockUOM = uomConversion.getAt(index);
-                        var conversions = stockUOM.data.vyuICGetUOMConversions;
-                        if (conversions) {
-                            var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                                if (row.intUnitMeasureId === current.get('intUnitMeasureId')) {
-                                    return true;
-                                }
-                            });
-                            if (selectedUOM) {
-                                current.set('dblUnitQty', selectedUOM.dblConversionToStock);
-                            }
-                        }
+                    },
+                    failure: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                     }
-                }
+                });
             }
         }
     },
@@ -1842,6 +1874,7 @@ Ext.define('Inventory.view.ItemViewController', {
     },
     
     onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
+        var me = this;
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
             var win = obj.up('window');
@@ -1915,6 +1948,10 @@ Ext.define('Inventory.view.ItemViewController', {
                                         else
                                             {
                                                 iRely.Functions.showCustomDialog('information', 'ok', 'Conversion to new stock unit has been completed.');
+                                                var context = me.view.context;
+                                                var vm = me.getViewModel();
+                                                vm.data.current.dirty = false;
+                                                context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
                                             }
                                 },
                                 failure: function(response)
@@ -2443,8 +2480,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Raw Material":
@@ -2456,8 +2493,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Finished Good":
@@ -2468,8 +2505,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Other Charge":
