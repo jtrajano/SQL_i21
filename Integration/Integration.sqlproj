@@ -344,5 +344,11 @@
     <Build Include="dbo\Tables\tblARptticmst.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportInvoiceFromPTTICMST.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportInvoiceBackupPTTICMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportAGTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportAGTaxXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceFromAGORDMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
   </ItemGroup>
 </Project>

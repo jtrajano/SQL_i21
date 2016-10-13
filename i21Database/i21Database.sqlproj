@@ -4100,6 +4100,8 @@
     <Build Include="dbo\Stored Procedures\uspICUnshipInventoryItem.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
     <Build Include="dbo\Stored Procedures\vyuRKUnrealizedPnL_Copy.sql" />
+    <Build Include="dbo\User Defined Types\ItemCostingZeroStockTableType.sql" />
+    <Build Include="dbo\Functions\fnSCCalculateDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

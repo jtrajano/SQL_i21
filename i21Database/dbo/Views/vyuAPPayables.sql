@@ -78,3 +78,25 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = B.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityVendorId
 WHERE A.ysnPosted = 1
+UNION ALL
+SELECT --OVERPAYMENT
+	A.dtmDate
+	, A.intBillId 
+	, A.strBillId 
+	, 0 AS dblAmountPaid 
+	, CASE WHEN A.intTransactionType != 1 AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal
+	, CASE WHEN A.intTransactionType != 1 AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0 
+	, C1.strVendorId 
+	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
+	, A.dtmDueDate
+	, A.ysnPosted 
+	, A.ysnPaid
+	,A.intAccountId
+FROM dbo.tblAPBill A
+LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
+	ON C1.[intEntityVendorId] = A.[intEntityVendorId]
+WHERE intTransactionType IN (8) AND A.ysnPaid != 1
+

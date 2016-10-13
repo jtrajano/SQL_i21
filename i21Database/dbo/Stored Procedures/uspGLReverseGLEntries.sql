@@ -33,7 +33,7 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
-		EXEC uspGLReverseGLEntry @strTransactionId, @intEntityId, @dtmDateReverse	
+		EXEC uspGLInsertReverseGLEntry @strTransactionId, @intEntityId, @dtmDateReverse	
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END

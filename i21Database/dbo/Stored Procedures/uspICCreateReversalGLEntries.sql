@@ -12,9 +12,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
-DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
-DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
+DECLARE @InventoryTransactionTypeId_AutoVariance AS INT = 1;
+--DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
+--DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 
 --1	Inventory Auto Variance
 --2	Inventory Write-Off Sold
@@ -49,7 +49,6 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
-
 -- Get the GL Account ids to use
 BEGIN 
 	INSERT INTO @GLAccounts (
@@ -80,7 +79,7 @@ IF EXISTS (
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	TRANS.strBatchId = @strBatchId
-			AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative 
+			AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance 
 )
 BEGIN 
 	SET @strItemNo = NULL
@@ -156,7 +155,7 @@ BEGIN
 				)
 	WHERE	Reversal.strBatchId = @strBatchId
 			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
-			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoNegative
+			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoVariance
 			
 	-----------------------------------------------------------------------------------
 	-- Create the Auto-Negative G/L Entries
@@ -203,7 +202,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
+			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 
 	UNION ALL 
 	SELECT	
@@ -247,7 +246,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
+			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 END
 ;
 

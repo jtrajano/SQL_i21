@@ -419,3 +419,31 @@ EXEC sp_addmessage 80084,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80086) EXEC sp_dropmessage 80086, 'us_english'	
 SET @strmessage = 'Cannot post this Inventory Receipt. The transfer order "%s" was already posted in "%s".'
 EXEC sp_addmessage 80086,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80087) EXEC sp_dropmessage 80087, 'us_english'	
+SET @strmessage = 'Please ensure that the line items and lots are located in the receipt''s location.'
+EXEC sp_addmessage 80087,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80088) EXEC sp_dropmessage 80088, 'us_english'	
+SET @strmessage = 'Other Vendor for Other Charge item %s is required to accrue.'
+EXEC sp_addmessage 80088,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80089) EXEC sp_dropmessage 80089, 'us_english'	
+SET @strmessage = 'Unable to Unship. The inventory shipment has already an invoice.'
+EXEC sp_addmessage 80089,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80090) EXEC sp_dropmessage 80090, 'us_english'	
+SET @strmessage = 'Lotted item %s should have lot(s) specified.'
+EXEC sp_addmessage 80090,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80091) EXEC sp_dropmessage 80091, 'us_english'	
+SET @strmessage = 'Unable to unpost the Inventory Shipment. The %s was billed.'
+EXEC sp_addmessage 80091,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80092) EXEC sp_dropmessage 80092, 'us_english'	
+SET @strmessage = 'The transaction you are trying to delete was processed to Invoice (%s). Delete the associated invoice before the shipment transaction can be deleted.'
+EXEC sp_addmessage 80092,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80093) EXEC sp_dropmessage 80093, 'us_english'	
+SET @strmessage = 'Stock quantity is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
+EXEC sp_addmessage 80093,11,@strmessage,'us_english','False'
