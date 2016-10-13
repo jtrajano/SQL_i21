@@ -5523,4 +5523,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strTemplateItemId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1361b4a9-6967-4ad3-ad9f-1b0683f075b8" ChangeDateTime="10/13/2016 11:10:18">
+    <Property Name="ElementName" Value="[dbo].[tblTRLoadBlendIngredient].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTRLoadBlendIngredient]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLoadBlendIngredientId" />
+  </Operation>
 </Operations>

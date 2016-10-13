@@ -4421,6 +4421,7 @@
     <Build Include="dbo\Views\vyuHDCustomerContactList.sql" />
     <Build Include="dbo\Functions\fnSCCalculateDiscount.sql" />
     <Build Include="dbo\Views\vyuCTInventoryItem.sql" />
+    <Build Include="dbo\Tables\tblTRLoadBlendIngredient.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
