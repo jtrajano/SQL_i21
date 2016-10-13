@@ -333,8 +333,8 @@ SELECT
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
 		,intAccountId				= tblGLAccount.intAccountId
-		,dblDebit					= Credit.Value
-		,dblCredit					= Debit.Value
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
@@ -367,14 +367,14 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
-WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
+WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
 				@InventoryTransactionTypeId_AutoNegative
 			)
 
@@ -383,8 +383,8 @@ SELECT
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
 		,intAccountId				= tblGLAccount.intAccountId
-		,dblDebit					= Debit.Value
-		,dblCredit					= Credit.Value
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
@@ -417,7 +417,7 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit
