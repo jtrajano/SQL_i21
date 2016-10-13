@@ -6,47 +6,36 @@ WITH ComPref AS(
 	FROM tblPATCompanyPreference
 )
 SELECT	NEWID() AS id,
-		intCustomerId = CV.intCustomerPatronId,
+		Total.intCustomerId,
 		strCustomerName = ENT.strName,
-		intFiscalYearId = CV.intFiscalYear,
+		intFiscalYearId = Total.intFiscalYear,
+		Total.intRefundTypeId,
 		AC.strStockStatus,
 		ysnEligibleRefund = CASE WHEN Total.dblRefundAmount < ComPref.dblMinimumRefund THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 		dblTotalPurchases = Total.dblTotalPurchases,
 		dblTotalSales = Total.dblTotalSales,
 		dblRefundAmount = Total.dblRefundAmount,
 		dblEquityRefund = CASE WHEN (Total.dblRefundAmount - Total.dblCashRefund) < 0 THEN 0 ELSE Total.dblRefundAmount - Total.dblCashRefund END 
-	FROM tblPATCustomerVolume CV
-	INNER JOIN tblARCustomer AC
-		ON AC.intEntityCustomerId = CV.intCustomerPatronId
-	INNER JOIN tblEMEntity ENT
-		ON ENT.intEntityId = CV.intCustomerPatronId
-	CROSS APPLY ComPref
-	CROSS APPLY (
+	FROM (
 		SELECT  intCustomerId = B.intCustomerPatronId,
-				dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN SUM(dblVolume) ELSE 0 END,
-				dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN SUM(dblVolume) ELSE 0 END,
-				dblRefundAmount = SUM(RRD.dblRate) * SUM(dblVolume),
-				dblCashRefund = ((SUM(RRD.dblRate) * SUM(dblVolume)) * (RR.dblCashPayout/100)) 
+				B.intFiscalYear,
+				RR.intRefundTypeId,
+				dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN B.dblVolume ELSE 0 END,
+				dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN B.dblVolume ELSE 0 END,
+				dblRefundAmount = RRD.dblRate * B.dblVolume,
+				dblCashRefund = (RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100)
 			FROM tblPATCustomerVolume B
 		INNER JOIN tblPATRefundRateDetail RRD
-				ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
+				ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
 		INNER JOIN tblPATRefundRate RR
 				ON RR.intRefundTypeId = RRD.intRefundTypeId
 		INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 		CROSS APPLY ComPref
-			WHERE B.intCustomerPatronId = CV.intCustomerPatronId AND B.ysnRefundProcessed <> 1
-		GROUP BY B.intCustomerPatronId, PC.strPurchaseSale, RR.dblCashPayout, ComPref.dblMinimumRefund
+			WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 	) Total
-	WHERE CV.ysnRefundProcessed <> 1
-	GROUP BY CV.intCustomerPatronId, 
-		ENT.strName, 
-		AC.strStockStatus, 
-		CV.intFiscalYear,
-		CV.dblVolume,
-		ComPref.dblMinimumRefund,
-		CV.dtmLastActivityDate,
-		Total.dblTotalPurchases,
-		Total.dblTotalSales,
-		Total.dblRefundAmount,
-		Total.dblCashRefund
+	INNER JOIN tblARCustomer AC
+		ON AC.intEntityCustomerId = Total.intCustomerId
+	INNER JOIN tblEMEntity ENT
+		ON ENT.intEntityId = Total.intCustomerId
+	CROSS APPLY ComPref

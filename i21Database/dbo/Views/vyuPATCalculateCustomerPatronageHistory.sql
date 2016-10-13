@@ -1,13 +1,14 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateCustomerPatronageHistory]
 	AS
-SELECT	DISTINCT RCat.intPatronageCategoryId,
+SELECT	RCus.intRefundTypeId,
+		RCat.intPatronageCategoryId,
 		R.intRefundId,
 		RCus.intCustomerId,
 		PC.strDescription,
 		PC.strCategoryCode,
 		dblRate = RCat.dblRefundRate,
 		RCat.dblVolume,
-		RCus.dblRefundAmount
+		dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate
 FROM tblPATRefundCustomer RCus
 INNER JOIN tblPATRefund R
 	ON RCus.intRefundId = R.intRefundId

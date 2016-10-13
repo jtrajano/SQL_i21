@@ -10,7 +10,7 @@ WITH ComPref AS (
 	FROM tblPATCompanyPreference
 ),
 FiscalSum AS (
-SELECT DISTINCT CV.intFiscalYear,
+SELECT DISTINCT Total.intFiscalYear,
 			dblVolume = Total.dblVolume,
 			dblRefundAmount = Total.dblRefundAmount,
 			dblNonRefundAmount = Total.dblNonRefundAmount,
@@ -23,33 +23,32 @@ SELECT DISTINCT CV.intFiscalYear,
 			intNonVoting = [dbo].[fnPATCountStockStatus]('Non-Voting', default),
 			intProducers = [dbo].[fnPATCountStockStatus]('Producer', default),
 			intOthers = [dbo].[fnPATCountStockStatus]('Other', default)
-		    FROM tblPATCustomerVolume CV
+		    FROM (
+				SELECT	B.intCustomerPatronId,
+						B.intPatronageCategoryId,
+						intFiscalYear = B.intFiscalYear,
+						dblVolume = ISNULL(B.dblVolume,0),
+						dblRefundAmount = CASE WHEN ISNULL((RRD.dblRate * B.dblVolume),0) >= ComPref.dblMinimumRefund THEN ISNULL((RRD.dblRate * B.dblVolume),0) ELSE 0 END,
+						dblNonRefundAmount = CASE WHEN ISNULL((RRD.dblRate * B.dblVolume),0) >= ComPref.dblMinimumRefund THEN 0 ELSE ISNULL((RRD.dblRate * B.dblVolume),0) END,
+						dblCashRefund = CASE WHEN ISNULL((RRD.dblRate * B.dblVolume),0) >= ComPref.dblMinimumRefund THEN ((RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100)) ELSE 0 END,
+						dblLessFWT = CASE WHEN AC.ysnSubjectToFWT = 1 AND (RRD.dblRate * B.dblVolume) >= ComPref.dblMinimumRefund THEN (((RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100)) * (ComPref.dblFederalBackup/100)) ELSE 0 END
+				FROM tblPATCustomerVolume B
+				INNER JOIN tblPATRefundRateDetail RRD
+						ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
+				INNER JOIN tblPATRefundRate RR
+						ON RR.intRefundTypeId = RRD.intRefundTypeId
+				INNER JOIN tblARCustomer AC
+						ON AC.intEntityCustomerId = B.intCustomerPatronId
+				CROSS APPLY ComPref
+				WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
+			) Total
      INNER JOIN tblPATRefundRateDetail RRD
-			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
+			 ON RRD.intPatronageCategoryId = Total.intPatronageCategoryId 
      INNER JOIN tblPATRefundRate RR
              ON RR.intRefundTypeId = RRD.intRefundTypeId
 	 INNER JOIN tblARCustomer AC
-			 ON AC.intEntityCustomerId = CV.intCustomerPatronId
+			 ON AC.intEntityCustomerId = Total.intCustomerPatronId
 	 CROSS APPLY ComPref
-	 INNER JOIN (
-			SELECT	intFiscalYear = B.intFiscalYear,
-					dblVolume = ISNULL(B.dblVolume,0),
-					dblRefundAmount = ISNULL((RRD.dblRate * dblVolume),0),
-					dblNonRefundAmount = CASE WHEN ISNULL((RRD.dblRate * dblVolume),0) >= ComPref.dblMinimumRefund THEN 0 ELSE ISNULL((RRD.dblRate * dblVolume),0) END,
-					dblCashRefund = ((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)),
-					dblLessFWT = CASE WHEN AC.ysnSubjectToFWT = 1 THEN (((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) * (ComPref.dblFederalBackup/100)) ELSE 0 END
-			FROM tblPATCustomerVolume B
-			INNER JOIN tblPATRefundRateDetail RRD
-					ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
-			INNER JOIN tblPATRefundRate RR
-					ON RR.intRefundTypeId = RRD.intRefundTypeId
-			INNER JOIN tblARCustomer AC
-					ON AC.intEntityCustomerId = B.intCustomerPatronId
-			CROSS APPLY ComPref
-			WHERE B.ysnRefundProcessed <> 1
-	 ) Total
-		ON Total.intFiscalYear = CV.intFiscalYear
-	WHERE CV.ysnRefundProcessed <> 1 
 )
 
 SELECT	intFiscalYear AS intFiscalYearId,

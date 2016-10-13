@@ -14,7 +14,7 @@ BEGIN
 			ON ARR.intEntityCustomerId = CVV.intCustomerPatronId
 		WHERE ARR.strStockStatus = @strStockStatus AND CVV.ysnRefundProcessed <> 1
 	ELSE
-		SELECT @stockStatusCount = ISNULL(Count(*),0) FROM tblPATRefundCustomer RC
+		SELECT @stockStatusCount = ISNULL(Count(*),0) FROM (SELECT DISTINCT intCustomerId,intRefundId,strStockStatus FROM tblPATRefundCustomer) RC
 		WHERE strStockStatus = @strStockStatus AND intRefundId = @intRefundId
 	RETURN @stockStatusCount
 END

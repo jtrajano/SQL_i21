@@ -3,6 +3,7 @@
 SELECT	NEWID() AS id,
 		R.intRefundId,
 		RR.intCustomerId,
+		RR.intRefundTypeId,
 		strCustomerName = ENT.strName,
 		intFiscalYearId = R.intFiscalYearId,
 		ysnEligibleRefund = CASE WHEN RefMerge.dblRefundAmount < R.dblMinimumRefund THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,

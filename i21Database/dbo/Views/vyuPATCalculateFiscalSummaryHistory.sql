@@ -2,30 +2,35 @@
 	AS
 WITH FiscalSum AS(
 	SELECT	R.intFiscalYearId,
-			dblVolume = SUM(RCat.dblVolume),
-			dblRefundAmount = RC.dblRefundAmount,
+			dblVolume = RC.dblVolume,
+			dblRefundAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblRefundAmount ELSE 0 END,
 			dblNonRefundAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN 0 ELSE RC.dblRefundAmount END,
-			dblCashRefund = RC.dblCashRefund,
-			dblLessFWT = CASE WHEN AC.ysnSubjectToFWT = 1 THEN RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) ELSE 0 END,
-			dblLessServiceFee =  RC.dblCashRefund * (R.dblServiceFee/100),
-			dblCheckAmount = CASE WHEN AC.ysnSubjectToFWT = 1 THEN
+			dblCashRefund = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblCashRefund ELSE 0 END,
+			dblLessFWT = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN (CASE WHEN AC.ysnSubjectToFWT = 1  THEN RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) ELSE 0 END) ELSE 0 END,
+			dblLessServiceFee =  CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblCashRefund * (R.dblServiceFee/100) ELSE 0 END,
+			dblCheckAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN (CASE WHEN AC.ysnSubjectToFWT = 1 THEN
 					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblFedWithholdingPercentage/100)) - (RC.dblCashRefund * (R.dblServiceFee/100.0))
 					ELSE
 					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblServiceFee/100.0))
-					END,
-			dblEquityRefund = RC.dblEquityRefund,
+					END) ELSE 0 END,
+			dblEquityRefund = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblRefundAmount - RC.dblCashRefund ELSE 0 END,
 			intVoting = [dbo].[fnPATCountStockStatus]('Voting', R.intRefundId),
 			intNonVoting = [dbo].[fnPATCountStockStatus]('Non-Voting', R.intRefundId),
 			intProducers = [dbo].[fnPATCountStockStatus]('Producer', R.intRefundId),
 			intOthers = [dbo].[fnPATCountStockStatus]('Other', R.intRefundId)
-	FROM tblPATRefundCustomer RC
+	FROM (SELECT intRefundId,
+				RC.intRefundCustomerId,
+				intCustomerId,
+				RCat.dblVolume,
+				dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate,
+				dblCashRefund = (RCat.dblVolume * RCat.dblRefundRate) * (RC.dblCashPayout/100)
+		FROM tblPATRefundCustomer RC
+		INNER JOIN tblPATRefundCategory RCat
+			ON RCat.intRefundCustomerId = RC.intRefundCustomerId) RC
 	INNER JOIN tblPATRefund R
 		ON R.intRefundId = RC.intRefundId
-	INNER JOIN tblPATRefundCategory RCat
-		ON RCat.intRefundCustomerId = RC.intRefundCustomerId
 	INNER JOIN tblARCustomer AC
 		ON AC.intEntityCustomerId = RC.intCustomerId
-	GROUP BY R.intRefundId, AC.ysnSubjectToFWT, R.intFiscalYearId, RC.dblRefundAmount, R.dblMinimumRefund, RC.dblCashRefund, R.dblFedWithholdingPercentage, R.dblServiceFee, RC.dblEquityRefund
 )
 SELECT	intFiscalYearId,
 		dblVolume = SUM(dblVolume), 

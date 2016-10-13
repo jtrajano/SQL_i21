@@ -7,14 +7,12 @@ SELECT	NEWID() AS id,
 		R.intFiscalYearId,
 		ysnEligibleRefund = (CASE WHEN RCus.dblRefundAmount >= R.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END),
 		ARC.strStockStatus,
-		RCatPCat.strPurchaseSale,
-		RCatPCat.intPatronageCategoryId,
 		TC.strTaxCode,
-		RCatPCat.intRefundTypeId,
-		RCatPCat.strRefundType,
-		RCatPCat.strRefundDescription,
-		RCatPCat.dblCashPayout,
-		RCatPCat.ysnQualified,
+		RCus.intRefundTypeId,
+		RR.strRefundType,
+		RR.strRefundDescription,
+		RCus.dblCashPayout,
+		RR.ysnQualified,
 		dtmLastActivityDate = R.dtmRefundDate,
 		RCus.dblRefundAmount,
 		RCus.dblCashRefund,
@@ -26,25 +24,9 @@ SELECT	NEWID() AS id,
 		ON EN.intEntityId = RCus.intCustomerId
 	INNER JOIN tblARCustomer ARC
 		ON ARC.intEntityCustomerId = RCus.intCustomerId
-	INNER JOIN
-	(
-		SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
-				intPatronageCategoryId = RCat.intPatronageCategoryId,
-				dblRefundRate = RCat.dblRefundRate,
-				strPurchaseSale = PCat.strPurchaseSale,
-				intRefundTypeId = RRD.intRefundTypeId,
-				strRefundType = RR.strRefundType,
-				strRefundDescription = RR.strRefundDescription,
-				dblCashPayout = RR.dblCashPayout,
-				ysnQualified = RR.ysnQualified
-		FROM tblPATRefundCategory RCat
-		INNER JOIN tblPATPatronageCategory PCat
-			ON RCat.intPatronageCategoryId	 = PCat.intPatronageCategoryId
-		INNER JOIN tblPATRefundRateDetail RRD
-			ON RRD.intPatronageCategoryId = RCat.intPatronageCategoryId
-		INNER JOIN tblPATRefundRate RR
-			ON RR.intRefundTypeId = RRD.intRefundTypeId
-	) RCatPCat
+	INNER JOIN tblPATRefundCategory RCatPCat
 		ON RCatPCat.intRefundCustomerId = RCus.intRefundCustomerId
+	INNER JOIN tblPATRefundRate RR
+		ON RR.intRefundTypeId = RCus.intRefundTypeId
 	LEFT JOIN tblSMTaxCode TC
 		ON TC.intTaxCodeId = ARC.intTaxCodeId
