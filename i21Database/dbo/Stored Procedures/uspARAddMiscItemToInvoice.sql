@@ -45,7 +45,7 @@ DECLARE @ZeroDecimal				NUMERIC(18, 6)
 		,@InvoiceDate				DATETIME
 		,@ServiceChargesAccountId	INT
 		,@CurrencyId				INT
-
+		
 SET @ZeroDecimal = 0.000000
 
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
@@ -79,9 +79,9 @@ IF ISNULL(@ItemConversionAccountId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM vyuGL
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
-
-
-SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)
+		
+	
+SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
 --IF ISNULL(@ServiceChargesAccountId,0) = 0
 --	BEGIN
 --		SET @ErrorMessage = 'The Service Charge account in the Company Preferences was not set.'
@@ -212,7 +212,7 @@ BEGIN TRY
 		,[intConversionAccountId]			= @ItemConversionAccountId
 		,[intConcurrencyId]					= 0
 		,[intStorageScheduleTypeId]			= @StorageScheduleTypeId
-
+			
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0	

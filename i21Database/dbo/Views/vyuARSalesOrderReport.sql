@@ -32,7 +32,11 @@ SELECT SO.intSalesOrderId
 	 , strCategoryCode			= ICC.strCategoryCode
 	 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
 	 , intSalesOrderDetailId	= SD.intSalesOrderDetailId
+	 , dblContractBalance		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN
+									CASE WHEN SD.dblContractBalance = 0 THEN CD.dblBalance ELSE SD.dblContractBalance END
+								  ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END
+	 , strItem					= CASE WHEN ISNULL(I.strItemNo, '') = '' THEN SD.strItemDescription ELSE LTRIM(RTRIM(I.strItemNo)) + ' - ' + ISNULL(SD.strItemDescription, '') END
 	 , strItemDescription		= SD.strItemDescription
 	 , strUnitMeasure			= UOM.strUnitMeasure
 	 , intTaxCodeId				= SDT.intTaxCodeId
@@ -78,10 +82,11 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId
 	LEFT JOIN tblICCategory ICC ON I.intCategoryId = ICC.intCategoryId
 	LEFT JOIN (tblARProductTypeDetail PDD INNER JOIN tblARProductType PD ON PDD.intProductTypeId = PD.intProductTypeId) ON PDD.intCategoryId = ICC.intCategoryId
-	LEFT JOIN tblSOSalesOrderDetailTax SDT ON SD.intSalesOrderDetailId = SDT.intSalesOrderDetailId
+	LEFT JOIN tblSOSalesOrderDetailTax SDT ON SD.intSalesOrderDetailId = SDT.intSalesOrderDetailId AND SDT.dblAdjustedTax <> 0
 	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
 	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId
+	LEFT JOIN tblCTContractDetail CD ON SD.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblMFRecipe MFR ON SD.intRecipeId = MFR.intRecipeId) ON SO.intSalesOrderId = SD.intSalesOrderId
 LEFT JOIN (tblARCustomer C 
 	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
