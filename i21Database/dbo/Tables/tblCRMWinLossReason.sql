@@ -5,5 +5,5 @@
 	[strDescription] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCRMWinLossReason] PRIMARY KEY CLUSTERED ([intWinLossReasonId] ASC),
-    CONSTRAINT [UNQ_tblHDOpportunityWinLossReason_strReason] UNIQUE ([strReason])
+    CONSTRAINT [UQ_tblCRMWinLossReason_strReason] UNIQUE ([strReason])
 )
