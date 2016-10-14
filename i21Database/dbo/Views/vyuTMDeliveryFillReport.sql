@@ -109,6 +109,7 @@ SELECT
 	,C.intLocationId
 	,intDriverId = C.intDriverID
 	,C.intRouteId
+	,dblNextDeliveryGallons = ISNULL(C.dblLastGalsInTank,0.0) - ISNULL(C.dblEstimatedGallonsLeft,0.0)
 FROM tblTMCustomer A 
 INNER JOIN tblEMEntity Ent
 	ON A.intCustomerNumber = Ent.intEntityId
