@@ -193,7 +193,7 @@ IF EXISTS (
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	TRANS.strBatchId = @strBatchId
-			AND TransType.intTransactionTypeId = @AccountCategory_Revalue_Shipment
+			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Shipment
 )
 BEGIN 
 	SET @strItemNo = NULL
