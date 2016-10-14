@@ -6,6 +6,24 @@
 	)
 AS
 BEGIN
+	DECLARE @strScheduleType NVARCHAR(50)
+		,@intAttributeId INT
+
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Schedule Type'
+
+	SELECT @strScheduleType = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = @intAttributeId and ISNULL(strAttributeValue,'')<>''
+
+	IF @strScheduleType IS NULL
+		OR @strScheduleType = ''
+	BEGIN
+		SELECT @strScheduleType = strScheduleType
+		FROM dbo.tblMFCompanyPreference
+	END
+
 	SELECT W.intManufacturingCellId
 		,W.intWorkOrderId
 		,W.strWorkOrderNo
@@ -30,7 +48,7 @@ BEGIN
 						WHEN W.intStatusId IN (
 								1
 								,3
-								)
+								) AND @strScheduleType = 'Backward Schedule'
 							THEN W.intManufacturingCellId
 						ELSE SL.intExecutionOrder
 						END
@@ -38,7 +56,7 @@ BEGIN
 						WHEN W.intStatusId IN (
 								1
 								,3
-								)
+								)AND @strScheduleType = 'Backward Schedule'
 							THEN W.dtmExpectedDate
 						ELSE SL.intExecutionOrder
 						END
@@ -46,7 +64,7 @@ BEGIN
 						WHEN W.intStatusId IN (
 								1
 								,3
-								)
+								)AND @strScheduleType = 'Backward Schedule'
 							THEN W.intItemId
 						ELSE SL.intExecutionOrder
 						END
@@ -76,7 +94,7 @@ BEGIN
 			WHEN W.intStatusId IN (
 					1
 					,3
-					)
+					)AND @strScheduleType = 'Backward Schedule'
 				THEN W.intManufacturingCellId
 			ELSE SL.intExecutionOrder
 			END
@@ -84,7 +102,7 @@ BEGIN
 			WHEN W.intStatusId IN (
 					1
 					,3
-					)
+					)AND @strScheduleType = 'Backward Schedule'
 				THEN W.dtmExpectedDate
 			ELSE SL.intExecutionOrder
 			END
@@ -92,7 +110,7 @@ BEGIN
 			WHEN W.intStatusId IN (
 					1
 					,3
-					)
+					)AND @strScheduleType = 'Backward Schedule'
 				THEN W.intItemId
 			ELSE SL.intExecutionOrder
 			END

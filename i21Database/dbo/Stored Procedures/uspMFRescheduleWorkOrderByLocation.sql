@@ -43,7 +43,7 @@ BEGIN TRY
 
 	SELECT @strScheduleType = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
-	WHERE intAttributeId = @intAttributeId
+	WHERE intAttributeId = @intAttributeId and ISNULL(strAttributeValue,'')<>''
 
 	IF @strScheduleType IS NULL
 		OR @strScheduleType = ''
