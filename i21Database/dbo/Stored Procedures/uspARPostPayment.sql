@@ -587,7 +587,28 @@ SET @batchIdUsed = @batchId
 				WHERE
 					(A.dblAmountPaid) <> 0
 					AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0	
-					AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)							
+					AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)		
+					
+					
+				--Prepaid Account
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'The Customer Prepaid account in Company Location - ' + CL.strLocationName  + ' was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblSMCompanyLocation CL
+						ON A.intLocationId = CL.intCompanyLocationId 
+				INNER JOIN
+					@ARPrepayment P
+						ON A.intPaymentId = P.intPaymentId						 
+				WHERE
+					ISNULL(CL.intPurchaseAdvAccount,0)  = 0										
 
 				--ALREADY POSTED
 				INSERT INTO
@@ -1328,12 +1349,12 @@ IF @post = 1
 		SELECT
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
-			,intAccountId				= @ARAccount 
+			,intAccountId				= SMCL.intPurchaseAdvAccount 
 			,dblDebit					= 0
 			,dblCredit					= A.dblAmountPaid
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
-			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = SMCL.intPurchaseAdvAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
@@ -1356,6 +1377,9 @@ IF @post = 1
 		INNER JOIN
 			tblARCustomer C
 				ON A.[intEntityCustomerId] = C.intEntityCustomerId
+		INNER JOIN
+			tblSMCompanyLocation SMCL
+				ON A.intLocationId = SMCL.intCompanyLocationId 
 		INNER JOIN
 			@ARPrepayment P
 				ON A.intPaymentId = P.intPaymentId
