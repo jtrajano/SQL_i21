@@ -4427,6 +4427,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportDiscount.sql" />
     <Build Include="dbo\Functions\fnIsDue.sql" />
+    <Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
