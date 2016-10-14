@@ -27,9 +27,7 @@ SELECT	Total.intCustomerId,
 		dblCashRefund = Total.dblCashRefund,
 		dbLessFWT = CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE Total.dbLessFWT END,
 		dblLessServiceFee = Total.dblCashRefund * (Total.dblLessServiceFee/100),
-		dblCheckAmount =  CASE WHEN (Total.dblCashRefund - (CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) < 0) THEN 0 ELSE Total.dblCashRefund - (CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) END,
-		dblTotalVolume = Total.dblVolume,
-		dblTotalRefund = Total.dblTotalRefund
+		dblCheckAmount =  CASE WHEN (Total.dblCashRefund - (CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) < 0) THEN 0 ELSE Total.dblCashRefund - (CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) END
 		FROM (
 			SELECT	B.intCustomerPatronId as intCustomerId,
 			B.intFiscalYear,
@@ -41,11 +39,9 @@ SELECT	Total.intCustomerId,
 			dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END,
 			dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END,
 			dblRefundAmount = (CASE WHEN (RRD.dblRate * dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) END),
-			dblCashRefund = (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100),
-			dbLessFWT = (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (ComPref.dblFederalBackup/100),
-			dblLessServiceFee = ComPref.dblServiceFee,
-			dblVolume = dblVolume,
-			dblTotalRefund = RRD.dblRate
+			dblCashRefund = CASE WHEN (RRD.dblRate * dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) END,
+			dbLessFWT = CASE WHEN (RRD.dblRate * dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (ComPref.dblFederalBackup/100) END,
+			dblLessServiceFee = ComPref.dblServiceFee
 			FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
 				ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -63,4 +59,3 @@ SELECT	Total.intCustomerId,
 	INNER JOIN tblEMEntity ENT
 			ON ENT.intEntityId = Total.intCustomerId
 	CROSS APPLY ComPref
-	WHERE Total.dblVolume <> 0.00 AND Total.ysnRefundProcessed <> 1

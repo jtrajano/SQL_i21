@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateCustomerPatronage]
 	AS
-SELECT	DISTINCT intCustomerId = CV.intCustomerPatronId,
+SELECT	RR.intRefundTypeId,
+		intCustomerId = CV.intCustomerPatronId,
 		intFiscalYearId = CV.intFiscalYear,
 		RRD.intPatronageCategoryId,
 		PC.strDescription,
@@ -14,4 +15,4 @@ INNER JOIN tblPATRefundRateDetail RRD
 INNER JOIN tblPATPatronageCategory PC
 	ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 INNER JOIN tblPATCustomerVolume CV
-	ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId AND CV.ysnRefundProcessed <> 1
+	ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId AND CV.ysnRefundProcessed <> 1 AND CV.dblVolume <> 0

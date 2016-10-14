@@ -15,7 +15,7 @@ SELECT	NEWID() AS id,
 		ysnEligibleRefund = (CASE WHEN RCus.dblRefundAmount >= R.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END),
 		RCatPCat.dblVolume,
 		dblRefundAmount = RCus.dblRefundAmount ,
-		dblNonRefundAmount = CASE WHEN RCus.dblRefundAmount < ComPref.dblMinimumRefund THEN RCus.dblRefundAmount ELSE 0 END,
+		dblNonRefundAmount = CASE WHEN (RCatPCat.dblRefundRate * RCatPCat.dblVolume) < ComPref.dblMinimumRefund THEN (RCatPCat.dblRefundRate * RCatPCat.dblVolume) ELSE 0 END,
 		RCus.dblCashRefund,
 		dblEquityRefund = CASE WHEN RCus.dblEquityRefund <= 0 THEN 0 ELSE RCus.dblEquityRefund END
 	FROM tblPATRefundCustomer RCus
