@@ -864,6 +864,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colPrice: {
                     disabled: '{current.ysnPosted}',
                     dataIndex: 'ysnPrice'
+                },
+                colChargeTax: {
+                    dataIndex: 'dblTax'
                 }
             },
 
@@ -944,6 +947,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Update the summary fields whenever the receipt item data changed.
         me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function (store) {
             store.on('update', function () {
+                me.doOtherChargeTaxCalculate(win);
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
@@ -984,7 +988,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
             /*'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +*/
             'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
-            'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
+            'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge,' + 
+            'tblICInventoryReceiptCharges.tblICInventoryReceiptChargeTaxes',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
                 window: win
@@ -1016,7 +1021,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         grid: grdCharges,
                         deleteButton: grdCharges.down('#btnRemoveCharge'),
                         createRecord: me.onChargeCreateRecord
-                    })
+                    }),
+                    details: [
+                        {
+                            key: 'tblICInventoryReceiptChargeTaxes'
+                        }
+                    ]
+
                 },
                 {
                     key: 'tblICInventoryReceiptInspections',
@@ -2109,6 +2120,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     calculateOtherCharges: function (win) {
         var current = win.viewModel.data.current;
         var totalCharges = 0;
+        var totalAmount = 0;
+        var totalChargeTaxes = 0;
         var lblCharges = win.down('#lblCharges');
 
         if (current) {
@@ -2117,18 +2130,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
                         var amount = charge.get('dblAmount');
+                        var otherChargeTax = charge.get('dblTax');
+                        
 
                         if (charge.get('ysnPrice') === true) {
-                            totalCharges -= amount;
+                            totalChargeTaxes -= otherChargeTax;
+                            totalAmount -= amount;
                         }
                         else {
-                            totalCharges += amount;
+                            totalChargeTaxes += otherChargeTax;
+                            totalAmount += amount;
                         }
 
                     }
                 });
             }
         }
+        totalCharges = totalChargeTaxes + totalAmount;
         lblCharges.setText('Charges: ' + Ext.util.Format.number(totalCharges, '0,000.00'));
         return totalCharges;
     },
@@ -5067,7 +5085,99 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     },
 
-    doOtherChargeCalculate: function (context, current) {
+    doOtherChargeTaxCalculate: function(win) {
+        var current = win.viewModel.data.current;
+        var me = win.controller;
+        var context = win.context;
+        
+        if (current) {
+            var charges = current.tblICInventoryReceiptCharges();
+            if (charges) {
+               Ext.Array.each(charges.data.items, function (charge) {
+                   if (!charge.dummy) {
+                      var computeItemTax = function (itemTaxes, me) {
+                          var totalItemTax = 0.00;
+                          //charge.tblICInventoryReceiptChargeTaxes().removeAll();
+                          Ext.Array.each(itemTaxes, function (itemDetailTax) {
+                              var taxableAmount = charge.get('dblAmount');
+                              var taxAmount = 0.00;
+
+                              if (itemDetailTax.strCalculationMethod === 'Percentage') {
+                                 taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
+                              } else {
+                                 taxAmount = taxableAmount * itemDetailTax.dblRate;
+                              }
+                              if (itemDetailTax.ysnCheckoffTax) {
+                                 taxAmount = taxAmount * -1;
+                              }
+
+                              taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
+
+                              if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
+                                 if (itemDetailTax.ysnTaxExempt) {
+                                    taxAmount = 0.00;
+                                 }
+                                                                                    
+                                 itemDetailTax.dblTax = taxAmount;
+                                 itemDetailTax.dblAdjustedTax = taxAmount;
+                              }
+                              else {
+                                 itemDetailTax.dblTax = taxAmount;
+                                 itemDetailTax.dblAdjustedTax = itemDetailTax.dblAdjustedTax;
+                                 itemDetailTax.ysnTaxAdjusted = true;
+                              }
+                              totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
+
+                              /* var newItemTax = Ext.create('Inventory.model.ReceiptChargeTax', {
+                                     intTaxGroupId: itemDetailTax.intTaxGroupId,
+                                     intTaxCodeId: itemDetailTax.intTaxCodeId,
+                                     intTaxClassId: itemDetailTax.intTaxClassId,
+                                     strTaxCode: itemDetailTax.strTaxCode,
+                                     strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
+                                     strCalculationMethod: itemDetailTax.strCalculationMethod,
+                                     dblRate: itemDetailTax.dblRate,
+                                     dblTax: itemDetailTax.dblTax,
+                                     dblAdjustedTax: itemDetailTax.dblAdjustedTax,
+                                     intTaxAccountId: itemDetailTax.intTaxAccountId,
+                                     ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
+                                     ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                                });
+                                charge.tblICInventoryReceiptItemTaxes().add(newItemTax);*/
+                            });
+
+                            charge.set('dblTax', totalItemTax);
+                         }
+
+                         //get EntityIdId and BillShipToLocationId
+                         var valEntityId, valTaxGroupId;
+
+                         if(charge.get('ysnAccrue') === true && (charge.get('intEntityVendorId') !== current.get('intEntityVendorId'))) {
+                               valEntityId = charge.get('intEntityVendorId');
+                               valTaxGroupId = null;
+                        }
+                        else {
+                               valEntityId = current.get('intEntityVendorId');
+                               valTaxGroupId = current.get('intTaxGroupId');
+                        }
+                        var currentCharge = {
+                               ItemId: charge.get('intChargeId'),
+                               TransactionDate: current.get('dtmReceiptDate'),
+                               LocationId: current.get('intLocationId'),
+                               TransactionType: 'Purchase',
+                               TaxGroupId: valTaxGroupId,
+                               EntityId: valEntityId,
+                               BillShipToLocationId: current.get('intShipFromId'),
+                               FreightTermId: current.get('intFreightTermId')
+                        };
+                        iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
+                     }
+                   });
+               
+            }
+        }
+    },
+
+    doOtherChargeCalculate: function(context, current) {
         if (context && current) {
             Ext.Ajax.request({
                 timeout: 120000,
