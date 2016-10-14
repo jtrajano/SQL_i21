@@ -55,7 +55,8 @@ DECLARE @intId AS INT
 		,@intSourceTransactionId AS INT
 		,@intSourceTransactionDetailId AS INT 
 		,@strSourceTransactionId AS NVARCHAR(40)
-		,@intFobPointId AS INT 
+		,@intFobPointId AS TINYINT 
+		,@intInTransitSourceLocationId AS INT
 		
 		,@intInventoryTransactionId INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -113,6 +114,7 @@ SELECT  intId
 		,intSourceTransactionDetailId
 		,strSourceTransactionId
 		,intFobPointId
+		,intInTransitSourceLocationId
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -139,6 +141,7 @@ FETCH NEXT FROM loopItems INTO
 	,@intSourceTransactionDetailId
 	,@strSourceTransactionId
 	,@intFobPointId
+	,@intInTransitSourceLocationId
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -182,6 +185,7 @@ BEGIN
 			,@strTransactionForm
 			,@intEntityUserSecurityId
 			,@intFobPointId
+			,@intInTransitSourceLocationId
 			;
 	END
 
@@ -208,6 +212,7 @@ BEGIN
 			,@strTransactionForm 
 			,@intEntityUserSecurityId 
 			,@intFobPointId
+			,@intInTransitSourceLocationId
 			;
 	END 
 
@@ -233,6 +238,7 @@ BEGIN
 		,@intSourceTransactionDetailId
 		,@strSourceTransactionId
 		,@intFobPointId
+		,@intInTransitSourceLocationId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
@@ -306,6 +312,7 @@ BEGIN
 					,[intCostingMethod]
 					,[strDescription]
 					,[intFobPointId]
+					,[intInTransitSourceLocationId]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -342,6 +349,7 @@ BEGIN
 															,cl.strLocationName														
 														)
 				,[intFobPointId]						= @FOB_DESTINATION 
+				,[intInTransitSourceLocationId]			= @intInTransitSourceLocationId
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId

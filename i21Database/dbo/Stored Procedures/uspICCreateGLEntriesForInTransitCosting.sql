@@ -45,13 +45,13 @@ INSERT INTO @GLAccounts (
 )
 SELECT	Query.intItemId
 		,Query.intItemLocationId
-		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory_In_Transit) 
-		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
-		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(Query.intInTransitSourceLocationId, Query.intItemLocationId), @AccountCategory_Inventory_In_Transit) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(Query.intInTransitSourceLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(Query.intInTransitSourceLocationId, Query.intItemLocationId), @AccountCategory_Auto_Variance) 
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
-					intItemId, intItemLocationId, intTransactionTypeId
+					intItemId, intItemLocationId, intTransactionTypeId, intInTransitSourceLocationId
 			FROM	dbo.tblICInventoryTransaction t 
 			WHERE	t.strBatchId = @strBatchId
 					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 

@@ -2949,6 +2949,7 @@ IF @post = 1
 					,[strSourceTransactionId] 
 					,[intSourceTransactionDetailId] 
 					,[intFobPointId] 
+					,[intInTransitSourceLocationId]
 			)
 			SELECT
 					[intItemId]					= t.intItemId
@@ -2971,6 +2972,7 @@ IF @post = 1
 					,[strSourceTransactionId]		= t.strTransactionId
 					,[intSourceTransactionDetailId] = t.intTransactionDetailId
 					,[intFobPointId]				= t.intFobPointId
+					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
 			FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
 						ON i.intInvoiceId = id.intInvoiceId
 					INNER JOIN tblICInventoryShipmentItem si

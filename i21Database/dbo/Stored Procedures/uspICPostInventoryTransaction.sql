@@ -25,7 +25,8 @@
 	,@intEntityUserSecurityId INT
 	,@intCostingMethod INT
 	,@InventoryTransactionIdentityId INT OUTPUT 
-	,@intFobPointId INT = NULL 
+	,@intFobPointId TINYINT = NULL 
+	,@intInTransitSourceLocationId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -72,6 +73,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intConcurrencyId] 
 		,[intCostingMethod]
 		,[intFobPointId]
+		,[intInTransitSourceLocationId]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -102,6 +104,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intConcurrencyId]					= 1
 		,[intCostingMethod]					= @intCostingMethod
 		,[intFobPointId]					= @intFobPointId
+		,[intInTransitSourceLocationId]		= @intInTransitSourceLocationId
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 

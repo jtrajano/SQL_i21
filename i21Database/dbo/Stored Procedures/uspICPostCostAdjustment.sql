@@ -29,8 +29,8 @@ DECLARE @returnValue AS INT
 IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
 	DROP TABLE #tmpRevalueProducedItems  
 
-IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevaluedInventoryTransaction')) 
-	DROP TABLE #tmpRevaluedInventoryTransaction
+--IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevaluedInventoryTransaction')) 
+--	DROP TABLE #tmpRevaluedInventoryTransaction
 
 -- Create the temp table if it does not exists. 
 BEGIN 
@@ -59,16 +59,17 @@ BEGIN
 		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 		,[intRelatedInventoryTransactionId] INT NULL 
+		,[intFobPointId] TINYINT NULL 
 	)
 END 
 
--- Create the temp table if it does not exists. 
-IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevaluedInventoryTransaction')) 
-BEGIN 
-	CREATE TABLE #tmpRevaluedInventoryTransaction (
-		[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED 
-	)
-END 
+---- Create the temp table if it does not exists. 
+--IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevaluedInventoryTransaction')) 
+--BEGIN 
+--	CREATE TABLE #tmpRevaluedInventoryTransaction (
+--		[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED 
+--	)
+--END 
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1
@@ -101,6 +102,7 @@ DECLARE @intId AS INT
 		,@strActualCostId NVARCHAR(50)
 		,@intRelatedInventoryTransactionId INT 
 		,@intLotId AS INT 
+		,@intFobPointId AS TINYINT
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionTypeName AS NVARCHAR(200) 
@@ -153,6 +155,7 @@ BEGIN
 			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId]
 			,[intRelatedInventoryTransactionId]	
+			,[intFobPointId]
 	)
 	SELECT 
 			[intItemId] 
@@ -179,6 +182,7 @@ BEGIN
 			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId] 
 			,[intRelatedInventoryTransactionId]
+			,[intFobPointId]
 	FROM	@ItemsToAdjust
 END 
 
@@ -215,6 +219,7 @@ SELECT  intId
 		,strActualCostId
 		,intRelatedInventoryTransactionId
 		,intLotId
+		,intFobPointId
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -244,6 +249,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@strActualCostId
 	,@intRelatedInventoryTransactionId
 	,@intLotId
+	,@intFobPointId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -375,6 +381,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
 			,@intLotId
+			,@intFobPointId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -434,6 +441,7 @@ BEGIN
 		,@strActualCostId
 		,@intRelatedInventoryTransactionId
 		,@intLotId
+		,@intFobPointId
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -468,6 +476,7 @@ BEGIN
 			,intTransactionTypeId
 			,strActualCostId
 			,intRelatedInventoryTransactionId
+			,intFobPointId
 	FROM	@Internal_ItemsToAdjust
 
 	OPEN loopItemsToAdjustForAutoNegative;
@@ -489,6 +498,7 @@ BEGIN
 		,@intTransactionTypeId
 		,@strActualCostId
 		,@intRelatedInventoryTransactionId
+		,@intFobPointId 
 	;
 
 	DECLARE @AutoNegativeAmount AS NUMERIC(38, 20)
@@ -549,6 +559,7 @@ BEGIN
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @AVERAGECOST
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT 
+						,@intFobPointId							= @intFobPointId
 			END 
 		END
 
@@ -568,6 +579,7 @@ BEGIN
 			,@intTransactionTypeId
 			,@strActualCostId
 			,@intRelatedInventoryTransactionId
+			,@intFobPointId
 		;
 	END 
 
@@ -613,6 +625,7 @@ BEGIN
 			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId]
 			,[intRelatedInventoryTransactionId]
+			,[intFobPointId]
 	)
 	SELECT 
 			[intItemId] 
@@ -639,6 +652,7 @@ BEGIN
 			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId] 
 			,[intRelatedInventoryTransactionId]
+			,[intFobPointId]
 	FROM	#tmpRevalueProducedItems
 
 	-- Clear the contents of the temp table.

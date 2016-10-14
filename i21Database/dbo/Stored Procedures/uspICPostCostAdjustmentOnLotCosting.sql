@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@intRelatedInventoryTransactionId AS INT = NULL 
 	,@intAdjustLotId AS INT = NULL 
 	,@strTransactionForm AS NVARCHAR(50) = 'Bill'	
+	,@intFobPointId AS TINYINT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -62,16 +63,17 @@ BEGIN
 		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 		,[intRelatedInventoryTransactionId] INT NULL 
+		,[intFobPointId] TINYINT NULL 
 	)
 END 
 
--- Create the temp table if it does not exists. 
-IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevaluedInventoryTransaction')) 
-BEGIN 
-	CREATE TABLE #tmpRevaluedInventoryTransaction (
-		[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED 
-	)
-END 
+---- Create the temp table if it does not exists. 
+--IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevaluedInventoryTransaction')) 
+--BEGIN 
+--	CREATE TABLE #tmpRevaluedInventoryTransaction (
+--		[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED 
+--	)
+--END 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Initialize
@@ -84,6 +86,9 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
 
+		,@FOB_ORIGIN AS INT = 1
+		,@FOB_DESTINATION AS INT = 2
+
 -- Declare the cost types
 DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 		,@COST_ADJ_TYPE_New_Cost AS INT = 2
@@ -93,16 +98,20 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
 		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 
+		,@INV_TRANS_TYPE_Inventory_Receipt AS INT = 4
+		,@INV_TRANS_TYPE_Inventory_Shipment AS INT = 5
+
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
 		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
-		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 35
-		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 36
-		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 37
-		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 38
+		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
+		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
+		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
+		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39		
+		,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
 
 		,@INV_TRANS_TYPE_Consume AS INT = 8
 		,@INV_TRANS_TYPE_Produce AS INT = 9
@@ -140,6 +149,7 @@ DECLARE @InvTranId AS INT
 		,@InvTranTypeName AS NVARCHAR(200)
 		,@InvTranTypeId AS INT 
 		,@InvTranBatchId AS NVARCHAR(20)
+		,@InvFobPointId AS TINYINT 
 
 DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 		,@NewTransactionValue AS NUMERIC(38,20)
@@ -186,14 +196,6 @@ BEGIN
 
 	SELECT	TOP 1 
 			@dblRemainingQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, il.intItemUOMId, @dblQty) 
-			--@dblRemainingQty  =  
-			--	CASE	WHEN l.intItemUOMId = @intItemUOMId AND l.intWeightUOMId IS NOT NULL AND l.dblWeightPerQty <> 0 THEN 
-			--				dbo.fnMultiply(@dblQty, l.dblWeightPerQty) 			
-			--			WHEN l.intWeightUOMId = @intItemUOMId THEN 
-			--				@dblQty
-			--			ELSE 
-			--				@dblQty
-			--	END 
 	FROM	dbo.tblICInventoryLot il 
 	WHERE	il.intItemId = @intItemId
 			AND il.intItemLocationId = @intItemLocationId
@@ -456,6 +458,7 @@ BEGIN
 		SET		dblLastCost = @dblNewCalculatedCost
 		FROM	tblICLot l
 		WHERE	l.intLotId = @intLotId
+				AND ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION
 	END 
 
 	-----------------------------------------------------------------------------------------------------------------------------
@@ -538,6 +541,7 @@ BEGIN
 					,@InvTranStringTransactionId	= NULL
 					,@InvTranTypeId					= NULL 
 					,@InvTranBatchId				= NULL 
+					,@InvFobPointId					= NULL 
 
 			-- Get the Stock Out data from the Inventory Transaction
 			SELECT	@InvTranId						= InvTran.intInventoryTransactionId
@@ -553,6 +557,7 @@ BEGIN
 					,@InvTranStringTransactionId	= InvTran.strTransactionId
 					,@InvTranTypeId					= InvTran.intTransactionTypeId
 					,@InvTranBatchId				= InvTran.strBatchId
+					,@InvFobPointId					= InvTran.intFobPointId
 			FROM	dbo.tblICInventoryTransaction InvTran
 			WHERE	InvTran.intInventoryTransactionId = @LotOutInventoryTransactionId
 
@@ -589,6 +594,7 @@ BEGIN
 						, @INV_TRANS_TYPE_ADJ_Split_Lot
 						, @INV_TRANS_TYPE_ADJ_Lot_Merge
 						, @INV_TRANS_TYPE_ADJ_Lot_Move
+						, @INV_TRANS_TYPE_Inventory_Shipment
 					)
 					AND @InvTranValue <> 0 
 				BEGIN 
@@ -619,11 +625,12 @@ BEGIN
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @LOTCOST
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+						,@intFobPointId							= @InvFobPointId
 
 					-- Insert the inventory transaction id into the x list. 
-					INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
-					SELECT	@InvTranId
-					WHERE NOT EXISTS (SELECT TOP 1 1 FROM #tmpRevaluedInventoryTransaction WHERE intInventoryTransactionId = @InvTranId)
+					--INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
+					--SELECT	@InvTranId
+					--WHERE NOT EXISTS (SELECT TOP 1 1 FROM #tmpRevaluedInventoryTransaction WHERE intInventoryTransactionId = @InvTranId)
 
 				END 	
 
@@ -638,7 +645,7 @@ BEGIN
 							, @INV_TRANS_TYPE_ADJ_Split_Lot
 							, @INV_TRANS_TYPE_ADJ_Lot_Merge
 							, @INV_TRANS_TYPE_ADJ_Lot_Move
-						
+							, @INV_TRANS_TYPE_Inventory_Shipment						
 						)
 						AND @InvTranValue <> 0 
 				BEGIN 
@@ -651,6 +658,8 @@ BEGIN
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Merge		THEN @INV_TRANS_TYPE_Revalue_Lot_Merge
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Move		THEN @INV_TRANS_TYPE_Revalue_Lot_Move
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Split_Lot		THEN @INV_TRANS_TYPE_Revalue_Split_Lot
+										
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Inventory_Shipment	THEN @INV_TRANS_TYPE_Revalue_Shipment
 								END
 							,@LoopTransactionTypeId
 								= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
@@ -661,6 +670,7 @@ BEGIN
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Merge		THEN @INV_TRANS_TYPE_Revalue_Lot_Merge
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Move		THEN @INV_TRANS_TYPE_Revalue_Lot_Move
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Split_Lot		THEN @INV_TRANS_TYPE_Revalue_Split_Lot
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Inventory_Shipment		THEN @INV_TRANS_TYPE_Revalue_Shipment
 								END
 
 					EXEC [dbo].[uspICPostInventoryTransaction]
@@ -690,15 +700,16 @@ BEGIN
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @LOTCOST
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+						,@intFobPointId							= @InvFobPointId
 					
 					-- Insert the inventory transaction id into the x list. 
-					INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
-					SELECT	@InvTranId
-					WHERE NOT EXISTS (SELECT TOP 1 1 FROM #tmpRevaluedInventoryTransaction WHERE intInventoryTransactionId = @InvTranId)					
+					--INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
+					--SELECT	@InvTranId
+					--WHERE NOT EXISTS (SELECT TOP 1 1 FROM #tmpRevaluedInventoryTransaction WHERE intInventoryTransactionId = @InvTranId)					
 
-					----------------------------------------------------------------------------------------------------
-					-- 9. Get the 'produced/transferred item'. Insert it in a temporary table for later processing. 
-					----------------------------------------------------------------------------------------------------
+					-----------------------------------------------------------------------------------------------------------
+					-- 9. Get the 'produced/transferred/in-transit item'. Insert it in a temporary table for later processing. 
+					-----------------------------------------------------------------------------------------------------------
 					IF @InvTranTypeId IN (
 							@INV_TRANS_TYPE_Consume						
 						)
@@ -712,6 +723,52 @@ BEGIN
 								AND ISNULL(InvTran.ysnIsUnposted, 0) = 0
 								AND ISNULL(InvTran.dblQty, 0) > 0 
 								AND InvTran.intTransactionTypeId = @INV_TRANS_TYPE_Produce
+					END 
+					IF	@InvTranTypeId = @INV_TRANS_TYPE_Inventory_Shipment	
+					BEGIN 
+						SELECT	TOP 1 
+								@intInventoryTrnasactionId_EscalateValue = InvTran.intInventoryTransactionId							
+						FROM	dbo.tblICInventoryTransaction InvTran
+						WHERE	InvTran.strBatchId = @InvTranBatchId
+								AND InvTran.intTransactionId = @InvTranIntTransactionId
+								AND InvTran.strTransactionId = @InvTranStringTransactionId
+								AND ISNULL(InvTran.ysnIsUnposted, 0) = 0
+								AND ISNULL(InvTran.dblQty, 0) > 0 
+								AND InvTran.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Shipment
+								AND InvTran.intFobPointId = @FOB_DESTINATION
+
+						-- Insert Revalue Sold if FOB Point is Destination
+						IF @intInventoryTrnasactionId_EscalateValue IS NULL 
+						BEGIN 
+							EXEC [dbo].[uspICPostInventoryTransaction]
+								@intItemId								= @intItemId
+								,@intItemLocationId						= @intItemLocationId
+								,@intItemUOMId							= @intItemUOMId
+								,@intSubLocationId						= @InvTranSubLocationId 
+								,@intStorageLocationId					= @InvTranStorageLocationId 
+								,@dtmDate								= @dtmDate
+								,@dblQty								= 0
+								,@dblUOMQty								= 0
+								,@dblCost								= 0
+								,@dblValue								= @InvTranValue
+								,@dblSalesPrice							= 0
+								,@intCurrencyId							= @InvTranCurrencyId
+								,@dblExchangeRate						= @InvTranExchangeRate
+								,@intTransactionId						= @intTransactionId
+								,@intTransactionDetailId				= @intTransactionDetailId
+								,@strTransactionId						= @strTransactionId
+								,@strBatchId							= @strBatchId
+								,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Sold
+								,@intLotId								= @intLotId 
+								,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
+								,@intRelatedTransactionId				= @InvTranIntTransactionId 
+								,@strRelatedTransactionId				= @InvTranStringTransactionId 
+								,@strTransactionForm					= @strTransactionForm
+								,@intEntityUserSecurityId				= @intEntityUserSecurityId
+								,@intCostingMethod						= @LOTCOST
+								,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+								,@intFobPointId							= @InvFobPointId
+						END
 					END 
 					ELSE 
 					BEGIN 
@@ -732,7 +789,6 @@ BEGIN
 									, @INV_TRANS_TYPE_ADJ_Lot_Move
 								)
 					END
-
 					
 					IF @intInventoryTrnasactionId_EscalateValue IS NOT NULL 
 					BEGIN 												
@@ -762,6 +818,7 @@ BEGIN
 								,[intSourceTransactionDetailId] 
 								,[strSourceTransactionId]
 								,[intRelatedInventoryTransactionId]
+								,[intFobPointId]
 						)
 						SELECT 
 								[intItemId]						= InvTran.intItemId
@@ -786,7 +843,8 @@ BEGIN
 								,[intSourceTransactionId]		= InvTran.intTransactionId
 								,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
 								,[strSourceTransactionId]		= InvTran.strTransactionId
-								,[intRelatedInventoryTransactionId] = InvTran.intInventoryTransactionId				
+								,[intRelatedInventoryTransactionId] = InvTran.intInventoryTransactionId	
+								,[intFobPointId]				= InvTran.intFobPointId 			
 						FROM	dbo.tblICInventoryTransaction InvTran
 						WHERE	intInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
 					END 

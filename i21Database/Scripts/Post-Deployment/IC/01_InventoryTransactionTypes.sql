@@ -166,6 +166,10 @@ USING	(
 		SELECT	id = 39
 				,name = 'Revalue Lot Move'
 				,form = NULL 
+		UNION ALL 
+		SELECT	id = 40
+				,name = 'Revalue Shipment'
+				,form = NULL 
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

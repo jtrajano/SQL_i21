@@ -64,7 +64,7 @@ BEGIN
 			,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Negative) 
 			,intTransactionTypeId
 	FROM	(
-				SELECT DISTINCT intItemId, intItemLocationId, intTransactionTypeId 
+				SELECT DISTINCT intItemId, intItemLocationId, intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction ItemTransactions 
 				WHERE	ItemTransactions.strBatchId = @strBatchId
 			) Query

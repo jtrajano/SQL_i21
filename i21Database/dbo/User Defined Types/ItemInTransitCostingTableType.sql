@@ -23,5 +23,6 @@ CREATE TYPE [dbo].[ItemInTransitCostingTableType] AS TABLE
     ,[intSourceTransactionId] INT NULL						-- The int id of the Inventory Shipment
 	,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id of the Inventory Shipment
     ,[intSourceTransactionDetailId] INT NULL				-- The int id of the Inventory Shipment detail. 
-	,[intFobPointId] INT NULL 
+	,[intFobPointId] TINYINT NULL 
+	,[intInTransitSourceLocationId] INT NULL 
 )

@@ -21,7 +21,8 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255)
 	,@intEntityUserSecurityId AS INT
-	,@intFobPointId AS INT 
+	,@intFobPointId AS TINYINT 
+	,@intInTransitSourceLocationId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -120,6 +121,7 @@ BEGIN
 					,@intCostingMethod = @ACTUALCOST
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intFobPointId = @intFobPointId
+					,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 			
 			-- Insert the record the the Actual-out table
 			INSERT INTO dbo.tblICInventoryActualCostOut (
@@ -175,7 +177,8 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@intCostingMethod = @ACTUALCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
-				,@intFobPointId = @intFobPointId	
+				,@intFobPointId = @intFobPointId
+				,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 
 		-- Repeat call on uspICIncreaseStockInActual until @dblAddQty is completely distributed to the negative cost Actual buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -244,6 +247,7 @@ BEGIN
 							,@intCostingMethod = @AVERAGECOST
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 							,@intFobPointId = @intFobPointId
+							,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 				END 
 			END
 			

@@ -484,6 +484,7 @@ BEGIN
 					,[strSourceTransactionId] 
 					,[intSourceTransactionDetailId]
 					,[intFobPointId]
+					,[intInTransitSourceLocationId]
 			)
 			SELECT
 					[intItemId] 
@@ -506,11 +507,13 @@ BEGIN
 					,[strTransactionId] 
 					,[intTransactionDetailId] 
 					,[intFobPointId] = @intFobPointId
+					,[intInTransitSourceLocationId] = t.intItemLocationId
 			FROM	tblICInventoryTransaction t 
 			WHERE	t.strTransactionId = @strTransactionId
 					AND t.ysnIsUnposted = 0 
 					AND t.strBatchId = @strBatchId
 					AND @intFobPointId = @FOB_DESTINATION
+					AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 
