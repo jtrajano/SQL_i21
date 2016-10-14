@@ -24,6 +24,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnFIFOCosting]
 	,@intEntityUserSecurityId AS INT
 	,@intRelatedInventoryTransactionId AS INT = NULL 
 	,@strTransactionForm AS NVARCHAR(50) = 'Bill'
+	,@intFobPointId AS TINYINT = NULL
+	,@intInTransitSourceLocationId AS INT = NULL  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -59,6 +61,8 @@ BEGIN
 		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 		,[intRelatedInventoryTransactionId] INT NULL 
+		,[intFobPointId] TINYINT NULL 
+		,[intInTransitSourceLocationId] INT NULL 
 	)
 END 
 
@@ -72,6 +76,9 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LIFO AS INT = 3
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
+		
+		,@FOB_ORIGIN AS INT = 1
+		,@FOB_DESTINATION AS INT = 2	
 
 -- Declare the cost types
 DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
@@ -259,6 +266,8 @@ BEGIN
 		,@intEntityUserSecurityId				= @intEntityUserSecurityId
 		,@intCostingMethod						= @FIFO
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+		,@intFobPointId							= @intFobPointId
+		,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 
 	-- Log original cost to tblICInventoryFIFOCostAdjustmentLog
 	IF NOT EXISTS (
@@ -451,6 +460,8 @@ BEGIN
 					,@intEntityUserSecurityId				= @intEntityUserSecurityId
 					,@intCostingMethod						= @FIFO
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+					,@intFobPointId							= @intFobPointId
+					,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 			END 	
 
 			---------------------------------------------------------------
@@ -496,6 +507,8 @@ BEGIN
 					,@intEntityUserSecurityId				= @intEntityUserSecurityId
 					,@intCostingMethod						= @FIFO
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+					,@intFobPointId							= @intFobPointId
+					,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 					
 				----------------------------------------------------------------------------------------------------
 				-- 9. Get the 'produced/transferred item'. Insert it in a temporary table for later processing. 
@@ -523,6 +536,8 @@ BEGIN
 						,[intSourceTransactionDetailId] 
 						,[strSourceTransactionId] 
 						,[intRelatedInventoryTransactionId]
+						,[intFobPointId]
+						,[intInTransitSourceLocationId]
 				)
 				SELECT 
 						[intItemId]						= InvTran.intItemId
@@ -546,7 +561,9 @@ BEGIN
 						,[intSourceTransactionId]		= InvTran.intTransactionId
 						,[intSourceTransactionDetailId] = InvTran.intTransactionDetailId
 						,[strSourceTransactionId]		= InvTran.strTransactionId
-						,[intRelatedInventoryTransactionId] = InvTran.intInventoryTransactionId
+						,[intRelatedInventoryTransactionId]		= InvTran.intInventoryTransactionId
+						,[intFobPointId]						= InvTran.intFobPointId 
+						,[intInTransitSourceLocationId]			= InvTran.intInTransitSourceLocationId
 				FROM	dbo.tblICInventoryTransaction InvTran
 				WHERE	InvTran.strBatchId = @InvTranBatchId
 						AND InvTran.intTransactionId = @InvTranIntTransactionId

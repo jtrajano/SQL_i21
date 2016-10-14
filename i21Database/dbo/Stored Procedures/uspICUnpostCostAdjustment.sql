@@ -47,10 +47,11 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
-		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 35
-		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 36
-		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 37
-		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 38
+		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
+		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
+		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
+		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39
+		,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
 
 
 DECLARE	@intItemId AS INT
@@ -67,6 +68,7 @@ BEGIN
 		,intRelatedTransactionId INT NULL 
 		,intTransactionTypeId INT NOT NULL 
 		,intCostingMethod INT 
+		,intFobPointId TINYINT 
 	)
 END 
 
@@ -81,6 +83,7 @@ INSERT INTO #tmpInvCostAdjustmentToReverse (
 	,strRelatedTransactionId
 	,intTransactionTypeId
 	,intCostingMethod
+	,intFobPointId
 )
 SELECT	Changes.intInventoryTransactionId
 		,Changes.intTransactionId
@@ -89,6 +92,8 @@ SELECT	Changes.intInventoryTransactionId
 		,Changes.strRelatedTransactionId
 		,Changes.intTransactionTypeId
 		,Changes.intCostingMethod 
+		,Changes.intFobPointId
+
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -111,6 +116,7 @@ FROM	(
 						, @INV_TRANS_TYPE_Revalue_Split_Lot 
 						, @INV_TRANS_TYPE_Revalue_Lot_Merge 
 						, @INV_TRANS_TYPE_Revalue_Lot_Move 
+						, @INV_TRANS_TYPE_Revalue_Shipment
 				)
 				AND 1 = 
 					CASE	WHEN	inventory_transaction.strTransactionId = Source_Query.strTransactionId 
@@ -136,6 +142,7 @@ FROM	(
 					, Inserted.strRelatedTransactionId
 					, Inserted.intTransactionTypeId
 					, Inserted.intCostingMethod
+					, Inserted.intFobPointId 
 		) AS Changes (
 			Action
 			, intInventoryTransactionId
@@ -145,6 +152,7 @@ FROM	(
 			, strRelatedTransactionId
 			, intTransactionTypeId
 			, intCostingMethod
+			, intFobPointId  
 		)
 WHERE	Changes.Action = 'UPDATE'
 ;
@@ -201,6 +209,8 @@ BEGIN
 			,[intCreatedUserId]
 			,[intConcurrencyId]
 			,[intCostingMethod]
+			,[intFobPointId]
+			,[intInTransitSourceLocationId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -231,6 +241,8 @@ BEGIN
 			,[intCreatedEntityId]					= @intEntityUserSecurityId
 			,[intConcurrencyId]						= 1
 			,[intCostingMethod]						= ActualTransaction.intCostingMethod
+			,[intFobPointId]						= ActualTransaction.intFobPointId
+			,[intInTransitSourceLocationId]			= ActualTransaction.intInTransitSourceLocationId
 	FROM	#tmpInvCostAdjustmentToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 
@@ -286,6 +298,7 @@ BEGIN
 				AND ActualTransaction.intItemUOMId IS NOT NULL
 			INNER JOIN tblICItemLocation ItemLocation
 				ON ActualTransaction.intItemLocationId = ItemLocation.intItemLocationId
+				AND ItemLocation.intLocationId IS NOT NULL 
 
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for related transactions 

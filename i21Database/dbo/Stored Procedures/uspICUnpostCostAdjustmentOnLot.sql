@@ -22,6 +22,9 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
 
+		,@FOB_ORIGIN AS INT = 1
+		,@FOB_DESTINATION AS INT = 2
+
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvCostAdjustmentToReverse')) 
 BEGIN 
@@ -33,6 +36,7 @@ BEGIN
 		,intRelatedTransactionId INT NULL 
 		,intTransactionTypeId INT NOT NULL 
 		,intCostingMethod INT 
+		,intFobPointId TINYINT 
 	)
 END 
 
@@ -48,6 +52,7 @@ BEGIN
 			,@CostAdjLogId AS INT 
 			,@CostAdjLogInventoryTransactionId AS INT 
 			,@CostAdjInventoryCostAdjustmentTypeId AS INT 
+			,@FobPointId AS TINYINT 
 
 			,@CostBucketCost AS NUMERIC(38,20)
 			,@OriginalCost AS NUMERIC(38,20)
@@ -64,6 +69,7 @@ BEGIN
 	FOR 
 	SELECT  intTransactionId
 			,strTransactionId
+			,intFobPointId
 			,CostAdjLog.dblQty
 			,CostAdjLog.dblCost
 			,CostAdjLog.intInventoryLotId
@@ -82,6 +88,7 @@ BEGIN
 	FETCH NEXT FROM loopLotCostBucket INTO 
 			@CostBucketIntTransactionId
 			,@CostBucketStrTransactionId 
+			,@FobPointId
 			,@CostAdjQty 
 			,@CostAdjNewCost 
 			,@CostBucketId 
@@ -169,6 +176,7 @@ BEGIN
 		FROM	tblICLot l
 		WHERE	l.intLotId = @intLotId
 				AND @dblNewCalculatedCost IS NOT NULL 
+				AND ISNULL(@FobPointId, @FOB_ORIGIN) = @FOB_ORIGIN
 
 		-- Update the Adjust Qty
 		WHILE (ISNULL(@CostAdjQty, 0) > 0) 
@@ -199,6 +207,7 @@ BEGIN
 		FETCH NEXT FROM loopLotCostBucket INTO 
 			@CostBucketIntTransactionId
 			,@CostBucketStrTransactionId 
+			,@FobPointId
 			,@CostAdjQty 
 			,@CostAdjNewCost 
 			,@CostBucketId

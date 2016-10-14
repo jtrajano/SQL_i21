@@ -26,7 +26,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@intRelatedInventoryTransactionId AS INT = NULL 
 	,@intAdjustLotId AS INT = NULL 
 	,@strTransactionForm AS NVARCHAR(50) = 'Bill'	
-	,@intFobPointId AS TINYINT = NULL 
+	,@intFobPointId AS TINYINT = NULL
+	,@intInTransitSourceLocationId AS INT = NULL  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -64,6 +65,7 @@ BEGIN
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 		,[intRelatedInventoryTransactionId] INT NULL 
 		,[intFobPointId] TINYINT NULL 
+		,[intInTransitSourceLocationId] INT NULL 
 	)
 END 
 
@@ -86,8 +88,8 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
 
-		,@FOB_ORIGIN AS INT = 1
-		,@FOB_DESTINATION AS INT = 2
+		,@FOB_ORIGIN AS TINYINT = 1
+		,@FOB_DESTINATION AS TINYINT = 2
 
 -- Declare the cost types
 DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
@@ -397,6 +399,8 @@ BEGIN
 			,@intEntityUserSecurityId				= @intEntityUserSecurityId
 			,@intCostingMethod						= @LOTCOST
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+			,@intFobPointId							= @intFobPointId 
+			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 
 		-- Log original cost to tblICInventoryLotCostAdjustmentLog
 		IF NOT EXISTS (
@@ -625,7 +629,8 @@ BEGIN
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @LOTCOST
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-						,@intFobPointId							= @InvFobPointId
+						,@intFobPointId							= @intFobPointId 
+						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 
 					-- Insert the inventory transaction id into the x list. 
 					--INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
@@ -700,7 +705,8 @@ BEGIN
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @LOTCOST
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-						,@intFobPointId							= @InvFobPointId
+						,@intFobPointId							= @intFobPointId 
+						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 					
 					-- Insert the inventory transaction id into the x list. 
 					--INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
@@ -767,7 +773,8 @@ BEGIN
 								,@intEntityUserSecurityId				= @intEntityUserSecurityId
 								,@intCostingMethod						= @LOTCOST
 								,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-								,@intFobPointId							= @InvFobPointId
+								,@intFobPointId							= @intFobPointId 
+								,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 						END
 					END 
 					ELSE 
@@ -819,6 +826,7 @@ BEGIN
 								,[strSourceTransactionId]
 								,[intRelatedInventoryTransactionId]
 								,[intFobPointId]
+								,[intInTransitSourceLocationId]
 						)
 						SELECT 
 								[intItemId]						= InvTran.intItemId
@@ -844,7 +852,8 @@ BEGIN
 								,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
 								,[strSourceTransactionId]		= InvTran.strTransactionId
 								,[intRelatedInventoryTransactionId] = InvTran.intInventoryTransactionId	
-								,[intFobPointId]				= InvTran.intFobPointId 			
+								,[intFobPointId]				= InvTran.intFobPointId
+								,[intInTransitSourceLocationId]	= InvTran.intInTransitSourceLocationId
 						FROM	dbo.tblICInventoryTransaction InvTran
 						WHERE	intInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
 					END 

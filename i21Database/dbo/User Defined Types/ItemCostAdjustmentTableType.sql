@@ -28,5 +28,6 @@ CREATE TYPE [dbo].[ItemCostAdjustmentTableType] AS TABLE
 	,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
 	,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 	,[intRelatedInventoryTransactionId] INT NULL 
-	,[intFobPointId] TINYINT NULL 
+	,[intFobPointId] TINYINT NULL
+	,[intInTransitSourceLocationId] INT NULL 
 )

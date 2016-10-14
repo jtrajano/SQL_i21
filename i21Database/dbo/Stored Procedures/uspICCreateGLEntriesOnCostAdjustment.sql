@@ -1009,14 +1009,16 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Lot_Move
 
 -----------------------------------------------------------------------------------
 -- This part is for Revalue Sold. 
+-- Negative value means Debit COGS
+-- Postive value means Credit COGS
 -----------------------------------------------------------------------------------
 UNION ALL  
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
 		,intAccountId				= tblGLAccount.intAccountId
-		,dblDebit					= Debit.Value
-		,dblCredit					= Credit.Value
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value 
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)

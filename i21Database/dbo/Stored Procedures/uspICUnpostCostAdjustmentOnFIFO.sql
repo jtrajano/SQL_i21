@@ -22,6 +22,9 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
 
+		,@FOB_ORIGIN AS INT = 1
+		,@FOB_DESTINATION AS INT = 2
+
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvCostAdjustmentToReverse')) 
 BEGIN 
@@ -33,6 +36,7 @@ BEGIN
 		,intRelatedTransactionId INT NULL 
 		,intTransactionTypeId INT NOT NULL 
 		,intCostingMethod INT 
+		,intFobPointId TINYINT 
 	)
 END 
 
@@ -46,6 +50,7 @@ BEGIN
 			,@CostAdjNewCost AS NUMERIC(38,20)
 			,@CostBucketId AS INT 
 			,@CostAdjLogId AS INT 
+			,@FobPointId AS TINYINT 
 
 			,@CostBucketCost AS NUMERIC(38,20)
 			,@OriginalCost AS NUMERIC(38,20)
@@ -63,6 +68,7 @@ BEGIN
 			,CostAdjLog.dblCost
 			,CostAdjLog.intInventoryFIFOId
 			,CostAdjLog.intId
+			,intFobPointId
 	FROM	#tmpInvCostAdjustmentToReverse InvReverse INNER JOIN dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjLog
 				ON InvReverse.intInventoryTransactionId = CostAdjLog.intInventoryTransactionId
 	WHERE	CostAdjLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost
@@ -78,6 +84,7 @@ BEGIN
 			,@CostAdjNewCost 
 			,@CostBucketId 
 			,@CostAdjLogId
+			,@FobPointId
 	;
 
 	-----------------------
@@ -127,6 +134,7 @@ BEGIN
 			,@CostAdjNewCost 
 			,@CostBucketId
 			,@CostAdjLogId
+			,@FobPointId
 		;
 	END 
 

@@ -60,6 +60,7 @@ BEGIN
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 		,[intRelatedInventoryTransactionId] INT NULL 
 		,[intFobPointId] TINYINT NULL 
+		,[intInTransitSourceLocationId] INT NULL 
 	)
 END 
 
@@ -103,6 +104,7 @@ DECLARE @intId AS INT
 		,@intRelatedInventoryTransactionId INT 
 		,@intLotId AS INT 
 		,@intFobPointId AS TINYINT
+		,@intInTransitSourceLocationId INT 
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionTypeName AS NVARCHAR(200) 
@@ -156,6 +158,7 @@ BEGIN
 			,[strSourceTransactionId]
 			,[intRelatedInventoryTransactionId]	
 			,[intFobPointId]
+			,[intInTransitSourceLocationId]
 	)
 	SELECT 
 			[intItemId] 
@@ -183,6 +186,7 @@ BEGIN
 			,[strSourceTransactionId] 
 			,[intRelatedInventoryTransactionId]
 			,[intFobPointId]
+			,[intInTransitSourceLocationId]
 	FROM	@ItemsToAdjust
 END 
 
@@ -220,6 +224,7 @@ SELECT  intId
 		,intRelatedInventoryTransactionId
 		,intLotId
 		,intFobPointId
+		,intInTransitSourceLocationId
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -250,6 +255,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intRelatedInventoryTransactionId
 	,@intLotId
 	,@intFobPointId
+	,@intInTransitSourceLocationId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -292,6 +298,9 @@ BEGIN
 			,@dblExchangeRate
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
+			,'Bill'
+			,@intFobPointId
+			,@intInTransitSourceLocationId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -321,6 +330,9 @@ BEGIN
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
+			,'Bill'
+			,@intFobPointId
+			,@intInTransitSourceLocationId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -350,6 +362,9 @@ BEGIN
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
+			,'Bill'
+			,@intFobPointId
+			,@intInTransitSourceLocationId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -381,7 +396,9 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
 			,@intLotId
+			,'Bill'
 			,@intFobPointId
+			,@intInTransitSourceLocationId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -412,6 +429,9 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@strActualCostId
 			,@intRelatedInventoryTransactionId
+			,'Bill'
+			,@intFobPointId
+			,@intInTransitSourceLocationId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -442,6 +462,7 @@ BEGIN
 		,@intRelatedInventoryTransactionId
 		,@intLotId
 		,@intFobPointId
+		,@intInTransitSourceLocationId
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -477,6 +498,7 @@ BEGIN
 			,strActualCostId
 			,intRelatedInventoryTransactionId
 			,intFobPointId
+			,intInTransitSourceLocationId
 	FROM	@Internal_ItemsToAdjust
 
 	OPEN loopItemsToAdjustForAutoNegative;
@@ -499,6 +521,7 @@ BEGIN
 		,@strActualCostId
 		,@intRelatedInventoryTransactionId
 		,@intFobPointId 
+		,@intInTransitSourceLocationId
 	;
 
 	DECLARE @AutoNegativeAmount AS NUMERIC(38, 20)
@@ -560,6 +583,7 @@ BEGIN
 						,@intCostingMethod						= @AVERAGECOST
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT 
 						,@intFobPointId							= @intFobPointId
+						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 			END 
 		END
 
@@ -580,6 +604,7 @@ BEGIN
 			,@strActualCostId
 			,@intRelatedInventoryTransactionId
 			,@intFobPointId
+			,@intInTransitSourceLocationId
 		;
 	END 
 
@@ -626,6 +651,7 @@ BEGIN
 			,[strSourceTransactionId]
 			,[intRelatedInventoryTransactionId]
 			,[intFobPointId]
+			,[intInTransitSourceLocationId]
 	)
 	SELECT 
 			[intItemId] 
@@ -653,6 +679,7 @@ BEGIN
 			,[strSourceTransactionId] 
 			,[intRelatedInventoryTransactionId]
 			,[intFobPointId]
+			,[intInTransitSourceLocationId]
 	FROM	#tmpRevalueProducedItems
 
 	-- Clear the contents of the temp table.

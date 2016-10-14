@@ -72,6 +72,7 @@ FROM	dbo.tblICItemLocation ItemLocation
 WHERE	intItemLocationId = @intItemLocationId
 		AND @intLotId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL
+		AND intLocationId IS NOT NULL 
 
 SET @InventoryLotTransactionIdentityId = SCOPE_IDENTITY();
 
