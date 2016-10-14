@@ -81,7 +81,7 @@ FROM
 		,dblTotal	= SUM(vyuPRPaycheckTax.dblTotal)
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
-			AND vyuPRPaycheckTax.strPaidBy = 'Company'
+			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
 	 GROUP BY 
 		DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate), 
 		DATEPART(Q, vyuPRPaycheckTax.dtmPayDate), 
