@@ -3244,25 +3244,20 @@ IF @post = 0
 				
 					DECLARE @intTransactionIdIC INT
 							,@strTransactionIdIC NVARCHAR(80)
-							,@WStorageCount INT
-							,@WOStorageCount INT
+							,@WStorageCount INT							 
 					
 					SELECT TOP 1 @intTransactionIdIC = intInvoiceId, @strTransactionIdIC = strTransactionId FROM @UnPostICInvoiceData ORDER BY intInvoiceId
 
 					SELECT @WStorageCount = COUNT(intCustomerStorageId) FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND (intItemId IS NOT NULL OR intItemId <> 0) AND (intCustomerStorageId IS NOT NULL OR ISNULL(intCustomerStorageId,0) <> 0)	
-					SELECT @WOStorageCount = COUNT(intCustomerStorageId) FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND (intItemId IS NOT NULL OR intItemId <> 0) AND (intCustomerStorageId IS NULL OR ISNULL(intCustomerStorageId,0) = 0)
-
-					IF @WOStorageCount > 1
-					BEGIN
-						-- Unpost onhand stocks. 
-						EXEC	dbo.uspICUnpostCosting
-									 @intTransactionIdIC
-									,@strTransactionIdIC
-									,@batchId
-									,@UserEntityID
-									,@recap 
-					END
-
+								 
+					-- Unpost onhand stocks. 
+					EXEC	dbo.uspICUnpostCosting
+									@intTransactionIdIC
+								,@strTransactionIdIC
+								,@batchId
+								,@UserEntityID
+								,@recap 
+  
 					IF @WStorageCount > 1 
 					BEGIN 
 						-- Unpost storage stocks. 
