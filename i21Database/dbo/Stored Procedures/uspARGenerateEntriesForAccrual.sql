@@ -7,6 +7,7 @@
 	,@UserEntityId				INT
 	,@ScreenName				NVARCHAR(25)
 	,@ModuleName				NVARCHAR(25)
+	,@AccrueLicense				BIT				= 0
 AS
 
 DECLARE @GLEntries AS RecapTableType
@@ -72,7 +73,7 @@ BEGIN
 		,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice'	THEN  
 																						(
 																						SELECT
-																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
+																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
 																						FROM
 																							tblARInvoiceDetail ARID 
 																						INNER JOIN
@@ -101,7 +102,7 @@ BEGIN
 																					ELSE 
 																						(
 																						SELECT
-																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
+																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
 																						FROM
 																							tblARInvoiceDetail ARID 
 																						INNER JOIN
@@ -161,7 +162,7 @@ BEGIN
 																					ELSE
 																						(
 																						SELECT
-																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
+																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
 																						FROM
 																							tblARInvoiceDetail ARID 
 																						INNER JOIN
@@ -185,7 +186,7 @@ BEGIN
 																					END
 		,dblCreditUnit				=  CASE WHEN A.strTransactionType = 'Invoice' THEN (
 																						SELECT
-																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
+																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
 																						FROM
 																							tblARInvoiceDetail ARID
 																						INNER JOIN
@@ -251,7 +252,7 @@ SELECT
 	 intInvoiceId			= ARI.intInvoiceId
 	,intInvoiceDetailId		= ARID.intInvoiceDetailId
 	,dblTotal				= ARID.dblTotal
-	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.000000))
+	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
 	,dblDiscount			= ARID.dblDiscount 
 	,dblQtyShipped			= ARID.dblQtyShipped
 	,dblPrice				= ARID.dblPrice 
@@ -268,8 +269,89 @@ WHERE
 	ARI.intInvoiceId = @InvoiceId 
 	AND ARID.dblTotal <> @ZeroDecimal 
 	AND ((ARID.intItemId IS NULL OR ARID.intItemId = 0)
-		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = ARID.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
+		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = ARID.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
 	AND ARI.strType <> 'Debit Memo'
+ORDER BY
+	ARI.intInvoiceId
+	,ARID.intInvoiceDetailId
+
+
+--License
+ INSERT INTO @InvoiceDetail
+	(intInvoiceId
+	,intInvoiceDetailId
+	,dblTotal
+	,dblUnits
+	,dblDiscount
+	,dblQtyShipped
+	,dblPrice)
+SELECT
+	 intInvoiceId			= ARI.intInvoiceId
+	,intInvoiceDetailId		= ARID.intInvoiceDetailId
+	,dblTotal				= ARID.dblLicenseAmount
+	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
+	,dblDiscount			= ARID.dblDiscount 
+	,dblQtyShipped			= ARID.dblQtyShipped
+	,dblPrice				= ARID.dblPrice 
+FROM
+	tblARInvoiceDetail ARID
+INNER JOIN
+	 tblARInvoice ARI
+		ON ARI.intInvoiceId = ARID.intInvoiceId
+INNER JOIN
+	tblICItem ICI
+		ON ARID.intItemId = ICI.intItemId 	
+LEFT OUTER JOIN
+	vyuICGetItemStock ICIS
+		ON ARID.intItemId = ICIS.intItemId 
+		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
+WHERE
+	ARI.intInvoiceId = @InvoiceId 
+	AND ARID.dblLicenseAmount <> @ZeroDecimal 
+	AND ARID.strMaintenanceType IN ('License/Maintenance', 'License Only')
+	AND ICI.strType = 'Software'
+	AND ARI.strType <> 'Debit Memo'
+	AND @AccrueLicense = 1
+ORDER BY
+	ARI.intInvoiceId
+	,ARID.intInvoiceDetailId
+
+--Maintenance
+ INSERT INTO @InvoiceDetail
+	(intInvoiceId
+	,intInvoiceDetailId
+	,dblTotal
+	,dblUnits
+	,dblDiscount
+	,dblQtyShipped
+	,dblPrice)
+SELECT
+	 intInvoiceId			= ARI.intInvoiceId
+	,intInvoiceDetailId		= ARID.intInvoiceDetailId
+	,dblTotal				= ARID.dblMaintenanceAmount
+	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
+	,dblDiscount			= ARID.dblDiscount 
+	,dblQtyShipped			= ARID.dblQtyShipped
+	,dblPrice				= ARID.dblPrice 
+FROM
+	tblARInvoiceDetail ARID
+INNER JOIN
+	 tblARInvoice ARI
+		ON ARI.intInvoiceId = ARID.intInvoiceId
+INNER JOIN
+	tblICItem ICI
+		ON ARID.intItemId = ICI.intItemId 	
+LEFT OUTER JOIN
+	vyuICGetItemStock ICIS
+		ON ARID.intItemId = ICIS.intItemId 
+		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
+WHERE
+	ARI.intInvoiceId = @InvoiceId 
+	AND ARID.dblMaintenanceAmount <> @ZeroDecimal 
+	AND ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+	AND ICI.strType = 'Software'
+	AND ARI.strType <> 'Debit Memo'
+	AND @AccrueLicense = 1
 ORDER BY
 	ARI.intInvoiceId
 	,ARID.intInvoiceDetailId
@@ -291,7 +373,7 @@ BEGIN
 
 	SELECT TOP 1 
 		 @InvoiceDetailId			= intInvoiceDetailId
-		,@Total						= ISNULL(dblTotal, 0.00) + ((ISNULL(dblDiscount, 0.00)/100.00) * (ISNULL(dblQtyShipped, 0.00) * ISNULL(dblPrice, 0.00)))
+		,@Total						= ISNULL(dblTotal, @ZeroDecimal) + ((ISNULL(dblDiscount, @ZeroDecimal)/100.00) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblPrice, @ZeroDecimal)))
 		,@TotalWODiscount			= dblTotal
 		,@UnitsTotal				= dblUnits
 	FROM 
