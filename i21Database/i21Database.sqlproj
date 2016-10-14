@@ -4428,6 +4428,9 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportDiscount.sql" />
     <Build Include="dbo\Functions\fnIsDue.sql" />
     <Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
+	<Build Include="dbo\Tables\tblICInventoryReceiptChargeTax.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeTax.sql" />
+    <Build Include="dbo\Views\vyuICGetChargeTaxDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
