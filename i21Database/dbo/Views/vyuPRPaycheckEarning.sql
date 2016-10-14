@@ -55,19 +55,29 @@ SELECT
 						AND PCX2.intTypeEarningId = tblPRPaycheckEarning.intTypeEarningId)
 	,ysnSSTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
-								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA Social Security')), 0) AS BIT)
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
+													 AND strCalculationType = 'USA Social Security')), 0) AS BIT)
 	,ysnMedTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
-								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA Medicare')), 0) AS BIT)
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
+													 AND strCalculationType = 'USA Medicare')), 0) AS BIT)
 	,ysnFITTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
-								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA Federal Tax')), 0) AS BIT)
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
+													 AND strCalculationType = 'USA Federal Tax')), 0) AS BIT)
 	,ysnStateTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
-								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA State')), 0) AS BIT)
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
+													 AND strCalculationType = 'USA State')), 0) AS BIT)
 	,ysnLocalTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
-								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA Local')), 0) AS BIT)
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
+													 AND strCalculationType = 'USA Local')), 0) AS BIT)
 	,tblPRPaycheckEarning.intAccountId
 	,tblPRPaycheckEarning.intSort
 	,tblPRPaycheckEarning.intConcurrencyId
