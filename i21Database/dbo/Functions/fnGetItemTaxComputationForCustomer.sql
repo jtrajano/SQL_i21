@@ -3,7 +3,7 @@
 	 @ItemId				INT
 	,@CustomerId			INT
 	,@TransactionDate		DATETIME
-	,@Amount				NUMERIC(18,6)
+	,@ItemPrice				NUMERIC(18,6)
 	,@QtyShipped			NUMERIC(18,6)
 	,@TaxGroupId			INT
 	,@CompanyLocationId		INT
@@ -138,7 +138,7 @@ BEGIN
 					
 			SELECT TOP 1 
 				 @Id			= [Id]
-				,@TaxableAmount	= ISNULL(@Amount, @ZeroDecimal)
+				,@TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@QtyShipped, @ZeroDecimal)
 			FROM
 				@ItemTaxes
 			WHERE
@@ -232,11 +232,11 @@ BEGIN
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @TaxableAmount = @TaxableAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (ISNULL(@Amount, @ZeroDecimal)) * (@TaxRate/100.00) END))
+										SET @TaxableAmount = @TaxableAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@ItemPrice * @QtyShipped) * (@TaxRate/100.00) END))
 									END
 								ELSE
 									BEGIN
-										SET @TaxableAmount = ISNULL(@Amount, @ZeroDecimal) + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@QtyShipped * @TaxRate) END))
+										SET @TaxableAmount = (@ItemPrice * @QtyShipped) + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@QtyShipped * @TaxRate) END))
 									END
 							END
 					END 
