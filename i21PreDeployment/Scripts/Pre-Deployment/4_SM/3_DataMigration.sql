@@ -277,6 +277,9 @@ GO
 			('
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Prepay'' AND intPaymentMethodID = 8)
 				BEGIN
+				
+					ALTER TABLE tblAPPayment DROP CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId]
+					ALTER TABLE tblCCSite DROP CONSTRAINT FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId
 									
 					SELECT * INTO tmpSMPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID > 7
 
