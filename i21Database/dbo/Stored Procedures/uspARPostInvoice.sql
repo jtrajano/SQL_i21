@@ -1877,7 +1877,7 @@ IF @post = 1
 						,@UserEntityId				= @UserEntityID
 						,@ScreenName				= @SCREEN_NAME
 						,@ModuleName				= @MODULE_NAME
-						,@AccrueBothForSoftware		= @accrueLicense
+						,@AccrueLicense				= @accrueLicense
 
 		END TRY
 		BEGIN CATCH
