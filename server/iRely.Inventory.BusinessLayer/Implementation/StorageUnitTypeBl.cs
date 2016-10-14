@@ -18,5 +18,15 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+
+        public override async Task<BusinessResult<tblICStorageUnitType>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.OtherException && result.message.statusText.ToString().Contains("Cannot insert duplicate key"))
+            {
+                result.message.statusText = "Storage Unit Type must be unique.";
+            }
+            return result;
+        }
     }
 }
