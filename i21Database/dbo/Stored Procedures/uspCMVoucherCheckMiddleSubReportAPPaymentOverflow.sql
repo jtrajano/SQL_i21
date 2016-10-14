@@ -100,48 +100,74 @@ DECLARE @BANK_DEPOSIT INT = 1
 --SET @intTransactionIdFrom = CASE WHEN ISNULL(@intTransactionIdFrom, 0) = 0 THEN NULL ELSE @intTransactionIdFrom END  
 
 -- Report Query:  
-SELECT 
-		intTransactionId
-		,strBillId
-		,strInvoice
-		,dtmDate
-		,strComment
-		,dblAmount
-		,dblDiscount
-		,dblNet
-		,strPaymentRecordNum
-		,dblTotalAmount
-		,dtmCheckDate
-		,strCheckNumber
- FROM 
-(
+SELECT * FROM (
 	SELECT 
-			intTransactionId = F.intTransactionId
-			,strBillId = BILL.strBillId
-			,strInvoice = BILL.strVendorOrderNumber
-			,dtmDate = BILL.dtmBillDate
-			,strComment = SUBSTRING(BILL.strComment,1,25)
-			,dblAmount = CASE WHEN BILL.intTransactionType = 3
-					THEN BILL.dblTotal * -1
-					ELSE BILL.dblTotal
-					END
-			,dblDiscount = PYMTDetail.dblDiscount
-			,dblNet = CASE WHEN BILL.intTransactionType = 3
-					THEN PYMTDetail.dblPayment * -1
-					ELSE PYMTDetail.dblPayment
-					END
-			,strPaymentRecordNum  = PYMT.strPaymentRecordNum
-			,dblTotalAmount = F.dblAmount
-			,dtmCheckDate = F.dtmDate
-			,strCheckNumber = F.strReferenceNo
-			,ROW_NUMBER() OVER (ORDER BY BILL.strBillId ASC) AS [row_number]
-	FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
-				ON F.strTransactionId = PYMT.strPaymentRecordNum
-			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
-				ON PYMT.intPaymentId = PYMTDetail.intPaymentId
-			INNER JOIN [dbo].[tblAPBill] BILL
-				ON PYMTDetail.intBillId = BILL.intBillId	
-	WHERE	F.intTransactionId =ISNULL(@intTransactionIdFrom, F.intTransactionId)
-			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
-) Data
+			intTransactionId
+			,strBillId
+			,strInvoice
+			,dtmDate
+			,strComment
+			,dblAmount
+			,dblDiscount
+			,dblNet
+			,strPaymentRecordNum
+			,dblTotalAmount
+			,dtmCheckDate
+			,strCheckNumber
+			,ROW_NUMBER() OVER (ORDER BY intPaymentDetailId ASC) AS [row_number]
+	 FROM 
+	(
+		SELECT 
+				intTransactionId = F.intTransactionId
+				,strBillId = BILL.strBillId
+				,strInvoice = BILL.strVendorOrderNumber
+				,dtmDate = BILL.dtmBillDate
+				,strComment = SUBSTRING(BILL.strComment,1,25)
+				,dblAmount = CASE WHEN BILL.intTransactionType = 3
+						THEN BILL.dblTotal * -1
+						ELSE BILL.dblTotal
+						END
+				,dblDiscount = PYMTDetail.dblDiscount
+				,dblNet = CASE WHEN BILL.intTransactionType = 3
+						THEN PYMTDetail.dblPayment * -1
+						ELSE PYMTDetail.dblPayment
+						END
+				,strPaymentRecordNum  = PYMT.strPaymentRecordNum
+				,dblTotalAmount = F.dblAmount
+				,dtmCheckDate = F.dtmDate
+				,strCheckNumber = F.strReferenceNo
+				,PYMTDetail.intPaymentDetailId
+		FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
+					ON F.strTransactionId = PYMT.strPaymentRecordNum
+				INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
+					ON PYMT.intPaymentId = PYMTDetail.intPaymentId
+				INNER JOIN [dbo].[tblAPBill] BILL
+					ON PYMTDetail.intBillId = BILL.intBillId	
+		WHERE	F.intTransactionId =ISNULL(@intTransactionIdFrom, F.intTransactionId)
+				AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
+
+		UNION ALL SELECT 
+				intTransactionId = F.intTransactionId
+				,strBillId = INV.strInvoiceNumber
+				,strInvoice = ''
+				,dtmDate = INV.dtmDate
+				,strComment = SUBSTRING(INV.strComments,1,25)
+				,dblAmount = INV.dblInvoiceTotal
+				,dblDiscount = PYMTDetail.dblDiscount
+				,dblNet =  PYMTDetail.dblPayment
+				,strPaymentRecordNum  = PYMT.strPaymentRecordNum
+				,dblTotalAmount = F.dblAmount
+				,dtmCheckDate = F.dtmDate
+				,strCheckNumber = F.strReferenceNo
+				,PYMTDetail.intPaymentDetailId
+		FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
+					ON F.strTransactionId = PYMT.strPaymentRecordNum
+				INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
+					ON PYMT.intPaymentId = PYMTDetail.intPaymentId
+				INNER JOIN [dbo].[tblARInvoice] INV
+					ON PYMTDetail.intInvoiceId = INV.intInvoiceId	
+		WHERE	F.intTransactionId =ISNULL(@intTransactionIdFrom, F.intTransactionId)
+				AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
+	) Data
+) tbl
 WHERE [row_number] > 10
