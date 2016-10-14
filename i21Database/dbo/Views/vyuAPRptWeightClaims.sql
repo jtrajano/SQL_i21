@@ -13,8 +13,8 @@ FROM (
 	SELECT
 		RTRIM(LTRIM(strVendorId)) + ' - ' + strName AS strVendorName,
 		strItemNo,  
-		SUM(dblNetQtyReceived) AS dblNetShippedWeight,
-		SUM(dblNetShippedWeight) AS dblGrossShippedWeight,
+		SUM(dblNetShippedWeight) AS dblNetShippedWeight,
+		SUM(dblGrossShippedWeight) AS dblGrossShippedWeight,
 		SUM(dblNetShippedWeight) - SUM(dblNetQtyReceived) AS dblWeightLoss,
 		SUM(dblTareShippedWeight) AS dblShipmentWeightLoss,
 		dblAmountPaid,
@@ -96,6 +96,7 @@ FROM (
 			,A.intEntityVendorId
 			,A.intShipToId
 			,L.dblTotal + L.dblTax AS dblPrepaidTotal
+			,LGC.dblGrossWt AS dblGrossShippedWeight
 			,LGC.dblNetWt AS dblNetShippedWeight--Loads.dblNetShippedWeight
 			,LGC.dblTareWt AS dblTareShippedWeight
 			,Container.strContainerNumber
