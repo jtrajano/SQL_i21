@@ -79,6 +79,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\i21_resources\SharedAssemblyInfo.cs">
+      <Link>SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Common\Common.cs" />
     <Compile Include="Common\GlobalSettings.cs" />
     <Compile Include="Common\Import\ImportData.cs" />
