@@ -729,5 +729,20 @@ namespace iRely.Inventory.BusinessLayer
             taxGroup = newTaxGroupId;
             return saveResult;
         }
+
+        public async Task<SearchResult> GetChargeTaxDetails(GetParameter param, int ChargeId)
+        {
+            var query = _db.GetQuery<vyuICGetChargeTaxDetails>()
+                    .Where(p => p.intChargeId == ChargeId)
+                    .Filter(param, true);
+
+            var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }
