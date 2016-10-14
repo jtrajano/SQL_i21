@@ -225,7 +225,7 @@
                                 "bodyPadding": 10,
                                 "container|align": "stretch",
                                 "layout": "hbox",
-                                "title": "Unit Detail"
+                                "title": "Detail"
                             },
                             "name": "MyPanel32",
                             "designerId": "d41a0da5-33be-4922-90cc-5b43036d42e8",
@@ -1301,7 +1301,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter139",
+                                                    "name": "filter127",
                                                     "designerId": "44f4490e-5a9c-40bb-beaf-26df2f659502",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1579,7 +1579,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter140",
+                                                    "name": "filter128",
                                                     "designerId": "22931607-4134-4630-a48a-1fe5916ccd67",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1777,7 +1777,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter141",
+                                                    "name": "filter129",
                                                     "designerId": "e4e6a664-7884-4ddd-8995-16e91bcb4363",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1964,7 +1964,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter142",
+                                                    "name": "filter130",
                                                     "designerId": "6e9571a9-d0ec-46b7-ab0d-11523cb26254",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2134,7 +2134,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging17",
+                    "name": "statusbarpaging15",
                     "designerId": "007a0d4c-2515-4998-91ed-043de4f99d12",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
