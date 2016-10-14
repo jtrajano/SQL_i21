@@ -9,8 +9,6 @@ StartTest(function (t) {
 
     engine.start(t)
 
-
-
         // LOG IN
         .displayText('Log In').wait(500)
         .addFunction(function (next) {
@@ -18,16 +16,13 @@ StartTest(function (t) {
         }).wait(100)
         .waitTillMainMenuLoaded('Login Successful').wait(500)
 
-
         //START OF TEST CASE - Opening IC Screens
         .displayText('"======== Scenario 1: Opening Inventory Screens. ========"').wait(1000)
         .expandMenu('Inventory').wait(1000)
         .markSuccess('Inventory successfully expanded').wait(500)
 
-
-        //# 1Inventory Receipt Screen
-
-        .displayText('"======== 1. Open Inventory Receipt Search Screen Check All Fields ========"').wait(500)
+        //Inventory Receipt Screen
+                .displayText('"======== 1. Open Inventory Receipt Search Screen Check All Fields ========"').wait(500)
         .openScreen('Inventory Receipts').wait(1000)
         .waitTillLoaded('Open Inventory Receipts Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
@@ -81,8 +76,8 @@ StartTest(function (t) {
         .markSuccess('======== Open Inventory Receipt Screen Tabs Successful ========').wait(500)
 
 
-        //#3 Inventory Shipment Screen
-        .displayText('"======== 3. Open Inventory Shipment Search Screen Check All Fields. ========"').wait(500)
+        //Inventory Shipment Screen
+                .displayText('"======== 3. Open Inventory Shipment Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Inventory Shipments').wait(1000)
         .waitTillLoaded('Open Inventory Shipment Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
@@ -131,10 +126,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Inventory Shipment Screen Fields Successful. ========').wait(500)
 
 
-
-        //#5 Inventory Transfers Screen
-
-        .displayText('"======== 5. Open Inventory Transfers Search Screen Check All Fields. ========"').wait(500)
+        //Inventory Transfers Screen
+                .displayText('"======== 5. Open Inventory Transfers Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Inventory Transfers').wait(1000)
         .waitTillLoaded('Open Inventory Transfer Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
@@ -171,11 +164,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Inventory Transfer Screen Fields Successful. ========').wait(500)
 
 
-
-
-        //#7 Inventory Adjustments Screen
-
-        .displayText('"======== 7. Open Inventory Adjustments Search Screen Check All Fields. ========"').wait(500)
+        //Inventory Adjustments Screen
+                .displayText('"======== 7. Open Inventory Adjustments Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Inventory Adjustments').wait(1000)
         .waitTillLoaded('Open Inventory Adjustments Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
@@ -211,9 +201,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Inventory Adjustment Screen Fields Successful. ========').wait(500)
 
 
-
-        //#9 Inventory Count Screen
-        .displayText('"======== 9. Open Inventory Count Search Screen Check All Fields. ========"').wait(500)
+        //Inventory Count Screen
+                .displayText('"======== 9. Open Inventory Count Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Inventory Count').wait(1000)
         .waitTillLoaded('Open Inventory Count Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
@@ -253,9 +242,8 @@ StartTest(function (t) {
         .markSuccess('Click New, Check Inventory Count Screen Fields Successful.').wait(500)
 
 
-        //#11 Storage Measurement Reading Screen
-
-        .displayText('"======== 11. Open Storage Measurement Reading Search Screen Check All Fields. ========"').wait(500)
+        //Storage Measurement Reading Screen
+                .displayText('"======== 11. Open Storage Measurement Reading Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Storage Measurement Reading').wait(1000)
         .waitTillLoaded('Open Storage Measurement Reading Screen Successful').wait(500)
         .markSuccess('======== Open Storage Measurement Reading Search Screen Check All Fields Successful. ========').wait(500)
@@ -274,9 +262,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Storage Measurement Reading Screen Fields Successful. ========').wait(500)
 
 
-        //#13 Item Screen
-
-        .displayText('"======== 13. Open Items Search Screen Check All Fields ========"').wait(500)
+        //Item Screen
+                .displayText('"======== 13. Open Items Search Screen Check All Fields ========"').wait(500)
         .openScreen('Items').wait(1000)
         .waitTillLoaded('Open Items Search Screen Successful').wait(500)
         .clickTab('Locations').wait(500)
@@ -375,9 +362,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Items Screen Fields Successful. ========').wait(500)
 
 
-        //#15 Commodities Screen
-
-        .displayText('"======== 15. Open Commodities Search Screen Check All Fields. ========"').wait(500)
+        //Commodities Screen
+                .displayText('"======== 15. Open Commodities Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Commodities').wait(1000)
         .waitTillLoaded('Open Commodities Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(100)
@@ -400,9 +386,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Commodity Screen Fields Successful. ========').wait(500)
 
 
-        //#17 Categories Screen
-
-        .displayText('"======== 17. Open Categories Search Screen Check All Fields. ========"').wait(500)
+        //Categories Screen
+                .displayText('"======== 17. Open Categories Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Categories').wait(1000)
         .waitTillLoaded('Open Categories Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(100)
@@ -435,9 +420,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Category Screen Fields Successful. ========').wait(500)
 
 
-
-        //#19 Fuel Types Screen
-        .displayText('"======== 19. Open Fuel Types Search Screen Check All Fields. ========"').wait(500)
+        //#Fuel Types Screen
+                .displayText('"======== 19. Open Fuel Types Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Fuel Types').wait(1000)
         .waitTillLoaded('Open Fuel Types Search Screen Successful').wait(500)
         .markSuccess('Open Fuel Types Search Screen Check All Fields Successful.').wait(500)
@@ -509,9 +493,8 @@ StartTest(function (t) {
         .markSuccess('"======== Click New, Check Fuel Types Screen Fields Successful. ========"').wait(500)
 
 
-        //#21Inventory OM's Screen
-
-        .displayText('"======== 21. Open Inventory UOMs Search Screen Check All Fields. ========"').wait(500)
+        //#Inventory UOM's Screen
+                .displayText('"======== 21. Open Inventory UOMs Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Inventory UOM').wait(1000)
         .waitTillLoaded('Open Fuel Types Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(100)
@@ -530,9 +513,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Inventory UOM Screen Fields Successful. ========').wait(500)
 
 
-        //23 Storage Locations Screen
-
-        .displayText('"======== 23. Open Storage Locations Search Screen Check All Fields. ========"').wait(500)
+        //Storage Locations Screen
+                .displayText('"======== 23. Open Storage Locations Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Storage Locations').wait(1000)
         .waitTillLoaded('Open Fuel Types Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: true, view: true, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(100)
@@ -563,8 +545,8 @@ StartTest(function (t) {
         .markSuccess('======== Click New, Check Open Storage Screen Fields Successful. ========').wait(500)
 
 
-        //25 Stock Details Screen
-        .displayText('"======== 25. Open Stock Details Search Screen Check All Fields. ========"').wait(500)
+        //Stock Details Screen
+                .displayText('"======== 25. Open Stock Details Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Stock Details').wait(1000)
         .waitTillLoaded('Open Stock Details Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: false, view: false, open: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
@@ -573,30 +555,28 @@ StartTest(function (t) {
         .markSuccess('======== Open Stock Details Search Screen Check All Fields Successful. ========').wait(500)
 
 
-        //#26 Lot Details Screen
+        //Lot Details Screen
+                    .displayText('"======== 26. Open Lot Details Search Screen Check All Fields. ========"').wait(500)
+            .openScreen('Lot Details').wait(1000)
+            .waitTillLoaded('Open Lot Details Search Screen Successful').wait(500)
+            .checkSearchToolbarButton({ new: false, view: false, open: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
+            .markSuccess('======== Open Lot Details Search Screen Check All Fields Successful. ========').wait(500)
 
-        .displayText('"======== 26. Open Lot Details Search Screen Check All Fields. ========"').wait(500)
-        .openScreen('Lot Details').wait(1000)
-        .waitTillLoaded('Open Lot Details Search Screen Successful').wait(500)
-        .checkSearchToolbarButton({ new: false, view: false, open: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
-        .markSuccess('======== Open Lot Details Search Screen Check All Fields Successful. ========').wait(500)
 
-
-        //#27 Inventory Valuation Screen
-
-        .displayText('"======== 27. Open Inventory Valuation Search Screen Check All Fields. ========"').wait(500)
+        //Inventory Valuation Screen
+                .displayText('"======== 27. Open Inventory Valuation Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Inventory Valuation').wait(1000)
         .waitTillLoaded('Open Lot Details Search Screen Successful').wait(500)
         .checkSearchToolbarButton({ new: false, view: false, open: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .markSuccess('======== Open Inventory Valuation Search Screen Check All Fields Successful. ========').wait(500)
 
 
-        //28 Inventory Valuation Screen
-        .displayText('"======== 28. Open Inventory Valuation Summary Search Screen Check All Fields. ========"').wait(500)
-        .openScreen('Inventory Valuation Summary').wait(1000)
-        .waitTillLoaded('Open Lot Details Search Screen Successful').wait(500)
-        .checkSearchToolbarButton({ new: false, view: false, open: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
-        .markSuccess('Open Inventory Valuation Summary Search Screen Check All Fields Successful.').wait(500)
+        //Inventory Valuation Screen
+                    .displayText('"======== 28. Open Inventory Valuation Summary Search Screen Check All Fields. ========"').wait(500)
+            .openScreen('Inventory Valuation Summary').wait(1000)
+            .waitTillLoaded('Open Lot Details Search Screen Successful').wait(500)
+            .checkSearchToolbarButton({ new: false, view: false, open: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
+            .markSuccess('Open Inventory Valuation Summary Search Screen Check All Fields Successful.').wait(500)
 
         .markSuccess('"======== Open Inventory Screens and Checking Fields done. ========="')
 

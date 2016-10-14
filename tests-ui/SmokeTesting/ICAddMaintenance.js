@@ -454,7 +454,6 @@ StartTest(function (t) {
         .markSuccess('======== Add Item Scenarios Done and Successful! ========')
 
 
-
         //#Scenario 2: Add Commodity
                 .displayText('====== Scenario 2. Add Cmmodity ======').wait(300)
         .openScreen('Commodities').wait(500)
@@ -495,7 +494,6 @@ StartTest(function (t) {
         .checkIfScreenClosed('iccommodity').wait(300)
 
 
-
         //#Scenario 3: Add Category
                         .displayText('====== Scenario 3. Add Category ======').wait(300)
                 .openScreen('Categories').wait(500)
@@ -521,7 +519,6 @@ StartTest(function (t) {
                 .clickButton('#btnSave').wait(300)
                 .markSuccess('Create Inventory Type Category Successful').wait(500)
                 .clickButton('#btnClose').wait(300)
-
 
 
         //Scenarios 4-9 Fuel Types Screen
@@ -619,7 +616,6 @@ StartTest(function (t) {
         .markSuccess('====== Add Add Fuel Type Successful ======').wait(300)
 
 
-
         //#Scenario 10: Inventory UOM
         // 10.1 Add stock UOM first
                .displayText('====== #1 Add Stock UOM ======').wait(300)
@@ -678,7 +674,6 @@ StartTest(function (t) {
         .clickButton('#btnClose').wait(100)
         .clickButton('#btnClose').wait(100)
         .checkIfScreenClosed('icinventoryuom').wait(100)
-
 
 
         //#Scenario 11: Add Storage Location

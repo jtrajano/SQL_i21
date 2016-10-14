@@ -439,7 +439,7 @@ StartTest(function (t) {
 
 
         //Add Storage Measurement Reading
-        .displayText('"======== Scenario 8:  Add Storage Measurement Reading ========"').wait(500)
+                .displayText('"======== Scenario 8:  Add Storage Measurement Reading ========"').wait(500)
         .displayText('"======== #1 Open New Storage Measurement Reading Screen ========"').wait(500)
         .openScreen('Storage Measurement Reading').wait(500)
         .waitTillLoaded('Open Storage Measurement Reading Search Screen Successful').wait(500)
