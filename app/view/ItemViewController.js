@@ -1791,6 +1791,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     });
                 }
             }
+            current.set('strCategory', null);
+            current.set('intCategoryId', null);
         }
     },
 
