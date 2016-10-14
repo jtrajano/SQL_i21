@@ -18,5 +18,15 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+
+        public override async Task<BusinessResult<tblICCountGroup>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.UniqueViolation)
+            {
+                result.message.statusText = "Count Group must be unique.";
+            }
+            return result;
+        }
     }
 }
