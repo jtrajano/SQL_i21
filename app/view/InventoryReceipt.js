@@ -2204,6 +2204,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         text: 'Calculate'
                                                                     },
                                                                     {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnChargeTaxDetails',
+                                                                        iconCls: 'small-open',
+                                                                        text: 'View Tax Details'
+                                                                    },
+                                                                    {
                                                                         xtype: 'filter1'
                                                                     }
                                                                 ]
@@ -2504,7 +2511,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             }
                                                         ],
                                                         selModel: {
-                                                            selType: 'checkboxmodel'
+                                                            selType: 'checkboxmodel',
+                                                            allowDeselect: true,
+                                                            mode: 'SINGLE'
                                                         }
                                                     },
                                                     {

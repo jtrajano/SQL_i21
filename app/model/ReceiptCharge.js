@@ -5,7 +5,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
     extend: 'iRely.BaseEntity',
 
     requires: [
-        'Inventory.model.ReceiptItemTax',
+        'Inventory.model.ReceiptChargeTax',
         'Ext.data.Field'
     ],
 

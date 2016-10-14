@@ -5118,7 +5118,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                    if (!charge.dummy) {
                       var computeItemTax = function (itemTaxes, me) {
                           var totalItemTax = 0.00;
-                          //charge.tblICInventoryReceiptChargeTaxes().removeAll();
+                          charge.tblICInventoryReceiptChargeTaxes().removeAll();
+
                           Ext.Array.each(itemTaxes, function (itemDetailTax) {
                               var taxableAmount = charge.get('dblAmount');
                               var taxAmount = 0.00;
@@ -5149,7 +5150,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                               }
                               totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
 
-                              /* var newItemTax = Ext.create('Inventory.model.ReceiptChargeTax', {
+                               var newItemTax = Ext.create('Inventory.model.ReceiptChargeTax', {
                                      intTaxGroupId: itemDetailTax.intTaxGroupId,
                                      intTaxCodeId: itemDetailTax.intTaxCodeId,
                                      intTaxClassId: itemDetailTax.intTaxClassId,
@@ -5163,7 +5164,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                      ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
                                      ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
                                 });
-                                charge.tblICInventoryReceiptItemTaxes().add(newItemTax);*/
+                                charge.tblICInventoryReceiptChargeTaxes().add(newItemTax);
                             });
 
                             charge.set('dblTax', totalItemTax);
@@ -5347,6 +5348,69 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onChargeTaxDetailsClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var grd = win.down('#grdCharges');
+        var me = this;
+        var selected = grd.getSelectionModel().getSelection();
+        var context = win.context;
+
+        if (selected) {
+            if (selected.length > 0) {
+                var current = selected[0];
+                if (!current.dummy) {
+                    var ChargeId = current.get('intChargeId');
+                    var showChargeTaxScreen = function () {
+                            var search = i21.ModuleMgr.Search;
+                            search.scope = me;
+                            search.url = '../Inventory/api/InventoryReceipt/GetChargeTaxDetails?ChargeId=' + ChargeId;
+                            search.columns = [
+                                { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { dataIndex: 'strItemNo', text: 'Item No', width: 200, dataType: 'string'},
+                                { dataIndex: 'strTaxGroup', text: 'Tax Group', width: 150, dataType: 'string' },
+                                { dataIndex: 'strTaxCode', text: 'Tax Code', width: 150, dataType: 'string' },
+                                { dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 200, dataType: 'string' },
+                                { xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
+                                { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' }
+                            ];
+                            search.title = "Charge Tax Details";
+                            search.showNew = false;
+                            search.showOpenSelected = false;
+                            search.on({
+                                scope: me,
+                            });
+                            search.show();
+                        };
+
+
+                        var task = new Ext.util.DelayedTask(function () {
+                            // If there is no data change, show charge tax details screen
+                            if (!context.data.hasChanges()) {
+                            showChargeTaxScreen();
+                            }
+
+                            // Save has data changes first before showing charge tax details screen
+                            context.data.saveRecord({
+                                successFn: function () {
+                                showChargeTaxScreen(); 
+                                }
+                            });
+                        });
+                        task.delay(10);
+                }
+                   // this.onViewChargeTaxDetailsClick(current.get('intChargeId'));
+            }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -5513,7 +5577,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboSubLocation": {
                 select: this.onReceiptItemSelect
-            }
+            },
+            "#btnChargeTaxDetails": {
+                click: this.onChargeTaxDetailsClick
+            },
         })
     }
 

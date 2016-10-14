@@ -1758,4 +1758,17 @@ namespace iRely.Inventory.Model
         public bool? ysnCheckoffTax { get; set; }
         public int? intSort { get; set; }
     }
+
+    public class vyuICGetChargeTaxDetails
+    {
+        public int? intKey { get; set; }
+        public int? intInventoryReceiptChargeTaxId { get; set; }
+        public int? intChargeId { get; set; }
+        public string strItemNo { get; set; }
+        public string strTaxGroup { get; set; }
+        public string strTaxCode { get; set; }
+        public string strCalculationMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public decimal? dblTax { get; set; }
+    }
 }

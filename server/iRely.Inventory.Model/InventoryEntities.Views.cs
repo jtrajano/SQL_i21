@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb6f3080fc30fcc7609b428b77838bce41acaa58be1a380ad58be4557aa676d12))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf0da1d08f90581c262b26c5023beee6d7846f737691e9d6250ff0d23080fcf6e))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsb6f3080fc30fcc7609b428b77838bce41acaa58be1a380ad58be4557aa676d12 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsf0da1d08f90581c262b26c5023beee6d7846f737691e9d6250ff0d23080fcf6e : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "b6f3080fc30fcc7609b428b77838bce41acaa58be1a380ad58be4557aa676d12"; }
+            get { return "f0da1d08f90581c262b26c5023beee6d7846f737691e9d6250ff0d23080fcf6e"; }
         }
 
         /// <summary>
@@ -1845,6 +1845,16 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.vyuICGetInventoryReceiptChargeTaxes")
             {
                 return GetView359();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetChargeTaxDetails")
+            {
+                return GetView360();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetChargeTaxDetails")
+            {
+                return GetView361();
             }
 
             return null;
@@ -14568,6 +14578,56 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSort AS vyuICGetInventoryReceiptChargeTax_intSort, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryReceiptChargeTax AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetChargeTaxDetails.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView360()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetChargeTaxDetails
+        [CodeFirstDatabaseSchema.vyuICGetChargeTaxDetails](T1.vyuICGetChargeTaxDetails_intKey, T1.vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, T1.vyuICGetChargeTaxDetails_intChargeId, T1.vyuICGetChargeTaxDetails_strItemNo, T1.vyuICGetChargeTaxDetails_strTaxGroup, T1.vyuICGetChargeTaxDetails_strTaxCode, T1.vyuICGetChargeTaxDetails_strCalculationMethod, T1.vyuICGetChargeTaxDetails_dblRate, T1.vyuICGetChargeTaxDetails_dblTax)
+    FROM (
+        SELECT 
+            T.intKey AS vyuICGetChargeTaxDetails_intKey, 
+            T.intInventoryReceiptChargeTaxId AS vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, 
+            T.intChargeId AS vyuICGetChargeTaxDetails_intChargeId, 
+            T.strItemNo AS vyuICGetChargeTaxDetails_strItemNo, 
+            T.strTaxGroup AS vyuICGetChargeTaxDetails_strTaxGroup, 
+            T.strTaxCode AS vyuICGetChargeTaxDetails_strTaxCode, 
+            T.strCalculationMethod AS vyuICGetChargeTaxDetails_strCalculationMethod, 
+            T.dblRate AS vyuICGetChargeTaxDetails_dblRate, 
+            T.dblTax AS vyuICGetChargeTaxDetails_dblTax, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetChargeTaxDetails AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetChargeTaxDetails.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView361()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetChargeTaxDetails
+        [iRely.Inventory.Model.vyuICGetChargeTaxDetails](T1.vyuICGetChargeTaxDetails_intKey, T1.vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, T1.vyuICGetChargeTaxDetails_intChargeId, T1.vyuICGetChargeTaxDetails_strItemNo, T1.vyuICGetChargeTaxDetails_strTaxGroup, T1.vyuICGetChargeTaxDetails_strTaxCode, T1.vyuICGetChargeTaxDetails_strCalculationMethod, T1.vyuICGetChargeTaxDetails_dblRate, T1.vyuICGetChargeTaxDetails_dblTax)
+    FROM (
+        SELECT 
+            T.intKey AS vyuICGetChargeTaxDetails_intKey, 
+            T.intInventoryReceiptChargeTaxId AS vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, 
+            T.intChargeId AS vyuICGetChargeTaxDetails_intChargeId, 
+            T.strItemNo AS vyuICGetChargeTaxDetails_strItemNo, 
+            T.strTaxGroup AS vyuICGetChargeTaxDetails_strTaxGroup, 
+            T.strTaxCode AS vyuICGetChargeTaxDetails_strTaxCode, 
+            T.strCalculationMethod AS vyuICGetChargeTaxDetails_strCalculationMethod, 
+            T.dblRate AS vyuICGetChargeTaxDetails_dblRate, 
+            T.dblTax AS vyuICGetChargeTaxDetails_dblTax, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetChargeTaxDetails AS T
     ) AS T1");
         }
     }
