@@ -1,74 +1,87 @@
-/**
- * Created by CCallado on 1/22/2016.
- */
-
-
-
-StartTest (function (t) {
+StartTest(function (t) {
 
     var engine = new iRely.TestEngine();
+    var commonSM = Ext.create('SystemManager.CommonSM');
+    var commonIC = Ext.create('i21.test.Inventory.CommonIC');
+
     engine.start(t)
 
-        /* Scenario 1: Open screen and check default controls' state */
-        .login('irelyadmin', 'i21by2015', '01')
-        .addFunction(function(next){t.diag("Scenario 1: Open screen and check default controls' state"); next();}).wait(100)
-        .expandMenu('Inventory').wait(500)
-        .openScreen('Inventory Receipts').wait(3000)
-        .checkScreenWindow({alias: 'icinventoryreceipt',title: 'Inventory Receipt',collapse: true,maximize: true,minimize: false,restore: false,close: true}).wait(500)
-        .checkSearchToolbarButton({new: true, view: true, openselected: false, openall: false, refresh: true, export: false, close: true}).wait(100)
-        .clickButton('#btnNew').wait(200)
-        .checkScreenShown('icinventoryreceipt')
-        .checkControlVisible([
-            '#cboReceiptType'
-            ,'#cboVendor'
-            ,'#txtVendorName'
-            ,'#cboLocation'
-            ,'#dtmReceiptDate'
-            ,'#cboCurrency'
-            ,'#txtReceiptNumber'
-            ,'#cboSourceType'
-            ,'#txtBillOfLadingNumber'
-            ,'#cboReceiver'
-            ,'#txtVessel'
-            ,'#txtBlanketReleaseNumber'
-            ,'#cboShipFrom'
-            ,'#cboFreightTerms'
-            ,'#cboTaxGroup'
-            ,'#txtVendorRefNumber'
-            ,'#cboShipVia'
-            ,'#txtFobPoint'
-            ,'#txtShiftNumber'
-            ,'#btnInsertInventoryReceipt'
-            ,'#btnViewItem'
-            ,'#btnQuality'
-            ,'#btnTaxDetails'
-            ,'#btnRemoveInventoryReceipt'
-            ,'#btnGridLayout'
-            ,'#btnInsertCriteria'
-            ,'#txtFilterGrid'
-        ], true)
-        .checkControlVisible(['#btnHelp', '#btnSupport', '#btnFieldName'], true)
-        .checkStatusMessage('Ready')
+        // LOG IN
+        .displayText('Log In').wait(500)
+        .addFunction(function (next) {
+            commonSM.commonLogin(t, next); }).wait(100)
+        .waitTillMainMenuLoaded('Login Successful').wait(500)
 
 
-        /* Scenario 2: Add New Direct Inventory Receipt Lotted Item*/
-        .addFunction(function(next){t.diag("Scenario 2: Add New Direct Inventory Receipt Lotted Item"); next();}).wait(100)
-        .selectComboRowByFilter('#cboReceiptType','Direct',300, 'strReceiptType').wait(100)
-        .selectComboRowByFilter('#cboVendor','0001005057',300, 'intEntityVendorId').wait(100)
-        .selectComboRowByFilter('#cboLocation','0001 - Fort Wayne',300, 'intLocationId').wait(100)
-        .enterData('#txtBillOfLadingNumber','Test - BOL').wait(100)
-        .enterData('#txtVessel','Test Vessel').wait(100)
-        .selectComboRowByFilter('#cboFreightTerms','Truck',300, 'intFreightTermId').wait(100)
-        .selectComboRowByFilter('#cboTaxGroup','IN SST',300, 'intTaxGroupId').wait(100)
-        .enterData('#txtVendorRefNumber','Test Vendor Reftest').wait(100)
-        .selectGridComboRowByFilter('#grdInventoryReceipt', 0,'strItemNo','asdasdasdasds',500,'strItemNo').wait(100)
-        .selectGridComboRowByIndex('#grdInventoryReceipt',0,'cboItem',1)
+        .displayText('"======== Scenario 1: Create Direct Inventory Receipt for Non Lotted Item. ========"').wait(1000)
+        .expandMenu('Inventory').wait(1000)
+        .markSuccess('Inventory successfully expanded').wait(500)
 
+        .displayText('"======== #1 Open New Inventory Receipt Screen ========"').wait(500)
+        .openScreen('Inventory Receipts').wait(1000)
+        .waitTillLoaded('Open Inventory Receipts Search Screen Successful').wait(500)
+        .clickButton('#btnNew').wait(1000)
+        .waitTillVisible('icinventoryreceipt','Open New Inventory Receipt Screen Successful').wait(1000)
 
+        .selectComboRowByIndex('#cboReceiptType',3).wait(200)
+        .selectComboRowByFilter('#cboVendor', 'ABC Trucking', 500, 'strName', 0).wait(200)
+        //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
+        .selectComboRowByIndex('#cboLocation',0).wait(300)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'CORN', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdInventoryReceipt', 0, 'colQtyToReceive', '100').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colItemSubCurrency', 'USD').wait(300)
+        .enterGridData('#grdInventoryReceipt', 0, 'colUnitCost', '10').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colCostUOM', 'Bushels').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colWeightUOM', 'Bushels').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colGross', '100').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colNet', '100').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colLineTotal', '1000').wait(500)
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblGrossWgt').text;
+            if (total == 'Gross: 100.00') {
+                t.ok(true, 'Gross is correct.');
+            }
+            else {
+                t.ok(false, 'Grossl is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblNetWgt').text;
+            if (total == 'Net: 100.00') {
+                t.ok(true, 'Net is correct.');
+            }
+            else {
+                t.ok(false, 'Net is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblTotal').text;
+            if (total == 'Total: 1,000.00') {
+                t.ok(true, 'Total is correct.');
+            }
+            else {
+                t.ok(false, 'Total is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .clickButton('#btnRecap').wait(300)
+        .waitTillLoaded('Open Recap Screen Successful')
+        //.checkGridData('#grdRecapTransaction', 0, 'colGross', '100').wait(500)
+        //.checkGridData('#grdRecapTransaction', 0, 'colGross', '100').wait(500)
+        .clickButton('#btnPost').wait(500)
+        .waitTillLoaded('Inventory Post Successful')
+        .markSuccess('======== Add Inventory Receipt Successful! ========')
 
-
-
-
-        .done()
+        .done();
 });
+
 

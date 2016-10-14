@@ -258,8 +258,6 @@ StartTest(function (t) {
         .displayText('"======== 11. Open Storage Measurement Reading Search Screen Check All Fields. ========"').wait(500)
         .openScreen('Storage Measurement Reading').wait(1000)
         .waitTillLoaded('Open Storage Measurement Reading Screen Successful').wait(500)
-        .clickButton('#btnNew').wait(200)
-        .waitTillLoaded('Open New Storage Measurement Reading Screen Successful').wait(1000)
         .markSuccess('======== Open Storage Measurement Reading Search Screen Check All Fields Successful. ========').wait(500)
 
         //#12
@@ -600,7 +598,7 @@ StartTest(function (t) {
         .checkSearchToolbarButton({ new: false, view: false, open: false, openselected: false, openall: false, refresh: true, export: true, close: false }).wait(500)
         .markSuccess('Open Inventory Valuation Summary Search Screen Check All Fields Successful.').wait(500)
 
-        .markSuccess('"======== Open Inventory Screens and Checking Fields done. ========="').wait(500)
+        .markSuccess('"======== Open Inventory Screens and Checking Fields done. ========="')
 
 
         .done();

@@ -1,4 +1,3 @@
-
 var Harness = new Siesta.Harness.Browser.ExtJS (),
     testEnginePath = '../../TestEngine/TestEngine.js',
     commonSM =  '../../i21/test-ui/CommonSM.js';
@@ -27,7 +26,7 @@ Harness.start(
     { group: 'SmokeTesting',
         items: [
             {
-                url: 'SmokeTesting/ICSmokeTests.js',
+                url: 'SmokeTesting/ICOpenScreens.js',
                 preload: [
                     testEnginePath,
                     commonSM,
@@ -35,8 +34,19 @@ Harness.start(
 
                 ]
             },
+
             {
-                url: 'SmokeTesting/AddInventoryItem.js',
+                url: 'SmokeTesting/ICAddMaintenance.js',
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
+
+                ]
+            },
+
+            {
+                url: 'SmokeTesting/ICAddTransactions.js',
                 preload: [
                     testEnginePath,
                     commonSM,
@@ -44,13 +54,14 @@ Harness.start(
 
                 ]
             }
+
         ]
     },
 
     { group: 'InventoryReceipt',
         items: [
             {
-                url: 'InventoryReceipt/AddInventoryReceiptDirect.js',  // url of the js file, containing actual test code
+                url: 'InventoryReceipt/ICAddTransactions.js',  // url of the js file, containing actual test code
                 preload: [
                     testEnginePath,
                     commonSM,

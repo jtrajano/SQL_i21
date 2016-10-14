@@ -38,8 +38,8 @@ Ext.define('i21.test.Inventory.CommonIC', {
             .enterData('#txtItemNo', item).wait(200)
             //.selectComboRowByIndex('#cboType',0).wait(200)
             .enterData('#txtDescription', itemdesc).wait(200)
-            .selectComboRowByFilter('#cboCategory', commodity, 500, 'cboCategory').wait(500)
-            .selectComboRowByFilter('#cboCommodity', category, 500, 'strCommodityCode').wait(500)
+            .selectComboRowByFilter('#cboCategory', commodity, 500, 'cboCategory',0).wait(500)
+            .selectComboRowByFilter('#cboCommodity', category, 500, 'strCommodityCode',0).wait(500)
             .selectComboRowByIndex('#cboLotTracking', lottrack).wait(500)
 
             .clickButton('#btnLoadUOM').wait(300)
@@ -76,6 +76,8 @@ Ext.define('i21.test.Inventory.CommonIC', {
             .clickTab('#cfgLocation').wait(300)
             .clickButton('#btnAddLocation').wait(100)
             .waitTillVisible('icitemlocation', 'Add Item Location Screen Displayed', 60000).wait(500)
+            .selectComboRowByFilter('#cboSubLocation', 'Raw Station', 600, 'intSubLocationId',0).wait(100)
+            .selectComboRowByFilter('#cboStorageLocation', 'RM Storage', 600, 'intStorageLocationId',0).wait(100)
             .selectComboRowByFilter('#cboIssueUom', saleuom, 600, 'strUnitMeasure').wait(500)
             .selectComboRowByFilter('#cboReceiveUom', receiveuom, 600, 'strUnitMeasure').wait(500)
             .selectComboRowByIndex('#cboNegativeInventory', 1).wait(500)
@@ -92,8 +94,9 @@ Ext.define('i21.test.Inventory.CommonIC', {
             .enterGridData('#grdPricing', 0, 'dblLastCost', priceLC).wait(300)
             .enterGridData('#grdPricing', 0, 'dblStandardCost', priceSC).wait(300)
             .enterGridData('#grdPricing', 0, 'dblAverageCost', priceAC).wait(300)
-            //.selectGridComboRowByIndex('#grdPricing', 0, 'strPricingMethod','2', 'strPricingMethod').wait(100)
-            //.enterGridData('#grdPricing', 0, 'dblAmountPercent', '40').wait(300)
+            //.selectGridComboRowByFilter('#grdPricing', 0, 'strPricingMethod', 'Markup Standard Cost', 400, 'strPricingMethod').wait(100)
+            .selectGridComboRowByIndex('#grdPricing', 0, 'strPricingMethod',2, 'strPricingMethod').wait(100)
+            .enterGridData('#grdPricing', 0, 'dblAmountPercent', '40').wait(300)
             .checkStatusMessage('Edited').wait(200)
             .clickButton('#btnSave').wait(200)
             .checkStatusMessage('Saved').wait(200)
@@ -135,8 +138,8 @@ Ext.define('i21.test.Inventory.CommonIC', {
             .selectComboRowByIndex('#cboType',5).wait(200)
             .enterData('#txtShortName', itemshort).wait(200)
             .enterData('#txtDescription', itemdesc).wait(200)
-            .selectComboRowByFilter('#cboCategory', 'Other Charges', 500, 'cboCategory').wait(500)
-            .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode').wait(500)
+            .selectComboRowByFilter('#cboCategory', 'Other Charges', 500, 'cboCategory',0).wait(500)
+            .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode',0).wait(500)
 
 
             .clickButton('#btnLoadUOM').wait(300)
@@ -164,7 +167,7 @@ Ext.define('i21.test.Inventory.CommonIC', {
             .clickCheckBox('#chkPrice', true).wait(300)
             .selectComboRowByIndex('#cboCostType', 2).wait(500)
             .selectComboRowByIndex('#cboCostMethod', 0).wait(500)
-            .selectComboRowByFilter('#cboCostUOM', 'Bushel', 500, 'strUnitMeasure').wait(500)
+            .selectComboRowByFilter('#cboCostUOM', 'Bushels', 500, 'strUnitMeasure',0).wait(500)
             .clickButton('#btnSave').wait(200)
             .checkStatusMessage('Saved').wait(200)
             .displayText('Setup Item Pricing Successful').wait(500)
@@ -175,5 +178,4 @@ Ext.define('i21.test.Inventory.CommonIC', {
 
 
 
-
-    });
+});
