@@ -2085,6 +2085,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
         var totalCharges = this.calculateOtherCharges(win);
+        var totalChargesTax = this.calculateOtherChargesTax(win);
+        totalTax = totalTax + totalChargesTax;
         var grandTotal = totalAmount + totalCharges + totalTax;
 
         lblSubTotal.setText('SubTotal: ' + Ext.util.Format.number(totalAmount, '0,000.00'));
@@ -2117,11 +2119,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return taxableAmount;
     },
 
+    calculateOtherChargesTax: function(win) {
+        var current = win.viewModel.data.current;
+        var totalChargeTaxes = 0;
+
+        if (current) {
+            var charges = current.tblICInventoryReceiptCharges();
+            if (charges) {
+                Ext.Array.each(charges.data.items, function (charge) {
+                    if (!charge.dummy) {
+                        var otherChargeTax = charge.get('dblTax');
+                        
+
+                        if (charge.get('ysnPrice') === true) {
+                            totalChargeTaxes -= otherChargeTax;
+                        }
+                        else {
+                            totalChargeTaxes += otherChargeTax;
+                        }
+
+                    }
+                });
+            }
+        }
+        return totalChargeTaxes;
+    },
+
     calculateOtherCharges: function (win) {
         var current = win.viewModel.data.current;
         var totalCharges = 0;
-        var totalAmount = 0;
-        var totalChargeTaxes = 0;
         var lblCharges = win.down('#lblCharges');
 
         if (current) {
@@ -2130,23 +2156,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
                         var amount = charge.get('dblAmount');
-                        var otherChargeTax = charge.get('dblTax');
-                        
 
                         if (charge.get('ysnPrice') === true) {
-                            totalChargeTaxes -= otherChargeTax;
-                            totalAmount -= amount;
+                            totalCharges -= amount;
                         }
                         else {
-                            totalChargeTaxes += otherChargeTax;
-                            totalAmount += amount;
+                            totalCharges += amount;
                         }
 
                     }
                 });
             }
         }
-        totalCharges = totalChargeTaxes + totalAmount;
         lblCharges.setText('Charges: ' + Ext.util.Format.number(totalCharges, '0,000.00'));
         return totalCharges;
     },
