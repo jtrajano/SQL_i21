@@ -250,7 +250,129 @@ BEGIN
 		-- 4. if changing the item id of an existing lot. 
 		IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblICLot WHERE strLotNumber = @strLotNumber AND intItemId = @intItemId ) AND @ysnItemChange = 0
 		BEGIN 
-			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
+			--EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT
+			DECLARE @intCategoryId INT = NULL
+			DECLARE @intManufacturingId INT = NULL
+			DECLARE @intOrderTypeId INT = NULL
+			DECLARE @intBlendRequirementId INT = NULL
+			DECLARE @intPatternCode INT = 24
+			DECLARE @ysnProposed INT = 0
+			DECLARE @strPatternString NVARCHAR(50)
+
+			DECLARE @strPatternName NVARCHAR(50)
+				,@strDescription NVARCHAR(100)
+				,@intPatternId INT
+				,@strSubPatternTypeDetail NVARCHAR(50)
+				,@strSubPatternName NVARCHAR(50)
+				,@intSubPatternTypeId INT
+				,@strSubPatternTypeDetail2 NVARCHAR(50)
+				,@strSubPatternName2 NVARCHAR(50)
+				,@intSubPatternTypeId2 INT
+
+			SELECT @intSubPatternTypeId = 1
+
+			SELECT @strSubPatternName = 'Part1'
+
+			SELECT @strSubPatternTypeDetail = 'L'
+
+			SELECT @intSubPatternTypeId2 = 3
+
+			SELECT @strSubPatternName2 = 'Part2'
+
+			SELECT @strSubPatternTypeDetail2 = 'Julian Date'
+
+			SELECT @strPatternName = N'Lot Number'
+				,@strDescription = N'Lot Number'
+				,@intPatternCode = 24
+
+			INSERT dbo.tblMFPattern (
+				strPatternName
+				,strDescription
+				,intPatternCode
+				)
+			SELECT strPatternName = @strPatternName
+				,strDescription = @strDescription
+				,strPatternCode = @intPatternCode
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM dbo.tblMFPattern
+					WHERE intPatternCode = @intPatternCode
+					)
+
+			SELECT @intPatternId = intPatternId
+			FROM dbo.tblMFPattern
+			WHERE intPatternCode = @intPatternCode
+
+			INSERT dbo.tblMFPatternDetail (
+				intPatternId
+				,strSubPatternName
+				,intSubPatternTypeId
+				,intSubPatternSize
+				,strSubPatternTypeDetail
+				,strSubPatternFormat
+				,intOrdinalPosition
+				)
+			SELECT intPatternId = @intPatternId
+				,strSubPatternName = @strSubPatternName
+				,intSubPatternTypeId = @intSubPatternTypeId
+				,intSubPatternSize = 1
+				,strSubPatternTypeDetail = @strSubPatternTypeDetail
+				,strSubPatternFormat = ''
+				,intOrdinalPosition = 1
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM dbo.tblMFPatternDetail
+					WHERE intPatternId = @intPatternId
+						AND strSubPatternName = @strSubPatternName
+					)
+
+			INSERT dbo.tblMFPatternDetail (
+				intPatternId
+				,strSubPatternName
+				,intSubPatternTypeId
+				,intSubPatternSize
+				,strSubPatternTypeDetail
+				,strSubPatternFormat
+				,intOrdinalPosition
+				)
+			SELECT intPatternId = @intPatternId
+				,strSubPatternName = @strSubPatternName2
+				,intSubPatternTypeId = @intSubPatternTypeId2
+				,intSubPatternSize = 5
+				,strSubPatternTypeDetail = @strSubPatternTypeDetail2
+				,strSubPatternFormat = ''
+				,intOrdinalPosition = 2
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM dbo.tblMFPatternDetail
+					WHERE intPatternId = @intPatternId
+						AND strSubPatternName = @strSubPatternName2
+					)
+
+			INSERT dbo.tblMFPatternDetail (
+				intPatternId
+				,strSubPatternName
+				,intSubPatternTypeId
+				,intSubPatternSize
+				,strSubPatternTypeDetail
+				,strSubPatternFormat
+				,intOrdinalPosition
+				)
+			SELECT intPatternId = @intPatternId
+				,strSubPatternName = 'Sequence'
+				,intSubPatternTypeId = 6
+				,intSubPatternSize = 4
+				,strSubPatternTypeDetail = ''
+				,strSubPatternFormat = ''
+				,intOrdinalPosition = 2
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM dbo.tblMFPatternDetail
+					WHERE intPatternId = @intPatternId
+						AND strSubPatternName = 'Sequence'
+					)
+
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId, @intItemId, @intManufacturingId, @intSubLocationId, @intLocationId, @intOrderTypeId, @intBlendRequirementId, @intPatternCode, @ysnProposed, @strLotNumber OUTPUT
 		END 
 	END 
 
