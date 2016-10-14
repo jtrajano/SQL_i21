@@ -71,7 +71,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -144,6 +144,7 @@ BEGIN
 			DELETE FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
 		END
 
+		
 		EXEC('SELECT * FROM vyuCFInvoiceReportSummary ' + @whereClause)
 	END
     
