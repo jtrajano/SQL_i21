@@ -106,7 +106,7 @@ BEGIN
 			SELECT TOP 1 @intInvoiceDetailId = intInvoiceDetailId FROM @InvoiceDetails ORDER BY intInvoiceDetailId
 
 			UPDATE tblARInvoiceDetail
-			SET dblDiscount		= dblDiscount * @dblSplitPercent
+			SET dblDiscount		= dblDiscount --* @dblSplitPercent
 			 --, dblPrice		= dblPrice * @dblSplitPercent  -- AR-2505
 			  , dblTotalTax	    = dblTotalTax * @dblSplitPercent
 			  , dblTotal		= dblTotal * @dblSplitPercent
