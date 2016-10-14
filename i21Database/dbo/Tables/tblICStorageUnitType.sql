@@ -167,3 +167,6 @@ Type the overview for the table here.
 		@level1name = N'tblICStorageUnitType',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+GO
+
+CREATE UNIQUE INDEX [UX_tblICStorageUnitType_strStorageUnitType] ON [dbo].[tblICStorageUnitType] ([strStorageUnitType])
