@@ -281,9 +281,9 @@ BEGIN
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND 
 		(
-			(B.intBillId > 0 AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2))))
+			(B.intBillId > 0 AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND CAST(C.dblAmountDue AS DECIMAL(18,2)) < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2))))
 			OR
-			(B.intInvoiceId > 0 AND B.dblPayment <> 0 AND D.ysnPaid = 0 AND D.dblAmountDue < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2))))
+			(B.intInvoiceId > 0 AND B.dblPayment <> 0 AND D.ysnPaid = 0 AND CAST(D.dblAmountDue AS DECIMAL(18,2)) < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2))))
 		)
 
 
