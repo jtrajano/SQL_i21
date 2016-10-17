@@ -85,7 +85,7 @@
     <Folder Include="Scripts\Pre-Deployment\18_IU" />
     <Folder Include="Scripts\Pre-Deployment\19_MF" />
     <Folder Include="Scripts\Pre-Deployment\20_CF" />
-    <Folder Include="Scripts\Pre-Deployment\21_PAT" />
+    <Folder Include="Scripts\Pre-Deployment\22_PAT" />
     <Folder Include="Scripts\Pre-Deployment\21_PR" />
   </ItemGroup>
   <ItemGroup>
