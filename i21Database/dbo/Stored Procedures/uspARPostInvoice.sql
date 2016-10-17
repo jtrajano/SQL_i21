@@ -3515,12 +3515,8 @@ IF @post = 0
 				BEGIN
 					-- Unpost onhand stocks. 
 					EXEC	dbo.uspICUnpostCosting
-									@intTransactionIdIC
+								@intTransactionIdIC
 								,@strTransactionIdIC
-								,@batchId
-								,@UserEntityID
-								,@recap 
-  
 								,@batchId
 								,@UserEntityID
 								,@recap 

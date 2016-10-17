@@ -50,6 +50,8 @@ BEGIN
 			,@CostAdjNewCost AS NUMERIC(38,20)
 			,@CostBucketId AS INT 
 			,@CostAdjLogId AS INT 
+			,@CostAdjLogInventoryTransactionId AS INT 
+			,@CostAdjInventoryCostAdjustmentTypeId AS INT 
 			,@FobPointId AS TINYINT 
 
 			,@CostBucketCost AS NUMERIC(38,20)
@@ -58,88 +60,160 @@ BEGIN
 			,@OriginalTransactionValue AS NUMERIC(38,20)
 			,@dblNewCalculatedCost AS NUMERIC(38,20)
 			,@CostBucketStockInQty AS NUMERIC(38,20)
-				
+			,@intLotId AS INT 
+			,@CostAdjValue AS NUMERIC(38,20)
+			,@intCostBucketLotOutId AS INT
 
-	DECLARE loopFIFOCostBucket CURSOR LOCAL FAST_FORWARD
+			,@CostAdjQtyProxy AS NUMERIC(38, 20)			
+
+	DECLARE loopLotCostBucket CURSOR LOCAL FAST_FORWARD
 	FOR 
 	SELECT  intTransactionId
 			,strTransactionId
+			,intFobPointId
 			,CostAdjLog.dblQty
 			,CostAdjLog.dblCost
 			,CostAdjLog.intInventoryFIFOId
 			,CostAdjLog.intId
-			,intFobPointId
+			,CostAdjLog.intInventoryTransactionId
+			,CostAdjLog.intInventoryCostAdjustmentTypeId
 	FROM	#tmpInvCostAdjustmentToReverse InvReverse INNER JOIN dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjLog
 				ON InvReverse.intInventoryTransactionId = CostAdjLog.intInventoryTransactionId
 	WHERE	CostAdjLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost
-			AND InvReverse.intCostingMethod IN (@FIFO, @AVERAGECOST)
+			AND InvReverse.intCostingMethod IN (@FIFO)
+			AND ysnIsUnposted = 0 
 
-	OPEN loopFIFOCostBucket;
+	OPEN loopLotCostBucket;
 
 	-- Initial fetch attempt
-	FETCH NEXT FROM loopFIFOCostBucket INTO 
+	FETCH NEXT FROM loopLotCostBucket INTO 
 			@CostBucketIntTransactionId
 			,@CostBucketStrTransactionId 
+			,@FobPointId
 			,@CostAdjQty 
 			,@CostAdjNewCost 
 			,@CostBucketId 
 			,@CostAdjLogId
-			,@FobPointId
+			,@CostAdjLogInventoryTransactionId
+			,@CostAdjInventoryCostAdjustmentTypeId
 	;
-
 	-----------------------
 	-- Start of the loop
 	-----------------------
 	WHILE @@FETCH_STATUS = 0
 	BEGIN 
-		-- Get the original cost
-		SELECT TOP 1 
-				@OriginalCost = dblCost
-		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
-		WHERE	intInventoryFIFOId = @CostBucketId
-				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+		SET @CostAdjQty = NULL		
+		SET	@dblNewCalculatedCost = NULL 
 
-		-- Get the cost at cost bucket. 
-		SELECT	@CostBucketCost = dblCost
-				,@CostBucketStockInQty = dblStockIn
-		FROM	dbo.tblICInventoryFIFO
-		WHERE	intInventoryFIFOId = @CostBucketId
+		-- Get the total Adjust Qty to be unposted. 
+		SELECT	@CostAdjQty = SUM(costAdjLog.dblQty) 
+		FROM	tblICInventoryFIFOCostAdjustmentLog costAdjLog INNER JOIN tblICInventoryFIFO costBucket
+					ON costAdjLog.intInventoryFIFOId = costBucket.intInventoryFIFOId
+		WHERE	costAdjLog.ysnIsUnposted = 0 
+				AND costAdjLog.intInventoryFIFOId = @CostBucketId
+				AND costAdjLog.intInventoryTransactionId = @CostAdjLogInventoryTransactionId
+				AND costAdjLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost
 
-		-- Compute the new transaction value. 
-		SELECT	@NewTransactionValue = @CostAdjQty * @CostAdjNewCost
+		-- Update log(s) as unposted 
+		UPDATE	tblICInventoryFIFOCostAdjustmentLog
+		SET		ysnIsUnposted = 1
+		FROM	tblICInventoryFIFOCostAdjustmentLog
+		WHERE	intInventoryTransactionId = @CostAdjLogInventoryTransactionId
+				--AND costAdjLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost
 
-		-- Compute the original transaction value. 
-		SELECT	@OriginalTransactionValue = @CostAdjQty * @OriginalCost
+		-- Recalculate the cost after the unpost. 
+		SELECT	@dblNewCalculatedCost = dbo.fnDivide(totalCostAdjLog.value, costBucket.dblStockIn) 
+		FROM	tblICInventoryFIFO costBucket
+				CROSS APPLY (
+					SELECT	value = SUM (
+								dbo.fnMultiply(
+									CASE	WHEN ISNULL(costAdjLog.dblQty, 0) = 0 THEN 
+												x.dblStockIn 
+											ELSE 
+												costAdjLog.dblQty 
+									END 
+								
+									,CASE	WHEN costAdjLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost THEN 
+												costAdjLog.dblCost										
+											ELSE
+												originalCost.dblCost - costAdjLog.dblCost
+									END
+								) 
+							)
+					FROM	tblICInventoryFIFOCostAdjustmentLog costAdjLog INNER JOIN tblICInventoryFIFO x
+								ON costAdjLog.intInventoryFIFOId = x.intInventoryFIFOId
+							OUTER APPLY (
+								SELECT	TOP 1 
+										dblCost
+								FROM	tblICInventoryFIFOCostAdjustmentLog x
+								WHERE	x.intInventoryFIFOId = costBucket.intInventoryFIFOId
+										AND x.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+								ORDER	BY x.intId DESC 
+							) originalCost 
+					WHERE	costAdjLog.intInventoryFIFOId = costBucket.intInventoryFIFOId
+							AND costAdjLog.ysnIsUnposted = 0 
+				) totalCostAdjLog 
+		WHERE	costBucket.intInventoryFIFOId = @CostBucketId
 
-		-- Compute the new cost. 
-		SELECT @dblNewCalculatedCost =	@CostBucketCost 
-										- ((@NewTransactionValue - @OriginalTransactionValue) / @CostBucketStockInQty)	
-
-		-- Calculate the new cost
+		-- If all cost adj logs are unposted, get the original cost. 
+		SELECT	TOP 1 
+				@dblNewCalculatedCost = dblCost
+		FROM	tblICInventoryFIFOCostAdjustmentLog x
+		WHERE	x.intInventoryFIFOId = @CostBucketId
+				AND x.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+				AND @dblNewCalculatedCost IS NULL
+		ORDER	BY x.intId DESC 
+				
+		-- Assign the recomputed cost to the cost bucket. 
 		UPDATE	CostBucket
 		SET		dblCost = @dblNewCalculatedCost
 		FROM	tblICInventoryFIFO CostBucket
 		WHERE	CostBucket.intInventoryFIFOId = @CostBucketId
-		
-		-- Mark the cost adjustment as unposted
-		UPDATE dbo.tblICInventoryFIFOCostAdjustmentLog
-		SET ysnIsUnposted = 1
-		WHERE intId = @CostAdjLogId
+				AND @dblNewCalculatedCost IS NOT NULL 
 
+		-- Update the Adjust Qty
+		WHILE (ISNULL(@CostAdjQty, 0) > 0) 
+		BEGIN 
+			SET @intCostBucketLotOutId = NULL 
+
+			UPDATE	costBucketOut
+			SET		dblCostAdjustQty = CASE WHEN dblCostAdjustQty < @CostAdjQty THEN 0 ELSE dblCostAdjustQty - @CostAdjQty END 
+					,@CostAdjQtyProxy = CASE WHEN dblCostAdjustQty < @CostAdjQty THEN @CostAdjQty - dblCostAdjustQty ELSE 0 END 
+					,@intCostBucketLotOutId = costBucketOut.intId
+			FROM	tblICInventoryFIFOOut costBucketOut 
+					CROSS APPLY (
+						SELECT	TOP 1 
+								x.intId 
+						FROM	tblICInventoryFIFOOut x 
+						WHERE	x.intInventoryFIFOId = @CostBucketId
+								AND ISNULL(x.dblCostAdjustQty, 0) > 0 
+						ORDER BY x.intId DESC 					
+					) lastCostBucketOut
+			WHERE	costBucketOut.intId = lastCostBucketOut.intId 
+
+			SET @CostAdjQty = @CostAdjQtyProxy
+
+			-- Do this to avoid the endless loop. 
+			IF @intCostBucketLotOutId IS NULL 
+				SET @CostAdjQty = 0 
+		END 
+		
 		-- Attempt to fetch the next row from cursor. 
-		FETCH NEXT FROM loopFIFOCostBucket INTO 
+		FETCH NEXT FROM loopLotCostBucket INTO 
 			@CostBucketIntTransactionId
 			,@CostBucketStrTransactionId 
+			,@FobPointId
 			,@CostAdjQty 
 			,@CostAdjNewCost 
 			,@CostBucketId
 			,@CostAdjLogId
-			,@FobPointId
+			,@CostAdjLogInventoryTransactionId
+			,@CostAdjInventoryCostAdjustmentTypeId
 		;
 	END 
 
-	CLOSE loopFIFOCostBucket;
-	DEALLOCATE loopFIFOCostBucket;
+	CLOSE loopLotCostBucket;
+	DEALLOCATE loopLotCostBucket;
 END 
 
 -----------------------

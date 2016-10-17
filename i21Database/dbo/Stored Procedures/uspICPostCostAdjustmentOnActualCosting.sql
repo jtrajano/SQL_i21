@@ -248,15 +248,9 @@ BEGIN
 			FROM	tblICItem 
 			WHERE	intItemId = @intItemId
 
-			SELECT	@strLotNumber = strLotNumber
-			FROM	tblICLot 
-			WHERE	intLotId = @intLotId
-
-			SET @strLotNumber = ISNULL(@strLotNumber, '{Unknown lot}')
-
-			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot %s in item %s that was posted in %s.'
-			RAISERROR(80071, 11, 1, @strLotNumber, @strItemNo, @strSourceTransactionId)  
-			RETURN -1 
+			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.
+			RAISERROR(80062, 11, 1, @strItemNo, @strSourceTransactionId)  
+			RETURN -1  
 		END
 	END 
 
@@ -446,13 +440,6 @@ BEGIN
 		WHERE	CostBucket.intInventoryActualCostId = @CostBucketId
 				AND CostBucket.dblStockIn > 0 
 				AND ISNULL(ysnIsUnposted, 0) = 0 
-
-		-- Update the lot's last cost
-		UPDATE	l
-		SET		dblLastCost = @dblNewCalculatedCost
-		FROM	tblICLot l
-		WHERE	l.intLotId = @intLotId
-				AND ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION
 	END 
 
 	-----------------------------------------------------------------------------------------------------------------------------
@@ -756,8 +743,7 @@ BEGIN
 					END
 					
 					IF @intInventoryTrnasactionId_EscalateValue IS NOT NULL 
-					BEGIN 												
-
+					BEGIN 		
 						-- Insert data into the #tmpRevalueProducedItems table. 
 						INSERT INTO #tmpRevalueProducedItems (
 								[intItemId] 
@@ -803,7 +789,7 @@ BEGIN
 								,[intSubLocationId]				= InvTran.intSubLocationId
 								,[intStorageLocationId]			= InvTran.intStorageLocationId
 								,[ysnIsStorage]					= NULL 
-								,[strActualCostId]				= NULL 
+								,[strActualCostId]				= @strActualCostId 
 								,[intSourceTransactionId]		= InvTran.intTransactionId
 								,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
 								,[strSourceTransactionId]		= InvTran.strTransactionId

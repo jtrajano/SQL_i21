@@ -286,6 +286,7 @@ BEGIN
 			,@dblQty
 			,@intCostUOMId			
 			,@dblVoucherCost 
+			,@dblNewValue
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -318,6 +319,7 @@ BEGIN
 			,@dblQty			
 			,@intCostUOMId
 			,@dblVoucherCost 
+			,@dblNewValue
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -350,6 +352,7 @@ BEGIN
 			,@dblQty		
 			,@intCostUOMId	
 			,@dblVoucherCost 
+			,@dblNewValue
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId

@@ -324,7 +324,7 @@ SET @strmessage = 'Unable to generate the Inventory Transfer. An error stopped t
 EXEC sp_addmessage 80061,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80062) EXEC sp_dropmessage 80062, 'us_english'	
-SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for %s.'
+SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.'
 EXEC sp_addmessage 80062,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80063) EXEC sp_dropmessage 80063, 'us_english'	
