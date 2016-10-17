@@ -1,25 +1,21 @@
-var gulp = require('gulp');
-//var livereload = require('gulp-livereload');
-
 var source = './app';
 var destination = '../../../artifacts/16.3/Inventory/app';
 
-var path = require('path');
-var merge = require('merge-stream');
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
-//var genSpec = require('./lib/gulp-plugins/i21-gen-spec');
-var genSpec2 = require('./lib/gulp-plugins/i21-gen-spec');
+var spec = require('./lib/gulp-plugins/i21-gen-spec');
 var prettify = require('gulp-js-prettify');
 var os = require('os');
 var open = require('gulp-open');
+var changed = require('gulp-changed');
 
 var Server = require('karma').Server;
 
 gulp.task('publish', function () {
     gulp.src(['app/**/*.js'])
+        .pipe(changed(destination))
         .pipe(gulp.dest(destination))
 });
 
@@ -29,7 +25,7 @@ gulp.task('watch', function () {
 
 gulp.task('generate-specs-model', function () {
     gulp.src('app/model/*.js')
-        .pipe(genSpec2({
+        .pipe(spec({
             type: "model",
             moduleName: "Inventory",
             destDir: "test/specs",
@@ -41,7 +37,7 @@ gulp.task('generate-specs-model', function () {
 
 gulp.task('generate-specs-store', function () {
     gulp.src('app/store/*.js')
-        .pipe(genSpec2({
+        .pipe(spec({
             type: "store",
             moduleName: "Inventory",
             destDir: "test/specs",
@@ -53,7 +49,7 @@ gulp.task('generate-specs-store', function () {
 
 gulp.task('generate-specs-viewcontroller', function () {
     gulp.src(['app/view/*.js'])
-        .pipe(genSpec2({
+        .pipe(spec({
             type: "viewcontroller",
             moduleName: "Inventory",
             destDir: "test/specs",
