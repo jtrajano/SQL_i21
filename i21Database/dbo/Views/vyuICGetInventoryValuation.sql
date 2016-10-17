@@ -64,7 +64,7 @@ FROM 	tblICItem i LEFT JOIN tblICItemUOM iuStock
 		LEFT JOIN tblICUnitMeasure umTransUOM
 			ON umTransUOM.intUnitMeasureId = iuTransUOM.intUnitMeasureId		
 		LEFT JOIN tblICItemLocation il 
-			ON il.intItemLocationId = t.intItemLocationId
+			ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId) 
 		LEFT JOIN tblICCostingMethod CostingMethod
 			ON CostingMethod.intCostingMethodId = t.intCostingMethod
 		LEFT JOIN tblSMCompanyLocation cl 
