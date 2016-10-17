@@ -4259,6 +4259,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Autho
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'TaxForm.view.TaxAuthority' WHERE strMenuName = 'Tax Authorities' AND strModuleName = 'Tax Form' AND intParentMenuID = @TaxParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Integration' AND strModuleName = 'Tax Form' AND intParentMenuID = @TaxParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Integration', N'Tax Form', @TaxParentMenuId, N'Integration', N'Maintenance', N'Screen', N'TaxForm.view.Integration', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'TaxForm.view.Integration' WHERE strMenuName = 'Integration' AND strModuleName = 'Tax Form' AND intParentMenuID = @TaxParentMenuId
+
 /* PATRONAGE */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Patronage' AND strModuleName = 'Patronage' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
