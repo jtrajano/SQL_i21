@@ -324,6 +324,7 @@ FROM
 			ON SOD.intItemId = IA.intItemId AND SO.intCompanyLocationId = IA.intLocationId
 	WHERE 
 		SO.ysnProcessed = 1
+		AND SO.strTransactionType = 'Order'
 	) AS SAR
 LEFT JOIN 
 	tblGLAccount GA 
