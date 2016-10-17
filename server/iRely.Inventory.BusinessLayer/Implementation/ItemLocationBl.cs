@@ -257,6 +257,10 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "Location must be unique per Item.";
                 }
+                else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemPricing_tblICItemLocation\"."))
+                {
+                    msg = "The location you are trying to delete is being used in the Pricing tab.";
+                }
             }
 
             return new BusinessResult<tblICItemLocation>()
