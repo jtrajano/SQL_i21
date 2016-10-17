@@ -30,436 +30,14 @@ StartTest(function (t) {
         })
 
 
-        //Add Items Complete Code
-        /* //START OF TEST CASE Scenario 1: Add Inventory Item - Non Lotted
-
-         .displayText('======== Scenario 1: Add Inventory Item - Non Lotted ========"').wait(1000)
-         .expandMenu('Inventory').wait(500)
-         .waitTillLoaded('Open Inventory Menu Successfull').wait(500)
-         .openScreen('Items').wait(500)
-         .waitTillLoaded('Open Items Search Screen Successful')
-         .markSuccess('======== Open Items Search Screen Successful ========').wait(500)
-
-         //#1
-         .displayText('======== 1. Open New Item Screen. ========').wait(500)
-         .clickButton('#btnNew').wait(500)
-         .waitTillVisible('icitem','Open New Item Screen Successful').wait(500)
-         .checkScreenShown('icitem').wait(200)
-         .checkStatusMessage('Ready')
-         .markSuccess('======== Open New Items Screen Successful ========').wait(500)
-
-
-         //#2
-         .displayText('======== 2. Setup Details Tab ========').wait(500)
-         .enterData('#txtItemNo', '01 - NLTI').wait(200)
-         //.selectComboRowByIndex('#cboType',0).wait(200)
-         .enterData('#txtShortName', 'Test Inventory Item').wait(200)
-         .enterData('#txtDescription', 'Non-Lotted Item 01').wait(200)
-         .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode').wait(500)
-         .selectComboRowByIndex('#cboLotTracking', 2).wait(200)
-         .checkControlReadOnly('#cboTracking', true).wait(100)
-         .checkControlData('#cboTracking', 'Item Level').wait(100)
-         .selectComboRowByFilter('#cboCategory', 'Grains', 500, 'strCategoryCode').wait(500)
-         .markSuccess('======== Setup Details Tab Successful ========').wait(500)
-
-
-         //#3
-         .displayText('======== 3. Setup Unit of Measure ========').wait(500)
-         .clickButton('#btnLoadUOM').wait(300)
-         .waitTillLoaded('Add UOM Successful')
-         //.selectGridComboRowByFilter('#grdUnitOfMeasure', 0, 'strUnitMeasure', 'LB', 300, 'strUnitMeasure').wait(100)
-         //.clickButton('#btnInsertUom').wait(100)
-         //.selectGridComboRowByFilter('#grdUnitOfMeasure', 1, 'strUnitMeasure', '50 lb bag', 300, 'strUnitMeasure').wait(100)
-         //.clickButton('#btnInsertUom').wait(100)
-         //.selectGridComboRowByFilter('#grdUnitOfMeasure', 2, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(100)
-         //.clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-         .markSuccess('======== Setup UOM Successful ========').wait(500)
-
-         //#4
-         .displayText('======== 3. Setup GL Accounts ========').wait(500)
-         .clickTab('#cfgSetup').wait(100)
-         .clickButton('#btnAddRequiredAccounts').wait(100)
-         .checkGridData('#grdGlAccounts', 0, 'colGLAccountCategory', 'AP Clearing').wait(100)
-         .checkGridData('#grdGlAccounts', 1, 'colGLAccountCategory', 'Inventory').wait(100)
-         .checkGridData('#grdGlAccounts', 2, 'colGLAccountCategory', 'Cost of Goods').wait(100)
-         .checkGridData('#grdGlAccounts', 3, 'colGLAccountCategory', 'Sales Account').wait(100)
-         .checkGridData('#grdGlAccounts', 4, 'colGLAccountCategory', 'Inventory In-Transit').wait(100)
-         .checkGridData('#grdGlAccounts', 5, 'colGLAccountCategory', 'Inventory Adjustment').wait(100)
-         .checkGridData('#grdGlAccounts', 6, 'colGLAccountCategory', 'Auto-Variance').wait(100)
-
-         .selectGridComboRowByFilter('#grdGlAccounts', 0, 'strAccountId', '21000-0000-000', 400, 'strAccountId').wait(100)
-         .addFunction(function (next) {
-         var t = this,
-         win = Ext.WindowManager.getActive();
-         if (win) {
-         var grdGlAccounts = win.down('#grdGlAccounts');
-         grdGlAccounts.editingPlugin.completeEdit();
-         }
-         next();
-         }).wait(1000)
-         .selectGridComboRowByFilter('#grdGlAccounts', 1, 'strAccountId', '16000-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 2, 'strAccountId', '50000-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 3, 'strAccountId', '40010-0001-006', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 4, 'strAccountId', '16050-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 5, 'strAccountId', '16040-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 6, 'strAccountId', '16010-0000-000', 400, 'strAccountId').wait(100)
-         .markSuccess('======== Setup GL Accounts Successful ========').wait(500)
-
-         //#5
-         .displayText('======== 5. Setup Location ========').wait(500)
-         .clickTab('#cfgLocation').wait(100)
-         .clickButton('#btnAddLocation').wait(100)
-         .waitTillVisible('icitemlocation','Add Item Location Screen Displayed',60000).wait(500)
-         //.selectComboRowByFilter('#cboDefaultVendor', '0001005057', 1000, 'intVendorId').wait(1000)
-         .enterData('#txtDescription', 'Test Pos Description').wait(500)
-         .selectComboRowByFilter('#cboSubLocation', 'Raw Station', 1000, 'intSubLocationId').wait(500)
-         .selectComboRowByFilter('#cboStorageLocation', 'RM Storage', 1000, 'intStorageLocationId').wait(500)
-         .selectComboRowByFilter('#cboIssueUom', 'LB', 1000, 'strUnitMeasure').wait(500)
-         .selectComboRowByFilter('#cboReceiveUom', 'LB', 1000, 'strUnitMeasure').wait(500)
-         .selectComboRowByIndex('#cboNegativeInventory', 1).wait(500)
-         .checkStatusMessage('Edited').wait(300)
-         .clickButton('#btnSave')
-         .checkStatusMessage('Saved').wait(300)
-         .clickButton('#btnClose').wait(300)
-         .markSuccess('======== 5. Setup Location Successful ========').wait(500)
-
-         //#6
-         .displayText('======== 6. Setup Item Pricing ========').wait(500)
-         .clickTab('#cfgPricing').wait(100)
-         .checkGridData('#grdPricing', 0, 'strLocationName', '0001 - Fort Wayne').wait(100)
-         .enterGridData('#grdPricing', 0, 'dblLastCost', '10').wait(300)
-         .enterGridData('#grdPricing', 0, 'dblStandardCost', '10').wait(300)
-         .enterGridData('#grdPricing', 0, 'dblAverageCost', '10').wait(300)
-         //.selectGridComboRowByIndex('#grdPricing', 0, 'strPricingMethod','2', 'strPricingMethod').wait(100)
-         //.enterGridData('#grdPricing', 0, 'dblAmountPercent', '40').wait(300)
-         .checkStatusMessage('Edited').wait(200)
-         .clickButton('#btnSave').wait(200)
-         .checkStatusMessage('Saved').wait(200)
-         .displayText('Setup Item Pricing Successful').wait(500)
-         .markSuccess('======== Create non-lotted Item Successful ========').wait(500)
-         .clickButton('#btnClose').wait(500)
-
-
-
-         //Scenario 2. Add Inventory Item - Lotted Yes Serial
-         .displayText('======== Scenario 2: Add Inventory Item - Lotted Yes Serial========"').wait(1000)
-         .expandMenu('Inventory').wait(500)
-         .waitTillLoaded('Open Inventory Menu Successfull').wait(200)
-         .openScreen('Items').wait(500)
-         .waitTillLoaded('Open Items Search Screen Successful').wait(500)
-
-
-         //#1
-         .displayText('======== 1. Open New Item Screen. ========').wait(500)
-         .clickButton('#btnNew').wait(200)
-         .waitTillVisible('icitem','Open New Item Screen Successful').wait(500)
-         .checkScreenShown('icitem').wait(200)
-         .checkStatusMessage('Ready')
-         .markSuccess('======== Open New Item Screen Successful ========').wait(500)
-
-
-         //#2
-         .displayText('======== 2. Setup Details Tab ========').wait(500)
-         .enterData('#txtItemNo', '01 - LTI').wait(200)
-         //.selectComboRowByIndex('#cboType',0).wait(200)
-         .enterData('#txtShortName', 'Test Inventory Item').wait(200)
-         .enterData('#txtDescription', 'Lotted Item 01').wait(200)
-         .selectComboRowByFilter('#cboCommodity', 'Corn', 600, 'strCommodityCode').wait(300)
-         .selectComboRowByIndex('#cboLotTracking', 1).wait(200)
-         .checkControlReadOnly('#cboTracking', true).wait(100)
-         .checkControlData('#cboTracking', 'Lot Level').wait(100)
-         .selectComboRowByFilter('#cboCategory', 'Grains', 600, 'strCategoryCode').wait(300)
-         .markSuccess('======== Setup Details Tab Successful ========').wait(500)
-
-
-         //#3
-         .displayText('======== 3. Setup Unit of Measure ========').wait(500)
-         .clickButton('#btnLoadUOM').wait(300)
-         .waitTillLoaded('Add UOM Successful')
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 0, 'strUnitMeasure', 'LB', 300, 'strUnitMeasure').wait(100)
-         .clickButton('#btnInsertUom').wait(100)
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 1, 'strUnitMeasure', '50 lb bag', 300, 'strUnitMeasure').wait(100)
-         .clickButton('#btnInsertUom').wait(100)
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 2, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(100)
-         .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-         .markSuccess('======== Setup UOM Successful ========').wait(500)
-
-         //#4
-         .displayText('======== 3. Setup GL Accounts ========').wait(500)
-         .clickTab('#cfgSetup').wait(100)
-         .clickButton('#btnAddRequiredAccounts').wait(100)
-         .checkGridData('#grdGlAccounts', 0, 'colGLAccountCategory', 'AP Clearing').wait(100)
-         .checkGridData('#grdGlAccounts', 1, 'colGLAccountCategory', 'Inventory').wait(100)
-         .checkGridData('#grdGlAccounts', 2, 'colGLAccountCategory', 'Cost of Goods').wait(100)
-         .checkGridData('#grdGlAccounts', 3, 'colGLAccountCategory', 'Sales Account').wait(100)
-         .checkGridData('#grdGlAccounts', 4, 'colGLAccountCategory', 'Inventory In-Transit').wait(100)
-         .checkGridData('#grdGlAccounts', 5, 'colGLAccountCategory', 'Inventory Adjustment').wait(100)
-         .checkGridData('#grdGlAccounts', 6, 'colGLAccountCategory', 'Auto-Variance').wait(100)
-
-         .selectGridComboRowByFilter('#grdGlAccounts', 0, 'strAccountId', '21000-0000-000', 400, 'strAccountId').wait(100)
-         .addFunction(function (next) {
-         var t = this,
-         win = Ext.WindowManager.getActive();
-         if (win) {
-         var grdGlAccounts = win.down('#grdGlAccounts');
-         grdGlAccounts.editingPlugin.completeEdit();
-         }
-         next();
-         }).wait(1000)
-         .selectGridComboRowByFilter('#grdGlAccounts', 1, 'strAccountId', '16000-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 2, 'strAccountId', '50000-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 3, 'strAccountId', '40010-0001-006', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 4, 'strAccountId', '16050-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 5, 'strAccountId', '16040-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 6, 'strAccountId', '16010-0000-000', 400, 'strAccountId').wait(100)
-         .markSuccess('Setup GL Accounts Successful').wait(500)
-
-         //#5
-         .displayText('======== 5. Setup Location ========').wait(500)
-         .clickTab('#cfgLocation').wait(100)
-         .clickButton('#btnAddLocation').wait(100)
-         .waitTillVisible('icitemlocation','Add Item Location Screen Displayed',60000).wait(500)
-         //.selectComboRowByFilter('#cboDefaultVendor', '0001005057', 1000, 'intVendorId').wait(500)
-         .enterData('#txtDescription', 'Test Pos Description').wait(500)
-         .selectComboRowByFilter('#cboSubLocation', 'Raw Station', 600, 'intSubLocationId').wait(500)
-         .selectComboRowByFilter('#cboStorageLocation', 'RM Storage', 600, 'intStorageLocationId').wait(500)
-         .selectComboRowByFilter('#cboIssueUom', 'LB', 600, 'strUnitMeasure').wait(500)
-         .selectComboRowByFilter('#cboReceiveUom', 'LB', 600, 'strUnitMeasure').wait(500)
-         .selectComboRowByIndex('#cboNegativeInventory', 1).wait(500)
-         .checkStatusMessage('Edited').wait(300)
-         .clickButton('#btnSave')
-         .checkStatusMessage('Saved').wait(300)
-         .clickButton('#btnClose').wait(300)
-         .markSuccess('======== Setup Location Successful ========').wait(500)
-
-         //#6
-         .displayText('======== 6. Setup Item Pricing ========').wait(500)
-         .clickTab('#cfgPricing').wait(100)
-         .checkGridData('#grdPricing', 0, 'strLocationName', '0001 - Fort Wayne').wait(100)
-         .enterGridData('#grdPricing', 0, 'dblLastCost', '10').wait(300)
-         .enterGridData('#grdPricing', 0, 'dblStandardCost', '10').wait(300)
-         .enterGridData('#grdPricing', 0, 'dblAverageCost', '10').wait(300)
-
-         //.enterGridData('#grdPricing', 0, 'dblAmountPercent', '40').wait(300)
-         .checkStatusMessage('Edited').wait(200)
-         .clickButton('#btnSave').wait(200)
-         .checkStatusMessage('Saved').wait(200)
-         .displayText('Setup Item Pricing Successful').wait(500)
-         .markSuccess('======== Create non-lotted Item Successful ========').wait(500)
-         .clickButton('#btnClose').wait(500)
-
-
-
-         //Scenario 3. Add Inventory Item - Lotted Yes Serial
-         .displayText('======== Scenario 3: Add Inventory Item - Lotted Yes Manual========"').wait(1000)
-         .expandMenu('Inventory').wait(500)
-         .waitTillLoaded('Open Inventory Menu Successfull').wait(200)
-         .openScreen('Items').wait(500)
-         .waitTillLoaded('Open Items Search Screen Successful').wait(500)
-
-         //#1
-         .displayText('======== 1. Open New Item Screen. ========').wait(500)
-         .clickButton('#btnNew').wait(200)
-         .waitTillVisible('icitem','Open New Item Screen Successful').wait(500)
-         .checkScreenShown('icitem').wait(200)
-         .checkStatusMessage('Ready')
-         .markSuccess('======== Open New Item Screen Successful ========')
-
-
-         //#2
-         .displayText('======== 2. Setup Details Tab ========').wait(500)
-         .enterData('#txtItemNo', '02 - LTI').wait(200)
-         //.selectComboRowByIndex('#cboType',0).wait(200)
-         .enterData('#txtShortName', 'Test Inventory Item').wait(200)
-         .enterData('#txtDescription', 'Lotted Item 02').wait(200)
-         .selectComboRowByFilter('#cboCommodity', 'Corn', 600, 'strCommodityCode').wait(300)
-         .selectComboRowByIndex('#cboLotTracking', 0).wait(200)
-         .checkControlReadOnly('#cboTracking', true).wait(100)
-         .checkControlData('#cboTracking', 'Lot Level').wait(100)
-         .selectComboRowByFilter('#cboCategory', 'Grains', 600, 'strCategoryCode').wait(300)
-         .markSuccess('======== Setup Details Tab Successful ========').wait(500)
-
-
-         //#3
-         .displayText('======== 3. Setup Unit of Measure ========').wait(500)
-         .clickButton('#btnLoadUOM').wait(300)
-         .waitTillLoaded('Add UOM Successful')
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 0, 'strUnitMeasure', 'LB', 300, 'strUnitMeasure').wait(100)
-         .clickButton('#btnInsertUom').wait(100)
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 1, 'strUnitMeasure', '50 lb bag', 300, 'strUnitMeasure').wait(100)
-         .clickButton('#btnInsertUom').wait(100)
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 2, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(100)
-         .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-         .markSuccess('======== Setup UOM Successful ========').wait(500)
-
-
-         //#4
-         .displayText('======== 3. Setup GL Accounts ========').wait(500)
-         .clickTab('#cfgSetup').wait(100)
-         .clickButton('#btnAddRequiredAccounts').wait(100)
-         .checkGridData('#grdGlAccounts', 0, 'colGLAccountCategory', 'AP Clearing').wait(100)
-         .checkGridData('#grdGlAccounts', 1, 'colGLAccountCategory', 'Inventory').wait(100)
-         .checkGridData('#grdGlAccounts', 2, 'colGLAccountCategory', 'Cost of Goods').wait(100)
-         .checkGridData('#grdGlAccounts', 3, 'colGLAccountCategory', 'Sales Account').wait(100)
-         .checkGridData('#grdGlAccounts', 4, 'colGLAccountCategory', 'Inventory In-Transit').wait(100)
-         .checkGridData('#grdGlAccounts', 5, 'colGLAccountCategory', 'Inventory Adjustment').wait(100)
-         .checkGridData('#grdGlAccounts', 6, 'colGLAccountCategory', 'Auto-Variance').wait(100)
-
-         .selectGridComboRowByFilter('#grdGlAccounts', 0, 'strAccountId', '21000-0000-000', 400, 'strAccountId').wait(100)
-         .addFunction(function (next) {
-         var t = this,
-         win = Ext.WindowManager.getActive();
-         if (win) {
-         var grdGlAccounts = win.down('#grdGlAccounts');
-         grdGlAccounts.editingPlugin.completeEdit();
-         }
-         next();
-         }).wait(1000)
-         .selectGridComboRowByFilter('#grdGlAccounts', 1, 'strAccountId', '16000-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 2, 'strAccountId', '50000-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 3, 'strAccountId', '40010-0001-006', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 4, 'strAccountId', '16050-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 5, 'strAccountId', '16040-0000-000', 400, 'strAccountId').wait(100)
-         .selectGridComboRowByFilter('#grdGlAccounts', 6, 'strAccountId', '16010-0000-000', 400, 'strAccountId').wait(100)
-         .markSuccess('======== Setup GL Accounts Successful ========').wait(500)
-
-         //#5
-         .displayText('======== 5. Setup Location ========').wait(500)
-         .clickTab('#cfgLocation').wait(100)
-         .clickButton('#btnAddLocation').wait(100)
-         .waitTillVisible('icitemlocation','Add Item Location Screen Displayed',60000).wait(500)
-         //.selectComboRowByFilter('#cboDefaultVendor', '0001005057', 1000, 'intVendorId').wait(500)
-         .enterData('#txtDescription', 'Test Pos Description').wait(500)
-         .selectComboRowByFilter('#cboSubLocation', 'Raw Station', 600, 'intSubLocationId').wait(500)
-         .selectComboRowByFilter('#cboStorageLocation', 'RM Storage', 600, 'intStorageLocationId').wait(500)
-         .selectComboRowByFilter('#cboIssueUom', 'LB', 600, 'strUnitMeasure').wait(500)
-         .selectComboRowByFilter('#cboReceiveUom', 'LB', 600, 'strUnitMeasure').wait(500)
-         .selectComboRowByIndex('#cboNegativeInventory', 1).wait(500)
-         .checkStatusMessage('Edited').wait(300)
-         .clickButton('#btnSave')
-         .checkStatusMessage('Saved').wait(300)
-         .clickButton('#btnClose').wait(300)
-         .markSuccess('======== Setup Location Successful ========').wait(500)
-
-         //#6
-         .displayText('======== 6. Setup Item Pricing ========').wait(500)
-         .clickTab('#cfgPricing').wait(100)
-         .checkGridData('#grdPricing', 0, 'strLocationName', '0001 - Fort Wayne').wait(100)
-         .enterGridData('#grdPricing', 0, 'dblLastCost', '10').wait(300)
-         .enterGridData('#grdPricing', 0, 'dblStandardCost', '10').wait(300)
-         .enterGridData('#grdPricing', 0, 'dblAverageCost', '10').wait(300)
-
-         //.enterGridData('#grdPricing', 0, 'dblAmountPercent', '40').wait(300)
-         .checkStatusMessage('Edited').wait(200)
-         .clickButton('#btnSave').wait(200)
-         .checkStatusMessage('Saved').wait(200)
-         .markSuccess('======== Setup Item Pricing Successful ========').wait(500)
-         .markSuccess('======== Create non-lotted Item Successful ========').wait(500)
-         .clickButton('#btnClose').wait(500)
-
-
-         //Scenario 4. Duplicate Item
-         .displayText('======== Scenario 4. Duplicate Item========"').wait(1000)
-         .expandMenu('Inventory').wait(500)
-         .waitTillLoaded('Open Inventory Menu Successfull').wait(200)
-         .openScreen('Items').wait(500)
-         .waitTillLoaded('Open Items Search Screen Successful').wait(500)
-
-         //#1
-         .displayText('======== 1. Open New Item Screen. ========').wait(500)
-         .clickButton('#btnNew').wait(200)
-         .waitTillVisible('icitem','Open New Item Screen Successful').wait(500)
-         .checkScreenShown('icitem').wait(200)
-         .checkStatusMessage('Ready')
-
-
-         //#2
-         .displayText('======== 2. Setup Details Tab ========').wait(500)
-         .enterData('#txtItemNo', '01 - LTI').wait(200)
-         //.selectComboRowByIndex('#cboType',0).wait(200)
-         .enterData('#txtShortName', 'Test Inventory Item').wait(200)
-         .enterData('#txtDescription', 'Lotted Item 01').wait(200)
-         .selectComboRowByFilter('#cboCommodity', 'Corn', 600, 'strCommodityCode').wait(300)
-         .selectComboRowByIndex('#cboLotTracking', 1).wait(200)
-         .checkControlReadOnly('#cboTracking', true).wait(100)
-         .checkControlData('#cboTracking', 'Lot Level').wait(100)
-         .selectComboRowByFilter('#cboCategory', 'Grains', 600, 'strCategoryCode').wait(300)
-         .markSuccess(' ======== Setup Details Tab Successful======== ').wait(500)
-
-
-         //#3
-         .displayText('======== 3. Setup Unit of Measure ========').wait(500)
-         .clickButton('#btnLoadUOM').wait(300)
-         .waitTillLoaded('Add UOM Successful')
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 0, 'strUnitMeasure', 'LB', 300, 'strUnitMeasure').wait(100)
-         .clickButton('#btnInsertUom').wait(100)
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 1, 'strUnitMeasure', '50 lb bag', 300, 'strUnitMeasure').wait(100)
-         .clickButton('#btnInsertUom').wait(100)
-         .selectGridComboRowByFilter('#grdUnitOfMeasure', 2, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(100)
-         .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-         .markSuccess('======== Setup UOM Successful======== ').wait(500)
-
-         //#4
-         .displayText('======== 3. Save Duplicate item ========').wait(500)
-         .clickButton('#btnSave').wait(300)
-         .checkMessageBox('iRely i21','Item No must be unique.','ok','error').wait(1000)
-         .clickMessageBoxButton('ok').wait(300)
-         .clickButton('#btnClose').wait(500)
-         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question').wait(1000)
-         .clickMessageBoxButton('no').wait(300)
-         .markSuccess('======== Was not able to save duplicate item. ========').wait(500)
-
-
-         //Scenario 5. Duplicate Button
-         .displayText('======== Scenario 5. Duplicate Button========"').wait(1000)
-         .expandMenu('Inventory').wait(500)
-         .waitTillLoaded('Open Inventory Menu Successfull').wait(200)
-         //#1
-         .displayText('======== 1. Open Items Screen ========').wait(500)
-         .openScreen('Items').wait(500)
-         .waitTillLoaded('Open Items Search Screen Successful').wait(500)
-
-         //#2
-         .displayText('========2. Select Any Item ========').wait(500)
-         .selectSearchRowByIndex(3).wait(500)
-         .waitTillLoaded('======== Search Item Successful ========')
-
-         //#3
-         .displayText('======== 3. Open Item ========').wait(500)
-         .clickButton('#btnOpenSelected').wait(500)
-         .waitTillVisible('icitem','Open New Item Screen Successful').wait(500)
-         .markSuccess('======== Open Item Succesful ========').wait(500)
-
-         //#4
-         .displayText('======== Click Duplicate Button ========').wait(500)
-         .clickButton('#btnDuplicate').wait(500)
-         .waitTillLoaded('Duplicate Item Successful')
-         .checkControlData('#txtItemNo', 'LTI - 01-copy').wait(100)
-         .markSuccess('======== Duplicate Item Successful ========').wait(500)
-
-         //#5
-         .displayText('======== 5. Update Item No. ========').wait(500)
-         .enterData('#txtItemNo', 'NLTI - 03').wait(200)
-         .enterData('#txtShortName', 'Test Inventory Item').wait(200)
-         .enterData('#txtDescription', 'Lotted Item 03').wait(200)
-         .markSuccess('======== Update Item No. Successful ========').wait(500)
-
-         //#6
-         .displayText('========6. Save and Close item screen. ========').wait(500)
-         .clickButton('#btnSave').wait(500)
-         .checkStatusMessage('Saved').wait(200)
-         .clickButton('#btnClose').wait(500)
-         .markSuccess('======== Item Save Successful ========').wait(500)
-         */
         .markSuccess('======== Add Item Scenarios Done and Successful! ========')
 
 
         //#Scenario 2: Add Commodity
-                .displayText('====== Scenario 2. Add Cmmodity ======').wait(300)
+         .displayText('====== Scenario 2. Add Cmmodity ======').wait(300)
         .openScreen('Commodities').wait(500)
         .waitTillLoaded('Open Commodity  Search Screen Successful').wait(200)
-        //#1 Add Commodity with no UOM Setup and Attributes
-        .displayText('====== Scenario 2.1. Add Commodity with no UOM Setup and Attributes ======').wait(300)
+        .displayText('====== Scenario 2.1. Add Commodity with no UOM Setup ======').wait(300)
         .clickButton('#btnNew').wait(300)
         .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
         .enterData('#txtCommodityCode','Test Commodity 1').wait(100)
@@ -473,8 +51,8 @@ StartTest(function (t) {
         .clickButton('#btnClose').wait(100)
         .checkIfScreenClosed('iccommodity').wait(300)
 
-        //#2 Add Commodity with UOM
-        .displayText('====== Scenario 2.2 Add Commodity with no UOM Setup and Attributes ======').wait(300)
+        //#2.1 Add Commodity with UOM
+        .displayText('====== Scenario 2.1 Add Commodity with UOM Setup ======').wait(300)
         .clickButton('#btnNew').wait(300)
         .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
         .enterData('#txtCommodityCode','Test Commodity 2').wait(100)
@@ -489,41 +67,41 @@ StartTest(function (t) {
         .clickGridCheckBox('#grdUom', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
         .clickButton('#btnSave').wait(100)
         .checkStatusMessage('Saved').wait(100)
-        .markSuccess('Add Commodity with no UOM Setup and Attributes Successful')
+        .markSuccess('Add Commodity with no UOM Setup Successful')
         .clickButton('#btnClose').wait(100)
         .checkIfScreenClosed('iccommodity').wait(300)
 
 
         //#Scenario 3: Add Category
-                        .displayText('====== Scenario 3. Add Category ======').wait(300)
-                .openScreen('Categories').wait(500)
-                .waitTillLoaded('Open Category Search Screen Successful').wait(200)
+        .displayText('====== Scenario 3. Add Category ======').wait(300)
+        .openScreen('Categories').wait(500)
+        .waitTillLoaded('Open Category Search Screen Successful').wait(200)
 
 
-                //#3.1 Add Category - Inventory
-                .displayText('====== Scenario 3.1. Create Inventory Type Category ======').wait(300)
-                .clickButton('#btnNew').wait(200)
-                .waitTillVisible('iccategory','Open Category Screen Successful').wait(300)
-                .enterData('#txtCategoryCode','Test Inventory Category').wait(300)
-                .enterData('#txtDescription','Test Description').wait(300)
-                .selectComboRowByIndex('#cboInventoryType',1).wait(200)
-                .selectComboRowByIndex('#cboCostingMethod',0,100).wait(300)
-                .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-                .clickButton('#btnSave').wait(300)
-                .checkStatusMessage('Saved').wait(300)
-                .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-                .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-                .enterData('#txtStandardQty','100000').wait(300)
-                //.selectComboRowByFilter('#cboStandardUOM','LB',500, 'intUOMId',0).wait(100)
-                .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-                .clickButton('#btnSave').wait(300)
-                .markSuccess('Create Inventory Type Category Successful').wait(500)
-                .clickButton('#btnClose').wait(300)
+        //#3. Add Category - Inventory
+        .displayText('====== Scenario 3.1. Create Inventory Type Category ======').wait(300)
+        .clickButton('#btnNew').wait(200)
+        .waitTillVisible('iccategory','Open Category Screen Successful').wait(300)
+        .enterData('#txtCategoryCode','Test Inventory Category').wait(300)
+        .enterData('#txtDescription','Test Description').wait(300)
+        .selectComboRowByIndex('#cboInventoryType',1).wait(200)
+        .selectComboRowByIndex('#cboCostingMethod',0,100).wait(300)
+        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
+        .clickButton('#btnSave').wait(300)
+        .checkStatusMessage('Saved').wait(300)
+        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
+        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
+        .enterData('#txtStandardQty','100000').wait(300)
+        //.selectComboRowByFilter('#cboStandardUOM','LB',500, 'intUOMId',0).wait(100)
+        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
+        .clickButton('#btnSave').wait(300)
+        .markSuccess('Create Inventory Type Category Successful').wait(500)
+        .clickButton('#btnClose').wait(300)
 
 
         //Scenarios 4-9 Fuel Types Screen
         //#Scenario 4: Add Fuel Category
-          .displayText('====== Scenario 4. Add Fuel Category ======').wait(300)
+        .displayText('====== Scenario 4. Add Fuel Category ======').wait(300)
         .openScreen('Fuel Types').wait(500)
         .waitTillLoaded()
         .clickButton('#btnClose').wait(500)
@@ -618,7 +196,10 @@ StartTest(function (t) {
 
         //#Scenario 10: Inventory UOM
         // 10.1 Add stock UOM first
-               .displayText('====== #1 Add Stock UOM ======').wait(300)
+        .displayText('====== Scenario 10: Inventory UOM ======').wait(300)
+        .openScreen('Inventory UOM').wait(500)
+        .waitTillLoaded()
+        .displayText('====== #1 Add Stock UOM ======').wait(300)
         .clickButton('#btnNew').wait(100)
         .waitTillVisible('icinventoryuom','Open Inventory UOM  Successful').wait(200)
         .checkScreenShown('icinventoryuom').wait(100)
@@ -638,7 +219,7 @@ StartTest(function (t) {
         .checkIfScreenClosed('icinventoryuom').wait(100)
 
         // 10.2. Add conversion UOMs on each stock UOM
-        .displayText('====== Scenario #2 Add Conversion UOM> 5 Lb Bag======').wait(300)
+        .displayText('====== Scenario #10.1 Add Conversion UOM> 5 Lb Bag======').wait(300)
         .clickButton('#btnNew').wait(100).wait(100)
         .enterData('#txtUnitMeasure', '5 Lb Bag_1').wait(100)
         .enterData('#txtSymbol', '5 Lb Bag_1').wait(100)
@@ -657,7 +238,7 @@ StartTest(function (t) {
         .checkIfScreenClosed('icinventoryuom').wait(100)
 
 
-        .displayText('====== Scenario #3 Add Conversion UOM> 10 Lb Bag======').wait(300)
+        .displayText('====== Scenario #10.2 Add Conversion UOM> 10 Lb Bag======').wait(300)
         .clickButton('#btnNew').wait(100)
         .enterData('#txtUnitMeasure', '10 Lb Bag_1').wait(100)
         .enterData('#txtSymbol', '10 Lb Bag_1').wait(100)
@@ -677,7 +258,10 @@ StartTest(function (t) {
 
 
         //#Scenario 11: Add Storage Location
-          .displayText('====== Scenario 1. Allow bin of the same name to be used in a different Sub Location ======').wait(300)
+
+        .displayText('====== Scenario 11. Add Storage Location: Allow bin of the same name to be used in a different Sub Location ======').wait(300)
+        .openScreen('Storage Locations').wait(500)
+        .waitTillLoaded()
         .clickButton('#btnNew').wait(200)
         .waitTillVisible('icstorageunit','Open Inventory UOM  Successful').wait(200)
         .checkScreenShown('icstorageunit').wait(200)

@@ -17,9 +17,9 @@ StartTest(function (t) {
         .markSuccess('Inventory successfully expanded').wait(500)
 
 
-        //Add Inventory Receipt
-        //Scenario 1: Add Direct IR for NON Lotted Item
-        .displayText('"======== Scenario 1:  Add Direct IR for NON Lotted Item ========"').wait(500)
+
+        //Scenario 1: Add Inventory Receipt
+         .displayText('"======== Scenario 1:  Add Direct IR for NON Lotted Item ========"').wait(500)
         .displayText('"======== #1 Open New Inventory Receipt Screen ========"').wait(500)
         .openScreen('Inventory Receipts').wait(1000)
         .waitTillLoaded('Open Inventory Receipts Search Screen Successful').wait(500)
@@ -99,8 +99,8 @@ StartTest(function (t) {
 
 
 
-        //Scenario 2: Add Direct IR for Lotted Item
-        .displayText('"======== Scenario 2: Create Direct Inventory Receipt for Lotted Item. ========"').wait(500)
+        //Scenario 1.2: Add Direct IR for Lotted Item
+        .displayText('"======== Scenario 1.2: Create Direct Inventory Receipt for Lotted Item. ========"').wait(500)
         .displayText('"======== #1 Open New Inventory Receipt Screen ========"').wait(500)
         .waitTillLoaded('Open Inventory Receipts Search Screen Successful').wait(500)
         .clickButton('#btnNew').wait(1000)
@@ -190,9 +190,8 @@ StartTest(function (t) {
         .markSuccess('======== Create Direct Receipt for Lotted Item Successful! ========')
 
 
-        //Add Inventory Shipmnent
-        //Scenario 3:  Add Direct IS for NON Lotted Item
-        .displayText('"======== Scenario 3:  Add Direct IS for NON Lotted Item ========"').wait(500)
+        //Scenario 2:  Add Inventory Shipmnent
+        .displayText('"======== Scenario 2.1:  Add Direct IS for NON Lotted Item ========"').wait(500)
         .displayText('"======== #1 Open New Inventory Shipment Screen ========"').wait(500)
         .openScreen('Inventory Shipments').wait(1000)
         .waitTillLoaded('Open Inventory Shipments Search Screen Successful').wait(500)
@@ -233,13 +232,8 @@ StartTest(function (t) {
         .waitTillLoaded('')
         .markSuccess('======== Create Direct Shipment for Non Lotted Item Successful! ========')
 
-
-
-
-
-        //Add Inventory Shipmnet
-        //Scenario 4:  Add Direct IS for Lotted Item
-        .displayText('"======== Scenario 4:  Add Direct IS for NON Lotted Item ========"').wait(500)
+        //Scenario 2.2:  Add Direct IS for Lotted Item
+        .displayText('"======== Scenario 2.2:  Add Direct IS for NON Lotted Item ========"').wait(500)
         .displayText('"======== #1 Open New Inventory Shipment Screen ========"').wait(500)
         .openScreen('Inventory Shipments').wait(1000)
         .waitTillLoaded('Open Inventory Shipments Search Screen Successful').wait(500)
@@ -319,9 +313,8 @@ StartTest(function (t) {
         .markSuccess('======== Post Inventory Transfer Successful! ========')
 
 
-
         //Scenario 4: Add Inventory Adjustment
-        .displayText('"======== Scenario 4:  Add Inventory Adjustment ========"').wait(500)
+        .displayText('"======== Scenario 4.1:  Add Inventory Adjustment ========"').wait(500)
         .displayText('"======== #1 Open New Inventory Adjustment Screen ========"').wait(500)
         .openScreen('Inventory Adjustments').wait(1000)
         .waitTillLoaded('Open Inventory Transfers Search Screen Successful').wait(500)
@@ -356,10 +349,10 @@ StartTest(function (t) {
         .waitTillLoaded('')
         .markSuccess('======== Post Inventory Adjustment Successful ========')
 
-        //#5 Lot Move
+        //#4.2 Lot Move
         .clickButton('#btnNew').wait(500)
 
-        .displayText('"======== #5 Lot Move ========"').wait(500)
+        .displayText('"======== #4.2 Lot Move ========"').wait(500)
         .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
         .selectComboRowByIndex('#cboAdjustmentType',7).wait(300)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
@@ -398,8 +391,8 @@ StartTest(function (t) {
         .markSuccess('======== Create Quantity Change Adjustment for Lotted Item Successful! ========')
 
 
-        //Add Inventory Count
-        .displayText('"======== Scenario 7:  Add Inventory Count ========"').wait(500)
+        //Scenario 5: Add Inventory Count
+        .displayText('"======== Scenario 5:  Add Inventory Count ========"').wait(500)
         .displayText('"======== #1 Open New Inventory Count Screen ========"').wait(500)
         .openScreen('Inventory Count').wait(500)
         .waitTillLoaded('Open Inventory Count Search Screen Successful').wait(500)
@@ -437,9 +430,8 @@ StartTest(function (t) {
         .markSuccess('======== Create Inventory Count Successful! ========')
 
 
-
-        //Add Storage Measurement Reading
-                .displayText('"======== Scenario 8:  Add Storage Measurement Reading ========"').wait(500)
+        //Scenario 6: Add Storage Measurement Reading
+        .displayText('"======== Scenario 6:  Add Storage Measurement Reading ========"').wait(500)
         .displayText('"======== #1 Open New Storage Measurement Reading Screen ========"').wait(500)
         .openScreen('Storage Measurement Reading').wait(500)
         .waitTillLoaded('Open Storage Measurement Reading Search Screen Successful').wait(500)

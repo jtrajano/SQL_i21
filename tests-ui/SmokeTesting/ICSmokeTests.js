@@ -1452,7 +1452,7 @@ StartTest(function (t) {
         .markSuccess('======== Open Inventory Valuation Search Screen Check All Fields Successful. ========').wait(200)
 
 
-        //Inventory Valuation Summary Screen
+        //Inventory Valuation Screen
         .displayText('"======== 28. Open Inventory Valuation Summary Search Screen Check All Fields. ========"').wait(200)
         .openScreen('Inventory Valuation Summary').wait(300)
         .waitTillLoaded('Open Lot Details Search Screen Successful').wait(200)
@@ -1469,6 +1469,866 @@ StartTest(function (t) {
             }).wait(200)
         .markSuccess('Open Inventory Valuation Summary Search Screen Check All Fields Successful.').wait(200)
         .markSuccess('"======== Open Inventory Screens and Checking Fields done. ========="')
+
+
+
+        //ADD MAINTENANCE SCREENS - IC Add Maintenance Records
+        .displayText('====== Scenario 1. Add Item ======').wait(300)
+        //#1.1 Add Non Lotted Inventory Item
+        .openScreen('Items').wait(500)
+        .waitTillLoaded('Open Items Search Screen Successful')
+        .clickButton('#btnNew').wait(500)
+        .waitTillVisible('icitem', 'Open New Item Screen Successful').wait(500)
+        .checkScreenShown('icitem').wait(200)
+        .checkStatusMessage('Ready')
+
+        .enterData('#txtItemNo', 'NLTI - 02').wait(200)
+        //.selectComboRowByIndex('#cboType',0).wait(200)
+        .enterData('#txtDescription', 'NLTI - 02').wait(200)
+        .selectComboRowByFilter('#cboCategory', 'Grains', 500, 'cboCategory',0).wait(500)
+        .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode',0).wait(500)
+        .selectComboRowByIndex('#cboLotTracking', 2).wait(500)
+
+        .clickButton('#btnLoadUOM').wait(300)
+        .waitTillLoaded('Add UOM Successful')
+
+        .clickTab('#cfgSetup').wait(100)
+        .clickButton('#btnAddRequiredAccounts').wait(100)
+        .checkGridData('#grdGlAccounts', 0, 'colGLAccountCategory', 'AP Clearing').wait(100)
+        .checkGridData('#grdGlAccounts', 1, 'colGLAccountCategory', 'Inventory').wait(100)
+        .checkGridData('#grdGlAccounts', 2, 'colGLAccountCategory', 'Cost of Goods').wait(100)
+        .checkGridData('#grdGlAccounts', 3, 'colGLAccountCategory', 'Sales Account').wait(100)
+        .checkGridData('#grdGlAccounts', 4, 'colGLAccountCategory', 'Inventory In-Transit').wait(100)
+        .checkGridData('#grdGlAccounts', 5, 'colGLAccountCategory', 'Inventory Adjustment').wait(100)
+        .checkGridData('#grdGlAccounts', 6, 'colGLAccountCategory', 'Auto-Variance').wait(100)
+
+        .selectGridComboRowByFilter('#grdGlAccounts', 0, 'strAccountId', '21000-0000-000', 400, 'strAccountId').wait(100)
+        .addFunction(function (next) {
+            var t = this,
+                win = Ext.WindowManager.getActive();
+            if (win) {
+                var grdGlAccounts = win.down('#grdGlAccounts');
+                grdGlAccounts.editingPlugin.completeEdit();
+            }
+            next();
+        }).wait(1000)
+        .selectGridComboRowByFilter('#grdGlAccounts', 1, 'strAccountId', '16000-0000-000', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 2, 'strAccountId', '50000-0000-000', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 3, 'strAccountId', '40010-0001-006', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 4, 'strAccountId', '16050-0000-000', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 5, 'strAccountId', '16040-0000-000', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 6, 'strAccountId', '16010-0000-000', 400, 'strAccountId').wait(100)
+        .markSuccess('======== Setup GL Accounts Successful ========').wait(500)
+
+        .clickTab('#cfgLocation').wait(300)
+        .clickButton('#btnAddLocation').wait(100)
+        .waitTillVisible('icitemlocation', 'Add Item Location Screen Displayed', 60000).wait(500)
+        .selectComboRowByFilter('#cboSubLocation', 'Raw Station', 600, 'intSubLocationId',0).wait(100)
+        .selectComboRowByFilter('#cboStorageLocation', 'RM Storage', 600, 'intStorageLocationId',0).wait(100)
+        .selectComboRowByFilter('#cboIssueUom', 'Bushels', 600, 'strUnitMeasure').wait(500)
+        .selectComboRowByFilter('#cboReceiveUom', 'Bushels', 600, 'strUnitMeasure').wait(500)
+        .selectComboRowByIndex('#cboNegativeInventory', 1).wait(500)
+        .clickButton('#btnSave').wait(300)
+        .checkStatusMessage('Saved').wait(300)
+        .clickButton('#btnClose').wait(300)
+
+        .clickTab('#cfgOthers').wait(500)
+        .clickCheckBox('#chkTankRequired', true).wait(300)
+        .clickCheckBox('#chkAvailableForTm', true).wait(300)
+
+        .clickTab('#cfgPricing').wait(300)
+        .checkGridData('#grdPricing', 0, 'strLocationName', '0001 - Fort Wayne').wait(100)
+        .enterGridData('#grdPricing', 0, 'dblLastCost', '10').wait(300)
+        .enterGridData('#grdPricing', 0, 'dblStandardCost', '10').wait(300)
+        .enterGridData('#grdPricing', 0, 'dblAverageCost', '10').wait(300)
+        //.selectGridComboRowByFilter('#grdPricing', 0, 'strPricingMethod', 'Markup Standard Cost', 400, 'strPricingMethod').wait(100)
+        .selectGridComboRowByIndex('#grdPricing', 0, 'strPricingMethod',2, 'strPricingMethod').wait(100)
+        .enterGridData('#grdPricing', 0, 'dblAmountPercent', '40').wait(300)
+        .checkStatusMessage('Edited').wait(200)
+        .clickButton('#btnSave').wait(200)
+        .checkStatusMessage('Saved').wait(200)
+        .displayText('Setup Item Pricing Successful').wait(500)
+
+        .clickButton('#btnClose').wait(300)
+
+        //#1.2 Add Non Lotted Inventory Item
+        .clickButton('#btnNew').wait(500)
+        .waitTillVisible('icitem', 'Open New Item Screen Successful').wait(500)
+        .checkScreenShown('icitem').wait(200)
+        .checkStatusMessage('Ready')
+
+        .enterData('#txtItemNo', 'LTI - 01').wait(200)
+        //.selectComboRowByIndex('#cboType',0).wait(200)
+        .enterData('#txtDescription', 'LTI - 01').wait(200)
+        .selectComboRowByFilter('#cboCategory', 'Grains', 500, 'cboCategory',0).wait(500)
+        .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode',0).wait(500)
+        .selectComboRowByIndex('#cboLotTracking', 0).wait(500)
+
+        .clickButton('#btnLoadUOM').wait(300)
+        .waitTillLoaded('Add UOM Successful')
+
+        .clickTab('#cfgSetup').wait(100)
+        .clickButton('#btnAddRequiredAccounts').wait(100)
+        .checkGridData('#grdGlAccounts', 0, 'colGLAccountCategory', 'AP Clearing').wait(100)
+        .checkGridData('#grdGlAccounts', 1, 'colGLAccountCategory', 'Inventory').wait(100)
+        .checkGridData('#grdGlAccounts', 2, 'colGLAccountCategory', 'Cost of Goods').wait(100)
+        .checkGridData('#grdGlAccounts', 3, 'colGLAccountCategory', 'Sales Account').wait(100)
+        .checkGridData('#grdGlAccounts', 4, 'colGLAccountCategory', 'Inventory In-Transit').wait(100)
+        .checkGridData('#grdGlAccounts', 5, 'colGLAccountCategory', 'Inventory Adjustment').wait(100)
+        .checkGridData('#grdGlAccounts', 6, 'colGLAccountCategory', 'Auto-Variance').wait(100)
+
+        .selectGridComboRowByFilter('#grdGlAccounts', 0, 'strAccountId', '21000-0000-000', 400, 'strAccountId').wait(100)
+        .addFunction(function (next) {
+            var t = this,
+                win = Ext.WindowManager.getActive();
+            if (win) {
+                var grdGlAccounts = win.down('#grdGlAccounts');
+                grdGlAccounts.editingPlugin.completeEdit();
+            }
+            next();
+        }).wait(1000)
+        .selectGridComboRowByFilter('#grdGlAccounts', 1, 'strAccountId', '16000-0000-000', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 2, 'strAccountId', '50000-0000-000', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 3, 'strAccountId', '40010-0001-006', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 4, 'strAccountId', '16050-0000-000', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 5, 'strAccountId', '16040-0000-000', 400, 'strAccountId').wait(100)
+        .selectGridComboRowByFilter('#grdGlAccounts', 6, 'strAccountId', '16010-0000-000', 400, 'strAccountId').wait(100)
+        .markSuccess('======== Setup GL Accounts Successful ========').wait(500)
+
+        .clickTab('#cfgLocation').wait(300)
+        .clickButton('#btnAddLocation').wait(100)
+        .waitTillVisible('icitemlocation', 'Add Item Location Screen Displayed', 60000).wait(500)
+        .selectComboRowByFilter('#cboSubLocation', 'Raw Station', 600, 'intSubLocationId',0).wait(100)
+        .selectComboRowByFilter('#cboStorageLocation', 'RM Storage', 600, 'intStorageLocationId',0).wait(100)
+        .selectComboRowByFilter('#cboIssueUom', 'Bushels', 600, 'strUnitMeasure').wait(500)
+        .selectComboRowByFilter('#cboReceiveUom', 'Bushels', 600, 'strUnitMeasure').wait(500)
+        .selectComboRowByIndex('#cboNegativeInventory', 1).wait(500)
+        .clickButton('#btnSave').wait(300)
+        .checkStatusMessage('Saved').wait(300)
+        .clickButton('#btnClose').wait(300)
+
+        .clickTab('#cfgOthers').wait(500)
+        .clickCheckBox('#chkTankRequired', true).wait(300)
+        .clickCheckBox('#chkAvailableForTm', true).wait(300)
+
+        .clickTab('#cfgPricing').wait(300)
+        .checkGridData('#grdPricing', 0, 'strLocationName', '0001 - Fort Wayne').wait(100)
+        .enterGridData('#grdPricing', 0, 'dblLastCost', '10').wait(300)
+        .enterGridData('#grdPricing', 0, 'dblStandardCost', '10').wait(300)
+        .enterGridData('#grdPricing', 0, 'dblAverageCost', '10').wait(300)
+        //.selectGridComboRowByFilter('#grdPricing', 0, 'strPricingMethod', 'Markup Standard Cost', 400, 'strPricingMethod').wait(100)
+        .selectGridComboRowByIndex('#grdPricing', 0, 'strPricingMethod',2, 'strPricingMethod').wait(100)
+        .enterGridData('#grdPricing', 0, 'dblAmountPercent', '40').wait(300)
+        .checkStatusMessage('Edited').wait(200)
+        .clickButton('#btnSave').wait(200)
+        .checkStatusMessage('Saved').wait(200)
+        .displayText('Setup Item Pricing Successful').wait(500)
+
+        .clickButton('#btnClose').wait(300)
+
+        .markSuccess('======== Add Item Scenarios Done and Successful! ========')
+
+
+        //#Scenario 2: Add Commodity
+        .displayText('====== Scenario 2. Add Cmmodity ======').wait(300)
+        .openScreen('Commodities').wait(500)
+        .waitTillLoaded('Open Commodity  Search Screen Successful').wait(200)
+        .displayText('====== Scenario 2.1. Add Commodity with no UOM Setup ======').wait(300)
+        .clickButton('#btnNew').wait(300)
+        .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
+        .enterData('#txtCommodityCode','Test Commodity 1').wait(100)
+        .enterData('#txtDescription','Test Commodity 1').wait(100)
+        .clickCheckBox('#chkExchangeTraded',true).wait(100)
+        .enterData('#txtDecimalsOnDpr','6.00').wait(100)
+        .enterData('#txtConsolidateFactor','6.00').wait(100)
+        .clickButton('#btnSave').wait(100)
+        .checkStatusMessage('Saved').wait(100)
+        .markSuccess('Add Commodity with no UOM Setup and Attributes Successful')
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('iccommodity').wait(300)
+
+        //#2.1 Add Commodity with UOM
+        .displayText('====== Scenario 2.1 Add Commodity with UOM Setup ======').wait(300)
+        .clickButton('#btnNew').wait(300)
+        .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
+        .enterData('#txtCommodityCode','Test Commodity 2').wait(100)
+        .enterData('#txtDescription','Test Commodity 2').wait(100)
+        .clickCheckBox('#chkExchangeTraded',true).wait(100)
+        .enterData('#txtDecimalsOnDpr','6.00').wait(100)
+        .enterData('#txtConsolidateFactor','6.00').wait(100)
+        .selectGridComboRowByFilter('#grdUom', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
+        .clickButton('#btnSave').wait(100)
+        .checkStatusMessage('Saved').wait(100)
+        .selectGridComboRowByFilter('#grdUom', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
+        .clickGridCheckBox('#grdUom', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
+        .clickButton('#btnSave').wait(100)
+        .checkStatusMessage('Saved').wait(100)
+        .markSuccess('Add Commodity with no UOM Setup Successful')
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('iccommodity').wait(300)
+
+
+        //#Scenario 3: Add Category
+        .displayText('====== Scenario 3. Add Category ======').wait(300)
+        .openScreen('Categories').wait(500)
+        .waitTillLoaded('Open Category Search Screen Successful').wait(200)
+
+
+        //#3. Add Category - Inventory
+        .displayText('====== Scenario 3.1. Create Inventory Type Category ======').wait(300)
+        .clickButton('#btnNew').wait(200)
+        .waitTillVisible('iccategory','Open Category Screen Successful').wait(300)
+        .enterData('#txtCategoryCode','Test Inventory Category').wait(300)
+        .enterData('#txtDescription','Test Description').wait(300)
+        .selectComboRowByIndex('#cboInventoryType',1).wait(200)
+        .selectComboRowByIndex('#cboCostingMethod',0,100).wait(300)
+        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
+        .clickButton('#btnSave').wait(300)
+        .checkStatusMessage('Saved').wait(300)
+        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
+        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
+        .enterData('#txtStandardQty','100000').wait(300)
+        //.selectComboRowByFilter('#cboStandardUOM','LB',500, 'intUOMId',0).wait(100)
+        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
+        .clickButton('#btnSave').wait(300)
+        .markSuccess('Create Inventory Type Category Successful').wait(500)
+        .clickButton('#btnClose').wait(300)
+
+
+        //Scenarios 4-9 Fuel Types Screen
+        //#Scenario 4: Add Fuel Category
+        .displayText('====== Scenario 4. Add Fuel Category ======').wait(300)
+        .openScreen('Fuel Types').wait(500)
+        .waitTillLoaded()
+        .clickButton('#btnClose').wait(500)
+        .clickButton('#btnFuelCategory').wait(300)
+        .enterGridData('#grdGridTemplate', 0, 'colRinFuelCategoryCode', 'Test Fuel Category 1').wait(150)
+        .enterGridData('#grdGridTemplate', 0, 'colDescription', 'Test Description 1').wait(150)
+        .enterGridData('#grdGridTemplate', 0, 'colEquivalenceValue', 'Test Equivalence Value 1').wait(150)
+        .enterGridData('#grdGridTemplate', 1, 'colRinFuelCategoryCode', 'Test Fuel Category 2').wait(150)
+        .enterGridData('#grdGridTemplate', 1, 'colDescription', 'Test Description 2').wait(150)
+        .enterGridData('#grdGridTemplate', 1, 'colEquivalenceValue', 'Test Equivalence Value 2').wait(150)
+        .checkStatusMessage('Edited')
+        .clickButton('#btnSave').wait(1000)
+        .checkStatusMessage('Saved').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .markSuccess('====== Add Fuel Category Successful ======').wait(300)
+
+
+        //#Scenario 5: Add Feed Stock
+        .displayText('====== Scenario 5. Add Feed Stock ======').wait(300)
+        .clickButton('#btnFeedStock').wait(300)
+        .enterGridData('#grdGridTemplate', 0, 'colRinFeedStockCode', 'FS01').wait(100)
+        .enterGridData('#grdGridTemplate', 0, 'colDescription', 'Feed Stock 01').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colRinFeedStockCode', 'FS02').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colDescription', 'Feed Stock 02').wait(100)
+        .checkStatusMessage('Edited')
+        .clickButton('#btnSave').wait(100)
+        .checkStatusMessage('Saved').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('feedstockcode').wait(100)
+        .markSuccess('====== Add Feed Stock Successful ======').wait(300)
+
+
+        //#Scenario 6: Add Fuel Code
+        .displayText('====== Scenario 6. Add Fuel Code ======').wait(300)
+        .clickButton('#btnFuelCode').wait(300)
+        .enterGridData('#grdGridTemplate', 0, 'colRinFuelCode', 'F01').wait(100)
+        .enterGridData('#grdGridTemplate', 0, 'colDescription', 'Fuel 01').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colRinFuelCode', 'F02').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colDescription', 'Fuel 02').wait(100)
+        .checkStatusMessage('Edited')
+        .clickButton('#btnSave').wait(100)
+        .checkStatusMessage('Saved').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('fuelcode').wait(100)
+        .markSuccess('====== Add Fuel Code Successful ======').wait(300)
+
+
+        //#Scenario 7: Add Production Process
+        .displayText('====== Scenario 7. Add Production Process ======').wait(300)
+        .clickButton('#btnProductionProcess').wait(300)
+        .enterGridData('#grdGridTemplate', 0, 'colRinProcessCode', 'PP01').wait(100)
+        .enterGridData('#grdGridTemplate', 0, 'colDescription', 'Production Process 01').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colRinProcessCode', 'PP02').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colDescription', 'Production Process 02').wait(100)
+        .checkStatusMessage('Edited')
+        .clickButton('#btnSave').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .markSuccess('====== Add Production Process Successful ======').wait(300)
+
+
+        //#Scenario 8: Add Feed Stock UOM
+        .displayText('====== Scenario 8. Add Feed Stock UOM ======').wait(300)
+        .clickButton('#btnFeedStockUOM').wait(300)
+        .selectGridComboRowByFilter('#grdGridTemplate', 0, 'strUnitMeasure', 'LB', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdGridTemplate', 0, 'colRinFeedStockUOMCode', 'LB').wait(100)
+        .selectGridComboRowByFilter('#grdGridTemplate', 1, 'strUnitMeasure', 'KG', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdGridTemplate', 1, 'colRinFeedStockUOMCode', 'KG').wait(100)
+        .checkStatusMessage('Edited')
+        .clickButton('#btnSave').wait(100)
+        .checkStatusMessage('Saved').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('feedstockuom').wait(100)
+        .markSuccess('====== Add Add Feed Stock UOM Successful ======').wait(300)
+
+
+        //#Scenario 9: Add Fuel Type
+        .displayText('====== Scenario 9. Add Fuel Type ======').wait(300)
+        .clickButton('#btnNew').wait(300)
+        .selectComboRowByFilter('#cboFuelCategory', 'Test Fuel Category 1', 300, 'intRinFuelCategoryId', 0).wait(200)
+        .selectComboRowByFilter('#cboFeedStock', 'FS01', 300, 'intRinFeedStockId', 0).wait(200)
+        .enterData('#txtBatchNo','10001').wait(100)
+        .enterData('#txtEndingRinGallonsForBatch','25').wait(100)
+        .checkControlData('#txtEquivalenceValue','Test Equivalence Value 1')
+        .selectComboRowByFilter('#cboFuelCode', 'F01', 300, 'intRinFuelId', 0).wait(200)
+        .selectComboRowByFilter('#cboProductionProcess', 'PP01', 300, 'intRinProcessId', 0).wait(200)
+        .selectComboRowByFilter('#cboFeedStockUom', 'LB', 300, 'intRinFeedStockUOMId', 0).wait(200)
+        .enterData('#txtFeedStockFactor','10').wait(200)
+        .clickButton('#btnSave').wait(500)
+        .clickButton('#btnClose').wait(200)
+        .markSuccess('====== Add Add Fuel Type Successful ======').wait(300)
+
+
+        //#Scenario 10: Inventory UOM
+        // 10.1 Add stock UOM first
+        .displayText('====== Scenario 10: Inventory UOM ======').wait(300)
+        .openScreen('Inventory UOM').wait(500)
+        .waitTillLoaded()
+        .displayText('====== #1 Add Stock UOM ======').wait(300)
+        .clickButton('#btnNew').wait(100)
+        .waitTillVisible('icinventoryuom','Open Inventory UOM  Successful').wait(200)
+        .checkScreenShown('icinventoryuom').wait(100)
+        .enterData('#txtUnitMeasure', 'Pound_1').wait(300)
+        .enterData('#txtSymbol', 'Lb_1').wait(300)
+        .selectComboRowByIndex('#cboUnitType', 5).wait(300)
+        .checkStatusMessage('Edited').wait(100)
+        .clickButton('#btnSave').wait(100)
+        .displayText('====== Verify Record Added ======').wait(300)
+        .clickButton('#btnSearch').wait(500)
+        .waitTillLoaded('').wait(500)
+        .checkGridData('#grdSearch', 40, 'strUnitMeasure', 'Pound_1').wait(100)
+        .checkGridData('#grdSearch', 40, 'strSymbol', 'Lb_1').wait(100)
+        .markSuccess('====== Add Stock UOM Successful ======').wait(200)
+        .clickButton('#btnClose').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('icinventoryuom').wait(100)
+
+        // 10.2. Add conversion UOMs on each stock UOM
+        .displayText('====== Scenario #10.1 Add Conversion UOM> 5 Lb Bag======').wait(300)
+        .clickButton('#btnNew').wait(100).wait(100)
+        .enterData('#txtUnitMeasure', '5 Lb Bag_1').wait(100)
+        .enterData('#txtSymbol', '5 Lb Bag_1').wait(100)
+        .selectComboRowByIndex('#cboUnitType', 5).wait(100)
+        .selectGridComboRowByFilter('#grdConversion', 0, 'strUnitMeasure', 'Pound_1', 1000).wait(100)
+        .enterGridData('#grdConversion', 0, 'colConversionToStockUOM', '5').wait(500)
+        .clickButton('#btnSave').wait(100)
+        .displayText('====== Verify Record Added ======').wait(300)
+        .clickButton('#btnSearch').wait(500)
+        .waitTillLoaded('').wait(500)
+        .checkGridData('#grdSearch', 41, 'strUnitMeasure', '5 Lb Bag_1').wait(100)
+        .checkGridData('#grdSearch', 41, 'strSymbol', '5 Lb Bag_1').wait(100)
+        .markSuccess('====== Add Conversion UOM> 5 Lb Bag ======').wait(200)
+        .clickButton('#btnClose').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('icinventoryuom').wait(100)
+
+
+        .displayText('====== Scenario #10.2 Add Conversion UOM> 10 Lb Bag======').wait(300)
+        .clickButton('#btnNew').wait(100)
+        .enterData('#txtUnitMeasure', '10 Lb Bag_1').wait(100)
+        .enterData('#txtSymbol', '10 Lb Bag_1').wait(100)
+        .selectComboRowByIndex('#cboUnitType', 5).wait(100)
+        .selectGridComboRowByFilter('#grdConversion', 0, 'strUnitMeasure', 'Pound_1', 1000).wait(100)
+        .enterGridData('#grdConversion', 0, 'colConversionToStockUOM', '10').wait(500)
+        .clickButton('#btnSave').wait(100)
+        .addFunction(function (next) { t.diag("Verify Record Added"); next(); }).wait(100)
+        .clickButton('#btnSearch').wait(500)
+        .waitTillLoaded('').wait(500)
+        .checkGridData('#grdSearch', 42, 'strUnitMeasure', '10 Lb Bag_1').wait(100)
+        .checkGridData('#grdSearch', 42, 'strSymbol', '10 Lb Bag_1').wait(100)
+        .markSuccess('====== Add Conversion UOM> 10 Lb Bag Successful ======').wait(200)
+        .clickButton('#btnClose').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('icinventoryuom').wait(100)
+
+
+        //#Scenario 11: Add Storage Location
+
+        .displayText('====== Scenario 11. Add Storage Location: Allow bin of the same name to be used in a different Sub Location ======').wait(300)
+        .openScreen('Storage Locations').wait(500)
+        .waitTillLoaded()
+        .clickButton('#btnNew').wait(200)
+        .waitTillVisible('icstorageunit','Open Inventory UOM  Successful').wait(200)
+        .checkScreenShown('icstorageunit').wait(200)
+        .enterData('#txtName','Test SL - SH - 001').wait(100)
+        .enterData('#txtDescription','Test SL - SH - 001').wait(100)
+        .selectComboRowByFilter('#cboUnitType','Bin',300, 'strStorageUnitType').wait(100)
+        .selectComboRowByFilter('#cboLocation','0001 - Fort Wayne',300, 'intLocationId').wait(100)
+        .selectComboRowByFilter('#cboSubLocation','Stellhorn',300, 'intSubLocationId').wait(100)
+        .selectComboRowByFilter('#cboParentUnit','RM Storage',300, 'intParentStorageLocationId').wait(100)
+        .enterData('#txtAisle','Test Aisle').wait(100)
+        .clickCheckBox('#chkAllowConsume',true).wait(100)
+        .clickCheckBox('#chkAllowMultipleItems',true).wait(100)
+        .clickCheckBox('#chkAllowMultipleLots',true).wait(100)
+        .clickCheckBox('#chkMergeOnMove',true).wait(100)
+        .clickCheckBox('#chkCycleCounted',true).wait(100)
+        .clickCheckBox('#chkDefaultWarehouseStagingUnit',true).wait(100)
+        .checkStatusMessage('Edited').wait(100)
+        .clickButton('#btnSave').wait(100)
+        .checkStatusMessage('Saved').wait(100)
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('icstorageunit').wait(100)
+        .markSuccess('====== Allow bin of the same name to be used in a different Sub Location Successful ======').wait(200)
+        .markSuccess('====== Add IC Maintenance Records Successful! Ole! ======')
+
+
+        //ADD TRANSACTION SCREENS - IC Add Transaction Screens
+        .displayText('"======== Scenario 1:  Add Direct IR for NON Lotted Item ========"').wait(500)
+        .displayText('"======== #1 Open New Inventory Receipt Screen ========"').wait(500)
+        .openScreen('Inventory Receipts').wait(1000)
+        .waitTillLoaded('Open Inventory Receipts Search Screen Successful').wait(500)
+        .clickButton('#btnNew').wait(1000)
+        .waitTillVisible('icinventoryreceipt','').wait(1000)
+        .markSuccess('Open New Inventory Receipt Screen Successful')
+
+        .displayText('======== #2. Enter/Select Inventory Receipt Details and Check Fields========')
+        .selectComboRowByIndex('#cboReceiptType',3).wait(200)
+        .selectComboRowByFilter('#cboVendor', 'ABC Trucking', 500, 'strName', 0).wait(200)
+        //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
+        .selectComboRowByIndex('#cboLocation',0).wait(300)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'NLTI - 02', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdInventoryReceipt', 0, 'colQtyToReceive', '1000').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colItemSubCurrency', 'USD').wait(300)
+        .enterGridData('#grdInventoryReceipt', 0, 'colUnitCost', '10').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colCostUOM', 'Bushels').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colWeightUOM', 'Bushels').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colGross', '1000').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colNet', '1000').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colLineTotal', '10000').wait(500)
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblGrossWgt').text;
+            if (total == 'Gross: 1,000.00') {
+                t.ok(true, 'Gross is correct.');
+            }
+            else {
+                t.ok(false, 'Grossl is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblNetWgt').text;
+            if (total == 'Net: 1,000.00') {
+                t.ok(true, 'Net is correct.');
+            }
+            else {
+                t.ok(false, 'Net is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblTotal').text;
+            if (total == 'Total: 10,000.00') {
+                t.ok(true, 'Total is correct.');
+            }
+            else {
+                t.ok(false, 'Total is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .markSuccess('Enter/Select Inventory Recepit Details and Check Fields Successful')
+
+        .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
+        .clickButton('#btnRecap').wait(300)
+        .waitTillLoaded('Open Recap Screen Successful')
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapDebit', '10000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '21000-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapCredit', '10000').wait(500)
+        .markSuccess('======== Open Recap Screen and Check Details Successful ========')
+
+        .displayText('======== #4. Post Inventory Receipt ========')
+        .clickButton('#btnPost').wait(500)
+        .waitTillLoaded('')
+        .markSuccess('======== Posting of Inventory Receipt Successful ========')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Create Direct Receipt for Non Lotted Item Successful! ========')
+
+
+
+        //Scenario 1.2: Add Direct IR for Lotted Item
+        .displayText('"======== Scenario 1.2: Create Direct Inventory Receipt for Lotted Item. ========"').wait(500)
+        .displayText('"======== #1 Open New Inventory Receipt Screen ========"').wait(500)
+        .waitTillLoaded('Open Inventory Receipts Search Screen Successful').wait(500)
+        .clickButton('#btnNew').wait(1000)
+        .waitTillVisible('icinventoryreceipt','').wait(500)
+        .displayText('"======== Open New Inventory Receipt Screen Successful ========"').wait(300)
+
+        .displayText('======== #2. Enter/Select Inventory Recepit Details and Check Fields========')
+        .selectComboRowByIndex('#cboReceiptType',3).wait(200)
+        .selectComboRowByFilter('#cboVendor', 'ABC Trucking', 500, 'strName', 0).wait(200)
+        //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
+        .selectComboRowByIndex('#cboLocation',0).wait(300)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdInventoryReceipt', 0, 'colQtyToReceive', '1000').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colItemSubCurrency', 'USD').wait(300)
+        .enterGridData('#grdInventoryReceipt', 0, 'colUnitCost', '10').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colCostUOM', 'Bushels').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colWeightUOM', 'Bushels').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colGross', '1000').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colNet', '1000').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colLineTotal', '10000').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colSubLocation', 'Raw Station').wait(500)
+        .checkGridData('#grdInventoryReceipt', 0, 'colStorageLocation', 'RM Storage').wait(500)
+
+        .enterGridData('#grdLotTracking', 0, 'colLotId', 'LOT-01').wait(500)
+        .selectGridComboRowByFilter('#grdLotTracking', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdLotTracking', 0, 'colLotQuantity', '1000').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colLotGrossWeight', '1000').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colLotTareWeight', '0').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colLotNetWeight', '1000').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colLotWeightUOM', 'Bushels').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colLotStorageLocation', 'RM Storage').wait(500)
+
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblGrossWgt').text;
+            if (total == 'Gross: 1,000.00') {
+                t.ok(true, 'Gross is correct.');
+            }
+            else {
+                t.ok(false, 'Grossl is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblNetWgt').text;
+            if (total == 'Net: 1,000.00') {
+                t.ok(true, 'Net is correct.');
+            }
+            else {
+                t.ok(false, 'Net is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblTotal').text;
+            if (total == 'Total: 10,000.00') {
+                t.ok(true, 'Total is correct.');
+            }
+            else {
+                t.ok(false, 'Total is incorrect.');
+            }
+            next();
+        }).wait(200)
+        .markSuccess('======== Enter/Select Inventory Recepit Details and Check Fields========')
+
+        .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
+        .clickButton('#btnRecap').wait(300)
+        .waitTillLoaded('Open Recap Screen Successful')
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapDebit', '10000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '21000-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapCredit', '10000').wait(500)
+        .markSuccess('======== Open Recap Screen and Check Details Successful========')
+
+        .displayText('======== #4. Post Inventory Receipt ========')
+        .clickButton('#btnPost').wait(500)
+        .waitTillLoaded('Inventory Post Successful')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Post Inventory Receipt Successful ========')
+        .markSuccess('======== Create Direct Receipt for Lotted Item Successful! ========')
+
+
+        //Scenario 2:  Add Inventory Shipmnent
+        .displayText('"======== Scenario 2.1:  Add Direct IS for NON Lotted Item ========"').wait(500)
+        .displayText('"======== #1 Open New Inventory Shipment Screen ========"').wait(500)
+        .openScreen('Inventory Shipments').wait(1000)
+        .waitTillLoaded('Open Inventory Shipments Search Screen Successful').wait(500)
+        .clickButton('#btnNew').wait(500)
+        .waitTillVisible('icinventoryshipment','').wait(500)
+        .markSuccess('Open New Inventory Shipments Screen Successful')
+
+        .displayText('======== #2. Enter/Select Inventory Shipment Details and Check Fields========')
+        .selectComboRowByIndex('#cboOrderType',3).wait(200)
+        .selectComboRowByFilter('#cboCustomer', 'Apple Spice Sales', 500, 'strName', 0).wait(200)
+        //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
+        .selectComboRowByFilter('#cboFreightTerms', 'Truck', 500, 'strFreightTerm', 0).wait(200)
+        .selectComboRowByIndex('#cboShipFromAddress',0).wait(300)
+        .selectComboRowByIndex('#cboShipToAddress',0).wait(300)
+
+        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'NLTI - 02', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdInventoryShipment', 0, 'colQuantity', '100').wait(500)
+        .enterGridData('#grdInventoryShipment', 0, 'colUnitPrice', '15').wait(500)
+        .checkGridData('#grdInventoryShipment', 0, 'colLineTotal', '1500').wait(500)
+        .checkGridData('#grdInventoryShipment', 0, 'colOwnershipType', 'Own').wait(500)
+        .markSuccess('Enter/Select Inventory Shipment Details and Check Fields Successful')
+
+        .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
+        .clickButton('#btnRecap').wait(300)
+        .waitTillLoaded('Open Recap Screen Successful')
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapCredit', '1000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '16050-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapDebit', '1000').wait(500)
+        .markSuccess('======== Open Recap Screen and Check Details Successful ========')
+
+        .displayText('======== #4. Post Inventory Shipment ========')
+        .clickButton('#btnPost').wait(500)
+        .waitTillLoaded('')
+        .markSuccess('======== Posting of Inventory Shipment Successful ========')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Create Direct Shipment for Non Lotted Item Successful! ========')
+
+        //Scenario 2.2:  Add Direct IS for Lotted Item
+        .displayText('"======== Scenario 2.2:  Add Direct IS for NON Lotted Item ========"').wait(500)
+        .displayText('"======== #1 Open New Inventory Shipment Screen ========"').wait(500)
+        .openScreen('Inventory Shipments').wait(1000)
+        .waitTillLoaded('Open Inventory Shipments Search Screen Successful').wait(500)
+        .clickButton('#btnNew').wait(500)
+        .waitTillVisible('icinventoryshipment','').wait(500)
+        .markSuccess('Open New Inventory Shipments Screen Successful')
+
+        .displayText('======== #2. Enter/Select Inventory Shipment Details and Check Fields========')
+        .selectComboRowByIndex('#cboOrderType',3).wait(200)
+        .selectComboRowByFilter('#cboCustomer', 'Apple Spice Sales', 500, 'strName', 0).wait(200)
+        //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
+        .selectComboRowByFilter('#cboFreightTerms', 'Truck', 500, 'strFreightTerm', 0).wait(200)
+        .selectComboRowByIndex('#cboShipFromAddress',0).wait(300)
+        .selectComboRowByIndex('#cboShipToAddress',0).wait(300)
+
+        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdInventoryShipment', 0, 'colQuantity', '100').wait(500)
+        .enterGridData('#grdInventoryShipment', 0, 'colUnitPrice', '15').wait(500)
+        .checkGridData('#grdInventoryShipment', 0, 'colLineTotal', '1500').wait(500)
+        .checkGridData('#grdInventoryShipment', 0, 'colOwnershipType', 'Own').wait(500)
+
+        .selectGridComboRowByFilter('#grdLotTracking', 0, 'strLotId', 'LOT-01', 300, 'strLotNumber').wait(1000)
+        .enterGridData('#grdLotTracking', 0, 'colShipQty', '100').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colLotUOM', 'Bushels').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colLotWeightUOM', 'Bushels').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colGrossWeight', '100').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colTareWeight', '0').wait(500)
+        .checkGridData('#grdLotTracking', 0, 'colNetWeight', '100').wait(500)
+        .markSuccess('Enter/Select Inventory Shipment Details and Check Fields Successful')
+
+        .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
+        .clickButton('#btnRecap').wait(300)
+        .waitTillLoaded('Open Recap Screen Successful')
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapCredit', '1000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '16050-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapDebit', '1000').wait(500)
+        .markSuccess('======== Open Recap Screen and Check Details Successful ========')
+
+        .displayText('======== #4. Post Inventory Shipment ========')
+        .clickButton('#btnPost').wait(500)
+        .waitTillLoaded('')
+        .markSuccess('======== Posting of Inventory Shipment Successful ========')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Create Direct Shipment for Non Lotted Item Successful! ========')
+
+
+        //Scenario 3:  Add Inventory Transfers
+        .displayText('"======== Scenario 3:  Add Inventory Transfer ========"').wait(500)
+        .displayText('"======== #1 Open New Inventory Transfer Screen ========"').wait(500)
+        .openScreen('Inventory Transfers').wait(1000)
+        .waitTillLoaded('Open Inventory Transfers Search Screen Successful').wait(500)
+        .clickButton('#btnNew').wait(500)
+
+        .displayText('======== #2. Enter/Select Inventory Transfer Details and Check Fields========')
+        .selectComboRowByFilter('#cboTransferType', 'Location to Location', 500, 'strTransferType', 0).wait(200)
+        .selectComboRowByFilter('#cboFromLocation', '0001 - Fort Wayne', 500, 'intFromLocationId', 0).wait(200)
+        .selectComboRowByFilter('#cboToLocation', '0001 - Fort Wayne', 500, 'intToLocationId', 0).wait(200)
+
+        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strFromSubLocationName', 'Raw Station', 300, 'strFromSubLocationName').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strFromStorageLocationName', 'RM Storage', 300, 'strFromStorageLocationName').wait(500)
+        .checkGridData('#grdInventoryTransfer', 0, 'colOwnershipType', 'Own').wait(300)
+        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strLotNumber', 'LOT-01', 300, 'strLotNumber').wait(500)
+        .checkGridData('#grdInventoryTransfer', 0, 'colAvailableUOM', 'Bushels').wait(300)
+        .enterGridData('#grdInventoryTransfer', 0, 'colTransferQty', '100').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strToSubLocationName', 'FG Station', 300, 'strToSubLocationName').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strToStorageLocationName', 'FG Storage', 300, 'strToStorageLocationName').wait(500)
+
+        .displayText('======== #3. Post Inventory Transfer ========')
+        .clickButton('#btnPost').wait(500)
+        .waitTillLoaded('Post Successful')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Post Inventory Transfer Successful! ========')
+
+
+        //Scenario 4: Add Inventory Adjustment
+        .displayText('"======== Scenario 4.1:  Add Inventory Adjustment ========"').wait(500)
+        .displayText('"======== #1 Open New Inventory Adjustment Screen ========"').wait(500)
+        .openScreen('Inventory Adjustments').wait(1000)
+        .waitTillLoaded('Open Inventory Transfers Search Screen Successful').wait(500)
+        .clickButton('#btnNew').wait(500)
+
+        .displayText('"======== #2 Quantity Change ========"').wait(500)
+        .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
+        .selectComboRowByIndex('#cboAdjustmentType',0).wait(300)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strSubLocation', 'Raw Station', 300, 'strSubLocation').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strStorageLocation', 'RM Storage', 300, 'strStorageLocation').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strLotNumber', 'LOT-01', 300, 'strLotNumber').wait(500)
+        .checkGridData('#grdInventoryAdjustment', 0, 'colUOM', 'Bushels').wait(300)
+        .enterGridData('#grdInventoryAdjustment', 0, 'colAdjustByQuantity', '200').wait(500)
+        .checkGridData('#grdInventoryAdjustment', 0, 'colUnitCost', '10').wait(300)
+        .checkGridData('#grdInventoryAdjustment', 0, 'colNewUnitCost', '10').wait(300)
+        .markSuccess('======== Enter Details successful ========')
+
+        .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
+        .clickButton('#btnRecap').wait(300)
+        .waitTillLoaded('Open Recap Screen Successful')
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapDebit', '2000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '16040-0001-000').wait(500)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapCredit', '2000').wait(500)
+        .markSuccess('======== Open Recap Screen and Check Details Successful========')
+
+        .displayText('======== #4. Post Inventory Adjustment ========')
+        .clickButton('#btnPost').wait(500)
+        .waitTillLoaded('Inventory Post Successful')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Post Inventory Adjustment Successful ========')
+
+        //#4.2 Lot Move
+        .clickButton('#btnNew').wait(500)
+
+        .displayText('"======== #4.2 Lot Move ========"').wait(500)
+        .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
+        .selectComboRowByIndex('#cboAdjustmentType',7).wait(300)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strSubLocation', 'Raw Station', 300, 'strSubLocation').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strStorageLocation', 'RM Storage', 300, 'strStorageLocation').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strLotNumber', 'LOT-01', 300, 'strLotNumber').wait(500)
+        .enterGridData('#grdInventoryAdjustment', 0, 'colNewLotNumber', 'LOT-02').wait(500)
+        .checkGridData('#grdInventoryAdjustment', 0, 'colUOM', 'Bushels').wait(300)
+        .enterGridData('#grdInventoryAdjustment', 0, 'colAdjustByQuantity', '-200').wait(500)
+        //.checkGridData('#grdInventoryAdjustment', 0, 'colUnitCost', '10').wait(300)
+        //.selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strNewStorageLocation', 'RM Bin 1', 300, 'strNewStorageLocation').wait(500)
+        //.checkGridData('#grdInventoryAdjustment', 0, 'colNewLocation', '0001 - Fort Wayne').wait(300)
+        .checkGridData('#grdInventoryAdjustment', 0, 'colSubLocation', 'Raw Station').wait(300)
+        .markSuccess('======== Enter Details successful ========')
+
+        .displayText('======== #6 Open Recap Screen and Check Account IDs and Totlas ========')
+        .clickButton('#btnRecap').wait(300)
+        .waitTillLoaded('Open Recap Screen Successful')
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(300)
+        .checkGridData('#grdRecapTransaction', 0, 'colRecapCredit', '2000').wait(300)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '16000-0001-000').wait(300)
+        .checkGridData('#grdRecapTransaction', 1, 'colRecapDebit', '2000').wait(300)
+
+        .checkGridData('#grdRecapTransaction', 2, 'colRecapAccountId', '16040-0001-000').wait(300)
+        .checkGridData('#grdRecapTransaction', 2, 'colRecapDebit', '2000').wait(300)
+        .checkGridData('#grdRecapTransaction', 3, 'colRecapAccountId', '16040-0001-000').wait(300)
+        .checkGridData('#grdRecapTransaction', 3, 'colRecapCredit', '2000').wait(300)
+        .markSuccess('======== Open Recap Screen and Check Details Successful========')
+
+        .displayText('======== #7. Post Inventory Adjustment ========')
+        .clickButton('#btnPost').wait(500)
+        .waitTillLoaded('Inventory Post Successful')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Post Inventory Adjustment Successful ========')
+        .markSuccess('======== Create Quantity Change Adjustment for Lotted Item Successful! ========')
+
+
+        //Scenario 5: Add Inventory Count
+        .displayText('"======== Scenario 5:  Add Inventory Count ========"').wait(500)
+        .displayText('"======== #1 Open New Inventory Count Screen ========"').wait(500)
+        .openScreen('Inventory Count').wait(500)
+        .waitTillLoaded('Open Inventory Count Search Screen Successful').wait(500)
+        .clickButton('#btnNew').wait(500)
+        .waitTillVisible('inventorycount','').wait(1000)
+        .markSuccess('Open New Inventory Count Screen Successful')
+
+        .displayText('======== #2. Enter/Select Inventory Count Details and Check Fields========')
+        .selectComboRowByFilter('#cboCategory', 'Grains', 500, 'strCategoryCode', 0).wait(200)
+        .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode', 0).wait(200)
+        .selectComboRowByFilter('#cboSubLocation', 'Raw Station', 500, 'strSubLocationName', 0).wait(200)
+        .selectComboRowByFilter('#cboStorageLocation', 'RM Storage', 500, 'strName', 0).wait(200)
+        .clickCheckBox('#chkIncludeZeroOnHand', true).wait(300)
+        .clickCheckBox('#chkIncludeOnHand', true).wait(300)
+        .clickCheckBox('#chkScannedCountEntry', true).wait(300)
+        .clickCheckBox('#chkCountByLots', true).wait(300)
+        .clickCheckBox('#chkCountByPallets', true).wait(300)
+
+
+        .clickButton('#btnFetch').wait(300)
+        .checkGridData('#grdPhysicalCount', 0, 'colItem', 'LTI - 01').wait(200)
+        .checkGridData('#grdPhysicalCount', 0, 'colCategory', 'Grains').wait(200)
+        .checkGridData('#grdPhysicalCount', 0, 'colSubLocation', 'Raw Station').wait(200)
+        .checkGridData('#grdPhysicalCount', 0, 'colStorageLocation', 'RM Storage').wait(200)
+        .checkGridData('#grdPhysicalCount', 0, 'colLotNo', 'LOT-01').wait(200)
+        .markSuccess('Enter/Select Inventory Count Details and Check Fields Successful')
+
+        .displayText('======== #3. Print Count Sheets ========')
+        .clickButton('#btnPrintCountSheets').wait(500)
+        .waitTillVisible('search', 'Print Count Sheets Displayed!')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Create Inventory Count Successful! ========')
+
+
+        //Scenario 6: Add Storage Measurement Reading
+        .displayText('"======== Scenario 6:  Add Storage Measurement Reading ========"').wait(500)
+        .displayText('"======== #1 Open New Storage Measurement Reading Screen ========"').wait(500)
+        .openScreen('Storage Measurement Reading').wait(500)
+        .waitTillLoaded('Open Storage Measurement Reading Search Screen Successful').wait(500)
+        //.clickButton('#btnClose').wait(300)
+        //.checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question').wait(1000)
+        //.clickMessageBoxButton('no').wait(300)
+        .clickButton('#btnNew').wait(300)
+        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question').wait(1000)
+        .clickMessageBoxButton('no').wait(300)
+        .waitTillVisible('storagemeasurementreading','').wait(1000)
+        .markSuccess('Open New Storage Measurement Reading Screen Successful')
+
+        .displayText('======== #2. Enter/Select Storage Measurement Reading Details and Check Fields========')
+        .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
+        .selectGridComboRowByFilter('#grdStorageMeasurementReading', 0, 'strCommodity', 'Corn', 300, 'strCommodity').wait(500)
+        //.selectGridComboRowByFilter('#grdStorageMeasurementReading', 0, 'strItemNo', 'LTI-01', 500, 'strItemNo').wait(1000)
+        .selectGridComboRowByIndex('#grdStorageMeasurementReading', 0, 'strItemNo','0', 'strItemNo').wait(100)
+        .selectGridComboRowByFilter('#grdStorageMeasurementReading', 0, 'strStorageLocationName', 'RM Storage', 300, 'strStorageLocationName').wait(500)
+        .checkGridData('#grdStorageMeasurementReading', 0, 'colSubLocation', 'Raw Station').wait(200)
+        .enterGridData('#grdStorageMeasurementReading', 0, 'colAirSpaceReading', '100').wait(500)
+        .enterGridData('#grdStorageMeasurementReading', 0, 'colCashPrice', '15').wait(500)
+        .displayText('======== Enter/Select Storage Measurement Reading Details and Check Fields Successful========')
+
+
+        .displayText('======== #3. Save Storage Measurement Reading ========')
+        .clickButton('#btnSave').wait(500)
+        .markSuccess('======== Saveing Storage Measurement Reading Successful ========')
+        .clickButton('#btnClose').wait(200)
+        .waitTillLoaded('')
+        .markSuccess('======== Create Storage Measurement Reading Successful! ========')
+
+
         .done();
 });
 

@@ -26,6 +26,16 @@ Harness.start(
     { group: 'SmokeTesting',
         items: [
             {
+                url: 'SmokeTesting/ICSmokeTests.js',
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
+
+                ]
+            },
+
+            {
                 url: 'SmokeTesting/ICOpenScreens.js',
                 preload: [
                     testEnginePath,
@@ -34,6 +44,7 @@ Harness.start(
 
                 ]
             },
+
 
             {
                 url: 'SmokeTesting/ICAddMaintenance.js',
