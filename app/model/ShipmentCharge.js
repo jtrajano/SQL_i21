@@ -89,7 +89,7 @@ Ext.define('Inventory.model.ShipmentCharge', {
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) ||
                 this.get('intEntityVendorId') === ShipmentCustomerId) {
                 errors.add({
-                    field: 'ysnAccrue',
+                    field: 'strVendorName',
                     message: 'Vendor for Other Charge Item ' + this.get('strItemNo') + '  is required to accrue.'
                 })
             }
