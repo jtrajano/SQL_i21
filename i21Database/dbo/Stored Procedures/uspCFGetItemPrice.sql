@@ -60,6 +60,16 @@ AS
 --3. Pricing Level, 
 --4. Standard Pricing
 
+DECLARE @CFItemPricingOnly INT
+IF(@CFTransactionType = 'Local/Network')
+BEGIN
+	SET @CFItemPricingOnly = 0
+END
+ELSE
+BEGIN
+	SET @CFItemPricingOnly = 1
+END
+
 IF (@CFCreditCard = 1)
 BEGIN
 	IF (@CFOriginalPrice IS NOT NULL)
@@ -94,6 +104,10 @@ BEGIN
 END
 ELSE
 BEGIN
+
+DECLARE @currency INT
+EXEC @currency = dbo.fnSMGetDefaultCurrency 'FUNCTIONAL'
+
 EXEC [uspARGetItemPrice] 
  @ItemUOMId = @CFItemUOMId
 ,@TransactionDate = @CFTransactionDate
@@ -101,6 +115,8 @@ EXEC [uspARGetItemPrice]
 ,@CustomerId = @CFCustomerId    
 ,@LocationId = @CFLocationId    
 ,@Quantity = @CFQuantity    
+,@CurrencyId = @currency
+,@ItemPricingOnly = @CFItemPricingOnly
 ,@Price = @CFPriceOut OUTPUT  
 ,@Pricing = @CFPricingOut OUTPUT
 ,@ContractHeaderId = @CFContractHeaderId OUTPUT
