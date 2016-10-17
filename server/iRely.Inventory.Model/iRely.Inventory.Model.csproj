@@ -53,7 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\i21_resources\SharedAssemblyInfo.cs">
+    <Compile Include="..\..\..\resources\SharedAssemblyInfo.cs">
       <Link>SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Configuration\tblICParentLotMap.cs" />
