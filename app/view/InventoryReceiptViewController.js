@@ -947,7 +947,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Update the summary fields whenever the receipt item data changed.
         me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function (store) {
             store.on('update', function () {
-                me.doOtherChargeTaxCalculate(win);
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
@@ -5113,6 +5112,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
+            var countCharges = charges.getRange().length;
+            var lineCharge = 1;
+
             if (charges) {
                Ext.Array.each(charges.data.items, function (charge) {
                    if (!charge.dummy) {
@@ -5168,6 +5170,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             });
 
                             charge.set('dblTax', totalItemTax);
+                            lineCharge++;
+
+                            if(lineCharge === countCharges) {
+                                context.data.saveRecord();
+                            }
                          }
 
                          //get EntityIdId and BillShipToLocationId
@@ -5193,13 +5200,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         };
                         iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
                      }
-                   });
-               
+                });
             }
         }
     },
 
-    doOtherChargeCalculate: function(context, current) {
+    doOtherChargeCalculate: function(win) {
+        var context = win.context;
+        var current = win.viewModel.data.current;
+        var me = win.controller;
+
         if (context && current) {
             Ext.Ajax.request({
                 timeout: 120000,
@@ -5212,6 +5222,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                     else {
                         context.configuration.paging.store.load();
+
+                        var task = new Ext.util.DelayedTask(function () {
+                            me.doOtherChargeTaxCalculate(win);
+                        });
+                        task.delay(1500);
                     }
                 },
                 failure: function (response) {
@@ -5230,14 +5245,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // If there is no data change, do the ajax request.
         if (!context.data.hasChanges()) {
-            me.doOtherChargeCalculate(context, current);
+            me.doOtherChargeCalculate(win);
             return;
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
             successFn: function () {
-                me.doOtherChargeCalculate(context, current);
+                me.doOtherChargeCalculate(win);
             }
         });
     },
