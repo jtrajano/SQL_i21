@@ -270,4 +270,12 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\12_EM\16_CleanCustomerProductVersion.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\21_PR\1_1620_to_1630.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\22_PAT\1_StaticTable.sql" />
+    <None Include="Scripts\Pre-Deployment\22_PAT\2_AddTransferType.sql" />
+    <None Include="Scripts\Pre-Deployment\22_PAT\3_MigrateDataChanges.sql" />
+  </ItemGroup>
 </Project>
