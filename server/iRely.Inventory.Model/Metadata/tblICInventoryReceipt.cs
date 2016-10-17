@@ -998,9 +998,12 @@ namespace iRely.Inventory.Model
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
 
-
     public class tblICInventoryReceiptCharge : BaseEntity
     {
+        public tblICInventoryReceiptCharge()
+        {
+            this.tblICInventoryReceiptChargeTaxes = new List<tblICInventoryReceiptChargeTax>();
+        }
         public int intInventoryReceiptChargeId { get; set; }
         public int intInventoryReceiptId { get; set; }
         public int? intContractId { get; set; }
@@ -1023,6 +1026,7 @@ namespace iRely.Inventory.Model
    //     public decimal? dblExchangeRate { get; set; }
    //     public int? intCent { get; set; }
         public bool? ysnSubCurrency { get; set; }
+        public decimal? dblTax { get; set; }
 
         private string _contractNo;
         [NotMapped]
@@ -1199,6 +1203,7 @@ namespace iRely.Inventory.Model
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public vyuICGetInventoryReceiptCharge vyuICGetInventoryReceiptCharge { get; set; }
+        public ICollection<tblICInventoryReceiptChargeTax> tblICInventoryReceiptChargeTaxes { get; set; }
     }
 
     public class vyuICGetInventoryReceiptCharge
@@ -1706,5 +1711,64 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+    }
+
+    public class tblICInventoryReceiptChargeTax : BaseEntity
+    {
+        public int intInventoryReceiptChargeTaxId { get; set; }
+        public int intInventoryReceiptChargeId { get; set; }
+        public int? intTaxGroupId { get; set; }
+        public int? intTaxCodeId { get; set; }
+        public int? intTaxClassId { get; set; }
+        public string strTaxableByOtherTaxes { get; set; }
+        public string strCalculationMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblAdjustedTax { get; set; }
+        public int? intTaxAccountId { get; set; }
+        public bool? ysnTaxAdjusted { get; set; }
+        public bool? ysnCheckoffTax { get; set; }
+        public string strTaxCode { get; set; }
+        public int? intSort { get; set; }
+
+        public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
+    }
+
+    public class vyuICGetInventoryReceiptChargeTax
+    {
+        public int intInventoryReceiptChargeTaxId { get; set; }
+        public int intInventoryReceiptChargeId { get; set; }
+        public int intInventoryReceiptId { get; set; }
+        public int? intChargeId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public int? intTaxGroupId { get; set; }
+        public string strTaxGroup { get; set; }
+        public int? intTaxClassId { get; set; }
+        public string strTaxClass { get; set; }
+        public int? intTaxCodeId { get; set; }
+        public string strTaxCode { get; set; }
+        public string strTaxableByOtherTaxes { get; set; }
+        public string strCalculationMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblAdjustedTax { get; set; }
+        public int? intTaxAccountId { get; set; }
+        public bool? ysnTaxAdjusted { get; set; }
+        public bool? ysnCheckoffTax { get; set; }
+        public int? intSort { get; set; }
+    }
+
+    public class vyuICGetChargeTaxDetails
+    {
+        public int? intKey { get; set; }
+        public int? intInventoryReceiptChargeTaxId { get; set; }
+        public int? intChargeId { get; set; }
+        public string strItemNo { get; set; }
+        public string strTaxGroup { get; set; }
+        public string strTaxCode { get; set; }
+        public string strCalculationMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public decimal? dblTax { get; set; }
     }
 }

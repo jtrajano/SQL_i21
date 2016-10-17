@@ -1,7 +1,7 @@
-
 var Harness = new Siesta.Harness.Browser.ExtJS (),
     testEnginePath = '../../TestEngine/TestEngine.js',
     commonSM =  '../../i21/test-ui/CommonSM.js';
+//  commonIC =  'CommonIC.js';
 
 
 
@@ -26,23 +26,59 @@ Harness.start(
     { group: 'SmokeTesting',
         items: [
             {
-                url: 'SmokeTesting/OpenICScreens.js',
+                url: 'SmokeTesting/ICOpenScreens.js',
                 preload: [
                     testEnginePath,
-                    commonSM
+                    commonSM,
+                    'CommonIC.js'
 
                 ]
             },
+
             {
-                url: 'SmokeTesting/AddInventoryItem.js',
+                url: 'SmokeTesting/ICAddMaintenance.js',
                 preload: [
                     testEnginePath,
-                    commonSM
+                    commonSM,
+                    'CommonIC.js'
 
+                ]
+            },
+
+            {
+                url: 'SmokeTesting/ICAddTransactions.js',
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
+
+                ]
+            }
+
+        ]
+    },
+
+    { group: 'InventoryReceipt',
+        items: [
+            {
+                url: 'InventoryReceipt/ICAddTransactions.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
+                ]
+            },
+            {
+                url: 'InventoryReceipt/DeleteInventoryReceipt.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
                 ]
             }
         ]
     },
+
     { group: 'Item',
         items: [
             {
@@ -83,44 +119,85 @@ Harness.start(
             }
         ]
     },
+
+    { group: 'Commodity',
+        items: [
+            {
+                url: 'Commodity/AddCommodity.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
+                ]
+            },
+            {
+                url: 'Commodity/DeleteCommodity.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
+                ]
+            }
+        ]
+    },
+
+    { group: 'Category',
+        items: [
+            {
+                url: 'Category/AddCategory.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
+                ]
+            },
+            {
+                url: 'Category/DeleteCategory.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
+                ]
+            }
+        ]
+    },
+
     { group: 'InventoryUOM',
         items: [
             {
                 url: 'InventoryUOM/AddInventoryUOM.js',  // url of the js file, containing actual test code
                 preload: [
-                    testEnginePath
-                ]
-            },
-            {
-                url: 'InventoryUOM/DeleteInventoryUOM.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
                 ]
             }
+
         ]
     },
-    { group: 'FuelCategory',
+
+    { group: 'StorageLocation',
         items: [
             {
-                url: 'FuelCategory/AddFuelCategory.js',
+                url: 'StorageLocation/AddStorageLocation.js',  // url of the js file, containing actual test code
                 preload: [
-                    testEnginePath
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
                 ]
             },
             {
-                url: 'FuelCategory/AddFuelCategory.js',
+                url: 'StorageLocation/DeleteStorageLocation.js',  // url of the js file, containing actual test code
                 preload: [
-                    testEnginePath
-                ]
-            },
-            {
-                url: 'FuelCategory/DeleteFuelCategory.js',
-                preload: [
-                    testEnginePath
+                    testEnginePath,
+                    commonSM,
+                    'CommonIC.js'
                 ]
             }
         ]
     },
+
+
     { group: 'FuelCode',
         items: [
             {
@@ -298,22 +375,7 @@ Harness.start(
             }
         ]
     },
-    { group: 'StorageUnitType',
-        items: [
-            {
-                url: 'StorageUnitType/AddStorageUnitType.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
-                ]
-            },
-            {
-                url: 'StorageUnitType/DeleteStorageUnitType.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
-                ]
-            }
-        ]
-    },
+
     { group: 'ItemSubstitution',
         items: [
             {
@@ -410,39 +472,6 @@ Harness.start(
             }
         ]
     },
-    { group: 'Category',
-        items: [
-            {
-                url: 'Category/AddCategory.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
-                ]
-            },
-            {
-                url: 'Category/DeleteCategory.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
-                ]
-            }
-        ]
-    },
-
-    { group: 'Commodity',
-        items: [
-            {
-                url: 'Commodity/AddCommodity.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
-                ]
-            },
-            {
-                url: 'Commodity/DeleteCommodity.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
-                ]
-            }
-        ]
-    },
 
 
     { group: 'PackType',
@@ -471,22 +500,6 @@ Harness.start(
             },
             {
                 url: 'InventoryCountGroup/DeleteInventoryCountGroup.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
-                ]
-            }
-        ]
-    },
-    { group: 'InventoryReceipt',
-        items: [
-            {
-                url: 'InventoryReceipt/AddInventoryReceiptDirect.js',  // url of the js file, containing actual test code
-                preload: [
-                    testEnginePath
-                ]
-            },
-            {
-                url: 'InventoryReceipt/DeleteInventoryReceipt.js',  // url of the js file, containing actual test code
                 preload: [
                     testEnginePath
                 ]

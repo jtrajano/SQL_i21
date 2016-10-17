@@ -42,7 +42,7 @@ Ext.define('Inventory.view.Item', {
 
     height: 650,
     hidden: false,
-    width: 950,
+    width: 935,
     layout: 'fit',
     collapsible: true,
     title: 'Inventory Items',
@@ -432,7 +432,7 @@ Ext.define('Inventory.view.Item', {
                                                 itemId: 'grdUnitOfMeasure',
                                                 title: 'Unit of Measure',
                                                 columnLines: true,
-                                                forceFit: true,
+                                                forceFit: false,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -4019,6 +4019,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 hidden: true,
                                                                 itemId: 'btnInsertPricing',
+                                                                arrowVisible: false,
                                                                 iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },

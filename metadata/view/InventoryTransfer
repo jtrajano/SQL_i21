@@ -289,6 +289,7 @@
                             "userConfig": {
                                 "bodyPadding": 5,
                                 "container|align": "stretch",
+                                "itemId": "pgeDetails",
                                 "layout": "vbox",
                                 "title": "Details"
                             },
@@ -1115,7 +1116,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter127",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2098,6 +2099,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "pgAttachments",
                                 "layout": "fit",
                                 "title": "Attachments"
                             },

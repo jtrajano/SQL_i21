@@ -1,20 +1,47 @@
 {
   "name": "inventory",
   "version": "0.0.1",
+  "author": "Wendell Wayne H. Estrada",
+  "license": "ISC",
+  "keywords": [],
+  "scripts": {
+    "preinstall": "npm install -g karma-cli",
+    "postinstall": "npm install -g gulp-cli"
+  },
+  "dependencies": {
+    "karma-cli": "*"
+  },
   "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-init": "^0.3.2",
-    "grunt-open": "^0.2.3",
-    "grunt-strip-code": "^1.0.4",
-    "grunt-template": "^1.0.0",
+    "chai": "^3.5.0",
+    "child_process": "^1.0.2",
+    "esprima": "^3.0.0",
+    "event-stream": "^3.3.4",
+    "fs": "0.0.1-security",
     "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-js-prettify": "^0.1.0",
     "gulp-livereload": "^3.8.1",
+    "gulp-open": "^2.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^2.0.0",
+    "gulp-util": "^3.0.7",
     "karma": "^1.2.0",
     "karma-chai": "^0.1.0",
-    "karma-mocha": "^1.1.1",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-html-reporter": "^0.2.7",
+    "karma-mocha": "^1.2.0",
+    "karma-mocha-reporter": "^2.2.0",
+    "karma-phantomjs-launcher": "^1.0.2",
     "karma-sinon": "^1.0.5",
-    "mocha": "^3.0.2"
+    "merge-stream": "^1.0.0",
+    "mocha": "^3.0.2",
+    "path": "^0.12.7",
+    "sinon": "^1.17.6",
+    "stream": "0.0.2",
+    "through": "^2.3.8",
+    "through2": "^2.0.1",
+    "topo-sort": "^1.0.0",
+    "transform": "^1.1.2",
+    "underscore": "^1.8.3"
   }
 }

@@ -79,6 +79,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\resources\SharedAssemblyInfo.cs">
+      <Link>SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Common\Common.cs" />
     <Compile Include="Common\GlobalSettings.cs" />
     <Compile Include="Common\Import\ImportData.cs" />
@@ -123,6 +126,7 @@
     <Compile Include="Implementation\CommodityUOMBl.cs" />
     <Compile Include="Implementation\CompanyPreferenceBl.cs" />
     <Compile Include="Implementation\CategoryTaxBl.cs" />
+    <Compile Include="Implementation\InventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Implementation\MeasurementBl.cs" />
     <Compile Include="Implementation\InventoryReceiptItemLotBl.cs" />
     <Compile Include="Implementation\ParentLotBl.cs" />
@@ -154,6 +158,7 @@
     <Compile Include="Implementation\StorageUnitTypeBl.cs" />
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
+    <Compile Include="Interface\IInventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Interface\IMeasurementBl.cs" />
     <Compile Include="Interface\IInventoryReceiptItemLotBl.cs" />
     <Compile Include="Interface\IParentLotBl.cs" />

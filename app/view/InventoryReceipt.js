@@ -2204,6 +2204,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         text: 'Calculate'
                                                                     },
                                                                     {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnChargeTaxDetails',
+                                                                        iconCls: 'small-open',
+                                                                        text: 'View Tax Details'
+                                                                    },
+                                                                    {
                                                                         xtype: 'filter1'
                                                                     }
                                                                 ]
@@ -2484,6 +2491,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 editor: {
                                                                     xtype: 'checkboxfield'
                                                                 }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                itemId: 'colChargeTax',
+                                                                width: 85,
+                                                                dataIndex: 'dblChargeTax',
+                                                                text: 'Tax'
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -2497,7 +2511,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             }
                                                         ],
                                                         selModel: {
-                                                            selType: 'checkboxmodel'
+                                                            selType: 'checkboxmodel',
+                                                            allowDeselect: true,
+                                                            mode: 'SINGLE'
                                                         }
                                                     },
                                                     {

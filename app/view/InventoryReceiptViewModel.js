@@ -241,9 +241,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         chargeUOM: {
             type: 'icbuffereditempricingview'
         },
-        vendor: {
-            type: 'emvendorbuffered'
-        },
         grade: {
             type: 'icbufferedgradeattribute'
         },

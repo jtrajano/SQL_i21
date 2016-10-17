@@ -53,6 +53,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\resources\SharedAssemblyInfo.cs">
+      <Link>SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Configuration\tblICParentLotMap.cs" />
     <Compile Include="Configuration\tblICItemMotorFuelTaxMap.cs" />
     <Compile Include="Configuration\tblICStorageMeasurementReadingMap.cs" />

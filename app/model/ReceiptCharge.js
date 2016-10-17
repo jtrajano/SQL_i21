@@ -5,6 +5,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
     extend: 'iRely.BaseEntity',
 
     requires: [
+        'Inventory.model.ReceiptChargeTax',
         'Ext.data.Field'
     ],
 
@@ -54,7 +55,8 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'strCurrency', type: 'string' },
         { name: 'dblExchangeRate', type: 'float', allowNull: true  },
         { name: 'intCent', type: 'int', allowNull: true },*/
-        { name: 'ysnSubCurrency', type: 'boolean', allowNull: true  }
+        { name: 'ysnSubCurrency', type: 'boolean', allowNull: true  },
+        { name: 'dblTax', type: 'float' },
     ],
 
     validators: [

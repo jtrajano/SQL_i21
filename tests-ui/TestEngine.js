@@ -375,7 +375,7 @@ Ext.define('iRely.TestEngine', {
         var me = this,
             t = me.t,
             chain = me.chain,
-            timeout = 30000;
+            timeout = 60000;
 
         var fn = function(next) {
             var t = this,
@@ -390,11 +390,11 @@ Ext.define('iRely.TestEngine', {
                 record = me.getRecordFromMenu(folder, folderName),
                     node = me.getNodeFromMenu(folder, folderName);
                 if(!record.data.expanded) {
-                    t.diag('Expanding Folder ' + folderName);
+                    //t.diag('Expanding Folder ' + folderName);
                     t.click(node, next);
                 }
                 else {
-                    t.diag('Folder ' + folderName + ' is already Expanded');
+                    //t.diag('Folder ' + folderName + ' is already Expanded');
                     next();
                 }
             },this, timeout)
@@ -411,23 +411,33 @@ Ext.define('iRely.TestEngine', {
      *
      * @returns {iRely.TestEngine}
      */
-    collapseMenu: function(folderName) {
+    collapseMenu: function(folderName, type) {
         var me = this,
             t = me.t,
-            chain = me.chain;
+            chain = me.chain,
+            timeout = 30000;
 
         var fn = function(next) {
-            var record = me.getRecordFromMenu('folder', folderName),
-                node = me.getNodeFromMenu('folder', folderName);
+            var t = this,
+                folder = type !== undefined ? type : 'folder',
+                record = me.getRecordFromMenu(folder, folderName),
+                node = null;
 
-            if(record.data.expanded) {
-                t.diag('Collapsing Folder ' + folderName);
-                t.click(node, next);
-            }
-            else {
-                t.diag('Folder ' + folderName + ' is already Collapsed');
-                next();
-            }
+            t.waitForFn(function() {
+                node = me.getNodeFromMenu(folder, folderName);
+                if(node) return true;
+            },function() {
+                record = me.getRecordFromMenu(folder, folderName),
+                    node = me.getNodeFromMenu(folder, folderName);
+                if(record.data.expanded) {
+                    t.diag('Collapsing Folder ' + folderName);
+                    t.click(node, next);
+                }
+                else {
+                    t.diag('Folder ' + folderName + ' is already Collapsed');
+                    next();
+                }
+            },this, timeout)
         };
 
         chain.push(fn);
@@ -453,8 +463,6 @@ Ext.define('iRely.TestEngine', {
             var t = this,
                 menu = type !== undefined ? type : 'screen',
                 node = null;
-
-            t.diag('Opening Screen ' + screenName);
 
             t.waitForFn(function() {
                 node = me.getNodeFromMenu(menu, screenName)
@@ -550,10 +558,6 @@ Ext.define('iRely.TestEngine', {
                             action: 'click',
                             target: button
                         },
-                        {
-                            action: 'wait',
-                            delay: 500
-                        },
                         function(next) {
                             var newActive = Ext.WindowManager.getActive();
                             if (newActive) {
@@ -561,7 +565,11 @@ Ext.define('iRely.TestEngine', {
                                     newActive.close();
                                 }
                             }
-                            next();
+                            var task = new Ext.util.DelayedTask(function(){
+                                next();
+                            });
+
+                            task.delay(1000);
                         },
                         next
                     ]);
@@ -674,7 +682,7 @@ Ext.define('iRely.TestEngine', {
             if (win) {
                 var field = win.down(item);
                 if (field) {
-                    var label = field.labelEl;
+                    var label = field.labelEl || field.el;
 
                     t.diag('Clicking label hyperlink ' + item);
                     t.click(label, next);
@@ -1082,7 +1090,10 @@ Ext.define('iRely.TestEngine', {
                         indexArrs = Ext.isArray(index) ? index : [index],
                         selected = [], bufferedData;
 
-                    if(store.buffered) {
+                    if(store.buffered && store.getCount() > store.config.pageSize) {
+                        bufferedData =  store.data.getRange(0, store.config.pageSize);
+                    }
+                    else{
                         bufferedData =  store.data.getRange(0, store.getCount());
                     }
 
@@ -1303,7 +1314,10 @@ Ext.define('iRely.TestEngine', {
                         indexArrs = Ext.isArray(index) ? index : [index],
                         selected = [], bufferedData;
 
-                    if(store.buffered) {
+                    if(store.buffered && store.getCount() > store.config.pageSize) {
+                        bufferedData =  store.data.getRange(0, store.config.pageSize);
+                    }
+                    else{
                         bufferedData =  store.data.getRange(0, store.getCount());
                     }
 
@@ -1471,13 +1485,9 @@ Ext.define('iRely.TestEngine', {
                             action: 'click',
                             target: trigger
                         },
-                        {
-                            action: 'wait',
-                            target: delay
-                        },
                         function(next) {
                             var panel = Ext.WindowManager.getActive(),
-//                                grid = combo.picker.getView() || combo.getPicker(),
+                                store = combo.getStore(),
                                 grid;
 
                             if (panel.getView) {
@@ -1486,14 +1496,47 @@ Ext.define('iRely.TestEngine', {
                                 grid = combo.getPicker();
                             }
 
-                            if (grid && grid.getNode) {
+                            if(!delay) delay = 1000;
+                            if(store.isLoading() == true){
+                                t.waitForStoresToLoad(store, function () {
+                                    if (grid && grid.getNode) {
+                                        var node = grid.getNode(index);
+                                        var task = new Ext.util.DelayedTask(function(){
+                                            t.click(node, next);
+                                        });
+
+                                        task.delay(delay);
+                                    }
+                                    else if(grid && grid.getView){
+                                        var view = grid.getView(),
+                                            node = view.getNode(index);
+                                        var task = new Ext.util.DelayedTask(function(){
+                                            t.click(node, next);
+                                        });
+
+                                        task.delay(delay);
+                                    } else {
+                                        t.ok(false, 'Combo Box is not existing.');
+                                        next();
+                                    }
+                                })
+                            }
+                            else if (grid && grid.getNode) {
                                 var node = grid.getNode(index);
-                                t.click(node, next);
+                                var task = new Ext.util.DelayedTask(function(){
+                                    t.click(node, next);
+                                });
+
+                                task.delay(delay);
                             }
                             else if(grid && grid.getView){
                                 var view = grid.getView(),
                                     node = view.getNode(index);
-                                t.click(node, next);
+                                var task = new Ext.util.DelayedTask(function(){
+                                    t.click(node, next);
+                                });
+
+                                task.delay(delay);
                             } else {
                                 t.ok(false, 'Combo Box is not existing.');
                                 next();
@@ -1543,11 +1586,9 @@ Ext.define('iRely.TestEngine', {
      *
      * @returns {iRely.TestEngine}
      */
-    selectComboRowByFilter: function(item, filter, delay, comboColumn) {
+    selectComboRowByFilter: function(item, filter, delay, comboColumn, index) {
         var me = this,
             chain = this.chain;
-
-        delay = delay ? delay : 0;
 
         var fn = function(next) {
             var t = this,
@@ -1592,6 +1633,10 @@ Ext.define('iRely.TestEngine', {
                     t.chain([
                         {
                             action: 'click',
+                            target: trigger
+                        },
+                        {
+                            action: 'click',
                             target: combo
                         },
                         function(next){
@@ -1601,16 +1646,26 @@ Ext.define('iRely.TestEngine', {
                         function(next) {
                             t.type(combo, filter, next);
                         },
-                        {
-                            action: 'wait',
-                            delay: delay
+                        function(next) {
+                            if(store.remoteFilter == true){
+                                t.waitForStoresToLoad(store, function () {
+                                    next();
+                                })
+                            }
+                            else {
+                                var task = new Ext.util.DelayedTask(function () {
+                                    next();
+                                });
+                                task.delay(1500);
+                            }
                         },
                         function(next){
                             var store = combo.store,
                                 storeCount = store.getCount();
 
+                            if(!delay) delay = 1000;
                             if (storeCount === 1){
-                                var comboGrid =  combo.picker;
+                                var comboGrid = combo.picker || combo.getPicker();
 
                                 if (typeof(comboGrid.getView) == "function") {
                                     var node = comboGrid.getView().getNode(0);
@@ -1618,17 +1673,40 @@ Ext.define('iRely.TestEngine', {
                                 } else {
                                     next();
                                 }
-                            } else {
+                            }
+                            else if(store.isLoading() == true) {
+                                t.waitForStoresToLoad(store, function () {
+                                    var filterRec = store.findExact(comboColumn, filter),
+                                        record = store.getAt(filterRec),
+                                        comboGrid1 =  combo.picker || combo.getPicker();
+
+                                    var task = new Ext.util.DelayedTask(function(){
+                                        if(index != null) filterRec = index;
+                                        if (typeof(comboGrid1.getView) == "function") {
+                                            var node1 = comboGrid1.getView().getNode(filterRec);
+                                            t.click(node1, next);
+                                        } else {
+                                            next();
+                                        }
+                                    });
+                                    task.delay(delay);
+                                })
+                            }
+                            else{
                                 var filterRec = store.findExact(comboColumn, filter),
                                     record = store.getAt(filterRec),
-                                    comboGrid1 =  combo.picker;
+                                    comboGrid1 =  combo.picker || combo.getPicker();
 
-                                if (typeof(comboGrid1.getView) == "function") {
-                                    var node1 = comboGrid1.getView().getNode(record);
-                                    t.click(node1, next);
-                                } else {
-                                    next();
-                                }
+                                var task = new Ext.util.DelayedTask(function(){
+                                    if(index != null) filterRec = index;
+                                    if (typeof(comboGrid1.getView) == "function") {
+                                        var node1 = comboGrid1.getView().getNode(filterRec);
+                                        t.click(node1, next);
+                                    } else {
+                                        next();
+                                    }
+                                });
+                                task.delay(delay);
                             }
                         },
                         next
@@ -1700,6 +1778,10 @@ Ext.define('iRely.TestEngine', {
                                 length = els.length,
                                 trigger = els[length - 1];
 
+                            var panel = Ext.WindowManager.getActive(),
+                                grid,
+                                comboStore;
+
                             t.diag('Entering data on grid ' + item);
 
                             t.chain([
@@ -1707,14 +1789,39 @@ Ext.define('iRely.TestEngine', {
                                     action: 'click',
                                     target: trigger
                                 },
-                                function(next) {
-                                    var panel = Ext.WindowManager.getActive(),
-                                        grid;
-
+                                function(next){
                                     if (panel.getView) {
                                         grid = panel.getView();
                                     } else {
                                         grid = editor.field.getPicker();
+                                    }
+                                    comboStore = grid.getStore();
+                                    if(comboStore.remoteFilter == true){
+                                        if(comboStore.isLoading() == true) {
+                                            t.waitForStoresToLoad(comboStore, function () {
+                                                next();
+                                            })
+                                        }
+                                        else{
+                                            next();
+                                        }
+                                    }
+                                    else {
+                                        var task = new Ext.util.DelayedTask(function () {
+                                            next();
+                                        });
+                                        task.delay(1500);
+                                    }
+                                },
+                                function(next) {
+                                    if (panel.getView) {
+                                        grid = panel.getView();
+                                    } else {
+                                        grid = editor.field.getPicker();
+                                    }
+
+                                    if(grid.getView && !grid.getNode){
+                                        grid = grid.getView();
                                     }
 
                                     if (grid) {
@@ -1786,7 +1893,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @returns {iRely.TestEngine}
      */
-    selectGridComboRowByFilter: function(item, row, column, filter, delay, comboColumn) {
+    selectGridComboRowByFilter: function(item, row, column, filter, delay, comboColumn, index) {
         var me = this,
             chain = me.chain;
 
@@ -1860,6 +1967,10 @@ Ext.define('iRely.TestEngine', {
 
                             t.chain([
                                 {
+                                    action: 'click',
+                                    target: trigger
+                                },
+                                {
                                     action: 'wait',
                                     delay: 100
                                 },
@@ -1890,10 +2001,24 @@ Ext.define('iRely.TestEngine', {
                                             } else {
                                                 next();
                                             }
+                                        } else if (store1.isLoading() == true){
+                                            t.waitForStoresToLoad(store1, function () {
+                                                var filterRec = store1.findExact(comboColumn, filter),
+                                                    record = store1.getAt(filterRec);
+
+                                                if(index != null) record = index;
+                                                if (typeof(comboGrid.getView) == "function") {
+                                                    var node1 = comboGrid.getView().getNode(record);
+                                                    t.click(node1, next);
+                                                } else {
+                                                    next();
+                                                }
+                                            })
                                         } else {
                                             var filterRec = store1.findExact(comboColumn, filter),
                                                 record = store1.getAt(filterRec);
 
+                                            if(index != null) record = index;
                                             if (typeof(comboGrid.getView) == "function") {
                                                 var node1 = comboGrid.getView().getNode(record);
                                                 t.click(node1, next);
@@ -2142,9 +2267,11 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Boolean} visible True to assert if the control is visible otherwise hidden.
      *
+     * @param {Integer} tab Index of the tab to be filtered. Optional.
+     *
      * @returns {iRely.TestEngine}
      */
-    checkControlVisible: function(items, visible) {
+    checkControlVisible: function(items, visible, tab) {
         var me = this,
             chain = me.chain;
 
@@ -2165,6 +2292,11 @@ Ext.define('iRely.TestEngine', {
             for (var i in items) {
                 var item = items[i],
                     control = win.down(item);
+
+                if (tab) {
+                    var tabPanel = win.down('tabpanel').items.items[tab];
+                    control = tabPanel.down(item);
+                }
 
                 if (control) {
                     var result = control.hidden === !visible;
@@ -2236,7 +2368,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @returns {iRely.TestEngine}
      */
-    checkControlData: function(items, values) {
+    checkControlData: function(items, values, condition) {
         var me = this,
             chain = me.chain;
 
@@ -2270,8 +2402,15 @@ Ext.define('iRely.TestEngine', {
                         fieldVal = control.getValue();
                     }
 
-                    var result = fieldVal === value;
-
+                    var result = false;
+                    if(!condition || condition === 'equal') {
+                        result = fieldVal === value;
+                    }
+                    else if (condition === 'like'){
+                        if(fieldVal.toLowerCase().indexOf(value.toLowerCase()) != -1){
+                            result = true;
+                        }
+                    }
                     t.ok(result, result ? item + ' value is correct.' : item + ' value is incorrect.');
                 } else {
                     t.ok(false, item + ' is not existing.');
@@ -2436,8 +2575,10 @@ Ext.define('iRely.TestEngine', {
                         count = store.getCount(),
                         result;
 
-                    if(grid.editingPlugin) {
-                        count--;
+                    if(grid.editingPlugin && !store.buffered && count > 0) {
+                        if (store.data.items[store.data.length - 1].dummy) {
+                            count--;
+                        }
                     }
 
                     result = count === expectedCount;
@@ -3446,9 +3587,14 @@ Ext.define('iRely.TestEngine', {
      * @param {String} menuName Menu Name.
      */
     getRecordFromMenu: function (type, menuName) {
-        var mainMenu = this.getComponentByQuery('viewport'),
-            treeView = mainMenu.down('#trvMenu'),
-            treeStore = treeView.dataSource;
+        var mainMenu = this.getComponentByQuery('viewport');
+        if(!mainMenu) return null;
+
+        var treeView = mainMenu.down('#trvMenu');
+        if(!treeView) return null;
+
+        var treeStore = treeView.dataSource;
+        if(!treeStore) return null;
 
         var menus = treeStore.queryBy(function(record) {
             return record.get('strType').toLowerCase() === type.toLowerCase() &&
@@ -3503,9 +3649,14 @@ Ext.define('iRely.TestEngine', {
      * @param {String} menuName Menu Name.
      */
     getNodeFromMenu: function (type, menuName) {
-        var mainMenu = this.getComponentByQuery('viewport'),
-            treeView = mainMenu.down('#trvMenu'),
-            record = this.getRecordFromMenu(type, menuName);
+        var mainMenu = this.getComponentByQuery('viewport');
+        if(!mainMenu) return null;
+
+        var treeView = mainMenu.down('#trvMenu');
+        if(!treeView) return null;
+
+        var record = this.getRecordFromMenu(type, menuName);
+        if(!record) return null;
 
         return treeView.getNodeByRecord(record);
     },
@@ -3540,6 +3691,12 @@ Ext.define('iRely.TestEngine', {
 
         return result;
     },
+
+    /**
+     *
+     *  NEWLY ADDED
+     *
+     */
 
     /**
      * @private
@@ -3758,8 +3915,9 @@ Ext.define('iRely.TestEngine', {
                 var com = me.getComponentByQuery(item);
                 if(com) return true;
             },function() {
-                if(!msg) msg = 'Component is shown';
-                t.ok(true, msg);
+                if(msg) {
+                    t.ok(true, msg);
+                }
                 next();
             },this, 60000)
         };
@@ -3810,7 +3968,7 @@ Ext.define('iRely.TestEngine', {
     },
 
     /**
-     * Continuously checks if the item becomes visible / ready
+     * Continuously checks if the main menu becomes visible / ready
      *
      *
      * @returns {iRely.TestEngine}
@@ -3829,10 +3987,10 @@ Ext.define('iRely.TestEngine', {
             else {
                 t.waitForCQVisible('viewport',
                     function () {
-                        t.ok(true, "Successfully Logged In");
-                        t.diag("Loading i21 Menu");
+                        //t.ok(true, "Successfully Logged In");
+                        //t.diag("Loading i21 Menu");
                         t.waitForRowsVisible('#tplMenu', function () {
-                            t.ok(true, 'i21 Menu successfully loaded');
+                            //t.ok(true, 'i21 Menu successfully loaded');
                             next();
                         });
                     }, this, 60000);
@@ -3842,12 +4000,12 @@ Ext.define('iRely.TestEngine', {
     },
 
     /**
-     * Continuously checks if the item becomes visible / ready
+     * Waits until the Initializing, Loading, etc. dialog closed
      *
      *
      * @returns {iRely.TestEngine}
      */
-    waitTillLoaded : function(msg) {
+    waitTillLoaded : function(msg,delay) {
         var me = this,
             chain = me.chain;
 
@@ -3856,16 +4014,35 @@ Ext.define('iRely.TestEngine', {
                 result = false;
 
             t.waitForFn(function() {
+                var loadmaskOk = false,
+                    messageboxOk = false;
+
                 var loadmask = Ext.ComponentQuery.query('loadmask');
                 if (loadmask){
-                    var ctr = loadmask.length - 1,
-                        current = loadmask[ctr];
-                    if(current.isVisible() == false) return true;
+                    for(var x = loadmask.length - 1; x >= 0; x--){
+                        if(loadmask[x].isVisible() == true){
+                            break;
+                        }
+                        else if(x == 0){
+                            loadmaskOk = true;
+                        }
+                    }
                 }
+                var messagebox = Ext.ComponentQuery.query('messagebox');
+                if (messagebox){
+                    var current = messagebox[0];
+                    if(current.isVisible() == false) messageboxOk = true;
+                }
+                if(loadmaskOk && messageboxOk) return true;
             },function() {
-                if(!msg) msg = 'Successfully loaded.';
-                t.ok(true, msg);
-                next();
+                if(!delay) delay = 1000;
+                var task = new Ext.util.DelayedTask(function(){
+                    if(msg) {
+                        t.ok(true, msg);
+                    }
+                    next();
+                });
+                task.delay(delay);
             },this, 60000)
         };
 
@@ -3874,7 +4051,7 @@ Ext.define('iRely.TestEngine', {
     },
 
     /**
-     * Display custom text
+     * This method output the custom message
      *
      *
      * @returns {iRely.TestEngine}
@@ -3895,7 +4072,7 @@ Ext.define('iRely.TestEngine', {
     },
 
     /**
-     * Mark success text
+     * This method output the success mark and message
      *
      *
      * @returns {iRely.TestEngine}
@@ -3912,6 +4089,220 @@ Ext.define('iRely.TestEngine', {
 
         chain.push({action:fn,timeout:60000});
 
+        return this;
+    },
+
+    /**
+     * This method output the custom message
+     *
+     *
+     * @returns {iRely.TestEngine}
+     */
+    addScenario: function(number, msg, time) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next){
+            var t = this;
+            t.diag('======== Scenario ' + number + ': ' + msg + ' ========');
+            next();
+        };
+
+        if(!time) time = 1000;
+        chain.push({action:fn,timeout:60000});
+
+        return this;
+    },
+
+    /**
+     * This method output the success mark and message
+     *
+     *
+     * @returns {iRely.TestEngine}
+     */
+    addStep: function(number, msg, time) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next){
+            var t = this;
+            t.diag(number + '.) ' + msg);
+            next();
+        };
+
+        if(!time) time = 1000;
+        chain.push({action:fn,timeout:60000});
+
+        return this;
+    },
+
+    /**
+     * This method output the success mark and message
+     *
+     *
+     * @returns {iRely.TestEngine}
+     */
+    addResult: function(msg, time) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next){
+            var t = this;
+            t.ok(true, msg);
+            next();
+        };
+
+        if(!time) time = 1000;
+        chain.push({action:fn,timeout:60000});
+
+        //chain.push({action:fn,timeout:60000},{action: 'delay',delay: time});
+
+        return this;
+    },
+
+    openSearchRowByIndexByDoubleClick: function(index, tab){
+        var me = this,
+            chain = this.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+
+            if (win) {
+                if (win.xtype === 'search' || 'frmintegrateddashboard') {
+                    var grid = win.down('#grdSearch');
+
+                    if (tab){
+                        var tabPanel = win.down('tabpanel').items.items[tab];
+                        grid = tabPanel.down('#grdSearch');
+                    }
+
+                    if (grid) {
+                        var node = grid.getView().getNode(index);
+                        t.doubleClick(node, function() {
+                            next();
+                        });
+                    } else {
+                        t.ok(false, 'Grid is not existing.');
+                        next();
+                    }
+                }
+                else {
+                    t.ok(false, 'Grid is not existing.');
+                    next();
+                }
+            }
+            else {
+                t.ok(false, 'Grid is not existing.');
+                next();
+            }
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Select a row in Search screen based on the index specified.
+     *
+     * @param {Number[]/Number} index Array of Indexs or Index of the row to select.
+     *
+     * @param {Integer} tab Index of the tab to be filtered.
+     *
+     * @returns {iRely.TestEngine}
+     */
+    selectSearchHyperLinkByIndex: function(row, column, index) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+            if (win) {
+                var grid = win.down('#grdSearch');
+                if (grid) {
+                    var store = grid.store;
+                    if (store.indexOf(row) === -1) {
+                        row = store.getAt(row);
+                    }
+
+                    if (Ext.Array.indexOf(grid.columns, column) === -1) {
+                        column = grid.columns[column] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + column + ']');
+                    }
+
+                    if (row && column) {
+                        var view = grid.getView(),
+                            cell = view.getCell(row, column);
+
+                        t.click(cell);
+                        next();
+
+                        //if (plugin.clicksToEdit === 1) {
+                        //    t.click(cell);
+                        //} else {
+                        //    t.doubleClick(cell);
+                        //}
+
+                        //if (plugin.activeEditor) {
+                        //    var editor = plugin.activeEditor,
+                        //        els = (function() {
+                        //            var cell = editor.field.el.query('.x-trigger-cell'),
+                        //                form = editor.field.el.query('.x-form-trigger');
+                        //
+                        //            return (cell.length && cell) || (form.length && form);
+                        //        })(),
+                        //        length = els.length,
+                        //        trigger = els[length - 1];
+                        //
+                        //    t.diag('Entering data on grid ' + item);
+                        //
+                        //    t.chain([
+                        //        {
+                        //            action: 'click',
+                        //            target: trigger
+                        //        },
+                        //        function(next) {
+                        //            var panel = Ext.WindowManager.getActive(),
+                        //                grid;
+                        //
+                        //            if (panel.getView) {
+                        //                grid = panel.getView();
+                        //            } else {
+                        //                grid = editor.field.getPicker();
+                        //            }
+                        //
+                        //            if (grid) {
+                        //                var node = grid.getNode(index);
+                        //                t.click(node, function() {
+                        //                    editor.completeEdit();
+                        //                    next();
+                        //                });
+                        //            } else {
+                        //                t.ok(false, 'Combo Box is not existing.');
+                        //                next();
+                        //            }
+                        //        },
+                        //        next
+                        //    ]);
+                        //} else {
+                        //    t.ok(false, 'Combo Box is not existing.');
+                        //    next();
+                        //}
+                    } else {
+                        t.ok(false, 'Cell is not existing.');
+                        next();
+                    }
+                } else {
+                    t.ok(false, 'Cell is not existing.');
+                    next();
+                }
+            } else {
+                t.ok(false, 'Cell is not existing.');
+                next();
+            }
+        };
+
+        chain.push(fn);
         return this;
     }
 });

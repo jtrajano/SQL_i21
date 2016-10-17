@@ -323,6 +323,7 @@
                             "userConfig": {
                                 "bodyPadding": 5,
                                 "container|align": "stretch",
+                                "itemId": "pgeDetails",
                                 "layout": "vbox",
                                 "title": "Details"
                             },
@@ -1170,7 +1171,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter129",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1970,6 +1971,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "pgeComments",
                                 "layout": "fit",
                                 "title": "Activities"
                             },
@@ -2010,6 +2012,8 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "attachmentgrid",
+                                "itemId": "pgeAttachments",
                                 "layout": "fit",
                                 "title": "Attachments"
                             },
@@ -2046,7 +2050,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging14",
                     "designerId": "819ea614-6c35-4e6e-8d56-521d4ef1d53e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
