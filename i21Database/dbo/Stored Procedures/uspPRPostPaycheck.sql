@@ -1023,6 +1023,10 @@ BEGIN
 			WHERE strPaycheckId = @strTransactionId
 			SET @isSuccessful = 1
 
+			/* Delete zero amount Earnings */
+			DELETE FROM tblPRPaycheckEarning 
+			WHERE intPaycheckId = @intPaycheckId AND dblTotal = 0
+
 			/* Update the Employee Time Off Hours Used */
 			UPDATE tblPREmployeeTimeOff
 				SET	dblHoursUsed = dblHoursUsed + A.dblHours
