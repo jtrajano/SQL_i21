@@ -154,9 +154,9 @@
 :r .\20_CF\FixeDataWithContraints.sql
 
 --PAT
-:r .\21_PAT\1_StaticTable.sql
-:r .\21_PAT\2_AddTransferType.sql
-:r .\21_PAT\3_MigrateDataChanges.sql
+:r .\22_PAT\1_StaticTable.sql
+:r .\22_PAT\2_AddTransferType.sql
+:r .\22_PAT\3_MigrateDataChanges.sql
 
 --PR
 :r .\21_PR\1_1620_to_1630.sql
