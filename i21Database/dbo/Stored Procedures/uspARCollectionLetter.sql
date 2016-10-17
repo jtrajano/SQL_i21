@@ -10,11 +10,8 @@ BEGIN
 			, @query					NVARCHAR(MAX)
 			, @intEntityCustomerId		INT
 			, @blb						VARBINARY(MAX)
-			, @originalMsgInHTML		VARCHAR(MAX)
-			, @newblb					VARBINARY(MAX)
-			, @sqlString				NVARCHAR(MAX)				
-			, @intInvoiceId				INT
-			, @intLoopCount				INT	
+			, @originalMsgInHTML		VARCHAR(MAX)	
+			, @filterValue				VARCHAR(MAX)										
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 	DECLARE @temp_params TABLE (
@@ -132,18 +129,22 @@ BEGIN
 	IF @LetterName = 'Recent Overdue Collection Letter'
 	BEGIN
 		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl0Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+		SET @filterValue = 'dbl0Days > 0'
 	END
 	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
 	BEGIN
 		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl30Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+		SET @filterValue = 'dbl30Days > 0'
 	END
 	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
 	BEGIN
 		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl60Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+		SET @filterValue = 'dbl60Days > 0'
 	END
 	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
 	BEGIN
 		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl90Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+		SET @filterValue = 'dbl90Days > 0'
 	END
 	 
 	INSERT INTO @SelectedPlaceHolderTable
@@ -408,7 +409,7 @@ BEGIN
 					' + @SourceTable + ' 
 				WHERE 
 					[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
-				+ ' 			
+				+ ' AND ' + @filterValue + '
 												
 				DECLARE @HTMLTableRows VARCHAR(MAX)
 				SET @HTMLTableRows = ''''
