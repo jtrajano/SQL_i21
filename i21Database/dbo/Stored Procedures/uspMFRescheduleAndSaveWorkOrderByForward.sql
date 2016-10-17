@@ -69,7 +69,7 @@ BEGIN TRY
 		,@dtmChangeoverEndDate DATETIME
 		,@intChangeoverDuration INT
 		,@tblMFScheduleWorkOrder AS ScheduleTable
-		,@tblMFFinalWorkOrder AS ScheduleTable
+		--,@tblMFFinalWorkOrder AS ScheduleTable
 		,@sqlCommand NVARCHAR(MAX)
 		,@ysnConsiderSumOfChangeoverTime BIT
 		,@intSetupDuration INT
@@ -134,7 +134,7 @@ BEGIN TRY
 		,intSetupDuration INT
 		)
 
-	INSERT INTO @tblMFFinalWorkOrder (
+	INSERT INTO @tblMFScheduleWorkOrder (
 		intManufacturingCellId
 		,intWorkOrderId
 		,intItemId
@@ -195,6 +195,8 @@ BEGIN TRY
 		,intDemandRatio
 		,intNoOfFlushes
 	FROM @tblMFWorkOrder
+	ORDER BY intManufacturingCellId
+		,intExecutionOrder
 
 	DECLARE @tblMFPreference TABLE (intPreferenceId INT)
 	DECLARE @intPreferenceId INT
@@ -220,73 +222,71 @@ BEGIN TRY
 
 		WHILE @intManufacturingCellId2 IS NOT NULL
 		BEGIN
-			DELETE
-			FROM @tblMFScheduleWorkOrder
-
-			INSERT INTO @tblMFScheduleWorkOrder (
-				intManufacturingCellId
-				,intWorkOrderId
-				,intItemId
-				,intItemUOMId
-				,intUnitMeasureId
-				,dblQuantity
-				,dblBalance
-				,dtmEarliestDate
-				,dtmExpectedDate
-				,dtmLatestDate
-				,intStatusId
-				,intExecutionOrder
-				,strComments
-				,strNote
-				,strAdditionalComments
-				,intNoOfSelectedMachine
-				,dtmEarliestStartDate
-				,intPackTypeId
-				,strPackName
-				,intNoOfUnit
-				,dblConversionFactor
-				,intScheduleWorkOrderId
-				,ysnFrozen
-				,intConcurrencyId
-				,strWIPItemNo
-				,intSetupDuration
-				,ysnPicked
-				,intDemandRatio
-				,intNoOfFlushes
-				)
-			SELECT intManufacturingCellId
-				,intWorkOrderId
-				,intItemId
-				,intItemUOMId
-				,intUnitMeasureId
-				,dblQuantity
-				,dblBalance
-				,dtmEarliestDate
-				,dtmExpectedDate
-				,dtmLatestDate
-				,intStatusId
-				,intExecutionOrder
-				,strComments
-				,strNote
-				,strAdditionalComments
-				,intNoOfSelectedMachine
-				,dtmEarliestStartDate
-				,intPackTypeId
-				,strPackName
-				,intNoOfUnit
-				,dblConversionFactor
-				,intScheduleWorkOrderId
-				,ysnFrozen
-				,intConcurrencyId
-				,strWIPItemNo
-				,intSetupDuration
-				,ysnPicked
-				,intDemandRatio
-				,intNoOfFlushes
-			FROM @tblMFFinalWorkOrder x
-			WHERE intManufacturingCellId = @intManufacturingCellId2
-			ORDER BY x.intExecutionOrder
-
+			--DELETE
+			--FROM @tblMFScheduleWorkOrder
+			--INSERT INTO @tblMFScheduleWorkOrder (
+			--	intManufacturingCellId
+			--	,intWorkOrderId
+			--	,intItemId
+			--	,intItemUOMId
+			--	,intUnitMeasureId
+			--	,dblQuantity
+			--	,dblBalance
+			--	,dtmEarliestDate
+			--	,dtmExpectedDate
+			--	,dtmLatestDate
+			--	,intStatusId
+			--	,intExecutionOrder
+			--	,strComments
+			--	,strNote
+			--	,strAdditionalComments
+			--	,intNoOfSelectedMachine
+			--	,dtmEarliestStartDate
+			--	,intPackTypeId
+			--	,strPackName
+			--	,intNoOfUnit
+			--	,dblConversionFactor
+			--	,intScheduleWorkOrderId
+			--	,ysnFrozen
+			--	,intConcurrencyId
+			--	,strWIPItemNo
+			--	,intSetupDuration
+			--	,ysnPicked
+			--	,intDemandRatio
+			--	,intNoOfFlushes
+			--	)
+			--SELECT intManufacturingCellId
+			--	,intWorkOrderId
+			--	,intItemId
+			--	,intItemUOMId
+			--	,intUnitMeasureId
+			--	,dblQuantity
+			--	,dblBalance
+			--	,dtmEarliestDate
+			--	,dtmExpectedDate
+			--	,dtmLatestDate
+			--	,intStatusId
+			--	,intExecutionOrder
+			--	,strComments
+			--	,strNote
+			--	,strAdditionalComments
+			--	,intNoOfSelectedMachine
+			--	,dtmEarliestStartDate
+			--	,intPackTypeId
+			--	,strPackName
+			--	,intNoOfUnit
+			--	,dblConversionFactor
+			--	,intScheduleWorkOrderId
+			--	,ysnFrozen
+			--	,intConcurrencyId
+			--	,strWIPItemNo
+			--	,intSetupDuration
+			--	,ysnPicked
+			--	,intDemandRatio
+			--	,intNoOfFlushes
+			--FROM @tblMFFinalWorkOrder x
+			--WHERE intManufacturingCellId = @intManufacturingCellId2
+			--ORDER BY x.intExecutionOrder
 			IF EXISTS (
 					SELECT *
 					FROM @tblMFScheduleWorkOrder x
@@ -511,40 +511,35 @@ BEGIN TRY
 					--	AND @ysnScheduleByManufacturingCell = 0
 					--	AND @intStatusId = 3
 					--BEGIN
-					--	SELECT @intItemFactoryId = NULL
-					--		,@intNextManufacturingCellId = NULL
-					--		,@intPreference = NULL
+					--	GOTO PickNextWorkOrderNo
 
-					--	SELECT @intItemFactoryId = intItemFactoryId
-					--	FROM tblICItemFactory
-					--	WHERE intFactoryId = @intLocationId
-					--		AND intItemId = @intItemId
-
-					--	SELECT @intPreference = intPreference
-					--	FROM tblICItemFactoryManufacturingCell
-					--	WHERE intItemFactoryId = @intItemFactoryId
-					--		AND intManufacturingCellId = @intManufacturingCellId2
-
-					--	SELECT TOP 1 @intNextManufacturingCellId = intManufacturingCellId
-					--	FROM tblICItemFactoryManufacturingCell
-					--	WHERE intItemFactoryId = @intItemFactoryId
-					--		AND intPreference > @intPreference
-					--	ORDER BY intPreference
-
-					--	IF @intNextManufacturingCellId IS NOT NULL
-					--	BEGIN
-					--		UPDATE @tblMFFinalWorkOrder
-					--		SET intManufacturingCellId = @intNextManufacturingCellId
-					--		WHERE intWorkOrderId = @intWorkOrderId
-
-					--		DELETE
-					--		FROM @tblMFScheduleWorkOrder
-					--		WHERE intRecordId = @intRecordId
-
-					--		GOTO PickNextWorkOrderNo
-					--	END
+					--	--SELECT @intItemFactoryId = NULL
+					--	--	,@intNextManufacturingCellId = NULL
+					--	--	,@intPreference = NULL
+					--	--SELECT @intItemFactoryId = intItemFactoryId
+					--	--FROM tblICItemFactory
+					--	--WHERE intFactoryId = @intLocationId
+					--	--	AND intItemId = @intItemId
+					--	--SELECT @intPreference = intPreference
+					--	--FROM tblICItemFactoryManufacturingCell
+					--	--WHERE intItemFactoryId = @intItemFactoryId
+					--	--	AND intManufacturingCellId = @intManufacturingCellId2
+					--	--SELECT TOP 1 @intNextManufacturingCellId = intManufacturingCellId
+					--	--FROM tblICItemFactoryManufacturingCell
+					--	--WHERE intItemFactoryId = @intItemFactoryId
+					--	--	AND intPreference > @intPreference
+					--	--ORDER BY intPreference
+					--	--IF @intNextManufacturingCellId IS NOT NULL
+					--	--BEGIN
+					--	--	UPDATE @tblMFFinalWorkOrder
+					--	--	SET intManufacturingCellId = @intNextManufacturingCellId
+					--	--	WHERE intWorkOrderId = @intWorkOrderId
+					--	--	DELETE
+					--	--	FROM @tblMFScheduleWorkOrder
+					--	--	WHERE intRecordId = @intRecordId
+							
+					--	--END
 					--END
-
 					SELECT @dblStdLineEfficiency = dblLineEfficiencyRate
 					FROM dbo.tblMFManufacturingCellPackType
 					WHERE intManufacturingCellId = @intManufacturingCellId2
@@ -636,6 +631,7 @@ BEGIN TRY
 										AND @dtmShiftEndTime
 									AND ysnPicked = 0
 									AND dtmPlannedEndDate <> @dtmShiftEndTime
+									AND intManufacturingCellId = @intManufacturingCellId2
 								)
 						BEGIN
 							SELECT TOP 1 @dtmPlannedStartDate = MIN(dtmPlannedEndDate)
@@ -645,6 +641,7 @@ BEGIN TRY
 									AND @dtmShiftEndTime
 								AND ysnPicked = 0
 								AND dtmPlannedEndDate <> @dtmShiftEndTime
+								AND intManufacturingCellId = @intManufacturingCellId2
 
 							UPDATE @tblMFScheduleWorkOrder
 							SET ysnPicked = 1
@@ -1254,6 +1251,7 @@ BEGIN TRY
 						FROM @tblMFScheduleWorkOrder S
 						WHERE S.intNoOfUnit > 0
 							AND S.intStatusId <> 1
+							AND intManufacturingCellId = @intManufacturingCellId2
 						)
 					BREAK
 
@@ -1262,6 +1260,7 @@ BEGIN TRY
 						FROM @tblMFScheduleWorkOrderDetail SD
 						JOIN @tblMFScheduleWorkOrder S ON S.intWorkOrderId = SD.intWorkOrderId
 						WHERE SD.intCalendarDetailId = @intCalendarDetailId
+							AND S.intManufacturingCellId = @intManufacturingCellId2
 						) + IsNULL(@intTotalSetupDuration, 0) >= @intDuration
 					OR NOT EXISTS (
 						SELECT *
@@ -1269,6 +1268,7 @@ BEGIN TRY
 						WHERE intNoOfUnit > 0
 							AND S.intStatusId <> 1
 							AND intWorkOrderId <> @intWorkOrderId
+							AND intManufacturingCellId = @intManufacturingCellId2
 						)
 					OR @intGapDuetoEarliestStartDate > 0
 				BEGIN
@@ -1313,283 +1313,6 @@ BEGIN TRY
 				RETURN
 			END
 
-			IF @ysnScheduleByManufacturingCell = 0
-			BEGIN
-				SELECT @ysnStandard = 1
-
-				DECLARE @intTransactionCount INT
-					,@strScheduleNo NVARCHAR(50)
-
-				SELECT @intTransactionCount = @@TRANCOUNT
-
-				SELECT @intScheduleId = NULL
-
-				SELECT @intScheduleId = intScheduleId
-				FROM dbo.tblMFSchedule
-				WHERE intManufacturingCellId = @intManufacturingCellId2
-					AND ysnStandard = 1
-
-				IF @intScheduleId IS NULL
-					SELECT @intScheduleId = intScheduleId
-					FROM dbo.tblMFSchedule
-					WHERE intManufacturingCellId = @intManufacturingCellId2
-
-				IF @intScheduleId IS NULL
-				BEGIN
-					IF @strScheduleNo IS NULL
-					BEGIN
-						DECLARE @intSubLocationId INT
-
-						SELECT @intSubLocationId = intSubLocationId
-						FROM dbo.tblMFManufacturingCell
-						WHERE intManufacturingCellId = @intManufacturingCellId2
-
-						EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-							,@intItemId = NULL
-							,@intManufacturingId = @intManufacturingCellId2
-							,@intSubLocationId = @intSubLocationId
-							,@intLocationId = @intLocationId
-							,@intOrderTypeId = NULL
-							,@intBlendRequirementId = NULL
-							,@intPatternCode = 63
-							,@ysnProposed = 0
-							,@strPatternString = @strScheduleNo OUTPUT
-					END
-
-					INSERT INTO dbo.tblMFSchedule (
-						strScheduleNo
-						,dtmScheduleDate
-						,intCalendarId
-						,intManufacturingCellId
-						,ysnStandard
-						,intLocationId
-						,intConcurrencyId
-						,dtmCreated
-						,intCreatedUserId
-						,dtmLastModified
-						,intLastModifiedUserId
-						)
-					VALUES (
-						@strScheduleNo
-						,@dtmCurrentDate
-						,@intCalendarId
-						,@intManufacturingCellId2
-						,@ysnStandard
-						,@intLocationId
-						,1
-						,@dtmCurrentDate
-						,@intUserId
-						,@dtmCurrentDate
-						,@intUserId
-						)
-
-					SELECT @intScheduleId = SCOPE_IDENTITY()
-				END
-				ELSE
-				BEGIN
-					UPDATE dbo.tblMFSchedule
-					SET ysnStandard = @ysnStandard
-						,intConcurrencyId = intConcurrencyId + 1
-						,dtmLastModified = @dtmCurrentDate
-						,intLastModifiedUserId = @intUserId
-					WHERE intScheduleId = @intScheduleId
-				END
-
-				SELECT @intConcurrencyId = intConcurrencyId
-				FROM dbo.tblMFSchedule
-				WHERE intScheduleId = @intScheduleId
-
-				DELETE
-				FROM dbo.tblMFScheduleWorkOrder
-				WHERE intScheduleId = @intScheduleId
-
-				INSERT INTO dbo.tblMFScheduleWorkOrder (
-					intScheduleId
-					,intWorkOrderId
-					,intStatusId
-					,intDuration
-					,intExecutionOrder
-					,intChangeoverDuration
-					,intSetupDuration
-					,dtmChangeoverStartDate
-					,dtmChangeoverEndDate
-					,dtmPlannedStartDate
-					,dtmPlannedEndDate
-					,intPlannedShiftId
-					,intNoOfSelectedMachine
-					,strComments
-					,strNote
-					,strAdditionalComments
-					,dtmEarliestStartDate
-					,ysnFrozen
-					,intConcurrencyId
-					,dtmCreated
-					,intCreatedUserId
-					,dtmLastModified
-					,intLastModifiedUserId
-					)
-				SELECT @intScheduleId
-					,x.intWorkOrderId
-					,x.intStatusId
-					,x.intDuration
-					,ROW_NUMBER() OVER (
-						PARTITION BY intManufacturingCellId ORDER BY x.intExecutionOrder
-						) AS intExecutionOrder
-					,x.intChangeoverDuration
-					,x.intSetupDuration
-					,x.dtmChangeoverStartDate
-					,x.dtmChangeoverEndDate
-					,x.dtmPlannedStartDate
-					,x.dtmPlannedEndDate
-					,x.intPlannedShiftId
-					,x.intNoOfSelectedMachine
-					,x.strComments
-					,x.strNote
-					,x.strAdditionalComments
-					,x.dtmEarliestStartDate
-					,x.ysnFrozen
-					,1
-					,@dtmCurrentDate
-					,@intUserId
-					,@dtmCurrentDate
-					,@intUserId
-				FROM @tblMFScheduleWorkOrder x
-				WHERE x.intStatusId <> 1
-
-				IF @ysnStandard = 1
-				BEGIN
-					UPDATE dbo.tblMFWorkOrder
-					SET intStatusId = (
-							CASE 
-								WHEN @intManufacturingCellId2 = x.intManufacturingCellId
-									THEN (
-											CASE 
-												WHEN tblMFWorkOrder.intStatusId IN (
-														10
-														,13
-														)
-													THEN tblMFWorkOrder.intStatusId
-												ELSE x.intStatusId
-												END
-											)
-								ELSE 1
-								END
-							)
-						,dblQuantity = x.dblQuantity
-						,intManufacturingCellId = x.intManufacturingCellId
-						,intPlannedShiftId = x.intPlannedShiftId
-						,dtmPlannedDate = x.dtmPlannedStartDate
-						,intExecutionOrder = x.intExecutionOrder
-					FROM @tblMFScheduleWorkOrder x
-					WHERE x.intWorkOrderId = tblMFWorkOrder.intWorkOrderId
-				END
-
-				INSERT INTO dbo.tblMFScheduleWorkOrderDetail (
-					intScheduleWorkOrderId
-					,intWorkOrderId
-					,intScheduleId
-					,dtmPlannedStartDate
-					,dtmPlannedEndDate
-					,intPlannedShiftId
-					,intDuration
-					,dblPlannedQty
-					,intSequenceNo
-					,intCalendarDetailId
-					,intConcurrencyId
-					)
-				SELECT (
-						SELECT intScheduleWorkOrderId
-						FROM dbo.tblMFScheduleWorkOrder W
-						WHERE W.intWorkOrderId = x.intWorkOrderId
-							AND W.intScheduleId = @intScheduleId
-						)
-					,x.intWorkOrderId
-					,@intScheduleId
-					,x.dtmPlannedStartDate
-					,x.dtmPlannedEndDate
-					,x.intPlannedShiftId
-					,x.intDuration
-					,x.dblPlannedQty
-					,x.intSequenceNo
-					,x.intCalendarDetailId
-					,1
-				FROM @tblMFScheduleWorkOrderDetail x
-				JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
-				WHERE W.intScheduleId = @intScheduleId
-
-				INSERT INTO dbo.tblMFScheduleMachineDetail (
-					intScheduleWorkOrderDetailId
-					,intWorkOrderId
-					,intScheduleId
-					,intCalendarMachineId
-					,intCalendarDetailId
-					,intConcurrencyId
-					)
-				SELECT (
-						SELECT intScheduleWorkOrderDetailId
-						FROM dbo.tblMFScheduleWorkOrderDetail WD
-						JOIN dbo.tblMFScheduleWorkOrder W ON W.intScheduleWorkOrderId = WD.intScheduleWorkOrderId
-						WHERE W.intWorkOrderId = x.intWorkOrderId
-							AND W.intScheduleId = @intScheduleId
-							AND WD.intCalendarDetailId = x.intCalendarDetailId
-						)
-					,x.intWorkOrderId
-					,@intScheduleId
-					,x.intCalendarMachineId
-					,x.intCalendarDetailId
-					,1
-				FROM @tblMFScheduleMachineDetail x
-				JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
-				WHERE W.intScheduleId = @intScheduleId
-
-				INSERT INTO dbo.tblMFScheduleConstraintDetail (
-					intScheduleWorkOrderId
-					,intWorkOrderId
-					,intScheduleId
-					,intScheduleRuleId
-					,dtmChangeoverStartDate
-					,dtmChangeoverEndDate
-					,intDuration
-					,intConcurrencyId
-					)
-				SELECT (
-						SELECT intScheduleWorkOrderId
-						FROM dbo.tblMFScheduleWorkOrder W
-						WHERE W.intWorkOrderId = x.intWorkOrderId
-							AND W.intScheduleId = @intScheduleId
-						)
-					,x.intWorkOrderId
-					,@intScheduleId
-					,x.intScheduleRuleId
-					,x.dtmChangeoverStartDate
-					,x.dtmChangeoverEndDate
-					,x.intDuration
-					,1
-				FROM @tblMFScheduleConstraintDetail x
-				JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
-				WHERE W.intScheduleId = @intScheduleId
-
-				INSERT INTO dbo.tblMFScheduleConstraint (
-					intScheduleId
-					,intScheduleRuleId
-					)
-				SELECT @intScheduleId
-					,intScheduleRuleId
-				FROM @tblMFScheduleConstraint
-
-				DELETE
-				FROM @tblMFScheduleWorkOrder
-
-				DELETE
-				FROM @tblMFScheduleWorkOrderDetail
-
-				DELETE
-				FROM @tblMFScheduleMachineDetail
-
-				DELETE
-				FROM @tblMFScheduleConstraintDetail
-			END
-
 			SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
 			FROM @tblMFWorkOrder
 			WHERE intManufacturingCellId > @intManufacturingCellId2
@@ -1598,6 +1321,306 @@ BEGIN TRY
 		SELECT @intPreferenceId = MIN(intPreferenceId)
 		FROM @tblMFPreference
 		WHERE intPreferenceId > @intPreferenceId
+	END
+
+	IF @ysnScheduleByManufacturingCell = 0
+	BEGIN
+		SELECT @intManufacturingCellId2 = NULL
+
+		SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
+		FROM @tblMFScheduleWorkOrder
+
+		WHILE @intManufacturingCellId2 IS NOT NULL
+		BEGIN
+			SELECT @ysnStandard = 1
+
+			DECLARE @intTransactionCount INT
+				,@strScheduleNo NVARCHAR(50)
+
+			SELECT @intTransactionCount = @@TRANCOUNT
+
+			SELECT @intScheduleId = NULL
+
+			SELECT @intScheduleId = intScheduleId
+			FROM dbo.tblMFSchedule
+			WHERE intManufacturingCellId = @intManufacturingCellId2
+				AND ysnStandard = 1
+
+			IF @intScheduleId IS NULL
+				SELECT @intScheduleId = intScheduleId
+				FROM dbo.tblMFSchedule
+				WHERE intManufacturingCellId = @intManufacturingCellId2
+
+			IF @intScheduleId IS NULL
+			BEGIN
+				IF @strScheduleNo IS NULL
+				BEGIN
+					DECLARE @intSubLocationId INT
+
+					SELECT @intSubLocationId = intSubLocationId
+					FROM dbo.tblMFManufacturingCell
+					WHERE intManufacturingCellId = @intManufacturingCellId2
+
+					EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+						,@intItemId = NULL
+						,@intManufacturingId = @intManufacturingCellId2
+						,@intSubLocationId = @intSubLocationId
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 63
+						,@ysnProposed = 0
+						,@strPatternString = @strScheduleNo OUTPUT
+				END
+
+				SELECT @intCalendarId = intCalendarId
+				FROM tblMFScheduleCalendar
+				WHERE intManufacturingCellId = @intManufacturingCellId2
+					AND ysnStandard = 1
+
+				INSERT INTO dbo.tblMFSchedule (
+					strScheduleNo
+					,dtmScheduleDate
+					,intCalendarId
+					,intManufacturingCellId
+					,ysnStandard
+					,intLocationId
+					,intConcurrencyId
+					,dtmCreated
+					,intCreatedUserId
+					,dtmLastModified
+					,intLastModifiedUserId
+					)
+				VALUES (
+					@strScheduleNo
+					,@dtmCurrentDate
+					,@intCalendarId
+					,@intManufacturingCellId2
+					,@ysnStandard
+					,@intLocationId
+					,1
+					,@dtmCurrentDate
+					,@intUserId
+					,@dtmCurrentDate
+					,@intUserId
+					)
+
+				SELECT @intScheduleId = SCOPE_IDENTITY()
+			END
+			ELSE
+			BEGIN
+				UPDATE dbo.tblMFSchedule
+				SET ysnStandard = @ysnStandard
+					,intConcurrencyId = intConcurrencyId + 1
+					,dtmLastModified = @dtmCurrentDate
+					,intLastModifiedUserId = @intUserId
+				WHERE intScheduleId = @intScheduleId
+			END
+
+			SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
+			FROM @tblMFScheduleWorkOrder
+			WHERE intManufacturingCellId > @intManufacturingCellId2
+		END
+
+		SELECT @intConcurrencyId = intConcurrencyId
+		FROM dbo.tblMFSchedule
+		WHERE ysnStandard = 1
+
+		DELETE SW
+		FROM dbo.tblMFScheduleWorkOrder SW
+		JOIN dbo.tblMFSchedule S ON S.intScheduleId = SW.intScheduleId
+		WHERE S.ysnStandard = 1
+
+		INSERT INTO dbo.tblMFScheduleWorkOrder (
+			intScheduleId
+			,intWorkOrderId
+			,intStatusId
+			,intDuration
+			,intExecutionOrder
+			,intChangeoverDuration
+			,intSetupDuration
+			,dtmChangeoverStartDate
+			,dtmChangeoverEndDate
+			,dtmPlannedStartDate
+			,dtmPlannedEndDate
+			,intPlannedShiftId
+			,intNoOfSelectedMachine
+			,strComments
+			,strNote
+			,strAdditionalComments
+			,dtmEarliestStartDate
+			,ysnFrozen
+			,intConcurrencyId
+			,dtmCreated
+			,intCreatedUserId
+			,dtmLastModified
+			,intLastModifiedUserId
+			)
+		SELECT S.intScheduleId
+			,x.intWorkOrderId
+			,x.intStatusId
+			,x.intDuration
+			,ROW_NUMBER() OVER (
+				PARTITION BY x.intManufacturingCellId ORDER BY x.intExecutionOrder
+				) AS intExecutionOrder
+			,x.intChangeoverDuration
+			,x.intSetupDuration
+			,x.dtmChangeoverStartDate
+			,x.dtmChangeoverEndDate
+			,x.dtmPlannedStartDate
+			,x.dtmPlannedEndDate
+			,x.intPlannedShiftId
+			,x.intNoOfSelectedMachine
+			,x.strComments
+			,x.strNote
+			,x.strAdditionalComments
+			,x.dtmEarliestStartDate
+			,x.ysnFrozen
+			,1
+			,@dtmCurrentDate
+			,@intUserId
+			,@dtmCurrentDate
+			,@intUserId
+		FROM @tblMFScheduleWorkOrder x
+		JOIN dbo.tblMFSchedule S ON S.intManufacturingCellId = x.intManufacturingCellId
+			AND S.ysnStandard = 1
+		WHERE x.intStatusId <> 1
+
+		IF @ysnStandard = 1
+		BEGIN
+			UPDATE dbo.tblMFWorkOrder
+			SET intStatusId = (
+					CASE 
+						WHEN S.intManufacturingCellId = x.intManufacturingCellId
+							THEN (
+									CASE 
+										WHEN tblMFWorkOrder.intStatusId IN (
+												10
+												,13
+												)
+											THEN tblMFWorkOrder.intStatusId
+										ELSE x.intStatusId
+										END
+									)
+						ELSE 1
+						END
+					)
+				,dblQuantity = x.dblQuantity
+				,intManufacturingCellId = x.intManufacturingCellId
+				,intPlannedShiftId = x.intPlannedShiftId
+				,dtmPlannedDate = x.dtmPlannedStartDate
+				,intExecutionOrder = x.intExecutionOrder
+			FROM @tblMFScheduleWorkOrder x
+			JOIN dbo.tblMFSchedule S ON S.intManufacturingCellId = x.intManufacturingCellId
+				AND S.ysnStandard = 1
+			WHERE x.intWorkOrderId = tblMFWorkOrder.intWorkOrderId
+		END
+
+		INSERT INTO dbo.tblMFScheduleWorkOrderDetail (
+			intScheduleWorkOrderId
+			,intWorkOrderId
+			,intScheduleId
+			,dtmPlannedStartDate
+			,dtmPlannedEndDate
+			,intPlannedShiftId
+			,intDuration
+			,dblPlannedQty
+			,intSequenceNo
+			,intCalendarDetailId
+			,intConcurrencyId
+			)
+		SELECT (
+				SELECT intScheduleWorkOrderId
+				FROM dbo.tblMFScheduleWorkOrder W
+				WHERE W.intWorkOrderId = x.intWorkOrderId
+					AND W.intScheduleId = S.intScheduleId
+				)
+			,x.intWorkOrderId
+			,S.intScheduleId
+			,x.dtmPlannedStartDate
+			,x.dtmPlannedEndDate
+			,x.intPlannedShiftId
+			,x.intDuration
+			,x.dblPlannedQty
+			,x.intSequenceNo
+			,x.intCalendarDetailId
+			,1
+		FROM @tblMFScheduleWorkOrderDetail x
+		JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFSchedule S ON S.intScheduleId = W.intScheduleId
+			AND S.ysnStandard = 1
+
+		INSERT INTO dbo.tblMFScheduleMachineDetail (
+			intScheduleWorkOrderDetailId
+			,intWorkOrderId
+			,intScheduleId
+			,intCalendarMachineId
+			,intCalendarDetailId
+			,intConcurrencyId
+			)
+		SELECT (
+				SELECT intScheduleWorkOrderDetailId
+				FROM dbo.tblMFScheduleWorkOrderDetail WD
+				JOIN dbo.tblMFScheduleWorkOrder W ON W.intScheduleWorkOrderId = WD.intScheduleWorkOrderId
+				WHERE W.intWorkOrderId = x.intWorkOrderId
+					AND W.intScheduleId = S.intScheduleId
+					AND WD.intCalendarDetailId = x.intCalendarDetailId
+				)
+			,x.intWorkOrderId
+			,S.intScheduleId
+			,x.intCalendarMachineId
+			,x.intCalendarDetailId
+			,1
+		FROM @tblMFScheduleMachineDetail x
+		JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFSchedule S ON S.intScheduleId = W.intScheduleId
+			AND S.ysnStandard = 1
+
+		INSERT INTO dbo.tblMFScheduleConstraintDetail (
+			intScheduleWorkOrderId
+			,intWorkOrderId
+			,intScheduleId
+			,intScheduleRuleId
+			,dtmChangeoverStartDate
+			,dtmChangeoverEndDate
+			,intDuration
+			,intConcurrencyId
+			)
+		SELECT (
+				SELECT intScheduleWorkOrderId
+				FROM dbo.tblMFScheduleWorkOrder W
+				WHERE W.intWorkOrderId = x.intWorkOrderId
+					AND W.intScheduleId = S.intScheduleId
+				)
+			,x.intWorkOrderId
+			,S.intScheduleId
+			,x.intScheduleRuleId
+			,x.dtmChangeoverStartDate
+			,x.dtmChangeoverEndDate
+			,x.intDuration
+			,1
+		FROM @tblMFScheduleConstraintDetail x
+		JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFSchedule S ON S.intScheduleId = W.intScheduleId
+			AND S.ysnStandard = 1
+
+		INSERT INTO dbo.tblMFScheduleConstraint (
+			intScheduleId
+			,intScheduleRuleId
+			)
+		SELECT S.intScheduleId
+			,intScheduleRuleId
+		FROM @tblMFScheduleConstraint
+			,dbo.tblMFSchedule S
+		WHERE S.ysnStandard = 1
+			--DELETE
+			--FROM @tblMFScheduleWorkOrder
+			--DELETE
+			--FROM @tblMFScheduleWorkOrderDetail
+			--DELETE
+			--FROM @tblMFScheduleMachineDetail
+			--DELETE
+			--FROM @tblMFScheduleConstraintDetail
 	END
 
 	IF @ysnScheduleByManufacturingCell = 0

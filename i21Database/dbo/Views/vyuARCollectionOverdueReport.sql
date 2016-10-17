@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCollectionOverdueReport]
 AS
-SELECT
+SELECT TOP 100 PERCENT
 	intCompanyLocationId		=	(SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 	, strCompanyName			=	(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	, strCompanyAddress			=	(SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
@@ -16,6 +16,7 @@ SELECT
 	, IAR.strBOLNumber
 	, IAR.dblCreditLimit
 	, ARI.intTermId
+	, Term.strTerm
 	, IAR.dblTotalAR
 	, CAR.[dblTotalARSum]		
 	, IAR.dblFuture
@@ -97,3 +98,5 @@ LEFT JOIN (
 				, strPhone 
 			FROM 
 				tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
+INNER JOIN (SELECT intTermID, strTerm  FROM tblSMTerm) Term ON ARI.intTermId = Term.intTermID
+ORDER BY IAR.intEntityCustomerId, IAR.intInvoiceId DESC

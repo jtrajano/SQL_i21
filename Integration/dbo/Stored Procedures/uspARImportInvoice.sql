@@ -37,11 +37,11 @@ BEGIN
 	
 	IF(@Checking = 0 and @Posted = 0)
 	BEGIN
-		IF @ysnAG		= 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agordmst')
-		DECLARE @totalDetailImported int
+	    DECLARE @totalDetailImported int
+		IF @ysnAG		= 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agordmst')	
 		BEGIN
 			DECLARE @totalagordmst int
-			EXEC [uspARImportInvoiceBackupAGORDMST] @StartDate ,@EndDate ,@totalagordmst OUTPUT
+			EXEC [uspARImportInvoiceBackupAGORDMST] @StartDate ,@EndDate ,@totalagordmst OUTPUT			
 			EXEC [uspARImportInvoiceFromAGORDMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT 			
 		END
 		

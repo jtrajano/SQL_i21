@@ -14,6 +14,7 @@
 	[ysnCreatedByAgent] [bit]  NULL,
 	[dtmSent] [datetime] NULL,
 	[ysnEncoded] [bit]  NULL,
+	[strCrmSendingStatus] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketComment] PRIMARY KEY CLUSTERED ([intTicketCommentId] ASC),
     CONSTRAINT [FK_TicketComment_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]) on delete cascade

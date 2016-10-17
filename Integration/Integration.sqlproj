@@ -359,9 +359,9 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateForPrintDeliveryTicketView.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportAGTax.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportAGTaxXref.sql" />
-    <Build Include="dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportInvoiceFromAGORDMST.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPTTax.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql" />
   </ItemGroup>
 </Project>

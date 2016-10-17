@@ -32,9 +32,8 @@ SELECT
 	SUM(ISNULL(A.dblCredit,0)) - SUM(ISNULL(A.dblDebit, 0))
 FROM tblGLDetail A
 INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-INNER JOIN tblGLAccountGroup C ON C.intAccountGroupId = B.intAccountGroupId
-INNER JOIN tblGLAccountCategory D ON C.intAccountCategoryId = D.intAccountCategoryId
-WHERE D.intAccountCategoryId = @intPayablesCategory
+INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
+WHERE D.intAccountCategoryId = 1
 AND A.ysnIsUnposted = 0
 GROUP BY B.strAccountId
 

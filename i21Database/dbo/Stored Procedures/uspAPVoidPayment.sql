@@ -247,6 +247,20 @@ BEGIN
 			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
+	--UPDATE INVOICES
+	DECLARE @invoices Id
+	INSERT INTO @invoices
+	SELECT DISTINCT
+		B.intPaymentDetailId
+	FROM #tmpPayables A
+	INNER JOIN tblAPPaymentDetail B
+		ON A.intPaymentId = B.intPaymentId
+	WHERE B.intInvoiceId > 0
+	IF EXISTS(SELECT 1 FROM @invoices)
+	BEGIN
+		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @intUserId, @post = 0
+	END
+
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 	UPDATE C
 		SET C.dblAmountDue = B.dblAmountDue,

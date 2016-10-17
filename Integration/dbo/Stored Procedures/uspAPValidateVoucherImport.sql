@@ -54,6 +54,10 @@ INSERT INTO @log
 SELECT TOP 1 
 	'There are invalid date value on apivc_gl_rev_dt of apivcmst.'
 FROM apivcmst A WHERE ISDATE(A.apivc_gl_rev_dt) = 0
+AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+			THEN
+				CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+			ELSE 1 END)
 UNION ALL
 SELECT TOP 1 
 	'There are invalid date value on aptrx_gl_rev_dt of aptrxmst'

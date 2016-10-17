@@ -112,7 +112,7 @@ BEGIN
 
 	--Vendor Address
 	strEntityName = ENTITY.strName,
-	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipToAddress, Bill.strShipToCity, Bill.strShipToState,Bill.strShipToZipCode),
+	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	TICKET.intTicketId,
 	INVRCPT.strReceiptNumber,
 	TICKET.strTicketNumber,
@@ -123,7 +123,7 @@ BEGIN
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
 	BillDtl.dblTotal
-	,(SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL) AS dblTotalDiscount
+	,ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS dblTotalDiscount
 	, BillDtl.intBillId
 	FROM tblCMBankTransaction BNKTRN
 	INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -166,7 +166,7 @@ BEGIN
 
 	--Vendor Address
 	strEntityName = ENTITY.strName,
-	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipToAddress, Bill.strShipToCity, Bill.strShipToState,Bill.strShipToZipCode),
+	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	TICKET.intTicketId,
 	INVRCPT.strReceiptNumber,
 	TICKET.strTicketNumber,
@@ -177,7 +177,7 @@ BEGIN
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
 	BillDtl.dblTotal
-	,(SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL) AS dblTotalDiscount
+	,ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS dblTotalDiscount
 	, BillDtl.intBillId
 	FROM tblCMBankTransaction BNKTRN
 	--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId

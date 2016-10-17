@@ -1320,6 +1320,8 @@ IF @post = 1
 		INNER JOIN
 			@AROverpayment P
 				ON A.intPaymentId = P.intPaymentId
+		WHERE
+			A.dblUnappliedAmount <> 0
 				
 		UNION ALL
 		--CREDIT Prepayment
@@ -1357,6 +1359,8 @@ IF @post = 1
 		INNER JOIN
 			@ARPrepayment P
 				ON A.intPaymentId = P.intPaymentId
+		WHERE
+			A.dblAmountPaid <> 0
 				
 				
 		UNION ALL

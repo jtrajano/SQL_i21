@@ -6,6 +6,7 @@ BEGIN
 			, @strCustomerIds			NVARCHAR(MAX)		
 			, @intLetterId				INT
 			, @strLetterId				NVARCHAR(10)  
+			 ,@LetterName				NVARCHAR(MAX)				
 			, @query					NVARCHAR(MAX)
 			, @intEntityCustomerId		INT
 			, @blb						VARBINARY(MAX)
@@ -72,6 +73,8 @@ BEGIN
 		
 	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
 
+	SELECT @LetterName = strName FROM tblSMLetter WHERE intLetterId = @intLetterId	
+
 	DECLARE @strMessage VARCHAR(MAX)
 	SELECT
 		@strMessage = CONVERT(VARCHAR(MAX), blbMessage)
@@ -125,7 +128,24 @@ BEGIN
 		@originalMsgInHTML = msgAsHTML 
 	FROM 
 		@OriginalMsgInHTMLTable
- 
+
+	IF @LetterName = 'Recent Overdue Collection Letter'
+	BEGIN
+		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl0Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+	END
+	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
+	BEGIN
+		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl30Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+	END
+	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
+	BEGIN
+		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl60Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+	END
+	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
+	BEGIN
+		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl90Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
+	END
+	 
 	INSERT INTO @SelectedPlaceHolderTable
 	(
 		intPlaceHolderId
@@ -183,8 +203,8 @@ BEGIN
 						,@InsertQuery	VARCHAR(MAX)
 						,@NotTableQuery	VARCHAR(MAX)
 
-				SET @NotTableQuery = 'DECLARE @SetQuery			VARCHAR(MAX)
-												,@InsertQuery	VARCHAR(MAX)
+				SET @NotTableQuery = 'DECLARE @SetQuery				VARCHAR(MAX)
+												,@InsertQuery		VARCHAR(MAX)							 
 
 										IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
 										CREATE TABLE #Records(
@@ -192,15 +212,45 @@ BEGIN
 											intEntityCustomerId		INT,
 											strValues		VARCHAR(MAX),
 											strDataType		VARCHAR(MAX)								
-										)																	
-										INSERT INTO #Records (RowId, intEntityCustomerId, strValues, strDataType)
-										SELECT TOP 1
-											RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL)), intEntityCustomerId = ' + CAST(@CustomerId AS VARCHAR(200)) + ', strValues =' + @SourceColumn + ', strDataType = ''' + @DataType + '''										
-										FROM 
-											' + @SourceTable + ' 
+										)								 
+
+										DECLARE @TermTable TABLE
+										(
+											intEntityCustomerId INT
+											, ' + @SourceColumn + ' nvarchar(max)
+										)
+
+										INSERT INTO 
+											@TermTable
+										(
+											intEntityCustomerId
+											, ' + @SourceColumn + '
+										) 
+										SELECT DISTINCT
+											intEntityCustomerId
+											, ' + @SourceColumn + ' 
+										FROM ' + @SourceTable + '  
 										WHERE 
 											[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))	+ '  
-											
+
+										INSERT INTO #Records (RowId, intEntityCustomerId, strValues, strDataType)
+
+										SELECT TOP 1 
+											RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
+											, intEntityCustomerId
+											, strValues = STUFF((SELECT '', '' + ' + @SourceColumn + ' 												
+																FROM 
+																	@TermTable 
+																WHERE 
+																	intEntityCustomerId = t.intEntityCustomerId
+																FOR XML PATH(''''), TYPE)
+																.value(''.'',''NVARCHAR(MAX)''),1,2,'' '') 
+											, strDataType = ''' + @DataType + '''
+										FROM 
+											@TermTable t
+										GROUP BY 
+											intEntityCustomerId						 
+ 				
 						 				UPDATE 
 											#Records
 										SET strValues = 
@@ -232,6 +282,7 @@ BEGIN
 											,[strPlaceHolder]		= ''' + @PlaceHolder + '''
 											,[intEntityCustomerId]	= ' + CAST(@CustomerId AS VARCHAR(200)) + ' 
 											,[strValue]				= '''' +  @SetQuery  + '''''
+											
 				EXEC sp_sqlexec @NotTableQuery 			 
 			END
 		ELSE
@@ -240,7 +291,8 @@ BEGIN
 						,@InsertQueryTable	VARCHAR(MAX)
 						,@HTMLTable			VARCHAR(MAX)
 						,@ColumnCount		INT
-						,@ColumnCounter		INT											
+						,@ColumnCounter		INT							
+ 										
 
 				IF OBJECT_ID('tempdb..#TempTableColumnHeaders') IS NOT NULL DROP TABLE #TempTableColumnHeaders
 				SELECT 
@@ -479,6 +531,8 @@ BEGIN
  
  
 				EXEC sp_sqlexec @InsertQueryTable 	
+
+			
 			END
 				
 			DELETE 
@@ -557,6 +611,3 @@ BEGIN
 			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
 
 END
- 
-
-
