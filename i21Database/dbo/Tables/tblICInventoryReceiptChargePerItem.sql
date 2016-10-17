@@ -17,7 +17,8 @@
 	--[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), -- Removed these field. Use tblICInventoryReceiptCharge.dblAmountBilled
 	--[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), -- Removed these field. Use tblICInventoryReceiptCharge.dblAmountBilled
 	CONSTRAINT [PK_tblICInventoryReceiptChargePerItem] PRIMARY KEY ([intInventoryReceiptChargePerItemId]), 
-	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
+	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblICInventoryReceiptCharge] FOREIGN KEY ([intInventoryReceiptChargeId]) REFERENCES [tblICInventoryReceiptCharge]([intInventoryReceiptChargeId]) ON DELETE CASCADE, 
+	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]), 
 	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
 	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [tblCTContractHeader]([intContractHeaderId])
 )
