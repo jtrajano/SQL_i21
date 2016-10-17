@@ -153,13 +153,14 @@
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
 
+--PR
+:r .\21_PR\1_1620_to_1630.sql
+:r .\21_PR\2_1630_to_1640.sql
+
 --PAT
 :r .\22_PAT\1_StaticTable.sql
 :r .\22_PAT\2_AddTransferType.sql
 :r .\22_PAT\3_MigrateDataChanges.sql
-
---PR
-:r .\21_PR\1_1620_to_1630.sql
 
 --EM
 

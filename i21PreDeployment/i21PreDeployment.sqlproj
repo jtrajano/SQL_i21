@@ -147,6 +147,7 @@
     <None Include="stroh1620.publish.xml" />
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Storage_Unit_Type.sql" />
+    <None Include="Scripts\Pre-Deployment\21_PR\2_1630_to_1640.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

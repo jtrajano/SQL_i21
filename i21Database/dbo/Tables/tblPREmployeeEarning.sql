@@ -12,7 +12,7 @@
     [intEmployeeTimeOffId]		INT             NULL,
 	[intEmployeeAccrueTimeOffId] INT            NULL,
 	[intEmployeeEarningLinkId]	INT             NULL,
-	[intPayGroupId]				INT             NULL,
+	[intPayGroupId]				INT             NOT NULL,
     [ysnDefault]				BIT             DEFAULT ((1)) NOT NULL,
     [intSort]					INT             NULL,
     [intConcurrencyId]			INT             DEFAULT ((1)) NULL,
