@@ -63,7 +63,8 @@ BEGIN
 			,@intLotId AS INT 
 			,@CostAdjValue AS NUMERIC(38,20)
 			,@intCostBucketLotOutId AS INT
-			
+
+			,@CostAdjQtyProxy AS NUMERIC(38, 20)			
 
 	DECLARE loopLotCostBucket CURSOR LOCAL FAST_FORWARD
 	FOR 
@@ -185,7 +186,7 @@ BEGIN
 
 			UPDATE	costBucketOut
 			SET		dblCostAdjustQty = CASE WHEN dblCostAdjustQty < @CostAdjQty THEN 0 ELSE dblCostAdjustQty - @CostAdjQty END 
-					,@CostAdjQty = CASE WHEN dblCostAdjustQty < @CostAdjQty THEN @CostAdjQty - dblCostAdjustQty ELSE 0 END 
+					,@CostAdjQtyProxy = CASE WHEN dblCostAdjustQty < @CostAdjQty THEN @CostAdjQty - dblCostAdjustQty ELSE 0 END 
 					,@intCostBucketLotOutId = costBucketOut.intId
 			FROM	tblICInventoryLotOut costBucketOut 
 					CROSS APPLY (
@@ -197,6 +198,8 @@ BEGIN
 						ORDER BY x.intId DESC 					
 					) lastCostBucketOut
 			WHERE	costBucketOut.intId = lastCostBucketOut.intId 
+
+			SET @CostAdjQty = @CostAdjQtyProxy
 
 			-- Do this to avoid the endless loop. 
 			IF @intCostBucketLotOutId IS NULL 
