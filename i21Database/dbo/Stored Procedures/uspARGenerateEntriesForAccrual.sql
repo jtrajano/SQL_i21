@@ -19,14 +19,18 @@ SET @PostDate = CAST(GETDATE() AS DATE)
 
 WHILE EXISTS(SELECT NULL FROM @Invoices I LEFT OUTER JOIN @GLEntries G ON I.intId = G.intTransactionId WHERE ISNULL(G.intTransactionId,0) = 0)
 BEGIN
-	DECLARE  @InvoiceId				INT
-			,@AccrualPeriod			INT
-			,@LoopCounter			INT
-			,@TaxLoopCounter		INT
-			,@Remainder				DECIMAL(18,6)
-			,@RemainderWODiscount	DECIMAL(18,6)
-			,@UnitsRemainder		DECIMAL(18,6)
-			,@TaxRemainder			DECIMAL(18,6)
+	DECLARE  @InvoiceId							INT
+			,@AccrualPeriod						INT
+			,@LoopCounter						INT
+			,@TaxLoopCounter					INT
+			,@Remainder							DECIMAL(18,6)
+			,@RemainderWODiscount				DECIMAL(18,6)
+			,@LicenseRemainder					DECIMAL(18,6)
+			,@LicenseRemainderWODiscount		DECIMAL(18,6)
+			,@MaintenanceRemainder				DECIMAL(18,6)
+			,@MaintenanceRemainderWODiscount	DECIMAL(18,6)
+			,@UnitsRemainder					DECIMAL(18,6)
+			,@TaxRemainder						DECIMAL(18,6)
 	SELECT TOP 1 @InvoiceId = I.intId FROM @Invoices I LEFT OUTER JOIN @GLEntries G ON I.intId = G.intTransactionId WHERE ISNULL(G.intTransactionId,0) = 0
 
 	SELECT
@@ -238,7 +242,7 @@ BEGIN
 		
 		
 		 
- DECLARE @InvoiceDetail AS TABLE(intInvoiceId INT, intInvoiceDetailId INT, dblTotal DECIMAL(18,6), dblDiscount DECIMAL(18,6), dblQtyShipped DECIMAL(18,6), dblPrice DECIMAL(18,6), dblUnits DECIMAL(18,6))
+ DECLARE @InvoiceDetail AS TABLE(intInvoiceId INT, intInvoiceDetailId INT, dblTotal DECIMAL(18,6), dblDiscount DECIMAL(18,6), dblQtyShipped DECIMAL(18,6), dblPrice DECIMAL(18,6), dblUnits DECIMAL(18,6), dblMaintenanceAmount DECIMAL(18,6), dblLicenseAmount DECIMAL(18,6))
  DELETE FROM @InvoiceDetail
  INSERT INTO @InvoiceDetail
 	(intInvoiceId
@@ -247,7 +251,9 @@ BEGIN
 	,dblUnits
 	,dblDiscount
 	,dblQtyShipped
-	,dblPrice)
+	,dblPrice
+	,dblMaintenanceAmount
+	,dblLicenseAmount)
 SELECT
 	 intInvoiceId			= ARI.intInvoiceId
 	,intInvoiceDetailId		= ARID.intInvoiceDetailId
@@ -255,7 +261,9 @@ SELECT
 	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
 	,dblDiscount			= ARID.dblDiscount 
 	,dblQtyShipped			= ARID.dblQtyShipped
-	,dblPrice				= ARID.dblPrice 
+	,dblPrice				= ARID.dblPrice
+	,dblMaintenanceAmount	= @ZeroDecimal
+	,dblLicenseAmount		= @ZeroDecimal
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -284,15 +292,19 @@ ORDER BY
 	,dblUnits
 	,dblDiscount
 	,dblQtyShipped
-	,dblPrice)
+	,dblPrice
+	,dblMaintenanceAmount
+	,dblLicenseAmount)
 SELECT
 	 intInvoiceId			= ARI.intInvoiceId
 	,intInvoiceDetailId		= ARID.intInvoiceDetailId
-	,dblTotal				= ARID.dblLicenseAmount
+	,dblTotal				= ARID.dblTotal
 	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
 	,dblDiscount			= ARID.dblDiscount 
 	,dblQtyShipped			= ARID.dblQtyShipped
-	,dblPrice				= ARID.dblPrice 
+	,dblPrice				= ARID.dblPrice
+	,dblMaintenanceAmount	= ARID.dblMaintenanceAmount
+	,dblLicenseAmount		= CASE WHEN @AccrueLicense = 1 THEN ARID.dblLicenseAmount ELSE @ZeroDecimal END
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -311,81 +323,117 @@ WHERE
 	AND ARID.strMaintenanceType IN ('License/Maintenance', 'License Only')
 	AND ICI.strType = 'Software'
 	AND ARI.strType <> 'Debit Memo'
-	AND @AccrueLicense = 1
+	--AND @AccrueLicense = 1
 ORDER BY
 	ARI.intInvoiceId
 	,ARID.intInvoiceDetailId
 
---Maintenance
- INSERT INTO @InvoiceDetail
-	(intInvoiceId
-	,intInvoiceDetailId
-	,dblTotal
-	,dblUnits
-	,dblDiscount
-	,dblQtyShipped
-	,dblPrice)
-SELECT
-	 intInvoiceId			= ARI.intInvoiceId
-	,intInvoiceDetailId		= ARID.intInvoiceDetailId
-	,dblTotal				= ARID.dblMaintenanceAmount
-	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
-	,dblDiscount			= ARID.dblDiscount 
-	,dblQtyShipped			= ARID.dblQtyShipped
-	,dblPrice				= ARID.dblPrice 
-FROM
-	tblARInvoiceDetail ARID
-INNER JOIN
-	 tblARInvoice ARI
-		ON ARI.intInvoiceId = ARID.intInvoiceId
-INNER JOIN
-	tblICItem ICI
-		ON ARID.intItemId = ICI.intItemId 	
-LEFT OUTER JOIN
-	vyuICGetItemStock ICIS
-		ON ARID.intItemId = ICIS.intItemId 
-		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
-WHERE
-	ARI.intInvoiceId = @InvoiceId 
-	AND ARID.dblMaintenanceAmount <> @ZeroDecimal 
-	AND ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-	AND ICI.strType = 'Software'
-	AND ARI.strType <> 'Debit Memo'
-ORDER BY
-	ARI.intInvoiceId
-	,ARID.intInvoiceDetailId
+----Maintenance
+-- INSERT INTO @InvoiceDetail
+--	(intInvoiceId
+--	,intInvoiceDetailId
+--	,dblTotal
+--	,dblUnits
+--	,dblDiscount
+--	,dblQtyShipped
+--	,dblPrice
+--	,dblMaintenanceAmount
+--	,dblLicenseAmount)
+--SELECT
+--	 intInvoiceId			= ARI.intInvoiceId
+--	,intInvoiceDetailId		= ARID.intInvoiceDetailId
+--	,dblTotal				= ARID.dblTotal
+--	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
+--	,dblDiscount			= ARID.dblDiscount 
+--	,dblQtyShipped			= ARID.dblQtyShipped
+--	,dblPrice				= ARID.dblPrice
+--	,dblMaintenanceAmount	= ARID.dblMaintenanceAmount
+--	,dblLicenseAmount		= @ZeroDecimal
+--FROM
+--	tblARInvoiceDetail ARID
+--INNER JOIN
+--	 tblARInvoice ARI
+--		ON ARI.intInvoiceId = ARID.intInvoiceId
+--INNER JOIN
+--	tblICItem ICI
+--		ON ARID.intItemId = ICI.intItemId 	
+--LEFT OUTER JOIN
+--	vyuICGetItemStock ICIS
+--		ON ARID.intItemId = ICIS.intItemId 
+--		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
+--WHERE
+--	ARI.intInvoiceId = @InvoiceId 
+--	AND ARID.dblMaintenanceAmount <> @ZeroDecimal 
+--	AND ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+--	AND ICI.strType = 'Software'
+--	AND ARI.strType <> 'Debit Memo'
+--ORDER BY
+--	ARI.intInvoiceId
+--	,ARID.intInvoiceDetailId
 
 
 WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceDetail)
 BEGIN
-	DECLARE @InvoiceDetailId			INT
-			,@Total						DECIMAL(18,6)
-			,@TotalPerPeriod			DECIMAL(18,6)
-			,@UnitsTotal				DECIMAL(18,6)
-			,@TotalWODiscount			DECIMAL(18,6)
-			,@TotalPerPeriodWODiscount	DECIMAL(18,6)
-			,@UnitsPerPeriod			DECIMAL(18,6)
+	DECLARE @InvoiceDetailId					INT
+			,@Total								DECIMAL(18,6)
+			,@TotalPerPeriod					DECIMAL(18,6)			
+			,@TotalWODiscount					DECIMAL(18,6)
+			,@TotalPerPeriodWODiscount			DECIMAL(18,6)
+			,@LicenseTotal						DECIMAL(18,6)
+			,@LicenseTotalPerPeriod				DECIMAL(18,6)			
+			,@LicenseTotalWODiscount			DECIMAL(18,6)
+			,@LicenseTotalPeriodWODiscount		DECIMAL(18,6)
+			,@MaintenanceTotal					DECIMAL(18,6)
+			,@MaintenanceTotalPerPeriod			DECIMAL(18,6)			
+			,@MaintenanceTotalWODiscount		DECIMAL(18,6)
+			,@MaintenanceTotalPeriodWODiscount	DECIMAL(18,6)
+			,@UnitsTotal						DECIMAL(18,6)
+			,@UnitsPerPeriod					DECIMAL(18,6)
 
 	SET @Remainder = @ZeroDecimal
 	SET @RemainderWODiscount = @ZeroDecimal
+	SET @LicenseRemainder = @ZeroDecimal
+	SET @LicenseRemainderWODiscount = @ZeroDecimal
+	SET @MaintenanceRemainder = @ZeroDecimal
+	SET @MaintenanceRemainderWODiscount = @ZeroDecimal
 	SET @UnitsRemainder = @ZeroDecimal
 
 	SELECT TOP 1 
-		 @InvoiceDetailId			= intInvoiceDetailId
-		,@Total						= ISNULL(dblTotal, @ZeroDecimal) + ((ISNULL(dblDiscount, @ZeroDecimal)/100.00) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblPrice, @ZeroDecimal)))
-		,@TotalWODiscount			= dblTotal
-		,@UnitsTotal				= dblUnits
+		 @InvoiceDetailId				= intInvoiceDetailId
+		,@Total							= ISNULL(dblTotal, @ZeroDecimal) + ((ISNULL(dblDiscount, @ZeroDecimal)/100.00) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblPrice, @ZeroDecimal)))		
+		,@TotalWODiscount				= dblTotal
+		,@LicenseTotal					= (ISNULL(dblLicenseAmount, @ZeroDecimal) * ISNULL(dblQtyShipped, @ZeroDecimal))  + ((ISNULL(dblDiscount, @ZeroDecimal)/100.00) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblLicenseAmount, @ZeroDecimal)))
+		,@LicenseTotalWODiscount		= dblLicenseAmount
+		,@MaintenanceTotal				= (ISNULL(dblMaintenanceAmount, @ZeroDecimal) * ISNULL(dblQtyShipped, @ZeroDecimal))  + ((ISNULL(dblDiscount, @ZeroDecimal)/100.00) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblMaintenanceAmount, @ZeroDecimal)))
+		,@MaintenanceTotalWODiscount	= dblMaintenanceAmount
+		,@UnitsTotal					= dblUnits
 	FROM 
 		@InvoiceDetail
 		
 	SET @Remainder = @ZeroDecimal
 	SET @RemainderWODiscount = @ZeroDecimal
+	SET @LicenseRemainder = @ZeroDecimal
+	SET @LicenseRemainderWODiscount = @ZeroDecimal
+	SET @MaintenanceRemainder = @ZeroDecimal
+	SET @MaintenanceRemainderWODiscount = @ZeroDecimal
 	SET @UnitsRemainder = @ZeroDecimal
 	
 	SET @TotalPerPeriod = ROUND((@Total/@AccrualPeriod),2)
 	SET @Remainder = ROUND(@Total,2) - ROUND((@TotalPerPeriod * @AccrualPeriod),2)
 	SET @TotalPerPeriodWODiscount = ROUND((@TotalWODiscount/@AccrualPeriod),2)
 	SET @RemainderWODiscount = ROUND(@TotalWODiscount,2) - ROUND((@TotalPerPeriodWODiscount * @AccrualPeriod),2)
+
+	SET @LicenseTotalPerPeriod = ROUND((@LicenseTotal/@AccrualPeriod),2)
+	SET @LicenseRemainder = ROUND(@Total,2) - ROUND((@LicenseTotalPerPeriod * @AccrualPeriod),2)
+	SET @LicenseTotalPeriodWODiscount = ROUND((@LicenseTotalWODiscount/@AccrualPeriod),2)
+	SET @LicenseRemainderWODiscount = ROUND(@LicenseTotalWODiscount,2) - ROUND((@LicenseTotalPeriodWODiscount * @AccrualPeriod),2)
+
+
+	SET @MaintenanceTotalPerPeriod = ROUND((@MaintenanceTotal/@AccrualPeriod),2)
+	SET @MaintenanceRemainder = ROUND(@Total,2) - ROUND((@MaintenanceTotalPerPeriod * @AccrualPeriod),2)
+	SET @MaintenanceTotalPeriodWODiscount = ROUND((@MaintenanceTotalWODiscount/@AccrualPeriod),2)
+	SET @MaintenanceRemainderWODiscount = ROUND(@MaintenanceTotalWODiscount,2) - ROUND((@MaintenanceTotalPeriodWODiscount * @AccrualPeriod),2)
+
 	SET @UnitsPerPeriod = ROUND((@UnitsTotal/@AccrualPeriod),6)
 	SET @UnitsRemainder = ROUND(@UnitsTotal,6) - ROUND((@UnitsPerPeriod * @AccrualPeriod),6)
 	SET @LoopCounter = 0		
@@ -490,10 +538,10 @@ BEGIN
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @BatchId
 				,intAccountId				= IST.intGeneralAccountId
-				,dblDebit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END 
-												ELSE CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END END
-				,dblCredit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
-												ELSE CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END)  END END
+				,dblDebit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+												ELSE CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END END
+				,dblCredit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+												ELSE CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END END
 
 				,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
@@ -550,10 +598,10 @@ BEGIN
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @BatchId
 				,intAccountId				= IST.intMaintenanceSalesAccountId
-								,dblDebit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END 
-												ELSE CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END END
-				,dblCredit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
-												ELSE CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END)  END END
+				,dblDebit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+												ELSE CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END END
+				,dblCredit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+												ELSE CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END END
 
 				,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
