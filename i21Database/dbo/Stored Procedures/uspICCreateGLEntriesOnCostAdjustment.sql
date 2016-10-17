@@ -1114,6 +1114,8 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold
 
 -----------------------------------------------------------------------------------
 -- This part is for Revalue In-Transit or Revalue Shipment 
+-- Debit: In-Transit 
+-- Credit: Inventory 
 -----------------------------------------------------------------------------------
 UNION ALL  
 SELECT	
@@ -1201,7 +1203,7 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit

@@ -231,6 +231,7 @@ BEGIN
 				AND ISNULL(tblICInventoryLIFO.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
 				AND tblICInventoryLIFO.strTransactionId = @strSourceTransactionId
 				AND ISNULL(tblICInventoryLIFO.ysnIsUnposted, 0) = 0 
+				AND tblICInventoryLIFO.intInventoryLIFOId > ISNULL(@CostBucketId, 0) 
 	END 
 
 	-- Validate the cost bucket
@@ -264,7 +265,7 @@ BEGIN
 			SET @OriginalCost = NULL
 			 
 			SELECT	@OriginalCost = dblCost
-			FROM	tblICInventoryLIFOAdjustmentLog
+			FROM	tblICInventoryLIFOCostAdjustmentLog
 			WHERE	intInventoryLIFOId = @CostBucketId
 					AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
 					AND ysnIsUnposted = 0 
@@ -279,7 +280,7 @@ BEGIN
 			SET @AdjustedQty = NULL 
 
 			SELECT	@AdjustedQty = SUM(dblQty) 
-			FROM	tblICInventoryLIFOAdjustmentLog
+			FROM	tblICInventoryLIFOCostAdjustmentLog
 			WHERE	intInventoryLIFOId = @CostBucketId
 					AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 					AND ysnIsUnposted = 0 
@@ -381,16 +382,16 @@ BEGIN
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 
-		-- Log original cost to tblICInventoryLIFOAdjustmentLog
+		-- Log original cost to tblICInventoryLIFOCostAdjustmentLog
 		IF NOT EXISTS (
 				SELECT	TOP 1 1 
-				FROM	tblICInventoryLIFOAdjustmentLog
+				FROM	tblICInventoryLIFOCostAdjustmentLog
 				WHERE	intInventoryLIFOId = @CostBucketId
 						AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
 						AND ysnIsUnposted = 0 
 		)
 		BEGIN 
-			INSERT INTO tblICInventoryLIFOAdjustmentLog (
+			INSERT INTO tblICInventoryLIFOCostAdjustmentLog (
 					[intInventoryLIFOId]
 					,[intInventoryTransactionId]
 					,[intInventoryCostAdjustmentTypeId]
@@ -410,7 +411,7 @@ BEGIN
 
 		-- Log a new cost. 
 		BEGIN 
-			INSERT INTO tblICInventoryLIFOAdjustmentLog (
+			INSERT INTO tblICInventoryLIFOCostAdjustmentLog (
 					[intInventoryLIFOId]
 					,[intInventoryTransactionId]
 					,[intInventoryCostAdjustmentTypeId]
@@ -784,7 +785,7 @@ BEGIN
 								,[intSubLocationId]				= InvTran.intSubLocationId
 								,[intStorageLocationId]			= InvTran.intStorageLocationId
 								,[ysnIsStorage]					= NULL 
-								,[strActualCostId]				= NULL 
+								,[strActualCostId]				= CASE WHEN InvTran.intFobPointId = @FOB_DESTINATION THEN @InvTranStringTransactionId ELSE NULL END  
 								,[intSourceTransactionId]		= InvTran.intTransactionId
 								,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
 								,[strSourceTransactionId]		= InvTran.strTransactionId
