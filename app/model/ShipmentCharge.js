@@ -79,6 +79,22 @@ Ext.define('Inventory.model.ShipmentCharge', {
             })
         }
 
+         if (this.joined.length > 0) {
+            var data = this.joined[0].associatedEntity;
+            var ShipmentCustomerId = null;
+            if (data) {
+                ShipmentCustomerId = data.get('intEntityCustomerId');
+            }
+            if (this.get('ysnAccrue') === true &&
+                iRely.Functions.isEmpty(this.get('intEntityVendorId')) ||
+                this.get('intEntityVendorId') === ShipmentCustomerId) {
+                errors.add({
+                    field: 'ysnAccrue',
+                    message: 'Vendor for Other Charge Item ' + this.get('strItemNo') + '  is required to accrue.'
+                })
+            }
+        }
+
         return errors;
     }
 
