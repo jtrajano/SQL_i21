@@ -4433,6 +4433,7 @@
     <Build Include="dbo\Views\vyuICGetChargeTaxDetails.sql" />
     <Build Include="dbo\Views\vyuPATCalculateFiscalPatronageHistory.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundPatronageHistory.sql" />
+    <Build Include="dbo\Tables\tblTMDispatchHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

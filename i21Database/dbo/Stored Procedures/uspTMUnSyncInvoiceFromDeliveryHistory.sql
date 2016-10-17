@@ -24,6 +24,7 @@ BEGIN
 	DECLARE @dblSeasonResetAccumulated NUMERIC(18,6)
 	DECLARE @intSeasonResetArchiveID INT
 	
+	
 	PRINT 'Get invoice header detail'
 	-----Get invoice header detail
 	SELECT 
@@ -265,6 +266,101 @@ BEGIN
 					,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,0,@intDeliveryHistoryId)
 				WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 				
+				--Restore the Call Entry
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId)
+				BEGIN
+						--CHECK if a corresponding entry in tblTMDispatchHistory is present for the delivery history
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatchHistory WHERE intDeliveryHistoryId = @intDeliveryHistoryId)
+					BEGIN
+						SET IDENTITY_INSERT tblTMDispatch ON
+
+						INSERT INTO tblTMDispatch (
+							[intDispatchID]            
+							,[intSiteID]
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductID]             
+							,[intSubstituteProductID]   
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverID]              
+							,[intDispatchDriverID]      
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserID]                
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermID]        
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]		
+						)	
+						SELECT TOP 1 
+							[intDispatchID]				= [intDispatchId]
+							,intSiteID					= [intSiteId]
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductID]				= [intProductId]
+							,[intSubstituteProductID]   = [intSubstituteProductId]
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverID]              = [intDriverId]              
+							,[intDispatchDriverID]		= [intDispatchDriverId]   
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserID]				= [intUserId]
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermID]		= [intDeliveryTermId] 
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]		
+						FROM tblTMDispatchHistory
+						WHERE intDeliveryHistoryId = @intDeliveryHistoryId
+
+						SET IDENTITY_INSERT tblTMDispatch OFF	
+
+						
+					END
+				END
 				
 				---- Update forecasted nad estimated % left
 				EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
@@ -515,7 +611,109 @@ BEGIN
 					-- No calculation for forecast since this is the start/setup state of site 
 					---EXEC uspTMUpdateForecastedValuesBySite @intSiteId
 				END
+
+				--Restore the Call Entry
+				--Check if an existing order is present
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId)
+				BEGIN
+					--CHECK if a corresponding entry in tblTMDispatchHistory is present for the delivery history
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatchHistory WHERE intDeliveryHistoryId = @intDeliveryHistoryId)
+					BEGIN
+						SET IDENTITY_INSERT tblTMDispatch ON
+
+						INSERT INTO tblTMDispatch (
+							[intDispatchID]            
+							,[intSiteID]
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductID]             
+							,[intSubstituteProductID]   
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverID]              
+							,[intDispatchDriverID]      
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserID]                
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermID]        
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]		
+						)	
+						SELECT TOP 1 
+							[intDispatchID]				= [intDispatchId]
+							,intSiteID					= [intSiteId]
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductID]				= [intProductId]
+							,[intSubstituteProductID]   = [intSubstituteProductId]
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverID]              = [intDriverId]              
+							,[intDispatchDriverID]		= [intDispatchDriverId]   
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserID]				= [intUserId]
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermID]		= [intDeliveryTermId] 
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]		
+						FROM tblTMDispatchHistory
+						WHERE intDeliveryHistoryId = @intDeliveryHistoryId
+
+						SET IDENTITY_INSERT tblTMDispatch OFF	
+
+					
+					END
+				END
+
+				
 			END
+
+			---DELETE Entry from the tblTMDispatchHistory
+			DELETE FROM tblTMDispatchHistory WHERE intDeliveryHistoryId = @intDeliveryHistoryId
 		END
 		
 		UPDATE 	#tmpDeliveryHistory 
