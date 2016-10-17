@@ -4361,6 +4361,7 @@
     <Build Include="dbo\Views\vyuRKOptionStrikeList.sql" />
     <Build Include="dbo\Views\vyuRKGetBrokerList.sql" />
     <Build Include="dbo\Tables\tblVTVeterinary.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityVeterinary.sql" />
     <Build Include="dbo\Stored Procedures\uspMBOnDeleteMeterReading.sql" />
     <Build Include="dbo\Views\vyuAPRptWeightClaims.sql" />
     <Build Include="dbo\Stored Procedures\uspGRShipped.sql" />

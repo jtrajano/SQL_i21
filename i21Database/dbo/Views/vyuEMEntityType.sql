@@ -22,7 +22,8 @@
 								CASE WHEN [Competitor] IS NOT NULL THEN 1 ELSE 0 END AS  [Competitor],
 								CASE WHEN [Buyer] IS NOT NULL THEN 1 ELSE 0 END AS  [Buyer],
 								CASE WHEN [Partner] IS NOT NULL THEN 1 ELSE 0 END AS  [Partner],
-								CASE WHEN [Lead] IS NOT NULL THEN 1 ELSE 0 END AS  [Lead]								
+								CASE WHEN [Lead] IS NOT NULL THEN 1 ELSE 0 END AS  [Lead],
+								CASE WHEN [Veterinary] IS NOT NULL THEN 1 ELSE 0 END AS  [Veterinary]
 
 			FROM
 			(
@@ -52,7 +53,8 @@
 						[Competitor],
 						[Buyer],
 						[Partner],
-						[Lead]
+						[Lead],
+						[Veterinary]
 
 
 					)
