@@ -77,6 +77,7 @@ SELECT INV.intInvoiceId
 	 , INV.strTransactionType
 	 , intDetailCount			= (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = INV.intInvoiceId)
 	 , ysnHasEmailSetup			= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = INV.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + INV.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , ysnHasRecipeItem			= CASE WHEN (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = ID.intInvoiceId AND intRecipeId IS NOT NULL) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , intRecipeId				= ID.intRecipeId
 	 , intOneLinePrintId		= ISNULL(MFR.intOneLinePrintId, 1)
 	 , strInvoiceComments		= I.strInvoiceComments

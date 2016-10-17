@@ -72,9 +72,10 @@ SELECT SO.intSalesOrderId
 	 , dblTaxDetail				= SDT.dblAdjustedTax
 	 , intDetailCount			= (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
 	 , ysnHasEmailSetup			= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + CASE WHEN SO.ysnQuote = 1 THEN 'Quote Order' ELSE 'Sales Order' END + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , ysnHasRecipeItem			= CASE WHEN (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId AND intRecipeId IS NOT NULL) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , strQuoteType
 	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
-	 , intRecipeId				= SD.intRecipeId
+	 , intRecipeId				= SD.intRecipeId	 
 	 , intOneLinePrintId		= ISNULL(MFR.intOneLinePrintId, 1)
 	 , dblTotalWeight			= ISNULL(SO.dblTotalWeight, 0)
 FROM tblSOSalesOrder SO
