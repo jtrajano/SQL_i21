@@ -1146,7 +1146,12 @@ BEGIN TRY
 					) --Exclude Kit Staging,Blend Staging
 				AND ISNULL(SL.ysnAllowConsume,0)=1
 				AND L.intLotId NOT IN (Select intLotId From @tblExcludedLot Where intItemId=@intRawItemId))
-				- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=@intRawItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0)
+				- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=@intRawItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0
+				AND intStorageLocationId NOT IN (
+					@intKitStagingLocationId
+					,@intBlendStagingLocationId
+					) --Exclude Kit Staging,Blend Staging				
+				)
 				- (SELECT ISNULL(SUM(BS.dblQuantity), 0) FROM #tblBlendSheetLot BS WHERE BS.intItemId = @intRawItemId)
 				
 				Delete From #tblInputLot
@@ -1486,6 +1491,7 @@ BEGIN TRY
 							Delete From @tblInputItem Where intItemId=@intRawItemId And ysnIsSubstitute=0 --Remove the main Item
 						End
 					Else --substitute does not exists then show 0 for main item
+					Begin
 						If ISNULL(@intPartialQuantitySubLocationId, 0) > 0
 							INSERT INTO @tblRemainingPickedLots(intWorkOrderInputLotId,	intLotId,	strLotNumber,	strItemNo,	strDescription,	dblQuantity,	
 							intItemUOMId,	strUOM,	dblIssuedQuantity,	intItemIssuedUOMId,	strIssuedUOM,	intItemId,	intRecipeItemId,	
@@ -1499,6 +1505,21 @@ BEGIN TRY
 							Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
 							Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 							Where i.intItemId=@intRawItemId ORDER BY l.intLotId DESC
+
+							--If No Lots found for Item
+						If (Select COUNT(1) FROM @tblRemainingPickedLots)=0 AND (Select COUNT(1) From tblICLot Where intItemId=@intRawItemId)=0
+							INSERT INTO @tblRemainingPickedLots(intWorkOrderInputLotId,	intLotId,	strLotNumber,	strItemNo,	strDescription,	dblQuantity,	
+							intItemUOMId,	strUOM,	dblIssuedQuantity,	intItemIssuedUOMId,	strIssuedUOM,	intItemId,	intRecipeItemId,	
+							dblUnitCost,	dblDensity,	dblRequiredQtyPerSheet,	dblWeightPerUnit,	dblRiskScore,	intStorageLocationId,	
+							strStorageLocationName,	strLocationName,	intLocationId,	strSubLocationName,intSubLocationId,	strLotAlias,	ysnParentLot,	strRowState)
+							Select TOP 1 0,0,'',i.strItemNo,i.strDescription,@dblRemainingRequiredQty,ri.intItemUOMId,um.strUnitMeasure,@dblRemainingRequiredQty, ri.intItemUOMId,um.strUnitMeasure,--l.intItemUOMId,um1.strUnitMeasure, 
+							@intRawItemId,0,0.0,0.0,0.0,1 AS dblWeightPerQty,0.0,0,'','',@intLocationId,'',0,'',0,'Added'
+							From tblMFRecipeItem ri 
+							Join tblICItem i on ri.intItemId=i.intItemId
+							Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
+							Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
+							Where ri.intRecipeItemId=@intRecipeItemId AND ri.intItemId=@intRawItemId
+					End
 				End
 				Else
 				Begin
