@@ -247,6 +247,22 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
+        drugCategory: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'MSDS'
+                },
+                {
+                    strDescription: 'VFD Order'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
         fuelInspectFees: {
             autoLoad: true,
             data: [

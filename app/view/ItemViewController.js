@@ -451,6 +451,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strBarcodePrint}',
                 store: '{barcodePrints}'
             },
+            cboRequired: {
+                value: '{current.strRequired}',
+                store: '{drugCategory}'
+            },
             chkMsdsRequired: '{current.ysnMSDSRequired}',
             txtEpaNumber: '{current.strEPANumber}',
             chkInboundTax: '{current.ysnInboundTax}',

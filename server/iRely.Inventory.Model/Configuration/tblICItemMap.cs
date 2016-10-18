@@ -17,6 +17,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strShortName).HasColumnName("strShortName");
             this.Property(t => t.strType).HasColumnName("strType");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strRequired).HasColumnName("strRequired");
             this.Property(t => t.intManufacturerId).HasColumnName("intManufacturerId");
             this.Property(t => t.intBrandId).HasColumnName("intBrandId");
             this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
@@ -250,6 +251,7 @@ namespace iRely.Inventory.Model
             this.ToTable("vyuICGetCompactItem");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strRequired).HasColumnName("strRequired");
             this.Property(t => t.strType).HasColumnName("strType");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.strManufacturer).HasColumnName("strManufacturer");

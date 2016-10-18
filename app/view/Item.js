@@ -1126,7 +1126,16 @@ Ext.define('Inventory.view.Item', {
                                                                         valueField: 'strDescription'
                                                                     },
                                                                     {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboRequired',
+                                                                        fieldLabel: 'Required',
+                                                                        labelWidth: 116,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
+                                                                    },
+                                                                    {
                                                                         xtype: 'checkboxfield',
+                                                                        hidden: true,
                                                                         itemId: 'chkMsdsRequired',
                                                                         fieldLabel: 'MSDS Required',
                                                                         labelWidth: 116
@@ -1154,7 +1163,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkRestrictedChemical',
-                                                                        fieldLabel: 'Restricted Chemical',
+                                                                        fieldLabel: 'Restricted',
                                                                         labelWidth: 116
                                                                     },
                                                                     {
@@ -4019,6 +4028,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 hidden: true,
                                                                 itemId: 'btnInsertPricing',
+                                                                arrowVisible: false,
                                                                 iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },

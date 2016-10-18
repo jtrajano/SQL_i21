@@ -151,6 +151,7 @@ namespace iRely.Inventory.Model
         public string strInvoiceComments { get; set; }
         public string strPickListComments { get; set; }
         public int? intLotStatusId { get; set; }
+        public string strRequired { get; set; }
 
         private string _manufacturer;
         [NotMapped]
@@ -279,6 +280,7 @@ namespace iRely.Inventory.Model
         public string strOriginName { get; set; }
         public string strCostType { get; set; }
         public string strShortName { get; set; }
+        public string strRequired { get; set; }
 
     }
 
