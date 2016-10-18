@@ -2141,7 +2141,9 @@ Ext.define('Inventory.view.ItemViewController', {
                                 intLocationId: location.data.intCompanyLocationId,
                                 intIssueUOMId: defaultUOMId,
                                 intReceiveUOMId: defaultUOMId,
-                                strLocationName: location.data.strLocationName
+                                strLocationName: location.data.strLocationName,
+                                intAllowNegativeInventory: 3,
+                                intCostingMethod: 1,
                             };
                             currentVM.tblICItemLocations().add(newRecord);
 
@@ -2164,6 +2166,8 @@ Ext.define('Inventory.view.ItemViewController', {
                                     dblStandardCost: 0.00,
                                     dblAverageCost: 0.00,
                                     dblEndMonthCost: 0.00,
+                                    intAllowNegativeInventory: newRecord.intAllowNegativeInventory,
+                                    intCostingMethod: newRecord.intCostingMethod,
                                     intSort: newRecord.intSort
                                 });
                                 currentVM.tblICItemPricings().add(newPrice);
