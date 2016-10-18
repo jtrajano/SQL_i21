@@ -7,15 +7,17 @@ AS
 			CD.intContractSeq,
 			CD.strContractType,
 			CE.strName AS strEntityName,
+			CE.strEntityNo,
 			CD.strPricingType,
 			CD.strFutureMonth,
 			CD.dblFutures,
 			CD.dblBasis,
 			CD.dblCashPrice,
 			CD.strPriceUOM,
+			CD.dblDetailQuantity dblQuantity,
 			CD.dblBalance,
 			CD.strItemUOM,
-			
+
 			AD.intAdjustmentId,
 			AD.strAdjustmentNo,
 			AD.dtmAdjustmentDate,
