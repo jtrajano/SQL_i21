@@ -71,6 +71,17 @@ BEGIN
 
 END 
 
+-- Get Total Value of Other Charges Taxes
+DECLARE @OtherChargeTaxes AS NUMERIC(18, 6);
+
+	SELECT @OtherChargeTaxes = SUM(CASE 
+										WHEN ReceiptCharge.ysnPrice = 1
+											THEN ISNULL(ReceiptCharge.dblTax,0) * -1
+										ELSE ISNULL(ReceiptCharge.dblTax,0) 
+									END )
+	FROM dbo.tblICInventoryReceiptCharge ReceiptCharge
+	WHERE ReceiptCharge.intInventoryReceiptId =  @intInventoryReceiptId
+
 -- Generate the G/L Entries here: 
 BEGIN 
 	DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'
@@ -100,7 +111,7 @@ BEGIN
 				,intTransactionId					= Receipt.intInventoryReceiptId				
 				,strTransactionId					= Receipt.strReceiptNumber
 				,intReceiptItemTaxId				= ReceiptTaxes.intInventoryReceiptItemTaxId
-				,dblTax								= ReceiptTaxes.dblTax + ISNULL(ReceiptCharge.dblTax, 0)
+				,dblTax								= ReceiptTaxes.dblTax + ISNULL(@OtherChargeTaxes,0)
 														--/ 
 														--CASE	WHEN ReceiptItem.ysnSubCurrency = 1 THEN 
 														--			CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Receipt.intSubCurrencyCents, 1) ELSE 1 END 
@@ -122,9 +133,6 @@ BEGIN
 					ON ReceiptItem.intInventoryReceiptItemId = ReceiptTaxes.intInventoryReceiptItemId
 				INNER JOIN dbo.tblSMTaxCode TaxCode
 					ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
-				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
-					ON ReceiptCharge.intInventoryReceiptId = Receipt.intInventoryReceiptId
-					AND ((ReceiptCharge.ysnAccrue = 1 AND ReceiptCharge.ysnPrice = 0 AND ReceiptCharge.ysnInventoryCost = 1) OR (ReceiptCharge.ysnAccrue = 0 AND ReceiptCharge.ysnPrice = 0))
 				LEFT JOIN dbo.tblICInventoryTransactionType TransType
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId				
