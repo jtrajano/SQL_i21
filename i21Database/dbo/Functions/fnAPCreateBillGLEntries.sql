@@ -44,12 +44,29 @@ BEGIN
 	DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 	DECLARE @SYSTEM_CURRENCY NVARCHAR(25) = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)
-
+	DECLARE @OtherChargeTaxes AS NUMERIC(18, 6),
+			@ReceiptId as INT;
 	DECLARE @tmpTransacions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
 		UNIQUE (intTransactionId)
 	);
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
+
+	-- Get Total Value of Other Charges Taxes
+	 SELECT @ReceiptId = IRI.intInventoryReceiptId
+	 FROM tblAPBillDetail APB
+	 INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = APB.intInventoryReceiptItemId
+	 WHERE APB.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	 --print @ReceiptId
+
+	 SELECT @OtherChargeTaxes = SUM(CASE 
+			  WHEN ReceiptCharge.ysnPrice = 1
+			   THEN ISNULL(ReceiptCharge.dblTax,0) * -1
+			  ELSE ISNULL(ReceiptCharge.dblTax,0) 
+			 END )
+	 FROM tblICInventoryReceiptCharge ReceiptCharge
+	 WHERE ReceiptCharge.intInventoryReceiptId = @ReceiptId 
+	 --print @OtherChargeTaxes
 
 	INSERT INTO @returntable
 	--CREDIT
@@ -175,7 +192,7 @@ BEGIN
 																												WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
 																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
 																	  ELSE B.dblTotal END)
-																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
+																+ CAST(ISNULL(Taxes.dblTotalICTax + @OtherChargeTaxes, 0) AS DECIMAL(18,2)) --IC Tax
 															END)
 													END
 												END) AS DECIMAL(18,2)), --Bill Detail

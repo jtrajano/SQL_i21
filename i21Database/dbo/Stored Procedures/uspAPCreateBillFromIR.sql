@@ -324,7 +324,7 @@ BEGIN
 		[intPODetailId]				=	NULL,
 		[dblQtyOrdered]				=	1,
 		[dblQtyReceived]			=	1,
-		[dblTax]					=	0,
+		[dblTax]					=	ISNULL(A.dblTax,0),
 		[dblRate]					=	ISNULL(G.dblRate,0),
 		[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 		[intTaxGroupId]				=	NULL,
