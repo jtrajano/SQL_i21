@@ -444,7 +444,7 @@ SET @strmessage = 'Unable to unpost the Inventory Shipment. The %s was billed.'
 EXEC sp_addmessage 80091,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80092) EXEC sp_dropmessage 80092, 'us_english'	
-SET @strmessage = 'The transaction you are trying to delete was processed to Invoice (%s). Delete the associated invoice before the shipment transaction can be deleted.'
+SET @strmessage = 'The item %s is already in %s. Remove it from the Invoice first before you can modify it from the Shipment.'
 EXEC sp_addmessage 80092,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80093) EXEC sp_dropmessage 80093, 'us_english'	

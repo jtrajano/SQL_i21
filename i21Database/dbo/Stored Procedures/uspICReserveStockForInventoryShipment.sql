@@ -26,21 +26,27 @@ DECLARE @Ownership_Own AS INT = 1
 
 
 -- Check if Source Type is Pick Lot
-IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intTransactionId AND intOrderType = 1 AND intSourceType = 3)
+IF EXISTS(
+	SELECT	TOP 1 1 
+	FROM	tblICInventoryShipment 
+	WHERE	intInventoryShipmentId = @intTransactionId 
+			AND intOrderType = 1 
+			AND intSourceType = 3
+)
 BEGIN
 	DECLARE @intInventoryTransactionType_PickLot AS INT = 21
 
-	DELETE FROM tblICStockReservation
-	WHERE intInventoryTransactionType = @intInventoryTransactionType_PickLot
-		AND intTransactionId IN (
-			SELECT intSourceId FROM tblICInventoryShipmentItem
-			WHERE intInventoryShipmentId = @intTransactionId
-		)
+	-- Delete the reservation for the Pick Lot transaction 	
+	DELETE	StockReservation
+	FROM	tblICStockReservation StockReservation INNER JOIN tblICInventoryShipmentItem si
+				ON StockReservation.intTransactionId = si.intSourceId
+	WHERE	si.intInventoryShipmentId = @intTransactionId
+			AND StockReservation.intInventoryTransactionType =  @intInventoryTransactionType_PickLot
 END
 
 -- Get the transaction type id
 BEGIN 
-	SELECT TOP 1 
+	SELECT	TOP 1 
 			@intInventoryTransactionType = intTransactionTypeId
 	FROM	dbo.tblICInventoryTransactionType
 	WHERE	strName = 'Inventory Shipment'
@@ -84,7 +90,7 @@ BEGIN
 				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 			AND dbo.fnGetItemLotType(ShipmentItems.intItemId) = @LotType_No
-			AND ShipmentItems.intOwnershipType = @Ownership_Own
+			AND ISNULL(ShipmentItems.intOwnershipType, @Ownership_Own) = @Ownership_Own
 
 	-- Lot Tracked items 
 	UNION ALL 
@@ -113,7 +119,7 @@ BEGIN
 			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
 				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
-			AND ShipmentItems.intOwnershipType = @Ownership_Own
+			AND ISNULL(ShipmentItems.intOwnershipType, @Ownership_Own) = @Ownership_Own
 END
 
 -- Do the reservations

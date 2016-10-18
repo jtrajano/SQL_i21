@@ -43,7 +43,7 @@ IF EXISTS (
 	SELECT TOP 1 1 
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
-			AND @intTransactionTypeId = @intTransactionTypeId	
+			AND intInventoryTransactionType = @intTransactionTypeId	
 )
 BEGIN 
 	INSERT INTO @ReservationToClear (
@@ -71,7 +71,7 @@ BEGIN
 			,intStorageLocationId
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
-			AND @intTransactionTypeId = @intTransactionTypeId
+			AND intInventoryTransactionType = @intTransactionTypeId
 
 	-- Call this SP to decrease the reserved qty. 
 	EXEC dbo.uspICIncreaseReservedQty
@@ -81,7 +81,7 @@ BEGIN
 	DELETE	Reservations
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
-			AND @intTransactionTypeId = @intTransactionTypeId
+			AND intInventoryTransactionType = @intTransactionTypeId
 
 END 
 
