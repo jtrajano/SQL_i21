@@ -192,6 +192,7 @@ BEGIN
 		[dblTotal],
 		[dblCost],
 		[dblOldCost],
+		[dblClaimAmount],
 		[dblNetWeight],
 		[dblNetShippedWeight],
 		[dblWeightLoss],
@@ -211,7 +212,7 @@ BEGIN
 		[int1099Category]
 	)
 	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
-	SELECT
+	SELECT 
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	B.intItemId,
 		[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
@@ -226,11 +227,11 @@ BEGIN
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 --SubCur True
 											 THEN (CASE WHEN B.dblNet > 0 
-														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)  * CAST(B.dblNet AS DECIMAL(18,6)) * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6))  / CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,6)))  AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
+														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
 														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)) *  (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2))  --Calculate Sub-Cur 
 												   END) 
 											 ELSE (CASE WHEN B.dblNet > 0 --SubCur False
-														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END * CAST(B.dblNet AS DECIMAL(18,6)) * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6))  / CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,6))) AS DECIMAL(18,2))--Base Gross/Net UOM 
+														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2))--Base Gross/Net UOM 
 														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Orig Calculation
 												   END)
 										END,
@@ -239,6 +240,11 @@ BEGIN
 											 ELSE B.dblUnitCost
 										END,
 		[dblOldCost]				=	NULL,
+		[dblClaimAmount]			=	CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END) THEN  
+										(
+										 (ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
+										 (CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * (ItemUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) ELSE B.dblUnitCost END) / ISNULL(A.intSubCurrencyCents,1)
+										) ELSE 0.00 END,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0),
 		[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
@@ -289,6 +295,7 @@ BEGIN
 	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
 	OUTER APPLY (
 		SELECT 
 			K.dblNetWt AS dblNet
@@ -324,6 +331,7 @@ BEGIN
 		[dblTotal]					=	CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END,
 		[dblCost]					=	A.dblUnitCost,
 		[dblOldCost]				=	NULL,
+		[dblClaimAmount]			=	0,
 		[dblNetWeight]				=	0,
 		[dblNetShippedWeight]		=	0,
 		[dblWeightLoss]				=	0,

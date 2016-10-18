@@ -48,7 +48,7 @@ FROM
 		,[intScaleTicketId]			=	NULL
 		,[strScaleTicketNumber]		=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]			=	0            
-		,[intLoadDetailId]	=	NULL
+		,[intLoadDetailId]			=	NULL
 		,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId
 		,[strUOM]					=	tblReceived.strUOM
 		,[intWeightUOMId]			=	tblReceived.intWeightUOMId
@@ -72,6 +72,7 @@ FROM
 		,[dblNetShippedWeight]		=	0.00
 		,[dblWeightLoss]			=	0.00
 		,[dblFranchiseWeight]		=	0.00
+		,[dblClaimAmount]			=	0.00
 		,[intLocationId]			=	tblReceived.intLocationId
 	
 		,[intInventoryShipmentItemId]				=   NULL
@@ -257,6 +258,7 @@ FROM
 	,[dblNetShippedWeight]		=	0.00
 	,[dblWeightLoss]			=	0.00
 	,[dblFranchiseWeight]		=	0.00 
+	,[dblClaimAmount]			=	0.00
 	,[intLocationId]			=	A.intShipToId
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
@@ -353,6 +355,13 @@ FROM
 	,[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0)
 	,[dblWeightLoss]			=	ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0)
 	,[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END
+	,[dblClaimAmount]			=	CASE WHEN (ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0) > (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) THEN 
+									(
+										(ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
+										(CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) 
+											  WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * (ItemUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) 
+										  ELSE B.dblUnitCost END) / ISNULL(A.intSubCurrencyCents,1)
+									) ELSE 0.00 END
 	,[intLocationId]			=	A.intLocationId
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
@@ -448,7 +457,7 @@ FROM
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
 		,[intShipmentId]							=	0      
-		,[intLoadDetailId]					=	NULL
+		,[intLoadDetailId]							=	NULL
   		,[intUnitMeasureId]							=	NULL
 		,[strUOM]									=	NULL
 		,[intWeightUOMId]							=	NULL
@@ -477,6 +486,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
@@ -569,6 +579,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
@@ -657,6 +668,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	NULL --Contract doesn't have location
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
@@ -742,6 +754,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
@@ -827,6 +840,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=	A.intInventoryShipmentItemId
 		,[intInventoryShipmentChargeId]				=	A.intInventoryShipmentChargeId
