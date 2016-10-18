@@ -209,3 +209,17 @@ GO
 GO
 	UPDATE tblSMActivity SET strFilter = NULL WHERE strType = 'Email' AND (strFilter = '' OR strFilter = 'null')
 GO
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Fix Payroll Menu')
+	BEGIN
+
+		UPDATE RoleMenu SET intSort = MasterMenu.intSort
+		FROM tblSMUserRoleMenu RoleMenu
+		INNER JOIN tblSMMasterMenu MasterMenu ON RoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE strModuleName = 'Payroll' AND ysnIsLegacy = 0
+
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Fix Payroll Menu', 'Fix Payroll Menu', GETDATE())
+
+	END
+GO
