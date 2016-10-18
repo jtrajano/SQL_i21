@@ -367,8 +367,8 @@ BEGIN TRY
 		,[strDocumentNumber]			= ''
 		,[intItemId]					= ARID.[intItemId]
 		,[strItemDescription]			= CONVERT(NVARCHAR(100), ARID.[intInvoiceDetailId])		
-		,[intOrderUOMId]				= ARID.[intOrderUOMId]																								
-		,[dblQtyOrdered]				= ARID.[dblQtyOrdered]
+		,[intOrderUOMId]				= NULL --ARID.[intOrderUOMId] 																							
+		,[dblQtyOrdered]				= NULL --ARID.[dblQtyOrdered] 
 		,[intItemUOMId]					= ARID.[intItemUOMId]
 		,[dblQtyShipped]				= CASE	WHEN ISNULL(SOSOD.intSalesOrderDetailId,0) = 0 AND ISNULL(ICISI.intInventoryShipmentItemId,0) = 0
 													THEN ARID.[dblQtyShipped]
@@ -401,11 +401,11 @@ BEGIN TRY
 		,[intSCBudgetId]				= NULL
 		,[strSCInvoiceNumber]			= ''
 		,[strSCBudgetDescription]		= ''
-		,[intInventoryShipmentItemId]	= ARID.[intInventoryShipmentItemId]
+		,[intInventoryShipmentItemId]	= NULL-- ARID.[intInventoryShipmentItemId]
 		,[intInventoryShipmentChargeId]	= NULL
 		,[strShipmentNumber]			= ''
-		,[intSalesOrderDetailId]		= ARID.[intSalesOrderDetailId]
-		,[strSalesOrderNumber]			= ARID.[strSalesOrderNumber]
+		,[intSalesOrderDetailId]		=  NULL --ARID.[intSalesOrderDetailId]
+		,[strSalesOrderNumber]			= '' --ARID.[strSalesOrderNumber]
 		,[intContractHeaderId]			= ARID.[intContractHeaderId]
 		,[intContractDetailId]			= ARID.[intContractDetailId]
 		,[intShipmentId]				= NULL
