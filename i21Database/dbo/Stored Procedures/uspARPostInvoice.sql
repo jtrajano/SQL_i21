@@ -1009,9 +1009,11 @@ END CATCH
 						AND D.intItemId = Acct.intItemId 		
 				LEFT OUTER JOIN
 					tblGLAccount GLA
-						ON Acct.intGeneralAccountId = GLA.intAccountId
+						--ON Acct.intGeneralAccountId = GLA.intAccountId
+						  ON ISNULL(Acct.intGeneralAccountId,Acct.intSalesAccountId) = GLA.intAccountId
 				WHERE
-					(ISNULL(Acct.intGeneralAccountId,0) = 0 OR GLA.intAccountId IS NULL)
+					--(ISNULL(Acct.intGeneralAccountId,0) = 0 OR GLA.intAccountId IS NULL)
+					(ISNULL(Acct.intGeneralAccountId,Acct.intSalesAccountId) = 0 OR GLA.intAccountId IS NULL)
 					AND I.strType IN ('Non-Inventory','Service')
 					
 				--Software - Maintenance Sales / General Account				
@@ -2064,7 +2066,7 @@ IF @post = 1
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
 													THEN
-														IST.intGeneralAccountId
+														ISNULL(IST.intGeneralAccountId,IST.intSalesAccountId)
 													WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Software')) 
 													THEN
 														ISNULL(IST.intMaintenanceSalesAccountId, IST.intGeneralAccountId)
