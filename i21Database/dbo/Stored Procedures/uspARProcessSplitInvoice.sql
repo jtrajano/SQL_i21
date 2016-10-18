@@ -100,6 +100,9 @@ BEGIN
 	INSERT INTO @InvoiceDetails
 	SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId
 
+	DECLARE @TransactionType varchar(20)
+	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
+
 	WHILE EXISTS(SELECT NULL FROM @InvoiceDetails)
 		BEGIN
 			DECLARE @intInvoiceDetailId INT
@@ -110,7 +113,8 @@ BEGIN
 			 --, dblPrice		= dblPrice * @dblSplitPercent  -- AR-2505
 			  , dblTotalTax	    = dblTotalTax * @dblSplitPercent
 			  , dblTotal		= dblTotal * @dblSplitPercent
-			  , dblQtyOrdered	= dblQtyShipped * @dblSplitPercent
+			  --, dblQtyOrdered	= dblQtyShipped * @dblSplitPercent
+			  , dblQtyOrdered	= (CASE WHEN  @TransactionType='Invoice' AND (intInventoryShipmentItemId is not null OR intSalesOrderDetailId is not null) THEN dblQtyShipped * @dblSplitPercent  ELSE 0 END)
 			  , dblQtyShipped	= dblQtyShipped * @dblSplitPercent
 			WHERE intInvoiceDetailId = @intInvoiceDetailId
 				
