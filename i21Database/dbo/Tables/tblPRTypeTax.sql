@@ -161,15 +161,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intVendorId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Supplemental Calculation Type',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTax',
-    @level2type = N'COLUMN',
-    @level2name = N'intSupplementalTaxType'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Supplemental Tax Calculation Type',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
