@@ -1114,8 +1114,8 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold
 
 -----------------------------------------------------------------------------------
 -- This part is for Revalue In-Transit or Revalue Shipment 
--- Debit: In-Transit 
--- Credit: Inventory 
+-- Debit: Inventory
+-- Credit: In-Transit 
 -----------------------------------------------------------------------------------
 UNION ALL  
 SELECT	
@@ -1156,7 +1156,7 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		INNER JOIN tblICItemLocation il
 			ON il.intItemLocationId  = ForGLEntries_CTE.intItemLocationId
 			AND il.intLocationId IS NOT NULL
@@ -1206,7 +1206,7 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 		INNER JOIN tblICItemLocation il
 			ON il.intItemLocationId  = ForGLEntries_CTE.intItemLocationId
 			AND il.intLocationId IS NOT NULL
