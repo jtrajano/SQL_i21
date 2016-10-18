@@ -141,11 +141,11 @@ BEGIN
 	--=====================================================================================================================================
 	-- 	UPDATE CUSTOMER VOLUME TABLE
 	---------------------------------------------------------------------------------------------------------------------------------------
-
+	SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined
 	UPDATE CVol
 	SET CVol.dtmLastActivityDate = GETDATE(), CVol.ysnRefundProcessed = ISNULL(@ysnPosted,1)
 	FROM tblPATCustomerVolume CVol
-	WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId = (SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined)
+	WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined)
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -274,7 +274,6 @@ END CATCH
 -- 	UPDATE CUSTOMER EQUITY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 BEGIN TRY
-
 	MERGE tblPATCustomerEquity AS EQ
 	USING (SELECT * FROM #tmpRefundDataCombined WHERE intRefundId = @intRefundId) AS B
 		ON (EQ.intCustomerId = B.intCustomerId AND EQ.intFiscalYearId = B.intFiscalYearId AND EQ.intRefundTypeId = B.intRefundTypeId)
@@ -294,7 +293,7 @@ BEGIN TRY
 		UPDATE CVol
 		SET CVol.dtmLastActivityDate = GETDATE(), CVol.ysnRefundProcessed = ISNULL(@ysnPosted, 0)
 		FROM tblPATCustomerVolume CVol
-		WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId = (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
+		WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
 		--SELECT	RCus.intCustomerId,
 		--RCat.intPatronageCategoryId,
 		--Ref.intFiscalYearId, 
