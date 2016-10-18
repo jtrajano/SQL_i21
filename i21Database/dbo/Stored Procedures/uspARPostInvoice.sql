@@ -448,9 +448,7 @@ BEGIN TRY
 								,@intStorageTypeId	= @StorageScheduleTypeId
 								,@dblUnitsConsumed	= @Quantity
 								,@IntSourceKey		= @InvoiceId
-								,@intUserId			= @UserEntityID
-
-							DELETE FROM @StorageTicketInfoByFIFO WHERE intItemId = @ItemId
+								,@intUserId			= @UserEntityID							
 
 							WHILE EXISTS (SELECT NULL FROM @StorageTicketInfoByFIFO)
 								BEGIN
@@ -519,7 +517,7 @@ BEGIN TRY
 									UPDATE tblARInvoiceDetail SET intCustomerStorageId = @CustomerStorageId WHERE intInvoiceDetailId = @NewDetailId
 									DELETE FROM @StorageTicketInfoByFIFO  WHERE intId  = @GrainId
 								END
-
+								DELETE FROM @StorageTicketInfoByFIFO WHERE intItemId = @ItemId
 							END
 					ELSE
 						BEGIN
