@@ -30,6 +30,7 @@ SELECT Item.intItemId
 , strOriginName = CommodityAttrib.strDescription
 , Item.strCostType
 , Item.strShortName
+, Item.strRequired
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

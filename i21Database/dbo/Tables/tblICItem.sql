@@ -154,6 +154,7 @@ Type the overview for the table here.
 		[strInvoiceComments] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
 		[strPickListComments] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
         [intLotStatusId] INT NULL, 
+		[strRequired] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
