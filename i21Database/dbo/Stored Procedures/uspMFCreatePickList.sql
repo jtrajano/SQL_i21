@@ -375,11 +375,21 @@ Begin
 					,@intBlendStagingLocationId
 					) --Exclude Kit Staging,Blend Staging
 				AND ISNULL(SL.ysnAllowConsume,0)=1)
-	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0
+					AND intStorageLocationId NOT IN (
+					@intKitStagingLocationId
+					,@intBlendStagingLocationId
+					) --Exclude Kit Staging,Blend Staging	
+	)
 	End AS dblAvailableQty,
 	CASE When ri.intConsumptionMethodId=1 Then  ISNULL(rq.dblReservedQty,0) 
 	Else
-	(Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0)
+	(Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0
+					AND intStorageLocationId NOT IN (
+					@intKitStagingLocationId
+					,@intBlendStagingLocationId
+					) --Exclude Kit Staging,Blend Staging	
+	)
 	End AS dblReservedQty,
 	CASE When ri.intConsumptionMethodId=1 Then  (cl.dblQuantity / tpl.dblWeightPerUnit) 
 	Else
@@ -395,7 +405,12 @@ Begin
 					,@intBlendStagingLocationId
 					) --Exclude Kit Staging,Blend Staging
 				AND ISNULL(SL.ysnAllowConsume,0)=1)
-	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0
+					AND intStorageLocationId NOT IN (
+					@intKitStagingLocationId
+					,@intBlendStagingLocationId
+					) --Exclude Kit Staging,Blend Staging	
+	)
 	End AS dblAvailableUnit,
 	um.strUnitMeasure AS strAvailableUnitUOM,
 	tpl.dblIssuedQuantity AS dblPickQuantity,tpl.intItemIssuedUOMId AS intPickUOMId,tpl.strIssuedUOM AS strPickUOM,
