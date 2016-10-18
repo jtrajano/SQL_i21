@@ -71,6 +71,17 @@ BEGIN
 
 END 
 
+-- Get Total Value of Other Charges Taxes
+DECLARE @OtherChargeTaxes AS NUMERIC(18, 6);
+
+	SELECT @OtherChargeTaxes = SUM(CASE 
+										WHEN ReceiptCharge.ysnPrice = 1
+											THEN ISNULL(ReceiptCharge.dblTax,0) * -1
+										ELSE ISNULL(ReceiptCharge.dblTax,0) 
+									END )
+	FROM dbo.tblICInventoryReceiptCharge ReceiptCharge
+	WHERE ReceiptCharge.intInventoryReceiptId =  @intInventoryReceiptId
+
 -- Generate the G/L Entries here: 
 BEGIN 
 	DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'
@@ -100,7 +111,7 @@ BEGIN
 				,intTransactionId					= Receipt.intInventoryReceiptId				
 				,strTransactionId					= Receipt.strReceiptNumber
 				,intReceiptItemTaxId				= ReceiptTaxes.intInventoryReceiptItemTaxId
-				,dblTax								=	ReceiptTaxes.dblTax
+				,dblTax								=	ReceiptTaxes.dblTax + ISNULL(@OtherChargeTaxes,0)
 														--/ 
 														--CASE	WHEN ReceiptItem.ysnSubCurrency = 1 THEN 
 														--			CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Receipt.intSubCurrencyCents, 1) ELSE 1 END 
