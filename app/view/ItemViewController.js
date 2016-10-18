@@ -1826,6 +1826,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepDetailUOM');
         var currentItem = win.viewModel.data.current;
         var current = plugin.getActiveRecord();
+        var me = this;
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
@@ -1837,34 +1838,42 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);
-
+            
             var itemStore = grid.store;
             var stockUnit = itemStore.findRecord('ysnStockUnit', true);
             if (stockUnit) {
                 var unitMeasureId = stockUnit.get('intUnitMeasureId');
-
-                Ext.Ajax.request({
-                    timeout: 120000,
-                    url: '../Inventory/api/UnitMeasure/Search',
-                    method: 'get',
-                    success: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: 9});
-                        if (stockUnitConversions) {
-                            var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
-                                { intUnitMeasureId: current.get('intUnitMeasureId'), intStockUnitMeasureId: unitMeasureId })
-                            var dblConversionToStock = stockConversion.dblConversionToStock;
-                            current.set('dblUnitQty', dblConversionToStock);
-                        }
-                    },
-                    failure: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-                    }
+                me.getConversionValue(current.get('intUnitMeasureId'), unitMeasureId, function(value) {
+                    current.set('dblUnitQty', value);
                 });
             }
         }
     },
+
+    getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
+        Ext.Ajax.request({
+            timeout: 120000,
+            url: '../Inventory/api/UnitMeasure/Search',
+            method: 'get',
+            success: function (response) {
+                var jsonData = Ext.decode(response.responseText);
+                var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: stockUnitMeasureId });
+                if (stockUnitConversions) {
+                    var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
+                        { intUnitMeasureId: unitMeasureId, intStockUnitMeasureId: stockUnitMeasureId });
+                    if (stockConversion) {
+                        var dblConversionToStock = stockConversion.dblConversionToStock;
+                        callback(dblConversionToStock);
+                    }
+                }
+            },
+            failure: function (response) {
+                var jsonData = Ext.decode(response.responseText);
+                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+            }
+        });
+    },
+    
     beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
@@ -1886,7 +1895,7 @@ Ext.define('Inventory.view.ItemViewController', {
             var win = obj.up('window');
             var current = grid.view.getRecord(rowIndex);
             var uomConversion = win.viewModel.storeInfo.uomConversion;
-            
+            var me = this;
             Ext.Ajax.request({
             url: '../Inventory/api/Item/CheckStockUnit?ItemId=' + current.get('intItemId') + 
             '&ItemStockUnit=' + current.get('ysnStockUnit') + '&ItemUOMId=' + current.get('intItemUOMId'),
@@ -1909,27 +1918,10 @@ Ext.define('Inventory.view.ItemViewController', {
                                             }
                                             if (uom !== current){
                                                 uom.set('ysnStockUnit', false);
-                                                if (uomConversion) {
-                                                    var index = uomConversion.data.findIndexBy(function (row) {
-                                                        if (row.get('intUnitMeasureId') === current.get('intUnitMeasureId')) {
-                                                            return true;
-                                                        }
-                                                    });
-                                                    if (index >= 0) {
-                                                        var stockUOM = uomConversion.getAt(index);
-                                                        var conversions = stockUOM.data.vyuICGetUOMConversions;
-                                                        if (conversions) {
-                                                            var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                                                                if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
-                                                                    return true;
-                                                                }
-                                                            });
-                                                            if (selectedUOM) {
-                                                                uom.set('dblUnitQty', selectedUOM.dblConversionToStock);
-                                                            }
-                                                        }
-                                                    }
-                                                }
+                                                var unitMeasureId = current.get('intUnitMeasureId');
+                                                me.getConversionValue(unitMeasureId, uom.get('intUnitMeasureId'), function (value) {
+                                                    uom.set('dblUnitQty', value);
+                                                });
                                             }
                                         });
                                     }
@@ -2003,27 +1995,10 @@ Ext.define('Inventory.view.ItemViewController', {
                                     }
                                     if (uom !== current){
                                         uom.set('ysnStockUnit', false);
-                                        if (uomConversion) {
-                                            var index = uomConversion.data.findIndexBy(function (row) {
-                                                if (row.get('intUnitMeasureId') === current.get('intUnitMeasureId')) {
-                                                    return true;
-                                                }
-                                            });
-                                            if (index >= 0) {
-                                                var stockUOM = uomConversion.getAt(index);
-                                                var conversions = stockUOM.data.vyuICGetUOMConversions;
-                                                if (conversions) {
-                                                    var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                                                        if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
-                                                            return true;
-                                                        }
-                                                    });
-                                                    if (selectedUOM) {
-                                                        uom.set('dblUnitQty', selectedUOM.dblConversionToStock);
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        var unitMeasureId = current.get('intUnitMeasureId');
+                                        me.getConversionValue(unitMeasureId, uom.get('intUnitMeasureId'), function (value) {
+                                            uom.set('dblUnitQty', value);
+                                        });
                                     }
                                 });
                             }
