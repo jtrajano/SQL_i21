@@ -237,7 +237,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Variance'),
+		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'),--[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Variance'),
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2))
 												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / (CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END)
 												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency > 0  THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / (CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END) 

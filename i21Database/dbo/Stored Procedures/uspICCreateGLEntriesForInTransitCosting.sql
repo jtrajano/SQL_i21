@@ -338,7 +338,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
-		,strCode					= 'IC' 
+		,strCode					= 'IAV' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate

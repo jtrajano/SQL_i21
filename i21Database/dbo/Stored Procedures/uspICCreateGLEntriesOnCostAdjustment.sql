@@ -14,7 +14,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Auto-Variance'
 
-		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
+		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'AP Clearing'--'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
 		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' -- 'Revalue WIP' -- As per Ajith, we should not add another category. Thus, I'm diverting it to reuse 'Work In Progress'. 
 
 		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Cost of Goods'
@@ -1157,6 +1157,9 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
+		INNER JOIN tblICItemLocation il
+			ON il.intItemLocationId  = ForGLEntries_CTE.intItemLocationId
+			AND il.intLocationId IS NOT NULL
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit
@@ -1204,6 +1207,9 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		INNER JOIN tblICItemLocation il
+			ON il.intItemLocationId  = ForGLEntries_CTE.intItemLocationId
+			AND il.intLocationId IS NOT NULL
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit
