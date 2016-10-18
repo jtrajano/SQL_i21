@@ -4415,6 +4415,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostActualCostInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForInTransitCosting.sql" />
     <Build Include="dbo\Tables\tblTMDispatchHistory.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryFillReportParameter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
