@@ -10,7 +10,7 @@
 	[intTypeTaxLocalId] INT NULL,
 	[intAccountId] INT NULL,
 	[intExpenseAccountId] INT NULL,
-	[intTaxAgencyId] INT NULL,
+	[intSupplementalCalc] INT NULL DEFAULT ((1)),
 	[strCheckLiteral] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intVendorId] INT NULL,
 	[intSort] INT NULL,
@@ -18,8 +18,7 @@
     CONSTRAINT [PK_tblPRTypeTax] PRIMARY KEY ([intTypeTaxId]), 
     CONSTRAINT [AK_tblPRTypeTax_strTax] UNIQUE ([strTax]),
 	CONSTRAINT [FK_tblPRTypeTax_tblPRTypeTaxState] FOREIGN KEY ([intTypeTaxStateId]) REFERENCES [tblPRTypeTaxState]([intTypeTaxStateId]),
-	CONSTRAINT [FK_tblPRTypeTax_tblPRTypeTaxLocal] FOREIGN KEY ([intTypeTaxLocalId]) REFERENCES [tblPRTypeTaxLocal]([intTypeTaxLocalId]),
-	CONSTRAINT [FK_tblPRTypeTax_tblPRTaxAgency] FOREIGN KEY ([intTaxAgencyId]) REFERENCES [tblPRTaxAgency]([intTaxAgencyId])
+	CONSTRAINT [FK_tblPRTypeTax_tblPRTypeTaxLocal] FOREIGN KEY ([intTypeTaxLocalId]) REFERENCES [tblPRTypeTaxLocal]([intTypeTaxLocalId])
 ) ON [PRIMARY]
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -103,14 +102,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblLimit'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Tax Agency Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTax',
-    @level2type = N'COLUMN',
-    @level2name = N'intTaxAgencyId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Account Id',
@@ -167,3 +159,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTypeTax',
     @level2type = N'COLUMN',
     @level2name = N'intVendorId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Supplemental Calculation Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intSupplementalTaxType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Supplemental Tax Calculation Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intSupplementalCalc'
