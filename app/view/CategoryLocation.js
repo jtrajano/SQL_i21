@@ -366,6 +366,11 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                             dataType: 'string',
                                                             text: 'Description',
                                                             flex: 1
+                                                        },
+                                                        {
+                                                            dataIndex: 'intCompanyLocationId',
+                                                            dataType: 'numeric',
+                                                            hidden: true
                                                         }
                                                     ],
                                                     itemId: 'cboDefaultProductCode',
