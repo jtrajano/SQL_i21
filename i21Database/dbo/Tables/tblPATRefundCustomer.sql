@@ -13,5 +13,5 @@
     [dblEquityRefund] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATRefundCustomer] PRIMARY KEY ([intRefundCustomerId]), 
-    CONSTRAINT [FK_tblPATRefundCustomer_tblPATRefund] FOREIGN KEY (intRefundId) REFERENCES [tblPATRefund]([intRefundId]) 
+    CONSTRAINT [FK_tblPATRefundCustomer_tblPATRefund] FOREIGN KEY (intRefundId) REFERENCES [tblPATRefund]([intRefundId]) ON DELETE CASCADE
 )
