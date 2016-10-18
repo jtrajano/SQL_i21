@@ -2749,7 +2749,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             var buttonAction = function (button) {
                 if (button === 'yes') {
-                    postReceipt();
+                    // If there is no data change, do the post.
+                    if (!context.data.hasChanges()) {
+                        me.doOtherChargeCalculate(win);
+                        var task = new Ext.util.DelayedTask(function () {
+                            postReceipt();
+                        });
+                        task.delay(3000);
+                        return;
+                    }
+
+                    // Save has data changes first before doing the post.
+                    context.data.saveRecord({
+                        successFn: function () {
+                            me.doOtherChargeCalculate(win);
+                            var task = new Ext.util.DelayedTask(function () {
+                                postReceipt();
+                            });
+                            task.delay(3000);
+                        }
+                    });
                 }
             }
 
@@ -2784,7 +2803,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 iRely.Functions.showCustomDialog('question', 'yesno', 'Received and Gross quantities are not equal for the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?', buttonAction);
             }
             else {
-                postReceipt();
+                // If there is no data change, do the post.
+                if (!context.data.hasChanges()) {
+                    me.doOtherChargeCalculate(win);
+                    var task = new Ext.util.DelayedTask(function () {
+                        postReceipt();
+                    });
+                    task.delay(3000);
+                    return;
+                }
+
+                // Save has data changes first before doing the post.
+                context.data.saveRecord({
+                    successFn: function () {
+                        me.doOtherChargeCalculate(win);
+                        var task = new Ext.util.DelayedTask(function () {
+                            postReceipt();
+                        });
+                        task.delay(3000);
+                    }
+                });
             }
         }
     },
@@ -2841,16 +2879,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // If there is no data change, calculate the charge and do the recap. 
         if (!context.data.hasChanges()) {
-            me.doOtherChargeCalculate(context, win.viewModel.data.current);
-            doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+            me.doOtherChargeCalculate(win);
+            var task = new Ext.util.DelayedTask(function () {
+                doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+            });
+            task.delay(3000);
+
             return;
         }
 
         // Save has data changes first before anything else. 
         context.data.saveRecord({
             successFn: function () {
-                me.doOtherChargeCalculate(context, win.viewModel.data.current);
-                doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+                me.doOtherChargeCalculate(win);
+                var task = new Ext.util.DelayedTask(function () {
+                    doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+                });
+                task.delay(3000);
             }
         });
     },
