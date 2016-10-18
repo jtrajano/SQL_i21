@@ -86,7 +86,7 @@ BEGIN TRY
 				JOIN	tblICItem					IM	ON	IM.intItemId		=	BD.intItemId		 LEFT			
 				JOIN	tblICItemUOM                IU  ON  IU.intItemUOMId     =   BD.intWeightUOMId    LEFT
                 JOIN	tblSMCurrency               CU  ON  CU.intCurrencyID    =   BL.intCurrencyId
-                WHERE	BD.intContractDetailId = @intContractDetailId AND BL.intTransactionType = 1 
+                WHERE	BD.intContractDetailId = @intContractDetailId AND BL.intTransactionType = 1 AND BD.intBillDetailId NOT IN (SELECT ISNULL(intBillDetailApplied, 0 ) FROM tblAPAppliedPrepaidAndDebit)
 				
 				UNION ALL 
 				
