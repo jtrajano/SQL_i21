@@ -360,7 +360,7 @@ FROM
 										(ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
 										(CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) 
 											  WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * (ItemUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) 
-										  ELSE B.dblUnitCost END) / ISNULL(A.intSubCurrencyCents,1)
+										  ELSE B.dblUnitCost END) / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END
 									) ELSE 0.00 END
 	,[intLocationId]			=	A.intLocationId
 	,[intInventoryShipmentItemId]				=   NULL
