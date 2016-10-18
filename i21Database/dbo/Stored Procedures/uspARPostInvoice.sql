@@ -3131,6 +3131,7 @@ IF @post = 1
 					INNER JOIN tblICInventoryTransaction t
 						ON t.intTransactionId = si.intInventoryShipmentId
 						AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+						AND t.ysnIsUnposted = 0 
 					INNER JOIN @PostInvoiceData p
 						ON i.[intInvoiceId] = p.[intInvoiceId]
 			WHERE	t.intFobPointId = @FOB_DESTINATION
