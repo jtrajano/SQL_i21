@@ -19,7 +19,6 @@ SELECT strContractNumber,
   dblReceivedUom,
   dblNet,
   dblWeightUom,
-  min(strCupRating) strCupRating,
   dtmReceiptDate,
   strRemarks,
   strContainerStatus
@@ -45,7 +44,6 @@ SELECT strContractNumber,
   dblReceivedUom			=	Um.strUnitMeasure ,
   dblNet					=	dbo.fnRemoveTrailingZeroes(ROUND(Lot.dblNet, 2)) ,
   dblWeightUom				=	Wm.strUnitMeasure ,
-  strCupRating				=	Result_cup.strPropertyValue ,
   dtmReceiptDate			=	Rc.dtmReceiptDate ,
   strRemarks				=	Cont.strComments ,
   strContainerStatus		=	CASE ISNULL(Lot.dblOrderQty, 0) WHEN 0 THEN 'Containers Not Received' ELSE 'Containers  Received' END
@@ -59,11 +57,6 @@ LEFT JOIN tblLGLoadDetail ld ON ld.intPContractDetailId = CD.intContractDetailId
 LEFT JOIN tblLGLoadDetailContainerLink lk ON lk.intLoadDetailId = ld.intLoadDetailId
 LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = lk.intLoadContainerId
 LEFT JOIN tblICInventoryReceiptItem AS Lot ON Lot.intContainerId = Cont.intLoadContainerId
-LEFT JOIN tblQMReportCuppingPropertyMapping AS Property_cup_map ON UPPER(Property_cup_map.strPropertyName) = 'OVERALL CUP ANALYSIS'
-LEFT JOIN tblQMProperty AS Property_cup ON UPPER(Property_cup.strPropertyName) = UPPER(Property_cup_map.strActualPropertyName)
-LEFT JOIN vyuQMCuppingTestResult AS Result_cup ON Result_cup.intPropertyId = Property_cup.intPropertyId
-JOIN tblQMSample AS smp ON smp.intSampleId = Result_cup.intSampleId AND smp.intLoadContainerId = Cont.intLoadContainerId
-LEFT JOIN tblQMSampleStatus st ON st.strStatus = 'Approved' AND st.intSampleStatusId = smp.intSampleStatusId
 LEFT JOIN tblSMCompanyLocationSubLocation AS SL ON SL.intCompanyLocationSubLocationId = Lot.intSubLocationId
 LEFT JOIN tblICItemUOM AS Lotuom ON Lotuom.intItemId = Lot.intItemId AND Lotuom.intItemUOMId = Lot.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure AS Um ON Um.intUnitMeasureId = Lotuom.intUnitMeasureId
@@ -72,7 +65,7 @@ LEFT JOIN tblICUnitMeasure AS Wm ON Wm.intUnitMeasureId = Lotwuom.intUnitMeasure
 LEFT JOIN tblICInventoryReceipt AS Rc ON Rc.intInventoryReceiptId = Lot.intInventoryReceiptId
 LEFT JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId
 LEFT JOIN tblICInventoryReceiptItemLot AS Lt ON Lt.intInventoryReceiptItemId = Lot.intInventoryReceiptItemId
-) rec
+) rec WHERE dblReceivedQty IS NOT NULL
 group by strContractNumber,intContractSeq ,strEntityName,strItemNo,strDescription,strFutureMonth,
 dblBasis,dblFixationPrice,dtmFixationDate,dblFinalPrice,strContainerNumber,strMarks,strIntegrationOrderNumber,strSubLocationDescription,intNoOfContainers,
 dblReceivedQty,dblReceivedUom,dblNet,dblWeightUom,dtmReceiptDate,strRemarks,strContainerStatus
