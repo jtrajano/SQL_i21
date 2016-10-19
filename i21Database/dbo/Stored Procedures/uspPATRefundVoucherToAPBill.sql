@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATRefundVoucherToAPBill]
 	 @intRefundId					INT
 	,@intPatronId					INT
-	,@dblRefundAmount				NUMERIC(18,2)
+	,@dblRefundAmount				NUMERIC(18,6)
 	,@intUserId						INT
 	,@intPaymentItemId				INT	
 	,@intBillId						INT = 0
@@ -57,6 +57,8 @@ BEGIN TRY
 		,@vendorOrderNumber = @strVendorOderNumber
 		,@voucherDate = @dtmDate
 		,@billId = @intCreatedBillId OUTPUT
+
+	UPDATE tblAPBillDetail SET int1099Form = 1, int1099Category= 0 WHERE intBillId = @intCreatedBillId
 
 	EXEC [dbo].[uspAPPostBill]
 		@batchId = @intCreatedBillId,
