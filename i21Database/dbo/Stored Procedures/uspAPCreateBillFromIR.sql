@@ -240,7 +240,7 @@ BEGIN
 											 ELSE B.dblUnitCost
 										END,
 		[dblOldCost]				=	NULL,
-		[dblClaimAmount]			=	CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END) THEN  
+		[dblClaimAmount]			=	CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
 										(
 										 (ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
 										 (CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) 
