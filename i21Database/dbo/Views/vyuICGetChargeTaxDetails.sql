@@ -6,6 +6,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intInventoryReceiptChargeTaxId) 
 FROM (
 	SELECT
 		ChargeTax.intInventoryReceiptChargeTaxId,
+		Charge.intInventoryReceiptId,
 		Charge.intChargeId,
 		Item.strItemNo,
 		TaxGroup.strTaxGroup,
