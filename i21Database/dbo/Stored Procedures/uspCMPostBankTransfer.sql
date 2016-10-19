@@ -291,7 +291,7 @@ BEGIN
 			,[dblCredit]			= A.dblAmount
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= GLAccnt.strDescription
+			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= NULL
@@ -324,7 +324,7 @@ BEGIN
 			,[dblCredit]			= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= GLAccnt.strDescription
+			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
 			,[intCurrencyId]		= NULL

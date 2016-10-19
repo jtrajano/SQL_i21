@@ -298,7 +298,7 @@ BEGIN
 			,[dblCredit]			= A.dblAmount
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= GLAccnt.strDescription
+			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strPayee
 			,[intCurrencyId]		= A.intCurrencyId

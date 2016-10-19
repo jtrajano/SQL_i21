@@ -312,7 +312,7 @@ BEGIN
 			,[dblCredit]			= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= GLAccnt.strDescription
+			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
