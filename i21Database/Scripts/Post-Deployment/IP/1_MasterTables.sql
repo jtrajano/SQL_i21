@@ -129,12 +129,12 @@ BEGIN
     INSERT INTO tblIPSQLType(intSQLTypeId,strName)
     VALUES(2,'Stored Procedure')
 END
---GO
---IF NOT EXISTS(SELECT * FROM tblIPSQLType WHERE intSQLTypeId = 3)
---BEGIN
---    INSERT INTO tblIPSQLType(intSQLTypeId,strName)
---    VALUES(3,'SQL Statement')
---END
+GO
+IF NOT EXISTS(SELECT * FROM tblIPSQLType WHERE intSQLTypeId = 3)
+BEGIN
+    INSERT INTO tblIPSQLType(intSQLTypeId,strName)
+    VALUES(3,'SQL Statement')
+END
 GO
 IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 1)
 BEGIN
