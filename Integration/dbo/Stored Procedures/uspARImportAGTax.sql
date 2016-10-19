@@ -8,8 +8,8 @@ BEGIN
 	--******************************** TAX FOR ITEM DOESNOT HAVE TAX SETUP IN ORIGIN *****************************************************************
 	--************************************************************************************************************************************************
 
-	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'temp_sst')
-		DROP table temp_sst
+	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'temp_agsst')
+		DROP table temp_agsst
 	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '#itmnotax')
 		DROP table #itmnotax
 	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '#itmnotax1')
@@ -839,7 +839,7 @@ BEGIN
 	--******************************** TAX FOR ITEM THAT HAVE TAX SETUP IN ORIGIN ********************************************************************
 	--************************************************************************************************************************************************
 	--drop table #temp_agstm
-	--drop table temp_sst
+	--drop table temp_agsst
 	--drop table #IVCTAX
 	--drop table #tempDTL
 
@@ -1010,7 +1010,7 @@ BEGIN
 	agstm_lc2_rt,agstm_lc2_amt, agstm_lc3_rt, agstm_lc3_amt,
 	agstm_lc4_rt,agstm_lc4_amt, agstm_lc5_rt, agstm_lc5_amt,
 	agstm_lc6_rt,agstm_lc6_amt
-	into temp_sst
+	into temp_agsst
 	from #temp_agstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
 	where  stm.agstm_sst_amt <> 0 and not exists
@@ -1020,7 +1020,7 @@ BEGIN
 				 XREF.strOrgLocal2 = SUBSTRING ( stm.agstm_tax_key ,16 , 3 ) and XREF.strOrgTaxType = 'SST') 
 
 
-	if (select COUNT (*) from temp_sst) <> 0
+	if (select COUNT (*) from temp_agsst) <> 0
 	Begin
 		INSERT INTO [tblARInvoiceDetailTax]
 				([intInvoiceDetailId]
@@ -1058,7 +1058,7 @@ BEGIN
 						THEN  1
 					ELSE 0
 				END--[ysnTaxExempt]
-		from temp_sst stm
+		from temp_agsst stm
 		INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
 		INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = ' ' and
 					 XREF.strOrgState = SUBSTRING ( stm.agstm_tax_key ,11 , 2 ) and
