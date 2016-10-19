@@ -57,18 +57,18 @@ INSERT INTO @GLAccounts (
 SELECT	Query.intItemId
 		,Query.intItemLocationId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
-		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(Query.intInTransitSourceLocationId, Query.intItemLocationId), @AccountCategory_Auto_Variance) 
-		,intCostAdjustment = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(Query.intInTransitSourceLocationId, Query.intItemLocationId), @AccountCategory_Cost_Adjustment) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
+		,intCostAdjustment = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment) 
 		,intRevalueTransfer = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
 		,intRevalueBuildAssembly = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
-
-		,intRevalueInTransit = dbo.fnGetItemGLAccount(Query.intItemId, Query.intInTransitSourceLocationId, @AccountCategory_Revalue_Shipment) 
-		,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intInTransitSourceLocationId, @AccountCategory_Revalue_Sold) 
-
+		,intRevalueInTransit = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Revalue_Shipment) 
+		,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Revalue_Sold) 
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
-					intItemId, intItemLocationId, intTransactionTypeId, intInTransitSourceLocationId
+					intItemId
+					, intItemLocationId = ISNULL(intInTransitSourceLocationId, intItemLocationId)
+					, intTransactionTypeId
 			FROM	dbo.tblICInventoryTransaction TRANS 
 			WHERE	TRANS.strBatchId = @strBatchId
 		) Query
@@ -150,6 +150,7 @@ BEGIN
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 				AND TRANS.intItemId = Item.intItemId
 	WHERE	ItemGLAccount.intCostAdjustment IS NULL 
+			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
@@ -267,6 +268,7 @@ WITH ForGLEntries_CTE (
 	,intInventoryTransactionId
 	,strInventoryTransactionTypeName
 	,strTransactionForm
+	,intInTransitSourceLocationId
 )
 AS 
 (
@@ -285,6 +287,7 @@ AS
 			,TRANS.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,'Bill' -- TRANS.strTransactionForm 
+			,TRANS.intInTransitSourceLocationId
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	TRANS.strBatchId = @strBatchId
@@ -1046,17 +1049,15 @@ SELECT
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
+			AND GLAccounts.intItemLocationId = ISNULL(ForGLEntries_CTE.intInTransitSourceLocationId, ForGLEntries_CTE.intItemLocationId)
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN tblICItemLocation il
 			ON il.intItemLocationId  = ForGLEntries_CTE.intItemLocationId
 		INNER JOIN dbo.tblGLAccount
-			--ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 			ON tblGLAccount.intAccountId = 
 				CASE	WHEN il.intLocationId IS NULL THEN GLAccounts.intRevalueInTransit
 						ELSE GLAccounts.intInventoryId
 				END 
-
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit
@@ -1153,7 +1154,7 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
