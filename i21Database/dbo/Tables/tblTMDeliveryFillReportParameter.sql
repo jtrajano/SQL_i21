@@ -20,6 +20,17 @@
     [dtmForecastedDeliveryTo] DATETIME NULL, 
     [dtmForecastedDeliveryFrom] DATETIME NULL, 
     [intEntityUserId] INT NOT NULL, 
+	[ysnPrintLastUnitPrice] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintDeliveryAddress] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintTankInfo] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintCustomerARBalance] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintConsumptionSiteInstructions] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintConsumptionSiteComments] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintContracts] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintRegularInfo] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintOnHoldInfo] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintFillGroupInfo] BIT NOT NULL DEFAULT 1, 
+	[ysnPrintTotalOnly] BIT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblTMDeliveryFillReportParameter] PRIMARY KEY CLUSTERED ([intDeliveryFillReportParameterId] ASC),
 )
@@ -208,3 +219,103 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryFillReportParameter',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Last Unit Price',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintLastUnitPrice'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Delivery Address',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintDeliveryAddress'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Tank Info',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintTankInfo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Customer AR Balance',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintCustomerARBalance'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Consumption Site Instructions',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintConsumptionSiteInstructions'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Consumption Site Comments',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintConsumptionSiteComments'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Contracts',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintContracts'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Regulator Info',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintRegularInfo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print On Hold Info',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintOnHoldInfo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Fill Group Info',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintFillGroupInfo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Total Only',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryFillReportParameter',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPrintTotalOnly'
