@@ -730,10 +730,10 @@ namespace iRely.Inventory.BusinessLayer
             return saveResult;
         }
 
-        public async Task<SearchResult> GetChargeTaxDetails(GetParameter param, int ChargeId)
+        public async Task<SearchResult> GetChargeTaxDetails(GetParameter param, int ChargeId, int ReceiptId)
         {
             var query = _db.GetQuery<vyuICGetChargeTaxDetails>()
-                    .Where(p => p.intChargeId == ChargeId)
+                    .Where(p => p.intChargeId == ChargeId && p.intInventoryReceiptId == ReceiptId)
                     .Filter(param, true);
 
             var data = await query.ExecuteProjection(param, "intKey").ToListAsync();

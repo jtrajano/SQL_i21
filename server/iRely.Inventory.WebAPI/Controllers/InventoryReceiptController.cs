@@ -172,9 +172,9 @@ namespace iRely.Inventory.WebApi
 
         [HttpGet]
         [ActionName("GetChargeTaxDetails")]
-        public async Task<HttpResponseMessage> GetChargeTaxDetails(GetParameter param, int ChargeId)
+        public async Task<HttpResponseMessage> GetChargeTaxDetails(GetParameter param, int ChargeId, int ReceiptId)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetChargeTaxDetails(param, ChargeId));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetChargeTaxDetails(param, ChargeId, ReceiptId));
         }
     }
 }
