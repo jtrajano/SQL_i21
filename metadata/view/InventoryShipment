@@ -2174,8 +2174,7 @@
                                                                             "[",
                                                                             "{dataIndex: 'intCustomerStorageId',dataType: 'numeric',text: 'Customer Storage Id',hidden: true},",
                                                                             "{dataIndex: 'strStorageTypeDescription',dataType: 'string',text: 'Storage Type Description', flex: 1},",
-                                                                            "{xtype: 'numbercolumn', dataIndex: 'dblOpenBalance',dataType: 'numeric',text: 'Open Balance', format: '0,000.##',flex: 1},",
-                                                                            "{dataIndex: 'strStorageTicketNumber',dataType: 'string',text: 'Ticket Number', flex: 1}",
+                                                                            "{xtype: 'numbercolumn', dataIndex: 'dblOpenBalance',dataType: 'numeric',text: 'Open Balance', format: '0,000.##',flex: 1}",
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
