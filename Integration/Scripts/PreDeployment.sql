@@ -179,9 +179,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveryTicketView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDYMOCustomerLabelReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateForPrintDeliveryTicketView.sql"
-
-
-
+:r "..\dbo\Stored Procedures\uspTMRecreateLeaseCodeView.sql"
 
 
 
