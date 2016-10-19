@@ -1885,59 +1885,60 @@ IF @post = 1
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblInvoiceTotal ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblInvoiceTotal END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
-																								(
-																								SELECT
-																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
-																								FROM
-																									tblARInvoiceDetail ARID 
-																								INNER JOIN
-																									tblARInvoice ARI
-																										ON ARID.intInvoiceId = ARI.intInvoiceId	
-																								LEFT OUTER JOIN
-																									tblICItem I
-																										ON ARID.intItemId = I.intItemId
-																								LEFT OUTER JOIN
-																									vyuARGetItemAccount IST
-																										ON ARID.intItemId = IST.intItemId 
-																										AND ARI.intCompanyLocationId = IST.intLocationId 
-																								LEFT OUTER JOIN
-																									vyuICGetItemStock ICIS
-																										ON ARID.intItemId = ICIS.intItemId 
-																										AND ARI.intCompanyLocationId = ICIS.intLocationId 
-																								WHERE
-																									ARI.intInvoiceId = A.intInvoiceId
-																									AND ARID.dblTotal <> @ZeroDecimal  
-																								)
-																							ELSE 
-																								0
-																							END
-				,dblCreditUnit				=  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
-																								0
-																							ELSE 
-																								(
-																								SELECT
-																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
-																								FROM
-																									tblARInvoiceDetail ARID 
-																								INNER JOIN
-																									tblARInvoice ARI
-																										ON ARID.intInvoiceId = ARI.intInvoiceId	
-																								LEFT OUTER JOIN
-																									tblICItem I
-																										ON ARID.intItemId = I.intItemId
-																								LEFT OUTER JOIN
-																									vyuARGetItemAccount IST
-																										ON ARID.intItemId = IST.intItemId 
-																										AND ARI.intCompanyLocationId = IST.intLocationId 
-																								LEFT OUTER JOIN
-																									vyuICGetItemStock ICIS
-																										ON ARID.intItemId = ICIS.intItemId 
-																										AND ARI.intCompanyLocationId = ICIS.intLocationId 
-																								WHERE
-																									ARI.intInvoiceId = A.intInvoiceId
-																									AND ARID.dblTotal <> @ZeroDecimal  
-																								)
-																							END				
+														(
+														SELECT
+															SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
+														FROM
+															tblARInvoiceDetail ARID 
+														INNER JOIN
+															tblARInvoice ARI
+																ON ARID.intInvoiceId = ARI.intInvoiceId	
+														LEFT OUTER JOIN
+															tblICItem I
+																ON ARID.intItemId = I.intItemId
+														LEFT OUTER JOIN
+															vyuARGetItemAccount IST
+																ON ARID.intItemId = IST.intItemId 
+																AND ARI.intCompanyLocationId = IST.intLocationId 
+														LEFT OUTER JOIN
+															vyuICGetItemStock ICIS
+																ON ARID.intItemId = ICIS.intItemId 
+																AND ARI.intCompanyLocationId = ICIS.intLocationId 
+														WHERE
+															ARI.intInvoiceId = A.intInvoiceId
+															AND ARID.dblTotal <> @ZeroDecimal  
+														)
+													ELSE 
+														0
+													END
+				,dblCreditUnit				=  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') 
+													THEN  
+														0
+													ELSE 
+														(
+														SELECT
+															SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
+														FROM
+															tblARInvoiceDetail ARID 
+														INNER JOIN
+															tblARInvoice ARI
+																ON ARID.intInvoiceId = ARI.intInvoiceId	
+														LEFT OUTER JOIN
+															tblICItem I
+																ON ARID.intItemId = I.intItemId
+														LEFT OUTER JOIN
+															vyuARGetItemAccount IST
+																ON ARID.intItemId = IST.intItemId 
+																AND ARI.intCompanyLocationId = IST.intLocationId 
+														LEFT OUTER JOIN
+															vyuICGetItemStock ICIS
+																ON ARID.intItemId = ICIS.intItemId 
+																AND ARI.intCompanyLocationId = ICIS.intLocationId 
+														WHERE
+															ARI.intInvoiceId = A.intInvoiceId
+															AND ARID.dblTotal <> @ZeroDecimal  
+														)
+													END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2380,54 +2381,54 @@ IF @post = 1
 			WHERE
 				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 
-			UNION ALL 
+			--UNION ALL --- AR-3173
 
-			--Credit Discount
-			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
-				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
-				,dblDebit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
-												ELSE 0 END
-				,dblCredit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
-												ELSE 0 END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= @PostDate
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= D.intInvoiceDetailId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1
-			FROM
-				tblARInvoiceDetail D
-			INNER JOIN			
-				tblARInvoice A 
-					ON D.intInvoiceId = A.intInvoiceId
-			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON D.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 
-			INNER JOIN
-				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId					
-			WHERE
-				(CASE WHEN A.intPeriodsToAccrue > 1 THEN CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END ELSE 0 END) <> @ZeroDecimal
+			----Credit Discount
+			--SELECT			
+			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+			--	,strBatchID					= @batchId
+			--	,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
+			--	,dblDebit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
+			--									ELSE 0 END
+			--	,dblCredit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
+			--									ELSE 0 END
+			--	,dblDebitUnit				= 0
+			--	,dblCreditUnit				= 0				
+			--	,strDescription				= A.strComments
+			--	,strCode					= @CODE
+			--	,strReference				= C.strCustomerNumber
+			--	,intCurrencyId				= A.intCurrencyId 
+			--	,dblExchangeRate			= 1
+			--	,dtmDateEntered				= @PostDate
+			--	,dtmTransactionDate			= A.dtmDate
+			--	,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+			--	,intJournalLineNo			= D.intInvoiceDetailId
+			--	,ysnIsUnposted				= 0
+			--	,intUserId					= @userId
+			--	,intEntityId				= @UserEntityID				
+			--	,strTransactionId			= A.strInvoiceNumber
+			--	,intTransactionId			= A.intInvoiceId
+			--	,strTransactionType			= A.strTransactionType
+			--	,strTransactionForm			= @SCREEN_NAME
+			--	,strModuleName				= @MODULE_NAME
+			--	,intConcurrencyId			= 1
+			--FROM
+			--	tblARInvoiceDetail D
+			--INNER JOIN			
+			--	tblARInvoice A 
+			--		ON D.intInvoiceId = A.intInvoiceId
+			--LEFT OUTER JOIN
+			--	vyuARGetItemAccount IST
+			--		ON D.intItemId = IST.intItemId 
+			--		AND A.intCompanyLocationId = IST.intLocationId 
+			--INNER JOIN
+			--	tblARCustomer C
+			--		ON A.intEntityCustomerId = C.intEntityCustomerId
+			--INNER JOIN 
+			--	@PostInvoiceData	P
+			--		ON A.intInvoiceId = P.intInvoiceId					
+			--WHERE
+			--	(CASE WHEN A.intPeriodsToAccrue > 1 THEN CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END ELSE 0 END) <> @ZeroDecimal
 
 			UNION ALL 
 			--DEBIT COGS - SHIPPED

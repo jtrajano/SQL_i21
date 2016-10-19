@@ -155,8 +155,8 @@ BEGIN
 		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 		,strBatchID					= @BatchId
 		,intAccountId				= @DeferredRevenueAccountId
-		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE A.dblInvoiceTotal END
-		,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
+		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE A.dblInvoiceTotal + ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
+		,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal  + ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END --- AR-3173
 		,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN  0
 																					ELSE
 																						(
@@ -231,7 +231,9 @@ BEGIN
 		tblARInvoice A
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.[intEntityCustomerId] = C.intEntityCustomerId 			
+			ON A.[intEntityCustomerId] = C.intEntityCustomerId 	
+	LEFT JOIN
+	    (SELECT * FROM tblARInvoiceDetail WHERE dblDiscount > 0) D ON A.intInvoiceId = D.intInvoiceId		
 	WHERE
 		A.intInvoiceId = @InvoiceId
 		
