@@ -35,10 +35,10 @@ SELECT
 	,intCustomerNumber = B.intCustomerNumber
 	,ysnPastDue = CAST((CASE WHEN ISNULL(I.dblHighPastDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 	,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(I.dblBalance,0.0) <= I.dblCreditLimit  THEN 0 ELSE 1 END)  AS BIT)
-	,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(I.dblTotalDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+	,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(I.dblBudgetAmount,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 	,dblARBalance = ISNULL(I.dblBalance,0.0)
 	,dblPastDue = ISNULL(I.dblHighPastDue,0.0)
-	,dblBudgetAmount = ISNULL(I.dblTotalDue,0.0)
+	,dblBudgetAmount = ISNULL(I.dblBudgetAmount,0.0)
 	,dblCreditLimit = ISNULL(I.dblCreditLimit,0.0)
 	,intLocationId = A.intLocationId
 	,A.intCustomerID
@@ -72,8 +72,8 @@ INNER JOIN (
 	SELECT 
 		Ent.intEntityId
 		,dblHighPastDue = ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0)
-		,dblBalance = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0) 
-		,dblTotalDue = ISNULL(CI.dblTotalDue,0.0)
+		,dblBalance = ISNULL(CI.dblTotalDue,0.0)
+		,dblBudgetAmount = ISNULL(CI.dblBudgetAmount,0.0)
 		,dblCreditLimit = ISNULL(CI.dblCreditLimit,0.0)
 	FROM tblEMEntity Ent
 	INNER JOIN tblARCustomer Cus 
