@@ -21,22 +21,22 @@ SELECT
 	  , dblUnitCost				= ISNULL(SAR.dblStandardCost, 0)
 	  , dblTotalCost			= ISNULL(SAR.dblStandardCost, 0) *
 									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
-										THEN ISNULL(SAR.dblQtyShipped, 0) 
+										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
 									END
 	 , dblMargin				= (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
-										THEN ISNULL(SAR.dblQtyShipped, 0) 
+										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
 									END
 	 , dblMarginPercentage		= CASE WHEN (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
-												THEN ISNULL(SAR.dblQtyShipped, 0) 
+												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
 											END > 0 AND ISNULL(SAR.dblLineTotal, 0) > 0
 									THEN ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
-												THEN ISNULL(SAR.dblQtyShipped, 0) 
+												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
 											END / ISNULL(SAR.dblLineTotal, 0)) * 100 
 									ELSE 0 
