@@ -85,13 +85,20 @@ Ext.define('Inventory.model.ShipmentCharge', {
             if (data) {
                 ShipmentCustomerId = data.get('intEntityCustomerId');
             }
-            if (this.get('ysnAccrue') === true &&
-                iRely.Functions.isEmpty(this.get('intEntityVendorId')) ||
-                this.get('intEntityVendorId') === ShipmentCustomerId) {
-                errors.add({
-                    field: 'strVendorName',
-                    message: 'Vendor for Other Charge Item ' + this.get('strItemNo') + '  is required to accrue.'
-                })
+            if (this.get('ysnAccrue') === true) {
+                if (iRely.Functions.isEmpty(this.get('intEntityVendorId'))) {
+                    errors.add({
+                        field: 'strVendorName',
+                        message: 'Vendor for Other Charge Item ' + this.get('strItemNo') + '  is required to accrue.'
+                    })
+                }
+
+                if (this.get('intEntityVendorId') === ShipmentCustomerId) {
+                    errors.add({
+                        field: 'strVendorName',
+                        message: 'Cannot accrue to a customer. Select a third party vendor.'
+                    })
+                }
             }
         }
 
