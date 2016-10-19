@@ -1763,6 +1763,7 @@ namespace iRely.Inventory.Model
     {
         public int? intKey { get; set; }
         public int? intInventoryReceiptChargeTaxId { get; set; }
+        public int? intInventoryReceiptId { get; set; }
         public int? intChargeId { get; set; }
         public string strItemNo { get; set; }
         public string strTaxGroup { get; set; }

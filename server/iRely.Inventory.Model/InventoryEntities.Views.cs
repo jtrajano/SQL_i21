@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets57e5e6c8368583231d92483ed04866c1e6267c8e5cf5d0ed6798b29b42b05a33))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets27654847ab7319caa17abc1e05ef7c45ae67671bfed62a6bb7be9f0f8e7aa01c))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets57e5e6c8368583231d92483ed04866c1e6267c8e5cf5d0ed6798b29b42b05a33 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets27654847ab7319caa17abc1e05ef7c45ae67671bfed62a6bb7be9f0f8e7aa01c : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "57e5e6c8368583231d92483ed04866c1e6267c8e5cf5d0ed6798b29b42b05a33"; }
+            get { return "27654847ab7319caa17abc1e05ef7c45ae67671bfed62a6bb7be9f0f8e7aa01c"; }
         }
 
         /// <summary>
@@ -14589,11 +14589,12 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetChargeTaxDetails
-        [CodeFirstDatabaseSchema.vyuICGetChargeTaxDetails](T1.vyuICGetChargeTaxDetails_intKey, T1.vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, T1.vyuICGetChargeTaxDetails_intChargeId, T1.vyuICGetChargeTaxDetails_strItemNo, T1.vyuICGetChargeTaxDetails_strTaxGroup, T1.vyuICGetChargeTaxDetails_strTaxCode, T1.vyuICGetChargeTaxDetails_strCalculationMethod, T1.vyuICGetChargeTaxDetails_dblRate, T1.vyuICGetChargeTaxDetails_dblTax)
+        [CodeFirstDatabaseSchema.vyuICGetChargeTaxDetails](T1.vyuICGetChargeTaxDetails_intKey, T1.vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, T1.vyuICGetChargeTaxDetails_intInventoryReceiptId, T1.vyuICGetChargeTaxDetails_intChargeId, T1.vyuICGetChargeTaxDetails_strItemNo, T1.vyuICGetChargeTaxDetails_strTaxGroup, T1.vyuICGetChargeTaxDetails_strTaxCode, T1.vyuICGetChargeTaxDetails_strCalculationMethod, T1.vyuICGetChargeTaxDetails_dblRate, T1.vyuICGetChargeTaxDetails_dblTax)
     FROM (
         SELECT 
             T.intKey AS vyuICGetChargeTaxDetails_intKey, 
             T.intInventoryReceiptChargeTaxId AS vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, 
+            T.intInventoryReceiptId AS vyuICGetChargeTaxDetails_intInventoryReceiptId, 
             T.intChargeId AS vyuICGetChargeTaxDetails_intChargeId, 
             T.strItemNo AS vyuICGetChargeTaxDetails_strItemNo, 
             T.strTaxGroup AS vyuICGetChargeTaxDetails_strTaxGroup, 
@@ -14614,11 +14615,12 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetChargeTaxDetails
-        [iRely.Inventory.Model.vyuICGetChargeTaxDetails](T1.vyuICGetChargeTaxDetails_intKey, T1.vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, T1.vyuICGetChargeTaxDetails_intChargeId, T1.vyuICGetChargeTaxDetails_strItemNo, T1.vyuICGetChargeTaxDetails_strTaxGroup, T1.vyuICGetChargeTaxDetails_strTaxCode, T1.vyuICGetChargeTaxDetails_strCalculationMethod, T1.vyuICGetChargeTaxDetails_dblRate, T1.vyuICGetChargeTaxDetails_dblTax)
+        [iRely.Inventory.Model.vyuICGetChargeTaxDetails](T1.vyuICGetChargeTaxDetails_intKey, T1.vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, T1.vyuICGetChargeTaxDetails_intInventoryReceiptId, T1.vyuICGetChargeTaxDetails_intChargeId, T1.vyuICGetChargeTaxDetails_strItemNo, T1.vyuICGetChargeTaxDetails_strTaxGroup, T1.vyuICGetChargeTaxDetails_strTaxCode, T1.vyuICGetChargeTaxDetails_strCalculationMethod, T1.vyuICGetChargeTaxDetails_dblRate, T1.vyuICGetChargeTaxDetails_dblTax)
     FROM (
         SELECT 
             T.intKey AS vyuICGetChargeTaxDetails_intKey, 
             T.intInventoryReceiptChargeTaxId AS vyuICGetChargeTaxDetails_intInventoryReceiptChargeTaxId, 
+            T.intInventoryReceiptId AS vyuICGetChargeTaxDetails_intInventoryReceiptId, 
             T.intChargeId AS vyuICGetChargeTaxDetails_intChargeId, 
             T.strItemNo AS vyuICGetChargeTaxDetails_strItemNo, 
             T.strTaxGroup AS vyuICGetChargeTaxDetails_strTaxGroup, 

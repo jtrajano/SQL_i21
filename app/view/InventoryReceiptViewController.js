@@ -5425,10 +5425,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var current = selected[0];
                 if (!current.dummy) {
                     var ChargeId = current.get('intChargeId');
+                    var ReceiptId = current.get('intInventoryReceiptId');
                     var showChargeTaxScreen = function () {
                             var search = i21.ModuleMgr.Search;
                             search.scope = me;
-                            search.url = '../Inventory/api/InventoryReceipt/GetChargeTaxDetails?ChargeId=' + ChargeId;
+                            search.url = '../Inventory/api/InventoryReceipt/GetChargeTaxDetails?ChargeId=' + ChargeId + '&ReceiptId=' + ReceiptId;
                             search.columns = [
                                 { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
                                 { dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
