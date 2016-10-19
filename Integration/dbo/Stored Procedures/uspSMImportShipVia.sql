@@ -55,7 +55,7 @@ BEGIN
 					THEN 
 						RTRIM(LTRIM(AG.[sscar_name])) + '' - '' + RTRIM(LTRIM(AG.[sscar_key]))
 					ELSE
-						RTRIM(LTRIM(AG.[sscar_name]))
+						RTRIM(LTRIM(ISNULL(AG.[sscar_name], AG.[sscar_key])))
 				  END)				AS [strShipVia]
 		,AG.[sscar_name]			AS [strShippingService]
 		,AG.[sscar_name]			AS [strName]
