@@ -3,8 +3,10 @@
 	
 SELECT FPPriceChangeDetail.intFuelPointPriceChangeDetailId
 	, FPPriceChangeDetail.intFuelPointPriceChangeId
+	, FPPriceChange.intEntityCustomerId
 	, FPPriceChange.strCustomerName
 	, FPPriceChange.strCustomerNumber
+	, FPPriceChange.intEntityLocationId
 	, FPPriceChange.strLocationName
 	, FPPriceChange.dtmDate
 	, FPPriceChangeDetail.strFuelingPoint

@@ -3,8 +3,10 @@
 	
 SELECT FPReadingDetail.intFuelPointReadingDetailId
 	, FPReadingDetail.intFuelPointReadingId
+	, FPReading.intEntityCustomerId
 	, FPReading.strCustomerName
 	, FPReading.strCustomerNumber
+	, FPReading.intEntityLocationId
 	, FPReading.strLocationName
 	, FPReading.dtmDate
 	, FPReadingDetail.strFuelingPoint
