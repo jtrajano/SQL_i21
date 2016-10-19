@@ -153,9 +153,9 @@ BEGIN
 						,vwcmt_user_rev_dt			=NULL
 						,A4GLIdentity	= CAST(intMessageId   AS INT)
 						,intConcurrencyId = 0
-					FROM tblARCustomerMessage A
+					FROM tblEMEntityMessage A
 					INNER JOIN tblARCustomer B
-						ON A.intEntityCustomerId = B.intEntityCustomerId
+						ON A.intEntityId = B.intEntityCustomerId
 		')
 	END
 END
