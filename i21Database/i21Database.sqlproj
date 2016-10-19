@@ -4442,11 +4442,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="C:\SharedAssemblyInfo.cs">
-      <Link>Properties\SharedAssemblyInfo.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -4608,5 +4603,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1m_UpdateCompany.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Resources\SharedAssemblyInfo.cs">
+      <Link>SharedAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 </Project>
