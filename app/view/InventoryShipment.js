@@ -1078,12 +1078,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     text: 'Open Balance',
                                                                                     format: '0,000.##',
                                                                                     flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strStorageTicketNumber',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Ticket Number',
-                                                                                    flex: 1
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboCustomerStorage',
