@@ -137,21 +137,9 @@
 			WHERE [strReminder] = N'Process' AND [strType] = N'Bill Template' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Voucher')
+	IF EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Voucher')
 		BEGIN
-			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
-			SELECT [strReminder]        =        N'Approve',
-				   [strType]        	=        N'Voucher',
-				   [strMessage]			=        N'{0} {1} {2} unapproved.',
-				   [strQuery]  			=        N'SELECT * FROM vyuAPBillForApproval WHERE intEntityApproverId = {0} AND ysnApproved = 0',
-				   [strNamespace]       =        N'AccountsPayable.view.VendorExpenseApproval', 
-				   [intSort]            =        6
-		END
-	ELSE
-		BEGIN
-			UPDATE [tblSMReminderList]
-			SET	[strMessage] = N'{0} {1} {2} unapproved.'
-			WHERE [strReminder] = N'Approve' AND [strType] = N'Voucher' 
+			DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Voucher'
 		END
 
 	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Update' AND [strType] = N'Invoice')
@@ -371,21 +359,9 @@
                 [intSort]           =        1
     END
 
-	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order')
+	IF EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order')
 		BEGIN
-			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
-			SELECT [strReminder]        =        N'Approve',
-				   [strType]        	=        N'Purchase Order',
-				   [strMessage]			=        N'{0} {1} {2} unapproved.',
-				   [strQuery]  			=        N'SELECT * FROM vyuPOForApproval WHERE intEntityApproverId = {0} AND ysnApproved = 0',
-				   [strNamespace]       =        N'AccountsPayable.view.VendorExpenseApproval', 
-				   [intSort]            =        16
-		END
-	ELSE
-		BEGIN
-			UPDATE [tblSMReminderList]
-			SET	[strMessage] = N'{0} {1} {2} unapproved.'
-			WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order' 
+			DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order'
 		END
 
 	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Sales Order')
