@@ -11,6 +11,7 @@ SELECT CT.intContainerTypeId
 	  ,CT.dblEmptyWeight
 	  ,CT.dblGrossWeight
 	  ,CT.intWeightUnitMeasureId
+	  ,CTCQ.intContainerTypeCommodityQtyId
 	  ,CTCQ.dblQuantity
 	  ,C.strCommodityCode
 	  ,C.strDescription AS strCommodityDescription
