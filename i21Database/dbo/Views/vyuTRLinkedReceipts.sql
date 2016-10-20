@@ -1,18 +1,27 @@
 ﻿CREATE VIEW [dbo].[vyuTRLinkedReceipts]
 	AS 
-select		TR.intLoadHeaderId,  
-            DD.intLoadDistributionDetailId,          
-			TR.strBillOfLading,
-			SP.strFuelSupplier,
-			SP.strSupplyPoint,
-			SM.strLocationName strReceiptCompanyLocation,
-			yy.strReceiptNumber,
-			yyy.strTransferNo,
-			TR.dblUnitCost		
-	from tblTRLoadDistributionHeader DH
-	     Join tblTRLoadDistributionDetail DD on DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
-	     left join tblTRLoadReceipt TR on DH.intLoadHeaderId = TR.intLoadHeaderId and  TR.strReceiptLine in (select Item from fnTRSplit(DD.strReceiptLink,','))
-         left join vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
-		 left join dbo.tblICInventoryReceipt yy on TR.intInventoryReceiptId = yy.intInventoryReceiptId and TR.intLoadReceiptId = TR.intLoadReceiptId
-		 left join dbo.tblICInventoryTransfer yyy on TR.intInventoryTransferId = yyy.intInventoryTransferId  and TR.intLoadReceiptId = TR.intLoadReceiptId
-		 left join dbo.tblSMCompanyLocation SM ON SM.intCompanyLocationId = TR.intCompanyLocationId
+
+SELECT TR.intLoadHeaderId
+	, DD.intLoadDistributionDetailId
+	, TR.strBillOfLading
+	, SP.intEntityVendorId
+	, SP.strFuelSupplier
+	, SP.intEntityLocationId
+	, SP.strSupplyPoint
+	, intReceiptCompanyLocationId = SM.intCompanyLocationId
+	, strReceiptCompanyLocation = SM.strLocationName
+	, TR.intInventoryReceiptId
+	, Receipt.strReceiptNumber
+	, TR.intInventoryTransferId
+	, Transfer.strTransferNo
+	, TR.dblUnitCost
+FROM tblTRLoadDistributionHeader DH
+JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+LEFT JOIN tblTRLoadReceipt TR ON DH.intLoadHeaderId = TR.intLoadHeaderId
+	AND TR.strReceiptLine IN (SELECT Item FROM fnTRSplit(DD.strReceiptLink,','))
+LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = TR.intSupplyPointId
+LEFT JOIN tblICInventoryReceipt Receipt ON TR.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	AND TR.intLoadReceiptId = TR.intLoadReceiptId
+LEFT JOIN tblICInventoryTransfer Transfer ON TR.intInventoryTransferId = Transfer.intInventoryTransferId
+	AND TR.intLoadReceiptId = TR.intLoadReceiptId
+LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = TR.intCompanyLocationId
