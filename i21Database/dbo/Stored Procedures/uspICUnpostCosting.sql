@@ -254,6 +254,7 @@ BEGIN
 			,[intCostingMethod]
 			,[strDescription]
 			,[intFobPointId]
+			,[intInTransitSourceLocationId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -286,6 +287,7 @@ BEGIN
 			,[intCostingMethod]						= ActualTransaction.intCostingMethod
 			,[strDescription]						= ActualTransaction.strDescription
 			,[intFobPointId]						= ActualTransaction.intFobPointId
+			,[intInTransitSourceLocationId]			= ActualTransaction.intInTransitSourceLocationId
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
