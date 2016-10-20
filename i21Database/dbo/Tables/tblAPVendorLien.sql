@@ -9,5 +9,5 @@
 	[intConcurrencyId] INT DEFAULT ((0)) NOT NULL,	
 	CONSTRAINT [PK_tblAPVendorLien] PRIMARY KEY CLUSTERED ([intEntityVendorLienId] ASC),
 	CONSTRAINT [FK_tblAPVendorLien_tblAPVendor_intEntityVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]) ON DELETE CASCADE,	
-	CONSTRAINT [FK_tblAPVendorLien_tblEMEntity_intEntityLienId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]) ON DELETE CASCADE	
+	CONSTRAINT [FK_tblAPVendorLien_tblEMEntity_intEntityLienId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
