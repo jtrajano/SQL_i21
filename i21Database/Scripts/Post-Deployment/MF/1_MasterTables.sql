@@ -2335,3 +2335,17 @@ BEGIN
 	VALUES(1,'PUT_BACK','PUT BACK',1,GETDATE())
 END
 GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFScheduleRuleType WHERE intScheduleRuleTypeId = 1)
+BEGIN
+    INSERT INTO tblMFScheduleRuleType(intScheduleRuleTypeId,strName)
+    VALUES(1,'Resource Constraint')
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFScheduleRuleType WHERE intScheduleRuleTypeId = 2)
+BEGIN
+    INSERT INTO tblMFScheduleRuleType(intScheduleRuleTypeId,strName)
+    VALUES(2,'Finite Constraint')
+END
+GO
