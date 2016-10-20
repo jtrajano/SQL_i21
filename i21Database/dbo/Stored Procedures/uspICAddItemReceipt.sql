@@ -694,6 +694,7 @@ BEGIN
 				WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 						AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 
+				-- Compute Taxes
 				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
 				INSERT INTO dbo.tblICInventoryReceiptItemTax (
 					[intInventoryReceiptItemId]
@@ -731,7 +732,8 @@ BEGIN
 						,[intConcurrencyId]				= 1
 				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId)
 
-				--Compute the tax
+			-- Removed this part as taxes are already computed in fnGetItemTaxComputationForVendor
+			  /*	--Compute the tax
 				BEGIN 
 					-- Clear the temp table 
 					DELETE FROM #tmpComputeItemTaxes
@@ -834,7 +836,7 @@ BEGIN
 					FROM	dbo.tblICInventoryReceiptItemTax ItemTax INNER JOIN #tmpComputeItemTaxes ComputedTax
 								ON ItemTax.intInventoryReceiptItemId = ComputedTax.intDetailId
 								AND ItemTax.intInventoryReceiptItemTaxId = ComputedTax.intTaxDetailId
-				END
+				END */
 									
 				-- Get the next item. 
 				FETCH NEXT FROM loopReceiptItems INTO 
