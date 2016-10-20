@@ -5,12 +5,12 @@ WITH ComPref AS (
 	strRefund,
 	dblMinimumRefund,
 	dblServiceFee,
-	dblCutoffAmount,
-	dblFederalBackup
+	dblCutoffAmount
 	FROM tblPATCompanyPreference
 ),
 FiscalSum AS (
 SELECT DISTINCT Total.intFiscalYear,
+			Total.intCompanyLocationId,
 			dblVolume = Total.dblVolume,
 			dblRefundAmount = Total.dblRefundAmount,
 			dblNonRefundAmount = Total.dblNonRefundAmount,
@@ -26,20 +26,22 @@ SELECT DISTINCT Total.intFiscalYear,
 		    FROM (
 				SELECT	B.intCustomerPatronId,
 						B.intPatronageCategoryId,
+						CompLoc.intCompanyLocationId,
 						intFiscalYear = B.intFiscalYear,
 						dblVolume = ISNULL(B.dblVolume,0),
 						dblRefundAmount = CASE WHEN ISNULL((RRD.dblRate * B.dblVolume),0) >= ComPref.dblMinimumRefund THEN ISNULL((RRD.dblRate * B.dblVolume),0) ELSE 0 END,
 						dblNonRefundAmount = CASE WHEN ISNULL((RRD.dblRate * B.dblVolume),0) >= ComPref.dblMinimumRefund THEN 0 ELSE ISNULL((RRD.dblRate * B.dblVolume),0) END,
 						dblCashRefund = CASE WHEN ISNULL((RRD.dblRate * B.dblVolume),0) >= ComPref.dblMinimumRefund THEN ((RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100)) ELSE 0 END,
-						dblLessFWT = CASE WHEN AC.ysnSubjectToFWT = 1 AND (RRD.dblRate * B.dblVolume) >= ComPref.dblMinimumRefund THEN (((RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100)) * (ComPref.dblFederalBackup/100)) ELSE 0 END
+						dblLessFWT = CASE WHEN APV.ysnWithholding = 1 AND (RRD.dblRate * B.dblVolume) >= ComPref.dblMinimumRefund THEN (((RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100)) * (CompLoc.dblWithholdPercent/100)) ELSE 0 END
 				FROM tblPATCustomerVolume B
 				INNER JOIN tblPATRefundRateDetail RRD
 						ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
 				INNER JOIN tblPATRefundRate RR
 						ON RR.intRefundTypeId = RRD.intRefundTypeId
-				INNER JOIN tblARCustomer AC
-						ON AC.intEntityCustomerId = B.intCustomerPatronId
+				INNER JOIN tblAPVendor APV
+						ON APV.intEntityVendorId = B.intCustomerPatronId
 				CROSS APPLY ComPref
+				CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) CompLoc
 				WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 			) Total
      INNER JOIN tblPATRefundRateDetail RRD
@@ -52,6 +54,7 @@ SELECT DISTINCT Total.intFiscalYear,
 )
 
 SELECT	intFiscalYear AS intFiscalYearId,
+		intCompanyLocationId,
 		dblVolume = SUM(dblVolume), 
 		dblRefundAmount = SUM(dblRefundAmount),
 		dblNonRefundAmount = SUM(dblNonRefundAmount),
@@ -65,4 +68,4 @@ SELECT	intFiscalYear AS intFiscalYearId,
 		intProducers,
 		intOthers
 FROM FiscalSum
-GROUP BY intFiscalYear, intVoting, intNonVoting, intProducers, intOthers
+GROUP BY intFiscalYear, intCompanyLocationId, intVoting, intNonVoting, intProducers, intOthers

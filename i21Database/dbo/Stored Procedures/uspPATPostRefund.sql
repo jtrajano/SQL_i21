@@ -43,9 +43,9 @@ SELECT	R.intRefundId,
 		R.dblFedWithholdingPercentage, 
 		dblPurchaseVolume = (CASE WHEN RCatPCat.strPurchaseSale = 'Purchase' THEN RCatPCat.dblVolume ELSE 0 END), 
 		dblSaleVolume = (CASE WHEN RCatPCat.strPurchaseSale = 'Sale' THEN RCatPCat.dblVolume ELSE 0 END), 
-		dblLessFWT = CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
+		dblLessFWT = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
 		dblLessService = RCus.dblCashRefund * (R.dblServiceFee/100),
-		dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RCus.dblCashRefund - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) END,
+		dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) END,
 		R.ysnPosted,
 		RCus.intRefundCustomerId,
 		RCus.intCustomerId,
@@ -66,6 +66,8 @@ INNER JOIN tblPATRefund R
 	ON R.intRefundId = RCus.intRefundId
 INNER JOIN tblARCustomer ARC
 	ON RCus.intCustomerId = ARC.intEntityCustomerId
+INNER JOIN tblAPVendor APV
+	ON APV.intEntityVendorId = RCus.intCustomerId
 INNER JOIN tblPATRefundRate RR
 	ON RR.intRefundTypeId = RCus.intRefundTypeId
 INNER JOIN
@@ -277,8 +279,8 @@ BEGIN TRY
 	MERGE tblPATCustomerEquity AS EQ
 	USING (SELECT * FROM #tmpRefundDataCombined WHERE intRefundId = @intRefundId) AS B
 		ON (EQ.intCustomerId = B.intCustomerId AND EQ.intFiscalYearId = B.intFiscalYearId AND EQ.intRefundTypeId = B.intRefundTypeId)
-		--WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
-		--	THEN DELETE
+		WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
+			THEN DELETE
 		WHEN MATCHED
 			THEN UPDATE SET EQ.dblEquity = CASE WHEN @ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END,
 			EQ.dtmLastActivityDate = GETDATE()

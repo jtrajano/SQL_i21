@@ -66,7 +66,7 @@
     [strStockStatus]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strPatronClass]                  CHAR (1)        COLLATE Latin1_General_CI_AS NULL,
     [dtmDeceasedDate]                 DATETIME        NULL,
-    [ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
+    --[ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
 	[ysnHDBillableSupport]			  BIT             DEFAULT ((0)) NOT NULL,
 	[intTaxCodeId]					  INT			  NULL,
 	[intContractGroupId]			  INT			  NULL,

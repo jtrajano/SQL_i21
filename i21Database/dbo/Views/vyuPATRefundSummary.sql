@@ -6,10 +6,10 @@ SELECT	R.intRefundId,
 		F.strFiscalYear,
 		dblTotalPurchases = (CASE WHEN RCatPCat.strPurchaseSale = 'Purchase' THEN RCatPCat.dblVolume ELSE 0 END),
 		dblTotalSales = (CASE WHEN RCatPCat.strPurchaseSale = 'Sale' THEN RCatPCat.dblVolume ELSE 0 END),
-		dbLessFWT = CASE WHEN C.ysnSubjectToFWT = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
+		dbLessFWT = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
 		dblTotalCashRefund = RC.dblCashRefund,
 		dblLessServiceFee = RC.dblCashRefund * (R.dblServiceFee/100),
-		dblCheckAmount = CASE WHEN (RC.dblCashRefund - (CASE WHEN C.ysnSubjectToFWT = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RC.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RC.dblCashRefund - (CASE WHEN C.ysnSubjectToFWT = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RC.dblCashRefund * (R.dblServiceFee/100)) END,
+		dblCheckAmount = CASE WHEN (RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RC.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RC.dblCashRefund * (R.dblServiceFee/100)) END,
 		dblTotalVolume = RCatPCat.dblVolume,
 		dblTotalRefund = RC.dblRefundAmount,
 		R.dtmRefundDate,
@@ -22,13 +22,15 @@ SELECT	R.intRefundId,
         R.ysnPrinted,
         R.intConcurrencyId
 FROM tblPATRefund R
-INNER JOIN tblPATRefundCustomer RC
+LEFT OUTER JOIN tblPATRefundCustomer RC
 	ON RC.intRefundId = R.intRefundId
-INNER JOIN tblGLFiscalYear F
+LEFT OUTER JOIN tblGLFiscalYear F
 	ON F.intFiscalYearId = R.intFiscalYearId
-INNER JOIN tblARCustomer C
+LEFT OUTER JOIN tblARCustomer C
 	ON C.intEntityCustomerId = RC.intCustomerId
-INNER JOIN (SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
+LEFT OUTER JOIN tblAPVendor APV
+	ON APV.intEntityVendorId = RC.intCustomerId
+LEFT OUTER JOIN (SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
 				intPatronageCategoryId = RCat.intPatronageCategoryId,
 				dblRefundRate = RCat.dblRefundRate,
 				strPurchaseSale = PCat.strPurchaseSale,

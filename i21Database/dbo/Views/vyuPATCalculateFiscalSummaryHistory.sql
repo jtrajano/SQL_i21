@@ -6,9 +6,9 @@ WITH FiscalSum AS(
 			dblRefundAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblRefundAmount ELSE 0 END,
 			dblNonRefundAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN 0 ELSE RC.dblRefundAmount END,
 			dblCashRefund = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblCashRefund ELSE 0 END,
-			dblLessFWT = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN (CASE WHEN AC.ysnSubjectToFWT = 1  THEN RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) ELSE 0 END) ELSE 0 END,
+			dblLessFWT = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN (CASE WHEN APV.ysnWithholding = 1  THEN RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) ELSE 0 END) ELSE 0 END,
 			dblLessServiceFee =  CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblCashRefund * (R.dblServiceFee/100) ELSE 0 END,
-			dblCheckAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN (CASE WHEN AC.ysnSubjectToFWT = 1 THEN
+			dblCheckAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN (CASE WHEN APV.ysnWithholding = 1 THEN
 					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblFedWithholdingPercentage/100)) - (RC.dblCashRefund * (R.dblServiceFee/100.0))
 					ELSE
 					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblServiceFee/100.0))
@@ -31,6 +31,8 @@ WITH FiscalSum AS(
 		ON R.intRefundId = RC.intRefundId
 	INNER JOIN tblARCustomer AC
 		ON AC.intEntityCustomerId = RC.intCustomerId
+	INNER JOIN tblAPVendor APV
+		ON APV.intEntityVendorId = RC.intCustomerId
 )
 SELECT	intFiscalYearId,
 		dblVolume = SUM(dblVolume), 

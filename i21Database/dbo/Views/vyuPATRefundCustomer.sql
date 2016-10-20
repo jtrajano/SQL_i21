@@ -16,9 +16,9 @@ SELECT	RC.intRefundCustomerId,
         RC.dblRefundAmount,
         RC.dblCashRefund,
         RC.dblEquityRefund,
-		dbLessFWT = CASE WHEN C.ysnSubjectToFWT = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
+		dbLessFWT = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
 		dblLessServiceFee = RC.dblCashRefund * (R.dblServiceFee/100),
-		dblCheckAmount = CASE WHEN (RC.dblCashRefund - (CASE WHEN C.ysnSubjectToFWT = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RC.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RC.dblCashRefund - (CASE WHEN C.ysnSubjectToFWT = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RC.dblCashRefund * (R.dblServiceFee/100)) END,
+		dblCheckAmount = CASE WHEN (RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RC.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RC.dblCashRefund * (R.dblServiceFee/100)) END,
 		dblTotalVolume = RCatPCat.dblVolume,
 		dblTotalRefund = RC.dblRefundAmount,
 		RC.intConcurrencyId
@@ -29,6 +29,8 @@ SELECT	RC.intRefundCustomerId,
 		ON E.intEntityId = RC.intCustomerId
 	INNER JOIN tblARCustomer C
 		ON C.intEntityCustomerId = RC.intCustomerId
+	INNER JOIN tblAPVendor APV
+		ON APV.intEntityVendorId = RC.intCustomerId
 	LEFT OUTER JOIN tblSMTaxCode TC
 		ON TC.intTaxCodeId = C.intTaxCodeId
 	INNER JOIN

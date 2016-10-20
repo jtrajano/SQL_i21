@@ -100,7 +100,7 @@ BEGIN
 		[strBatchID]					=	'',
 		[intAccountId]					=	@apClearing, 
 		[dblDebit]						=	0,
-		[dblCredit]						=	B.dblCashRefund - (B.dblCashRefund * (A.dblServiceFee/100)) - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (B.dblCashRefund * (A.dblFedWithholdingPercentage/100))END),
+		[dblCredit]						=	B.dblCashRefund - (B.dblCashRefund * (A.dblServiceFee/100)) - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE (B.dblCashRefund * (A.dblFedWithholdingPercentage/100))END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strRefund,
@@ -136,6 +136,8 @@ BEGIN
 				ON B.intRefundTypeId = D.intRefundTypeId
 			INNER JOIN tblARCustomer ARC
 				ON B.intCustomerId = ARC.intEntityCustomerId
+			INNER JOIN tblAPVendor APV
+				ON APV.intEntityVendorId = B.intCustomerId
 	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL
 	--GENERAL RESERVE
@@ -228,7 +230,7 @@ WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
 	[strBatchID]					=	'',
 	[intAccountId]					=	(SELECT DISTINCT intFWTLiabilityAccountId FROM tblPATCompanyPreference), -- change this
 	[dblDebit]						=	0,
-	[dblCredit]						=	(CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (B.dblCashRefund * (A.dblFedWithholdingPercentage/100))END), 
+	[dblCredit]						=	(CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE (B.dblCashRefund * (A.dblFedWithholdingPercentage/100))END), 
 	[dblDebitUnit]					=	0,
 	[dblCreditUnit]					=	0,
 	[strDescription]				=	A.strRefund,
@@ -263,7 +265,9 @@ FROM	[dbo].tblPATRefund A
 		INNER JOIN tblPATRefundRate D
 			ON B.intRefundTypeId = D.intRefundTypeId
 		INNER JOIN tblARCustomer ARC
-				ON B.intCustomerId = ARC.intEntityCustomerId
+			ON B.intCustomerId = ARC.intEntityCustomerId
+		INNER JOIN tblAPVendor APV
+			ON APV.intEntityVendorId = B.intCustomerId
 WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
 
 	DELETE FROM @returntable WHERE ( [dblCredit] = 0 AND strTransactionType = 'Undistributed Equity') OR ([dblCredit] = 0 AND strTransactionType = 'AP Clearing') OR ([dblDebit] = 0 AND strTransactionType = 'General Reserve') OR ([dblCredit] = 0 AND strTransactionType = 'Service Fee Income') OR ([dblCredit] = 0 AND strTransactionType = 'FWT Liability')
