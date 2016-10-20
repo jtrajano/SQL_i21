@@ -269,6 +269,8 @@ WITH ForGLEntries_CTE (
 	,strInventoryTransactionTypeName
 	,strTransactionForm
 	,intInTransitSourceLocationId
+	,strItemNo 
+	,strRelatedTransactionId
 )
 AS 
 (
@@ -288,8 +290,12 @@ AS
 			,strInventoryTransactionTypeName = TransType.strName
 			,'Bill' -- TRANS.strTransactionForm 
 			,TRANS.intInTransitSourceLocationId
+			,i.strItemNo
+			,TRANS.strRelatedTransactionId
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = TRANS.intItemId
 	WHERE	TRANS.strBatchId = @strBatchId
 )
 
@@ -304,7 +310,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									) 
 		,strCode					= 'IAV' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -351,7 +362,12 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'IAV' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -402,7 +418,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -449,7 +470,12 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -502,7 +528,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'ICA' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -549,7 +580,12 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'ICA' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -607,7 +643,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RCON' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -665,7 +706,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RPRD' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -716,7 +762,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RTRF' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -767,7 +818,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RBLD' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -818,7 +874,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RIC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -869,7 +930,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RSL' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -920,7 +986,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RLMG' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -971,7 +1042,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RLMV' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -1022,7 +1098,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RCOGS' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -1074,7 +1155,12 @@ SELECT
 		,dblCredit					= Debit.Value 
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RCOGS' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -1127,7 +1213,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RSHP' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -1177,7 +1268,12 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
 		,strCode					= 'RSHP' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
