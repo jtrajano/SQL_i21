@@ -373,7 +373,7 @@ BEGIN
 	--     GET TO BE IMPORTED RECORDS
 	--	This is checking if there are still records need to be import	
 	--================================================
-	IF(@Checking = 1 AND @Posted = 1)
+	IF(@Checking = 1)
 	BEGIN
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
