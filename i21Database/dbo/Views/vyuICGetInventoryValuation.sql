@@ -84,7 +84,10 @@ FROM 	tblICItem i LEFT JOIN tblICItemUOM iuStock
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
+		LEFT JOIN tblAPBill bill
+			ON bill.intBillId = t.intTransactionId
+			AND bill.strBillId = t.strTransactionId
 		LEFT JOIN tblEMEntity e 
-			ON e.intEntityId = ISNULL(receipt.intEntityVendorId, shipment.intEntityCustomerId)
+			ON e.intEntityId = ISNULL(receipt.intEntityVendorId, ISNULL(shipment.intEntityCustomerId, ISNULL(invoice.intEntityCustomerId, bill.intEntityVendorId)))
 
 WHERE	i.strType != 'Comment'
