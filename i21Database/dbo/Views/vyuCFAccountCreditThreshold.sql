@@ -8,6 +8,7 @@ FROM   (SELECT intEntityCustomerId, strCustomerName, strCustomerNumber, dblCredi
              dbo.tblARCustomer AS ARCust ON mainQuery.intEntityCustomerId = ARCust.intEntityCustomerId INNER JOIN
              dbo.tblCFAccount AS CFAccnt ON mainQuery.intEntityCustomerId = CFAccnt.intCustomerId INNER JOIN
                  (SELECT DISTINCT intAccountId
-                 FROM    dbo.tblCFCard) AS CFCard ON CFAccnt.intAccountId = CFCard.intAccountId
+                  FROM dbo.tblCFCard
+                  WHERE (ysnCardLocked = 0)) AS CFCard ON CFAccnt.intAccountId = CFCard.intAccountId
 WHERE (mainQuery.dblOverLimit > 0) OR
              (mainQuery.dblTotalDue > 0)
