@@ -4444,6 +4444,7 @@
     <Build Include="dbo\Tables\tblAPVendorLien.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetStartingNumberSubType.sql" />
     <Build Include="dbo\Views\vyuLGContainerTypeNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
