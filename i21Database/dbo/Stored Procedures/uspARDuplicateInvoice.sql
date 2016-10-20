@@ -157,44 +157,44 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
 		RETURN 0;
 	END
 
---VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Inventory Shipment
-IF EXISTS(	SELECT 
-				NULL
-			FROM
-				tblARInvoiceDetail ARID
-			INNER JOIN
-				tblICInventoryShipmentItem ICISI 
-					ON ARID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId
-			WHERE 
-				ARID.intInvoiceId = @InvoiceId
-				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(ICISI.dblQuantity, @ZeroDecimal))
-	BEGIN
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION		
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120039, 16, 1)
-		RETURN 0;
-	END
+----VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Inventory Shipment
+--IF EXISTS(	SELECT 
+--				NULL
+--			FROM
+--				tblARInvoiceDetail ARID
+--			INNER JOIN
+--				tblICInventoryShipmentItem ICISI 
+--					ON ARID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId
+--			WHERE 
+--				ARID.intInvoiceId = @InvoiceId
+--				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(ICISI.dblQuantity, @ZeroDecimal))
+--	BEGIN
+--		IF ISNULL(@RaiseError,0) = 0
+--			ROLLBACK TRANSACTION		
+--		IF ISNULL(@RaiseError,0) = 1
+--			RAISERROR(120039, 16, 1)
+--		RETURN 0;
+--	END
 
---VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Sales Order
-IF EXISTS(	SELECT
-				NULL 
-			FROM
-				tblARInvoiceDetail ARID
-			INNER JOIN
-				tblSOSalesOrderDetail SOSOD 
-					ON ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId
-					AND ARID.intInventoryShipmentItemId IS NULL
-			WHERE
-				ARID.intInvoiceId = @InvoiceId
-				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(SOSOD.dblQtyOrdered - SOSOD.dblQtyShipped, @ZeroDecimal))
-	BEGIN
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION		
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120040, 16, 1)
-		RETURN 0;
-	END
+----VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Sales Order
+--IF EXISTS(	SELECT
+--				NULL 
+--			FROM
+--				tblARInvoiceDetail ARID
+--			INNER JOIN
+--				tblSOSalesOrderDetail SOSOD 
+--					ON ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId
+--					AND ARID.intInventoryShipmentItemId IS NULL
+--			WHERE
+--				ARID.intInvoiceId = @InvoiceId
+--				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(SOSOD.dblQtyOrdered - SOSOD.dblQtyShipped, @ZeroDecimal))
+--	BEGIN
+--		IF ISNULL(@RaiseError,0) = 0
+--			ROLLBACK TRANSACTION		
+--		IF ISNULL(@RaiseError,0) = 1
+--			RAISERROR(120040, 16, 1)
+--		RETURN 0;
+--	END
 
 
 BEGIN TRY
