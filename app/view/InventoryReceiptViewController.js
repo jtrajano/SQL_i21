@@ -2441,7 +2441,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             win.context.data.saveRecord({
                 callbackFn: function (batch, eOpts, success) {
                     iRely.Functions.openScreen(screenName, {
-                        id: grd.getSelection()[0].data.intInventoryReceiptItemId
+                        id: grd.getSelection()[0].data.intInventoryReceiptItemId,
+                        viewConfig: { modal: true }
                     });
                     return;
                 }
@@ -2449,7 +2450,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (win.context.data.hasChanges() !== true) {
             iRely.Functions.openScreen(screenName, {
-                id: ReceiptItemId
+                id: ReceiptItemId,
+                viewConfig: { modal: true }
             });
         }
         else {
@@ -2458,7 +2460,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     win.context.data.saveRecord({
                         callbackFn: function (batch, eOpts, success) {
                             iRely.Functions.openScreen(screenName, {
-                                id: grd.getSelection()[0].data.intInventoryReceiptItemId
+                                id: grd.getSelection()[0].data.intInventoryReceiptItemId,
+                                viewConfig: { modal: true }
                             });
                             return;
                         }
