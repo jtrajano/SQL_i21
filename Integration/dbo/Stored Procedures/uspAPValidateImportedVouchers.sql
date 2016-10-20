@@ -128,4 +128,9 @@ SELECT
 FROM @log
 
 IF EXISTS(SELECT 1 FROM @log) SET @isValid = 0;
-ELSE SET @isValid = 1
+ELSE 
+BEGIN
+	IF OBJECT_ID('dbo.tmp_apivcmstImport') IS NOT NULL DROP TABLE tmp_apivcmstImport
+	IF OBJECT_ID('dbo.tmp_aptrxmstImport') IS NOT NULL DROP TABLE tmp_aptrxmstImport
+	SET @isValid = 1
+END
