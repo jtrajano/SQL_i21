@@ -39,6 +39,7 @@ BEGIN
 	DECLARE @strBillingBy NVARCHAR(15)
 	DECLARE @intSeasonResetId INT
 	DECLARE @dblLastAccumulatedDDOnSeasonReset NUMERIC(18,6)
+	DECLARE @ysnMaxExceed BIT
 	
 
 
@@ -354,25 +355,53 @@ BEGIN
 					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 					ORDER BY dblPercentAfterDelivery DESC, intInvoiceDetailId ASC
 					
-					SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId) 
+					SET @ysnMaxExceed = 0
+					SET @dblNewBurnRate = 0.0
+
+					SELECT TOP 1 
+						@dblNewBurnRate = dblBurnRate
+						,@ysnMaxExceed = ysnMaxExceed
+					FROM dbo.fnTMComputeNewBurnRateTable(@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId)
+					
 					
 					---Update Site Burn Rate, dblDegreeDayBetweenDelivery,intNextDeliveryDegreeDay based on the new calculated burn rate
 					UPDATE tblTMSite
 					SET dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-											THEN @dblNewBurnRate
+											THEN ISNULL(@dblNewBurnRate,0.0)
 											ELSE dblBurnRate 
 										END)
-						,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
+						,dblDegreeDayBetweenDelivery = ISNULL(@dblNewBurnRate,0.0) * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
 						,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
 					WHERE intSiteID = @intSiteId
+
+
 
 					----UPDATE Delivery history header for the new calc burnrate 
 					UPDATE tblTMDeliveryHistory
 						SET 
-						dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId)
+						dblBurnRateAfterDelivery = @dblNewBurnRate
 						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,0,@intNewDeliveryHistoryId)
 					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
-					
+
+					---Check Max exceed
+					IF(@ysnMaxExceed = 1)
+					BEGIN
+						---Insert into out of range table
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMSyncOutOfRange WHERE intSiteID = @intSiteId AND DATEADD(dd, DATEDIFF(dd, 0, dtmDateSync),0) = DATEADD(dd, DATEDIFF(dd, 0, GETDATE()),0))
+						BEGIN
+							INSERT INTO tblTMSyncOutOfRange
+							(
+								intSiteID
+								,dtmDateSync
+								,ysnCommit
+							)
+							SELECT 
+								intSiteID		= @intSiteId
+								,dtmDateSync	= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()),0)
+								,ysnCommit		= 1
+						END
+						
+					END
 					
 					---- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
@@ -633,8 +662,15 @@ BEGIN
 			ELSE
 			BEGIN
 				---------GET New Burn rate 
-				SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,NULL) 
-				
+				SET @ysnMaxExceed = 0
+				SET @dblNewBurnRate = 0.0
+
+				SELECT TOP 1 
+					@dblNewBurnRate = dblBurnRate
+					,@ysnMaxExceed = ysnMaxExceed
+				FROM dbo.fnTMComputeNewBurnRateTable(@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,NULL) 
+
+
 				IF(@strTransactionType = 'Invoice')
 				BEGIN
 					PRINT 'Invoice'
@@ -711,7 +747,7 @@ BEGIN
 						,dblQuantityDelivered = (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems)
 						,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
 						,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
-						,dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,null)
+						,dblBurnRateAfterDelivery = ISNULL(@dblNewBurnRate,0.0)
 						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,0,null)
 						,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
 						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intClockReadingId,null)
@@ -787,6 +823,26 @@ BEGIN
 					
 					SET @intNewDeliveryHistoryId = @@IDENTITY
 					
+					---Check Max exceed
+					IF(@ysnMaxExceed = 1)
+					BEGIN
+						---Insert into out of range table
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMSyncOutOfRange WHERE intSiteID = @intSiteId AND DATEADD(dd, DATEDIFF(dd, 0, dtmDateSync),0) = DATEADD(dd, DATEDIFF(dd, 0, GETDATE()),0))
+						BEGIN
+							INSERT INTO tblTMSyncOutOfRange
+							(
+								intSiteID
+								,dtmDateSync
+								,ysnCommit
+							)
+							SELECT 
+								intSiteID		= @intSiteId
+								,dtmDateSync	= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()),0)
+								,ysnCommit		= 1
+						END
+						
+					END
+
 					--Insert Delivery History Detail	
 					INSERT INTO tblTMDeliveryHistoryDetail(
 						intDeliveryHistoryID
@@ -1136,4 +1192,5 @@ BEGIN
 		
 DONESYNCHING:
 END
+
 GO

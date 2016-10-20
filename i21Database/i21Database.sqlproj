@@ -4419,6 +4419,7 @@
     <Build Include="dbo\Views\vyuGRGetStorageTakeOut.sql" />
     <Build Include="dbo\Functions\fnCTGetFranchiseReweights.sql" />
     <Build Include="dbo\Functions\fnCreateCostAdjGLDescription.sql" />
+    <Build Include="dbo\Functions\fnTMComputeNewBurnRateTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
