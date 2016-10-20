@@ -341,6 +341,7 @@ BEGIN
 				AND ActualTransaction.intItemUOMId IS NOT NULL
 			INNER JOIN tblICItemLocation ItemLocation
 				ON ActualTransaction.intItemLocationId = ItemLocation.intItemLocationId
+				AND ItemLocation.intLocationId IS NOT NULL 
 
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for related transactions 
