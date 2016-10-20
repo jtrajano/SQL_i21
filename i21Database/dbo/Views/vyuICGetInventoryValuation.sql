@@ -81,6 +81,9 @@ FROM 	tblICItem i LEFT JOIN tblICItemUOM iuStock
 		LEFT JOIN tblICInventoryShipment shipment 
 			ON shipment.intInventoryShipmentId = t.intTransactionId
 			AND shipment.strShipmentNumber = t.strTransactionId
+		LEFT JOIN tblARInvoice invoice
+			ON invoice.intInvoiceId = t.intTransactionId
+			AND invoice.strInvoiceNumber = t.strTransactionId
 		LEFT JOIN tblEMEntity e 
 			ON e.intEntityId = ISNULL(receipt.intEntityVendorId, shipment.intEntityCustomerId)
 
