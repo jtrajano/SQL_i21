@@ -1125,6 +1125,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Out of Range Burn Rates' AND s
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Leak Check / Gas Check' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'On Hold Detail' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Customer List by Route' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Two-Part Delivery Fill Report' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
 /* END OF DELETING */
 
 
