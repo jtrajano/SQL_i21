@@ -256,7 +256,7 @@ INNER JOIN (SELECT *
 			AS cfTransPrice
 ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
 LEFT JOIN vyuCTContractDetailView ctContracts
-ON cfTrans.intContractId = ctContracts.intContractDetailId
+ON cfTrans.intContractId = ctContracts.intContractHeaderId AND cfTrans.intContractDetailId =  ctContracts.intContractDetailId
 WHERE cfTrans.intTransactionId = @TransactionId
 
 
