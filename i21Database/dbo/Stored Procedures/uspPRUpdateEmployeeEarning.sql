@@ -9,7 +9,8 @@ BEGIN
 			dblAmount = Earning.dblAmount,
 			dblDefaultHours = Earning.dblDefaultHours,
 			strW2Code = Earning.strW2Code,
-			intAccountId = Earning.intAccountId
+			intAccountId = Earning.intAccountId,
+			intTaxCalculationType = Earning.intTaxCalculationType
 		FROM tblPRTypeEarning Earning INNER JOIN tblPREmployeeEarning EmpEarning
 		ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
 		WHERE EmpEarning.intTypeEarningId = @intTypeEarningId
@@ -54,7 +55,8 @@ BEGIN
 			dblAmount = Earning.dblAmount,
 			dblDefaultHours = Earning.dblDefaultHours,
 			strW2Code = Earning.strW2Code,
-			intAccountId = Earning.intAccountId
+			intAccountId = Earning.intAccountId,
+			intTaxCalculationType = Earning.intTaxCalculationType
 		FROM tblPRTypeEarning Earning INNER JOIN tblPRTemplateEarning EmpEarning
 		ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
 		WHERE EmpEarning.intTypeEarningId = @intTypeEarningId

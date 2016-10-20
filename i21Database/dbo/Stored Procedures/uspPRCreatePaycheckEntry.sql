@@ -206,6 +206,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,[intEmployeeTimeOffId]
 			,[intEmployeeEarningLinkId]
 			,[intAccountId]
+			,[intTaxCalculationType]
 			,[intSort]
 			,[intConcurrencyId])
 		OUTPUT
@@ -226,6 +227,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,E.intEmployeeTimeOffId
 			,E.intEmployeeEarningLinkId
 			,E.intAccountId
+			,E.intTaxCalculationType
 			,P.intSort
 			,1
 		FROM tblPRPayGroupDetail P INNER JOIN tblPREmployeeEarning E 

@@ -69,6 +69,7 @@ SELECT
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
 								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA Local')), 0) AS BIT)
 	,tblPRPaycheckEarning.intAccountId
+	,tblPRPaycheckEarning.intTaxCalculationType
 	,tblPRPaycheckEarning.intSort
 	,tblPRPaycheckEarning.intConcurrencyId
 	,tblPRPaycheck.dblGross

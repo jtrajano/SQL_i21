@@ -13,6 +13,7 @@
 	[intEmployeeTimeOffId] INT NULL,
 	[intEmployeeEarningLinkId] INT NULL,
 	[intAccountId] INT NOT NULL,
+	[intTaxCalculationType] INT NULL DEFAULT ((0)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRPaycheckEarning] PRIMARY KEY ([intPaycheckEarningId]),
@@ -180,3 +181,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheckEarning',
     @level2type = N'COLUMN',
     @level2name = N'intWorkersCompensationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tax Calculation Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intTaxCalculationType'

@@ -8,6 +8,7 @@
     [dblDefaultHours]			NUMERIC (18, 6) DEFAULT ((0)) NULL,
 	[dblHoursToProcess]			NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [intAccountId]				INT             NULL,
+	[intTaxCalculationType]		INT				NULL DEFAULT ((0)),
     [strW2Code]					NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intEmployeeTimeOffId]		INT             NULL,
 	[intEmployeeAccrueTimeOffId] INT            NULL,
@@ -183,3 +184,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeEarning',
     @level2type = N'COLUMN',
     @level2name = N'dblRateAmount'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tax Calculation Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intTaxCalculationType'
