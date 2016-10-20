@@ -1807,11 +1807,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
         }
 
-        // Calculate the Gross/Net 
-        if (combo.itemId !== 'cboStorageLocation') {
-            this.calculateGrossNet(current, 1);
-        }
-
         // Calculate the taxes
         // win.viewModel.data.currentReceiptItem = current;
         // this.calculateItemTaxes();
@@ -3096,7 +3091,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        if (context.field === 'dblOpenReceive') {
+        if (context.field === 'dblOpenReceive' || context.field === 'strUnitMeasure' || context.field === 'strWeightUOM') {
             if (context.record) {
                 // Calculate the gross weight.
                 me.calculateGrossNet(context.record, 1);
@@ -3110,11 +3105,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var grossMargin = ((salesPrice - context.record.get('dblUnitCost')) / (salesPrice)) * 100;
                 context.record.set('dblGrossMargin', grossMargin);
             }
-        }
-
-        else if (context.field === 'strWeightUOM') {
-            // Calculate the gross weight.
-            me.calculateGrossNet(context.record, 1);
         }
 
         // Accept the data input.
