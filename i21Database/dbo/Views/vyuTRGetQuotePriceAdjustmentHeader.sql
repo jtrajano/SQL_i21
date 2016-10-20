@@ -8,6 +8,9 @@ SELECT QPAHeader.intQuotePriceAdjustmentHeaderId
 	, strCustomerName = Customer.strName
 	, Customer.strCustomerNumber
 	, QPAHeader.intSupplyPointId
+	, SupplyPoint.intEntityVendorId
+	, SupplyPoint.strFuelSupplier
+	, SupplyPoint.intEntityLocationId
 	, SupplyPoint.strSupplyPoint
 FROM tblTRQuotePriceAdjustmentHeader QPAHeader
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = QPAHeader.intEntityCustomerId

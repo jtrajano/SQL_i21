@@ -3,8 +3,13 @@
 
 SELECT QPADetail.intQuotePriceAdjustmentDetailId
 	, QPADetail.intQuotePriceAdjustmentHeaderId
+	, QPAHeader.intCustomerGroupId
 	, QPAHeader.strCustomerGroup
+	, QPAHeader.intEntityCustomerId
 	, QPAHeader.strCustomerName
+	, QPAHeader.intEntityVendorId
+	, QPAHeader.strFuelSupplier
+	, QPAHeader.intEntityLocationId
 	, QPAHeader.strSupplyPoint
 	, QPADetail.intItemId
 	, Item.strItemNo
