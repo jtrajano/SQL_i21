@@ -424,6 +424,13 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             else
                 return true;
         },
+        disableFieldInShipmentGrid: function (get) {
+           if (iRely.Functions.isEmpty(get('grdInventoryShipment.selection.strItemNo'))) {
+               return true;
+           }
+           else {
+               return false;
+           }
+       }
     }
-
 });

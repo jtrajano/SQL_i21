@@ -331,6 +331,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colCustomerStorage: {
                     dataIndex: 'strStorageTypeDescription',
                     editor: {
+                        readOnly: '{disableFieldInShipmentGrid}',
                         store: '{customerStorage}',
                         defaultFilters: [
                             {
@@ -349,6 +350,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
+                        readOnly: '{disableFieldInShipmentGrid}',
                         store: '{subLocation}',
                         origValueField: 'intCompanyLocationSubLocationId',
                         origUpdateField: 'intSubLocationId',
@@ -362,6 +364,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colStorageLocation: {
                     dataIndex: 'strStorageLocationName',
                     editor: {
+                        readOnly: '{disableFieldInShipmentGrid}',
                         store: '{storageLocation}',
                         origValueField: 'intStorageLocationId',
                         origUpdateField: 'intStorageLocationId',
@@ -400,6 +403,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     hidden: '{checkHideOwnershipType}',
                     dataIndex: 'strOwnershipType',
                     editor: {
+                        readOnly: '{disableFieldInShipmentGrid}',
                         origValueField: 'intOwnershipType',
                         origUpdateField: 'intOwnershipType',
                         store: '{ownershipTypes}'
@@ -413,10 +417,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderUOM'
                 },
-                colQuantity: 'dblQuantity',
+                colQuantity: {
+                    dataIndex: 'dblQuantity',
+                    editor: {
+                        readOnly: '{disableFieldInShipmentGrid}'
+                    }
+                },
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        readOnly: '{disableFieldInShipmentGrid}',
                         store: '{itemUOM}',
                         defaultFilters: [
                             {
@@ -435,6 +445,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
+                        readOnly: '{disableFieldInShipmentGrid}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
@@ -445,7 +456,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colUnitCost: 'dblUnitCost',
-                colUnitPrice: 'dblUnitPrice',
+                colUnitPrice: {
+                    dataIndex: 'dblUnitPrice',
+                    editor: {
+                        readOnly: '{disableFieldInShipmentGrid}'
+                    }
+                },
                 colLineTotal: 'dblLineTotal',
                 colNotes: 'strNotes'
             },
