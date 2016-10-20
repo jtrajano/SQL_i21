@@ -1,15 +1,17 @@
 ﻿CREATE VIEW dbo.vyuCFInvoiceDiscount
 AS
-SELECT   ISNULL(cfTransPrice.dblCalculatedAmount, 0) AS dblTotalAmount, smTerm.intTermID, smTerm.strTerm, smTerm.strType, smTerm.dblDiscountEP, smTerm.intBalanceDue, 
-                         smTerm.intDiscountDay, smTerm.dblAPR, smTerm.strTermCode, smTerm.ysnAllowEFT, smTerm.intDayofMonthDue, smTerm.intDueNextMonth, smTerm.dtmDiscountDate, 
-                         smTerm.dtmDueDate, smTerm.ysnActive, smTerm.ysnEnergyTrac, smTerm.intSort, smTerm.intConcurrencyId, cfTrans.dblQuantity, cfCardAccount.intAccountId, 
-                         cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, cfCardAccount.strInvoiceCycle, 
-                         cfTrans.dtmTransactionDate, cfTrans.strTransactionType, cfCardAccount.intDiscountScheduleId, cfCardAccount.intCustomerId, ISNULL(emGroup.intCustomerGroupId, 0) 
-                         AS intCustomerGroupId, emGroup.strGroupName, arInv.intInvoiceId, arInv.strInvoiceNumber, cfTrans.strInvoiceReportNumber, cfTrans.strPrintTimeStamp
+SELECT   cfTrans.strTransactionType, cfDiscountSched.ysnDiscountOnExtRemotes, cfDiscountSched.ysnDiscountOnRemotes, ISNULL(cfTransPrice.dblCalculatedAmount, 0) 
+                         AS dblTotalAmount, smTerm.intTermID, smTerm.strTerm, smTerm.strType, smTerm.dblDiscountEP, smTerm.intBalanceDue, smTerm.intDiscountDay, smTerm.dblAPR, 
+                         smTerm.strTermCode, smTerm.ysnAllowEFT, smTerm.intDayofMonthDue, smTerm.intDueNextMonth, smTerm.dtmDiscountDate, smTerm.dtmDueDate, smTerm.ysnActive, 
+                         smTerm.ysnEnergyTrac, smTerm.intSort, smTerm.intConcurrencyId, cfTrans.dblQuantity, cfCardAccount.intAccountId, cfTrans.intTransactionId, arInv.strCustomerName, 
+                         cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, cfCardAccount.intDiscountScheduleId, 
+                         cfCardAccount.intCustomerId, ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, arInv.intInvoiceId, arInv.strInvoiceNumber, 
+                         cfTrans.strInvoiceReportNumber, cfTrans.strPrintTimeStamp
 FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
-                         dbo.vyuCFCardAccount AS cfCardAccount ON cfTrans.intCardId = cfCardAccount.intCardId LEFT OUTER JOIN
+                         dbo.vyuCFCardAccount AS cfCardAccount ON cfTrans.intCardId = cfCardAccount.intCardId INNER JOIN
+                         dbo.tblCFDiscountSchedule AS cfDiscountSched ON cfCardAccount.intDiscountScheduleId = cfDiscountSched.intDiscountScheduleId LEFT OUTER JOIN
                              (SELECT   arCustGroupDetail.intCustomerGroupDetailId, arCustGroupDetail.intCustomerGroupId, arCustGroupDetail.intEntityId, arCustGroupDetail.ysnSpecialPricing, 
                                                          arCustGroupDetail.ysnContract, arCustGroupDetail.ysnBuyback, arCustGroupDetail.ysnQuote, arCustGroupDetail.ysnVolumeDiscount, 
                                                          arCustGroupDetail.intConcurrencyId, arCustGroup.strGroupName
@@ -64,5 +66,8 @@ FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                                                          dbo.tblSMTaxCode AS ismTaxCode ON icfTramsactionTax.intTaxCodeId = ismTaxCode.intTaxCodeId INNER JOIN
                                                          dbo.tblSMTaxClass AS ismTaxClass ON ismTaxCode.intTaxClassId = ismTaxClass.intTaxClassId
                                 GROUP BY icfTramsactionTax.intTransactionId) AS TotalTaxes ON cfTrans.intTransactionId = TotalTaxes.intTransactionId
-WHERE     (cfSiteItem.ysnIncludeInQuantityDiscount = 1)
-
+WHERE     (cfSiteItem.ysnIncludeInQuantityDiscount = 1) AND (cfTrans.ysnPosted = 1) AND (cfTrans.strTransactionType = 'Remote') AND 
+                         (cfDiscountSched.ysnDiscountOnRemotes = 1) OR
+                         (cfSiteItem.ysnIncludeInQuantityDiscount = 1) AND (cfTrans.ysnPosted = 1) AND (cfTrans.strTransactionType = 'Local/Network') OR
+                         (cfSiteItem.ysnIncludeInQuantityDiscount = 1) AND (cfTrans.ysnPosted = 1) AND (cfTrans.strTransactionType = 'Extended Remote') AND 
+                         (cfDiscountSched.ysnDiscountOnExtRemotes = 1)

@@ -70,5 +70,6 @@ FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                                 WHERE     (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTrans.intTransactionId = cfTransNetPrice.intTransactionId LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId LEFT OUTER JOIN
                          dbo.tblCFDepartment AS cfDep ON cfDep.intDepartmentId = cfCardAccount.intCardId
+WHERE     (cfTrans.ysnPosted = 1)
 
 
