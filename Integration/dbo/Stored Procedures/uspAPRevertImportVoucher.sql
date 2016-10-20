@@ -85,18 +85,20 @@ BEGIN
 		SELECT 1 FROM aptrxmst B WHERE A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no
 	)
 	
-	DELETE A
-	FROM tblAPPayment A
-	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-	INNER JOIN tblAPaptrxmst D ON C.intBillId = D.intBillId
-	INNER JOIN tmp_aptrxmstImport E ON D.intId = E.intBackupId
+	--NO NEED AS WE DO NOT CREATE PAYMENT ON IMPORT ON-GOING
+	--DELETE A
+	--FROM tblAPPayment A
+	--INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+	--INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+	--INNER JOIN tblAPaptrxmst D ON C.intBillId = D.intBillId
+	--INNER JOIN tmp_aptrxmstImport E ON D.intId = E.intBackupId
 
 	--DELETE FIRST THE INSERTED VOUCHER
 	DELETE A
 	FROM tblAPBill A
 	INNER JOIN tblAPaptrxmst B ON A.intBillId = B.intBillId
 	INNER JOIN tmp_aptrxmstImport C ON B.intId = C.intBackupId
+	WHERE A.ysnPosted = 0
 
 	--DELETE BACK UP RECORDS FROM tblAPaptrxmst
 	DELETE A
