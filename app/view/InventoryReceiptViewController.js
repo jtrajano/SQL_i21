@@ -418,6 +418,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
+                        readOnly: '{disableFieldInReceiptGrid}',
                         origValueField: 'intCompanyLocationSubLocationId',
                         origUpdateField: 'intSubLocationId',
                         store: '{subLocation}',
@@ -438,6 +439,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colStorageLocation: {
                     dataIndex: 'strStorageLocationName',
                     editor: {
+                        readOnly: '{disableFieldInReceiptGrid}',
                         store: '{storageLocation}',
                         origValueField: 'intStorageLocationId',
                         origUpdateField: 'intStorageLocationId',
@@ -476,6 +478,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     hidden: '{checkHideOwnershipType}',
                     dataIndex: 'strOwnershipType',
                     editor: {
+                        readOnly: '{disableFieldInReceiptGrid}',
                         origValueField: 'intOwnershipType',
                         origUpdateField: 'intOwnershipType',
                         store: '{ownershipTypes}'
@@ -502,7 +505,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'dblReceived'
                 },
-                colQtyToReceive: 'dblOpenReceive',
+                colQtyToReceive: {
+                    dataIndex: 'dblOpenReceive',
+                    editor: {
+                        readOnly: '{disableFieldInReceiptGrid}'
+                    }
+                },
                 colLoadToReceive: {
                     hidden: '{checkShowLoadContractOnly}',
                     dataIndex: 'intLoadReceive'
@@ -513,6 +521,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        readOnly: '{disableFieldInReceiptGrid}',
                         store: '{itemUOM}',
                         defaultFilters: [
                             {
@@ -531,6 +540,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
+                        readOnly: '{disableFieldInReceiptGrid}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
@@ -573,7 +583,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colTax: {
                     dataIndex: 'dblTax'
                 },
-                colUnitRetail: 'dblUnitRetail',
+                colUnitRetail: {
+                    dataIndex: 'dblUnitRetail',
+                    editor: {
+                        readOnly: '{disableFieldInReceiptGrid}'
+                    }
+                },
                 colGross: {
                     dataIndex: 'dblGross',
                     editor: {

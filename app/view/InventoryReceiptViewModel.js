@@ -722,18 +722,21 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         readOnlyUnitCost: function (get) {
-            switch (get('current.strReceiptType')) {       
-                case 'Purchase Contract':
-                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber')) || get('grdInventoryReceipt.selection.strPricingType') === 'Unit') {
+            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strItemNo'))) {
+               return true;
+            }
+            else {
+                switch (get('current.strReceiptType')) {       
+                    case 'Purchase Contract':
+                        if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber')) || get('grdInventoryReceipt.selection.strPricingType') === 'Unit') {
+                            return false;
+                        }
+                        else {
+                            return true;
+                        }
+                    default:
                         return false;
-                    }
-                    else {
-                        return true;
-                    }
-                    break;
-                default:
-                    return false;
-                    break;
+                }
             }
         },
         readOnlyNoGrossNetUOM: function (get) {
@@ -794,7 +797,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                       return false;
                       break;
               }
-	       }
+	       },
+       disableFieldInReceiptGrid: function (get) {
+           if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strItemNo'))) {
+               return true;
+           }
+           else {
+               return false;
+           }
+       }
     }
-
 });
