@@ -4418,6 +4418,7 @@
     <Build Include="dbo\Tables\tblTMDeliveryFillReportParameter.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageTakeOut.sql" />
     <Build Include="dbo\Functions\fnCTGetFranchiseReweights.sql" />
+    <Build Include="dbo\Functions\fnCreateCostAdjGLDescription.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
