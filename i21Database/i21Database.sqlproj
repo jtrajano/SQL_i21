@@ -4440,7 +4440,10 @@
     <Build Include="dbo\Functions\fnCTGetFranchiseReweights.sql" />
     <Build Include="dbo\Tables\tblEMEntityClass.sql" />
     <None Include="Scripts\Post-Deployment\EM\034_EntityClassData.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityLien.sql" />
+    <Build Include="dbo\Tables\tblAPVendorLien.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetStartingNumberSubType.sql" />
+    <Build Include="dbo\Views\vyuLGContainerTypeNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
