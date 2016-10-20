@@ -7,6 +7,13 @@ END
 
 GO
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '15.4' AND strText like '%Governing Law; Arbitration; Exclusive Jurisdiction.%')
+BEGIN
+	DELETE FROM tblSMEULA WHERE strVersionNumber = '15.4'
+END
+
+GO
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '15.4')
 BEGIN
 INSERT INTO tblSMEULA(strVersionNumber, strText)
@@ -1114,18 +1121,17 @@ of this Agreement.
 
 <h3 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
 margin-bottom:.0001pt;text-align:justify;text-indent:-.25in''><a
-name="_Ref456628893"><b><span style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>9.10 Governing Law and Jurisdiction.</span></b></a><span
-style=''font-size:10.0pt;font-family:"Arial","sans-serif"''> This Agreement will be construed and enforced in accordance with the laws 
-of the State of Indiana, USA, excluding choice of law.  In 
-any action relating to this Agreement, (a) each of the parties irrevocably 
-consents to the exclusive jurisdiction and venue of the federal and state 
-courts located in the State of Indiana, (b) each of the parties 
-irrevocably waives the right to trial by jury, (c) each of the 
-parties irrevocably consents to service of process by first class certified mail, 
-return receipt requested, postage prepaid, to the address at which the party 
-is to receive notice hereunder and (d) the prevailing party will be 
-entitled to recover its reasonable attorney''s fees (including, if applicable, charges for 
-in-house counsel), court costs and other legal expenses from the other party. 
+name="_Ref456628893"><b><span style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>9.10 Governing Law; Arbitration; Exclusive Jurisdiction.</span></b></a><span
+style=''font-size:10.0pt;font-family:"Arial","sans-serif"''> This Agreement, for all purposes, shall be construed in accordance with the substantive laws of the State 
+of Indiana, without regard to conflicts-of-law principles. The parties agree that any dispute, controversy or claim arising out of or related to this Agreement, 
+including without limitation the formation or validity of the Agreement or this arbitration provision, or any breach of this Agreement, shall be submitted to 
+and decided by binding arbitration in Fort Wayne, Indiana, administered by the American Arbitration Association.  Any arbitral award determination shall be 
+final and binding upon the parties and may be entered as a judgment in a court of competent jurisdiction.  Nothing in this arbitration provision shall limit 
+the right of either party to invoke the jurisdiction of an appropriate court to seek and to obtain injunctive or other emergency relief enforcing this 
+Agreement, or to seek an order compelling arbitration or enforcing an arbitration award.  Any action or proceeding by either party with respect to this 
+Agreement shall be brought only in the state courts located in the State of Indiana, Allen County or the United States District Court for the Northern 
+District of Indiana.  The parties hereby irrevocably submit to the exclusive jurisdiction of such courts and waive the defense of inconvenient forum 
+to the maintenance of any such action or proceeding in such venue. 
 </span></h3>
 
 <p class=MsoNormal>&nbsp;</p>
