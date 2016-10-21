@@ -699,8 +699,8 @@ BEGIN
 		WHERE	ItemUOM.intItemId = @intItemId
 				AND ItemUOM.intItemUOMId = @intItemUOMId
 
-		-- {Lot number} has stock and is assigned with UOM = {Quantity UOM used}. You cannot use the same Lot Number if Lot UOM is not {Quantity UOM used}.
-		RAISERROR(80011, 11, 1, @strLotNumber, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMFrom);
+		-- Lot {Lot number} exists in {Quantity UOM used}. Cannot receive in {Quantity UOM proposed value}. Change the receiveing UOM to {Quantity UOM used} or create a new lot.
+		RAISERROR(80011, 11, 1, @strLotNumber, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo, @strUnitMeasureItemUOMFrom);
 		RETURN -6;
 	END 
 
