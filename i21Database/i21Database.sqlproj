@@ -4448,6 +4448,10 @@
     <Build Include="dbo\Views\vyuCRMCustomerContact.sql" />
     <Build Include="dbo\Views\vyuCRMCustomerProspectType.sql" />
     <Build Include="dbo\Views\vyuCRMCampaignSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalanceHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetGrainInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCompanyOwnership.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
