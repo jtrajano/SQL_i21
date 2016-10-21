@@ -408,6 +408,9 @@ BEGIN
 	ELSE
 	BEGIN
 
+		--CHECK THE BALANCE
+		IF dbo.fnAPIsBalanced() = 0 RAISERROR('AP balance is not equal to GL balance', 16, 1);
+
 		UPDATE tblAPBill
 			SET ysnPosted = 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
