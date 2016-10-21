@@ -4447,6 +4447,7 @@
     <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistory.sql" />
     <Build Include="dbo\Views\vyuCRMCustomerContact.sql" />
     <Build Include="dbo\Views\vyuCRMCustomerProspectType.sql" />
+    <Build Include="dbo\Views\vyuCRMCampaignSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
