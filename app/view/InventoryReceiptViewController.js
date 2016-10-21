@@ -4874,7 +4874,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             if (replicaCount == 0) {
                 iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') +
-                    ' is fully replicated.');
+                    ' are fully replicated.');
             // When item is already fully replicated, it should not generate lots anymore but should show an error message IC-1888
             /*  iRely.Msg.showQuestion('The lots for ' + currentReceiptItem.get('strItemNo') +
                     ' is fully replicated. Are you sure you want to continue?',
@@ -5016,7 +5016,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (totalLotQty > lineItemQty) {
                         var itemNo = currentReceiptItem.get('strItemNo');
                         iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') +
-                    ' is fully replicated.');
+                    ' are fully replicated.');
                        // When item is already fully replicated, it should not generate lots anymore but should show an error message IC-1888
                        /* iRely.Msg.showQuestion('The lots for ' + itemNo + ' is fully replicated. Are you sure you want to continue?',
                             function (p) {
