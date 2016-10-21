@@ -4445,6 +4445,8 @@
     <Build Include="dbo\Stored Procedures\uspSMGetStartingNumberSubType.sql" />
     <Build Include="dbo\Views\vyuLGContainerTypeNotMapped.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistory.sql" />
+    <Build Include="dbo\Views\vyuCRMCustomerContact.sql" />
+    <Build Include="dbo\Views\vyuCRMCustomerProspectType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
