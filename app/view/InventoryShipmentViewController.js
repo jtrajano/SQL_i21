@@ -1072,7 +1072,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
 
         else if (combo.itemId === 'cboCustomerStorage') {
-            current.set('intCustomerStorageId', records[0].get('intCustomerStorageId'));
+            current.set('intStorageScheduleTypeId', records[0].get('intStorageTypeId'));
 
         }
     },

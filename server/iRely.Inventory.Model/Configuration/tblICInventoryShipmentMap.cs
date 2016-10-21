@@ -131,7 +131,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intCustomerStorageId).HasColumnName("intCustomerStorageId");
+            this.Property(t => t.intStorageScheduleTypeId).HasColumnName("intStorageScheduleTypeId");
 
             this.HasMany(p => p.tblICInventoryShipmentItemLots)
                 .WithRequired(p => p.tblICInventoryShipmentItem)
