@@ -15,7 +15,7 @@ SELECT TOP 100 PERCENT
 	, IAR.strInvoiceNumber
 	, IAR.strBOLNumber
 	, IAR.dblCreditLimit
-	, ARI.intTermId
+	, intTermId					= Cus.intTermsId
 	, Term.strTerm
 	, IAR.dblTotalAR
 	, CAR.[dblTotalARSum]		
@@ -98,5 +98,6 @@ LEFT JOIN (
 				, strPhone 
 			FROM 
 				tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
-INNER JOIN (SELECT intTermID, strTerm  FROM tblSMTerm) Term ON ARI.intTermId = Term.intTermID
+INNER JOIN (SELECT intTermID, strTerm  FROM tblSMTerm) Term ON Cus.intTermsId = Term.intTermID
+WHERE IAR.intEntityCustomerId = 8
 ORDER BY IAR.intEntityCustomerId, IAR.intInvoiceId DESC
