@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCRMCampaignEntity]
 (
 	[intCampaignEntityId] [int] IDENTITY(1,1) NOT NULL,
-	[intOpportunityCampaignId] [int] NOT NULL,
+	[intCampaignId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
 	[strResponse] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,

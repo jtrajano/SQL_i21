@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCRMCampaignCompetitor]
 (
 	[intCampaignCompetitorId] [int] IDENTITY(1,1) NOT NULL,
-	[intOpportunityCampaignId] [int] NOT NULL,
+	[intCampaignId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCRMCampaignCompetitor_intCampaignCompetitorId] PRIMARY KEY CLUSTERED ([intCampaignCompetitorId] ASC)
