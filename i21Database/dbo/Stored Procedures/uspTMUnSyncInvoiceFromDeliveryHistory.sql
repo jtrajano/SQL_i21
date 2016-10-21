@@ -240,6 +240,8 @@ BEGIN
 					FROM tblTMDeliveryHistoryDetail
 					WHERE intDeliveryHistoryID = @intDeliveryHistoryId		
 				)A
+				WHERE tblTMSite.intSiteID = @intSiteId
+				
 				
 				---- get the invoicedetail Id of the highest percent full
 				SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId 
