@@ -4873,7 +4873,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
 
             if (replicaCount == 0) {
-                iRely.Msg.showQuestion('The lots for ' + currentReceiptItem.get('strItemNo') +
+                iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') +
+                    ' is fully replicated.');
+            // When item is already fully replicated, it should not generate lots anymore but should show an error message IC-1888
+            /*  iRely.Msg.showQuestion('The lots for ' + currentReceiptItem.get('strItemNo') +
                     ' is fully replicated. Are you sure you want to continue?',
                     function (p) {
                         if (p === 'no') {
@@ -4930,6 +4933,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
                         }
                     }, Ext.MessageBox.YESNO, win);
+                */
             }
 
             // Show a progress message box.
@@ -5011,7 +5015,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     if (totalLotQty > lineItemQty) {
                         var itemNo = currentReceiptItem.get('strItemNo');
-                        iRely.Msg.showQuestion('The lots for ' + itemNo + ' is fully replicated. Are you sure you want to continue?',
+                        iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') +
+                    ' is fully replicated.');
+                       // When item is already fully replicated, it should not generate lots anymore but should show an error message IC-1888
+                       /* iRely.Msg.showQuestion('The lots for ' + itemNo + ' is fully replicated. Are you sure you want to continue?',
                             function (p) {
                                 if (p === 'no') {
                                     grdLotTracking.resumeEvents(true);
@@ -5019,7 +5026,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 } else {
                                     currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
                                 }
-                            }, Ext.MessageBox.YESNO, win);
+                            }, Ext.MessageBox.YESNO, win);*/
                     } else {
                         currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
                     }
