@@ -400,11 +400,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 condition: 'noteq',
                                 value: 'Other Charge',
                                 conjunction: 'and'
-                            },
-                            {
-                                column: 'strStatus',
-                                value: 'Active',
-                                conjunction: 'and'
                             }
                         ],
                         store: '{items}'

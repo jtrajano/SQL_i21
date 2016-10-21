@@ -1958,11 +1958,6 @@
                                                                                     "dataIndex: 'strLifeTimeType',",
                                                                                     "dataType: 'string',",
                                                                                     "hidden: true",
-                                                                                    "},",
-                                                                                    "{",
-                                                                                    "dataIndex: 'strStatus',",
-                                                                                    "dataType: 'string',",
-                                                                                    "hidden: true",
                                                                                     "}",
                                                                                     "]"
                                                                                 ],
