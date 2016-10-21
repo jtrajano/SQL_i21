@@ -1,30 +1,6 @@
 ﻿CREATE VIEW vyuLGContainerReceiptView
 AS
-SELECT strContractNumber,
-  intContractSeq ,
-  strEntityName,
-  strItemNo,
-  strDescription,
-  strFutureMonth,
-  dblBasis ,
-  dblFixationPrice,
-  dtmFixationDate,
-  dblFinalPrice,
-  strContainerNumber,
-  strMarks,
-  strIntegrationOrderNumber,
-  strSubLocationDescription,
-  intNoOfContainers,
-  dblReceivedQty,
-  dblReceivedUom,
-  dblNet,
-  dblWeightUom,
-  dtmReceiptDate,
-  strRemarks,
-  strContainerStatus
-  FROM
-  (
- SELECT
+SELECT
   strContractNumber	=	CH.strContractNumber,
   intContractSeq	=	CD.intContractSeq ,
   strEntityName		=	E.strName ,
@@ -32,9 +8,9 @@ SELECT strContractNumber,
   strDescription	=	I.strDescription,
   strFutureMonth	=	MO.strFutureMonth ,
   dblBasis			=	dbo.fnRemoveTrailingZeroes (ROUND(CD.dblBasis,2)) ,
-  dblFixationPrice	=	dbo.fnRemoveTrailingZeroes (ROUND(PfixDt.dblFixationPrice,2)) ,
-  dtmFixationDate	=	PfixDt.dtmFixationDate ,
-  dblFinalPrice		=	dbo.fnRemoveTrailingZeroes (ROUND(PfixDt.dblFinalPrice,2)) ,
+  dblFixationPrice	=	dbo.fnRemoveTrailingZeroes (ROUND(CD.dblFutures,2)) ,
+  dtmFixationDate	=	(SELECT Top(1) PfixDt.dtmFixationDate FROM tblCTPriceFixationDetail PfixDt JOIN tblCTPriceFixation Pfix ON Pfix.intPriceFixationId = PfixDt.intPriceFixationId AND Pfix.intContractDetailId=CD.intContractDetailId),
+  dblFinalPrice		=	dbo.fnRemoveTrailingZeroes (ROUND(CD.dblCashPrice,2)) ,
   strContainerNumber=	Cont.strContainerNumber ,
   strMarks			=	Cont.strMarks ,
   strIntegrationOrderNumber	=	lk.strIntegrationOrderNumber ,
@@ -47,16 +23,15 @@ SELECT strContractNumber,
   dtmReceiptDate			=	Rc.dtmReceiptDate ,
   strRemarks				=	Cont.strComments ,
   strContainerStatus		=	CASE ISNULL(Lot.dblOrderQty, 0) WHEN 0 THEN 'Containers Not Received' ELSE 'Containers  Received' END
-FROM tblCTContractHeader CH
-JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-INNER JOIN tblICItem AS I ON I.intItemId = CD.intItemId
-LEFT JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId
-LEFT JOIN tblCTPriceFixation AS Pfix ON Pfix.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN tblCTPriceFixationDetail AS PfixDt ON PfixDt.intPriceFixationId = Pfix.intPriceFixationId
-LEFT JOIN tblLGLoadDetail ld ON ld.intPContractDetailId = CD.intContractDetailId
-LEFT JOIN tblLGLoadDetailContainerLink lk ON lk.intLoadDetailId = ld.intLoadDetailId
-LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = lk.intLoadContainerId
+FROM tblLGLoadDetailContainerLink lk
+JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = lk.intLoadContainerId
+JOIN tblLGLoadDetail ld ON ld.intLoadDetailId = lk.intLoadDetailId
+JOIN tblCTContractDetail CD ON CD.intContractDetailId = ld.intPContractDetailId
+JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+JOIN tblICItem AS I ON I.intItemId = CD.intItemId
+JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId
 LEFT JOIN tblICInventoryReceiptItem AS Lot ON Lot.intContainerId = Cont.intLoadContainerId
+LEFT JOIN tblICInventoryReceiptItemLot AS Lt ON Lt.intInventoryReceiptItemId = Lot.intInventoryReceiptItemId
 LEFT JOIN tblSMCompanyLocationSubLocation AS SL ON SL.intCompanyLocationSubLocationId = Lot.intSubLocationId
 LEFT JOIN tblICItemUOM AS Lotuom ON Lotuom.intItemId = Lot.intItemId AND Lotuom.intItemUOMId = Lot.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure AS Um ON Um.intUnitMeasureId = Lotuom.intUnitMeasureId
@@ -64,8 +39,3 @@ LEFT JOIN tblICItemUOM AS Lotwuom ON Lotwuom.intItemId = Lot.intItemId AND Lotwu
 LEFT JOIN tblICUnitMeasure AS Wm ON Wm.intUnitMeasureId = Lotwuom.intUnitMeasureId
 LEFT JOIN tblICInventoryReceipt AS Rc ON Rc.intInventoryReceiptId = Lot.intInventoryReceiptId
 LEFT JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId
-LEFT JOIN tblICInventoryReceiptItemLot AS Lt ON Lt.intInventoryReceiptItemId = Lot.intInventoryReceiptItemId
-) rec WHERE dblReceivedQty IS NOT NULL
-group by strContractNumber,intContractSeq ,strEntityName,strItemNo,strDescription,strFutureMonth,
-dblBasis,dblFixationPrice,dtmFixationDate,dblFinalPrice,strContainerNumber,strMarks,strIntegrationOrderNumber,strSubLocationDescription,intNoOfContainers,
-dblReceivedQty,dblReceivedUom,dblNet,dblWeightUom,dtmReceiptDate,strRemarks,strContainerStatus
