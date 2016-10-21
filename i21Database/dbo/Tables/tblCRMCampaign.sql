@@ -12,7 +12,7 @@
 	[dblTotalCost] [numeric](18, 6) NULL,
 	[dblExpectedRevenue] [numeric](18, 6) NULL,
 	[dtmCreateDate] [datetime] NULL,
-	intCampaignStatusId [int] NULL,
+	intStatusId [int] NULL,
 	[ysnHold] [bit] null,
 	[ysnActive] [bit] null,
 	[intEntityId] [int] NULL,
