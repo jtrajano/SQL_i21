@@ -4,7 +4,7 @@ AS
 
 	SELECT	PL.intPickLotDetailId,
 			AD.intPContractDetailId intContractDetailId,
-			LH.[strPickLotNumber],
+			LH.[strPickLotNumber] AS intReferenceNumber,
 			LT.strLotNumber,
 			LT.strMarkings,
 			PL.dblLotPickedQty dblPickedQty
