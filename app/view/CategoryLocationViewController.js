@@ -49,13 +49,7 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
             chkDepartmentKeyTaxed: '{current.ysnDeptKeyTaxed}',
             cboDefaultProductCode: {
                 value: '{current.intProductCodeId}',
-                store: '{product}',
-                defaultFilters: [
-                    {
-                        column: 'intCompanyLocationId',
-                        value: '{current.intLocationId}'
-                    }
-                ]
+                store: '{product}'
             },
             cboDefaultFamily: {
                 value: '{current.intFamilyId}',

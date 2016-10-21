@@ -21,8 +21,7 @@ Ext.define('Inventory.view.CategoryLocationViewModel', {
         'i21.store.CompanyLocationBuffered',
         //'Inventory.store.PaidOut',
         //'Inventory.store.Class',
-        'Store.store.SubCategoryBuffered',
-        'Store.store.SubcategoryRegProdBuffered'
+        'Store.store.SubCategoryBuffered'
     ],
 
     stores: {
@@ -37,10 +36,10 @@ Ext.define('Inventory.view.CategoryLocationViewModel', {
         },
         family: {
             type: 'stsubcategorybuffered'
-        },
-        product: {
-            type: 'stsubcategoryregprodbuffered'
         }
+        //product: {
+        //    type: 'storeproduct'
+        //}
     }
 
 });
