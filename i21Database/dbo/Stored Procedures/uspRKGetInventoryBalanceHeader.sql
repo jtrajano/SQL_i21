@@ -81,8 +81,11 @@ SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum, dtmDate,[Rec
 FROM (
 SELECT dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryBalanceCarryForward,
 		(SELECT SUM(InventoryBalanceCarryForward) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900')) AS [InventoryBalance],
-		[Unpaid In],[Unpaid Out],[Balance]
-
+		(case when isnull([Unpaid In],0)=0 and isnull([Unpaid Out],0)=0 then
+		(SELECT SUM(Balance) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900')) 
+		else [Balance] end) [Balance],
+		[Unpaid In],[Unpaid Out]
+		
  FROM(
 SELECT	dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryBalanceCarryForward,
 		[Unpaid In],[Unpaid Out],[Balance]
