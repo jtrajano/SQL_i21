@@ -82,6 +82,7 @@ BEGIN TRY
 		,@intNextManufacturingCellId INT
 		,@intPreference INT
 		,@intStatusId INT
+		,@intWorkOrderId2 INT
 
 	SELECT @intAllottedNoOfMachine = 0
 		,@intTotalSetupDuration = 0
@@ -164,6 +165,11 @@ BEGIN TRY
 		,ysnPicked
 		,intDemandRatio
 		,intNoOfFlushes
+		,intNoOfOrgUnit
+		,intRequiredDuration
+		,intAvailableDuration
+		,ysnUnableToSchedule
+		,intCalendarDetailId
 		)
 	SELECT intManufacturingCellId
 		,intWorkOrderId
@@ -194,17 +200,29 @@ BEGIN TRY
 		,ysnPicked
 		,intDemandRatio
 		,intNoOfFlushes
+		,intNoOfUnit
+		,0 AS intRequiredDuration
+		,0 AS intAvailableDuration
+		,0 AS ysnUnableToSchedule
+		,0 AS intCalendarDetailId
 	FROM @tblMFWorkOrder
 	ORDER BY intManufacturingCellId
 		,intExecutionOrder
 
 	DECLARE @tblMFPreference TABLE (intPreferenceId INT)
 	DECLARE @intPreferenceId INT
+	DECLARE @tblMFManufacturingCell TABLE (intManufacturingCellId INT)
 
 	IF @ysnScheduleByManufacturingCell = 0
 	BEGIN
 		INSERT INTO @tblMFPreference (intPreferenceId)
-		SELECT 1 --ROW_NUMBER() OVER(ORDER BY intManufacturingCellId)FROM tblMFManufacturingCell WHERE ysnIncludeSchedule =1 AND intLocationId=@intLocationId AND ysnActive =1
+		SELECT ROW_NUMBER() OVER (
+				ORDER BY intManufacturingCellId
+				)
+		FROM tblMFManufacturingCell
+		WHERE ysnIncludeSchedule = 1
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
 	END
 	ELSE
 	BEGIN
@@ -217,8 +235,17 @@ BEGIN TRY
 
 	WHILE @intPreferenceId IS NOT NULL
 	BEGIN
-		SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
-		FROM @tblMFWorkOrder
+		IF @intPreferenceId = 1
+		BEGIN
+			SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
+			FROM @tblMFWorkOrder
+		END
+		ELSE
+		BEGIN
+			SELECT @intManufacturingCellId2 = MIN(W.intManufacturingCellId)
+			FROM @tblMFWorkOrder W
+			JOIN @tblMFManufacturingCell M ON M.intManufacturingCellId = W.intManufacturingCellId
+		END
 
 		WHILE @intManufacturingCellId2 IS NOT NULL
 		BEGIN
@@ -398,10 +425,27 @@ BEGIN TRY
 
 			IF @ysnScheduleByManufacturingCell = 0
 			BEGIN
+				SELECT @intCalendarId = NULL
+
 				SELECT @intCalendarId = intCalendarId
 				FROM tblMFScheduleCalendar
 				WHERE intManufacturingCellId = @intManufacturingCellId2
 					AND ysnStandard = 1
+
+				IF @intPreferenceId > 1
+				BEGIN
+					SELECT @intCalendarDetailId = NULL
+
+					SELECT @intCalendarDetailId = Min(intCalendarDetailId)
+					FROM @tblMFScheduleWorkOrder
+					WHERE intManufacturingCellId = @intManufacturingCellId2
+
+					--AND ysnUnableToSchedule = 1
+					IF @intCalendarDetailId IS NULL
+					BEGIN
+						SELECT @intCalendarDetailId = 0
+					END
+				END
 			END
 
 			DELETE
@@ -432,6 +476,13 @@ BEGIN TRY
 				AND CD.dtmShiftEndTime > @dtmCurrentDateTime
 				AND CD.intDuration > 0
 				AND CD.intNoOfMachine > 0
+				AND CD.intCalendarDetailId >= (
+					CASE 
+						WHEN @intCalendarDetailId > 0
+							THEN @intCalendarDetailId
+						ELSE intCalendarDetailId
+						END
+					)
 
 			SELECT @intCalendarDetailId = MIN(intCalendarDetailId)
 			FROM @tblMFScheduleWorkOrderCalendarDetail
@@ -472,6 +523,7 @@ BEGIN TRY
 						WHERE SD.intWorkOrderId = S.intWorkOrderId
 							AND SD.intCalendarDetailId = @intCalendarDetailId
 						)
+					AND ysnUnableToSchedule = 0
 
 				WHILE @intRecordId IS NOT NULL
 				BEGIN
@@ -502,44 +554,6 @@ BEGIN TRY
 					LEFT JOIN @tblMFScheduleSetupDuration SD ON SW.intWorkOrderId = SD.intWorkOrderId
 					WHERE intRecordId = @intRecordId
 
-					--IF @dtmShiftStartTime > @dtmExpectedDate
-					--	AND NOT EXISTS (
-					--		SELECT *
-					--		FROM @tblMFScheduleWorkOrderDetail
-					--		WHERE intWorkOrderId = @intWorkOrderId
-					--		)
-					--	AND @ysnScheduleByManufacturingCell = 0
-					--	AND @intStatusId = 3
-					--BEGIN
-					--	GOTO PickNextWorkOrderNo
-
-					--	--SELECT @intItemFactoryId = NULL
-					--	--	,@intNextManufacturingCellId = NULL
-					--	--	,@intPreference = NULL
-					--	--SELECT @intItemFactoryId = intItemFactoryId
-					--	--FROM tblICItemFactory
-					--	--WHERE intFactoryId = @intLocationId
-					--	--	AND intItemId = @intItemId
-					--	--SELECT @intPreference = intPreference
-					--	--FROM tblICItemFactoryManufacturingCell
-					--	--WHERE intItemFactoryId = @intItemFactoryId
-					--	--	AND intManufacturingCellId = @intManufacturingCellId2
-					--	--SELECT TOP 1 @intNextManufacturingCellId = intManufacturingCellId
-					--	--FROM tblICItemFactoryManufacturingCell
-					--	--WHERE intItemFactoryId = @intItemFactoryId
-					--	--	AND intPreference > @intPreference
-					--	--ORDER BY intPreference
-					--	--IF @intNextManufacturingCellId IS NOT NULL
-					--	--BEGIN
-					--	--	UPDATE @tblMFFinalWorkOrder
-					--	--	SET intManufacturingCellId = @intNextManufacturingCellId
-					--	--	WHERE intWorkOrderId = @intWorkOrderId
-					--	--	DELETE
-					--	--	FROM @tblMFScheduleWorkOrder
-					--	--	WHERE intRecordId = @intRecordId
-							
-					--	--END
-					--END
 					SELECT @dblStdLineEfficiency = dblLineEfficiencyRate
 					FROM dbo.tblMFManufacturingCellPackType
 					WHERE intManufacturingCellId = @intManufacturingCellId2
@@ -622,6 +636,16 @@ BEGIN TRY
 						SELECT @intRemainingDuration = DateDiff(minute, @dtmEarliestStartDate, @dtmShiftEndTime)
 					END
 
+					IF @intPreferenceId > 1
+					BEGIN
+						SELECT @intAllottedNoOfMachine = Count(*)
+						FROM @tblMFScheduleMachineDetail
+						WHERE intCalendarDetailId = @intCalendarDetailId
+
+						IF @intAllottedNoOfMachine IS NULL
+							SELECT @intAllottedNoOfMachine = 0
+					END
+
 					IF 0 >= @intNoOfMachine - @intAllottedNoOfMachine
 					BEGIN
 						IF EXISTS (
@@ -645,6 +669,7 @@ BEGIN TRY
 
 							UPDATE @tblMFScheduleWorkOrder
 							SET ysnPicked = 1
+								,intPickedWorkOrder = @intWorkOrderId
 							WHERE intWorkOrderId = @intPreviousWorkOrderId
 
 							SELECT @intRemainingDuration = DateDiff(minute, @dtmPlannedStartDate, @dtmShiftEndTime)
@@ -695,6 +720,29 @@ BEGIN TRY
 					SELECT @dblMachineCapacity = @dblMachineCapacity * @dblStdLineEfficiency / 100
 
 					SELECT @intWODuration = @intNoOfUnit / @dblMachineCapacity
+
+					IF @dtmShiftStartTime > @dtmExpectedDate
+						AND NOT EXISTS (
+							SELECT *
+							FROM @tblMFScheduleWorkOrderDetail
+							WHERE intWorkOrderId = @intWorkOrderId
+							)
+						AND @ysnScheduleByManufacturingCell = 0
+						AND @intStatusId = 3
+					BEGIN
+						UPDATE @tblMFScheduleWorkOrder
+						SET ysnUnableToSchedule = 1
+							,intCalendarDetailId = 0
+							,intRequiredDuration = @intWODuration
+							,dtmPlannedStartDate = NULL
+							,intPlannedShiftId = NULL
+							,dtmPlannedEndDate = NULL
+							,intDuration = NULL
+							,strNote = 'Unable to Schedule'
+						WHERE intWorkOrderId = @intWorkOrderId
+
+						GOTO PickNextWorkOrderNo
+					END
 
 					IF NOT EXISTS (
 							SELECT *
@@ -1158,6 +1206,7 @@ BEGIN TRY
 						BEGIN
 							UPDATE @tblMFScheduleWorkOrder
 							SET dtmPlannedEndDate = @dtmShiftEndTime
+								,intCalendarDetailId = 0
 							WHERE intWorkOrderId = @intWorkOrderId
 
 							SELECT @intSequenceNo = @intSequenceNo + 1
@@ -1173,6 +1222,7 @@ BEGIN TRY
 										THEN @intWODuration
 									ELSE intDuration
 									END
+								,intCalendarDetailId = 0
 							WHERE intWorkOrderId = @intWorkOrderId
 
 							SELECT @intSequenceNo = 1
@@ -1244,6 +1294,7 @@ BEGIN TRY
 							WHERE SD.intWorkOrderId = S.intWorkOrderId
 								AND SD.intCalendarDetailId = @intCalendarDetailId
 							)
+						AND ysnUnableToSchedule = 0
 				END
 
 				IF NOT EXISTS (
@@ -1252,6 +1303,7 @@ BEGIN TRY
 						WHERE S.intNoOfUnit > 0
 							AND S.intStatusId <> 1
 							AND intManufacturingCellId = @intManufacturingCellId2
+							AND ysnUnableToSchedule = 0
 						)
 					BREAK
 
@@ -1269,6 +1321,7 @@ BEGIN TRY
 							AND S.intStatusId <> 1
 							AND intWorkOrderId <> @intWorkOrderId
 							AND intManufacturingCellId = @intManufacturingCellId2
+							AND ysnUnableToSchedule = 0
 						)
 					OR @intGapDuetoEarliestStartDate > 0
 				BEGIN
@@ -1290,6 +1343,7 @@ BEGIN TRY
 					WHERE intNoOfUnit > 0
 						AND S.intStatusId <> 1
 						AND intManufacturingCellId = @intManufacturingCellId2
+						AND ysnUnableToSchedule = 0
 					)
 			BEGIN
 				SELECT @intWorkOrderId = intWorkOrderId
@@ -1313,9 +1367,221 @@ BEGIN TRY
 				RETURN
 			END
 
-			SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
-			FROM @tblMFWorkOrder
-			WHERE intManufacturingCellId > @intManufacturingCellId2
+			IF @intPreferenceId = 1
+			BEGIN
+				SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
+				FROM @tblMFScheduleWorkOrder
+				WHERE intManufacturingCellId > @intManufacturingCellId2
+			END
+			ELSE
+			BEGIN
+				SELECT @intManufacturingCellId2 = MIN(W.intManufacturingCellId)
+				FROM @tblMFScheduleWorkOrder W
+				JOIN @tblMFManufacturingCell M ON M.intManufacturingCellId = W.intManufacturingCellId
+				WHERE W.intManufacturingCellId > @intManufacturingCellId2
+			END
+		END
+
+		IF @ysnScheduleByManufacturingCell = 0
+		BEGIN
+			DECLARE @intRequiredDuration INT
+				,@intExecutionOrder INT
+				,@intAllocatedHours INT
+				,@intAvailableDuration INT
+
+			SELECT @intWorkOrderId2 = NULL
+
+			DECLARE @tblMFAllocatedCalendar TABLE (
+				intManufacturingCellId INT
+				,dtmExpectedDate DATETIME
+				,intAllocatedHours INT
+				)
+
+			SELECT @intWorkOrderId2 = MIN(intWorkOrderId)
+			FROM @tblMFScheduleWorkOrder
+			WHERE ysnUnableToSchedule = 1
+
+			IF @intWorkOrderId2 IS NULL
+			BEGIN
+				BREAK
+			END
+
+			WHILE @intWorkOrderId2 IS NOT NULL
+			BEGIN
+				SELECT @intManufacturingCellId2 = NULL
+					,@intRequiredDuration = NULL
+					,@dtmExpectedDate = NULL
+					,@intItemId = NULL
+					,@intItemFactoryId = NULL
+					,@intNextManufacturingCellId = NULL
+					,@intPreference = NULL
+					,@intExecutionOrder = NULL
+
+				SELECT @intManufacturingCellId2 = intManufacturingCellId
+					,@intItemId = intItemId
+					,@dtmExpectedDate = dtmExpectedDate
+					,@intRequiredDuration = intRequiredDuration
+				FROM @tblMFScheduleWorkOrder
+				WHERE intWorkOrderId = @intWorkOrderId2
+					AND ysnUnableToSchedule = 1
+
+				SELECT @intItemFactoryId = intItemFactoryId
+				FROM tblICItemFactory
+				WHERE intFactoryId = @intLocationId
+					AND intItemId = @intItemId
+
+				SELECT @intPreference = intPreference
+				FROM tblICItemFactoryManufacturingCell
+				WHERE intItemFactoryId = @intItemFactoryId
+					AND intManufacturingCellId = @intManufacturingCellId2
+
+				SELECT TOP 1 @intNextManufacturingCellId = intManufacturingCellId
+				FROM tblICItemFactoryManufacturingCell
+				WHERE intItemFactoryId = @intItemFactoryId
+					AND intPreference > @intPreference
+				ORDER BY intPreference
+
+				IF @intNextManufacturingCellId IS NOT NULL
+				BEGIN
+					SELECT @dtmPlannedStartDate = MAX(dtmPlannedStartDate)
+						,@intExecutionOrder = MAX(intExecutionOrder)
+					FROM @tblMFScheduleWorkOrder
+					WHERE intManufacturingCellId = @intNextManufacturingCellId
+						AND dtmExpectedDate = @dtmExpectedDate
+
+					IF @dtmPlannedStartDate IS NULL
+					BEGIN
+						SELECT @dtmPlannedStartDate = MIN(dtmPlannedStartDate)
+							,@intExecutionOrder = MIN(intExecutionOrder)
+							,@dtmExpectedDate = MIN(dtmExpectedDate)
+						FROM @tblMFScheduleWorkOrder
+						WHERE intManufacturingCellId = @intNextManufacturingCellId
+							AND dtmExpectedDate >= @dtmExpectedDate
+					END
+
+					SELECT @intAllocatedHours = intAllocatedHours
+					FROM @tblMFAllocatedCalendar
+					WHERE intManufacturingCellId = @intNextManufacturingCellId
+						AND dtmExpectedDate = @dtmExpectedDate
+
+					IF @intAllocatedHours IS NULL
+						SELECT @intAllocatedHours = 0
+
+					SELECT @intAvailableDuration = 0
+
+					SELECT @intCalendarDetailId = NULL
+
+					SELECT @intAvailableDuration = SUM(intDuration)
+						,@intCalendarDetailId = MIN(intCalendarDetailId)
+					FROM tblMFScheduleCalendar SC
+					JOIN tblMFScheduleCalendarDetail SCD ON SC.intCalendarId = SCD.intCalendarId
+					WHERE intManufacturingCellId = @intNextManufacturingCellId
+						AND dtmCalendarDate BETWEEN @dtmPlannedStartDate
+							AND @dtmExpectedDate
+
+					IF @intAvailableDuration IS NULL
+						SELECT @intAvailableDuration = 0
+
+					IF @intAvailableDuration - @intAllocatedHours > @intRequiredDuration
+					BEGIN
+						DELETE
+						FROM @tblMFScheduleWorkOrderDetail
+						WHERE intWorkOrderId IN (
+								SELECT intWorkOrderId
+								FROM @tblMFScheduleWorkOrder
+								WHERE intManufacturingCellId = @intNextManufacturingCellId
+									AND intExecutionOrder >= @intExecutionOrder
+									AND intStatusId = 3
+								)
+
+						DELETE
+						FROM @tblMFScheduleMachineDetail
+						WHERE intWorkOrderId IN (
+								SELECT intWorkOrderId
+								FROM @tblMFScheduleWorkOrder
+								WHERE intManufacturingCellId = @intNextManufacturingCellId
+									AND intExecutionOrder >= @intExecutionOrder
+									AND intStatusId = 3
+								)
+
+						DELETE
+						FROM @tblMFScheduleConstraintDetail
+						WHERE intWorkOrderId IN (
+								SELECT intWorkOrderId
+								FROM @tblMFScheduleWorkOrder
+								WHERE intManufacturingCellId = @intNextManufacturingCellId
+									AND intExecutionOrder >= @intExecutionOrder
+									AND intStatusId = 3
+								)
+
+						UPDATE @tblMFScheduleWorkOrder
+						SET ysnPicked = 0
+							,intPickedWorkOrder = NULL
+						WHERE intPickedWorkOrder IN (
+								SELECT intWorkOrderId
+								FROM @tblMFScheduleWorkOrder
+								WHERE intManufacturingCellId = @intNextManufacturingCellId
+									AND intExecutionOrder >= @intExecutionOrder
+									AND intStatusId = 3
+								)
+
+						UPDATE @tblMFScheduleWorkOrder
+						SET intExecutionOrder = intExecutionOrder + 1
+							,intNoOfUnit = intNoOfOrgUnit
+						WHERE intManufacturingCellId = @intNextManufacturingCellId
+							AND intExecutionOrder >= @intExecutionOrder
+							AND intStatusId = 3
+
+						UPDATE @tblMFScheduleWorkOrder
+						SET intManufacturingCellId = @intNextManufacturingCellId
+							,ysnUnableToSchedule = 0
+							,intRequiredDuration = 0
+							,intExecutionOrder = @intExecutionOrder
+							,intCalendarDetailId = @intCalendarDetailId
+							,strNote=''
+						WHERE intWorkOrderId = @intWorkOrderId2
+
+						IF NOT EXISTS (
+								SELECT *
+								FROM @tblMFManufacturingCell
+								WHERE intManufacturingCellId = @intNextManufacturingCellId
+								)
+						BEGIN
+							INSERT INTO @tblMFManufacturingCell
+							SELECT @intNextManufacturingCellId
+						END
+
+						IF NOT EXISTS (
+								SELECT *
+								FROM @tblMFAllocatedCalendar
+								WHERE intManufacturingCellId = @intNextManufacturingCellId
+									AND dtmExpectedDate = @dtmExpectedDate
+								)
+						BEGIN
+							INSERT INTO @tblMFAllocatedCalendar (
+								intManufacturingCellId
+								,dtmExpectedDate
+								,intAllocatedHours
+								)
+							SELECT @intNextManufacturingCellId
+								,@dtmExpectedDate
+								,@intRequiredDuration
+						END
+						ELSE
+						BEGIN
+							UPDATE @tblMFAllocatedCalendar
+							SET intAllocatedHours = intAllocatedHours + @intRequiredDuration
+							WHERE intManufacturingCellId = @intNextManufacturingCellId
+								AND dtmExpectedDate = @dtmExpectedDate
+						END
+					END
+				END
+
+				SELECT @intWorkOrderId2 = MIN(intWorkOrderId)
+				FROM @tblMFScheduleWorkOrder
+				WHERE intWorkOrderId > @intWorkOrderId2
+					AND ysnUnableToSchedule = 1
+			END
 		END
 
 		SELECT @intPreferenceId = MIN(intPreferenceId)
@@ -1613,14 +1879,6 @@ BEGIN TRY
 		FROM @tblMFScheduleConstraint
 			,dbo.tblMFSchedule S
 		WHERE S.ysnStandard = 1
-			--DELETE
-			--FROM @tblMFScheduleWorkOrder
-			--DELETE
-			--FROM @tblMFScheduleWorkOrderDetail
-			--DELETE
-			--FROM @tblMFScheduleMachineDetail
-			--DELETE
-			--FROM @tblMFScheduleConstraintDetail
 	END
 
 	IF @ysnScheduleByManufacturingCell = 0
