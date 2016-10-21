@@ -1,5 +1,6 @@
 var Harness = new Siesta.Harness.Browser.ExtJS (),
     testEnginePath = '../../TestEngine/TestEngine.js',
+    functionalTest = '../../TestEngine/FunctionalTest.js',
     commonSM =  '../../i21/test-ui/CommonSM.js';
 //  commonIC =  'CommonIC.js';
 
@@ -29,6 +30,7 @@ Harness.start(
                 url: 'SmokeTesting/ICSmokeTests.js',
                 preload: [
                     testEnginePath,
+                    functionalTest,
                     commonSM,
                     'CommonIC.js'
 
@@ -39,6 +41,7 @@ Harness.start(
                 url: 'SmokeTesting/ICOpenScreens.js',
                 preload: [
                     testEnginePath,
+                    functionalTest,
                     commonSM,
                     'CommonIC.js'
 
@@ -50,6 +53,7 @@ Harness.start(
                 url: 'SmokeTesting/ICAddMaintenance.js',
                 preload: [
                     testEnginePath,
+                    functionalTest,
                     commonSM,
                     'CommonIC.js'
 
@@ -60,6 +64,7 @@ Harness.start(
                 url: 'SmokeTesting/ICAddTransactions.js',
                 preload: [
                     testEnginePath,
+                    functionalTest,
                     commonSM,
                     'CommonIC.js'
 
@@ -72,9 +77,10 @@ Harness.start(
     { group: 'InventoryReceipt',
         items: [
             {
-                url: 'InventoryReceipt/ICAddTransactions.js',  // url of the js file, containing actual test code
+                url: 'InventoryReceipt/AddInventoryReceiptDirect.js',  // url of the js file, containing actual test code
                 preload: [
                     testEnginePath,
+                    functionalTest,
                     commonSM,
                     'CommonIC.js'
                 ]
@@ -83,49 +89,9 @@ Harness.start(
                 url: 'InventoryReceipt/DeleteInventoryReceipt.js',  // url of the js file, containing actual test code
                 preload: [
                     testEnginePath,
+                    functionalTest,
                     commonSM,
                     'CommonIC.js'
-                ]
-            }
-        ]
-    },
-
-    { group: 'Item',
-        items: [
-            {
-                url: 'Item/AddItem_InventoryType.js',
-                preload: [
-                    testEnginePath,
-                    commonSM
-
-                ]
-            },
-            {
-                url: 'Item/AddItem_RawMaterialType.js',
-                preload: [
-                    testEnginePath,
-                    commonSM
-                ]
-            },
-            {
-                url: 'Item/AddItem_FinishedGoodType.js',
-                preload: [
-                    testEnginePath,
-                    commonSM
-                ]
-            },
-            {
-                url: 'Item/AddItem_SoftwareType.js',
-                preload: [
-                    testEnginePath,
-                    commonSM
-                ]
-            },
-            {
-                url: 'Item/DeleteItem.js',
-                preload: [
-                    testEnginePath,
-                    commonSM
                 ]
             }
         ]

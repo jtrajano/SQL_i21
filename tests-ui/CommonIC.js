@@ -173,9 +173,7 @@ Ext.define('i21.test.Inventory.CommonIC', {
             .displayText('Setup Item Pricing Successful').wait(500)
             .clickButton('#btnClose').wait(300)
             .markSuccess('Crate Other Carge Discount Item Successful')
-            .done();
+
         }
-
-
 
 });

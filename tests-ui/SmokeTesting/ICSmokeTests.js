@@ -2,7 +2,7 @@ StartTest(function (t) {
 
     var engine = new iRely.TestEngine(),
         commonSM = Ext.create('SystemManager.CommonSM');
-        //commonIC = Ext.create('Inventory.CommonIC');
+
 
     engine.start(t)
 
@@ -17,6 +17,8 @@ StartTest(function (t) {
         .displayText('"======== Scenario 1: Opening Inventory Screens. ========"').wait(300)
         .expandMenu('Inventory').wait(300)
         .markSuccess('Inventory successfully expanded').wait(300)
+
+       
          //Inventory Receipt Screen
         .displayText('"======== 1. Open Inventory Receipt Search Screen Check All Fields ========"').wait(300)
         .openScreen('Inventory Receipts').wait(300)
@@ -83,6 +85,15 @@ StartTest(function (t) {
                 ,'#btnEmailUrl'
             ], true).wait(200)
         .checkStatusMessage('Ready')
+        .selectComboRowByIndex('#cboReceiptType',3).wait(200)
+        .selectComboRowByFilter('#cboVendor', 'ABC Trucking', 500, 'strName', 0).wait(200)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'CORN', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
+        .enterGridData('#grdInventoryReceipt', 0, 'colQtyToReceive', '1000').wait(500)
+        .clickButton('#btnRecap').wait(200)
+        .waitTillVisible('cmcmrecaptransaction','').wait(500)
+        .waitTillLoaded('').wait(500)
+        .clickButton('#btnClose').wait(200)
         .markSuccess('======== Click New, Check Inventory Receipt Screen Fields Successful. ========').wait(200)
 
         .displayText('Open Inventory Receipt Screen Tabs').wait(300)
@@ -127,7 +138,7 @@ StartTest(function (t) {
                 ,'#txtActualTempReading'
             ], true).wait(200)
         .clickTab('#cfgComments').wait(300)
-        .waitTillLoaded('').wait(200)
+        .waitTillLoaded('').wait(1000)
         .checkControlVisible(
             [
                 '#btnOpenActivity'
@@ -159,9 +170,6 @@ StartTest(function (t) {
                 ,'#txtFilterGrid'
             ], true).wait(200)
         .clickButton('#btnClose').wait(300)
-        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question').wait(200)
-        .clickMessageBoxButton('no').wait(300)
-        .checkIfScreenClosed('icinventoryreceipt').wait(100)
         .markSuccess('======== Open Inventory Receipt Screen Tabs Successful ========').wait(200)
 
 
@@ -292,7 +300,7 @@ StartTest(function (t) {
 
 
         //Inventory Transfers Screen
-                .displayText('"======== 5. Open Inventory Transfers Search Screen Check All Fields. ========"').wait(200)
+        .displayText('"======== 5. Open Inventory Transfers Search Screen Check All Fields. ========"').wait(200)
         .openScreen('Inventory Transfers').wait(300)
         .waitTillLoaded('Open Inventory Transfer Search Screen Successful').wait(200)
         .checkSearchToolbarButton(
@@ -1482,9 +1490,9 @@ StartTest(function (t) {
         .checkScreenShown('icitem').wait(200)
         .checkStatusMessage('Ready')
 
-        .enterData('#txtItemNo', 'NLTI - 02').wait(200)
+        .enterData('#txtItemNo', 'NLTI - 05').wait(200)
         //.selectComboRowByIndex('#cboType',0).wait(200)
-        .enterData('#txtDescription', 'NLTI - 02').wait(200)
+        .enterData('#txtDescription', 'NLTI - 05').wait(200)
         .selectComboRowByFilter('#cboCategory', 'Grains', 500, 'cboCategory',0).wait(500)
         .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode',0).wait(500)
         .selectComboRowByIndex('#cboLotTracking', 2).wait(500)
@@ -1557,9 +1565,9 @@ StartTest(function (t) {
         .checkScreenShown('icitem').wait(200)
         .checkStatusMessage('Ready')
 
-        .enterData('#txtItemNo', 'LTI - 01').wait(200)
+        .enterData('#txtItemNo', 'LTI - 04').wait(200)
         //.selectComboRowByIndex('#cboType',0).wait(200)
-        .enterData('#txtDescription', 'LTI - 01').wait(200)
+        .enterData('#txtDescription', 'LTI - 04').wait(200)
         .selectComboRowByFilter('#cboCategory', 'Grains', 500, 'cboCategory',0).wait(500)
         .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode',0).wait(500)
         .selectComboRowByIndex('#cboLotTracking', 0).wait(500)
@@ -1629,30 +1637,14 @@ StartTest(function (t) {
         .markSuccess('======== Add Item Scenarios Done and Successful! ========')
 
 
-        //#Scenario 2: Add Commodity
+        //#Scenario 2: Add Commodity with UOM
         .displayText('====== Scenario 2. Add Cmmodity ======').wait(300)
         .openScreen('Commodities').wait(500)
         .waitTillLoaded('Open Commodity  Search Screen Successful').wait(200)
-        .displayText('====== Scenario 2.1. Add Commodity with no UOM Setup ======').wait(300)
         .clickButton('#btnNew').wait(300)
         .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
         .enterData('#txtCommodityCode','Test Commodity 1').wait(100)
         .enterData('#txtDescription','Test Commodity 1').wait(100)
-        .clickCheckBox('#chkExchangeTraded',true).wait(100)
-        .enterData('#txtDecimalsOnDpr','6.00').wait(100)
-        .enterData('#txtConsolidateFactor','6.00').wait(100)
-        .clickButton('#btnSave').wait(100)
-        .checkStatusMessage('Saved').wait(100)
-        .markSuccess('Add Commodity with no UOM Setup and Attributes Successful')
-        .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('iccommodity').wait(300)
-
-        //#2.1 Add Commodity with UOM
-        .displayText('====== Scenario 2.1 Add Commodity with UOM Setup ======').wait(300)
-        .clickButton('#btnNew').wait(300)
-        .waitTillVisible('iccommodity','Open Commodity Screen Successful').wait(300)
-        .enterData('#txtCommodityCode','Test Commodity 2').wait(100)
-        .enterData('#txtDescription','Test Commodity 2').wait(100)
         .clickCheckBox('#chkExchangeTraded',true).wait(100)
         .enterData('#txtDecimalsOnDpr','6.00').wait(100)
         .enterData('#txtConsolidateFactor','6.00').wait(100)
@@ -1897,7 +1889,7 @@ StartTest(function (t) {
         .selectComboRowByFilter('#cboVendor', 'ABC Trucking', 500, 'strName', 0).wait(200)
         //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
         .selectComboRowByIndex('#cboLocation',0).wait(300)
-        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'NLTI - 02', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'NLTI - 05', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
         .enterGridData('#grdInventoryReceipt', 0, 'colQtyToReceive', '1000').wait(500)
         .checkGridData('#grdInventoryReceipt', 0, 'colItemSubCurrency', 'USD').wait(300)
@@ -1947,7 +1939,8 @@ StartTest(function (t) {
 
         .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
         .clickButton('#btnRecap').wait(300)
-        .waitTillLoaded('Open Recap Screen Successful')
+        .waitTillVisible('cmcmrecaptransaction','').wait(500)
+        .waitTillLoaded('').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapDebit', '10000').wait(500)
         .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '21000-0001-000').wait(500)
@@ -1977,7 +1970,7 @@ StartTest(function (t) {
         .selectComboRowByFilter('#cboVendor', 'ABC Trucking', 500, 'strName', 0).wait(200)
         //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
         .selectComboRowByIndex('#cboLocation',0).wait(300)
-        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'LTI - 04', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
         .enterGridData('#grdInventoryReceipt', 0, 'colQtyToReceive', '1000').wait(500)
         .checkGridData('#grdInventoryReceipt', 0, 'colItemSubCurrency', 'USD').wait(300)
@@ -2039,7 +2032,8 @@ StartTest(function (t) {
 
         .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
         .clickButton('#btnRecap').wait(300)
-        .waitTillLoaded('Open Recap Screen Successful')
+        .waitTillVisible('cmcmrecaptransaction','').wait(500)
+        .waitTillLoaded('').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapDebit', '10000').wait(500)
         .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '21000-0001-000').wait(500)
@@ -2072,7 +2066,7 @@ StartTest(function (t) {
         .selectComboRowByIndex('#cboShipFromAddress',0).wait(300)
         .selectComboRowByIndex('#cboShipToAddress',0).wait(300)
 
-        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'NLTI - 02', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'NLTI - 05', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
         .enterGridData('#grdInventoryShipment', 0, 'colQuantity', '100').wait(500)
         .enterGridData('#grdInventoryShipment', 0, 'colUnitPrice', '15').wait(500)
@@ -2082,7 +2076,8 @@ StartTest(function (t) {
 
         .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
         .clickButton('#btnRecap').wait(300)
-        .waitTillLoaded('Open Recap Screen Successful')
+        .waitTillVisible('cmcmrecaptransaction','').wait(500)
+        .waitTillLoaded('').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapCredit', '1000').wait(500)
         .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '16050-0001-000').wait(500)
@@ -2114,7 +2109,7 @@ StartTest(function (t) {
         .selectComboRowByIndex('#cboShipFromAddress',0).wait(300)
         .selectComboRowByIndex('#cboShipToAddress',0).wait(300)
 
-        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'LTI - 04', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
         .enterGridData('#grdInventoryShipment', 0, 'colQuantity', '100').wait(500)
         .enterGridData('#grdInventoryShipment', 0, 'colUnitPrice', '15').wait(500)
@@ -2132,7 +2127,8 @@ StartTest(function (t) {
 
         .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
         .clickButton('#btnRecap').wait(300)
-        .waitTillLoaded('Open Recap Screen Successful')
+       .waitTillVisible('cmcmrecaptransaction','').wait(500)
+        .waitTillLoaded('').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapCredit', '1000').wait(500)
         .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '16050-0001-000').wait(500)
@@ -2160,15 +2156,15 @@ StartTest(function (t) {
         .selectComboRowByFilter('#cboFromLocation', '0001 - Fort Wayne', 500, 'intFromLocationId', 0).wait(200)
         .selectComboRowByFilter('#cboToLocation', '0001 - Fort Wayne', 500, 'intToLocationId', 0).wait(200)
 
-        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strItemNo', 'LTI - 04', 300, 'strItemNo').wait(500)
         .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strFromSubLocationName', 'Raw Station', 300, 'strFromSubLocationName').wait(500)
         .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strFromStorageLocationName', 'RM Storage', 300, 'strFromStorageLocationName').wait(500)
         .checkGridData('#grdInventoryTransfer', 0, 'colOwnershipType', 'Own').wait(300)
         .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strLotNumber', 'LOT-01', 300, 'strLotNumber').wait(500)
         .checkGridData('#grdInventoryTransfer', 0, 'colAvailableUOM', 'Bushels').wait(300)
         .enterGridData('#grdInventoryTransfer', 0, 'colTransferQty', '100').wait(500)
-        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strToSubLocationName', 'FG Station', 300, 'strToSubLocationName').wait(500)
-        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strToStorageLocationName', 'FG Storage', 300, 'strToStorageLocationName').wait(500)
+        //.selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strToSubLocationName', 'FG Station', 300, 'strToSubLocationName').wait(500)
+        //.selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strToStorageLocationName', 'FG Storage', 300, 'strToStorageLocationName').wait(500)
 
         .displayText('======== #3. Post Inventory Transfer ========')
         .clickButton('#btnPost').wait(500)
@@ -2188,7 +2184,7 @@ StartTest(function (t) {
         .displayText('"======== #2 Quantity Change ========"').wait(500)
         .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
         .selectComboRowByIndex('#cboAdjustmentType',0).wait(300)
-        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 04', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strSubLocation', 'Raw Station', 300, 'strSubLocation').wait(500)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strStorageLocation', 'RM Storage', 300, 'strStorageLocation').wait(500)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strLotNumber', 'LOT-01', 300, 'strLotNumber').wait(500)
@@ -2200,7 +2196,8 @@ StartTest(function (t) {
 
         .displayText('======== #3. Open Recap Screen and Check Account IDs and Totlas ========')
         .clickButton('#btnRecap').wait(300)
-        .waitTillLoaded('Open Recap Screen Successful')
+        .waitTillVisible('cmcmrecaptransaction','').wait(500)
+        .waitTillLoaded('').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapDebit', '2000').wait(500)
         .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '16040-0001-000').wait(500)
@@ -2220,7 +2217,7 @@ StartTest(function (t) {
         .displayText('"======== #4.2 Lot Move ========"').wait(500)
         .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
         .selectComboRowByIndex('#cboAdjustmentType',7).wait(300)
-        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 01', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 04', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strSubLocation', 'Raw Station', 300, 'strSubLocation').wait(500)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strStorageLocation', 'RM Storage', 300, 'strStorageLocation').wait(500)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strLotNumber', 'LOT-01', 300, 'strLotNumber').wait(500)
@@ -2235,7 +2232,8 @@ StartTest(function (t) {
 
         .displayText('======== #6 Open Recap Screen and Check Account IDs and Totlas ========')
         .clickButton('#btnRecap').wait(300)
-        .waitTillLoaded('Open Recap Screen Successful')
+        .waitTillVisible('cmcmrecaptransaction','').wait(500)
+        .waitTillLoaded('').wait(500)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapAccountId', '16000-0001-000').wait(300)
         .checkGridData('#grdRecapTransaction', 0, 'colRecapCredit', '2000').wait(300)
         .checkGridData('#grdRecapTransaction', 1, 'colRecapAccountId', '16000-0001-000').wait(300)
@@ -2312,8 +2310,7 @@ StartTest(function (t) {
         .displayText('======== #2. Enter/Select Storage Measurement Reading Details and Check Fields========')
         .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
         .selectGridComboRowByFilter('#grdStorageMeasurementReading', 0, 'strCommodity', 'Corn', 300, 'strCommodity').wait(500)
-        //.selectGridComboRowByFilter('#grdStorageMeasurementReading', 0, 'strItemNo', 'LTI-01', 500, 'strItemNo').wait(1000)
-        .selectGridComboRowByIndex('#grdStorageMeasurementReading', 0, 'strItemNo','0', 'strItemNo').wait(100)
+        .selectGridComboRowByFilter('#grdStorageMeasurementReading', 0, 'strItemNo', 'CORN', 500, 'strItemNo').wait(500)       
         .selectGridComboRowByFilter('#grdStorageMeasurementReading', 0, 'strStorageLocationName', 'RM Storage', 300, 'strStorageLocationName').wait(500)
         .checkGridData('#grdStorageMeasurementReading', 0, 'colSubLocation', 'Raw Station').wait(200)
         .enterGridData('#grdStorageMeasurementReading', 0, 'colAirSpaceReading', '100').wait(500)
@@ -2327,6 +2324,8 @@ StartTest(function (t) {
         .clickButton('#btnClose').wait(200)
         .waitTillLoaded('')
         .markSuccess('======== Create Storage Measurement Reading Successful! ========')
+
+
 
 
         .done();
