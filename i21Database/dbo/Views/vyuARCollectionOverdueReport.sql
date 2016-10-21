@@ -99,5 +99,4 @@ LEFT JOIN (
 			FROM 
 				tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
 INNER JOIN (SELECT intTermID, strTerm  FROM tblSMTerm) Term ON Cus.intTermsId = Term.intTermID
-WHERE IAR.intEntityCustomerId = 8
 ORDER BY IAR.intEntityCustomerId, IAR.intInvoiceId DESC
