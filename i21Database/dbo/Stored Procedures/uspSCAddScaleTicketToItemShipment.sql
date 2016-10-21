@@ -98,6 +98,7 @@ BEGIN
 		,intWeightUOMId
 		,intSubLocationId
 		,intStorageLocationId
+		,intStorageScheduleTypeId
 		,intItemUOMId
 		,intItemLotGroup
 		
@@ -130,6 +131,7 @@ BEGIN
 		,intWeightUOMId				= SC.intItemUOMIdFrom
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
+		,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId
 		,intItemUOMId				= LI.intItemUOMId
 		,intItemLotGroup			= LI.intItemId
 		
