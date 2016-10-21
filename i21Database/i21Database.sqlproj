@@ -4452,6 +4452,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetGrainInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyOwnership.sql" />
+    <Build Include="dbo\Views\vyuCRMSalesPerson.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
