@@ -1136,18 +1136,18 @@ UPDATE tblSMMasterMenu SET intSort = 6 WHERE strMenuName = 'Cash Management' AND
 DECLARE @CashManagementParentMenuId INT
 SELECT @CashManagementParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Cash Management' AND strModuleName = 'Cash Management' AND intParentMenuID = 0
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId)
-    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-    VALUES (N'Reports', N'Cash Management', @CashManagementParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, NULL, 1)
-ELSE
-    UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = NULL WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId)
+--    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--    VALUES (N'Reports', N'Cash Management', @CashManagementParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, NULL, 1)
+--ELSE
+--    UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = NULL WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
 
-DECLARE @CashManagementReportParentMenuId INT
-SELECT @CashManagementReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+--DECLARE @CashManagementReportParentMenuId INT
+--SELECT @CashManagementReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
 
-/* Start of moving reports */
-UPDATE tblSMMasterMenu SET intParentMenuID = @CashManagementReportParentMenuId WHERE strMenuName = 'Check Register' AND strModuleName = 'Cash Management' AND strType = 'Report' AND intParentMenuID = @CashManagementParentMenuId
-/* End of moving reports */
+--/* Start of moving reports */
+--UPDATE tblSMMasterMenu SET intParentMenuID = @CashManagementReportParentMenuId WHERE strMenuName = 'Check Register' AND strModuleName = 'Cash Management' AND strType = 'Report' AND intParentMenuID = @CashManagementParentMenuId
+--/* End of moving reports */
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Bank Deposits' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CashManagement.view.BankDeposit' WHERE strMenuName = N'Bank Deposits' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
@@ -1192,13 +1192,15 @@ UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CashManagement.view.BankA
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Bank File Formats' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'CashManagement.view.BankFileFormat' WHERE strMenuName = N'Bank File Formats' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Check Register' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId)
-INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-VALUES (N'Check Register', N'Cash Management', @CashManagementReportParentMenuId, N'Check Register', N'Report', N'Report', N'Check Register', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Check Register' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId)
+--INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--VALUES (N'Check Register', N'Cash Management', @CashManagementReportParentMenuId, N'Check Register', N'Report', N'Report', N'Check Register', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Positive Pay Export' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Export' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Check Register' AND strModuleName = 'Cash Management'
 /* END OF DELETING */
 
 /* ACCOUNTS PAYABLE */
