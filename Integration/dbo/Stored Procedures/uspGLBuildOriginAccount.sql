@@ -205,14 +205,15 @@ BEGIN
 			   strAccountGroup,
 			   intAccountGroupId,
 			   strAccountSegmentId,	   
-			   intAccountUnitId = (SELECT TOP 1 intAccountUnitId FROM tblGLAccountUnit WHERE strUOMCode = (SELECT TOP 1 gluom_code COLLATE Latin1_General_CI_AS FROM gluommst WHERE gluom_code COLLATE Latin1_General_CI_AS = glact_uom)), -- WHERE A4GLIdentity = CAST(glactmst.glact_uom AS INT))), 
+			   intAccountUnitId = U.intAccountUnitId,
 			   ysnSystem = (CASE WHEN glact_sys_acct_yn = ''N'' THEN 0 ELSE 1 END), -- glact_sys_acct_yn
 			   ysnActive = (CASE WHEN glact_active_yn = ''N'' THEN 0 ELSE 1 END), -- glact_active_yn   
 			   @intUserId AS intUserId,	   
 			   getDate() AS dtmCreated
 		FROM #ConstructAccount
-		INNER JOIN tblGLOriginAccounts ON (CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)) + ''-'' + CAST(CAST(strSegment AS INT) AS NVARCHAR(50))) = 
+		INNER JOIN tblGLOriginAccounts O ON (CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)) + ''-'' + CAST(CAST(strSegment AS INT) AS NVARCHAR(50))) = 
 		(CAST(CAST(glact_acct1_8_new AS INT) AS NVARCHAR(50)) + ''-'' + CAST(CAST(glact_acct9_16 AS INT) AS NVARCHAR(50)))
+		LEFT JOIN tblGLAccountUnit U ON O.glact_uom = U.strUOMCode
 		WHERE strCode NOT IN (SELECT strAccountId FROM tblGLAccount)
 		ORDER BY strCode		
 		
