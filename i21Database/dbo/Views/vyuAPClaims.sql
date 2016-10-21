@@ -56,8 +56,8 @@ FROM (
             LGC.dblNetWt AS dblNetShippedWeight
 			,Receipts.dblNetQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
-			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
-					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty / B.dblCostUnitQty) ELSE B.dblCost END AS dblCost
+			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / ISNULL(NULLIF(B.dblCostUnitQty, 0),1))
+					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty /  ISNULL(NULLIF(B.dblCostUnitQty, 0),1)) ELSE B.dblCost END AS dblCost
 			,B.dblCost AS dblBillCost
 			,B.dblQtyReceived
 			,B.dblQtyOrdered AS dblQtyBillCreated
