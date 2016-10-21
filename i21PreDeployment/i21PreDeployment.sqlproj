@@ -273,4 +273,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\5_InvoiceCurrencyCleanUp.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\Rename_IC_Database_Objects.sql" />
+  </ItemGroup>
 </Project>

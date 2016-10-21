@@ -34,36 +34,168 @@ DECLARE
 
 -- Insert Raw Data
 -- 1. Shipment Header and Items
-INSERT INTO @ShipmentEntries(intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId,
-	intFreightTermId, strSourceScreenName, strReferenceNumber, dtmRequestedArrivalDate, intShipToCompanyLocationId, strBOLNumber,
-	intShipViaId, strVessel, strProNumber, strDriverId, strSealNumber, strDeliveryInstruction, dtmAppointmentTime,
-	dtmDepartureTime, dtmArrivalTime, dtmDeliveredDate, dtmFreeTime, strReceivedBy, strComment, intItemId, intOwnershipType,
-	dblQuantity, intItemUOMId, intItemLotGroup, intOrderId, intSourceId, intLineNo, intSubLocationId, intStorageLocationId,
-	intCurrencyId, intWeightUOMId, dblUnitPrice, intDockDoorId, strNotes, intGradeId, intDiscountSchedule)
-SELECT intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId,
-	intFreightTermId, strSourceScreenName, strReferenceNumber, dtmRequestedArrivalDate, 
-	intShipToCompanyLocationId, -- Sets to Default Company Location
-	ISNULL(strBOLNumber, ''),
-	intShipViaId, strVessel, strProNumber, strDriverId, strSealNumber, strDeliveryInstruction, dtmAppointmentTime,
-	dtmDepartureTime, dtmArrivalTime, dtmDeliveredDate, dtmFreeTime, strReceivedBy, strComment, intItemId, intOwnershipType,
-	dblQuantity, intItemUOMId, intItemLotGroup, intOrderId, intSourceId, intLineNo, intSubLocationId, intStorageLocationId,
-	intCurrencyId, intWeightUOMId, dblUnitPrice, intDockDoorId, strNotes, intGradeId, intDiscountSchedule
+INSERT INTO @ShipmentEntries(
+		intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, strSourceScreenName
+		, strReferenceNumber
+		, dtmRequestedArrivalDate
+		, intShipToCompanyLocationId
+		, strBOLNumber
+		, intShipViaId
+		, strVessel
+		, strProNumber
+		, strDriverId
+		, strSealNumber
+		, strDeliveryInstruction
+		, dtmAppointmentTime
+		, dtmDepartureTime
+		, dtmArrivalTime
+		, dtmDeliveredDate
+		, dtmFreeTime
+		, strReceivedBy
+		, strComment
+		, intItemId
+		, intOwnershipType
+		, dblQuantity
+		, intItemUOMId
+		, intItemLotGroup
+		, intOrderId
+		, intSourceId
+		, intLineNo
+		, intSubLocationId
+		, intStorageLocationId
+		, intCurrencyId
+		, intWeightUOMId
+		, dblUnitPrice
+		, intDockDoorId
+		, strNotes
+		, intGradeId
+		, intDiscountSchedule
+		, intStorageScheduleTypeId
+)
+SELECT 
+		intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, strSourceScreenName
+		, strReferenceNumber
+		, dtmRequestedArrivalDate
+		, intShipToCompanyLocationId -- Sets to Default Company Location
+		, ISNULL(strBOLNumber, '')
+		, intShipViaId
+		, strVessel
+		, strProNumber
+		, strDriverId
+		, strSealNumber
+		, strDeliveryInstruction
+		, dtmAppointmentTime
+		, dtmDepartureTime
+		, dtmArrivalTime
+		, dtmDeliveredDate
+		, dtmFreeTime
+		, strReceivedBy
+		, strComment
+		, intItemId
+		, intOwnershipType
+		, dblQuantity
+		, intItemUOMId
+		, intItemLotGroup
+		, intOrderId
+		, intSourceId
+		, intLineNo
+		, intSubLocationId
+		, intStorageLocationId
+		, intCurrencyId
+		, intWeightUOMId
+		, dblUnitPrice
+		, intDockDoorId
+		, strNotes
+		, intGradeId
+		, intDiscountSchedule
+		, intStorageScheduleTypeId
 FROM @Entries
+
 -- 2. Charges
-INSERT INTO @ShipmentCharges(intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId,
-	intShipToLocationId, intFreightTermId, intContractId, intChargeId, strCostMethod, dblRate, intCostUOMId,
-	intCurrency, dblAmount, ysnAccrue, intEntityVendorId, ysnPrice)
-SELECT intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId,
-	intShipToLocationId, intFreightTermId, intContractId, intChargeId, strCostMethod, dblRate, intCostUOMId,
-	intCurrency, dblAmount, ysnAccrue, intEntityVendorId, ysnPrice
+INSERT INTO @ShipmentCharges(
+		intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, intContractId
+		, intChargeId
+		, strCostMethod
+		, dblRate
+		, intCostUOMId
+		, intCurrency
+		, dblAmount
+		, ysnAccrue
+		, intEntityVendorId
+		, ysnPrice
+)
+SELECT 
+		intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, intContractId
+		, intChargeId
+		, strCostMethod
+		, dblRate
+		, intCostUOMId
+		, intCurrency
+		, dblAmount
+		, ysnAccrue
+		, intEntityVendorId
+		, ysnPrice
 FROM @Charges
+
 -- 3. Item Lots
-INSERT INTO @ShipmentItemLots(intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId,
-	intShipToLocationId, intFreightTermId, intItemLotGroup, intLotId, dblQuantityShipped, dblGrossWeight,
-	dblTareWeight, dblWeightPerQty, strWarehouseCargoNumber)
-SELECT intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId,
-	intShipToLocationId, intFreightTermId, intItemLotGroup, intLotId, dblQuantityShipped, dblGrossWeight,
-	dblTareWeight, dblWeightPerQty, strWarehouseCargoNumber
+INSERT INTO @ShipmentItemLots(
+		intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, intItemLotGroup
+		, intLotId
+		, dblQuantityShipped
+		, dblGrossWeight
+		, dblTareWeight
+		, dblWeightPerQty
+		, strWarehouseCargoNumber
+)
+SELECT	intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, intItemLotGroup
+		, intLotId
+		, dblQuantityShipped
+		, dblGrossWeight
+		, dblTareWeight
+		, dblWeightPerQty
+		, strWarehouseCargoNumber
 FROM @ItemLots
 
 -- Get the entity id
@@ -203,12 +335,47 @@ DEALLOCATE cur
 ---------------------------------------- END OF CURSOR -----------------------------------------
 
 -- Insert shipment items
-INSERT INTO tblICInventoryShipmentItem(intInventoryShipmentId, intItemId, intOwnershipType, dblQuantity, intItemUOMId, 
-	intOrderId, intSourceId, intLineNo, intSubLocationId, intStorageLocationId, intCurrencyId, intWeightUOMId,
-	dblUnitPrice, intDockDoorId, strNotes, intGradeId, intDiscountSchedule, intConcurrencyId)
-SELECT se.intShipmentId, se.intItemId, se.intOwnershipType, se.dblQuantity, se.intItemUOMId, 
-	se.intOrderId, se.intSourceId, se.intLineNo, se.intSubLocationId, se.intStorageLocationId, 
-	se.intCurrencyId, se.intWeightUOMId, se.dblUnitPrice, se.intDockDoorId, se.strNotes, se.intGradeId, se.intDiscountSchedule, 1
+INSERT INTO tblICInventoryShipmentItem(
+	intInventoryShipmentId
+	, intItemId
+	, intOwnershipType
+	, dblQuantity
+	, intItemUOMId
+	, intOrderId
+	, intSourceId
+	, intLineNo
+	, intSubLocationId
+	, intStorageLocationId
+	, intCurrencyId
+	, intWeightUOMId
+	, dblUnitPrice
+	, intDockDoorId
+	, strNotes
+	, intGradeId
+	, intDiscountSchedule
+	, intConcurrencyId
+	, intStorageScheduleTypeId
+)
+SELECT 
+	se.intShipmentId
+	, se.intItemId
+	, se.intOwnershipType
+	, se.dblQuantity
+	, se.intItemUOMId
+	, se.intOrderId
+	, se.intSourceId
+	, se.intLineNo
+	, se.intSubLocationId
+	, se.intStorageLocationId
+	, se.intCurrencyId
+	, se.intWeightUOMId
+	, se.dblUnitPrice
+	, se.intDockDoorId
+	, se.strNotes
+	, se.intGradeId
+	, se.intDiscountSchedule
+	, 1
+	, intStorageScheduleTypeId
 FROM @ShipmentEntries se
 
 -- Insert shipment charges
@@ -247,7 +414,6 @@ DECLARE @intShipmentId INT
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 	FOR 
 		SELECT DISTINCT intShipmentId FROM @ShipmentEntries
-
 OPEN cur
 
 FETCH NEXT FROM cur INTO @intShipmentId

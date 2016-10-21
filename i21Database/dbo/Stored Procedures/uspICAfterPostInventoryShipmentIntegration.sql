@@ -44,6 +44,7 @@ BEGIN
 		,[dtmDate]
 		,[intCurrencyId]
 		,[dblExchangeRate]
+		,[intEntityCustomerId]
 
 		-- Detail 
 		,[intInventoryShipmentItemId]
@@ -65,6 +66,7 @@ BEGIN
 		,[intOrderId]
 		,[intSourceId]
 		,[intLineNo]
+		,[intStorageScheduleTypeId]
 	)
 	EXEC dbo.uspICGetItemsFromItemShipment
 		@intShipmentId = @intTransactionId

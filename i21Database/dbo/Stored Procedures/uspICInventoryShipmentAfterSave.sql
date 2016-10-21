@@ -66,6 +66,12 @@ BEGIN
 	FROM	tblICInventoryShipment
 	WHERE	intInventoryShipmentId = @ShipmentId
 END
+
+IF @ForDelete = 1
+BEGIN 
+	-- Call the grain sp when deleting the shipment. 
+	EXEC uspGRDeleteStorageHistory 'InventoryShipment', @ShipmentId
+END 
 			
 -- Create snapshot of Shipment Items before Save
 SELECT	intInventoryShipmentId = intTransactionId
