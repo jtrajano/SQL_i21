@@ -4421,6 +4421,10 @@
     <Build Include="dbo\Functions\fnCreateCostAdjGLDescription.sql" />
     <Build Include="dbo\Functions\fnTMComputeNewBurnRateTable.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalanceHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetGrainInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCompanyOwnership.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
