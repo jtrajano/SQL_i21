@@ -599,7 +599,8 @@ BEGIN
 	SELECT
 		SC.*
 		, blbMessage			= dbo.[fnARConvertLetterMessage](@strMessage, SC.intEntityCustomerId , @PlaceHolderTable)
-		, strCompanyAddress		= (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, strCompanyName, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
+		, strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+		, strCompanyAddress		= (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
 		, strCompanyPhone		= (SELECT TOP 1 strPhone FROM tblSMCompanySetup)
 		, strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
 		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
