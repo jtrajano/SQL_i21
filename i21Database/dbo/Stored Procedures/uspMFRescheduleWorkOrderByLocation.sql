@@ -112,7 +112,7 @@ BEGIN TRY
 		,intNoOfUnit
 		,dblConversionFactor
 		)
-	SELECT IsNULL(MC1.intManufacturingCellId,x.intManufacturingCellId)
+	SELECT Case When x.intStatusId=3 Then IsNULL(MC1.intManufacturingCellId,x.intManufacturingCellId) Else x.intManufacturingCellId End
 		,x.intWorkOrderId
 		,x.intItemId
 		,x.dblQuantity
@@ -195,7 +195,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
 		AND PTD.intTargetUnitMeasureId = x.intUnitMeasureId
 		AND PTD.intSourceUnitMeasureId = MC.intLineCapacityUnitMeasureId
-	ORDER BY x.intManufacturingCellId
+	ORDER BY Case When x.intStatusId=3 Then IsNULL(MC1.intManufacturingCellId,x.intManufacturingCellId) Else x.intManufacturingCellId End
 		,x.dtmExpectedDate
 		,x.intItemId
 
