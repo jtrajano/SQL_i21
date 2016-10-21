@@ -127,26 +127,26 @@ BEGIN
 		@OriginalMsgInHTMLTable
 
 	IF @LetterName = 'Recent Overdue Collection Letter'
-	BEGIN
-		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl0Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
-		SET @filterValue = 'dbl0Days > 0'
+	BEGIN		
+		SET @filterValue = 'dbl0DaysSum > 0 OR dbl0DaysSum > 1'
 	END
 	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
-	BEGIN
-		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl30Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
-		SET @filterValue = 'dbl30Days > 0'
+	BEGIN		
+		SET @filterValue = 'dbl30DaysSum > 0 OR dbl30DaysSum > 1'
 	END
 	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
-	BEGIN
-		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl60Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
-		SET @filterValue = 'dbl60Days > 0'
+	BEGIN		
+		SET @filterValue = 'dbl60DaysSum > 0 OR dbl60DaysSum > 1'
 	END
 	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
-	BEGIN
-		UPDATE tblARLetterPlaceHolder SET strSourceColumn = 'dtmDate, strInvoiceNumber, dbl90Days' WHERE strPlaceHolderName = 'dtmDate, strInvoiceNumber, dblTotalDue'
-		SET @filterValue = 'dbl90Days > 0'
+	BEGIN		
+		SET @filterValue = 'dbl90DaysSum > 0 OR dbl90DaysSum > 1'
 	END
-	 
+	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
+	BEGIN		
+		SET @filterValue = 'dblTotalARSum > 0 OR dblTotalARSum > 1'
+	END
+		 
 	INSERT INTO @SelectedPlaceHolderTable
 	(
 		intPlaceHolderId
