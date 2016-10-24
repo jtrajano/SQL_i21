@@ -30,6 +30,7 @@
 	[dblMargin] NUMERIC(18,6) NULL,
 	[ysnCostAppliedAtInvoice] BIT,
 	[intCommentTypeId] INT NULL,
+	[intSequenceNo] INT NULL,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
