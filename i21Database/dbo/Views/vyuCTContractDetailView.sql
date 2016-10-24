@@ -27,7 +27,8 @@ AS
 			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,			CD.strLoadingPointType,
 			CD.strDestinationPointType,			CD.intItemContractId,			CD.intNoOfLoad,
 			CD.dblQuantityPerLoad,				CD.strReference,				CD.intStorageScheduleRuleId,
-			CD.dblNetWeight,					CD.ysnUseFXPrice,
+			CD.dblNetWeight,					CD.ysnUseFXPrice,				CD.intSplitId,
+			CD.intFarmFieldId,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -38,9 +39,10 @@ AS
 			SR.strScheduleDescription,			IM.strShortName,				DP.strCity						AS	strDestinationPoint,
 			SK.intStockUOMId,					SK.strStockUnitMeasure,			DC.strCity						AS	strDestinationCity,
 			SK.intStockUnitMeasureId,			IC.strContractItemName,			PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
-																				U4.strUnitMeasure				AS	strStockItemUOM,
+			ST.strSplitNumber,													U4.strUnitMeasure				AS	strStockItemUOM,
 			CU.intMainCurrencyId,				CU.strCurrency,					CY.strCurrency					AS	strMainCurrency,
 																				U7.strUnitMeasure				AS	strNetWeightUOM,
+																				ST.strDescription				AS	strSplitDescription,
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)															AS	ysnSubCurrency,
 			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
 			YEAR(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityYear,
@@ -192,7 +194,8 @@ AS
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DC	ON	DC.intCityId				=	CD.intDestinationCityId		LEFT
-	JOIN	[tblEMEntityFarm]					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
+	JOIN	tblEMEntityFarm					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
+	JOIN	tblEMEntitySplit				ST	ON	ST.intSplitId				=	CD.intSplitId				LEFT
 	JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId	=	CD.intStorageScheduleRuleId	LEFT
 	JOIN	(
 				SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 

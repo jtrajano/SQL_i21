@@ -71,6 +71,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strRemark] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 
 	[intFarmFieldId] INT NULL,
+	[intSplitId] INT NULL,
 	[strGrade] NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorLotID] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strInvoiceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
@@ -148,7 +149,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategory_intCategoryId] FOREIGN KEY([intCategoryId])REFERENCES [tblICCategory] ([intCategoryId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblEMEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId])
+	CONSTRAINT [FK_tblCTContractDetail_tblEMEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId])
 ) 
 
 GO
