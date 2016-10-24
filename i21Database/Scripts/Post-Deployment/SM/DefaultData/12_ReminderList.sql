@@ -1,5 +1,12 @@
 ﻿GO
 
+	IF EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal')
+	BEGIN
+		UPDATE [tblSMReminderList] SET [strType] = 'General Journal Recurring' WHERE [strReminder] = N'Process' AND [strType] = N'General Journal'
+	END
+
+GO
+
 	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Invoice')
 		BEGIN
 			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
@@ -28,11 +35,11 @@
 			WHERE [strReminder] = N'Process' AND [strType] = N'Invoice' 
 		END
 
-	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal')
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal Recurring')
 		BEGIN
 			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 			SELECT [strReminder]        =        N'Process',
-				   [strType]        	=        N'General Journal',
+				   [strType]        	=        N'General Journal Recurring',
 				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
 				   [strQuery]  			=        N'SELECT intRecurringId ' +
 												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''General Journal'' ' +
@@ -53,7 +60,7 @@
 		BEGIN
 			UPDATE [tblSMReminderList]
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
-			WHERE [strReminder] = N'Process' AND [strType] = N'General Journal' 
+			WHERE [strReminder] = N'Process' AND [strType] = N'General Journal Recurring' 
 		END
 
 	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Voucher')
@@ -153,16 +160,16 @@
 				[intSort]           =        7
 	END	
 
-	--IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
-	--BEGIN
-	--	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
-	--	SELECT [strReminder]        =        N'Post',
-	--			[strType]        	=        N'General Journal',
-	--			[strMessage]		=        N'{0} {1} {2} left unposted.',
-	--			[strQuery]  		=        N'Select intJournalId FROM vyuGLPostRemind WHERE intEntityId = {0}',
-	--			[strNamespace]      =        N'GeneralLedger.view.GeneralJournal?unposted=1',
-	--			[intSort]           =        8
-	--END	
+	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
+	BEGIN
+		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		SELECT [strReminder]        =        N'Post',
+				[strType]        	=        N'General Journal',
+				[strMessage]		=        N'{0} {1} {2} left unposted.',
+				[strQuery]  		=        N'Select intJournalId FROM vyuGLPostRemind WHERE intEntityId = {0}',
+				[strNamespace]      =        N'GeneralLedger.view.GeneralJournal?unposted=1',
+				[intSort]           =        8
+	END	
 
 	IF NOT EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9)
 	BEGIN
@@ -504,7 +511,7 @@
 		END
 GO
 
-	IF EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
-	DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal'
+--	IF EXISTS (SELECT 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
+--	DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal'
 
-GO
+--GO
