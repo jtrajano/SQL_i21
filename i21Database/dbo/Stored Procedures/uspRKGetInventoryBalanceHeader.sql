@@ -1,9 +1,33 @@
 ﻿CREATE PROC uspRKGetInventoryBalanceHeader
 
-       @dtmFromTransactionDate datetime = null,
-          @dtmToTransactionDate datetime = null,
+       @dtmFromTransactionDate DATETIME = null,
+          @dtmToTransactionDate DATETIME = NULL,
           @intCommodityId int =  NULL
 AS 
+
+DECLARE @tblDateList TABLE
+(Id INT identity(1,1),
+       DateData datetime
+)
+
+DECLARE @StartDateTime DATETIME
+DECLARE @EndDateTime DATETIME
+
+SET @StartDateTime = @dtmFromTransactionDate
+SET @EndDateTime = @dtmToTransactionDate;
+
+WITH DateRange(DateData) AS 
+(
+    SELECT @StartDateTime as Date
+    UNION ALL
+    SELECT DATEADD(d,1,DateData)
+    FROM DateRange 
+    WHERE DateData < @EndDateTime
+)
+INSERT INTO @tblDateList(DateData)
+SELECT DateData FROM DateRange
+OPTION (MAXRECURSION 0)
+
 DECLARE @tblResult TABLE
 (Id INT identity(1,1),
        intRowNum int,
@@ -89,6 +113,9 @@ SELECT dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryB
               [Unpaid In],[Unpaid Out]
               
 FROM(
-SELECT dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryBalanceCarryForward,
+SELECT DateData dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryBalanceCarryForward,
               [Unpaid In],[Unpaid Out],[Balance]
-FROM @tblConsolidatedResult T1 )t )t1 order by dtmDate
+FROM @tblConsolidatedResult T1
+RIGHT JOIN @tblDateList list on T1.dtmDate=list.DateData
+
+  )t )t1 order by dtmDate
