@@ -1913,7 +1913,7 @@ Ext.define('Inventory.view.ItemViewController', {
                                             if (uom !== current){
                                                 uom.set('ysnStockUnit', false);
                                                 var unitMeasureId = current.get('intUnitMeasureId');
-                                                me.getConversionValue(unitMeasureId, uom.get('intUnitMeasureId'), function (value) {
+                                                me.getConversionValue(uom.get('intUnitMeasureId'), unitMeasureId, function (value) {
                                                     uom.set('dblUnitQty', value);
                                                 });
                                             }
@@ -1990,7 +1990,7 @@ Ext.define('Inventory.view.ItemViewController', {
                                     if (uom !== current){
                                         uom.set('ysnStockUnit', false);
                                         var unitMeasureId = current.get('intUnitMeasureId');
-                                        me.getConversionValue(unitMeasureId, uom.get('intUnitMeasureId'), function (value) {
+                                        me.getConversionValue(uom.get('intUnitMeasureId'), unitMeasureId, function (value) {
                                             uom.set('dblUnitQty', value);
                                         });
                                     }
