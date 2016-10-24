@@ -109,7 +109,7 @@ BEGIN
 	FROM 
 		fnGetRowsFromDelimitedValues(@strCustomerIds)
 
-	SELECT 
+ 	SELECT 
 		@blb = blbMessage 
 	FROM 
 		tblSMLetter 
@@ -128,33 +128,32 @@ BEGIN
 
 	IF @LetterName = 'Recent Overdue Collection Letter'
 	BEGIN		
-		SET @filterValue = 'dbl10DaysSum > 0 OR dbl10DaysSum > 1'
+		SET @filterValue = '(dbl10DaysSum > 0 OR dbl10DaysSum > 1)'
 	END
 	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
 	BEGIN		
-		SET @filterValue = 'dbl30DaysSum > 0 OR dbl30DaysSum > 1'
+		SET @filterValue = '(dbl30DaysSum > 0 OR dbl30DaysSum > 1)'
 	END
 	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
 	BEGIN		
-		SET @filterValue = 'dbl60DaysSum > 0 OR dbl60DaysSum > 1'
+		SET @filterValue = '(dbl60DaysSum > 0 OR dbl60DaysSum > 1)'
 	END
 	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
 	BEGIN		
-		SET @filterValue = 'dbl90DaysSum > 0 OR dbl90DaysSum > 1'
+		SET @filterValue = '(dbl90DaysSum > 0 OR dbl90DaysSum > 1)'
 	END
 	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
 	BEGIN		
-		SET @filterValue = '[dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1'
+		SET @filterValue = '([dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1)'
 	END
 	ELSE IF @LetterName = 'Credit Suspension'					
 	BEGIN
-		SET @filterValue = '[dblCreditLimit] = 0'
+		SET @filterValue = '([dblCreditLimit] = 0)'
 	END
 	ELSE IF @LetterName = 'Credit Review'					
 	BEGIN
-		SET @filterValue = '[dblCreditLimit] > 0'
+		SET @filterValue = '([dblCreditLimit] > 0)'
 	END
-
 		 
 	INSERT INTO @SelectedPlaceHolderTable
 	(
@@ -303,7 +302,6 @@ BEGIN
 						,@ColumnCount		INT
 						,@ColumnCounter		INT							
  										
-
 				IF OBJECT_ID('tempdb..#TempTableColumnHeaders') IS NOT NULL DROP TABLE #TempTableColumnHeaders
 				SELECT 
 					RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
@@ -352,7 +350,7 @@ BEGIN
 					#TempTableColumns
 				FROM 
 					fnARGetRowsFromDelimitedValues(@SourceColumn)
-
+					 
 				IF OBJECT_ID('tempdb..#TempDataType') IS NOT NULL DROP TABLE #TempDataType
 				SELECT 
 					RowId	= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))			
@@ -404,7 +402,7 @@ BEGIN
 				INSERT INTO 
 					#TempTable
 				SELECT 
-					@HTMLTable					 
+					@HTMLTable		 	 
 
 				SET @PHQueryTable = '
 				DECLARE @HTMLTableValue NVARCHAR(MAX)
@@ -419,7 +417,7 @@ BEGIN
 				WHERE 
 					[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
 				+ ' AND ' + @filterValue + '
-												
+												 
 				DECLARE @HTMLTableRows VARCHAR(MAX)
 				SET @HTMLTableRows = ''''
 
@@ -506,8 +504,7 @@ BEGIN
 						ELSE
 						BEGIN
 							SET @HTMLTableRows = @HTMLTableRows + ''<td> <span style="font-family: Arial; font-size:9"> '' + (SELECT TOP 1 strField FROM #Field) + '' </span> </td>''																									
-						END
-						
+						END						
 
 						SET @ColumnCounter1 = @ColumnCounter1 + 1
 					END
@@ -519,13 +516,13 @@ BEGIN
 						#Records 
 					WHERE 
 						RowId = @RowId
-				END
+				END				 
 
 				UPDATE #TempTable
 				SET strTableBody = strTableBody + @HTMLTableRows + ''</tbody></table>'''
 
-				EXEC sp_sqlexec @PHQueryTable 				 
-									
+				EXEC sp_sqlexec @PHQueryTable 				 							
+						 
 				SET @InsertQueryTable= '
 									INSERT INTO	#CustomerPlaceHolder(
 										[intPlaceHolderId],
@@ -539,10 +536,7 @@ BEGIN
 										,[intEntityCustomerId]	= ' + CAST(@CustomerId AS VARCHAR(200)) + '
 										,[strValue]				= ''' +  (SELECT TOP 1 strTableBody FROM #TempTable) 	  + ''''
  
- 
-				EXEC sp_sqlexec @InsertQueryTable 	
-
-			
+ 				EXEC sp_sqlexec @InsertQueryTable 				
 			END
 				
 			DELETE 
