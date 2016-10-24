@@ -367,7 +367,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 text: '{getWeightLossText}'
             },
             lblWeightLossMsgValue: {
-                text: '{getWeightLossValueText}',
+              //  text: '{getWeightLossValueText}',
                 hidden: '{hidelblWeightLossMsgValue}'
             },
             grdInventoryReceipt: {
@@ -1190,7 +1190,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
             var ReceiptItems = current.tblICInventoryReceiptItems();
 
-            me.validateWeightLoss(win, ReceiptItems.data.items);
+            me.validateWeightLoss(win);
             me.showSummaryTotals(win);
             me.showOtherCharges(win);
         }
@@ -5121,42 +5121,50 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var dblNetShippedWt = 0;
         var dblNetReceivedWt = 0;
         var dblFranchise = 0;
+        
+        // Check if item is Inbound Shipment
+        if (sourceType === 2) {           
+            Ext.Array.each(ReceiptItems.data.items, function (item) {
+                if (!item.dummy) {
+                    /*  dblFranchise = item.data.dblFranchise;
+                      dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
+                      dblNetReceivedWt = item.data.dblNet;
 
-        Ext.Array.each(ReceiptItems, function (item) {
-            if (item.dummy) {
+                      if (dblFranchise > 0)
+                          dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
+                      if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
+                          dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
 
-            }
-            else {
-                /*  dblFranchise = item.data.dblFranchise;
-                  dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
-                  dblNetReceivedWt = item.data.dblNet;
-  
-                  if (dblFranchise > 0)
-                      dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
-                  if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
-                      dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
-
-
-                // Check if item is Inbound Shipment
-                if (sourceType === 2) {
-                    dblNetReceivedWt = item.data.dblNet;
-                    dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
-                    dblWeightLoss = dblNetReceivedWt - dblNetShippedWt;
+                    if (iRely.Functions.isEmpty(item.get('dblNet'))) item.get('dblNet') = 0.00;
+                    if (iRely.Functions.isEmpty(item.get('dblOrderQty'))) item.get('dblOrderQty') = 0.00;
+                    if (iRely.Functions.isEmpty(item.get('dblContainerWeightPerQty'))) item.get('dblContainerWeightPerQty') = 0.00;
+                    
+                    dblNetReceivedWt = item.get('dblNet');
+                    dblNetShippedWt = item.get('dblOrderQty') * item.get('dblContainerWeightPerQty');
+                    dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
                 }
-                else {
-                    dblWeightLoss = 0;
-                }
-
-            }
-        });
+            });
+        }
+        else {
+             dblWeightLoss = 0.00;
+        }
 
         action(dblWeightLoss);
     },
 
     validateWeightLoss: function (win, ReceiptItems) {
         win.viewModel.data.weightLoss = 0;
+        var lblWeightLossMsgValue = win.down('#lblWeightLossMsgValue');
+
         var action = function (weightLoss) {
             win.viewModel.set('weightLoss', weightLoss);
+            lblWeightLossMsgValue.setText(Ext.util.Format.number(weightLoss, '0,000.00'));
+            if(weightLoss == 0) {
+                lblWeightLossMsgValue.setStyle({color: 'black'});
+            }
+            else {
+                lblWeightLossMsgValue.setStyle({color: 'red'});
+            }
         };
 
         var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
@@ -5165,7 +5173,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var sourceType = current.get('intSourceType');
 
         if (ReceiptItems) {
-            this.getWeightLoss(ReceiptItems.data.items, sourceType, action);
+            this.getWeightLoss(ReceiptItems, sourceType, action);
         }
 
     },
