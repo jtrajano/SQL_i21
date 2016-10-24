@@ -4456,6 +4456,8 @@
     <Build Include="dbo\Functions\fnAPIsBalanced.sql" />
     <Build Include="dbo\Views\vyuCRMLostRevenue.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityContact.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityQuote.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
