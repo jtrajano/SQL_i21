@@ -26,7 +26,7 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<tblICCommodity>()
                 .Filter(param, true);
             var data = await query.Execute(param, "intCommodityId").ToListAsync();
-
+                
             return new SearchResult()
             {
                 data = data.AsQueryable(),
@@ -36,27 +36,12 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<BusinessResult<tblICCommodity>> SaveAsync(bool continueOnConflict)
         {
-            var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
-            var msg = result.Exception.Message;
-
-            if (result.HasError)
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.UniqueViolation)
             {
-                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICCommodity_strCommodityCode'"))
-                {
-                    msg = "Commodity Code must be unique.";
-                }
+                result.message.statusText = "UOM for Commodity must be unique.";
             }
-
-            return new BusinessResult<tblICCommodity>()
-            {
-                success = !result.HasError,
-                message = new MessageResult()
-                {
-                    statusText = msg,
-                    status = result.Exception.Error,
-                    button = result.Exception.Button.ToString()
-                }
-            };
+            return result;
         }
 
         /// <summary>
