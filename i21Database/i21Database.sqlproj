@@ -4458,6 +4458,7 @@
     <Build Include="dbo\Tables\tblCRMOpportunityContact.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityQuote.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityContract.sql" />
+    <Build Include="dbo\Views\vyuSMCompanyLocationSubLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
