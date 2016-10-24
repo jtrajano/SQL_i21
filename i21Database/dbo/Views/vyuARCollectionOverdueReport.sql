@@ -31,8 +31,10 @@ SELECT TOP 100 PERCENT
 	, CAR.[dbl60DaysSum]	
 	, IAR.dbl90Days
 	, CAR.[dbl90DaysSum]
-	, IAR.dbl91Days
-	, CAR.[dbl91DaysSum]	
+	, IAR.dbl120Days
+	, CAR.[dbl120DaysSum]	
+	, IAR.[dbl121Days]
+	, CAR.[dbl121DaysSum]	
 	, IAR.dblTotalDue
 	, CAR.[dblTotalDueSum]	
 	, IAR.dblAmountPaid
@@ -46,7 +48,7 @@ SELECT TOP 100 PERCENT
 	, IAR.dtmDate
 	, IAR.dtmDueDate	
 FROM 
-	vyuARInvoiceAgingReport IAR
+	vyuARCollectionOverdueDetailReport IAR
 INNER JOIN (
 			SELECT 
 				intInvoiceId
@@ -59,17 +61,18 @@ INNER JOIN (
 				, [dblTotalARSum]		=	dblTotalAR  
 				, [dblFutureSum]		=	dblFuture 
 				, [dbl0DaysSum]			=	dbl0Days 
-				, [dbl10DaysSum]		=	dbl10Days
-				, [dbl30DaysSum]		=	dbl30Days
-				, [dbl60DaysSum]		=	dbl60Days
-				, [dbl90DaysSum]		=	dbl90Days
-				, [dbl91DaysSum]		=	dbl91Days
+				, [dbl10DaysSum]		=	([dbl10Days] + [dbl30Days] + [dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
+				, [dbl30DaysSum]		=	([dbl30Days] + [dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
+				, [dbl60DaysSum]		=	([dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
+				, [dbl90DaysSum]		=	([dbl90Days] + [dbl120Days] + [dbl121Days])
+				, [dbl120DaysSum]		=	([dbl120Days] + [dbl121Days])
+				, [dbl121DaysSum]		=	[dbl121Days]
 				, [dblTotalDueSum]		=	dblTotalDue
 				, [dblAmountPaidSum]	=	dblAmountPaid
 				, [dblInvoiceTotalSum]	=	dblInvoiceTotal
 				, [dblCreditsSum]		=	dblCredits
 				, [dblPrepaidsSum]		=	dblPrepaids
-			FROM vyuARCustomerAgingReport
+			FROM vyuARCollectionOverdueSummaryReport
 ) CAR ON IAR.intEntityCustomerId = CAR.intEntityCustomerId
 INNER JOIN (
 			SELECT 

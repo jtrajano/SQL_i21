@@ -128,7 +128,7 @@ BEGIN
 
 	IF @LetterName = 'Recent Overdue Collection Letter'
 	BEGIN		
-		SET @filterValue = 'dbl0DaysSum > 0 OR dbl0DaysSum > 1'
+		SET @filterValue = 'dbl10DaysSum > 0 OR dbl10DaysSum > 1'
 	END
 	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
 	BEGIN		
@@ -144,8 +144,17 @@ BEGIN
 	END
 	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
 	BEGIN		
-		SET @filterValue = 'dblTotalARSum > 0 OR dblTotalARSum > 1'
+		SET @filterValue = '[dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1'
 	END
+	ELSE IF @LetterName = 'Credit Suspension'					
+	BEGIN
+		SET @filterValue = '[dblCreditLimit] = 0'
+	END
+	ELSE IF @LetterName = 'Credit Review'					
+	BEGIN
+		SET @filterValue = '[dblCreditLimit] > 0'
+	END
+
 		 
 	INSERT INTO @SelectedPlaceHolderTable
 	(
