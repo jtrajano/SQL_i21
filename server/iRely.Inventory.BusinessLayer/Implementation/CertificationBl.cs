@@ -17,6 +17,16 @@ namespace iRely.Inventory.BusinessLayer
         {
             _db = db;
         }
+
+        public override async Task<BusinessResult<tblICCertification>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.UniqueViolation)
+            {
+                result.message.statusText = "Certification Program must be unique.";
+            }
+            return result;
+        }
         #endregion
     }
 }
