@@ -8,6 +8,6 @@ CREATE TABLE [dbo].[tblSMCalendars] (
 	[dtmCreated]		[datetime]										NULL,
 	[dtmModified]		[datetime]										NULL,
 	[intConcurrencyId]	[int]											NOT NULL,
-	[ysShowEvents]		[bit]			DEFAULT (1)						NOT NULL,
+	[ysnShowEvents]		[bit]			DEFAULT (1)						NOT NULL,
     CONSTRAINT [PK_tblSMCalendars] PRIMARY KEY CLUSTERED ([intCalendarId] ASC)
 );
