@@ -27,7 +27,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblCRMCampaignCompetitor',
     @level2type = N'COLUMN',
-    @level2name = N'intOpportunityCampaignId'
+    @level2name = N'intCampaignId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Entity Reference Id',
