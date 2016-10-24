@@ -4,7 +4,7 @@
 	   @dtmToTransactionDate datetime = null,
 	   @intCommodityId int =  null
 
-as
+AS
 
 DECLARE @tblResult TABLE
 (Id INT identity(1,1),
@@ -68,7 +68,7 @@ SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate, dblOpenReceive*dblUnitCost AS d
  from 
  vyuAPBillDetail ap
  JOIN tblICInventoryReceiptItem ir on ap.intInventoryReceiptId=ir.intInventoryReceiptId
- JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
+ LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
  JOIN tblICItem i on i.intItemId=ir.intItemId where dtmDate between @dtmFromTransactionDate and @dtmToTransactionDate and i.intCommodityId= @intCommodityId
  )t where dblQtyReceived <> 0)t2
 
