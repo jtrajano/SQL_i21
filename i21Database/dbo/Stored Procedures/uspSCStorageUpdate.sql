@@ -553,13 +553,17 @@ BEGIN TRY
 			SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
 		END
 
-	SELECT intItemId = ScaleTicket.intItemId
+		SELECT intItemId = ScaleTicket.intItemId
 				,intLocationId = ItemLocation.intItemLocationId 
 				,intItemUOMId = ItemUOM.intItemUOMId
 				,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblQty = @dblNetUnits 
 				,dblUOMQty = ItemUOM.dblUnitQty
-				,dblCost = 0
+				,dblCost = 
+				CASE 
+					WHEN ISNULL(@intDPContractId,0) > 0 THEN (ScaleTicket.dblUnitPrice - ScaleTicket.dblUnitBasis)
+					WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
+				END
 				,dblSalesPrice = 0
 				,intCurrencyId = ScaleTicket.intCurrencyId
 				,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
