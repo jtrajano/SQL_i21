@@ -4,6 +4,7 @@
     [intNetworkId]        INT            NOT NULL,
     [strNetworkAccountId] NVARCHAR (250) COLLATE Latin1_General_CI_AS NOT NULL,
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblCFNetworkAccount_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFNetworkAccount] PRIMARY KEY CLUSTERED ([intNetworkAccountId] ASC)
+    CONSTRAINT [PK_tblCFNetworkAccount] PRIMARY KEY CLUSTERED ([intNetworkAccountId] ASC),
+	CONSTRAINT [FK_tblCFNetworkAccount_tblCFNetwork] FOREIGN KEY (intNetworkId) REFERENCES [dbo].tblCFNetwork (intNetworkId)
 );
 
