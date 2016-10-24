@@ -489,7 +489,8 @@ BEGIN
 	----------------------------------
 	-- Duplicate Item Pricing table --
 	----------------------------------
-	INSERT INTO tblICItemPricing(intItemId,
+	INSERT INTO tblICItemPricing(
+		intItemId,
 		intItemLocationId,
 		dblAmountPercent,
 		dblSalePrice,
@@ -499,8 +500,10 @@ BEGIN
 		dblStandardCost,
 		dblAverageCost,
 		dblEndMonthCost,
-		intSort)
-	SELECT @NewItemId,
+		intSort
+	)
+	SELECT 
+		@NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
 		dblAmountPercent,
 		0.00,
