@@ -62,7 +62,10 @@ SELECT	ReceiptItem.intInventoryReceiptId
 
 				WHEN Receipt.intSourceType = 3 -- Transport
 					THEN LoadReceipt.strTransaction 
-					
+
+				WHEN Receipt.intSourceType = 4 -- Settle Storage
+					THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 					
+
 				ELSE CAST(NULL AS NVARCHAR(50)) 
 				END
 			)
@@ -293,3 +296,8 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		LEFT JOIN vyuTRGetLoadReceipt LoadReceipt
 			ON LoadReceipt.intLoadReceiptId = ReceiptItem.intSourceId
 			AND Receipt.intSourceType = 3
+
+		-- 7. Grain > Settle Storage 
+		LEFT JOIN vyuGRStorageSearchView
+			ON vyuGRStorageSearchView.intCustomerStorageId = ReceiptItem.intSourceId
+				AND Receipt.intSourceType = 4
