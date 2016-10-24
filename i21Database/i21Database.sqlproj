@@ -4425,6 +4425,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetGrainInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyOwnership.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBeforeShipmentDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspICUpdateStatusOnShipmentSave]
+﻿
+-- This sp updates the status of the integrated transactions with Inventory Shipment. 
+CREATE PROCEDURE [dbo].[uspICUpdateStatusOnShipmentSave]
 	@intShipmentId INT
 	,@ysnOpenStatus	BIT = 0
 AS
