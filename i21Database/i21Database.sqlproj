@@ -4462,6 +4462,8 @@
     <Build Include="dbo\Views\vyuCRMSalesRepSummary.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityContact.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityCustomerContact.sql" />
+    <Build Include="dbo\Views\vyuCRMOpportunitySearch.sql" />
+    <Build Include="dbo\Views\vyuCRMOpportunitySearchSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
