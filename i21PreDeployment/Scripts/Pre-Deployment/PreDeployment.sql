@@ -60,7 +60,6 @@
 -- AR
 :r .\7_AR\1_1410_to_1420.sql
 :r .\7_AR\2_DropTableScript.sql
-:r .\7_AR\3_FixARTransactionsAccounts.sql
 :r .\7_AR\4_InvoicePaymentMethodCleanUp.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql
 
