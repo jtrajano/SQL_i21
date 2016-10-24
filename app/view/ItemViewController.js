@@ -1845,6 +1845,7 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
+        iRely.Msg.showWait('Converting units...');
         Ext.Ajax.request({
             timeout: 120000,
             url: '../Inventory/api/UnitMeasure/Search',
@@ -1860,9 +1861,11 @@ Ext.define('Inventory.view.ItemViewController', {
                         callback(dblConversionToStock);
                     }
                 }
+                iRely.Msg.close();
             },
             failure: function (response) {
                 var jsonData = Ext.decode(response.responseText);
+                iRely.Msg.close();
                 iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
             }
         });
