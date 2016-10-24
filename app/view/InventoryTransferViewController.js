@@ -530,6 +530,27 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         return value;
     },
 
+    onLocationSelect: function(combo, records, eOpts) {
+        var vm = this.view.viewModel;
+        var current = vm.data.current;
+        if(current) {
+            if(records[0] && current.intFromLocationId === records[0].intCompanyLocationId) {
+                iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', function(button) {
+                    if (current.tblICInventoryTransferDetails()) {
+                        if (button === 'yes') {
+                            _.each(current.tblICInventoryTransferDetails().data.items, function(item) {
+                                item.set('intToStorageLocationId', null);
+                                item.set('strToStorageLocationName', null);
+                                item.set('intToSubLocationId', null);
+                                item.set('strToSubLocationName', null);
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    },
+
     onTransferDetailSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -871,6 +892,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#cboToStorage": {
                 select: this.onTransferDetailSelect
+            },
+            "#cboToLocation" : {
+                select: this.onLocationSelect
             },
             //"#cboUOM": {
             //    select: this.onTransferDetailSelect
