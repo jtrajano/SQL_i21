@@ -18,8 +18,8 @@ FROM tblARInvoice I
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) 
 		ON I.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
-	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1
-	LEFT JOIN (
+	INNER JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1
+	INNER JOIN (
 		(SELECT SUM(dblPayment) AS dblPayment
 				 , PD.intInvoiceId
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1
