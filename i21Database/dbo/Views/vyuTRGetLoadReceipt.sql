@@ -11,6 +11,7 @@ SELECT Receipt.intLoadReceiptId
 	, strTerminalId = Terminal.strVendorId
 	, Receipt.intSupplyPointId
 	, strSupplyPoint = SupplyPoint.strSupplyPoint
+	, SupplyPoint.intEntityLocationId
 	, Receipt.intCompanyLocationId
 	, CompanyLocation.strLocationName
 	, Receipt.strBillOfLading
