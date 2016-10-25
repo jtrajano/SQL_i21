@@ -215,7 +215,7 @@ AS
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-			AND t.intFobPointId IS NOT NULL 			
+			AND t.intFobPointId IS NOT NULL 	
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
