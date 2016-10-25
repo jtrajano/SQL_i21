@@ -4468,6 +4468,7 @@
     <Build Include="dbo\Views\vyuCRMCustomerProspectVendor.sql" />
     <Build Include="dbo\Views\vyuMFWastageNotMapped.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunitySearchSummary1.sql" />
+    <Build Include="dbo\Views\vyuCRMAgentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
