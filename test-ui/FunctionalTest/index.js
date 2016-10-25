@@ -1,5 +1,5 @@
 var Harness = new Siesta.Harness.Browser.ExtJS (),
-    functionalTest = '../../../TestEngine/FunctionalTest.js';
+    functionalTest = '../../../TestFramework/FunctionalTest.js';
 
 Harness.configure({
     title: 'i21 Test Suite',

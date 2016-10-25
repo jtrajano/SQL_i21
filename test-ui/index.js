@@ -1,6 +1,6 @@
 var Harness = new Siesta.Harness.Browser.ExtJS (),
-    testEnginePath = '../../TestEngine/TestEngine.js',
-    functionalTest = '../../TestEngine/FunctionalTest.js',
+    testEnginePath = '../../TestFramework/TestEngine.js',
+    functionalTest = '../../TestFramework/FunctionalTest.js',
     commonSM =  '../../i21/test-ui/CommonSM.js';
 //  commonIC =  'CommonIC.js';
 
