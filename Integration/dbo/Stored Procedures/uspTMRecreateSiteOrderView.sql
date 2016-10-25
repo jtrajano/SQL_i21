@@ -96,7 +96,7 @@ BEGIN
 				ON A.intProduct = F.A4GLIdentity
 			LEFT JOIN tblTMDispatch G
 				ON A.intSiteID = G.intSiteID
-			WHERE A.ysnActive = 1
+			WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0
 			')	
 		END	
 
@@ -187,6 +187,7 @@ BEGIN
 				LEFT JOIN [vyuARCustomerInquiryReport] CI
 					ON Ent.intEntityId = CI.intEntityCustomerId) I
 				ON B.intCustomerNumber = I.intEntityId
+			WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0
 			
 		')
 	END
