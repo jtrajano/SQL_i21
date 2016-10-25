@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdeaBlade.Linq;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -401,6 +402,27 @@ namespace iRely.Inventory.BusinessLayer
             {
                 data = data.AsQueryable(),
                 total = await query.CountAsync()
+            };
+        }
+
+        public async Task<object> GetItemUOMsByType(int? intItemId, string strUnitType)
+        {
+            var query = @"SELECT DISTINCT um.intUnitMeasureId, um.strUnitMeasure, um.strUnitType, um.strSymbol
+                 FROM tblICUnitMeasure um
+                  INNER JOIN tblICItemUOM uom ON uom.intUnitMeasureId = um.intUnitMeasureId
+                 WHERE uom.intItemId = @intItemId
+                  AND um.strUnitType = @strUnitType";
+
+            var param = new  SqlParameter("@intItemId", intItemId);
+            var param2 = new SqlParameter("@strUnitType", strUnitType);
+            param.DbType = System.Data.DbType.Int32;
+            param2.DbType = System.Data.DbType.String;
+
+            var dbSet = _db.ContextManager.Database.SqlQuery<UnitOfMeasure>(query, param, param2);
+            var list = await dbSet.ToListAsync();
+            return new {
+                data = list,
+                total = list.Count()
             };
         }
 
@@ -821,6 +843,15 @@ namespace iRely.Inventory.BusinessLayer
             }
 
             return saveResult;
+        }
+
+        public class UnitOfMeasure
+        {
+            [Key]
+            public int? intUnitMeasureId { get; set; }
+            public string strUnitMeasure { get; set; }
+            public string strUnitType { get; set; }
+            public string strSymbol { get; set; }
         }
     }
 }

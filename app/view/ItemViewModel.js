@@ -180,6 +180,32 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
+        weightUOMs: {
+            model: Ext.create('Ext.data.Model', {
+                idProperty: 'id',
+                fields: [
+                    { name: 'intUnitMeasureId', type: 'int' },
+                    { name: 'strUnitMeasure', type: 'string' },
+                    { name: 'strUnitType', type: 'string' },
+                    { name: 'strSymbol', type: 'string' }
+                ]
+            }),
+            proxy: {
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Item/GetItemUOMsByType'
+                },
+                extraParams: {
+                    intItemId: '{current.intItemId}',
+                    strUnitType: 'Weight'   
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
+        },
         uomUnitMeasure: {
             type: 'icbuffereduom'
         },

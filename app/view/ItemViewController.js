@@ -592,7 +592,14 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboWeightUOM: {
                 value: '{current.intWeightUOMId}',
-                store: '{mfgWeightUom}'
+                store: '{weightUOMs}',
+                defaultFilters: [
+                    { 
+                        name: 'intUnitMeasureId',
+                        condition: 'eq',
+                        value: 0
+                    }
+                ]
             },
             txtWeight: '{current.dblWeight}',
             txtMaterialPack: '{current.intMaterialPackTypeId}',

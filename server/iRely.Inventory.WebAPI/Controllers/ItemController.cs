@@ -112,7 +112,14 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStockTrackingItems(param));
         }
-        
+
+        [HttpGet]
+        [ActionName("GetItemUOMsByType")]
+        public async Task<HttpResponseMessage> GetItemUOMsByType(int? intItemId = 0, string strUnitType = "")
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemUOMsByType(intItemId, strUnitType));
+        }
+
         [HttpGet]
         [ActionName("DuplicateItem")]
         public HttpResponseMessage DuplicateItem(int ItemId)

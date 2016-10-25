@@ -27,5 +27,6 @@ namespace iRely.Inventory.BusinessLayer
         SaveResult CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId);
         SaveResult ConvertItemToNewStockUnit(int ItemId, int ItemUOMId);
         int? DuplicateItem(int intItemId);
+        Task<object> GetItemUOMsByType(int? intItemId, string strUnitType);
     }
 }
