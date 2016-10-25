@@ -44,8 +44,8 @@ SELECT	R.intRefundId,
 		dblPurchaseVolume = (CASE WHEN RCatPCat.strPurchaseSale = 'Purchase' THEN RCatPCat.dblVolume ELSE 0 END), 
 		dblSaleVolume = (CASE WHEN RCatPCat.strPurchaseSale = 'Sale' THEN RCatPCat.dblVolume ELSE 0 END), 
 		dblLessFWT = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
-		dblLessService = RCus.dblCashRefund * (R.dblServiceFee/100),
-		dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) END,
+		dblLessService = R.dblServiceFee,
+		dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) < 0) THEN 0 ELSE RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) END,
 		R.ysnPosted,
 		RCus.intRefundCustomerId,
 		RCus.intCustomerId,
@@ -279,8 +279,8 @@ BEGIN TRY
 	MERGE tblPATCustomerEquity AS EQ
 	USING (SELECT * FROM #tmpRefundDataCombined WHERE intRefundId = @intRefundId) AS B
 		ON (EQ.intCustomerId = B.intCustomerId AND EQ.intFiscalYearId = B.intFiscalYearId AND EQ.intRefundTypeId = B.intRefundTypeId)
-		WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
-			THEN DELETE
+		--WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
+		--	THEN DELETE
 		WHEN MATCHED
 			THEN UPDATE SET EQ.dblEquity = CASE WHEN @ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END,
 			EQ.dtmLastActivityDate = GETDATE()
@@ -296,61 +296,7 @@ BEGIN TRY
 		SET CVol.dtmLastActivityDate = GETDATE(), CVol.ysnRefundProcessed = ISNULL(@ysnPosted, 0)
 		FROM tblPATCustomerVolume CVol
 		WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
-		--SELECT	RCus.intCustomerId,
-		--RCat.intPatronageCategoryId,
-		--Ref.intFiscalYearId, 
-		--RCat.dblVolume
-		--INTO #tmpCustomerVolume
-		--FROM tblPATRefund Ref
-		--INNER JOIN tblPATRefundCustomer RCus
-		--ON Ref.intRefundId = RCus.intRefundId
-		--INNER JOIN tblPATRefundCategory RCat
-		--ON RCus.intRefundCustomerId	 = RCat.intRefundCustomerId
-		--INNER JOIN tblPATPatronageCategory PCat
-		--ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
-		--INNER JOIN tblARCustomer ARC
-		--ON RCus.intCustomerId = ARC.intEntityCustomerId
-		--WHERE Ref.intRefundId = @intRefundId
 
-		--IF NOT EXISTS(SELECT * FROM #tmpCustomerVolume)
-		--BEGIN
-		--	DROP TABLE #tmpCustomerVolume
-		--END
-		--ELSE
-		--BEGIN
-		--	MERGE tblPATCustomerVolume AS PAT
-		--	USING #tmpCustomerVolume AS B
-		--	   ON (PAT.intCustomerPatronId = B.intCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.intFiscalYearId)
-		--	 WHEN MATCHED
-		--		  THEN UPDATE SET PAT.dblVolume = PAT.dblVolume + B.dblVolume, PAT.dtmLastActivityDate = GETDATE()
-		--	 WHEN NOT MATCHED BY TARGET
-		--		  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
-		--			   VALUES (B.intCustomerId, B.intPatronageCategoryId, B.intFiscalYearId, GETDATE(),  B.dblVolume, 1);
-
-		--	DROP TABLE #tmpCustomerVolume
-		--END
-
-		----------------------------------------------------------------------------------------------------------------------------
-
-		--DELETE RCat
-		--FROM tblPATRefund Ref
-		--INNER JOIN tblPATRefundCustomer RCus
-		--ON Ref.intRefundId = RCus.intRefundId
-		--INNER JOIN tblPATRefundCategory RCat
-		--ON RCus.intRefundCustomerId	 = RCat.intRefundCustomerId
-		--INNER JOIN tblPATPatronageCategory PCat
-		--ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
-		--WHERE Ref.intRefundId = @intRefundId
-
-		--DELETE RCus
-		--FROM tblPATRefund Ref
-		--INNER JOIN tblPATRefundCustomer RCus
-		--ON Ref.intRefundId = RCus.intRefundId
-		--WHERE Ref.intRefundId = @intRefundId
-
-		--DELETE Ref
-		--FROM tblPATRefund Ref
-		--WHERE Ref.intRefundId = @intRefundId
 	END
 
 END TRY
@@ -388,7 +334,6 @@ Post_Cleanup:
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundData
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundDataCombined')) DROP TABLE #tmpRefundDataCombined
-	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCurrentData')) DROP TABLE #tmpCurrentData
 END
 ---------------------------------------------------------------------------------------------------------------------------------------
 GO

@@ -26,8 +26,8 @@ SELECT	Total.intCustomerId,
 		dblEquityRefund = CASE WHEN (Total.dblRefundAmount - Total.dblCashRefund) < 0 THEN 0 ELSE Total.dblRefundAmount - Total.dblCashRefund END,
 		dblCashRefund = Total.dblCashRefund,
 		dbLessFWT = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE Total.dbLessFWT END,
-		dblLessServiceFee = Total.dblCashRefund * (Total.dblLessServiceFee/100),
-		dblCheckAmount =  CASE WHEN (Total.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) < 0) THEN 0 ELSE Total.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) END
+		dblLessServiceFee = Total.dblLessServiceFee,
+		dblCheckAmount =  CASE WHEN (Total.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblLessServiceFee) < 0) THEN 0 ELSE Total.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblLessServiceFee) END
 		FROM (
 			SELECT	B.intCustomerPatronId as intCustomerId,
 			B.intFiscalYear,

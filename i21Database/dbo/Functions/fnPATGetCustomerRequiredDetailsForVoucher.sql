@@ -15,8 +15,7 @@ BEGIN
 		,[dblCheckAmount]
 	)
 	SELECT	RCus.intCustomerId,
-			dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 
-									ELSE RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) END
+			dblCheckAmount = RCus.dblCashRefund
 	FROM tblPATRefundCustomer RCus
 	INNER JOIN tblPATRefund R
 		ON RCus.intRefundId = R.intRefundId

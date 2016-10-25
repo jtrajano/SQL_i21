@@ -92,7 +92,7 @@ BEGIN
 				ON B.intRefundCustomerId = C.intRefundCustomerId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
-	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
+	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.dblEquityRefund <> 0
 	UNION ALL
 	--AP Clearing
 	SELECT	
@@ -100,7 +100,7 @@ BEGIN
 		[strBatchID]					=	'',
 		[intAccountId]					=	@apClearing, 
 		[dblDebit]						=	0,
-		[dblCredit]						=	B.dblCashRefund - (B.dblCashRefund * (A.dblServiceFee/100)) - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE (B.dblCashRefund * (A.dblFedWithholdingPercentage/100))END),
+		[dblCredit]						=	B.dblCashRefund,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strRefund,
@@ -134,11 +134,7 @@ BEGIN
 				ON B.intRefundCustomerId = C.intRefundCustomerId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
-			INNER JOIN tblARCustomer ARC
-				ON B.intCustomerId = ARC.intEntityCustomerId
-			INNER JOIN tblAPVendor APV
-				ON APV.intEntityVendorId = B.intCustomerId
-	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
+	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.dblCashRefund <> 0
 	UNION ALL
 	--GENERAL RESERVE
 	SELECT	
@@ -181,96 +177,6 @@ BEGIN
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
 	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
-	UNION ALL
-	--Service Fee Income
-	SELECT	
-	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-	[strBatchID]					=	'',
-	[intAccountId]					=	(SELECT DISTINCT intServiceFeeIncomeId FROM tblPATCompanyPreference),
-	[dblDebit]						=	0,
-	[dblCredit]						=	B.dblCashRefund * (A.dblServiceFee/100), 
-	[dblDebitUnit]					=	0,
-	[dblCreditUnit]					=	0,
-	[strDescription]				=	A.strRefund,
-	[strCode]						=	'PAT',
-	[strReference]					=	A.strRefund,
-	[intCurrencyId]					=	0,
-	[dblExchangeRate]				=	1,
-	[dtmDateEntered]				=	GETDATE(),
-	[dtmTransactionDate]			=	NULL,
-	[strJournalLineDescription]		=	'Posted Cash Refund Amount',
-	[intJournalLineNo]				=	1,
-	[ysnIsUnposted]					=	0,
-	[intUserId]						=	@intUserId,
-	[intEntityId]					=	@intUserId,
-	[strTransactionId]				=	A.strRefund, 
-	[intTransactionId]				=	A.intRefundId, 
-	[strTransactionType]			=	'Service Fee Income',
-	[strTransactionForm]			=	@SCREEN_NAME,
-	[strModuleName]					=	@MODULE_NAME,
-	[dblDebitForeign]				=	0,      
-	[dblDebitReport]				=	0,
-	[dblCreditForeign]				=	0,
-	[dblCreditReport]				=	0,
-	[dblReportingRate]				=	0,
-	[dblForeignRate]				=	0,
-	[intConcurrencyId]				=	1
-FROM	[dbo].tblPATRefund A
-		INNER JOIN tblPATRefundCustomer B
-			ON A.intRefundId = B.intRefundId
-		INNER JOIN tblPATRefundCategory C
-			ON B.intRefundCustomerId = C.intRefundCustomerId
-		INNER JOIN tblPATRefundRate D
-			ON B.intRefundTypeId = D.intRefundTypeId
-WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
-	UNION ALL
-	--FWT Liability
-	SELECT	
-	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-	[strBatchID]					=	'',
-	[intAccountId]					=	(SELECT DISTINCT intFWTLiabilityAccountId FROM tblPATCompanyPreference), -- change this
-	[dblDebit]						=	0,
-	[dblCredit]						=	(CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE (B.dblCashRefund * (A.dblFedWithholdingPercentage/100))END), 
-	[dblDebitUnit]					=	0,
-	[dblCreditUnit]					=	0,
-	[strDescription]				=	A.strRefund,
-	[strCode]						=	'PAT',
-	[strReference]					=	A.strRefund,
-	[intCurrencyId]					=	0,
-	[dblExchangeRate]				=	1,
-	[dtmDateEntered]				=	GETDATE(),
-	[dtmTransactionDate]			=	NULL,
-	[strJournalLineDescription]		=	'Posted Cash Refund Amount',
-	[intJournalLineNo]				=	1,
-	[ysnIsUnposted]					=	0,
-	[intUserId]						=	@intUserId,
-	[intEntityId]					=	@intUserId,
-	[strTransactionId]				=	A.strRefund, 
-	[intTransactionId]				=	A.intRefundId, 
-	[strTransactionType]			=	'FWT Liability',
-	[strTransactionForm]			=	@SCREEN_NAME,
-	[strModuleName]					=	@MODULE_NAME,
-	[dblDebitForeign]				=	0,      
-	[dblDebitReport]				=	0,
-	[dblCreditForeign]				=	0,
-	[dblCreditReport]				=	0,
-	[dblReportingRate]				=	0,
-	[dblForeignRate]				=	0,
-	[intConcurrencyId]				=	1
-FROM	[dbo].tblPATRefund A
-		INNER JOIN tblPATRefundCustomer B
-			ON A.intRefundId = B.intRefundId
-		INNER JOIN tblPATRefundCategory C
-			ON B.intRefundCustomerId = C.intRefundCustomerId
-		INNER JOIN tblPATRefundRate D
-			ON B.intRefundTypeId = D.intRefundTypeId
-		INNER JOIN tblARCustomer ARC
-			ON B.intCustomerId = ARC.intEntityCustomerId
-		INNER JOIN tblAPVendor APV
-			ON APV.intEntityVendorId = B.intCustomerId
-WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
-
-	DELETE FROM @returntable WHERE ( [dblCredit] = 0 AND strTransactionType = 'Undistributed Equity') OR ([dblCredit] = 0 AND strTransactionType = 'AP Clearing') OR ([dblDebit] = 0 AND strTransactionType = 'General Reserve') OR ([dblCredit] = 0 AND strTransactionType = 'Service Fee Income') OR ([dblCredit] = 0 AND strTransactionType = 'FWT Liability')
 	
 	RETURN
 END

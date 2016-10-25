@@ -7,11 +7,11 @@ WITH FiscalSum AS(
 			dblNonRefundAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN 0 ELSE RC.dblRefundAmount END,
 			dblCashRefund = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblCashRefund ELSE 0 END,
 			dblLessFWT = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN (CASE WHEN APV.ysnWithholding = 1  THEN RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) ELSE 0 END) ELSE 0 END,
-			dblLessServiceFee =  CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblCashRefund * (R.dblServiceFee/100) ELSE 0 END,
+			dblLessServiceFee =  CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN R.dblServiceFee ELSE 0 END,
 			dblCheckAmount = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN (CASE WHEN APV.ysnWithholding = 1 THEN
-					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblFedWithholdingPercentage/100)) - (RC.dblCashRefund * (R.dblServiceFee/100.0))
+					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblFedWithholdingPercentage/100)) - (R.dblServiceFee)
 					ELSE
-					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblServiceFee/100.0))
+					(RC.dblCashRefund) - (R.dblServiceFee)
 					END) ELSE 0 END,
 			dblEquityRefund = CASE WHEN RC.dblRefundAmount >= R.dblMinimumRefund THEN RC.dblRefundAmount - RC.dblCashRefund ELSE 0 END,
 			intVoting = [dbo].[fnPATCountStockStatus]('Voting', R.intRefundId),
