@@ -172,7 +172,7 @@ BEGIN
 					tblSMPaymentMethod PM
 						ON P.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode] 
 				WHERE
-					PM.[strPaymentMethodCode] IS NULL
+					PM.[strPaymentMethodCode] IS NULL AND P.[strPaymentMethod] COLLATE Latin1_General_CI_AS NOT IN (SELECT [strPaymentMethod] FROM tblSMPaymentMethod)
 
 				RETURN @Total;
 			END	
@@ -204,7 +204,7 @@ BEGIN
 			tblSMPaymentMethod PM
 				ON P.[strPaymentMethod] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethod] 
 		WHERE
-			PM.[strPaymentMethod] IS NULL
+			PM.[strPaymentMethodCode] IS NULL AND P.[strPaymentMethod] COLLATE Latin1_General_CI_AS NOT IN (SELECT [strPaymentMethod] FROM tblSMPaymentMethod)
 		ORDER BY
 			P.[strPaymentMethodCode]
 
@@ -234,7 +234,7 @@ BEGIN
 						tblSMPaymentMethod PM
 							ON P.[pttyp_pay_type] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					WHERE
-						PM.[strPaymentMethodCode] IS NULL
+						PM.[strPaymentMethodCode] IS NULL AND P.[pttyp_desc] COLLATE Latin1_General_CI_AS NOT IN (SELECT [strPaymentMethod] FROM tblSMPaymentMethod)
 
 					RETURN @Total;
 				END	
@@ -268,7 +268,7 @@ BEGIN
 				tblSMPaymentMethod PM
 					ON P.[pttyp_pay_type] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode] 
 			WHERE
-				PM.[strPaymentMethodCode] IS NULL
+				PM.[strPaymentMethodCode] IS NULL AND P.[pttyp_desc] COLLATE Latin1_General_CI_AS NOT IN (SELECT [strPaymentMethod] FROM tblSMPaymentMethod)
 			ORDER BY
 				P.[pttyp_pay_type]
 
