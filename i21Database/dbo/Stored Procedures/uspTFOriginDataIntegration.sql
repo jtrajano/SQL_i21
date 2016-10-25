@@ -5,13 +5,12 @@
 @System NVARCHAR(100),
 @State NVARCHAR(20),
 @DateFrom NVARCHAR(80),
-@DateTo NVARCHAR(80),
-@ImportedCount INT OUTPUT,
-@ErrorCount INT OUTPUT
+@DateTo NVARCHAR(80)
 
 AS
 
-DECLARE @query NVARCHAR(MAX)
+DECLARE @query NVARCHAR(max)
+
 TRUNCATE TABLE tblTFIntegrationError
 
 SET @query = 'SELECT DISTINCT CONVERT(NVARCHAR(30), pxrpt_trans_rev_dt) + ''_'' + REPLACE(pxrpt_ord_no, ''   '', '''')  + ''_'' + pxrpt_trans_type + ''_'' + CONVERT(NVARCHAR(50), pxrpt_seq_no) AS strSourceRecordConcatKey, 
@@ -42,7 +41,7 @@ INSERT INTO tblTFIntegrationItemProductCode
 EXEC (@query)
 
 --START ERROR INTEGRATION--
-DECLARE @qPCException NVARCHAR(MAX)
+DECLARE @qPCException NVARCHAR(max)
 
 
 SET @qPCException = 'SELECT * FROM (
@@ -64,10 +63,12 @@ SET @qPCException = 'SELECT * FROM (
 									AND convert(datetime, convert(varchar(20), pxrpt_trans_rev_dt), 112) <= CONVERT(NVARCHAR(20), ''' + @DateTo + ''')
 									AND NOT EXISTS (select * from tblTFProductCode where strProductCode COLLATE Latin1_General_CI_AS = ProductCode)) t
 									WHERE rn = 1'
+
 INSERT INTO tblTFIntegrationError
 EXEC (@qPCException)
-SELECT @ErrorCount = @@ROWCOUNT
+
 --END ERROR INTEGRATION--
+
 
 INSERT tblTFIntegrationTransaction (strTransactionGuid,
 strSourceRecordConcatKey,
@@ -164,6 +165,7 @@ dtmTransactionDate
 , dblTransactionOutboundSETExemptGals
 , strDiversionNumber
 , strDiversionOriginalDestinationState)
+
   SELECT
     @Guid,
     (CONVERT(NVARCHAR(30), pxrpt_trans_rev_dt) + '_' + REPLACE(pxrpt_ord_no, '   ', '') + '_' + pxrpt_trans_type + '_' + CONVERT(NVARCHAR(20), pxrpt_seq_no)),
@@ -272,60 +274,57 @@ dtmTransactionDate
   AND NOT EXISTS (SELECT
     strSourceRecordConcatKey
   FROM tblTFIntegrationError AS err
-  WHERE (strSourceRecordConcatKey = CONVERT(NVARCHAR(30), px.pxrpt_trans_rev_dt) + '_' + REPLACE(px.pxrpt_ord_no COLLATE Latin1_General_CI_AS, '   ', '') + '_' + px.pxrpt_trans_type + '_' + CONVERT(NVARCHAR(50), px.pxrpt_seq_no)))
-  SELECT @ImportedCount = @@ROWCOUNT
+  WHERE (strSourceRecordConcatKey = CONVERT(nvarchar(30), px.pxrpt_trans_rev_dt) + '_' + REPLACE(px.pxrpt_ord_no COLLATE Latin1_General_CI_AS, '   ', '') + '_' + px.pxrpt_trans_type + '_' + CONVERT(NVARCHAR(50), px.pxrpt_seq_no)))
 
-	TRUNCATE TABLE tblTFTransactions
-	INSERT INTO tblTFTransactions (uniqTransactionGuid,
-	intTaxAuthorityId,
-	strTaxAuthority,
-	strFormCode,
-	strScheduleCode,
-	strProductCode,
-	strType,
-	intProductCodeId,
-	intItemId,
-	dblQtyShipped,
-	dblGross,
-	dblNet,
-	dblBillQty,
-	dblTax,
-	dblTaxExempt,
-	strInvoiceNumber,
-	strPONumber,
-	strBOLNumber,
-	dtmDate,
-	strDestinationCity,
-	strDestinationState,
-	strOriginCity,
-	strOriginState,
-	--strAccountStatusCode,
-	strShipVia,
-	strTransporterLicense,
-	strTransportationMode,
-	strTransporterName,
-	strTransporterFederalTaxId,
-	strConsignorName,
-	strConsignorFederalTaxId,
-	strCustomerName,
-	strCustomerFederalTaxId,
-	--strTaxCategory,
-	strTerminalControlNumber,
-	strVendorName,
-	strVendorFederalTaxId,
-	strTaxPayerName,
-	strTaxPayerAddress,
-	strCity,
-	strState,
-	strZipCode,
-	strTelephoneNumber,
-	strTaxPayerIdentificationNumber,
-	strTaxPayerFEIN,
-	dtmReportingPeriodBegin,
-	dtmReportingPeriodEnd,
-	strItemNo,
-	intIntegrationError,
-	leaf)
+INSERT INTO tblTFTransactions (uniqTransactionGuid,
+intTaxAuthorityId,
+strTaxAuthority,
+strFormCode,
+strScheduleCode,
+strProductCode,
+strType,
+intProductCodeId,
+intItemId,
+dblQtyShipped,
+dblGross,
+dblNet,
+dblBillQty,
+dblTax,
+dblTaxExempt,
+strInvoiceNumber,
+strPONumber,
+strBOLNumber,
+dtmDate,
+strDestinationCity,
+strDestinationState,
+strOriginCity,
+strOriginState,
+--strAccountStatusCode,
+strShipVia,
+strTransporterLicense,
+strTransportationMode,
+strTransporterName,
+strTransporterFederalTaxId,
+strConsignorName,
+strConsignorFederalTaxId,
+--strTaxCategory,
+strTerminalControlNumber,
+strVendorName,
+strVendorFederalTaxId,
+strTaxPayerName,
+strTaxPayerAddress,
+strCity,
+strState,
+strZipCode,
+strTelephoneNumber,
+strTaxPayerIdentificationNumber,
+strTaxPayerFEIN,
+dtmReportingPeriodBegin,
+dtmReportingPeriodEnd,
+strItemNo,
+intIntegrationError,
+leaf)
+
   SELECT
     @Guid,
     (SELECT TOP 1 intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'),
@@ -350,6 +349,7 @@ dtmTransactionDate
     tr.strCustomerState AS strDestinationState,
     tr.strVendorCity AS strOriginCity,
     tr.strVendorState AS strOriginState,
+    --tr.strVendorAccountStatusCode AS strAccountStatusCode,
     tr.strCarrierTransportationMode AS strShipVia,
     tr.strCarrierLicenseNumber1 AS strTransporterLicense,
     tr.strCarrierTransportationMode AS strTransportationMode,
@@ -357,8 +357,6 @@ dtmTransactionDate
     tr.strCarrierFEIN AS strTransporterFEIN,
     tr.strCarrierName AS strConsignorName,
     tr.strCarrierFEIN AS strConsignorFEIN,
-	tr.strCustomerName,
-	tr.strCustomerFEIN,
     tr.strVendorTerminalControlNumber AS strTerminalControlNumber,
     tr.strVendorName,
     tr.strVendorFEIN,
@@ -380,3 +378,4 @@ dtmTransactionDate
   ON tr.strSourceRecordConcatKey = tblTFIntegrationItemProductCode.strSourceRecordConcatKey
   CROSS JOIN tblSMCompanySetup AS cl
 
+--exec uspTFOriginDataInteration 'E0950FA1-8E42-42C5-8BBC-253FB84B9D40','20120101','20160101'

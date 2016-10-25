@@ -145,8 +145,8 @@ DECLARE @tblTempTransaction TABLE (
 				--INVENTORY TRANSFER
 				SET @query = 'INSERT INTO tblTFTransactions (uniqTransactionGuid, intReportingComponentId, intTaxAuthorityId, strTaxAuthority, strFormCode, strScheduleCode, strType, intProductCodeId, strProductCode, intItemId, dblQtyShipped, dblGross, dblNet,
 							  dblBillQty, dblTax, dblTaxExempt, strInvoiceNumber, strPONumber, strBOLNumber, dtmDate, strDestinationCity, strDestinationState, strOriginCity, strOriginState, strShipVia, strTransporterLicense,
-							  strTransportationMode, strTransporterName, strTransporterFederalTaxId, strConsignorName, strConsignorFederalTaxId, strTerminalControlNumber, strVendorName, strVendorFederalTaxId,strCustomerName,strCustomerFederalTaxId,
-							  strTaxPayerName, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strTaxPayerIdentificationNumber, strTaxPayerFEIN, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strItemNo,intIntegrationError,leaf)
+							  strTransportationMode, strTransporterName, strTransporterFederalTaxId, strConsignorName, strConsignorFederalTaxId, strTerminalControlNumber, strVendorName, strVendorFederalTaxId, strTaxPayerName,
+							  strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strTaxPayerIdentificationNumber, strTaxPayerFEIN, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strItemNo,intIntegrationError,leaf)
 							  SELECT ''' + @Guid + ''', RC.intReportingComponentId,
 								RC.intTaxAuthorityId,
 								IPC.strTaxAuthority,
@@ -180,8 +180,6 @@ DECLARE @tblTempTransaction TABLE (
 								TR.strVendorTerminalControlNumber AS strTerminalControlNumber,
 								TR.strVendorName,
 								TR.strVendorFEIN,
-								TR.strCustomerName,
-								TR.strCustomerTaxID1,
 								SMCOMPSETUP.strCompanyName,
 								SMCOMPSETUP.strAddress,
 								SMCOMPSETUP.strCity,
@@ -190,8 +188,8 @@ DECLARE @tblTempTransaction TABLE (
 								SMCOMPSETUP.strPhone,
 								SMCOMPSETUP.strStateTaxID,
 								SMCOMPSETUP.strFederalTaxID,
-								''' + @DateFrom + ''',
-								''' + @DateTo + ''',
+								NULL,
+								NULL,
 								TR.strItemNumber,
 								(SELECT COUNT(*) FROM tblTFIntegrationError),
 								0
@@ -200,8 +198,6 @@ DECLARE @tblTempTransaction TABLE (
 							  INNER JOIN tblTFIntegrationItemProductCode AS IPC ON VPC.strProductCode = IPC.strProductCode
 							  INNER JOIN tblTFIntegrationTransaction AS TR ON IPC.strSourceRecordConcatKey = TR.strSourceRecordConcatKey
 							  WHERE (RC.intReportingComponentId IN(' + @RCId + ')) 
-							  AND TR.strSourceSystem NOT IN (''F'')
-							  AND TR.strTransactionType IN (''T'', ''O'')
 							  AND TR.dtmTransactionDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							  ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
 							  ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ''
