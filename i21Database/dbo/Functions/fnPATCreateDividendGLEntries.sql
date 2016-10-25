@@ -52,11 +52,11 @@ BEGIN
 
 	INSERT INTO @returntable
 	--UNDISTRIBUTED EQUITY
-	SELECT	
+	SELECT	DISTINCT
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
 		[strBatchID]					=	'',
 		[intAccountId]					=	D.intDividendsGLAccount,
-		[dblDebit]						=	C.dblDividendAmount,
+		[dblDebit]						=	B.dblDividendAmount,
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -99,7 +99,7 @@ BEGIN
 		[strBatchID]					=	'',
 		[intAccountId]					=	@apClearing, 
 		[dblDebit]						=	0,
-		[dblCredit]						=	B.dblDividendAmount - (B.dblDividendAmount * (A.dblFederalTaxWithholding/100)),
+		[dblCredit]						=	B.dblDividendAmount,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	'Posted AP Clearing',
@@ -129,46 +129,9 @@ BEGIN
 	FROM	[dbo].tblPATDividends A
 	INNER JOIN tblPATDividendsCustomer B
 			ON A.intDividendId = B.intDividendId
-	WHERE	A.intDividendId IN (SELECT intTransactionId FROM @tmpTransacions)
-	UNION ALL
-	--FWT Liability
-	SELECT 
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchID]					=	'',
-		[intAccountId]					=	(SELECT DISTINCT intFWTLiabilityAccountId FROM tblPATCompanyPreference), 
-		[dblDebit]						=	0,
-		[dblCredit]						=	B.dblDividendAmount - (B.dblDividendAmount - (B.dblDividendAmount * (A.dblFederalTaxWithholding/100))),
-		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	0,
-		[strDescription]				=	'Posted FWT Liability',
-		[strCode]						=	'PAT',
-		[strReference]					=	A.strDividendNo,
-		[intCurrencyId]					=	0,
-		[dblExchangeRate]				=	1,
-		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	A.dtmProcessDate,
-		[strJournalLineDescription]		=	'Posted FWT Liability',
-		[intJournalLineNo]				=	1,
-		[ysnIsUnposted]					=	0,
-		[intUserId]						=	@intUserId,
-		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.strDividendNo, 
-		[intTransactionId]				=	A.intDividendId, 
-		[strTransactionType]			=	'FWT Liability - Dividends',
-		[strTransactionForm]			=	@SCREEN_NAME,
-		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	0,      
-		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	0,
-		[dblCreditReport]				=	0,
-		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	0,
-		[intConcurrencyId]				=	1
-	FROM	[dbo].tblPATDividends A
-	INNER JOIN tblPATDividendsCustomer B
-			ON A.intDividendId = B.intDividendId
+	INNER JOIN tblAPVendor APV
+			ON APV.intEntityVendorId = B.intCustomerId
 	WHERE	A.intDividendId IN (SELECT intTransactionId FROM @tmpTransacions)	
-	
 	RETURN 
 END
 

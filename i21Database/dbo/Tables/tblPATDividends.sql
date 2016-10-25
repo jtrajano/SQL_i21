@@ -12,6 +12,7 @@
     [dtmCutoffDate] DATETIME NULL, 
     [dblFederalTaxWithholding] NUMERIC(18, 6) NULL, 
 	[ysnPosted] BIT NULL DEFAULT 0,
+	[ysnVoucherProcessed] BIT NULL DEFAULT 0,
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATDividends] PRIMARY KEY ([intDividendId]) 
 )

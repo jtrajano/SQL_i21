@@ -4469,6 +4469,7 @@
     <Build Include="dbo\Views\vyuMFWastageNotMapped.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunitySearchSummary1.sql" />
     <Build Include="dbo\Views\vyuCRMAgentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForDividends.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
