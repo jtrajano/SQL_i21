@@ -128,19 +128,19 @@ BEGIN
 
 	IF @LetterName = 'Recent Overdue Collection Letter'
 	BEGIN		
-		SET @filterValue = '(dbl10DaysSum > 0 OR dbl10DaysSum > 1)'
+		SET @filterValue = '((dbl10DaysSum > 0 OR dbl10DaysSum > 1) AND (dbl30DaysSum > 0 OR dbl30DaysSum > 1) AND (dbl60DaysSum > 0 OR dbl60DaysSum > 1) AND (dbl90DaysSum > 0 OR dbl90DaysSum > 1) AND  ([dbl120DaysSum] > 0 OR [dbl121DaysSum] > 1) AND ([dbl120DaysSum] > 0 OR [dbl121DaysSum] > 1))'		
 	END
 	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
 	BEGIN		
-		SET @filterValue = '(dbl30DaysSum > 0 OR dbl30DaysSum > 1)'
+		SET @filterValue =  '((dbl60DaysSum > 0 OR dbl60DaysSum > 1) AND (dbl90DaysSum > 0 OR dbl90DaysSum > 1) AND ([dbl120DaysSum] > 0 OR [dbl120DaysSum] > 1) AND ([dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1))'
 	END
 	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
 	BEGIN		
-		SET @filterValue = '(dbl60DaysSum > 0 OR dbl60DaysSum > 1)'
+		SET @filterValue = '((dbl90DaysSum > 0 OR dbl90DaysSum > 1) AND ([dbl120DaysSum] > 0 OR [dbl120DaysSum] > 1) AND ([dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1))'
 	END
 	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
 	BEGIN		
-		SET @filterValue = '(dbl90DaysSum > 0 OR dbl90DaysSum > 1)'
+		SET @filterValue = '(([dbl120DaysSum] > 0 OR [dbl120DaysSum] > 1) AND ([dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1))'
 	END
 	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
 	BEGIN		

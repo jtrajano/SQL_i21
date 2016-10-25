@@ -62,9 +62,9 @@ INNER JOIN (
 				, [dblFutureSum]		=	dblFuture 
 				, [dbl0DaysSum]			=	dbl0Days 
 				, [dbl10DaysSum]		=	([dbl10Days] + [dbl30Days] + [dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
-				, [dbl30DaysSum]		=	([dbl30Days] + [dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
-				, [dbl60DaysSum]		=	([dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
-				, [dbl90DaysSum]		=	([dbl90Days] + [dbl120Days] + [dbl121Days])
+				, [dbl30DaysSum]		=	([dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
+				, [dbl60DaysSum]		=	([dbl90Days] + [dbl120Days] + [dbl121Days])
+				, [dbl90DaysSum]		=	([dbl120Days] + [dbl121Days])
 				, [dbl120DaysSum]		=	([dbl120Days] + [dbl121Days])
 				, [dbl121DaysSum]		=	[dbl121Days]
 				, [dblTotalDueSum]		=	dblTotalDue
@@ -103,3 +103,6 @@ LEFT JOIN (
 				tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
 INNER JOIN (SELECT intTermID, strTerm  FROM tblSMTerm) Term ON Cus.intTermsId = Term.intTermID
 ORDER BY IAR.intEntityCustomerId, IAR.intInvoiceId DESC
+
+
+
