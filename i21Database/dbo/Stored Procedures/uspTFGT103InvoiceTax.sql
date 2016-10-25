@@ -167,8 +167,8 @@ DECLARE @tblTempTransaction TABLE (
                          (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity, 
                          (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState,tblSMCompanyLocation.strCity AS strOriginCity, 
                          tblSMCompanyLocation.strStateProvince AS strOriginState,tblEMEntity.strName,tblEMEntity.strFederalTaxId AS strCustomerFEIN,tblARAccountStatus.strAccountStatusCode,tblSMShipVia.strShipVia, 
-                         tblSMShipVia.strTransporterLicense,tblSMShipVia.strTransportationMode,tblEMEntity_Transporter.strName AS strTransporterName,tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN, 
-                         '''', NULL,NULL,NULL,tblSMCompanySetup.strCompanyName,tblSMCompanySetup.strAddress,tblSMCompanySetup.strCity,tblSMCompanySetup.strState, 
+                         tblSMShipVia.strTransporterLicense,tblSMShipVia.strTransportationMode,tblEMEntity_Transporter.strName AS strTransporterName,tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN,NULL,NULL,
+                         '''',NULL,NULL,NULL,tblSMCompanySetup.strCompanyName,tblSMCompanySetup.strAddress,tblSMCompanySetup.strCity,tblSMCompanySetup.strState, 
                          tblSMCompanySetup.strZip,tblSMCompanySetup.strPhone,tblSMCompanySetup.strStateTaxID,tblSMCompanySetup.strFederalTaxID
 					FROM tblEMEntity AS tblEMEntity_Transporter INNER JOIN tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.intEntityShipViaId FULL OUTER JOIN
                          tblSMTaxCode INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId INNER JOIN
@@ -256,8 +256,8 @@ DECLARE @tblTempTransaction TABLE (
 						 tblSMShipVia.strShipVia,
 						 tblSMShipVia.strTransporterLicense, 
                          tblSMShipVia.strTransportationMode,
-						 NULL,
-						 NULL,
+						 tblEMEntity.strName AS strTransporterName, 
+						 tblEMEntity.strFederalTaxId AS strTransporterFEIN,
                          tblEMEntity.strName AS strConsignorName, 
 						 tblEMEntity.strFederalTaxId AS strConsignorFEIN, 
 						 NULL,

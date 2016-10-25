@@ -4428,6 +4428,12 @@
     <Build Include="dbo\Stored Procedures\uspICBeforeShipmentDelete.sql" />
     <Build Include="dbo\Views\vyuARCollectionOverdueDetailReport.sql" />
     <Build Include="dbo\Views\vyuAPClaimsDetails.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationTransaction.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationItemProductCode.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationSystem.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationError.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFOriginDataIntegration.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_IntegrationSystem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
