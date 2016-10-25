@@ -7,5 +7,5 @@
     [dblQuantityAdjusted] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATAdjustVolumeDetails] PRIMARY KEY ([intAdjustmentDetailId]), 
-    CONSTRAINT [FK_tblPATAdjustVolumeDetails_tblPATAdjustVolume] FOREIGN KEY ([intAdjustmentId]) REFERENCES [tblPATAdjustVolume]([intAdjustmentId]) 
+    CONSTRAINT [FK_tblPATAdjustVolumeDetails_tblPATAdjustVolume] FOREIGN KEY ([intAdjustmentId]) REFERENCES [tblPATAdjustVolume]([intAdjustmentId]) ON DELETE CASCADE
 )
