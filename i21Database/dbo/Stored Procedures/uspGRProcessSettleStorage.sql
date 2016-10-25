@@ -81,6 +81,8 @@ BEGIN TRY
 	DECLARE @intCurrencyId INT
 	DECLARE @intDefaultCurrencyId INT
 	DECLARE @intItemLocationId INT
+	DECLARE @strOrderType NVARCHAR(50)
+	DECLARE @dblUnits DECIMAL(24, 10)
 
 	SET @dtmDate = GETDATE()
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference
@@ -130,7 +132,8 @@ BEGIN TRY
 	
 	DECLARE @SettleVoucherCreate AS TABLE 
 	(
-		intSettleVoucherKey INT IDENTITY(1, 1)
+		 intSettleVoucherKey INT IDENTITY(1, 1)
+		,strOrderType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,intCustomerStorageId INT
 		,intCompanyLocationId INT
 		,intContractHeaderId INT NULL
@@ -548,7 +551,8 @@ BEGIN TRY
 
 					INSERT INTO @SettleVoucherCreate 
 					(
-						intCustomerStorageId
+						 intCustomerStorageId
+						,strOrderType
 						,intCompanyLocationId
 						,intContractHeaderId
 						,intContractDetailId
@@ -561,6 +565,7 @@ BEGIN TRY
 					)
 					SELECT 
 						 @intCustomerStorageId
+						,'Purchase Contract'
 						,@intCompanyLocationId
 						,@intContractHeaderId
 						,@intContractDetailId
@@ -619,6 +624,7 @@ BEGIN TRY
 					INSERT INTO @SettleVoucherCreate 
 					(
 						 intCustomerStorageId
+						,strOrderType
 						,intCompanyLocationId
 						,intContractHeaderId
 						,intContractDetailId
@@ -631,6 +637,7 @@ BEGIN TRY
 					)
 					SELECT 
 						 @intCustomerStorageId
+						,'Purchase Contract'
 						,@intCompanyLocationId
 						,@intContractHeaderId
 						,@intContractDetailId
@@ -778,6 +785,7 @@ BEGIN TRY
 				INSERT INTO @SettleVoucherCreate
 				(
 					 intCustomerStorageId
+					,strOrderType
 					,intCompanyLocationId
 					,intContractHeaderId
 					,intContractDetailId
@@ -790,6 +798,7 @@ BEGIN TRY
 				)
 				SELECT 
 					 @intCustomerStorageId
+					,'Direct'
 					,@intCompanyLocationId
 					,NULL
 					,NULL
@@ -839,6 +848,7 @@ BEGIN TRY
 				INSERT INTO @SettleVoucherCreate
 				(
 					 intCustomerStorageId
+					,strOrderType
 					,intCompanyLocationId
 					,intContractHeaderId
 					,intContractDetailId
@@ -851,6 +861,7 @@ BEGIN TRY
 				)
 				SELECT 
 					 @intCustomerStorageId
+					,'Direct'
 					,@intCompanyLocationId
 					,NULL
 					,NULL
@@ -872,7 +883,7 @@ BEGIN TRY
 	END
 	
 	---Creating Receipt and Voucher.
-		
+	
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3  	
 	DECLARE @ItemsToStorage AS ItemCostingTableType
 		   ,@ItemsToPost  AS ItemCostingTableType
@@ -886,15 +897,17 @@ BEGIN TRY
 		   
 	SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
 	FROM @SettleVoucherCreate
-	WHERE IsProcessed = 0
+	WHERE IsProcessed = 0 AND strOrderType IS NOT NULL
 	
 	WHILE @intSettleVoucherKey > 0
 	BEGIN
 		SET @LocationId = NULL
 		SET @intCustomerStorageId=NULL
+		SET @strOrderType=NULL
+		SET @dblUnits=NULL
 		
-		SELECT @LocationId = intCompanyLocationId,@intCustomerStorageId=intCustomerStorageId
-		FROM @SettleVoucherCreate
+		SELECT @LocationId = intCompanyLocationId,@intCustomerStorageId=intCustomerStorageId,@strOrderType=strOrderType
+		FROM   @SettleVoucherCreate
 		WHERE intSettleVoucherKey = @intSettleVoucherKey
 		
 		SELECT @intItemLocationId=intItemLocationId FROM tblICItemLocation WHERE intItemId=@ItemId AND intLocationId=@LocationId
@@ -949,7 +962,7 @@ BEGIN TRY
 		FROM @SettleVoucherCreate SV
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
-		WHERE SV.intCustomerStorageId=@intCustomerStorageId AND SV.intItemSort=1 AND SV.IsProcessed = 0   
+		WHERE SV.intCustomerStorageId=@intCustomerStorageId AND SV.intItemSort=1 AND SV.IsProcessed = 0 AND SV.strOrderType=@strOrderType   
 		ORDER BY SV.intItemSort
 
 		INSERT INTO @ItemsToPost
@@ -993,7 +1006,7 @@ BEGIN TRY
 		FROM @SettleVoucherCreate SV
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=1
-		WHERE SV.intCustomerStorageId=@intCustomerStorageId AND SV.intItemSort=1 AND SV.IsProcessed = 0     
+		WHERE SV.intCustomerStorageId=@intCustomerStorageId AND SV.intItemSort=1 AND SV.IsProcessed = 0 AND SV.strOrderType=@strOrderType     
 		ORDER BY SV.intItemSort
 						
 		--Reduce the On-Storage Quantity		
@@ -1065,7 +1078,7 @@ BEGIN TRY
 			)	
 			
 			SELECT 
-				 strReceiptType				= 'Purchase Contract'
+				 strReceiptType				= @strOrderType 
 				,intEntityVendorId			= @EntityId
 				,intShipFromId				= SV.intCompanyLocationId
 				,intLocationId				= SV.intCompanyLocationId
@@ -1099,7 +1112,10 @@ BEGIN TRY
 				,strSourceId				= NULL
 				,strSourceScreenName		= 'Settle Storage'
 			FROM @SettleVoucherCreate SV
-			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort=1 ORDER BY intSettleVoucherKey
+			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort=1 AND SV.strOrderType=@strOrderType ORDER BY intSettleVoucherKey 
+			
+			SELECT @dblUnits=SUM(dblUnits) FROM @SettleVoucherCreate SV
+			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort=1 AND SV.strOrderType=@strOrderType
 			
 			INSERT INTO @OtherCharges
 			(
@@ -1126,7 +1142,7 @@ BEGIN TRY
 		    SELECT	
 		     [intEntityVendorId]				= @EntityId
 			,[strBillOfLadding]					= NULL
-			,[strReceiptType]					= 'Purchase Contract'
+			,[strReceiptType]					= @strOrderType
 			,[intLocationId]					= SV.intCompanyLocationId
 			,[intShipViaId]						= NULL
 			,[intShipFromId]					= SV.intCompanyLocationId
@@ -1137,7 +1153,7 @@ BEGIN TRY
 			,[dblRate]							= ABS(SV.[dblCashPrice])
 			,[intCostUOMId]						= Item.intCostUOMId
 			,[intOtherChargeEntityVendorId]		= NULL
-			,[dblAmount]						= SV.[dblUnits]* ABS(SV.[dblCashPrice])
+			,[dblAmount]						= @dblUnits* ABS(SV.[dblCashPrice])
 			,[strAllocateCostBy]				= 'Unit'
 			,[intContractHeaderId]				= SV.[intContractHeaderId]
 			,[intContractDetailId]				= SV.[intContractDetailId]
@@ -1145,11 +1161,8 @@ BEGIN TRY
 			,[ysnPrice]							= CASE WHEN SV.[dblCashPrice] < 0 THEN 1 ELSE 0 END
 			FROM @SettleVoucherCreate SV
 			JOIN tblICItem Item ON Item.intItemId = SV.[intItemId]
-			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort <> 1 ORDER BY intSettleVoucherKey
-			
-			
+			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort <> 1  ORDER BY intSettleVoucherKey
 
-			
 			EXEC dbo.uspICAddItemReceipt 
 				 @ReceiptStagingTable
 				,@OtherCharges
@@ -1215,11 +1228,11 @@ BEGIN TRY
 		
 		UPDATE @SettleVoucherCreate
 		SET IsProcessed = 1
-		WHERE intCustomerStorageId=@intCustomerStorageId 
+		WHERE intCustomerStorageId=@intCustomerStorageId AND strOrderType=@strOrderType 
 		
 		SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
 		FROM @SettleVoucherCreate
-		WHERE intSettleVoucherKey > @intSettleVoucherKey AND IsProcessed = 0
+		WHERE intSettleVoucherKey > @intSettleVoucherKey AND IsProcessed = 0 AND strOrderType IS NOT NULL
 		
 	END
 	
