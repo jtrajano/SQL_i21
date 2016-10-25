@@ -2811,7 +2811,7 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Generate.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupIdForVendor.sql" />
-    <Build Include="dbo\Functions\fnCTGetBillIds.sql" />
+    <Build Include="dbo\Functions\fnCTGetPrepaidIds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLotLabel.sql" />
     <Build Include="dbo\Tables\tblICCategoryTax.sql" />
     <Build Include="dbo\Tables\tblPRTypeTimeOffDetail.sql" />

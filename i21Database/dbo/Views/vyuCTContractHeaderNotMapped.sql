@@ -3,7 +3,7 @@
 AS 
 
 	SELECT	*,
-			CAST(CASE WHEN ISNULL(strBillIds,'') = '' THEN 0 ELSE 1 END AS BIT) ysnPrepaid
+			CAST(CASE WHEN ISNULL(strPrepaidIds,'') = '' THEN 0 ELSE 1 END AS BIT) ysnPrepaid
 	FROM	(
 				SELECT	CH.intContractHeaderId,
 						PF.intPriceFixationId, 
@@ -17,7 +17,7 @@ AS
 						END		AS		ysnSpreadAvailable,
 
 						dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intLoadUOMId,CH.intCommodityUOMId,1)	AS	dblCommodityUOMConversionFactor,
-						dbo.fnCTGetBillIds(CH.intContractHeaderId) strBillIds,
+						dbo.fnCTGetPrepaidIds(CH.intContractHeaderId) strPrepaidIds,
 						CY.ysnExchangeTraded
 
 				FROM	tblCTContractHeader CH	LEFT
