@@ -18,6 +18,7 @@ SELECT Header.intQuoteHeaderId
 	, strTerminalNumber = Terminal.strVendorId
 	, strTerminalName = Terminal.strName
 	, Detail.intSupplyPointId
+	, SupplyPoint.intEntityLocationId
 	, SupplyPoint.strSupplyPoint
 	, dblRackPrice = ISNULL(Detail.dblRackPrice, 0.000000)
 	, dblDeviationAmount = ISNULL(Detail.dblDeviationAmount, 0.000000)
