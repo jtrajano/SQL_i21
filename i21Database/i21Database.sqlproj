@@ -4470,6 +4470,8 @@
     <Build Include="dbo\Views\vyuCRMOpportunitySearchSummary1.sql" />
     <Build Include="dbo\Views\vyuCRMAgentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForDividends.sql" />
+    <Build Include="dbo\Functions\fnAESDecrypt.sql" />
+    <Build Include="dbo\Functions\fnAESEncrypt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

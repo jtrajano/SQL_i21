@@ -177,6 +177,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				GOTO EXIT_TRIGGER
 			END		
 
+			--For Encryption and Decryption
+			OPEN SYMMETRIC KEY i21EncryptionSymKey
+			   DECRYPTION BY CERTIFICATE i21EncryptionCert
+			   WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
+
 			-- Proceed in inserting the record the base table (tblCMBankAccount)			
 			INSERT INTO tblCMBankAccount (
 					intBankId
@@ -240,8 +245,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCurrencyId						= i.intCurrencyId
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
-					,strBankAccountNo					= i.strBankAccountNo
-					,strRTN								= i.strRTN
+					,strBankAccountNo					= [dbo].fnAESEncrypt(i.strBankAccountNo)
+					,strRTN								= [dbo].fnAESEncrypt(i.strRTN)
 					,strAddress							= i.strAddress
 					,strZipCode							= i.strZipCode
 					,strCity							= i.strCity
@@ -266,8 +271,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
-					,strMICRRoutingNo					= i.strMICRRoutingNo
-					,strMICRBankAccountNo				= i.strMICRBankAccountNo
+					,strMICRRoutingNo					= [dbo].fnAESEncrypt(i.strMICRRoutingNo)
+					,strMICRBankAccountNo				= [dbo].fnAESEncrypt(i.strMICRBankAccountNo)
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -368,6 +373,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 		 		
 		EXIT_TRIGGER: 
 
+		CLOSE SYMMETRIC KEY i21EncryptionSymKey
+
 		END
 		')
 
@@ -397,6 +404,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				GOTO EXIT_TRIGGER
 			END 
 
+			--For Encryption and Decryption
+			OPEN SYMMETRIC KEY i21EncryptionSymKey
+			   DECRYPTION BY CERTIFICATE i21EncryptionCert
+			   WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
+
 			-- Proceed in updating the base table (tblCMBankAccount)				
 			UPDATE	dbo.tblCMBankAccount 
 			SET		intBankId							= i.intBankId
@@ -405,8 +417,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCurrencyId						= i.intCurrencyId
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
-					,strBankAccountNo					= i.strBankAccountNo
-					,strRTN								= i.strRTN
+					,strBankAccountNo					= [dbo].fnAESEncrypt(i.strBankAccountNo)
+					,strRTN								= [dbo].fnAESEncrypt(i.strRTN)
 					,strAddress							= i.strAddress
 					,strZipCode							= i.strZipCode
 					,strCity							= i.strCity
@@ -431,8 +443,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
-					,strMICRRoutingNo					= i.strMICRRoutingNo
-					,strMICRBankAccountNo				= i.strMICRBankAccountNo
+					,strMICRRoutingNo					= [dbo].fnAESEncrypt(i.strMICRRoutingNo)
+					,strMICRBankAccountNo				= [dbo].fnAESEncrypt(i.strMICRBankAccountNo)
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -580,6 +592,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 
 		EXIT_TRIGGER:
+
+		CLOSE SYMMETRIC KEY i21EncryptionSymKey
 		END
 		')
 END

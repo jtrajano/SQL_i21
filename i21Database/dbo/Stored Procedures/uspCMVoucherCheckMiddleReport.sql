@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
   
 DECLARE @BANK_DEPOSIT INT = 1  
   ,@BANK_WITHDRAWAL INT = 2  
@@ -109,6 +109,11 @@ WHERE [fieldname] = 'strBatchId'
 -- Sanitize the parameters  
 SET @strTransactionId = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL ELSE @strTransactionId END  
 SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL ELSE @strBatchId END  
+
+--For Encryption and Decryption
+OPEN SYMMETRIC KEY i21EncryptionSymKey
+	DECRYPTION BY CERTIFICATE i21EncryptionCert
+	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
   
 -- Report Query:  
 SELECT	CHK.dtmDate
@@ -189,3 +194,5 @@ WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
 		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
 ORDER BY CHK.strReferenceNo ASC
+
+CLOSE SYMMETRIC KEY i21EncryptionSymKey
