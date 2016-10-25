@@ -81,3 +81,4 @@ INNER JOIN (
 	LEFT JOIN [vyuARCustomerInquiryReport] CI
 		ON Ent.intEntityId = CI.intEntityCustomerId) I
 	ON B.intCustomerNumber = I.intEntityId
+WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0
