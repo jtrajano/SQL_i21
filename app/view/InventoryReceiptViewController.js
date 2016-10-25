@@ -4851,7 +4851,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
              }*/
 
             // Calculate how many times to loop.
-            var replicaCount = (convertedItemQty - lastQty) / lotQty;
+            var totalLot = 0;
+
+            grdLotTracking.store.each(function (lot) {
+                totalLot += lot.get('dblQuantity');
+            });
+
+            var replicaCount = (convertedItemQty - lastQty) / totalLot;
             replicaCount = Math.ceil(replicaCount);
 
             // Calculate the last Gross and Tare weights.
@@ -5007,16 +5013,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     var totalLotQty = 0;
 
-                    currentReceiptItem.tblICInventoryReceiptItemLots().each(function (lot) {
+                   /* currentReceiptItem.tblICInventoryReceiptItemLots().each(function (lot) {
+                        totalLotQty += lot.get('dblQuantity');
+                    });*/
+                    grdLotTracking.store.each(function (lot) {
                         totalLotQty += lot.get('dblQuantity');
                     });
 
                     totalLotQty += (ctr === replicaCount - 1 ? lastQty : lotQty);
 
                     if (totalLotQty > lineItemQty) {
-                        var itemNo = currentReceiptItem.get('strItemNo');
-                        iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') +
-                    ' are fully replicated.');
+                        //Show this message only if before replicating lots, total quantity is already greater than or equal to line item quantity
+                        if(ctr === 0) {
+                           var itemNo = currentReceiptItem.get('strItemNo');
+                           iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') + ' are fully replicated.');
+                        }
+
                        // When item is already fully replicated, it should not generate lots anymore but should show an error message IC-1888
                        /* iRely.Msg.showQuestion('The lots for ' + itemNo + ' is fully replicated. Are you sure you want to continue?',
                             function (p) {
@@ -5028,7 +5040,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                             }, Ext.MessageBox.YESNO, win);*/
                     } else {
-                        currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+                       //currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+                       grdLotTracking.store.add(newLot);
                     }
 
                     // call f function from above within a setTimeout.
