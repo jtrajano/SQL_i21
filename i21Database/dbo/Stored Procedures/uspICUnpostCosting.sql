@@ -446,15 +446,18 @@ BEGIN
 						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
 				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
-				EXEC [dbo].[uspICPostStockQuantity]
-					@intItemId
-					,@intItemLocationId
-					,@intSubLocationId
-					,@intStorageLocationId
-					,@intItemUOMId
-					,@dblQty
-					,@dblUOMQty
-					,@intLotId
+				IF ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+				BEGIN 
+					EXEC [dbo].[uspICPostStockQuantity]
+						@intItemId
+						,@intItemLocationId
+						,@intSubLocationId
+						,@intStorageLocationId
+						,@intItemUOMId
+						,@dblQty
+						,@dblUOMQty
+						,@intLotId
+				END 
 
 				FETCH NEXT FROM loopItemsToUnpost INTO 
 					@intItemId
