@@ -4304,5 +4304,350 @@ Ext.define('iRely.TestEngine', {
 
         chain.push(fn);
         return this;
+    },
+
+//------------------------------------------ selectGridComboBottomRowByFilter----------------------------------------
+    selectGridComboBottomRowByFilter: function(item,  column, filter, delay, comboColumn, index) {
+        var me = this,
+            chain = me.chain;
+        me.selectBottomRow(item);
+        var fn = function (next) {
+            var t = this,
+                win = Ext.WindowManager.getActive();
+            if (win) {
+                var grid = item.editingPlugin ? item : win.down(item);
+                if (grid) {
+                    var store = grid.store,
+                        sm = grid.getSelectionModel(),
+                        selected, row;
+                    if (!sm) {
+                        t.ok(false, 'No Selected Record');
+                    }
+                    selected = sm.getSelection();
+                    if (selected > 1) {
+                        t.ok(false, 'Only supports 1 data row entry at one time');
+                    }
+                    row = store.indexOf(selected[0]);
+                    if (row !== -1) {
+                        row = store.getAt(row);
+                    }
+                    else {
+                        next();
+                    }
+                    if (Ext.Array.indexOf(grid.columns, column) === -1) {
+                        column = grid.columns[column] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + column + ']');
+                    }
+                    if (row && column) {
+                        var plugin = grid.editingPlugin,
+                            cell = plugin.getCell(row, column);
+                        if (plugin.clicksToEdit === 1) {
+                            t.click(cell);
+                        } else {
+                            t.doubleClick(cell);
+                        }
+                        if (plugin.activeEditor) {
+                            var editor = plugin.activeEditor,
+                                els = (function () {
+                                    var cell = editor.field.el.query('.x-trigger-cell'),
+                                        form = editor.field.el.query('.x-form-trigger');
+                                    return (cell.length && cell) || (form.length && form);
+                                })(),
+                                length = els.length,
+                                trigger = els[length - 1];
+                            t.diag('Entering data on grid ' + item);
+                            if (Ext.isArray(filter)) {
+                                editor.field.defaultFilters = filter;
+                                t.chain([
+                                    {
+                                        action: 'wait',
+                                        delay: 100
+                                    },
+                                    function (next) {
+                                        editor.field.expand();
+                                        next();
+                                    },
+                                    function (next) {
+                                        var comboGrid = editor.field.getPicker();
+                                        if (typeof(comboGrid.getView) == "function") {
+                                            var node = comboGrid.getView().getNode(0);
+                                            t.click(node, function () {
+                                                editor.completeEdit();
+                                                next();
+                                            });
+                                        } else {
+                                            next();
+                                        }
+                                    },
+                                    next
+                                ]);
+                                return;
+                            }
+                            t.chain([
+                                {
+                                    action: 'click',
+                                    target: trigger
+                                },
+                                {
+                                    action: 'wait',
+                                    delay: 100
+                                },
+                                function (next) {
+                                    t.selectText(editor, 0, 30);
+                                    next();
+                                },
+                                function (next) {
+                                    t.type(editor, filter, next);
+                                },
+                                {
+                                    action: 'wait',
+                                    delay: delay
+                                },
+                                function (next) {
+                                    if (editor.field.isExpanded === true) {
+                                        var comboGrid = editor.field.getPicker(),
+                                            store1 = comboGrid.store,
+                                            storeCount = store1.getCount();
+                                        if (storeCount === 1) {
+                                            if (typeof(comboGrid.getView) == "function") {
+                                                var node = comboGrid.getView().getNode(0);
+                                                t.click(node, function () {
+                                                    editor.completeEdit();
+                                                    next();
+                                                });
+                                            } else {
+                                                next();
+                                            }
+                                        } else if (store1.isLoading() == true) {
+                                            t.waitForStoresToLoad(store1, function () {
+                                                var filterRec = store1.findExact(comboColumn, filter),
+                                                    record = store1.getAt(filterRec);
+                                                if (index != null) record = index;
+                                                if (typeof(comboGrid.getView) == "function") {
+                                                    var node1 = comboGrid.getView().getNode(record);
+                                                    t.click(node1, next);
+                                                } else {
+                                                    next();
+                                                }
+                                            })
+                                        } else {
+                                            var filterRec = store1.findExact(comboColumn, filter),
+                                                record = store1.getAt(filterRec);
+                                            if (index != null) record = index;
+                                            if (typeof(comboGrid.getView) == "function") {
+                                                var node1 = comboGrid.getView().getNode(record);
+                                                t.click(node1, next);
+                                            } else {
+                                                next();
+                                            }
+                                        }
+                                    } else {
+                                        next();
+                                    }
+                                },
+                                next
+                            ]);
+                        } else {
+                            t.ok(false, 'Combo Box is not existing.');
+                            next();
+                        }
+                    } else {
+                        t.ok(false, 'Cell is not existing.');
+                        next();
+                    }
+                } else {
+                    t.ok(false, 'Cell is not existing.');
+                    next();
+                }
+            } else {
+                t.ok(false, 'Cell is not existing.');
+                next();
+            }
+        };
+        chain.push(fn);
+        return this;
+    },
+
+//------------------------------------------ selectBottomRow ----------------------------------------
+    selectBottomRow : function(item) {
+        var me = this,
+            chain = me.chain,
+            fn = function (next) {
+                var w = Ext.WindowManager.getActive(),
+                    grid = w.down(!item ? 'grid' : item),
+                    store = grid.getStore(),
+                    sm = grid.getSelectionModel();
+                var storeLoadCheck = setInterval(function () {
+                    if (store.isLoaded()) {
+                        clearInterval(storeLoadCheck);
+                        if (store.data.items.length.bottom){
+                            sm.select(store.data.items.length - 2);
+                        }
+                        next();
+                    }
+                }, 30);
+            };
+        chain.push(fn);
+        return this;
+    },
+
+//------------------------------------------ selectGridComboDummyRowByFilter ----------------------------------------
+    selectGridComboDummyRowByFilter: function(item,  column, filter, delay, comboColumn, index) {
+        var me = this,
+            chain = me.chain;
+        me.selectDummyRow(item);
+        var fn = function (next) {
+            var t = this,
+                win = Ext.WindowManager.getActive();
+            if (win) {
+                var grid = item.editingPlugin ? item : win.down(item);
+                if (grid) {
+                    var store = grid.store,
+                        sm = grid.getSelectionModel(),
+                        selected, row;
+                    if (!sm) {
+                        t.ok(false, 'No Selected Record');
+                    }
+                    selected = sm.getSelection();
+                    if (selected > 1) {
+                        t.ok(false, 'Only supports 1 data row entry at one time');
+                    }
+                    row = store.indexOf(selected[0]);
+                    if (row !== -1) {
+                        row = store.getAt(row);
+                    }
+                    else {
+                        next();
+                    }
+                    if (Ext.Array.indexOf(grid.columns, column) === -1) {
+                        column = grid.columns[column] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + column + ']');
+                    }
+                    if (row && column) {
+                        var plugin = grid.editingPlugin,
+                            cell = plugin.getCell(row, column);
+                        if (plugin.clicksToEdit === 1) {
+                            t.click(cell);
+                        } else {
+                            t.doubleClick(cell);
+                        }
+                        if (plugin.activeEditor) {
+                            var editor = plugin.activeEditor,
+                                els = (function () {
+                                    var cell = editor.field.el.query('.x-trigger-cell'),
+                                        form = editor.field.el.query('.x-form-trigger');
+                                    return (cell.length && cell) || (form.length && form);
+                                })(),
+                                length = els.length,
+                                trigger = els[length - 1];
+                            t.diag('Entering data on grid ' + item);
+                            if (Ext.isArray(filter)) {
+                                editor.field.defaultFilters = filter;
+                                t.chain([
+                                    {
+                                        action: 'wait',
+                                        delay: 100
+                                    },
+                                    function (next) {
+                                        editor.field.expand();
+                                        next();
+                                    },
+                                    function (next) {
+                                        var comboGrid = editor.field.getPicker();
+                                        if (typeof(comboGrid.getView) == "function") {
+                                            var node = comboGrid.getView().getNode(0);
+                                            t.click(node, function () {
+                                                editor.completeEdit();
+                                                next();
+                                            });
+                                        } else {
+                                            next();
+                                        }
+                                    },
+                                    next
+                                ]);
+                                return;
+                            }
+                            t.chain([
+                                {
+                                    action: 'click',
+                                    target: trigger
+                                },
+                                {
+                                    action: 'wait',
+                                    delay: 100
+                                },
+                                function (next) {
+                                    t.selectText(editor, 0, 30);
+                                    next();
+                                },
+                                function (next) {
+                                    t.type(editor, filter, next);
+                                },
+                                {
+                                    action: 'wait',
+                                    delay: delay
+                                },
+                                function (next) {
+                                    if (editor.field.isExpanded === true) {
+                                        var comboGrid = editor.field.getPicker(),
+                                            store1 = comboGrid.store,
+                                            storeCount = store1.getCount();
+                                        if (storeCount === 1) {
+                                            if (typeof(comboGrid.getView) == "function") {
+                                                var node = comboGrid.getView().getNode(0);
+                                                t.click(node, function () {
+                                                    editor.completeEdit();
+                                                    next();
+                                                });
+                                            } else {
+                                                next();
+                                            }
+                                        } else if (store1.isLoading() == true) {
+                                            t.waitForStoresToLoad(store1, function () {
+                                                var filterRec = store1.findExact(comboColumn, filter),
+                                                    record = store1.getAt(filterRec);
+                                                if (index != null) record = index;
+                                                if (typeof(comboGrid.getView) == "function") {
+                                                    var node1 = comboGrid.getView().getNode(record);
+                                                    t.click(node1, next);
+                                                } else {
+                                                    next();
+                                                }
+                                            })
+                                        } else {
+                                            var filterRec = store1.findExact(comboColumn, filter),
+                                                record = store1.getAt(filterRec);
+                                            if (index != null) record = index;
+                                            if (typeof(comboGrid.getView) == "function") {
+                                                var node1 = comboGrid.getView().getNode(record);
+                                                t.click(node1, next);
+                                            } else {
+                                                next();
+                                            }
+                                        }
+                                    } else {
+                                        next();
+                                    }
+                                },
+                                next
+                            ]);
+                        } else {
+                            t.ok(false, 'Combo Box is not existing.');
+                            next();
+                        }
+                    } else {
+                        t.ok(false, 'Cell is not existing.');
+                        next();
+                    }
+                } else {
+                    t.ok(false, 'Cell is not existing.');
+                    next();
+                }
+            } else {
+                t.ok(false, 'Cell is not existing.');
+                next();
+            }
+        };
+        chain.push(fn);
+        return this;
     }
 });
