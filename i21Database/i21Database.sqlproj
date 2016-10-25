@@ -4427,6 +4427,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyOwnership.sql" />
     <Build Include="dbo\Stored Procedures\uspICBeforeShipmentDelete.sql" />
     <Build Include="dbo\Views\vyuARCollectionOverdueDetailReport.sql" />
+    <Build Include="dbo\Views\vyuAPClaimsDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
