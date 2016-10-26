@@ -5,8 +5,9 @@
 	[intExpenseAccount] [int] NULL,
 	[intEarningAccountId] [int] NULL,
 	[intDeductionAccountId] [int] NULL,
+	[ysnMaskEmployeeName] BIT NOT NULL DEFAULT ((0)), 
 	[intConcurrencyId] [int] NULL,
- CONSTRAINT [PK_tblPRCompanyPreference] PRIMARY KEY CLUSTERED 
+    CONSTRAINT [PK_tblPRCompanyPreference] PRIMARY KEY CLUSTERED 
 (
 	[intCompanyPreferenceId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
