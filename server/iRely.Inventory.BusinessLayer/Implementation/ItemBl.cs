@@ -281,10 +281,18 @@ namespace iRely.Inventory.BusinessLayer
         /// <returns></returns>
         public async Task<SearchResult> GetItemStockDetails(GetParameter param)
         {
+            bool excludePhasedOutZeroStockItem = false;
+            var el = param.filter.Where(p => p.c == "excludePhasedOutZeroStockItem").Select(p => p.v);
+            if (el != null)
+            {
+                if(el.Count() > 0)
+                    bool.TryParse(el.First(), out excludePhasedOutZeroStockItem);
+            }
             var query = _db.GetQuery<vyuICGetItemStock>()
                 .Include(p => p.tblICItemAccounts)
                 .Include(p => p.tblICItemPricings).Filter(param, true)
-                .Where(p => p.strStatus != "Discontinued");
+                .Where(p => p.strStatus != "Discontinued" && 
+                    (excludePhasedOutZeroStockItem ? !(p.strStatus == "Phased Out" && p.dblAvailable <= 0) : true));
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()

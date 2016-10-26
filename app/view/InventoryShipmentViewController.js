@@ -319,10 +319,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strItemNo',
                     editor: {
                         readOnly: '{readOnlyItemDropdown}',
-                        store: '{items}',
+                        store: '{items}', 
                         defaultFilters: [{
                             column: 'intLocationId',
                             value: '{current.intShipFromLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'excludePhasedOutZeroStockItem',
+                            value: true,
                             conjunction: 'and'
                         }]
                     }
