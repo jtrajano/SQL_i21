@@ -409,6 +409,32 @@ BEGIN
 		where strType = 'CRM' and intProjectId not in (select intOpportunityId from tblCRMOpportunity)
 	)
 	SET IDENTITY_INSERT tblCRMOpportunity OFF
+
+	insert into tblSMTransaction
+	(
+		intScreenId
+		,strRecordNo
+		,strTransactionNo
+		,intEntityId
+		,dtmDate
+		,strApprovalStatus
+		,intConcurrencyId
+	)
+	(
+		select
+			intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity')
+			,strRecordNo = convert(nvarchar(50), tblCRMOpportunity.intOpportunityId)
+			,strTransactionNo = SUBSTRING(tblCRMOpportunity.strName, 0, 47) + '...'
+			,intEntityId = tblCRMOpportunity.intInternalSalesPerson
+			,dtmDate = tblCRMOpportunity.dtmCreated
+			,strApprovalStatus = null
+			,intConcurrencyId = 1
+		from
+			tblCRMOpportunity
+		where
+			convert(nvarchar(50), tblCRMOpportunity.intOpportunityId) not in (select strRecordNo from tblSMTransaction where intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity'))
+	)
+
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityOverview'))
