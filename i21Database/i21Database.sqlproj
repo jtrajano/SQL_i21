@@ -4473,6 +4473,7 @@
     <Build Include="dbo\Functions\fnAESEncrypt.sql" />
     <Build Include="dbo\Tables\tblGLCrossReferenceMapping.sql" />
     <Build Include="dbo\Tables\tblGLAccountSystem.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForPaidEquity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -7,6 +7,7 @@
     [intRefundTypeId] INT NOT NULL, 
     [dblEquity] NUMERIC(18, 6) NOT NULL, 
 	[dtmLastActivityDate] DATETIME NULL,
+	[ysnEquityPaid] BIT NULL DEFAULT 0,
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATCustomerEquity] PRIMARY KEY ([intCustomerEquityId]) 
 )

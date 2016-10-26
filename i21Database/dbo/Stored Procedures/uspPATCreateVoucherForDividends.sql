@@ -45,8 +45,6 @@ BEGIN TRANSACTION
 
 	INSERT INTO @dividendCustomerIds
 	SELECT intDividendCustomerId FROM #tempDivCust
-
-	SELECT * from @dividendCustomerIds
 BEGIN TRY
 
 	WHILE EXISTS(SELECT 1 FROM @dividendCustomerIds)
