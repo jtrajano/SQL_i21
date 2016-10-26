@@ -1,6 +1,11 @@
-﻿CREATE PROCEDURE [dbo].[uspARCollectionLetter]  
+﻿ CREATE PROCEDURE [dbo].[uspARCollectionLetter]  
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
+
+--DECLARE 	@xmlParam NVARCHAR(MAX) = NULL
+
+--SET @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>intEntityCustomerId</fieldname><condition>EQUAL TO</condition><from>1177|^|</from><join>OR</join><begingroup /><endgroup /><datatype>String</datatype></filter><filter><fieldname>intLetterId</fieldname><condition>EQUAL TO</condition><from>73</from><join>OR</join><begingroup /><endgroup /><datatype>Int32</datatype></filter></filters></xmlparam>'
+
 BEGIN
 	DECLARE @idoc						INT
 			, @strCustomerIds			NVARCHAR(MAX)		
@@ -61,7 +66,7 @@ BEGIN
 	DECLARE @OriginalMsgInHTMLTable TABLE  (
 		msgAsHTML VARCHAR(max)
 	);
-
+	 
 	SELECT 
 		@intLetterId = [from]
 	FROM 
@@ -126,35 +131,7 @@ BEGIN
 	FROM 
 		@OriginalMsgInHTMLTable
 
-	IF @LetterName = 'Recent Overdue Collection Letter'
-	BEGIN		
-		SET @filterValue = '((dbl10DaysSum > 0 OR dbl10DaysSum > 1) AND (dbl30DaysSum > 0 OR dbl30DaysSum > 1) AND (dbl60DaysSum > 0 OR dbl60DaysSum > 1) AND (dbl90DaysSum > 0 OR dbl90DaysSum > 1) AND  ([dbl120DaysSum] > 0 OR [dbl121DaysSum] > 1) AND ([dbl120DaysSum] > 0 OR [dbl121DaysSum] > 1))'		
-	END
-	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
-	BEGIN		
-		SET @filterValue =  '((dbl60DaysSum > 0 OR dbl60DaysSum > 1) AND (dbl90DaysSum > 0 OR dbl90DaysSum > 1) AND ([dbl120DaysSum] > 0 OR [dbl120DaysSum] > 1) AND ([dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1))'
-	END
-	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
-	BEGIN		
-		SET @filterValue = '((dbl90DaysSum > 0 OR dbl90DaysSum > 1) AND ([dbl120DaysSum] > 0 OR [dbl120DaysSum] > 1) AND ([dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1))'
-	END
-	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
-	BEGIN		
-		SET @filterValue = '(([dbl120DaysSum] > 0 OR [dbl120DaysSum] > 1) AND ([dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1))'
-	END
-	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
-	BEGIN		
-		SET @filterValue = '([dbl121DaysSum] > 0 OR [dbl121DaysSum] > 1)'
-	END
-	ELSE IF @LetterName = 'Credit Suspension'					
-	BEGIN
-		SET @filterValue = '([dblCreditLimit] = 0)'
-	END
-	ELSE IF @LetterName = 'Credit Review'					
-	BEGIN
-		SET @filterValue = '([dblCreditLimit] > 0)'
-	END
-		 
+	 
 	INSERT INTO @SelectedPlaceHolderTable
 	(
 		intPlaceHolderId
@@ -182,7 +159,29 @@ BEGIN
 	BEGIN
 		DECLARE @CustomerId INT
 		SELECT TOP 1 @CustomerId = intEntityCustomerId FROM @SelectedCustomer ORDER BY intEntityCustomerId
-						
+
+	IF @LetterName = 'Recent Overdue Collection Letter'
+	BEGIN		
+		UPDATE tblARCollectionOverdue SET dbl10DaysSum = (dbl10DaysSum + dbl30DaysSum + dbl60DaysSum + dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId 
+		SET @filterValue = '((dbl10DaysSum > 0 OR dbl10DaysSum > 1) OR (dbl30DaysSum > 0 OR dbl30DaysSum > 1) OR (dbl60DaysSum > 0 OR dbl60DaysSum > 1) OR (dbl90DaysSum > 0 OR dbl90DaysSum > 1) OR  ([dbl120DaysSum] > 0 OR [dbl121DaysSum] > 1) OR ([dbl120DaysSum] > 0 OR [dbl121DaysSum] > 1))'		
+	END
+	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
+	BEGIN		
+		UPDATE tblARCollectionOverdue SET dbl30DaysSum =  (dbl60DaysSum + dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+	END
+	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
+	BEGIN		
+		UPDATE tblARCollectionOverdue SET dbl60DaysSum =  (dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+	END
+	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
+	BEGIN		
+		UPDATE tblARCollectionOverdue SET dbl90DaysSum =  (dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+	END
+	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
+	BEGIN		
+		UPDATE tblARCollectionOverdue SET dbl121DaysSum =  (dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+	END
+ 						
 		WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
 		BEGIN
 			DECLARE @PlaceHolderId				INT
@@ -416,7 +415,7 @@ BEGIN
 					' + @SourceTable + ' 
 				WHERE 
 					[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
-				+ ' AND ' + @filterValue + '
+				+ '
 												 
 				DECLARE @HTMLTableRows VARCHAR(MAX)
 				SET @HTMLTableRows = ''''
@@ -614,5 +613,8 @@ BEGIN
 			intEntityCustomerId, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId, strName
 		FROM 
 			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
+
+TRUNCATE TABLE tblARCollectionOverdueDetail
+TRUNCATE TABLE tblARCollectionOverdue
 
 END

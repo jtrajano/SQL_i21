@@ -1,108 +1,57 @@
 ﻿CREATE VIEW [dbo].[vyuARCollectionOverdueReport]
 AS
-SELECT TOP 100 PERCENT
-	intCompanyLocationId		=	(SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
-	, strCompanyName			=	(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-	, strCompanyAddress			=	(SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
-	, strCompanyPhone			=	(SELECT TOP 1 strPhone FROM tblSMCompanySetup)
-	, IAR.intEntityCustomerId
-	, Cus.strCustomerNumber
-	, strCustomerName			=	Cus.strName
-	, strCustomerAddress		=	[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, Cus.strName, NULL)
-	, strCustomerPhone			=	EnPhoneNo.strPhone 
-	, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = Cus.intEntityCustomerId) 
-	, IAR.intInvoiceId
-	, IAR.strInvoiceNumber
-	, IAR.strBOLNumber
-	, IAR.dblCreditLimit
-	, intTermId					= Cus.intTermsId
-	, Term.strTerm
-	, IAR.dblTotalAR
-	, CAR.[dblTotalARSum]		
-	, IAR.dblFuture
-	, CAR.[dblFutureSum]	
-	, IAR.dbl0Days
-	, CAR.[dbl0DaysSum]	
-	, IAR.dbl10Days
-	, CAR.[dbl10DaysSum]	
-	, IAR.dbl30Days
-	, CAR.[dbl30DaysSum]
-	, IAR.dbl60Days
-	, CAR.[dbl60DaysSum]	
-	, IAR.dbl90Days
-	, CAR.[dbl90DaysSum]
-	, IAR.dbl120Days
-	, CAR.[dbl120DaysSum]	
-	, IAR.[dbl121Days]
-	, CAR.[dbl121DaysSum]	
-	, IAR.dblTotalDue
-	, CAR.[dblTotalDueSum]	
-	, IAR.dblAmountPaid
-	, CAR.[dblAmountPaidSum]	
-	, IAR.dblInvoiceTotal
-	, CAR.[dblInvoiceTotalSum]	 
-	, IAR.dblCredits
-	, CAR.[dblCreditsSum]	
-	, IAR.dblPrepaids
-	, CAR.[dblPrepaidsSum]
-	, IAR.dtmDate
-	, IAR.dtmDueDate	
-FROM 
-	vyuARCollectionOverdueDetailReport IAR
-INNER JOIN (
-			SELECT 
-				intInvoiceId
-				, intTermId  
-			FROM tblARInvoice 
-			) ARI ON IAR.intInvoiceId = ARI.intInvoiceId
-INNER JOIN (
-			SELECT 
-				intEntityCustomerId
-				, [dblTotalARSum]		=	dblTotalAR  
-				, [dblFutureSum]		=	dblFuture 
-				, [dbl0DaysSum]			=	dbl0Days 
-				, [dbl10DaysSum]		=	([dbl10Days] + [dbl30Days] + [dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
-				, [dbl30DaysSum]		=	([dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
-				, [dbl60DaysSum]		=	([dbl90Days] + [dbl120Days] + [dbl121Days])
-				, [dbl90DaysSum]		=	([dbl120Days] + [dbl121Days])
-				, [dbl120DaysSum]		=	([dbl120Days] + [dbl121Days])
-				, [dbl121DaysSum]		=	[dbl121Days]
-				, [dblTotalDueSum]		=	dblTotalDue
-				, [dblAmountPaidSum]	=	dblAmountPaid
-				, [dblInvoiceTotalSum]	=	dblInvoiceTotal
-				, [dblCreditsSum]		=	dblCredits
-				, [dblPrepaidsSum]		=	dblPrepaids
-			FROM vyuARCollectionOverdueSummaryReport
-) CAR ON IAR.intEntityCustomerId = CAR.intEntityCustomerId
-INNER JOIN (
-			SELECT 
-				intEntityCustomerId
-				, strCustomerNumber
-				, strName
-				, strBillToAddress
-				, strBillToCity
-				, strBillToCountry
-				, strBillToLocationName
-				, strBillToState
-				, strBillToZipCode
-				, intTermsId 
-			FROM 
-				vyuARCustomer) Cus ON IAR.intEntityCustomerId = Cus.intEntityCustomerId AND CAR.intEntityCustomerId = IAR.intEntityCustomerId
-INNER JOIN (
-			SELECT 
-				intEntityId
-					, [intEntityContactId]
-					, ysnDefaultContact 
-			FROM 
-				[tblEMEntityToContact]) CusToCon ON IAR.intEntityCustomerId = CusToCon.intEntityId AND CAR.intEntityCustomerId = CusToCon.intEntityId AND  Cus.intEntityCustomerId = CusToCon.intEntityId AND CusToCon.ysnDefaultContact = 1
-LEFT JOIN (
-			SELECT 
-				intEntityId
-				, strPhone 
-			FROM 
-				tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
-INNER JOIN (SELECT intTermID, strTerm  FROM tblSMTerm) Term ON Cus.intTermsId = Term.intTermID
-ORDER BY IAR.intEntityCustomerId, IAR.intInvoiceId DESC
-
+SELECT 
+	ARCOD.intCompanyLocationId		 
+	,ARCOD.strCompanyName				 
+	,ARCOD.strCompanyAddress			 
+	,ARCOD.strCompanyPhone			 
+	,ARCOD.intEntityCustomerId		 
+	,ARCOD.strCustomerNumber			 
+	,ARCOD.strCustomerName			 
+	,ARCOD.strCustomerAddress			 
+	,ARCOD.strCustomerPhone			 
+	,ARCOD.strAccountNumber			 
+	,ARCOD.intInvoiceId				 
+	,ARCOD.strInvoiceNumber			 
+	,ARCOD.strBOLNumber				 
+	,ARCOD.dblCreditLimit	
+	,ARCO.dblCreditLimitSum				 
+	,ARCOD.intTermId					 
+	,ARCOD.strTerm					 
+	,ARCOD.dblTotalAR
+	,ARCO.dblTotalARSum						 
+	,ARCOD.dblFuture	
+	,ARCO.dblFutureSum						 
+	,ARCOD.dbl0Days	
+	,ARCO.dbl0DaysSum						 
+	,ARCOD.dbl10Days					 
+	,ARCO.dbl10DaysSum
+	,ARCOD.dbl30Days					 
+	,ARCO.dbl30DaysSum
+	,ARCOD.dbl60Days					 
+	,ARCO.dbl60DaysSum					 
+	,ARCOD.dbl90Days					 
+	,ARCO.dbl90DaysSum
+	,ARCOD.dbl120Days					 
+	,ARCO.dbl120DaysSum
+	,ARCOD.dbl121Days					 
+	,ARCO.dbl121DaysSum
+	,ARCOD.dblTotalDue				 
+	,ARCO.dblTotalDueSum
+	,ARCOD.dblAmountPaid				 
+	,ARCO.dblAmountPaidSum
+	,ARCOD.dblInvoiceTotal			 		 
+	,ARCO.dblInvoiceTotalSum
+	,ARCOD.dblCredits					 	
+	,ARCO.dblCreditsSum
+	,ARCOD.dblPrepaids				 	
+	,ARCO.dblPrepaidsSum
+	,ARCOD.dtmDate					 
+	,ARCOD.dtmDueDate	
+ FROM 
+	tblARCollectionOverdueDetail ARCOD
+INNER JOIN
+	tblARCollectionOverdue ARCO ON ARCOD.intEntityCustomerId = ARCO.intEntityCustomerId 
+WHERE intInvoiceId NOT IN (SELECT intInvoiceId FROm tblARInvoice WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') AND ysnPaid = 1) 
 
 

@@ -4435,6 +4435,10 @@
     <Build Include="dbo\Stored Procedures\uspTFOriginDataIntegration.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_IntegrationSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspSCManualDistributionOutbound.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCollectionOverdueDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSearchLetterCustomer.sql" />
+    <Build Include="dbo\Tables\tblARCollectionOverdue.sql" />
+    <Build Include="dbo\Tables\tblARCollectionOverdueDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
