@@ -270,9 +270,10 @@ BEGIN
 				
 				--select * from tblGLTempAccountToBuild	
 		
-				EXEC uspGLBuildOriginAccount  0
-				EXEC uspGLBuildAccount 0			
-				EXEC uspGLConvertAccountGroupToCategory		
+				EXEC dbo.uspGLBuildOriginAccount  0
+				EXEC dbo.uspGLBuildAccount 0			
+				EXEC dbo.uspGLConvertAccountGroupToCategory		
+				EXEC dbo.uspGLInsertOriginCrossReferenceMapping
 				-- commented until further notice
 				--EXEC uspGLUpdateCategoryFromOrigin		
 			END	

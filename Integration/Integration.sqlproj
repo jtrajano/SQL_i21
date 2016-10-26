@@ -71,6 +71,7 @@
     <Folder Include="Scripts\NR" />
     <Folder Include="Scripts\SM" />
     <Folder Include="Scripts\PAT" />
+    <Folder Include="Scripts\GL" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -162,6 +163,7 @@
     <PostDeploy Include="Scripts\PostDeployment1.sql" />
     <None Include="Scripts\SM\FixCompanyLocationNumber.sql" />
     <None Include="Scripts\SM\SetDefaultValues.sql" />
+    <None Include="Scripts\GL\1a_OriginCrossReferenceMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\vyuTFTaxCycle.sql" />
@@ -357,5 +359,6 @@
     <Build Include="dbo\Stored Procedures\uspARImportInvoiceBackupPTTICMST.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateForPrintDeliveryTicketView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateLeaseCodeView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
   </ItemGroup>
 </Project>

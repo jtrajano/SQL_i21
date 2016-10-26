@@ -18,7 +18,6 @@ BEGIN
 		-- +++++ TO TEMP TABLE +++++ --
 		SELECT * INTO #TempUpdateCrossReference
 		FROM tblGLCOACrossReference WHERE intLegacyReferenceId IS NULL
-		AND strCompanyId = ''Legacy''
 
 		-- +++++ SYNC ACCOUNTS +++++ --
 		WHILE EXISTS(SELECT 1 FROM #TempUpdateCrossReference)
@@ -75,7 +74,6 @@ BEGIN
 			BEGIN		
 				UPDATE tblGLCOACrossReference SET intLegacyReferenceId = (SELECT TOP 1 A4GLIdentity FROM glactmst WHERE [glact_acct1_8] = CONVERT(INT, SUBSTRING(@ACCOUNT_update,1,8)) and [glact_acct9_16] = CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16))) 
 						WHERE inti21Id = @Id_update		
-						AND strCompanyId = ''Legacy''
 			END
 			ELSE
 			BEGIN
@@ -122,7 +120,6 @@ BEGIN
 		
 				UPDATE tblGLCOACrossReference SET stri21IdNumber = REPLACE(strExternalId ,''.'',''''),
 				intLegacyReferenceId = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21Id = @Id_update		
-				AND strCompanyId=''Legacy''
 
 				--RETAIN THE ORIGINAL VALUE OF glact_acct1_8 IN CASE LENGHT ADJUSTMENT WAS MADE
 				UPDATE A
@@ -133,7 +130,6 @@ BEGIN
 					INNER JOIN tblGLCOACrossReference C ON  C.intLegacyReferenceId =  A.A4GLIdentity
 				WHERE A.glact_acct9_16 = B.glact_acct9_16
 				AND C.inti21Id = @Id_update	
-				AND C.strCompanyId=''Legacy''
 			END
 			UPDATE C SET
 			strExternalId =
@@ -146,7 +142,6 @@ BEGIN
 			INNER JOIN tblGLOriginAccounts B ON A.glact_acct1_8 = B.glact_acct1_8
 			WHERE A.glact_acct9_16 = B.glact_acct9_16
 			AND C.inti21Id = @Id_update	
-			AND C.strCompanyId=''Legacy''	
 
 			--CONFORM THE External ID and Current External Id with glactmst
 			DELETE FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update

@@ -38,3 +38,6 @@ GO
 
 --Patronage
 :r "..\Scripts\PAT\DropStoredProcedures.sql"
+
+--General Ledger
+:r "..\Scripts\GL\1a_OriginCrossReferenceMapping.sql"
