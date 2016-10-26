@@ -75,7 +75,8 @@ BEGIN
 		0 AS dblQtyToReceive,
 		0 AS dblQtyVouchered,
 		0 AS dblQtyToVoucher,
-		0 AS dblAmountToVoucher
+		0 AS dblAmountToVoucher,
+		0 AS dblChargeAmount
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -114,7 +115,7 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmReceiptDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SET @innerQuery = 'SELECT 
+SET @innerQuery = 'SELECT DISTINCT
 						intInventoryReceiptId
 						,intBillId
 						,strVendorIdName
@@ -130,6 +131,7 @@ SET @innerQuery = 'SELECT
 						,dblQtyVouchered
 						,dblQtyToVoucher
 						,dblAmountToVoucher
+						,dblChargeAmount
 				  FROM dbo.vyuAPClearables'
 
 IF @dateFrom IS NOT NULL
@@ -244,19 +246,19 @@ END
 	END  
 	
 SET @query = '
-	SELECT * FROM (
+SELECT * FROM (
 	SELECT
 	 DISTINCT
 	 IR.intInventoryReceiptId
 	,IR.dtmReceiptDate
 	,IR.strReceiptNumber
 	,IR.strBillOfLading
-	,IR.strOrderNumber
+	,'''' AS strOrderNumber
 	,A.dtmDate
 	,A.dtmDueDate
 	,IR.strVendorId
 	,B.[intEntityVendorId]
-	,IR.intBillId
+	,tmpAgingSummaryTotal.intBillId
 	,strBillId = ISNULL(A.strBillId, ''New Voucher'')
 	,A.strVendorOrderNumber
 	,T.strTerm
@@ -266,7 +268,7 @@ SET @query = '
 	,tmpAgingSummaryTotal.dblTotal
 	,tmpAgingSummaryTotal.dblAmountPaid
 	,ISNULL(tmpAgingSummaryTotal.dblAmountDue,0) as dblAmountDue
-	,ISNULL(IR.strVendorIdName,'''') as strVendorIdName 
+	,ISNULL(tmpAgingSummaryTotal.strVendorIdName,'''') as strVendorIdName 
 	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 
 		THEN 0 
 		ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
@@ -276,33 +278,17 @@ SET @query = '
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 
 		THEN tmpAgingSummaryTotal.dblAmountDue 
 		ELSE 0 END AS dblCurrent
-	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 
-		--THEN tmpAgingSummaryTotal.dblAmountDue 
-		--ELSE 0 END AS dbl1
-	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60
-		--THEN tmpAgingSummaryTotal.dblAmountDue 
-		--ELSE 0 END AS dbl30
-	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 
-		--THEN tmpAgingSummaryTotal.dblAmountDue 
-		--ELSE 0 END AS dbl60
-	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90  
-		--THEN tmpAgingSummaryTotal.dblAmountDue 
-		--ELSE 0 END AS dbl90
-	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN ''Current''
-		--	WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 THEN ''01 - 30 Days''
-		--	WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN ''31 - 60 Days'' 
-		--	WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 THEN ''61 - 90 Days''
-		--	WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90 THEN ''Over 90'' 
-		--	ELSE ''Current'' END AS strAge
 	 ,tmpAgingSummaryTotal.dblQtyToReceive
 	 ,tmpAgingSummaryTotal.dblQtyVouchered
 	 ,tmpAgingSummaryTotal.dblQtyToVoucher
 	 ,tmpAgingSummaryTotal.dblAmountToVoucher
+	 ,tmpAgingSummaryTotal.dblChargeAmount
 	FROM  
 	(
-		SELECT 
+		SELECT DISTINCT
 		 tmpAPClearables.intInventoryReceiptId
 		,tmpAPClearables.intBillId
+		,tmpAPClearables.strVendorIdName
 		,SUM(tmpAPClearables.dblVoucherAmount) as dblVoucherAmount
 		,SUM(tmpAPClearables.dblTotal) AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
@@ -311,10 +297,11 @@ SET @query = '
 		,SUM(tmpAPClearables.dblQtyVouchered) AS dblQtyVouchered
 		,SUM(tmpAPClearables.dblQtyToVoucher) AS dblQtyToVoucher
 		,SUM(tmpAPClearables.dblAmountToVoucher) AS dblAmountToVoucher
+		,SUM(tmpAPClearables.dblChargeAmount) AS dblChargeAmount
 		FROM ('
-				+ @innerQuery + 
-			 ') tmpAPClearables 
-		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue
+				+ @innerQuery +
+			   ') tmpAPClearables 
+		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue,strVendorIdName
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
@@ -325,7 +312,7 @@ SET @query = '
 		ON  A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T 
 		ON A.intTermsId = T.intTermID
-	LEFT JOIN vyuAPClearables  IR
+	INNER JOIN vyuICGetInventoryReceipt IR
 		ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
 	--WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
