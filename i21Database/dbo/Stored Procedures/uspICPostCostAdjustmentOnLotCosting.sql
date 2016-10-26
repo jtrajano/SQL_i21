@@ -161,7 +161,6 @@ DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 
 DECLARE @LoopTransactionTypeId AS INT 
 		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId		
-		--,@intLotId AS INT 
 		
 DECLARE @dblRemainingQty AS NUMERIC(38,20)
 		,@AdjustedQty AS NUMERIC(38,20) 
@@ -429,7 +428,6 @@ BEGIN
 			SET		ysnNoGLPosting = @ysnNoGLPosting_ForInvTransfer
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
 		END 
-
 
 		-- Log original cost to tblICInventoryLotCostAdjustmentLog
 		IF NOT EXISTS (
@@ -859,7 +857,6 @@ BEGIN
 						SET		ysnNoGLPosting = 1
 						FROM	tblICInventoryTransaction t
 						WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId_SoldOrUsed
-
 					END 
 				END 
 
