@@ -54,7 +54,8 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'ysnPosted', type: 'boolean' },
         { name: 'intCreatedUserId', type: 'int', allowNull: true },
         { name: 'intEntityId', type: 'int', allowNull: true },
-        { name: 'dblClaimableWt', type: 'float' }
+        { name: 'dblClaimableWt', type: 'float' },
+        { name: 'strWarehouseRefNo', type: 'string' }
     ],
 
     validators: [

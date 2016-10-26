@@ -440,11 +440,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
+                                                                        hidden: true,
                                                                         itemId: 'txtBlanketReleaseNumber',
                                                                         fieldLabel: 'Blanket Release No',
                                                                         labelWidth: 115,
                                                                         hideTrigger: true,
                                                                         allowDecimals: false
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtWarehouseRefNo',
+                                                                        fieldLabel: 'Warehouse Ref No',
+                                                                        labelWidth: 115
                                                                     }
                                                                 ]
                                                             },

@@ -56,6 +56,7 @@ namespace iRely.Inventory.Model
         public int? intCreatedUserId { get; set; }
         public int? intEntityId { get; set; }
         public bool? ysnOrigin { get; set; }
+        public string strWarehouseRefNo { get; set; }
 
         private string _vendorName;
         [NotMapped]
@@ -189,6 +190,7 @@ namespace iRely.Inventory.Model
         public int? intEntityId { get; set; }
         public string strEntityName { get; set; }
         public string strActualCostId { get; set; }
+        public string strWarehouseRefNo { get; set; }
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
     }

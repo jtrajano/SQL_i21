@@ -49,6 +49,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCreatedUserId).HasColumnName("intCreatedUserId");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.ysnOrigin).HasColumnName("ysnOrigin");
+            this.Property(t => t.strWarehouseRefNo).HasColumnName("strWarehouseRefNo");
 
             this.HasOptional(p => p.vyuICInventoryReceiptLookUp)
                 .WithRequired(p => p.tblICInventoryReceipt);
@@ -120,6 +121,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.strEntityName).HasColumnName("strEntityName");
             this.Property(t => t.strActualCostId).HasColumnName("strActualCostId");
+            this.Property(t => t.strWarehouseRefNo).HasColumnName("strWarehouseRefNo");
         }
     }
 

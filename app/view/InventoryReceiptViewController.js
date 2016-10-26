@@ -30,6 +30,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 { dataIndex: 'strCurrency', text: 'Currency', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'intBlanketRelease', text: 'Blanket Release', flex: 1, dataType: 'int', hidden: true },
                 { dataIndex: 'strVendorRefNo', text: 'Vendor Reference No', flex: 1, dataType: 'string', hidden: true },
+                { dataIndex: 'strWarehouseRefNo', text: 'Warehouse Reference No', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strShipVia', text: 'Ship Via', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strShipFrom', text: 'Ship From', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strReceiver', text: 'Receiver', flex: 1, dataType: 'string', hidden: true },
@@ -269,6 +270,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             txtVendorRefNumber: {
                 value: '{current.strVendorRefNo}',
+                readOnly: '{isReceiptReadonly}'
+            },
+            txtWarehouseRefNo: {
+                value: '{current.strWarehouseRefNo}',
                 readOnly: '{isReceiptReadonly}'
             },
             txtBillOfLadingNumber: {

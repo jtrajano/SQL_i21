@@ -890,6 +890,7 @@
                                                             "userConfig": {
                                                                 "allowDecimals": false,
                                                                 "fieldLabel": "Blanket Release No",
+                                                                "hidden": true,
                                                                 "hideTrigger": true,
                                                                 "itemId": "txtBlanketReleaseNumber",
                                                                 "labelWidth": 115,
@@ -901,6 +902,22 @@
                                                             },
                                                             "name": "MyNumberField10",
                                                             "designerId": "95a0c35e-af2c-4c86-aaa2-780ab85f242b"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "fieldLabel": "Warehouse Ref No",
+                                                                "itemId": "txtWarehouseRefNo",
+                                                                "labelWidth": 115,
+                                                                "layout|flex": 1
+                                                            },
+                                                            "name": "MyTextField3",
+                                                            "designerId": "b06b2f49-f998-47bb-8f91-94319d60db38"
                                                         }
                                                     ]
                                                 },
