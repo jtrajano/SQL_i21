@@ -184,6 +184,19 @@ GO
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId]) 
 			VALUES (N'Activity Email', N'Activity Email', N'GlobalComponentEngine.view.ActivityEmail', N'System Manager', N'tblSMActivity', 0)
 		END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CRM.view.Opportunity') 
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],  [ysnApproval], [ysnActivity], [intConcurrencyId]) 
+			VALUES (N'Opportunity', N'Opportunity', N'CRM.view.Opportunity', N'CRM', N'tblCRMOpportunity',  null,  1,  0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET strTableName = 'tblCRMOpportunity',
+				ysnActivity = 1
+			WHERE strNamespace = 'CRM.view.Opportunity'
+		END
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO

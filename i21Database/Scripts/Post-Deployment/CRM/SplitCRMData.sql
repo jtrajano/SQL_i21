@@ -273,6 +273,20 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDProject'))
 BEGIN
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CRM.view.Opportunity') 
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],  [ysnApproval], [ysnActivity], [intConcurrencyId]) 
+			VALUES (N'Opportunity', N'Opportunity', N'CRM.view.Opportunity', N'CRM', N'tblCRMOpportunity',  null,  1,  0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET strTableName = 'tblCRMOpportunity',
+				ysnActivity = 1
+			WHERE strNamespace = 'CRM.view.Opportunity'
+		END
+
 	SET IDENTITY_INSERT tblCRMOpportunity ON
 	insert into tblCRMOpportunity
 	(
