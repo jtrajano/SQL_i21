@@ -534,9 +534,16 @@ BEGIN TRY
 				--DECLARE @v XML = (SELECT * FROM @tblMFScheduleWorkOrderDetail FOR XML AUTO)
 				SELECT @dblMachineCapacity = SUM(DT.dblMachineCapacity)
 				FROM (
-					SELECT TOP (@intNoOfSelectedMachine) MP.dblMachineCapacity
+					SELECT TOP (@intNoOfSelectedMachine) (
+							CASE 
+								WHEN U.strUnitMeasure = 'Hour'
+									THEN MP.dblMachineCapacity / 60
+								ELSE MP.dblMachineCapacity
+								END
+							) AS dblMachineCapacity
 					FROM dbo.tblMFScheduleCalendarMachineDetail MD
 					JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = MD.intMachineId
+					JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = MP.intMachineRateUOMId
 					WHERE intCalendarDetailId = @intCalendarDetailId
 						AND MP.intPackTypeId = @intPackTypeId
 						AND NOT EXISTS (
@@ -1403,7 +1410,6 @@ BEGIN TRY
 
 			DELETE
 			FROM @tblMFScheduleConstraintDetail
-				
 		END
 
 		SELECT @intManufacturingCellId = MIN(intManufacturingCellId)
