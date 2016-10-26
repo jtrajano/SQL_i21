@@ -43,6 +43,7 @@ DECLARE @matchStorageType AS INT
 DECLARE @ysnIsStorage AS INT
 DECLARE @intContractHeaderId INT
 DECLARE @strLotTracking NVARCHAR(4000)
+DECLARE @dblAvailableGrainOpenBalance DECIMAL(24, 10)
 
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
@@ -74,7 +75,8 @@ BEGIN TRY
 	
 	SELECT @intContractHeaderId=intContractHeaderId FROM vyuCTContractDetailView Where intContractDetailId=@intDPContractId
 	
-	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId, @intCommodityId = TIC.intCommodityId FROM tblSCTicket TIC
+	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId, @intCommodityId = TIC.intCommodityId,
+	@intScaleStationId = TIC.intScaleSetupId, @intItemId = TIC.intItemId FROM tblSCTicket TIC
 	WHERE TIC.intTicketId = @intTicketId
 
 	IF @intStorageScheduleId IS NOT NULL
@@ -127,17 +129,22 @@ BEGIN TRY
 
 		SELECT @intStorageTypeId = ST.intStorageScheduleTypeId
 		FROM dbo.tblGRStorageType ST
-		WHERE ST.strStorageTypeCode = @strDistributionOption		
+		WHERE ST.strStorageTypeCode = @strDistributionOption
+		
+		IF @intStorageTypeId is NULL
+		BEGIN
+	   		SELECT	@intStorageTypeId = ST.intDefaultStorageTypeId
+			FROM	dbo.tblSCScaleSetup ST	        
+			WHERE	ST.intScaleSetupId = @intScaleStationId
+		END
 
-		DECLARE @dblAvailableGrainOpenBalance DECIMAL(24, 10)
-		DECLARE @tblTotalAvailableGrainOpenBalance AS TABLE 
-		(
-			[dblAvailableGrainOpenBalance] NUMERIC(18, 6)
-		) 
-		INSERT INTO @tblTotalAvailableGrainOpenBalance
-		EXEC uspGRUpdateGrainOpenBalanceByFIFO 'Inquiry','Scale',@intEntityId,@intItemId,@intStorageTypeId, @dblUnits, @intTicketId , @intUserId
-		SELECT @dblAvailableGrainOpenBalance=dblAvailableGrainOpenBalance FROM @tblTotalAvailableGrainOpenBalance
-
+		SELECT @dblAvailableGrainOpenBalance = SUM(dblOpenBalance)
+		FROM vyuGRGetStorageTransferTicket
+		WHERE intEntityId = @intEntityId
+			AND intItemId = @intItemId
+			AND intStorageTypeId = @intStorageTypeId
+			AND ysnDPOwnedType = 0
+			AND ysnCustomerStorage = 0
 		IF (@dblAvailableGrainOpenBalance > 0)
 		BEGIN			  
 			    IF @dblAvailableGrainOpenBalance > @dblUnits
@@ -147,25 +154,6 @@ BEGIN TRY
 				BEGIN
 						IF @dblAvailableGrainOpenBalance >= @dblUnits
 						BEGIN
-						INSERT INTO @ItemsForItemShipment (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,strTransactionId
-							,intTransactionTypeId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId 
-							,ysnIsStorage
-						)
 						SELECT	intItemId = ScaleTicket.intItemId
 								,intLocationId = ItemLocation.intItemLocationId 
 								,intItemUOMId = ItemUOM.intItemUOMId
@@ -177,6 +165,7 @@ BEGIN TRY
 								,intCurrencyId = ScaleTicket.intCurrencyId
 								,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 								,intTransactionId = ScaleTicket.intTicketId
+								,intTransactionDetailId = NULL
 								,strTransactionId = ScaleTicket.strTicketNumber
 								,intTransactionTypeId = @intDirectType 
 								,intLotId = NULL 
@@ -193,143 +182,7 @@ BEGIN TRY
 						END
 				END
 		END
-
-		BEGIN
-			INSERT INTO @LineItems (
-			intContractDetailId,
-			dblUnitsDistributed,
-			dblUnitsRemaining,
-			dblCost)
-			EXEC dbo.uspCTUpdationFromTicketDistribution 
-				@intTicketId
-				,@intEntityId
-				,@dblUnits
-				,NULL
-				,@intUserId
-				,0
-			BEGIN
-				DECLARE @intLoopContractId INT;
-				DECLARE @dblLoopContractUnits NUMERIC(12,4);
-				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-				FOR
-				SELECT intContractDetailId, dblUnitsDistributed
-				FROM @LineItems;
-
-				OPEN intListCursor;
-
-				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-
-				WHILE @@FETCH_STATUS = 0
-				BEGIN
-				   -- Here we do some kind of action that requires us to 
-				   -- process the table variable row-by-row. This example simply
-				   -- uses a PRINT statement as that action (not a very good
-				   -- example).
-				   IF	ISNULL(@intLoopContractId,0) != 0
-				   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
-				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-				   
-				   -- Attempt to fetch next row from cursor
-				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-				END;
-
-				CLOSE intListCursor;
-				DEALLOCATE intListCursor;
-			END
-			SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
-			IF(@dblRemainingUnits IS NULL)
-			BEGIN
-			SET @dblRemainingUnits = @dblUnits
-			END
-			IF(@dblRemainingUnits != @dblUnits)
-			BEGIN
-				UPDATE @LineItems set intTicketId = @intTicketId
-				INSERT INTO @ItemsForItemShipment (
-					intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,dtmDate
-					,dblQty
-					,dblUOMQty
-					,dblCost
-					,dblSalesPrice
-					,intCurrencyId
-					,dblExchangeRate
-					,intTransactionId
-					,strTransactionId
-					,intTransactionTypeId
-					,intTransactionDetailId
-					,intLotId
-					,intSubLocationId
-					,intStorageLocationId 
-					,ysnIsStorage
-				)
-				EXEC dbo.uspSCGetScaleItemForItemShipment
-					@intTicketId
-					,@strSourceType
-					,@intUserId
-					,@dblRemainingUnits
-					,0
-					,@intEntityId
-					,NULL
-					,'CNT'
-					,@LineItems
-			END
-			IF(@dblRemainingUnits > 0)
-			BEGIN
-				INSERT INTO @ItemsForItemShipment (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,strTransactionId
-				,intTransactionTypeId
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId 
-				,ysnIsStorage
-				)
-				SELECT	intItemId = ScaleTicket.intItemId
-						,intLocationId = ItemLocation.intItemLocationId 
-						,intItemUOMId = ItemUOM.intItemUOMId
-						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-						,dblQty = @dblRemainingUnits 
-						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = ScaleTicket.dblUnitBasis + dblUnitPrice
-						,dblSalesPrice = 0
-						,intCurrencyId = ScaleTicket.intCurrencyId
-						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-						,intTransactionId = ScaleTicket.intTicketId
-						,strTransactionId = ScaleTicket.strTicketNumber
-						,intTransactionTypeId = @intDirectType 
-						,intLotId = NULL 
-						,intSubLocationId = ScaleTicket.intSubLocationId
-						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsStorage = 0
-				FROM	dbo.tblSCTicket ScaleTicket
-						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
-						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
-						AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
-			END
-			SET @dblUnits = 0
-			GOTO CONTINUEISH
-		END		
-		GOTO CONTINUEISH
 	END
-
-	
-	SELECT @intScaleStationId = SC.intScaleSetupId, @intItemId = SC.intItemId
-	FROM	dbo.tblSCTicket SC	        
-	WHERE	SC.intTicketId = @intTicketId
 
 	SELECT	@intGRStorageId = ST.intStorageScheduleTypeId
 	FROM	dbo.tblGRStorageType ST	        
@@ -591,32 +444,32 @@ BEGIN TRY
 	
 	CONTINUEISH:
 
-	IF @PostShipment = 2
-		BEGIN			
-			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
+	--IF @PostShipment = 2
+	--	BEGIN			
+	--		EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 			
-			IF @strSourceType = @SALES_ORDER
-			BEGIN 
-				EXEC dbo.uspSCAddScaleTicketToItemShipment 
-					  @intTicketId
-					 ,@intUserId
-					 ,@ItemsForItemShipment
-					 ,@intEntityId
-					 ,4
-					 ,@InventoryShipmentId OUTPUT;
-			END
-			BEGIN 
-			SELECT	@strTransactionId = ship.strShipmentNumber
-			FROM	dbo.tblICInventoryShipment ship	        
-			WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
-			END
-			SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-			IF @strLotTracking = 'No'
-			BEGIN
-				EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
-			END
+	--		IF @strSourceType = @SALES_ORDER
+	--		BEGIN 
+	--			EXEC dbo.uspSCAddScaleTicketToItemShipment 
+	--				  @intTicketId
+	--				 ,@intUserId
+	--				 ,@ItemsForItemShipment
+	--				 ,@intEntityId
+	--				 ,4
+	--				 ,@InventoryShipmentId OUTPUT;
+	--		END
+	--		BEGIN 
+	--		SELECT	@strTransactionId = ship.strShipmentNumber
+	--		FROM	dbo.tblICInventoryShipment ship	        
+	--		WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+	--		END
+	--		SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+	--		IF @strLotTracking = 'No'
+	--		BEGIN
+	--			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+	--		END
 		
-		END
+	--	END
 	END
 
 END TRY

@@ -63,9 +63,9 @@ BEGIN TRY
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
+						,intTransactionDetailId = LI.intContractDetailId
 						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType
-						,intTransactionDetailId = LI.intContractDetailId 
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
@@ -93,9 +93,9 @@ BEGIN TRY
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
+						,intTransactionDetailId = NULL
 						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType 
-						,intTransactionDetailId = NULL
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId

@@ -4434,6 +4434,7 @@
     <Build Include="dbo\Tables\tblTFIntegrationError.sql" />
     <Build Include="dbo\Stored Procedures\uspTFOriginDataIntegration.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_IntegrationSystem.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistributionOutbound.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
