@@ -55,6 +55,7 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.intEntityId
 	, strEntityName = Entity.strName
 	, Receipt.strActualCostId
+	, Receipt.strWarehouseRefNo
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = Receipt.intEntityVendorId

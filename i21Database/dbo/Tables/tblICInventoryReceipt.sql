@@ -51,6 +51,7 @@ Type the overview for the table here.
 		[intConcurrencyId] [int] NULL DEFAULT ((0)),
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strReceiptOriginId] NVARCHAR(8) NULL, 
+		[strWarehouseRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [ysnOrigin] BIT NULL, 
     CONSTRAINT [PK_tblICInventoryReceipt] PRIMARY KEY ([intInventoryReceiptId]), 
 		CONSTRAINT [AK_tblICInventoryReceipt_strReceiptNumber] UNIQUE ([strReceiptNumber]), 
