@@ -3,6 +3,7 @@ PRINT 'START TF tblTFIntegrationSystem'
 GO
 
 DECLARE @IntegrationSystemId INT
+DECLARE @OriginDestinationStateId INT
 
 SELECT TOP 1 @OriginDestinationStateId = intIntegrationSystemId FROM tblTFIntegrationSystem
 IF (@OriginDestinationStateId IS NULL)
