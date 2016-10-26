@@ -4475,6 +4475,7 @@
     <Build Include="dbo\Tables\tblGLAccountSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForPaidEquity.sql" />
     <Build Include="dbo\Views\vyuPATCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuLGStockSalesNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
