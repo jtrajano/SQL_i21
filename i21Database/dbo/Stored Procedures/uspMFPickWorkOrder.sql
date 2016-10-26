@@ -308,7 +308,17 @@ BEGIN TRY
 				THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
 			WHEN C.strCategoryCode = @strPackagingCategory
 				THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
-			ELSE (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))
+			ELSE (
+					ri.dblCalculatedQuantity * (
+						dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
+							CASE 
+								WHEN r.intRecipeTypeId = 1
+									THEN r.dblQuantity
+								ELSE 1
+								END
+							)
+						)
+					)
 			END AS RequiredQty
 		,ri.intItemUOMId
 		,ri.intStorageLocationId
@@ -364,7 +374,17 @@ BEGIN TRY
 					THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
 				WHEN C.strCategoryCode = @strPackagingCategory
 					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
-				ELSE (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))
+				ELSE (
+						ri.dblCalculatedQuantity * (
+							dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
+								CASE 
+									WHEN r.intRecipeTypeId = 1
+										THEN r.dblQuantity
+									ELSE 1
+									END
+								)
+							)
+						)
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
 		,ri.intItemUOMId
