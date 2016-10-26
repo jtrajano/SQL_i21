@@ -400,12 +400,12 @@ BEGIN
 
 	SELECT TOP 1 
 		 @InvoiceDetailId				= intInvoiceDetailId
-		,@Total							= ISNULL(dblTotal, @ZeroDecimal) + ((ISNULL(dblDiscount, @ZeroDecimal)/100.00) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblPrice, @ZeroDecimal)))		
+		,@Total							= ISNULL(dblTotal, @ZeroDecimal) + ((ISNULL(dblDiscount, @ZeroDecimal)/100.000000) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblPrice, @ZeroDecimal)))		
 		,@TotalWODiscount				= dblTotal
-		,@LicenseTotal					= (ISNULL(dblLicenseAmount, @ZeroDecimal) * ISNULL(dblQtyShipped, @ZeroDecimal))  + ((ISNULL(dblDiscount, @ZeroDecimal)/100.00) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblLicenseAmount, @ZeroDecimal)))
-		,@LicenseTotalWODiscount		= dblLicenseAmount
-		,@MaintenanceTotal				= (ISNULL(dblMaintenanceAmount, @ZeroDecimal) * ISNULL(dblQtyShipped, @ZeroDecimal))  + ((ISNULL(dblDiscount, @ZeroDecimal)/100.00) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblMaintenanceAmount, @ZeroDecimal)))
-		,@MaintenanceTotalWODiscount	= dblMaintenanceAmount
+		,@LicenseTotal					= ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
+		,@LicenseTotalWODiscount		= ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) --+ ((ISNULL(dblDiscount, @ZeroDecimal)/100.000000) * (ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())))
+		,@MaintenanceTotal				= ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
+		,@MaintenanceTotalWODiscount	= ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) --+ ((ISNULL(dblDiscount, @ZeroDecimal)/100.000000) * (ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())))
 		,@UnitsTotal					= dblUnits
 	FROM 
 		@InvoiceDetail
@@ -418,21 +418,21 @@ BEGIN
 	SET @MaintenanceRemainderWODiscount = @ZeroDecimal
 	SET @UnitsRemainder = @ZeroDecimal
 	
-	SET @TotalPerPeriod = ROUND((@Total/@AccrualPeriod),2)
-	SET @Remainder = ROUND(@Total,2) - ROUND((@TotalPerPeriod * @AccrualPeriod),2)
-	SET @TotalPerPeriodWODiscount = ROUND((@TotalWODiscount/@AccrualPeriod),2)
-	SET @RemainderWODiscount = ROUND(@TotalWODiscount,2) - ROUND((@TotalPerPeriodWODiscount * @AccrualPeriod),2)
+	SET @TotalPerPeriod = ROUND((@Total/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @Remainder = ROUND(@Total, dbo.fnARGetDefaultDecimal()) - ROUND((@TotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @TotalPerPeriodWODiscount = ROUND((@TotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @RemainderWODiscount = ROUND(@TotalWODiscount, dbo.fnARGetDefaultDecimal()) - ROUND((@TotalPerPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
 
-	SET @LicenseTotalPerPeriod = ROUND((@LicenseTotal/@AccrualPeriod),2)
-	SET @LicenseRemainder = ROUND(@Total,2) - ROUND((@LicenseTotalPerPeriod * @AccrualPeriod),2)
-	SET @LicenseTotalPeriodWODiscount = ROUND((@LicenseTotalWODiscount/@AccrualPeriod),2)
-	SET @LicenseRemainderWODiscount = ROUND(@LicenseTotalWODiscount,2) - ROUND((@LicenseTotalPeriodWODiscount * @AccrualPeriod),2)
+	SET @LicenseTotalPerPeriod = ROUND((@LicenseTotal/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @LicenseRemainder = ROUND(@LicenseTotal, dbo.fnARGetDefaultDecimal()) - ROUND((@LicenseTotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @LicenseTotalPeriodWODiscount = ROUND((@LicenseTotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @LicenseRemainderWODiscount = ROUND(@LicenseTotalWODiscount, dbo.fnARGetDefaultDecimal()) - ROUND((@LicenseTotalPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
 
 
-	SET @MaintenanceTotalPerPeriod = ROUND((@MaintenanceTotal/@AccrualPeriod),2)
-	SET @MaintenanceRemainder = ROUND(@Total,2) - ROUND((@MaintenanceTotalPerPeriod * @AccrualPeriod),2)
-	SET @MaintenanceTotalPeriodWODiscount = ROUND((@MaintenanceTotalWODiscount/@AccrualPeriod),2)
-	SET @MaintenanceRemainderWODiscount = ROUND(@MaintenanceTotalWODiscount,2) - ROUND((@MaintenanceTotalPeriodWODiscount * @AccrualPeriod),2)
+	SET @MaintenanceTotalPerPeriod = ROUND((@MaintenanceTotal/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @MaintenanceRemainder = ROUND(@MaintenanceTotal, dbo.fnARGetDefaultDecimal()) - ROUND((@MaintenanceTotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @MaintenanceTotalPeriodWODiscount = ROUND((@MaintenanceTotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @MaintenanceRemainderWODiscount = ROUND(@MaintenanceTotalWODiscount, dbo.fnARGetDefaultDecimal()) - ROUND((@MaintenanceTotalPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
 
 	SET @UnitsPerPeriod = ROUND((@UnitsTotal/@AccrualPeriod),6)
 	SET @UnitsRemainder = ROUND(@UnitsTotal,6) - ROUND((@UnitsPerPeriod * @AccrualPeriod),6)
