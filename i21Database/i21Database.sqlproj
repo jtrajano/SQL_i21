@@ -176,6 +176,7 @@
     <Folder Include="Scripts\Post-Deployment\CF" />
     <Folder Include="Scripts\Post-Deployment\IP" />
     <Folder Include="Scripts\Post-Deployment\TR\" />
+    <Folder Include="Scripts\Post-Deployment\CRM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3586,7 +3587,6 @@
     <Build Include="dbo\Views\vyuMBGetFuelPointPriceChangeDetail.sql" />
     <Build Include="dbo\Views\vyuMBGetFuelPointReading.sql" />
     <Build Include="dbo\Views\vyuMBGetFuelPointReadingDetail.sql" />
-    <Build Include="dbo\Tables\tblCRMContract.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateNextJulianDeliveryBySite.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateNextJulianDelivery.sql" />
     <Build Include="dbo\Functions\fnCTCalculateAmountBetweenCurrency.sql" />
@@ -4329,7 +4329,6 @@
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewSolution.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewUniqueValue.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewGain.sql" />
-    <Build Include="dbo\Tables\tblCRMQuote.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentChargePerItem.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentItemAllocatedCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByContractAndPrice.sql" />
@@ -4595,6 +4594,7 @@
     <None Include="Scripts\Post-Deployment\PR\DefaultData\2_ElectronicFileFormats.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
+    <None Include="Scripts\Post-Deployment\CRM\SplitCRMData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

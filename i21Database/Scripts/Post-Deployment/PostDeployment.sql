@@ -253,6 +253,9 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\HDEntryDataFix.sql
 :R .\HD\CustomField.sql
 
+--CRM
+:R .\CRM\SplitCRMData.sql
+
 --Contract Management
 :R .\CT\1_MasterTables.sql
 :R .\CT\2_DataMigration.sql
