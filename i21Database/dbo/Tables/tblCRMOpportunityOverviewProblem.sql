@@ -6,7 +6,7 @@
 	[intEntityId] [int] NULL,
 	[strOverviewType] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
-	CONSTRAINT [PK_tblCRMOpportunityOverview] PRIMARY KEY CLUSTERED ([intOpportunityOverviewId] ASC)
-    --CONSTRAINT [FK_tblCRMOpportunityOverview_tblCRMOpportunity] FOREIGN KEY ([intOpportunityId]) REFERENCES [dbo].[tblCRMOpportunity] ([intOpportunityId]),
-    --CONSTRAINT [FK_tblCRMOpportunityOverview_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
+	CONSTRAINT [PK_tblCRMOpportunityOverview] PRIMARY KEY CLUSTERED ([intOpportunityOverviewId] ASC),
+    CONSTRAINT [FK_tblCRMOpportunityOverview_tblCRMOpportunity_intOpportunityId] FOREIGN KEY ([intOpportunityId]) REFERENCES [dbo].[tblCRMOpportunity] ([intOpportunityId]),
+    CONSTRAINT [FK_tblCRMOpportunityOverview_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )

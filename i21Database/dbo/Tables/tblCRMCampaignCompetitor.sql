@@ -4,10 +4,10 @@
 	[intCampaignId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
-	CONSTRAINT [PK_tblCRMCampaignCompetitor_intCampaignCompetitorId] PRIMARY KEY CLUSTERED ([intCampaignCompetitorId] ASC)
-	--CONSTRAINT [UQ_tblHDCampaignCompetitor_intOpportunityCampaignId_intEntityId] UNIQUE ([intOpportunityCampaignId],[intEntityId]),
-    --CONSTRAINT [FK_tblHDCampaignCompetitor_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblCRMCampaign] ([intCampaignId]),
-    --CONSTRAINT [FK_tblHDCampaignCompetitor_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
+	CONSTRAINT [PK_tblCRMCampaignCompetitor_intCampaignCompetitorId] PRIMARY KEY CLUSTERED ([intCampaignCompetitorId] ASC),
+	CONSTRAINT [UQ_tblCRMCampaignCompetitor_intCampaignId_intEntityId] UNIQUE ([intCampaignId],[intEntityId]),
+    CONSTRAINT [FK_tblCRMCampaignCompetitor_tblCRMCampaign_intCampaignId] FOREIGN KEY ([intCampaignId]) REFERENCES [dbo].[tblCRMCampaign] ([intCampaignId]),
+    CONSTRAINT [FK_tblCRMCampaignCompetitor_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 
 GO

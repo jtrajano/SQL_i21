@@ -4,10 +4,10 @@
 	[intOpportunityId] [int] NOT NULL,
 	[intContractHeaderId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
-	CONSTRAINT [PK_tblCRMContract_intContractId] PRIMARY KEY CLUSTERED ([intContractId] ASC)
-	--CONSTRAINT [UQ_tblCRMContract_intContractHeaderId] UNIQUE ([intContractHeaderId]),
- --   CONSTRAINT [FK_tblCRMContract_tblCRMOpportunity] FOREIGN KEY ([intOpportunityId]) REFERENCES [dbo].[tblCRMOpportunity] ([intOpportunityId]),
- --   CONSTRAINT [FK_tblCRMContract_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
+	CONSTRAINT [PK_tblCRMContract_intContractId] PRIMARY KEY CLUSTERED ([intContractId] ASC),
+	CONSTRAINT [UQ_tblCRMContract_intOpportunityId_intContractHeaderId] UNIQUE ([intOpportunityId],[intContractHeaderId]),
+    CONSTRAINT [FK_tblCRMContract_tblCRMOpportunity_intOpportunityId] FOREIGN KEY ([intOpportunityId]) REFERENCES [dbo].[tblCRMOpportunity] ([intOpportunityId]),
+	CONSTRAINT [FK_tblCRMContract_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
 )
 
 GO

@@ -19,13 +19,11 @@
 	[strRetrospective] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strImageId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
-	CONSTRAINT [PK_tblCRMCampaign_intCampaignId] PRIMARY KEY CLUSTERED ([intCampaignId] ASC)
-	/*
+	CONSTRAINT [PK_tblCRMCampaign_intCampaignId] PRIMARY KEY CLUSTERED ([intCampaignId] ASC),
 	CONSTRAINT [UQ_tblCRMCampaign_strCampaignName] UNIQUE ([strCampaignName]),
 	CONSTRAINT [FK_tblCRMCampaign_tblCRMType_intTypeId] FOREIGN KEY ([intTypeId]) REFERENCES [dbo].[tblCRMType] ([intTypeId]),
-	CONSTRAINT [FK_tblCRMCampaign_tblCRMCampaignStatus_intCampaignStatusId] FOREIGN KEY (intCampaignStatusId) REFERENCES [dbo].[tblCRMCampainStatus] (intCampaignStatusId),
+	CONSTRAINT [FK_tblCRMCampaign_tblCRMStatus_intStatusId] FOREIGN KEY (intStatusId) REFERENCES [dbo].[tblCRMStatus] (intStatusId),
 	CONSTRAINT [FK_tblCRMCampaign_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
-	*/
 
 )
 
