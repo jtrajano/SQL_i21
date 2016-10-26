@@ -19,7 +19,7 @@ SELECT
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN (ReceiptCharge.dblAmount * 100) ELSE ReceiptCharge.dblAmount END
-	,[dblTax]									=	0
+	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0)
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
 																OtherChargeExpense.intAccountId 
@@ -139,7 +139,7 @@ SELECT
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId  --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount /* Negate the amount if other charge is set as price*/  END 
-	,[dblTax]									=	0
+	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0) * -1
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
 																OtherChargeExpense.intAccountId 
