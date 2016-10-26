@@ -36,6 +36,7 @@ SELECT
 						AND PCX2.intTypeTaxId = tblPRPaycheckTax.intTypeTaxId)
 	,tblPRPaycheckTax.intAccountId
 	,tblPRPaycheckTax.intExpenseAccountId
+	,tblPRPaycheckTax.intSupplementalCalc
 	,tblPRPaycheckTax.intAllowance
 	,tblPRPaycheckTax.strPaidBy
 	,tblPRPaycheckTax.strVal1
@@ -81,6 +82,7 @@ GROUP BY
 	tblPRPaycheckTax.dblTotal,
 	tblPRPaycheckTax.intAccountId,
 	tblPRPaycheckTax.intExpenseAccountId,
+	tblPRPaycheckTax.intSupplementalCalc,
 	tblPRPaycheckTax.intAllowance,
 	tblPRPaycheckTax.strPaidBy,
 	tblPRPaycheckTax.strVal1,

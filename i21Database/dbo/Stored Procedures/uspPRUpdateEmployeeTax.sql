@@ -11,6 +11,7 @@ BEGIN
 		,dblLimit = Tax.dblLimit
 		,intAccountId = Tax.intAccountId 
 		,intExpenseAccountId = Tax.intExpenseAccountId
+		,intSupplementalCalc = Tax.intSupplementalCalc
 		,strPaidBy = Tax.strPaidBy
 		,intSort = Tax.intSort
 	FROM tblPRTypeTax Tax INNER JOIN tblPREmployeeTax EmpTax
@@ -25,6 +26,7 @@ BEGIN
 		,dblLimit = Tax.dblLimit
 		,intAccountId = Tax.intAccountId 
 		,intExpenseAccountId = Tax.intExpenseAccountId
+		,intSupplementalCalc = Tax.intSupplementalCalc
 		,strPaidBy = Tax.strPaidBy
 		,intSort = Tax.intSort
 	FROM tblPRTypeTax Tax INNER JOIN tblPRTemplateTax EmpTax

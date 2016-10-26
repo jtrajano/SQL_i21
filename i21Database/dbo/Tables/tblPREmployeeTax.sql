@@ -6,6 +6,7 @@
     [strFilingStatus]     NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [intTypeTaxStateId]   INT             NULL,
     [intTypeTaxLocalId]   INT             NULL,
+	[intSupplementalCalc] INT			  NULL DEFAULT ((1)),
     [dblAmount]           NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [dblExtraWithholding] NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [dblLimit]            NUMERIC (18, 6) DEFAULT ((0)) NULL,
@@ -246,3 +247,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeTax',
     @level2type = N'COLUMN',
     @level2name = N'strVal6'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Supplemental Tax Calculation Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intSupplementalCalc'
