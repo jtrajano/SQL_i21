@@ -95,7 +95,7 @@ BEGIN CATCH
 	SET @strErrorMessage  = ERROR_MESSAGE()
 	SET @intErrorState    = ERROR_STATE()
 	RAISERROR (@strErrorMessage , @intErrorSeverity, @intErrorState, @intErrorNumber)
-	GOTO Post_RollBack
+	GOTO Post_Rollback
 END CATCH
 
 Post_Commit:
