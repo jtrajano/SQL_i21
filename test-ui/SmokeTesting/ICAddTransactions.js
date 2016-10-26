@@ -91,9 +91,9 @@ StartTest(function (t) {
 
         .displayText('======== #4. Post Inventory Receipt ========')
         .clickButton('#btnPost').wait(500)
-        .waitTillLoaded('')
+
         .markSuccess('======== Posting of Inventory Receipt Successful ========')
-        .clickButton('#btnClose').wait(200)
+        .clickButton('#btnClose').wait(500)
         .waitTillLoaded('')
         .markSuccess('======== Create Direct Receipt for Non Lotted Item Successful! ========')
 
