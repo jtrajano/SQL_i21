@@ -1,10 +1,6 @@
-﻿ CREATE PROCEDURE [dbo].[uspARCollectionLetter]  
+﻿CREATE PROCEDURE [dbo].[uspARCollectionLetter]  
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
-
---DECLARE 	@xmlParam NVARCHAR(MAX) = NULL
-
---SET @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>intEntityCustomerId</fieldname><condition>EQUAL TO</condition><from>1177|^|</from><join>OR</join><begingroup /><endgroup /><datatype>String</datatype></filter><filter><fieldname>intLetterId</fieldname><condition>EQUAL TO</condition><from>73</from><join>OR</join><begingroup /><endgroup /><datatype>Int32</datatype></filter></filters></xmlparam>'
 
 BEGIN
 	DECLARE @idoc						INT
