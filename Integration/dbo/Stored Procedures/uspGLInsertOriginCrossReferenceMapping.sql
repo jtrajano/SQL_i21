@@ -7,20 +7,13 @@ BEGIN
 	SET strOldId = CAST(CAST(glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''-'' + CAST( CAST(glact_acct9_16 AS INT) AS NVARCHAR(50))
 	FROM tblGLCOACrossReference coa JOIN glactmst orig ON coa.intLegacyReferenceId = orig.A4GLIdentity
 
-	SET IDENTITY_INSERT tblGLAccountSystem ON
-	MERGE tblGLAccountSystem A
-	USING (
-	SELECT id =1 , name = ''Origin'', parent =NULL UNION ALL
-	SELECT id = 2, name = ''i21'', parent =1
-	) AS B
-	ON A.intAccountSystemId = B.id
-	WHEN MATCHED THEN UPDATE
-	SET strAccountSystemDescription  = name,intParentAccountSystemId = parent
-
-	WHEN NOT MATCHED THEN
-	INSERT(intAccountSystemId,strAccountSystemDescription, intParentAccountSystemId,intConcurrencyId)
-	VALUES(id,name,parent,1);
-	SET IDENTITY_INSERT tblGLAccountSystem OFF
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLAccountSystem WHERE strAccountSystemDescription = ''Origin'')
+	BEGIN
+		SET IDENTITY_INSERT tblGLAccountSystem ON
+		INSERT INTO tblGLAccountSystem(intAccountSystemId, strAccountSystemDescription, intConcurrencyId)
+		VALUES( 1, ''Origin'',1)
+		SET IDENTITY_INSERT tblGLAccountSystem OFF
+	END
 
 	MERGE dbo.tblGLCrossReferenceMapping as map
 	USING dbo.tblGLCOACrossReference AS coa
