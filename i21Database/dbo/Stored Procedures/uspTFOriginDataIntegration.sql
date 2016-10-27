@@ -7,6 +7,8 @@
 @DateFrom NVARCHAR(80),
 @DateTo NVARCHAR(80)
 
+--exec uspTFOriginDataInteration 'E0950FA1-8E42-42C5-8BBC-253FB84B9D40','20120101','20160101'
+
 AS
 
 DECLARE @query NVARCHAR(max)
@@ -307,6 +309,8 @@ strTransporterName,
 strTransporterFederalTaxId,
 strConsignorName,
 strConsignorFederalTaxId,
+strCustomerName,
+strCustomerFederalTaxId,
 --strTaxCategory,
 strTerminalControlNumber,
 strVendorName,
@@ -357,6 +361,8 @@ leaf)
     tr.strCarrierFEIN AS strTransporterFEIN,
     tr.strCarrierName AS strConsignorName,
     tr.strCarrierFEIN AS strConsignorFEIN,
+	tr.strCustomerName,
+	tr.strCustomerFEIN,
     tr.strVendorTerminalControlNumber AS strTerminalControlNumber,
     tr.strVendorName,
     tr.strVendorFEIN,
@@ -378,4 +384,3 @@ leaf)
   ON tr.strSourceRecordConcatKey = tblTFIntegrationItemProductCode.strSourceRecordConcatKey
   CROSS JOIN tblSMCompanySetup AS cl
 
---exec uspTFOriginDataInteration 'E0950FA1-8E42-42C5-8BBC-253FB84B9D40','20120101','20160101'
