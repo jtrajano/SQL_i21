@@ -231,6 +231,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateOldCost.sql
 :r .\AP\MigrateVouchersForApproval.sql
 :r .\AP\MigratePOForApprovals.sql
+:r .\AP\UpdateVoucherDetail1099.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
