@@ -45,48 +45,49 @@ DECLARE @temp_xml_table TABLE (
 )
 
 DECLARE @temp_aging_table TABLE(
-     [strCustomerName]            NVARCHAR(100)
-    ,[strEntityNo]                NVARCHAR(100)
-    ,[intEntityCustomerId]        INT
-    ,[dblCreditLimit]            NUMERIC(18,6)
-    ,[dblTotalAR]                NUMERIC(18,6)
+     [strCustomerName]          NVARCHAR(100)
+    ,[strEntityNo]              NVARCHAR(100)
+    ,[intEntityCustomerId]      INT
+    ,[dblCreditLimit]			NUMERIC(18,6)
+    ,[dblTotalAR]               NUMERIC(18,6)
     ,[dblFuture]                NUMERIC(18,6)
-    ,[dbl0Days]                    NUMERIC(18,6)
+    ,[dbl0Days]                 NUMERIC(18,6)
     ,[dbl10Days]                NUMERIC(18,6)
     ,[dbl30Days]                NUMERIC(18,6)
     ,[dbl60Days]                NUMERIC(18,6)
     ,[dbl90Days]                NUMERIC(18,6)
     ,[dbl91Days]                NUMERIC(18,6)
-    ,[dblTotalDue]                NUMERIC(18,6)
+    ,[dblTotalDue]              NUMERIC(18,6)
     ,[dblAmountPaid]            NUMERIC(18,6)
-    ,[dblCredits]                NUMERIC(18,6)
-    ,[dblPrepaids]                NUMERIC(18,6)
-    ,[dtmAsOfDate]                DATETIME
-    ,[strSalespersonName]        NVARCHAR(100)
+    ,[dblCredits]               NUMERIC(18,6)
+	,[dblPrepayments]			NUMERIC(18,6)
+    ,[dblPrepaids]              NUMERIC(18,6)
+    ,[dtmAsOfDate]              DATETIME
+    ,[strSalespersonName]       NVARCHAR(100)
 )
 
 DECLARE @temp_statement_table TABLE(
-     [intEntityCustomerId]     INT
-    ,[strCustomerNumber]     NVARCHAR(100)
-    ,[strCustomerName]         NVARCHAR(100)
-    ,[dblCreditLimit]         NUMERIC(18,6)
-    ,[intInvoiceId]             INT
-    ,[strInvoiceNumber]         NVARCHAR(100)
-    ,[strBOLNumber]             NVARCHAR(100)
-    ,[dtmDate]                 DATETIME
-    ,[dtmDueDate]             DATETIME
-    ,[dtmShipDate]             DATETIME
-    ,[dblInvoiceTotal]         NUMERIC(18,6)
-    ,[intPaymentId]             INT
-    ,[strRecordNumber]         NVARCHAR(100)
-    ,[strPaymentInfo]         NVARCHAR(100)
-    ,[dtmDatePaid]             DATETIME
-    ,[dblPayment]             NUMERIC(18,6)
-    ,[dblBalance]             NUMERIC(18,6)
-    ,[strSalespersonName]     NVARCHAR(100)    
-    ,[strFullAddress]         NVARCHAR(MAX)
-    ,[strCompanyName]         NVARCHAR(MAX)
-    ,[strCompanyAddress]     NVARCHAR(MAX)
+     [intEntityCustomerId]		INT
+    ,[strCustomerNumber]		NVARCHAR(100)
+    ,[strCustomerName]			NVARCHAR(100)
+    ,[dblCreditLimit]			NUMERIC(18,6)
+    ,[intInvoiceId]				INT
+    ,[strInvoiceNumber]			NVARCHAR(100)
+    ,[strBOLNumber]				NVARCHAR(100)
+    ,[dtmDate]					DATETIME
+    ,[dtmDueDate]				DATETIME
+    ,[dtmShipDate]				DATETIME
+    ,[dblInvoiceTotal]			NUMERIC(18,6)
+    ,[intPaymentId]				INT
+    ,[strRecordNumber]			NVARCHAR(100)
+    ,[strPaymentInfo]			NVARCHAR(100)
+    ,[dtmDatePaid]				DATETIME
+    ,[dblPayment]				NUMERIC(18,6)
+    ,[dblBalance]				NUMERIC(18,6)
+    ,[strSalespersonName]		NVARCHAR(100)    
+    ,[strFullAddress]			NVARCHAR(MAX)
+    ,[strCompanyName]			NVARCHAR(MAX)
+    ,[strCompanyAddress]		NVARCHAR(MAX)
 )
 
 -- Prepare the XML 
@@ -209,6 +210,7 @@ SELECT STATEMENTREPORT.*
       ,dbl90Days            = ISNULL(AGINGREPORT.dbl90Days, 0)
       ,dbl91Days            = ISNULL(AGINGREPORT.dbl91Days, 0)
       ,dblCredits           = ISNULL(AGINGREPORT.dblCredits, 0)
+	  ,dblPrepayments		= ISNULL(AGINGREPORT.dblPrepayments, 0)
       ,dtmAsOfDate          = @dtmDateTo
       ,blbLogo              = dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
