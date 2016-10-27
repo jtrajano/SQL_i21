@@ -610,7 +610,6 @@ BEGIN
 		FROM 
 			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
 
-TRUNCATE TABLE tblARCollectionOverdueDetail
-TRUNCATE TABLE tblARCollectionOverdue
+
 
 END
