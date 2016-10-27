@@ -8,6 +8,7 @@
 	,@intPatternCode INT
 	,@ysnProposed BIT = 0
 	,@strPatternString NVARCHAR(50) OUTPUT
+	,@intEntityId INT = NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
@@ -71,7 +72,6 @@ BEGIN
 			,@intLocationId
 
 		--SELECT @strPatternString AS strPatternString
-
 		RETURN
 	END
 
@@ -224,6 +224,8 @@ BEGIN
 						THEN @intOrderTypeId
 					WHEN @strTableName = 'tblMFBlendRequirement'
 						THEN @intBlendRequirementId
+					WHEN @strTableName = 'tblEMEntity'
+						THEN @intEntityId
 					END
 
 			IF @intPrimaryColumnId IS NULL
@@ -322,6 +324,5 @@ BEGIN
 		FROM @tblMFPatternDetail
 		WHERE intRecordId > @intRecordId
 	END
-
-	--SELECT @strPatternString AS strPatternString
+			--SELECT @strPatternString AS strPatternString
 END
