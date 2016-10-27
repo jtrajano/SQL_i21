@@ -12,20 +12,22 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+	DECLARE @intRefundCustomerId INT
 	DECLARE @intCustomerId INT
-	DECLARE @dblCheckAmount DECIMAL(18,2)
+	DECLARE @dblCheckAmount NUMERIC(18,6)
+	DECLARE @dblServiceFee NUMERIC(18,6)
 
 	DECLARE the_cursor CURSOR FAST_FORWARD
-	FOR SELECT intCustomerId, dblCheckAmount
+	FOR SELECT intRefundCustomerId,intCustomerId, dblCheckAmount, dblServiceFee
 		FROM fnPATGetCustomerRequiredDetailsForVoucher(@intRefundId)
 	OPEN the_cursor
-	FETCH NEXT FROM the_cursor INTO @intCustomerId,@dblCheckAmount
+	FETCH NEXT FROM the_cursor INTO @intRefundCustomerId,@intCustomerId,@dblCheckAmount,@dblServiceFee
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		EXEC uspPATRefundVoucherToAPBill @intRefundId,@intCustomerId,@dblCheckAmount,@intUserId,@intPaymentItemId
+		EXEC uspPATRefundVoucherToAPBill @intRefundId,@intRefundCustomerId,@intCustomerId,@dblCheckAmount,@dblServiceFee,@intUserId,@intPaymentItemId
 
-		FETCH NEXT FROM the_cursor INTO @intCustomerId,@dblCheckAmount
+		FETCH NEXT FROM the_cursor INTO @intRefundCustomerId,@intCustomerId,@dblCheckAmount,@dblServiceFee
 	END
 
 	CLOSE the_cursor

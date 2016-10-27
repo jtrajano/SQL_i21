@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATRefundVoucherToAPBill]
 	 @intRefundId					INT
+	,@intRefundCustomerId			INT
 	,@intPatronId					INT
 	,@dblRefundAmount				NUMERIC(18,6)
+	,@dblServiceFee					NUMERIC(18,6)
 	,@intUserId						INT
 	,@intPaymentItemId				INT	
 	,@intBillId						INT = 0
@@ -26,9 +28,12 @@ BEGIN TRY
 	DECLARE @intVendorId INT
 	DECLARE @strVendorOderNumber NVARCHAR(MAX)
 	DECLARE @intAPClearingGLAccount INT
+	DECLARE @intServiceFeeIncomeId INT
 
-	SELECT @strVendorOderNumber = 'PAT-' + CONVERT(VARCHAR,@intRefundId) + '-' + CONVERT(VARCHAR,GETDATE(),112) + CONVERT(VARCHAR,CAST((RAND() * (899999) + 100000) AS INT))
-	SELECT @intAPClearingGLAccount = intAPClearingGLAccount FROM tblPATCompanyPreference
+	SELECT	@strVendorOderNumber = 'PAT-' + CONVERT(VARCHAR, @intRefundId) + CONVERT(NVARCHAR(MAX),@intRefundCustomerId)
+	SELECT	@intAPClearingGLAccount = intAPClearingGLAccount,
+			@intServiceFeeIncomeId = intServiceFeeIncomeId
+	FROM tblPATCompanyPreference
 
 	-- Fill-up voucher details
 	INSERT INTO @voucherDetailNonInventory
@@ -41,12 +46,19 @@ BEGIN TRY
 		,[intTaxGroupId])
 	VALUES
 		(@intAPClearingGLAccount											
-		,@intPaymentItemId							
-		,'Patronage Refund Voucher (Tax Inclusive)'		
+		,0					
+		,'Patronage Refund'		
 		,1												
 		,0												
 		,@dblRefundAmount								
-		,NULL)											
+		,NULL),
+		(@intServiceFeeIncomeId
+		,0
+		,'Service Fee'
+		,1
+		,0
+		,(@dblServiceFee * -1)
+		,NULL)
 
 	EXEC [dbo].[uspAPCreateBillData]
 		 @userId	= @intUserId

@@ -4,18 +4,24 @@
 )
 RETURNS @returntable TABLE
 (
-	[intCustomerId]				INT		NULL,
-	[dblCheckAmount]			NUMERIC(18,6)	NULL
+	[intRefundCustomerId] INT			NULL,
+	[intCustomerId]		INT				NULL,
+	[dblCheckAmount]	NUMERIC(18,6)	NULL,
+	[dblServiceFee]		NUMERIC(18,6)	NULL
 )
 AS
 BEGIN
 	INSERT INTO @returntable
-	(
-		 [intCustomerId]				
+	(	
+		[intRefundCustomerId]
+		,[intCustomerId]				
 		,[dblCheckAmount]
+		,[dblServiceFee]
 	)
-	SELECT	RCus.intCustomerId,
-			dblCheckAmount = RCus.dblCashRefund
+	SELECT	RCus.intRefundCustomerId,
+			RCus.intCustomerId,
+			dblCheckAmount = RCus.dblCashRefund,
+			dblServiceFee = R.dblServiceFee
 	FROM tblPATRefundCustomer RCus
 	INNER JOIN tblPATRefund R
 		ON RCus.intRefundId = R.intRefundId

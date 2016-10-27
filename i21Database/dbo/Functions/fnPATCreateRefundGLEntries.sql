@@ -110,7 +110,7 @@ BEGIN
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	'Posted Undistributed Equity',
+		[strJournalLineDescription]		=	'Posted Cash Refund',
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
@@ -152,7 +152,7 @@ BEGIN
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	'Posted Cash Refund Amount',
+		[strJournalLineDescription]		=	'Posted Refund Amount',
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
@@ -177,7 +177,7 @@ BEGIN
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
 	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
-	
+
 	RETURN
 END
 
