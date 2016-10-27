@@ -4076,7 +4076,7 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '1A', 'Exports','', 700, 'Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '1A', 'Exports','', 700, 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 		
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
@@ -4153,7 +4153,7 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '1A', 'Exports','', 710, 'Column B Gasoline (Gasoline, Gasohol)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '1A', 'Exports','', 710, 'Gasoline (Gasoline, Gasohol)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 	
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
@@ -4230,7 +4230,7 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '1A', 'Exports','', 720, 'Column C Other Products (Jet Fuel, Kerosene)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '1A', 'Exports','', 720, 'Other Products (Jet Fuel, Kerosene)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 		
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
@@ -4307,7 +4307,7 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '2A', 'Imports','', 730, 'Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '2A', 'Imports','', 730, 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 		
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
@@ -4384,7 +4384,7 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '2A', 'Imports','', 750, 'Column B Gasoline (Gasoline, Gasohol)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '2A', 'Imports','', 750, 'Gasoline (Gasoline, Gasohol)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
@@ -4461,7 +4461,7 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '2A', 'Imports','', 760, 'Column C Other Products (Jet Fuel, Kerosene)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '2A', 'Imports','', 760, 'Other Products (Jet Fuel, Kerosene)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
@@ -4538,84 +4538,7 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '3A', 'In-State Transfers', '', 770, 'Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
-		SELECT @MasterPk  = SCOPE_IDENTITY();
-	
-		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
-		VALUES(@MasterPk)
-
-		SET @ReportingComponentId = (SELECT TOP 1 intReportingComponentId FROM tblTFFilingPacket WHERE intReportingComponentId = @MasterPk)
-		IF @ReportingComponentId IS NULL
-			BEGIN
-				INSERT INTO [tblTFFilingPacket]([intTaxAuthorityId],[intReportingComponentId],[ysnStatus],[intFrequency])
-				VALUES(@intTaxAuthorityId, @MasterPk,1,2)
-			END
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strProductCode', N'Product Code', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strConsignorName', N'Consignor Name', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strConsignorFederalTaxId', N'Consignor FEIN', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strVendorName', N'Supplier Name', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strVendorFederalTaxId', N'Supplier FEIN', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strOriginState', N'State of Origin', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strCustomerName', N'Customer Name', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strCustomerFederalTaxId', N'Customer FEIN', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strDestinationState', N'Destination State', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'dtmDate', N'Document Date', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		--NOT EXIST YET
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strBillOfLading', N'Document Number', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'dblGross', N'Gross Gallons', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'dblNet', N'Billed or Net Gallons', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
-		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'', N'Import Verification Number', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
-
-		--END
-
-		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '3A' , 'In-State Transfers', '', 780, 'Column B Gasoline (Gasoline, Gasohol)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '3A', 'In-State Transfers', '', 770, 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 	
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
@@ -4692,7 +4615,84 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
-		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '3A' , 'In-State Transfers', '', 790, 'Column C Other Products (Jet Fuel, Kerosene)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '3A' , 'In-State Transfers', '', 780, 'Gasoline (Gasoline, Gasohol)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
+		SELECT @MasterPk  = SCOPE_IDENTITY();
+	
+		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
+		VALUES(@MasterPk)
+
+		SET @ReportingComponentId = (SELECT TOP 1 intReportingComponentId FROM tblTFFilingPacket WHERE intReportingComponentId = @MasterPk)
+		IF @ReportingComponentId IS NULL
+			BEGIN
+				INSERT INTO [tblTFFilingPacket]([intTaxAuthorityId],[intReportingComponentId],[ysnStatus],[intFrequency])
+				VALUES(@intTaxAuthorityId, @MasterPk,1,2)
+			END
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strProductCode', N'Product Code', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strConsignorName', N'Consignor Name', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strConsignorFederalTaxId', N'Consignor FEIN', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strVendorName', N'Supplier Name', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strVendorFederalTaxId', N'Supplier FEIN', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strOriginState', N'State of Origin', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strCustomerName', N'Customer Name', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strCustomerFederalTaxId', N'Customer FEIN', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strDestinationState', N'Destination State', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'dtmDate', N'Document Date', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		--NOT EXIST YET
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'strBillOfLading', N'Document Number', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'dblGross', N'Gross Gallons', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'dblNet', N'Billed or Net Gallons', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
+		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
+		VALUES (@MasterPk, N'', N'Import Verification Number', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+
+		--END
+
+		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
+		VALUES(@intTaxAuthorityId, 'SF-401',	'Transporters Monthly Tax Return', '3A' , 'In-State Transfers', '', 790, 'Other Products (Jet Fuel, Kerosene)', 'Invoice','uspTFGetInventoryTax','uspTFSF401InvoiceTax','uspTFGenerateSF401')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 	
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])
