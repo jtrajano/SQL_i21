@@ -45,7 +45,12 @@ BEGIN
 	inti21Id,
 	stri21Id,
 	1,
-	1);')
+	1);
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption)
+		INSERT INTO tblGLCompanyPreferenceOption(intDefaultVisibleOldAccountSystemId,intConcurrencyId) VALUES(1,1)
+	
+	UPDATE tblGLCompanyPreferenceOption SET intDefaultVisibleOldAccountSystemId = 1 WHERE intDefaultVisibleOldAccountSystemId IS NULL')
 END
 	
 

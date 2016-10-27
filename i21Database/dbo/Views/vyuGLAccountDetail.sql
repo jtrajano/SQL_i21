@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGLAccountDetail]
 AS
-	SELECT      TOP 1000000  dbo.tblGLAccount.strAccountId,replace(dbo.tblGLAccount.strAccountId,'-','') strAccountId1, dbo.tblGLAccount.strDescription, dbo.tblGLAccountGroup.strAccountGroup, dbo.tblGLAccountGroup.strAccountType, dbo.tblGLAccountCategory.strAccountCategory, 
+	SELECT      TOP 1000000  dbo.tblGLAccount.strAccountId,replace(dbo.tblGLAccount.strAccountId,'-','') strAccountId1,tblGLCrossReferenceMapping.strOldAccountId, dbo.tblGLAccount.strDescription, dbo.tblGLAccountGroup.strAccountGroup, dbo.tblGLAccountGroup.strAccountType, dbo.tblGLAccountCategory.strAccountCategory, 
                          dbo.tblGLAccount.strComments, dbo.tblGLAccount.strCashFlow, dbo.tblGLAccount.ysnActive, dbo.tblGLAccount.ysnSystem, dbo.tblGLAccount.ysnRevalue, dbo.tblGLAccountUnit.intAccountUnitId, 
                          dbo.tblGLAccountUnit.strUOMCode, dbo.tblGLAccount.intAccountId, dbo.tblGLAccount.intCurrencyID, dbo.tblGLAccount.intCurrencyExchangeRateTypeId, dbo.tblGLAccount.strNote, dbo.tblSMCurrency.strCurrency, 
                          dbo.tblSMCurrencyExchangeRateType.strCurrencyExchangeRateType, dbo.tblGLAccount.intAccountGroupId, dbo.tblGLAccountSegment.intAccountCategoryId,
@@ -15,5 +15,8 @@ FROM            dbo.tblGLAccount INNER JOIN
                          dbo.tblSMCurrency ON dbo.tblGLAccount.intCurrencyID = dbo.tblSMCurrency.intCurrencyID LEFT OUTER JOIN
                          dbo.tblGLAccountUnit ON dbo.tblGLAccount.intAccountUnitId = dbo.tblGLAccountUnit.intAccountUnitId LEFT OUTER JOIN
 						 dbo.tblGLCOACrossReference ON dbo.tblGLAccount.intAccountId = dbo.tblGLCOACrossReference.inti21Id LEFT OUTER JOIN
-                         dbo.tblGLAccountGroup ON dbo.tblGLAccount.intAccountGroupId = dbo.tblGLAccountGroup.intAccountGroupId
+                         dbo.tblGLAccountGroup ON dbo.tblGLAccount.intAccountGroupId = dbo.tblGLAccountGroup.intAccountGroupId LEFT OUTER JOIN
+						 dbo.tblGLCrossReferenceMapping ON tblGLAccount.intAccountId = dbo.tblGLCrossReferenceMapping.inti21AccountId  
+						 and dbo.tblGLCrossReferenceMapping.intAccountSystemId in (select [intDefaultVisibleOldAccountSystemId] from tblGLCompanyPreferenceOption)
 WHERE        (dbo.tblGLAccountStructure.strType = 'Primary')
+GO
