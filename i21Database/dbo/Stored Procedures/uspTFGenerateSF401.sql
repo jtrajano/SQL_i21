@@ -113,23 +113,14 @@ SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 									SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A')
 
 									INSERT INTO tblTFTaxReportSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
-									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 1, 'Summary','Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFReportingComponent rc 
-																 INNER JOIN tblTFValidProductCode vpc ON rc.intReportingComponentId = vpc.intReportingComponentId 
-																 INNER JOIN tblTFTransactions tr ON vpc.strProductCode = tr.strProductCode
-																 WHERE (rc.strFormCode = @FormCodeParam) AND (rc.strScheduleCode IN('1A','2A','3A')) AND (rc.strType = 'Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)') AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 1, 'Summary','Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 									
 									
 									INSERT INTO tblTFTaxReportSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 2, 'Summary','Column B Gasoline (Gasoline, Gasohol)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFReportingComponent rc 
-																	  INNER JOIN tblTFValidProductCode vpc ON rc.intReportingComponentId = vpc.intReportingComponentId 
-																	  INNER JOIN tblTFTransactions tr ON vpc.strProductCode = tr.strProductCode
-																	  WHERE (rc.strFormCode = @FormCodeParam) AND (rc.strScheduleCode IN('1A','2A','3A')) AND (rc.strType = 'Column B Gasoline (Gasoline, Gasohol)') AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 2, 'Summary','Column B Gasoline (Gasoline, Gasohol)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Gasoline (Gasoline, Gasohol)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 									-- OTHERS
 									INSERT INTO tblTFTaxReportSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 3, 'Summary','Column C Other Products (Jet Fuel, Kerosene)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFReportingComponent rc 
-																	INNER JOIN tblTFValidProductCode vpc ON rc.intReportingComponentId = vpc.intReportingComponentId 
-																	INNER JOIN tblTFTransactions tr ON vpc.strProductCode = tr.strProductCode
-																	WHERE (rc.strFormCode = @FormCodeParam) AND (rc.strScheduleCode IN('1A','2A','3A')) AND (rc.strType = 'Column C Other Products (Jet Fuel, Kerosene)') AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 3, 'Summary','Column C Other Products (Jet Fuel, Kerosene)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Other Products (Jet Fuel, Kerosene)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 									
 									DELETE FROM @tblSchedule
 								END
@@ -139,23 +130,13 @@ SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 									DECLARE @paramScheduleCode NVARCHAR(MAX)
 									SET @paramScheduleCode = (SELECT strTempScheduleCode FROM @tblTempScheduleCodeParam WHERE strTempScheduleCode = @tplScheduleCode)
 									PRINT @paramScheduleCode
-									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-
-									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFReportingComponent rc 
-																 INNER JOIN tblTFValidProductCode vpc ON rc.intReportingComponentId = vpc.intReportingComponentId 
-																 INNER JOIN tblTFTransactions tr ON vpc.strProductCode = tr.strProductCode
-																 WHERE (rc.strFormCode = @FormCodeParam) AND (rc.strScheduleCode = @paramScheduleCode) AND (rc.strType = 'Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)') AND uniqTransactionGuid = @Guid)
+									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 
 									
-									SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFReportingComponent rc 
-																	  INNER JOIN tblTFValidProductCode vpc ON rc.intReportingComponentId = vpc.intReportingComponentId 
-																	  INNER JOIN tblTFTransactions tr ON vpc.strProductCode = tr.strProductCode
-																	  WHERE (rc.strFormCode = @FormCodeParam) AND (rc.strScheduleCode = @paramScheduleCode) AND (rc.strType = 'Column B Gasoline (Gasoline, Gasohol)') AND uniqTransactionGuid = @Guid)
+									SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline (Gasoline, Gasohol)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 
-									SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFReportingComponent rc 
-																	INNER JOIN tblTFValidProductCode vpc ON rc.intReportingComponentId = vpc.intReportingComponentId 
-																	INNER JOIN tblTFTransactions tr ON vpc.strProductCode = tr.strProductCode
-																	WHERE (rc.strFormCode = @FormCodeParam) AND (rc.strScheduleCode = @paramScheduleCode) AND (rc.strType = 'Column C Other Products (Jet Fuel, Kerosene)') AND uniqTransactionGuid = @Guid)
+
+									SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Other Products (Jet Fuel, Kerosene)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 									
 									-- GAS
 									DECLARE @SmryDetailItemId NVARCHAR(MAX)
