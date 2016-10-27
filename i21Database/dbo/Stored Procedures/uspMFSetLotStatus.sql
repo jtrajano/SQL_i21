@@ -1,22 +1,21 @@
-﻿CREATE PROCEDURE [uspMFSetLotStatus]
-	@intLotId INT
+﻿CREATE PROCEDURE [uspMFSetLotStatus] @intLotId INT
 	,@intNewLotStatusId INT
 	,@intUserId INT
 	,@strNotes NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-	DECLARE @dtmDate DATETIME
-	DECLARE @intLocationId INT
-	DECLARE @intSubLocationId INT
-	DECLARE @intStorageLocationId INT
-	DECLARE @strLotNumber NVARCHAR(50)
-	DECLARE @intSourceId INT
-	DECLARE @intSourceTransactionTypeId INT
-	DECLARE @intLotStatusId INT
-	DECLARE @intInventoryAdjustmentId INT
-	DECLARE @TransactionCount INT
-	DECLARE @ErrMsg NVARCHAR(MAX)
+		,@dtmDate DATETIME
+		,@intLocationId INT
+		,@intSubLocationId INT
+		,@intStorageLocationId INT
+		,@strLotNumber NVARCHAR(50)
+		,@intSourceId INT
+		,@intSourceTransactionTypeId INT
+		,@intLotStatusId INT
+		,@intInventoryAdjustmentId INT
+		,@TransactionCount INT
+		,@ErrMsg NVARCHAR(MAX)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -95,6 +94,24 @@ BEGIN TRY
 		,@intSourceTransactionTypeId
 		,@intUserId
 		,@intInventoryAdjustmentId OUTPUT
+
+	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
+		,@intTransactionTypeId = 16
+		,@intItemId = @intItemId
+		,@intSourceLotId = @intLotId
+		,@intDestinationLotId = NULL
+		,@dblQty = NULL
+		,@intItemUOMId = NULL
+		,@intOldItemId = NULL
+		,@dtmOldExpiryDate = NULL
+		,@dtmNewExpiryDate = NULL
+		,@intOldLotStatusId = @intLotStatusId
+		,@intNewLotStatusId = @intNewLotStatusId
+		,@intUserId = @intUserId
+		,@strNote = NULL
+		,@strReason = NULL
+		,@intLocationId = @intLocationId
+		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 END TRY
 
 BEGIN CATCH
