@@ -2,8 +2,9 @@ StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
         //region Scenario 1: Add Lotted Yes Serial Item
-        .clickMenu('Inventory','Folder')
-        .clickScreenMenu('Items','Screen')
+        .displayText('===== Scenario 1: Add Lotted Yes Serial Item =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Items','Screen')
         .clickButton('New')
         .enterData('textbox','ItemNo','001 - CLTI')
         .enterData('textbox','Description','001 - CRUD Lotted Item Serial')
@@ -54,13 +55,14 @@ StartTest (function (t) {
         .verifyGridData('Pricing', 0, 'strLocationName', '0001 - Fort Wayne')
         .enterGridData('Pricing', 0, 'dblLastCost', '10')
         .enterGridData('Pricing', 0, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('#grdPricing', 0, 'strPricingMethod',2)
+        .selectGridComboBoxRowNumber('Pricing', 0, 'strPricingMethod',2)
         .enterGridData('Pricing', 0, 'dblAmountPercent', '40')
         .clickButton('Save')
         .clickButton('Close')
 
 
         //region Scenario 2: Add Lotted Yes Manual Item
+        .displayText('===== Scenario 2: Add Lotted Yes Manual Item =====')
         .clickButton('New')
         .enterData('textbox','ItemNo','002 - CLTI')
         .enterData('textbox','Description','002 - CRUD Lotted Item Manual')
@@ -111,13 +113,14 @@ StartTest (function (t) {
         .verifyGridData('Pricing', 0, 'strLocationName', '0001 - Fort Wayne')
         .enterGridData('Pricing', 0, 'dblLastCost', '10')
         .enterGridData('Pricing', 0, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('#grdPricing', 0, 'strPricingMethod',2)
+        .selectGridComboBoxRowNumber('Pricing', 0, 'strPricingMethod',2)
         .enterGridData('Pricing', 0, 'dblAmountPercent', '40')
         .clickButton('Save')
         .clickButton('Close')
 
 
         //region Scenario 3: Add Non Lotted Item
+        .displayText('===== Scenario 3: Add Non Lotted Item =====')
         .clickButton('New')
         .enterData('textbox','ItemNo','001 - CNLTI')
         .enterData('textbox','Description','001 - CRUD Non Lotted Item')
@@ -168,14 +171,16 @@ StartTest (function (t) {
         .verifyGridData('Pricing', 0, 'strLocationName', '0001 - Fort Wayne')
         .enterGridData('Pricing', 0, 'dblLastCost', '10')
         .enterGridData('Pricing', 0, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('#grdPricing', 0, 'strPricingMethod',2)
+        .selectGridComboBoxRowNumber('Pricing', 0, 'strPricingMethod',2)
         .enterGridData('Pricing', 0, 'dblAmountPercent', '40')
         .clickButton('Save')
         .clickButton('Close')
         //endregion
 
 
+
         //region Scenario 4: Update an Item
+        .displayText('===== Scenario 4: Update an Item =====')
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
         .enterData('textbox','Description','001 - CRUD Lotted Item - Updated')
@@ -186,20 +191,20 @@ StartTest (function (t) {
         .verifyStatusMessage('Saved')
         .clickButton('Close')
 
-
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
         .verifyData('textbox','Description','001 - CRUD Lotted Item - Updated')
         .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitMeasure', '40 lb bag')
-        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '40')
-        .clickTab('Setup')
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '40').wait(1000)
         .clickButton('Close')
         //endregion
 
 
+
         //region Scenario 5: Duplicate an Item
+        .displayText('===== Scenario 5: Duplicate an Item =====')
         .selectSearchRowNumber(1)
-        .clickButton('OpenSelected')
+        .clickButton('OpenSelected').wait(1000)
         .clickButton('Duplicate')
         .verifyData('textbox','ItemNo','001 - CLTI-copy')
         .verifyData('textbox','Description','001 - CRUD Lotted Item - Updated')
@@ -242,12 +247,39 @@ StartTest (function (t) {
 
 
         //region Scenario 6: Check Required Fields
+        .displayText('===== Scenario 6: Check Required Fields =====')
         .clickButton('New')
         .clickButton('Save')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
         .clickMessageBoxButton('no')
         //endregion
+
+
+        //region Scenario 7: Save Duplicate Item No.
+        .displayText('===== Scenario 7: Save Duplicate Item No. =====')
+        .clickMenuScreen('Items','Screen')
+        .clickButton('New')
+        .enterData('textbox','ItemNo','001 - CLTI')
+        .enterData('textbox','Description','001 - CRUD Lotted Item Serial')
+        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
+        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',0)
+        .selectComboBoxRowNumber('LotTracking',2,0)
+        .clickButton('Save')
+        .verifyMessageBox('iRely i21','Item No must be unique.','ok','error')
+        .clickMessageBoxButton('ok')
+        .clickButton('Close')
+        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+        .clickMessageBoxButton('yes').wait(1000)
+        .verifyMessageBox('iRely i21','Item No must be unique.','ok','error')
+        .clickMessageBoxButton('ok')
+        .enterData('textbox','ItemNo','003 - CLTI')
+        .clickButton('Save')
+        .clickButton('Close')
+
+        //endregion
+
+
 
 
         .done();
