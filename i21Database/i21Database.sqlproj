@@ -4477,6 +4477,7 @@
     <None Include="Scripts\Post-Deployment\EM\035_EncryptEFTAccountNumber.sql" />
     <Build Include="dbo\Views\vyuPATCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuLGStockSalesNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutureAndBasisPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
