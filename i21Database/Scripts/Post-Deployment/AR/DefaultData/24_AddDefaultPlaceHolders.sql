@@ -175,12 +175,12 @@ IF NOT EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN
 BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
 	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-10', 'PH-12')
-	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="text" name="PH-10" style="border:none" placeholder="Terms" readonly="">', N'vyuARCollectionCreditViewReport', N'strTerm', N'strTerm', N'Terms', 0, N'PH-10', 0, N'nvarchar')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="text" name="PH-10" style="border:none" placeholder="Terms" readonly="">', N'vyuARCollectionOverdueReport', N'strTerm', N'strTerm', N'Terms', 0, N'PH-10', 0, N'nvarchar')
 END
 ELSE
 BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
-	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="text" name="PH-10" style="border:none" placeholder="Terms" readonly="">', N'vyuARCollectionCreditViewReport', N'strTerm', N'strTerm', N'Terms', 0, N'PH-10', 0, N'nvarchar')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="text" name="PH-10" style="border:none" placeholder="Terms" readonly="">', N'vyuARCollectionOverdueReport', N'strTerm', N'strTerm', N'Terms', 0, N'PH-10', 0, N'nvarchar')
 END
 
 IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-11', 'PH-13'))
