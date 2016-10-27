@@ -83,7 +83,7 @@ BEGIN
 		from tblHDTicketStatus
 		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select distinct intTicketStatusId from tblHDSalesPipeStatus union all select distinct intCampaignStatusId from tblHDOpportunityCampaign)
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-			and (ysnActivity = 1 or ysnOpportunity = 1)
+			--and (ysnActivity = 1 or ysnOpportunity = 1)
 	)
 	SET IDENTITY_INSERT tblCRMStatus OFF
 END
