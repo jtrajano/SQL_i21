@@ -1,193 +1,249 @@
-StartTest(function (t) {
+StartTest (function (t) {
+    new iRely.FunctionalTest().start(t)
 
-    var engine = new iRely.TestEngine();
-    var commonSM = Ext.create('SystemManager.CommonSM');
-    var commonIC = Ext.create('i21.test.Inventory.CommonIC');
+        //region Scenario 1: Add New Category - Inventory Type
+        .displayText('===== Scenario 1: Add New Category - Inventory Type =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Categories','Screen')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','001 - Inventory Category')
+        .enterData('textbox','Description','Test Inventory Category')
+        .selectComboBoxRowNumber('InventoryType',2,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
 
-    engine.start(t)
-
-
-        // LOG IN
-        .displayText('Log In').wait(500)
-        .addFunction(function (next) {
-            commonSM.commonLogin(t, next); }).wait(100)
-        .waitTillMainMenuLoaded('Login Successful').wait(500)
-
-
-        .expandMenu('Inventory').wait(500)
-        .markSuccess('Inventory successfully expanded').wait(300)
-        .openScreen('Categories').wait(500)
-        .waitTillLoaded('Open Category Search Screen Successful').wait(200)
-
-
-        //#1 Add Category - Inventory
-        .displayText('====== Scenario 1. Create Inventory Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .waitTillVisible('iccategory','Open Category Screen Successful').wait(300)
-        .enterData('#txtCategoryCode','Test Inventory Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',1).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100).wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .checkStatusMessage('Saved').wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-        .enterData('#txtStandardQty','100000').wait(300)
-        .selectComboRowByFilter('#cboStandardUOM','LB',500, 'cboStandardUOM').wait(100)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Inventory Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
+        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
+        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
+        .clickGridCheckBox('UnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true)
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '50')
+        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '56')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
 
 
-        //#2 Add Category - Bundle
-        .displayText('====== Scenario 2. Create Bundle Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .enterData('#txtCategoryCode','Test Bundle Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',0).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100).wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .checkStatusMessage('Saved').wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-        .enterData('#txtStandardQty','100000').wait(300)
-        .selectComboRowByFilter('#cboStandardUOM','LB',500, 'cboStandardUOM').wait(100)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Bundle Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
+        //region Scenario 2: Add New Category - Bundle
+        .displayText('===== Scenario 2: Add New Category - Bundle =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','002 - Bundle Category')
+        .enterData('textbox','Description','Test Bundle Category')
+        .selectComboBoxRowNumber('InventoryType',1,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Use Tax Gasoline','strTaxClass')
 
-        //#3 Add Category - Kit
-        .displayText('====== Scenario 3. Create Kit Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .enterData('#txtCategoryCode','Test Kit Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',2).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100).wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .checkStatusMessage('Saved').wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-        .enterData('#txtStandardQty','100000').wait(300)
-        .selectComboRowByFilter('#cboStandardUOM','LB',500, 'cboStandardUOM').wait(100)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Kit Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
-
-        //#4 Add Category - Finished Good
-        .displayText('====== Scenario 4. Create Finished Good Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .enterData('#txtCategoryCode','Test Finished Good Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',3).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100).wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .checkStatusMessage('Saved').wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-        .enterData('#txtStandardQty','100000')
-        .selectComboRowByFilter('#cboStandardUOM','LB',500, 'cboStandardUOM').wait(100)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Finished Good Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
-
-        //#5 Add Category - Non Inventory
-        .displayText('====== Scenario 5. Create Non Inventory Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .enterData('#txtCategoryCode','Test Non Inventory Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',4).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100).wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .checkStatusMessage('Saved').wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-        .enterData('#txtStandardQty','100000').wait(300)
-        .selectComboRowByFilter('#cboStandardUOM','LB',500, 'cboStandardUOM').wait(100)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Non Inventory Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
-
-        //#6 Add Category - Other Charge
-        .displayText('====== Scenario 6. Create Other Charge Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .enterData('#txtCategoryCode','Test Other Charge Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',5).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .checkStatusMessage('Saved').wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-        .enterData('#txtStandardQty','100000').wait(300)
-        .selectComboRowByFilter('#cboStandardUOM','LB',500, 'cboStandardUOM').wait(100)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Other Charge Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
-
-        //#7 Add Category - Raw Material
-        .displayText('====== Scenario 7. Create Raw Material Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .enterData('#txtCategoryCode','Test Raw Material Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',6).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .checkStatusMessage('Saved').wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-        .enterData('#txtStandardQty','100000')
-        .selectComboRowByFilter('#cboStandardUOM','LB',500, 'cboStandardUOM').wait(100)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Raw Material Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
-
-        //#8 Add Category - Service
-        .displayText('====== Scenario 8. Create Service Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .enterData('#txtCategoryCode','Test Service Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',7).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 0,'strUnitMeasure','LB', 300,'strUnitMeasure').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .checkStatusMessage('Saved').wait(300)
-        .selectGridComboRowByFilter('#grdUnitOfMeasure', 1,'strUnitMeasure','50 lb bag', 300,'strUnitMeasure').wait(100)
-        .clickGridCheckBox('#grdUnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true).wait(100)
-        .enterData('#txtStandardQty','100000').wait(300)
-        .selectComboRowByFilter('#cboStandardUOM','LB',500, 'cboStandardUOM').wait(100)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Service Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
-
-        //#9 Add Category - Software
-        .displayText('====== Scenario 9. Create Software Type Category ======').wait(300)
-        .clickButton('#btnNew').wait(200)
-        .enterData('#txtCategoryCode','Test Software Category').wait(300)
-        .enterData('#txtDescription','Test Description').wait(300)
-        .selectComboRowByIndex('#cboInventoryType',8).wait(200)
-        .selectComboRowByIndex('#cboCostingMethod',0,100)
-        .enterData('#txtStandardQty','100000').wait(300)
-        .selectGridComboRowByFilter('#grdTax', 0,'strTaxClass','State Sales Tax (SST)', 300,'strTaxClass').wait(100)
-        .clickButton('#btnSave').wait(300)
-        .markSuccess('Create Software Type Category Successful').wait(500)
-        .clickButton('#btnClose').wait(300)
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Each','strUnitMeasure')
+        .clickGridCheckBox('UnitOfMeasure', 'strUnitMeasure', 'Each', 'ysnStockUnit', true)
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
 
 
-        .done()
-});
+        //region Scenario 3: Add New Category - Kit
+        .displayText('===== Scenario 3: Add New Category - Kit =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','003 - Kit Category')
+        .enterData('textbox','Description','Test Kit Category')
+        .selectComboBoxRowNumber('InventoryType',3,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','Checkoff','strTaxClass')
 
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Each','strUnitMeasure')
+        .clickGridCheckBox('UnitOfMeasure', 'strUnitMeasure', 'Each', 'ysnStockUnit', true)
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
+
+        //region Scenario 4: Add New Category - Finished Good Type
+        .displayText('===== Scenario 4: Add New Category - Finished Good Type =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','004 - Finished Good Category')
+        .enterData('textbox','Description','Test Finished Good Category')
+        .selectComboBoxRowNumber('InventoryType',4,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
+
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','KG','strUnitMeasure')
+        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','60 Kg Bag','strUnitMeasure')
+        .clickGridCheckBox('UnitOfMeasure', 'strUnitMeasure', 'KG', 'ysnStockUnit', true)
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '60')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
+
+        //region Scenario 5: Add New Category - Non Inventory
+        .displayText('===== Scenario 5: Add New Category - Non Inventory =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','005 - Non Inventory Category')
+        .enterData('textbox','Description','Test Non Inventory Category')
+        .selectComboBoxRowNumber('InventoryType',5,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','Checkoff','strTaxClass')
+
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Each','strUnitMeasure')
+        .clickGridCheckBox('UnitOfMeasure', 'strUnitMeasure', 'Each', 'ysnStockUnit', true)
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
+
+
+        //region Scenario 6: Add New Category - Other Charge Type
+        .displayText('===== Scenario 6: Add New Category - Other Charge Type =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','006 - Other Charge Category')
+        .enterData('textbox','Description','Test Inventory Category')
+        .selectComboBoxRowNumber('InventoryType',6,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
+
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
+        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
+        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
+        .enterGridData('UnitOfMeasure', 0, 'dblUnitQty', '1')
+        .enterGridData('UnitOfMeasure', 2, 'dblUnitQty', '1')
+        .enterGridData('UnitOfMeasure', 3, 'dblUnitQty', '1')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
+
+
+        //region Scenario 7: Add New Category - Raw Material Type
+        .displayText('===== Scenario 7: Add New Category - Raw Material Type =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','007 - Raw Material Category')
+        .enterData('textbox','Description','Test Raw Material Category')
+        .selectComboBoxRowNumber('InventoryType',7,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
+
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
+        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
+        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
+        .clickGridCheckBox('UnitOfMeasure', 'strUnitMeasure', 'LB', 'ysnStockUnit', true)
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '50')
+        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '56')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
+
+
+        //region Scenario 8: Add New Category - Service
+        .displayText('===== Scenario 8: Add New Category - Service =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','008 - Service Category')
+        .enterData('textbox','Description','Test Non Inventory Category')
+        .selectComboBoxRowNumber('InventoryType',8,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','Checkoff','strTaxClass')
+
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Each','strUnitMeasure')
+        .clickGridCheckBox('UnitOfMeasure', 'strUnitMeasure', 'Each', 'ysnStockUnit', true)
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
+
+
+        //region Scenario 9: Add New Category - Software
+        .displayText('===== Scenario 9: Add New Category - Software =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','009 - Software Category')
+        .enterData('textbox','Description','Test Non Inventory Category')
+        .selectComboBoxRowNumber('InventoryType',9,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','Checkoff','strTaxClass')
+
+        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Each','strUnitMeasure')
+        .clickGridCheckBox('UnitOfMeasure', 'strUnitMeasure', 'Each', 'ysnStockUnit', true)
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        //endregion
+
+        //region Scenario 10: Update Category
+        .displayText('===== Scenario 4: Update Commodity =====')
+
+        .selectSearchRowValue('001 - Inventory Category',500,'strCategoryCode')
+        .clickButton('OpenSelected')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','Description','Updated Test Category Code')
+        .selectComboBoxRowNumber('CostingMethod',2,0)
+        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','Checkoff','strTaxClass')
+
+        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','25 kg bag','strUnitMeasure')
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '50')
+        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '55.1156')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close').wait(500)
+
+        .selectSearchRowNumber(1)
+        .clickButton('OpenSelected')
+        .waitTillLoaded('iccategory','')
+        .verifyData('textbox','Description','Updated Test Category Code')
+        .verifyGridData('UnitOfMeasure', 0, 'colDetailUnitQty', '1')
+        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '50')
+        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '55.1156')
+        .clickButton('Close').wait(500)
+        //endregion
+
+
+        //region Scenario 11: Check Required Fields
+        .displayText('===== Scenario 5: Check Required Fields =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .clickButton('Save')
+        .clickButton('Close').wait(500)
+        //endregion
+
+
+        //region Scenario 12: Save Duplicate Commodity Code
+        .displayText('===== Scenario 12: Save Duplicate Commodity Code =====')
+        .clickButton('New')
+        .waitTillLoaded('iccategory','')
+        .enterData('textbox','CategoryCode','001 - Inventory Category')
+        .enterData('textbox','Description','Test Inventory Category')
+        .selectComboBoxRowNumber('InventoryType',2,0)
+        .selectComboBoxRowNumber('CostingMethod',1,0)
+        .clickButton('Save')
+        .verifyMessageBox('iRely i21','Category must be unique.','ok','error')
+        .clickMessageBoxButton('ok')
+        .clickButton('Close')
+        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+        .clickMessageBoxButton('yes').wait(1000)
+        .verifyMessageBox('iRely i21','Category must be unique.','ok','error')
+        .clickMessageBoxButton('ok')
+        .enterData('textbox','CategoryCode','010 - Inventory Category')
+        .clickButton('Save')
+        .clickButton('Close')
+
+
+        .done();
+
+})

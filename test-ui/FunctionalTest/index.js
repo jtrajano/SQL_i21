@@ -6,7 +6,9 @@ Harness.configure({
     hostPageUrl: '../../../i21',
     forceDOMVisible: false,
     waitForExtReady: false,
-    sandbox: false
+    sandbox: false,
+    viewportWidth: 1200,
+    viewPortHeight: 1000
 
 });
 
@@ -32,6 +34,17 @@ Harness.start(
         items: [
             {
                 url: '../Commodity/AddCommodity.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
+    },
+
+    { group: 'Category',
+        items: [
+            {
+                url: '../Category/AddCategory.js',
                 preload: [
                     functionalTest
                 ]
