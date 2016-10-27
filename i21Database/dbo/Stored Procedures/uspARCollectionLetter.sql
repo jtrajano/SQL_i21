@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCollectionLetter]  
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
-
 BEGIN
 	DECLARE @idoc						INT
 			, @strCustomerIds			NVARCHAR(MAX)		
@@ -16,28 +15,28 @@ BEGIN
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 	DECLARE @temp_params TABLE (
-					[fieldname]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				, [condition]		NVARCHAR(20)   COLLATE Latin1_General_CI_AS    
+				[fieldname]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+				, [condition]		NVARCHAR(20)	COLLATE Latin1_General_CI_AS    
 				, [from]			NVARCHAR(MAX)
-				, [to]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				, [join]			NVARCHAR(10) COLLATE Latin1_General_CI_AS
-				, [begingroup]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				, [endgroup]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				, [datatype]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				, [to]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+				, [join]			NVARCHAR(10)	COLLATE Latin1_General_CI_AS
+				, [begingroup]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+				, [endgroup]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+				, [datatype]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 				) 
 	INSERT INTO 
 		@temp_params
 	SELECT *
 	FROM OPENXML(@idoc, 'xmlparam/filters/filter',2)
 	WITH (	
-			[fieldname]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			, [condition]		NVARCHAR(20) COLLATE Latin1_General_CI_AS
-			, [from]			NVARCHAR(MAX)
-			, [to]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			, [join]			NVARCHAR(10) COLLATE Latin1_General_CI_AS
-			, [begingroup]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			, [endgroup]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			, [datatype]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+			[fieldname]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+			, [condition]	NVARCHAR(20)	COLLATE Latin1_General_CI_AS
+			, [from]		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS
+			, [to]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+			, [join]		NVARCHAR(10)	COLLATE Latin1_General_CI_AS
+			, [begingroup]	NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+			, [endgroup]	NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+			, [datatype]	NVARCHAR(50)	COLLATE Latin1_General_CI_AS
 			)
 	SELECT 
 		@strCustomerIds = [from]		
@@ -82,25 +81,37 @@ BEGIN
 		intLetterId  = @strLetterId		
 
 	DECLARE @SelectedPlaceHolderTable TABLE  (
-		intPlaceHolderId	INT
-		, strPlaceHolder	VARCHAR(max)
-		, strSourceColumn	NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strPlaceHolderDescription	NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strSourceTable	NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, ysnTable			INT
-		, strDataType		NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		intPlaceHolderId				INT
+		, strPlaceHolder				VARCHAR(MAX)
+		, strSourceColumn				NVARCHAR(200)	COLLATE Latin1_General_CI_AS
+		, strPlaceHolderDescription		NVARCHAR(200)	COLLATE Latin1_General_CI_AS
+		, strSourceTable				NVARCHAR(200)	COLLATE Latin1_General_CI_AS
+		, ysnTable						INT
+		, strDataType					NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	);
 				
  	DECLARE @SelectedCustomer TABLE  (
 		intEntityCustomerId		INT
 	);
-
+	
 	IF OBJECT_ID('tempdb..#CustomerPlaceHolder') IS NOT NULL DROP TABLE #CustomerPlaceHolder	
 	CREATE TABLE #CustomerPlaceHolder (
-		[intPlaceHolderId] [int] NOT NULL,
-		[strPlaceHolder]	VARCHAR(MAX),
-		[intEntityCustomerId] [int] NOT NULL,
-		[strValue] varchar(MAX)
+		[intPlaceHolderId]		INT NOT NULL,
+		[strPlaceHolder]		VARCHAR(MAX)	COLLATE Latin1_General_CI_AS,
+		[intEntityCustomerId]	INT NOT NULL,
+		[strValue]				VARCHAR(MAX)	COLLATE Latin1_General_CI_AS
+	)
+
+	IF OBJECT_ID('tempdb..#TransactionLetterDetail') IS NOT NULL DROP TABLE #TransactionLetterDetail	
+	CREATE TABLE #TransactionLetterDetail (
+		strInvoiceNumber	VARCHAR(MAX)	COLLATE Latin1_General_CI_AS, 
+		dtmDate				DATETIME, 
+		dbl10Days			NUMERIC(18,6), 
+		dbl30Days			NUMERIC(18,6), 
+		dbl60Days			NUMERIC(18,6), 
+		dbl90Days			NUMERIC(18,6), 
+		dbl120Days			NUMERIC(18,6), 
+		dbl121Days			NUMERIC(18,6)
 	)
 
 	INSERT INTO 
@@ -126,7 +137,6 @@ BEGIN
 		@originalMsgInHTML = msgAsHTML 
 	FROM 
 		@OriginalMsgInHTMLTable
-
 	 
 	INSERT INTO @SelectedPlaceHolderTable
 	(
@@ -154,35 +164,208 @@ BEGIN
 	WHILE EXISTS(SELECT NULL FROM @SelectedCustomer)
 	BEGIN
 		DECLARE @CustomerId INT
-		SELECT TOP 1 @CustomerId = intEntityCustomerId FROM @SelectedCustomer ORDER BY intEntityCustomerId
+		SELECT TOP 1
+			 @CustomerId = intEntityCustomerId 
+		FROM 
+			@SelectedCustomer 
+		ORDER BY 
+			intEntityCustomerId
 
 	IF @LetterName = 'Recent Overdue Collection Letter'
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl10DaysSum = (dbl10DaysSum + dbl30DaysSum + dbl60DaysSum + dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId 
-		SET @filterValue = '((dbl10DaysSum > 0 OR dbl10DaysSum > 1) OR (dbl30DaysSum > 0 OR dbl30DaysSum > 1) OR (dbl60DaysSum > 0 OR dbl60DaysSum > 1) OR (dbl90DaysSum > 0 OR dbl90DaysSum > 1) OR  ([dbl120DaysSum] > 0 OR [dbl121DaysSum] > 1) OR ([dbl120DaysSum] > 0 OR [dbl121DaysSum] > 1))'		
+		INSERT INTO #TransactionLetterDetail
+		(
+			strInvoiceNumber	 
+			,dtmDate				 
+			,dbl10Days			 
+			,dbl30Days			 
+			,dbl60Days			  
+			,dbl90Days			 
+			,dbl120Days			 
+			,dbl121Days			 
+		)
+		SELECT strInvoiceNumber
+			, dtmDate
+			, dbl10Days
+			, dbl30Days
+			, dbl60Days
+			, dbl90Days
+			, dbl120Days
+			, dbl121Days
+		FROM
+		( 
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl10Days <> 0
+			UNION ALL 
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl30Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl60Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl90Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl120Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl121Days  <> 0
+		) ABC
 	END
 	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl30DaysSum =  (dbl60DaysSum + dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+		INSERT INTO #TransactionLetterDetail
+		(
+			strInvoiceNumber	 
+			,dtmDate				 
+			,dbl10Days			 
+			,dbl30Days			 
+			,dbl60Days			  
+			,dbl90Days			 
+			,dbl120Days			 
+			,dbl121Days			 
+		)
+		SELECT strInvoiceNumber
+			, dtmDate
+			, dbl10Days
+			, dbl30Days
+			, dbl60Days
+			, dbl90Days
+			, dbl120Days
+			, dbl121Days
+		FROM
+		( 
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl60Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl90Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl120Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl121Days  <> 0
+		) ABC
 	END
 	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl60DaysSum =  (dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+		INSERT INTO #TransactionLetterDetail
+		(
+			strInvoiceNumber	 
+			,dtmDate				 
+			,dbl10Days			 
+			,dbl30Days			 
+			,dbl60Days			  
+			,dbl90Days			 
+			,dbl120Days			 
+			,dbl121Days			 
+		)
+		SELECT strInvoiceNumber
+			, dtmDate
+			, dbl10Days
+			, dbl30Days
+			, dbl60Days
+			, dbl90Days
+			, dbl120Days
+			, dbl121Days
+		FROM
+		( 
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl90Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl120Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl121Days  <> 0
+		) ABC
 	END
 	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl90DaysSum =  (dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+		INSERT INTO #TransactionLetterDetail
+		(
+			strInvoiceNumber	 
+			,dtmDate				 
+			,dbl10Days			 
+			,dbl30Days			 
+			,dbl60Days			  
+			,dbl90Days			 
+			,dbl120Days			 
+			,dbl121Days			 
+		)
+		SELECT strInvoiceNumber
+			, dtmDate
+			, dbl10Days
+			, dbl30Days
+			, dbl60Days
+			, dbl90Days
+			, dbl120Days
+			, dbl121Days
+		FROM
+		( 
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl120Days  <> 0
+			UNION ALL
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl121Days  <> 0
+		) ABC
 	END
 	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl121DaysSum =  (dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+		INSERT INTO #TransactionLetterDetail
+		(
+			strInvoiceNumber	 
+			,dtmDate				 
+			,dbl10Days			 
+			,dbl30Days			 
+			,dbl60Days			  
+			,dbl90Days			 
+			,dbl120Days			 
+			,dbl121Days			 
+		)
+		SELECT strInvoiceNumber
+			, dtmDate
+			, dbl10Days
+			, dbl30Days
+			, dbl60Days
+			, dbl90Days
+			, dbl120Days
+			, dbl121Days
+		FROM
+		( 
+			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			WHERE intEntityCustomerId = @CustomerId
+			AND dbl121Days  <> 0
+		) ABC
 	END
  						
 		WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
 		BEGIN
 			DECLARE @PlaceHolderId				INT
-					,@PlaceHolder				VARCHAR(MAX)
-					,@SourceColumn				VARCHAR(MAX)
+					,@PlaceHolder				VARCHAR(MAX)	 
+					,@SourceColumn				VARCHAR(MAX)	 
 					,@PlaceHolderDescription	VARCHAR(MAX)
 					,@SourceTable				VARCHAR(MAX)
 					,@Table						BIT
@@ -203,7 +386,7 @@ BEGIN
 		 
 			IF @Table = 0
 			BEGIN
-				DECLARE @PHQuery		VARCHAR(MAX)
+				DECLARE @PHQuery		VARCHAR(MAX)  
 						,@InsertQuery	VARCHAR(MAX)
 						,@NotTableQuery	VARCHAR(MAX)
 
@@ -212,10 +395,10 @@ BEGIN
 
 										IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
 										CREATE TABLE #Records(
-											RowId			INT,
-											intEntityCustomerId		INT,
-											strValues		VARCHAR(MAX),
-											strDataType		VARCHAR(MAX)								
+											RowId							INT,
+											intEntityCustomerId				INT,
+											strValues		VARCHAR(MAX)	COLLATE Latin1_General_CI_AS,
+											strDataType		VARCHAR(MAX)	COLLATE Latin1_General_CI_AS								
 										)								 
 
 										DECLARE @TermTable TABLE
@@ -233,7 +416,8 @@ BEGIN
 										SELECT DISTINCT
 											intEntityCustomerId
 											, ' + @SourceColumn + ' 
-										FROM ' + @SourceTable + '  
+										FROM 
+											' + @SourceTable + '  
 										WHERE 
 											[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))	+ '  
 
@@ -411,8 +595,8 @@ BEGIN
 					' + @SourceTable + ' 
 				WHERE 
 					[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
-				+ '
-												 
+				+ ' AND strInvoiceNumber IN (SELECT strInvoiceNumber FROM #TransactionLetterDetail) ORDER BY intInvoiceId DESC
+											 
 				DECLARE @HTMLTableRows VARCHAR(MAX)
 				SET @HTMLTableRows = ''''
 
@@ -426,7 +610,7 @@ BEGIN
 					FROM 
 						#Records
 					ORDER BY
-						RowId		 
+						strInvoiceNumber		 
 
 					SET @HTMLTableRows = @HTMLTableRows + ''<tr> ''
 
@@ -469,19 +653,19 @@ BEGIN
 
 						EXEC sp_sqlexec @SetQuery	
 
-						 					UPDATE 
-												#Field 
-											SET strField = 
-												CASE WHEN strDataType = ''datetime'' 
-													THEN CAST(month(strField) AS VARCHAR(2)) + ''/'' + CAST(day(strField) AS VARCHAR(2)) + ''/'' + CAST(year(strField) AS VARCHAR(4)) 
-												ELSE strField END
+						UPDATE 
+							#Field 
+						SET strField = 
+							CASE WHEN strDataType = ''datetime'' 
+								THEN CAST(month(strField) AS VARCHAR(2)) + ''/'' + CAST(day(strField) AS VARCHAR(2)) + ''/'' + CAST(year(strField) AS VARCHAR(4)) 
+							ELSE strField END
 
-						 					UPDATE 
-												#Field 
-											SET 												
-												strField = CONVERT(varchar, CAST(strField AS money), 1)
-											WHERE 
-												ISNUMERIC(strField) = 1						
+						UPDATE 
+							#Field 
+						SET 												
+							strField = CONVERT(varchar, CAST(strField AS money), 1)
+						WHERE 
+							ISNUMERIC(strField) = 1						
 												
 						DECLARE @isNumeric BIT 
 						SET  @isNumeric = 0 
@@ -609,7 +793,4 @@ BEGIN
 			intEntityCustomerId, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId, strName
 		FROM 
 			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
-
-
-
 END
