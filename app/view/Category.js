@@ -140,6 +140,10 @@ Ext.define('Inventory.view.Category', {
                                             type: 'vbox',
                                             align: 'stretch'
                                         },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgDetails'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'container',
@@ -620,6 +624,10 @@ Ext.define('Inventory.view.Category', {
                                         xtype: 'panel',
                                         layout: 'fit',
                                         title: 'Locations',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgLocations'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -717,6 +725,10 @@ Ext.define('Inventory.view.Category', {
                                         xtype: 'panel',
                                         layout: 'fit',
                                         title: 'GL Accounts',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgGLAccounts'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -824,6 +836,10 @@ Ext.define('Inventory.view.Category', {
                                         xtype: 'panel',
                                         layout: 'fit',
                                         title: 'Vendor Category Xref',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgVendorCategoryXref'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -1096,6 +1112,10 @@ Ext.define('Inventory.view.Category', {
                                         layout: {
                                             type: 'vbox',
                                             align: 'stretch'
+                                        },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgManufacturing'
                                         },
                                         items: [
                                             {

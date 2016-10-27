@@ -236,6 +236,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgDetails"
+                                    },
                                     "name": "TabConfig24",
                                     "designerId": "77e9bbab-d454-4f23-8e14-84b667e7ae23"
                                 },
@@ -1280,6 +1283,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgLocations"
+                                    },
                                     "name": "TabConfig25",
                                     "designerId": "0a148f5c-bb5c-47d0-849e-1c754757eeba"
                                 },
@@ -1518,6 +1524,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgGLAccounts"
+                                    },
                                     "name": "TabConfig26",
                                     "designerId": "ca8d8001-d5f3-4035-9f49-fb4a51aa7d7f"
                                 },
@@ -1784,6 +1793,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgVendorCategoryXref"
+                                    },
                                     "name": "TabConfig27",
                                     "designerId": "3a607677-74ad-4c87-9da7-e3b46efdcc32"
                                 },
@@ -2417,6 +2429,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgManufacturing"
+                                    },
                                     "name": "TabConfig24",
                                     "designerId": "71293478-49d9-410e-8a1e-72e427dccf41"
                                 },

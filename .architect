@@ -2346,7 +2346,6 @@
                             "cn": [
                                 {
                                     "id": "dca757e6-10ec-49f2-97ad-ce128fbb1777",
-                                    "expanded": false,
                                     "cn": [
                                         {
                                             "id": "2fd436e2-07a8-40e9-b8de-afa12f835239"
@@ -2695,6 +2694,9 @@
                                                                 },
                                                                 {
                                                                     "id": "549f5f41-42a5-4fcc-b8e1-fb4fb0dd21a9"
+                                                                },
+                                                                {
+                                                                    "id": "50705fa0-97aa-4596-adae-f66753526bc7"
                                                                 },
                                                                 {
                                                                     "id": "da428243-da90-49b8-b887-d63c3495bc66"
@@ -6397,7 +6399,6 @@
                                 },
                                 {
                                     "id": "1269c7ab-0230-468e-8317-19586d1ae7d3",
-                                    "expanded": false,
                                     "cn": [
                                         {
                                             "id": "71293478-49d9-410e-8a1e-72e427dccf41"
@@ -10145,15 +10146,16 @@
     },
     "tabState": {
         "openTabs": [
-            "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
+            "b6b8ef41-1eb1-4854-99ef-98f5a7167844",
+            "f3120086-71dc-484a-b2c7-92f06568ac59"
         ]
     },
     "canvasState": {
-        "topInstance": "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
+        "topInstance": "f3120086-71dc-484a-b2c7-92f06568ac59"
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "f3120086-71dc-484a-b2c7-92f06568ac59",
+        "selectedInstance": "71293478-49d9-410e-8a1e-72e427dccf41"
     },
     "editMode": "design",
     "userSettings": {
