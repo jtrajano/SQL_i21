@@ -81,10 +81,91 @@ BEGIN
 			,ysnUpdated
 			,intConcurrencyId
 		from tblHDTicketStatus
-		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select distinct intTicketStatusId from tblHDSalesPipeStatus union all select distinct intCampaignStatusId from tblHDOpportunityCampaign)
+		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM')
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
 			--and (ysnActivity = 1 or ysnOpportunity = 1)
 	)
+
+	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDSalesPipeStatus'))
+	BEGIN
+		insert into tblCRMStatus (
+			intStatusId
+			,strStatus
+			,strDescription
+			,ysnActivity
+			,ysnOpportunity
+			,ysnDefaultActivity
+			,ysnDefaultOpportunity
+			,strIcon
+			,strFontColor
+			,strBackColor
+			,ysnSupported
+			,intSort
+			,ysnUpdated
+			,intConcurrencyId
+		)(
+			select
+				intTicketStatusId
+				,strStatus
+				,strDescription
+				,ysnActivity
+				,ysnOpportunity
+				,ysnDefaultActivity
+				,ysnDefaultOpportunity
+				,strIcon
+				,strFontColor
+				,strBackColor
+				,ysnSupported
+				,intSort
+				,ysnUpdated
+				,intConcurrencyId
+			from tblHDTicketStatus
+			where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select distinct intTicketStatusId from tblHDSalesPipeStatus)
+				and intTicketStatusId not in (select intStatusId from tblCRMStatus)
+				--and (ysnActivity = 1 or ysnOpportunity = 1)
+		)
+	END
+
+	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityCampaign'))
+	BEGIN
+		insert into tblCRMStatus (
+			intStatusId
+			,strStatus
+			,strDescription
+			,ysnActivity
+			,ysnOpportunity
+			,ysnDefaultActivity
+			,ysnDefaultOpportunity
+			,strIcon
+			,strFontColor
+			,strBackColor
+			,ysnSupported
+			,intSort
+			,ysnUpdated
+			,intConcurrencyId
+		)(
+			select
+				intTicketStatusId
+				,strStatus
+				,strDescription
+				,ysnActivity
+				,ysnOpportunity
+				,ysnDefaultActivity
+				,ysnDefaultOpportunity
+				,strIcon
+				,strFontColor
+				,strBackColor
+				,ysnSupported
+				,intSort
+				,ysnUpdated
+				,intConcurrencyId
+			from tblHDTicketStatus
+			where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select distinct intCampaignStatusId from tblHDOpportunityCampaign)
+				and intTicketStatusId not in (select intStatusId from tblCRMStatus)
+				--and (ysnActivity = 1 or ysnOpportunity = 1)
+		)
+	END
+
 	SET IDENTITY_INSERT tblCRMStatus OFF
 END
 
