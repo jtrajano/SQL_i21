@@ -81,7 +81,7 @@ BEGIN
 			,ysnUpdated
 			,intConcurrencyId
 		from tblHDTicketStatus
-		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select distinct intTicketStatusId from tblHDSalesPipeStatus)
+		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select distinct intTicketStatusId from tblHDSalesPipeStatus union all select distinct intCampaignStatusId from tblHDOpportunityCampaign)
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
 			and (ysnActivity = 1 or ysnOpportunity = 1)
 	)
