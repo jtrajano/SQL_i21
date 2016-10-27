@@ -4438,6 +4438,7 @@
     <Build Include="dbo\Tables\tblARCollectionOverdue.sql" />
     <Build Include="dbo\Tables\tblARCollectionOverdueDetail.sql" />
     <Build Include="dbo\Functions\fnGetDaysInMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutureAndBasisPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
