@@ -22,7 +22,7 @@ BEGIN TRY
 			@intTypeRef					INT,
 			@intNewFutureMonthId		INT,
 			@intNewFutureMarketId		INT,
-			@intLotsUnfixed				INT,
+			@dblLotsUnfixed				NUMERIC(18,6),
 			@intPriceFixationDetailId	INT,
 			@intFutOptTransactionId		INT,
 			@ysnMultiplePriceFixation	BIT,
@@ -34,28 +34,28 @@ BEGIN TRY
 			@XML						NVARCHAR(MAX),
 			@dblNewQuantity				NUMERIC(18,6),
 			@intNewContractDetailId		INT,
-			@intPFDetailNoOfLots		INT,
+			@dblPFDetailNoOfLots		NUMERIC(18,6),
 			@ysnSplit					BIT,
 			@intNewPriceFixationId		INT,
 			@ysnHedge					BIT,
 			@dblFutures					NUMERIC(18,6),
-			@intTotalLots				INT,
-			@intTotalPFDetailNoOfLots	INT,
+			@dblTotalLots				NUMERIC(18,6),
+			@dblTotalPFDetailNoOfLots	NUMERIC(18,6),
 			@ysnUnlimitedQuantity		BIT,
 			@intFirstPFDetailId			INT
 
 	SET		@ysnMultiplePriceFixation = 0
 
-	SELECT	@intLotsUnfixed			=	ISNULL(intTotalLots,0) - ISNULL(intLotsFixed,0),
+	SELECT	@dblLotsUnfixed			=	ISNULL([dblTotalLots],0) - ISNULL([dblLotsFixed],0),
 			@intContractDetailId	=	intContractDetailId,
 			@intContractHeaderId	=	intContractHeaderId,
 			@intFinalPriceUOMId		=	intFinalPriceUOMId,
 			@ysnSplit				=	ysnSplit,
-			@intTotalLots			=	intTotalLots
+			@dblTotalLots			=	[dblTotalLots]
 	FROM	tblCTPriceFixation
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
-	SELECT	@intTotalPFDetailNoOfLots	=	SUM(intNoOfLots)
+	SELECT	@dblTotalPFDetailNoOfLots	=	SUM([dblNoOfLots])
 	FROM	tblCTPriceFixationDetail
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
@@ -167,9 +167,9 @@ BEGIN TRY
 			WHERE	intPriceFixationId = @intPriceFixationId
 
 			UPDATE	PF
-			SET		PF.intTotalLots			=	FD.intNoOfLots,
-					PF.intLotsFixed			=	FD.intNoOfLots,
-					PF.intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN FD.intNoOfLots ELSE NULL END,
+			SET		PF.[dblTotalLots]			=	FD.[dblNoOfLots],
+					PF.[dblLotsFixed]			=	FD.[dblNoOfLots],
+					PF.intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN FD.[dblNoOfLots] ELSE NULL END,
 					PF.dblPriceWORollArb	=	FD.dblFutures,
 					PF.dblFinalPrice		=	PF.dblFinalPrice - PF.dblPriceWORollArb + FD.dblFutures
 			FROM	tblCTPriceFixation			PF 
@@ -177,7 +177,7 @@ BEGIN TRY
 			WHERE	FD.intPriceFixationDetailId	=	@intFirstPFDetailId 
 
 			UPDATE	tblCTContractDetail	
-			SET		dblNoOfLots				=	 (SELECT SUM(intNoOfLots) FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intFirstPFDetailId) 
+			SET		dblNoOfLots				=	 (SELECT SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intFirstPFDetailId) 
 			WHERE	intContractDetailId		=	 @intContractDetailId
 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
@@ -190,7 +190,7 @@ BEGIN TRY
 			BEGIN
 					
 					SELECT	@dblPFDetailQuantity	=	dblQuantity,
-							@intPFDetailNoOfLots	=	intNoOfLots,
+							@dblPFDetailNoOfLots	=	[dblNoOfLots],
 							@intFutOptTransactionId	=	intFutOptTransactionId,
 							@ysnHedge				=	ysnHedge,
 							@dblFutures				=	dblFutures
@@ -210,9 +210,9 @@ BEGIN TRY
 						
 						UPDATE	tblCTPriceFixation 
 						SET		intContractDetailId =	@intNewContractDetailId,
-								intTotalLots		=	@intPFDetailNoOfLots,
-								intLotsFixed		=	@intPFDetailNoOfLots,
-								intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN @intPFDetailNoOfLots ELSE NULL END,
+								[dblTotalLots]		=	@dblPFDetailNoOfLots,
+								[dblLotsFixed]		=	@dblPFDetailNoOfLots,
+								intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN @dblPFDetailNoOfLots ELSE NULL END,
 								dblPriceWORollArb	=	@dblFutures,
 								dblFinalPrice		=	dblFinalPrice - dblPriceWORollArb + @dblFutures
 						WHERE	intPriceFixationId	=	@intNewPriceFixationId
@@ -227,7 +227,7 @@ BEGIN TRY
 						AND		intFutOptTransactionId	=	@intFutOptTransactionId
 
 						UPDATE	tblCTContractDetail	
-						SET		dblNoOfLots				=	 @intPFDetailNoOfLots 
+						SET		dblNoOfLots				=	 @dblPFDetailNoOfLots 
 						WHERE	intContractDetailId		=	 @intNewContractDetailId
 
 						EXEC	uspCTPriceFixationSave @intNewPriceFixationId, 'Added', @intUserId
@@ -241,7 +241,7 @@ BEGIN TRY
 				
 			END	
 
-			IF	@intLotsUnfixed > 0
+			IF	@dblLotsUnfixed > 0
 			BEGIN
 
 				SELECT	@intPriceFixationDetailId	=	MIN(intPriceFixationDetailId) 
@@ -249,7 +249,7 @@ BEGIN TRY
 				WHERE	intPriceFixationId			=	@intPriceFixationId
 
 				SELECT	@dblPFDetailQuantity		=	dblQuantity,
-						@intPFDetailNoOfLots		=	intNoOfLots,
+						@dblPFDetailNoOfLots		=	[dblNoOfLots],
 						@intFutOptTransactionId		=	intFutOptTransactionId,
 						@ysnHedge					=	ysnHedge,
 						@dblFutures					=	dblFutures
@@ -257,14 +257,14 @@ BEGIN TRY
 				WHERE	intPriceFixationDetailId	=	@intPriceFixationDetailId
 
 				UPDATE tblCTPriceFixation	
-				SET		intTotalLots		=	@intPFDetailNoOfLots,
-						intLotsFixed		=	@intPFDetailNoOfLots,
-						intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN @intPFDetailNoOfLots ELSE NULL END,
+				SET		[dblTotalLots]		=	@dblPFDetailNoOfLots,
+						[dblLotsFixed]		=	@dblPFDetailNoOfLots,
+						intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN @dblPFDetailNoOfLots ELSE NULL END,
 						dblPriceWORollArb	=	@dblFutures,
 						dblFinalPrice		=	dblFinalPrice - dblPriceWORollArb + @dblFutures
 				WHERE intPriceFixationId	=	@intPriceFixationId
 
-				UPDATE tblCTContractDetail	SET dblNoOfLots = @intPFDetailNoOfLots WHERE intContractDetailId = @intContractDetailId
+				UPDATE tblCTContractDetail	SET dblNoOfLots = @dblPFDetailNoOfLots WHERE intContractDetailId = @intContractDetailId
 
 				SELECT	@dblPFDetailQuantity	=	dblQuantity
 				FROM	tblCTPriceFixationDetail 
@@ -277,14 +277,14 @@ BEGIN TRY
 					EXEC uspCTSplitSequence @intContractDetailId,@dblNewQuantity,@intUserId,@intPriceFixationId,'Price Contract', @intNewContractDetailId OUTPUT
 					
 					UPDATE	tblCTContractDetail	
-					SET		dblNoOfLots = CASE WHEN @intTotalLots - @intTotalPFDetailNoOfLots <=0 THEN 1 ELSE  @intTotalLots - @intTotalPFDetailNoOfLots END,
+					SET		dblNoOfLots = CASE WHEN @dblTotalLots - @dblTotalPFDetailNoOfLots <=0 THEN 1 ELSE  @dblTotalLots - @dblTotalPFDetailNoOfLots END,
 							dblFutures = null,
 							dblCashPrice = null,
 							dblTotalCost = null
 					WHERE	intContractDetailId = @intNewContractDetailId	
 				END
 
-				SET @intLotsUnfixed = 0
+				SET @dblLotsUnfixed = 0
 			END
 			
 		END
@@ -323,7 +323,7 @@ BEGIN TRY
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 		END
 
-		IF	@intLotsUnfixed = 0
+		IF	@dblLotsUnfixed = 0
 		BEGIN
 			UPDATE	CD
 			SET		CD.intPricingTypeId		=	1,

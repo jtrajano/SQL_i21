@@ -70,7 +70,7 @@ BEGIN TRY
 			CH.strCustomerContract,
 			MA.strFutMarketName,
 			MO.strFutureMonth,
-			PF.intLotsFixed,
+			PF.[dblLotsFixed],
 			PD.dtmFixationDate,
 			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strPeriod,
 			LTRIM(RTRIM(EY.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +

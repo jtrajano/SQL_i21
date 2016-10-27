@@ -11,8 +11,8 @@ AS
 				SELECT	CD.intContractDetailId,
 						ISNULL(CAST(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity) AS NUMERIC(18,2)) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') Quantity,
 						ISNULL(CAST(LTRIM(CAST(CD.dblBasis AS NUMERIC(18,2)))  + ' ' + CY.strCurrency + ' Per ' + PM.strUnitMeasure AS NVARCHAR(100) ) collate Latin1_General_CI_AS,'') [Differential],
-						ISNULL(CAST(LTRIM(PF.intLotsFixed) + '/' + LTRIM(PF.intTotalLots - PF.intLotsFixed) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Fixed/Unfixed],
-						ISNULL(CAST(LTRIM(PF.intLotsHedged) + '/' + LTRIM(PF.intTotalLots - PF.intLotsHedged) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Hedge/Not Hedge],
+						ISNULL(CAST(LTRIM(PF.[dblLotsFixed]) + '/' + LTRIM(PF.[dblTotalLots] - PF.[dblLotsFixed]) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Fixed/Unfixed],
+						ISNULL(CAST(LTRIM(PF.intLotsHedged) + '/' + LTRIM(PF.[dblTotalLots] - PF.intLotsHedged) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Hedge/Not Hedge],
 						ISNULL(CAST(LTRIM(CAST(ISNULL(PF.dblFinalPrice,CD.dblCashPrice) AS NUMERIC(18,2)))  + ' ' + CY.strCurrency + ' Per ' + ISNULL(FM.strUnitMeasure,PM.strUnitMeasure) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') [Final Price]
 				FROM	tblCTContractDetail			CD LEFT
 				JOIN	tblCTPriceFixation			PF	ON	PF.intContractDetailId			=		CD.intContractDetailId	LEFT

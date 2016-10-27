@@ -19,7 +19,7 @@ AS
 					ysnMultiplePriceFixation,
 					dblQuantity AS dblQuantity,
 					strItemUOM AS strUOM,
-					CAST(dblNoOfLots AS INT) AS dblNoOfLots,
+					dblNoOfLots,
 					strLocationName,
 					CD.intItemId,
 					CD.intItemUOMId,
@@ -37,8 +37,8 @@ AS
 					intCurrencyId,
 					intCompanyLocationId,
 					'Unpriced' AS strStatus,
-					CAST(0 AS INT) AS intLotsFixed,
-					CAST(dblNoOfLots AS INT) AS intBalanceNoOfLots,
+					CAST(0 AS INT) AS dblLotsFixed,
+					CAST(dblNoOfLots AS INT) AS dblBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
@@ -91,7 +91,7 @@ AS
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
 					'Unpriced' AS strStatus,
 					CAST(0 AS INT) AS intLotsFixed,
-					CAST(ROUND(SUM(CD.dblNoOfLots),0)AS INT) AS intBalanceNoOfLots,
+					SUM(CD.dblNoOfLots) AS dblBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
@@ -140,7 +140,7 @@ AS
 					ysnMultiplePriceFixation,
 					CD.dblQuantity,
 					strItemUOM AS strUOM,
-					PF.intTotalLots AS dblNoOfLots,
+					PF.[dblTotalLots] AS dblNoOfLots,
 					strLocationName,
 					CD.intItemId,
 					CD.intItemUOMId,
@@ -157,13 +157,13 @@ AS
 					intSalespersonId,
 					intCurrencyId,
 					intCompanyLocationId,
-					CASE	WHEN ISNULL(PF.intTotalLots,0)-ISNULL(intLotsFixed,0) = 0 
+					CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL([dblLotsFixed],0) = 0 
 							THEN 'Fully Priced' 
-							WHEN ISNULL(intLotsFixed,0) = 0 THEN 'Unpriced'
+							WHEN ISNULL([dblLotsFixed],0) = 0 THEN 'Unpriced'
 							ELSE 'Partially Priced' 
 					END		AS strStatus,
-					PF.intLotsFixed,
-					PF.intTotalLots-intLotsFixed AS intBalanceNoOfLots,
+					PF.[dblLotsFixed],
+					PF.[dblTotalLots]-[dblLotsFixed] AS dblBalanceNoOfLots,
 					PF.intLotsHedged,
 					PF.dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
@@ -197,7 +197,7 @@ AS
 					CD.ysnMultiplePriceFixation,
 					CAST(NULL AS NUMERIC(12,4)) AS  dblHeaderQuantity,
 					QM.strUnitMeasure			AS	strHeaderUnitMeasure,
-					PF.intTotalLots				AS	dblNoOfLots,
+					PF.[dblTotalLots]				AS	dblNoOfLots,
 					LTRIM(NULL)					AS	strLocationName,
 					CAST (NULL AS INT)			AS	intItemId,
 					CAST (NULL AS INT)			AS	intItemUOMId,
@@ -214,13 +214,13 @@ AS
 					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
-					CASE	WHEN ISNULL(CAST(ROUND(SUM(CD.dblNoOfLots),0)AS INT),0)-ISNULL(PF.intLotsFixed,0) = 0 
+					CASE	WHEN ISNULL(CAST(ROUND(SUM(CD.dblNoOfLots),0)AS INT),0)-ISNULL(PF.[dblLotsFixed],0) = 0 
 							THEN 'Fully Priced' 
-							WHEN ISNULL(intLotsFixed,0) = 0 THEN 'Unpriced'
+							WHEN ISNULL([dblLotsFixed],0) = 0 THEN 'Unpriced'
 							ELSE 'Partially Priced' 
 					END		AS strStatus,
-					PF.intLotsFixed,
-					PF.intTotalLots-PF.intLotsFixed AS intBalanceNoOfLots,
+					PF.[dblLotsFixed],
+					PF.[dblTotalLots]-PF.[dblLotsFixed] AS dblBalanceNoOfLots,
 					PF.intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
@@ -249,8 +249,8 @@ AS
 					CH.dblQuantity,
 					QM.strUnitMeasure,
 					CD.intSalespersonId,
-					PF.intLotsFixed,
-					PF.intTotalLots,
+					PF.[dblLotsFixed],
+					PF.[dblTotalLots],
 					PF.intLotsHedged,
 					PF.intPriceFixationId,
 					CU.intCommodityUnitMeasureId,

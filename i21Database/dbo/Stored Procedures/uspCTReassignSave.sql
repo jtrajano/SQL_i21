@@ -95,13 +95,13 @@ BEGIN TRY
 			RP.dblReassign,
 			RP.intPriceFixationDetailId,
 			F1.intPriceFixationId,
-			F1.intNoOfLots,
+			F1.[dblNoOfLots],
 			CAST(ISNULL(F2.intPriceFixationDetailId,0)/ISNULL(F2.intPriceFixationDetailId,1) AS INT) AS ysnFullyPricingReassign,
 			F1.intFutOptTransactionId
 	FROM	tblCTReassignPricing RP
 	JOIN	tblCTPriceFixationDetail	F1	ON	F1.intPriceFixationDetailId	=	RP.intPriceFixationDetailId	LEFT
 	JOIN	tblCTPriceFixationDetail	F2	ON	F2.intPriceFixationDetailId =	RP.intPriceFixationDetailId	AND 
-											F2.intNoOfLots				=	RP.dblReassign
+											F2.[dblNoOfLots]				=	RP.dblReassign
 	WHERE	RP.intReassignId = @intReassignId AND ISNULL(RP.dblReassign,0) > 0
 	
 	INSERT	INTO @tblFutures
@@ -146,7 +146,7 @@ BEGIN TRY
 
 	---------------------------------------Pircing------------------------------
 	UPDATE	FD
-	SET		FD.intNoOfLots = FD.intNoOfLots - PR.dblReassign
+	SET		FD.[dblNoOfLots] = FD.[dblNoOfLots] - PR.dblReassign
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	@tblPricing					PR	ON	PR.intPriceFixationDetailId = FD.intPriceFixationDetailId
 	WHERE	PR.ysnFullyPricingReassign = 0
@@ -242,7 +242,7 @@ BEGIN TRY
 
 				UPDATE	tblCTPriceFixationDetail
 				SET		intPriceFixationId = @intNewPriceFixationId,
-						intNoOfLots = @dblReassignPricing
+						[dblNoOfLots] = @dblReassignPricing
 				WHERE	intPriceFixationDetailId = @intNewPriceFixationDetailId
 
 				IF ISNULL(@intAssignFuturesToContractSummaryId,0) > 0
@@ -287,39 +287,39 @@ BEGIN TRY
 
 		UPDATE	PF
 		SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
-				PF.intLotsFixed			=	FD.intLotsFixed,
+				PF.[dblLotsFixed]			=	FD.intLotsFixed,
 				PF.dblFinalPrice		=	PF.dblFinalPrice - ISNULL(PF.dblPriceWORollArb,0) +  ISNULL(FD.dblPriceWORollArb,0)
 		FROM	tblCTPriceFixation			PF
 		CROSS APPLY(
 				SELECT	intPriceFixationId,
-						SUM(intNoOfLots * dblFutures)/SUM(intNoOfLots) dblPriceWORollArb,
-						SUM(intNoOfLots) intLotsFixed
+						SUM([dblNoOfLots] * dblFutures)/SUM([dblNoOfLots]) dblPriceWORollArb,
+						SUM([dblNoOfLots]) intLotsFixed
 		
 				FROM	tblCTPriceFixationDetail
 				GROUP BY intPriceFixationId
 		)	FD		
 		WHERE	FD.intPriceFixationId	=	PF.intPriceFixationId AND PF.intPriceFixationId	= @intPriceFixationId
 
-		SELECT	@intLotsHedged	= SUM(intNoOfLots) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND ysnHedge = 1
+		SELECT	@intLotsHedged	= SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND ysnHedge = 1
 		UPDATE	tblCTPriceFixation SET intLotsHedged = @intLotsHedged  WHERE intPriceFixationId = @intPriceFixationId
 
 		UPDATE	PF
 		SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
-				PF.intTotalLots			=	@dblRecipientNoOfLots,
-				PF.intLotsFixed			=	FD.intLotsFixed,
+				PF.[dblTotalLots]			=	@dblRecipientNoOfLots,
+				PF.[dblLotsFixed]			=	FD.intLotsFixed,
 				PF.dblFinalPrice		=	FD.dblPriceWORollArb +  PF.dblOriginalBasis
 		FROM	tblCTPriceFixation			PF
 		CROSS APPLY(
 				SELECT	intPriceFixationId,
-						SUM(intNoOfLots * dblFutures)/SUM(intNoOfLots) dblPriceWORollArb,
-						SUM(intNoOfLots) intLotsFixed
+						SUM([dblNoOfLots] * dblFutures)/SUM([dblNoOfLots]) dblPriceWORollArb,
+						SUM([dblNoOfLots]) intLotsFixed
 		
 				FROM	tblCTPriceFixationDetail
 				GROUP BY intPriceFixationId
 		)	FD		
 		WHERE	FD.intPriceFixationId	=	PF.intPriceFixationId AND PF.intPriceFixationId	=	@intNewPriceFixationId
 		
-		SELECT	@intLotsHedged	= SUM(intNoOfLots) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intNewPriceFixationId AND ysnHedge = 1
+		SELECT	@intLotsHedged	= SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intNewPriceFixationId AND ysnHedge = 1
 		UPDATE	tblCTPriceFixation SET intLotsHedged = @intLotsHedged  WHERE intPriceFixationId = @intNewPriceFixationId
 
 		EXEC uspCTPriceFixationSave	@intPriceFixationId, 'Save', @intUserId

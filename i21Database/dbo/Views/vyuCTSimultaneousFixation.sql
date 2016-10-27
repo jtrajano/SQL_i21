@@ -8,7 +8,7 @@ FROM
 	SELECT	PF.intPriceFixationId,
 			CD.intContractDetailId,
 			CD.intContractSeq,
-			PF.intLotsFixed/dblHeaderQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(QM.intCommodityUnitMeasureId,CD.intCommodityUnitMeasureId,CD.dblDetailQuantity) dblFixedLots,
+			PF.[dblLotsFixed]/dblHeaderQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(QM.intCommodityUnitMeasureId,CD.intCommodityUnitMeasureId,CD.dblDetailQuantity) dblFixedLots,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblFutures) dblFutures,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblOriginalBasis) dblOriginalBasis,
 			PF.dblRollArb,

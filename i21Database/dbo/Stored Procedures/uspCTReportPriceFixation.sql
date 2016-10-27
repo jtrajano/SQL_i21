@@ -72,7 +72,7 @@ BEGIN TRY
 			IM.strDescription,
 			LTRIM(CD.dblQuantity)+ ' ' + UM.strUnitMeasure strQuantity,
 			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strPeriod,
-			CASE	WHEN	ISNULL(PF.intTotalLots,0) - ISNULL(PF.intLotsFixed,0) = 0 
+			CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 					THEN	'This confirms that the above contract has been fully fixed as follows:'
 					ELSE	'This confirms that the above contract has been partially fixed as follows:'
 			END		AS		strStatus,			
@@ -87,7 +87,7 @@ BEGIN TRY
 			LTRIM(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18,4))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strDifferential,
 			LTRIM(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strAdditionalCost,
 			LTRIM(PF.dblFinalPrice) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strFinalPrice,
-			CASE	WHEN	ISNULL(PF.intTotalLots,0) - ISNULL(PF.intLotsFixed,0) = 0 
+			CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 					THEN	'All lot(s) are fixed.'
 					ELSE	''
 			END		AS		strSummary,

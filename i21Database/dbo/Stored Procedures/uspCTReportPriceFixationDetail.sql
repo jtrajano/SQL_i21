@@ -26,7 +26,7 @@ BEGIN TRY
 			PD.dtmFixationDate,
 			MA.strFutMarketName,
 			MO.strFutureMonth,
-			PD.intNoOfLots,
+			PD.[dblNoOfLots],
 			LTRIM(PD.dblFutures) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPrice,
 			PD.strNotes
 	

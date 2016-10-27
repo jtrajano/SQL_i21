@@ -87,12 +87,12 @@ AS
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)							AS	ysnAllowedToShow,
 			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)											AS	dblExchangeRate,
 			CASE	WHEN	CD.intPricingTypeId = 2
-					THEN	CASE	WHEN	ISNULL(PF.intTotalLots,0) = 0 
+					THEN	CASE	WHEN	ISNULL(PF.[dblTotalLots],0) = 0 
 									THEN	'Unpriced'
 							ELSE
-									CASE	WHEN ISNULL(PF.intTotalLots,0)-ISNULL(intLotsFixed,0) = 0
+									CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL([dblLotsFixed],0) = 0
 												THEN 'Fully Priced' 
-											WHEN ISNULL(intLotsFixed,0) = 0 
+											WHEN ISNULL([dblLotsFixed],0) = 0 
 												THEN 'Unpriced'
 											ELSE 'Partially Priced' 
 									END
@@ -102,8 +102,8 @@ AS
 							THEN	'Priced'
 					ELSE	''
 			END		AS strPricingStatus,
-			CAST(ISNULL(PF.intTotalLots - ISNULL(PF.intLotsFixed,0),CD.dblNoOfLots)	AS NUMERIC(18,0))			AS	dblUnpricedLots,
-			CAST(ISNULL(PF.intTotalLots - ISNULL(PF.intLotsHedged,0),CD.dblNoOfLots)	AS NUMERIC(18,0))		AS	dblUnhedgedLots,
+			CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed],0),CD.dblNoOfLots)	AS NUMERIC(18,0))			AS	dblUnpricedLots,
+			CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.intLotsHedged,0),CD.dblNoOfLots)	AS NUMERIC(18,0))		AS	dblUnhedgedLots,
 			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT)										AS	intLoadReceived,
 			CAST(
 				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),CD.dtmStartDate) AND CH.intContractTypeId = 1 

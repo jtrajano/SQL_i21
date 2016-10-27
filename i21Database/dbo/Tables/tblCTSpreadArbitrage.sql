@@ -15,7 +15,7 @@
 	[dblSpreadPrice] NUMERIC(18,6) NOT NULL,
 	[intSpreadUOMId] INT NOT NULL,
 	[dblSpreadAmount] NUMERIC(18,6) NOT NULL,
-	[intNoOfLots] INT NOT NULL,
+	[dblNoOfLots] NUMERIC(18,6) NOT NULL,
 	[dblCommissionPrice] NUMERIC(18,6) NULL,
 	[dblCommission] NUMERIC(18,6) NULL,
 	[dblTotalSpread] NUMERIC(18,6) NULL,

@@ -11,7 +11,7 @@ AS
 			PD.dtmFixationDate,
 			PD.dblQuantity,
 			PD.intQtyItemUOMId,
-			PD.intNoOfLots,
+			PD.[dblNoOfLots],
 			PD.intFutureMarketId,
 			PD.intFutureMonthId,
 			PD.dblFixationPrice,

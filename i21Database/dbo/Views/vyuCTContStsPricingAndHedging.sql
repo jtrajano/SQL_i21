@@ -5,7 +5,7 @@ AS
 	SELECT	SY.intAssignFuturesToContractSummaryId,
 			SY.intContractDetailId,
 			PD.dtmFixationDate,
-			PD.intNoOfLots,
+			PD.[dblNoOfLots],
 			PD.dblFinalPrice,
 			CM.strUnitMeasure strPricingUOM,
 			SY.dtmMatchDate,

@@ -8,7 +8,7 @@
 	[dtmFixationDate] DATETIME NOT NULL,
 	[dblQuantity] NUMERIC(18,6) NULL,
 	[intQtyItemUOMId] INT NULL,
-	[intNoOfLots] INT NOT NULL,
+	[dblNoOfLots] NUMERIC(18,6) NOT NULL,
 	[intFutureMarketId] INT NOT NULL,
 	[intFutureMonthId] INT NOT NULL,
 	[dblFixationPrice] NUMERIC(18,6) NULL,

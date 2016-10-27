@@ -5530,4 +5530,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLoadBlendIngredientId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d068b0c9-ee9d-42d9-866b-f3e93880b97e" ChangeDateTime="10/26/2016 14:07:43">
+    <Property Name="ElementName" Value="[dbo].[tblCTPriceFixation].[intTotalLots]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPriceFixation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblTotalLots]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a44233fd-8576-4fcb-a3b6-b7de88371eee" ChangeDateTime="10/26/2016 14:12:14">
+    <Property Name="ElementName" Value="[dbo].[tblCTPriceFixation].[intLotsFixed]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPriceFixation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblLotsFixed]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7e47f60a-dd9b-4c8b-9390-dfe9abba52e8" ChangeDateTime="10/26/2016 14:18:28">
+    <Property Name="ElementName" Value="[dbo].[tblCTPriceFixationDetail].[intNoOfLots]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPriceFixationDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblNoOfLots]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dead2903-379d-4e4c-9ceb-aab72f327005" ChangeDateTime="10/27/2016 10:30:45">
+    <Property Name="ElementName" Value="[dbo].[tblCTSpreadArbitrage].[inNoOfLots]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTSpreadArbitrage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblNoOfLots]" />
+  </Operation>
 </Operations>
