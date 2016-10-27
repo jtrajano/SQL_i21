@@ -4478,6 +4478,8 @@
     <Build Include="dbo\Views\vyuPATCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuLGStockSalesNotMapped.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFutureAndBasisPrice.sql" />
+    <Build Include="dbo\Tables\tblMFInventoryAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAdjustInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
