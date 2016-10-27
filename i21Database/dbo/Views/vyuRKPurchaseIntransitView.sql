@@ -13,8 +13,9 @@ SELECT
 		ISNULL(LD.dblDeliveredQuantity, 0) as dblPurchaseContractReceivedQty,
 		PCT.intCommodityId,PCT.intEntityId,e.strName,
 		PCT.intContractDetailId,
-		PCT.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,intCommodityUnitMeasureId as intUnitMeasureId
+		PCT.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,intCommodityUnitMeasureId as intUnitMeasureId 
 FROM tblLGLoad L 
-JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId and ysnPosted=1
 JOIN vyuCTContractDetailView PCT ON PCT.intContractDetailId = LD.intPContractDetailId
-JOIN tblEMEntity e on e.intEntityId=PCT.intEntityId
+JOIN tblEMEntity e on e.intEntityId=PCT.intEntityId 
+GO
