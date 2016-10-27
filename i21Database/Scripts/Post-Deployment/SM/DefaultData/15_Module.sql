@@ -157,13 +157,17 @@ GO
 	       [intSort]						=		14
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Ticket Management')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [strVersionStart], [strVersionEnd], [intSort])
 	SELECT [intModuleId]					=		15,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Ticket Management',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
+   		   [strVersionStart]				=		'16.3',
+		   [strVersionEnd]					=		'',
 	       [intSort]						=		15
+	ELSE
+	UPDATE tblSMModule SET strVersionStart = '16.3', strVersionEnd = '' WHERE strApplicationName = 'i21' AND strModule = 'Ticket Management'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Logistics')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -853,13 +857,17 @@ GO
 	       [intSort]						=		91
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Scale')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [strVersionStart], [strVersionEnd], [intSort])
 	SELECT [intModuleId]					=		92,
 		   [strApplicationName]				=		N'i21',
 		   [strModule]						=		N'Scale',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
+		   [strVersionStart]				=		'',
+		   [strVersionEnd]					=		'16.2',
 	       [intSort]						=		92
+	ELSE
+	UPDATE tblSMModule SET strVersionStart = '', strVersionEnd = '16.2' WHERE strApplicationName = 'i21' AND strModule = 'Scale'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'System Manager')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -1032,10 +1040,19 @@ GO
 		   [ysnSupported]					=		1,
            [intSort]						=		111
 
-	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Grain')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [strVersionStart], [strVersionEnd], [intSort])
+	SELECT [intModuleId]					=		112,
+		   [strApplicationName]				=		N'i21',		  
+		   [strModule]						=		N'Grain',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [strVersionStart]				=		'',
+		   [strVersionEnd]					=		'16.2',
+           [intSort]						=		112
+	ELSE
+	UPDATE tblSMModule SET strVersionStart = '', strVersionEnd = '16.2' WHERE strApplicationName = 'i21' AND strModule = 'Grain'
 
-GO
-	-- SCALE
-	DELETE FROM tblSMModule WHERE intModuleId = 92
+	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO

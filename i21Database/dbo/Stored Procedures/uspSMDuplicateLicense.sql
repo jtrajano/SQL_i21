@@ -10,6 +10,7 @@ BEGIN
 	SELECT @intCount = COUNT(*) FROM [tblARCustomerLicenseInformation] WHERE [strDescription] LIKE 'DUP: ' + (SELECT [strDescription] FROM [tblARCustomerLicenseInformation] WHERE intCustomerLicenseInformationId = @intCustomerLicenseInformationId) + '%' 
 
 	INSERT tblARCustomerLicenseInformation([strUniqueId],
+	[strVersion],
 	[intEntityCustomerId],
 	[strCompanyId],
 	[intNumberOfUser],
@@ -21,6 +22,7 @@ BEGIN
 	[strLicenseKey],
 	[ysnNew])
 	SELECT @strUniqueId,
+	[strVersion],
 	[intEntityCustomerId],
 	[strCompanyId],
 	[intNumberOfUser],
