@@ -361,7 +361,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{current.ysnPosted}'
             },
             btnBill: {
-                hidden: '{!current.ysnPosted}',
+                hidden: '{hideBtnBill}',
                 disabled: '{current.ysnOrigin}'
             },
             btnQuality: {
