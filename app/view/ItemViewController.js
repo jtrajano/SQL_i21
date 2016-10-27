@@ -369,6 +369,9 @@ Ext.define('Inventory.view.ItemViewController', {
             //------------------//
             //Location Store Tab//
             //------------------//
+            btnEditLocation: {
+                hidden: true
+            },
             cboCopyLocation: {
                 store: '{copyLocation}',
                 defaultFilters: [{
@@ -1462,6 +1465,12 @@ Ext.define('Inventory.view.ItemViewController', {
 
         var colStockUOM = grdStock.columns[1];
         colStockUOM.renderer = this.onRenderStockUOM;
+
+        var colLocationLocation = grdLocationStore.columns[0];
+        colLocationLocation.renderer = function(value, opt, record) {
+            return '<a style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration=\'none\'" onMouseOver="this.style.textDecoration=\'underline\'" href="javascript:void(0);">' + value + '</a>';
+        };
+        
 
         var colStockOnOrder = grdStock.columns[2];
         colStockOnOrder.summaryRenderer = this.StockSummaryRenderer;
@@ -3476,6 +3485,37 @@ Ext.define('Inventory.view.ItemViewController', {
     },
     
     //</editor-fold>
+    onLocationCellClick: function(view, cell, cellIndex, record, row, rowIndex, e) {
+        var linkClicked = (e.target.tagName == 'A');
+        var clickedDataIndex =
+            view.panel.headerCt.getHeaderAtIndex(cellIndex).dataIndex;
+
+        if (linkClicked && clickedDataIndex == 'strLocationName') {
+            var win = view.up('window');
+            var me = win.controller;
+            var vm = win.getViewModel();
+
+            if (!record){
+                iRely.Functions.showErrorDialog('Please select a location to edit.');
+                return;
+            }
+
+            if (vm.data.current.phantom === true) {
+                win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                    me.openItemLocationScreen('edit', win, record);
+                    return;
+                } });
+            }
+            else {
+                win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                    if (valid) {
+                        me.openItemLocationScreen('edit', win, record);
+                        return;
+                    }
+                });
+            }
+        }
+    },
 
     init: function(application) {
         this.control({
@@ -3583,7 +3623,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 beforecheckchange: this.onManufacturingCellDefaultCheckChange
             },
             "#grdLocationStore": {
-                itemdblclick: this.onLocationDoubleClick
+                itemdblclick: this.onLocationDoubleClick,
+                cellclick: this.onLocationCellClick
             },
             "#cboTracking": {
                 specialKey: this.onSpecialKeyTab
