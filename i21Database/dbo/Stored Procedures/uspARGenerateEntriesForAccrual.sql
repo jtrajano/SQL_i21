@@ -160,8 +160,8 @@ BEGIN
 		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 		,strBatchID					= @BatchId
 		,intAccountId				= @DeferredRevenueAccountId
-		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0 ELSE A.dblInvoiceTotal END
-		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal ELSE 0 END
+		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0 ELSE A.dblInvoiceTotal + DT.dblDiscountTotal END
+		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal + DT.dblDiscountTotal ELSE 0 END
 		,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0
 																					ELSE
 																						(
@@ -236,7 +236,18 @@ BEGIN
 		tblARInvoice A
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.[intEntityCustomerId] = C.intEntityCustomerId 			
+			ON A.[intEntityCustomerId] = C.intEntityCustomerId 		
+	LEFT OUTER	JOIN
+		(
+			SELECT 
+				 intInvoiceId		= intInvoiceId
+				,dblDiscountTotal	= SUM(ISNULL(ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal))
+			FROM
+				tblARInvoiceDetail
+			GROUP BY
+				intInvoiceId 
+		)  DT
+			ON A.intInvoiceId = DT.intInvoiceId
 	WHERE
 		A.intInvoiceId = @InvoiceId
 		
@@ -400,12 +411,12 @@ BEGIN
 
 	SELECT TOP 1 
 		 @InvoiceDetailId				= intInvoiceDetailId
-		,@Total							= ISNULL(dblTotal, @ZeroDecimal) + ((ISNULL(dblDiscount, @ZeroDecimal)/100.000000) * (ISNULL(dblQtyShipped, @ZeroDecimal) * ISNULL(dblPrice, @ZeroDecimal)))		
+		,@Total							= ISNULL(dblTotal, @ZeroDecimal) + ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
 		,@TotalWODiscount				= dblTotal
 		,@LicenseTotal					= ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
-		,@LicenseTotalWODiscount		= ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) --+ ((ISNULL(dblDiscount, @ZeroDecimal)/100.000000) * (ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())))
+		,@LicenseTotalWODiscount		= ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) --+ ROUND((ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
 		,@MaintenanceTotal				= ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
-		,@MaintenanceTotalWODiscount	= ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) --+ ((ISNULL(dblDiscount, @ZeroDecimal)/100.000000) * (ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())))
+		,@MaintenanceTotalWODiscount	= ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) --+ ROUND((ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
 		,@UnitsTotal					= dblUnits
 	FROM 
 		@InvoiceDetail
