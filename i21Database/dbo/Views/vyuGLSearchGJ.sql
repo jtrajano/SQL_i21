@@ -22,7 +22,7 @@ SELECT strJournalType,
    LEFT JOIN tblEMEntity e ON e.intEntityId = j.intEntityId
    LEFT JOIN tblSMCurrency C ON C.intCurrencyID = j.intCurrencyId
    where  strTransactionType IN ('General Journal','Recurring')
-   and  strSourceType <> 'AA'
+   and  ISNULL(strSourceType,'') <> 'AA'
 GO
 CREATE NONCLUSTERED INDEX [_dta_index_tblEMEntity_9_2007079032__K1_2] ON [dbo].[tblEMEntity]
 (
