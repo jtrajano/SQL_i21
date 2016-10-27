@@ -4480,6 +4480,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetFutureAndBasisPrice.sql" />
     <Build Include="dbo\Tables\tblMFInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAdjustInventory.sql" />
+    <Build Include="dbo\Views\vyuAP1099PATR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4604,6 +4605,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
     <None Include="Scripts\Post-Deployment\CRM\SplitCRMData.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
