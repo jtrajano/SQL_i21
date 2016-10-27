@@ -33,18 +33,52 @@ IF (@Type = 'Standard')
 	END	
 ELSE IF (@Type = 'Date Driven')
 	BEGIN
-		DECLARE @TransactionMonth int, @TransactionDay int, @TransactionYear int
-		SELECT @TransactionMonth = DATEPART(MONTH,@TransactionDate), @TransactionDay = DATEPART(DAY,@TransactionDate) ,@TransactionYear = DATEPART(YEAR,@TransactionDate)
-		
-		DECLARE @TempDueDate datetime
-		Set @TempDueDate = CONVERT(datetime, (CAST(@TransactionMonth AS nvarchar(10)) + '/' + CAST(@DayMonthDue AS nvarchar(10)) + '/' + CAST(@TransactionYear AS nvarchar(10))), 101)
-			
-		IF (DATEDIFF(DAY,@TransactionDate,@TempDueDate) < @DueNextMonth)
-			RETURN DATEADD(MONTH, 0, @TempDueDate);
-		ELSE	
-			RETURN DATEADD(MONTH, 1, @TempDueDate);
-		
-	END	
+
+	DECLARE @daysOfMonth		INT
+            ,@daysOfDueMonth	INT
+            ,@dayDueMonthDiff	INT
+            ,@dayOfDueMonth		INT
+            ,@maxDayOfMonth		INT
+            ,@currentDueDate	DATE
+
+            --get the actual number of days in current month
+			SELECT @daysOfMonth = [dbo].[fnGetDaysInMonth](@TransactionDate)
+
+            --set the day of due if it was more than a day available for first due date
+            IF(@daysOfMonth < @DayMonthDue)
+				SET @DayMonthDue = @daysOfMonth
+
+            SET @currentDueDate = DATEADD(DAY, -DATEPART(DAY,@TransactionDate), @TransactionDate)
+            SET @currentDueDate = DATEADD(DAY, @DayMonthDue, @currentDueDate)
+            SET @maxDayOfMonth = @DayMonthDue - @DueNextMonth
+
+            if(DATEPART(DAY,@TransactionDate) < @maxDayOfMonth)
+				RETURN @currentDueDate;
+            ELSE
+				BEGIN
+					SET @DueDate = DATEADD(MONTH, 1, @currentDueDate);
+
+					--get the actual number of days in due month
+					SET @daysOfDueMonth = [dbo].[fnGetDaysInMonth](@DueDate);
+
+					--get the actual day of the due month
+					SET @dayOfDueMonth = DATEPART(DAY,@DueDate)
+
+					--get the original due day
+					if (@daysOfDueMonth > @DayMonthDue)
+						SET @DayMonthDue = @dayOfDueMonth
+
+					--current due month must have equal number days of every n of the month
+					IF(@dayOfDueMonth <> @daysOfDueMonth AND @dayOfDueMonth <> @DayMonthDue)
+					BEGIN
+						SET @dayDueMonthDiff = @daysOfDueMonth - @dayOfDueMonth
+						SET @DueDate = DATEADD(DAY, @dayOfDueMonth, @DueDate)
+						RETURN @DueDate;
+					END
+
+					RETURN @DueDate;
+				END		
+	END
 ELSE
 	BEGIN
 		RETURN ISNULL(@DueDate, @TransactionDate);
