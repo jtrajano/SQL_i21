@@ -333,6 +333,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\032_MigrateVendorApprovalList.sql
 :r .\EM\033_UpdateUserSecurityAdmin.sql
 :r .\EM\034_EntityClassData.sql
+:r .\EM\035_EncryptEFTAccountNumber.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

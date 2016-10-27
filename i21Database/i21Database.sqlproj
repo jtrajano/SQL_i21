@@ -4474,6 +4474,7 @@
     <Build Include="dbo\Tables\tblGLCrossReferenceMapping.sql" />
     <Build Include="dbo\Tables\tblGLAccountSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForPaidEquity.sql" />
+    <None Include="Scripts\Post-Deployment\EM\035_EncryptEFTAccountNumber.sql" />
     <Build Include="dbo\Views\vyuPATCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuLGStockSalesNotMapped.sql" />
   </ItemGroup>
