@@ -26,7 +26,8 @@ SELECT   CP.intCompanyPreferenceId,
 		 strDividendsGLAccount = DA.strAccountId, 
          CP.intTreasuryGLAccount, 
 		 strTreasuryGLAccount = TA.strAccountId,
-         CP.intAPClearingGLAccount
+         CP.intAPClearingGLAccount,
+		 CP.intConcurrencyId
 FROM tblPATCompanyPreference CP
 LEFT JOIN tblGLAccount DA
 	ON DA.intAccountId = CP.intDividendsGLAccount
