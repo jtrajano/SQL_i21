@@ -26,6 +26,17 @@ Harness.start(
                 ]
             }
         ]
+    },
+
+    { group: 'Commodity',
+        items: [
+            {
+                url: '../Commodity/AddCommodity.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
     }
 
 
