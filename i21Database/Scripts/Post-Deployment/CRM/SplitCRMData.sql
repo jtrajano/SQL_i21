@@ -4,6 +4,9 @@ GO
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketPriority'))
 BEGIN
+
+	PRINT N'Begin splitting Priority...'
+
 	SET IDENTITY_INSERT tblCRMPriority ON
 	insert into tblCRMPriority (
 		intPriorityId
@@ -48,6 +51,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketStatus'))
 BEGIN
+
+	PRINT N'Begin splitting Status...'
+
 	SET IDENTITY_INSERT tblCRMStatus ON
 	insert into tblCRMStatus (
 		intStatusId
@@ -171,6 +177,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDSalesPipeStatus'))
 BEGIN
+
+	PRINT N'Begin splitting Sales Pipe Status...'
+
 	SET IDENTITY_INSERT tblCRMSalesPipeStatus ON
 	insert into tblCRMSalesPipeStatus (
 		intSalesPipeStatusId
@@ -202,6 +211,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunitySource'))
 BEGIN
+
+	PRINT N'Begin splitting Source...'
+
 	SET IDENTITY_INSERT tblCRMSource ON
 	insert tblCRMSource
 	(
@@ -224,6 +236,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketType'))
 BEGIN
+
+	PRINT N'Begin splitting Type...'
+
 	SET IDENTITY_INSERT tblCRMType ON
 	insert into tblCRMType (
 		intTypeId
@@ -260,6 +275,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityCampaign'))
 BEGIN
+
+	PRINT N'Begin splitting Campaign...'
+
 	SET IDENTITY_INSERT tblCRMCampaign ON
 	insert into tblCRMCampaign (
 		intCampaignId
@@ -310,6 +328,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDMilestone'))
 BEGIN
+	
+	PRINT N'Begin splitting Milestone...'
+
 	SET IDENTITY_INSERT tblCRMMilestone ON
 	insert into tblCRMMilestone (
 		intMilestoneId
@@ -334,6 +355,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityWinLossReason'))
 BEGIN
+
+	PRINT N'Begin splitting Win/Loss Reason...'
+
 	SET IDENTITY_INSERT tblCRMWinLossReason ON
 	insert into tblCRMWinLossReason (
 		intWinLossReasonId
@@ -367,6 +391,8 @@ BEGIN
 				ysnActivity = 1
 			WHERE strNamespace = 'CRM.view.Opportunity'
 		END
+
+	PRINT N'Begin splitting Opportunity and Project...'
 
 	SET IDENTITY_INSERT tblCRMOpportunity ON
 	insert into tblCRMOpportunity
@@ -516,10 +542,15 @@ BEGIN
 			convert(nvarchar(50), tblCRMOpportunity.intOpportunityId) not in (select strRecordNo from tblSMTransaction where intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity'))
 	)
 
+	update tblSMAttachment set strScreen = 'CRM.Opportunity' where strScreen = 'HelpDesk.Project' and strRecordNo in (select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity);
+
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityOverview'))
 BEGIN
+
+	PRINT N'Begin splitting Opportunity Overview...'
+
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewProblem ON
 	insert tblCRMOpportunityOverviewProblem
 	(
@@ -668,6 +699,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityQuote'))
 BEGIN
+
+	PRINT N'Begin splitting Opportunity Quote...'
+
 	SET IDENTITY_INSERT tblCRMOpportunityQuote ON
 	insert tblCRMOpportunityQuote
 	(
@@ -694,6 +728,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityContract'))
 BEGIN
+
+	PRINT N'Begin splitting Opportunity Contract...'
+
 	SET IDENTITY_INSERT tblCRMOpportunityContract ON
 	insert tblCRMOpportunityContract
 	(
@@ -720,6 +757,9 @@ END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDProjectContactInfo'))
 BEGIN
+
+	PRINT N'Begin splitting Opportunity Contact...'
+
 	SET IDENTITY_INSERT tblCRMOpportunityContact ON
 	insert tblCRMOpportunityContact
 	(
@@ -754,6 +794,516 @@ BEGIN
 	)
 	SET IDENTITY_INSERT tblCRMOpportunityContact OFF
 END
+
+
+PRINT N'Moving Opportunity activity...'
+
+DECLARE @queryResultAct CURSOR
+
+declare @intTransactionIdAct int
+declare @strTypeAct nvarchar(50)
+declare @strSubjectAct nvarchar(100)
+declare @intEntityContactIdAct int
+declare @intEntityIdAct int
+declare @dtmStartDateAct datetime
+declare @dtmEndDateAct datetime
+declare @dtmStartTimeAct datetime
+declare @dtmEndTimeAct datetime
+declare @strStatusAct nvarchar(50)
+declare @strPriorityAct nvarchar(50)
+declare @strCategoryAct nvarchar(50)
+declare @intAssignedToAct int
+declare @strActivityNoAct nvarchar(50)
+declare @strDetailsAct nvarchar(max)
+declare @ysnPublicAct bit
+declare @dtmCreatedAct datetime
+declare @dtmModifiedAct datetime
+declare @intCreatedByAct int
+declare @intConcurrencyIdAct int
+declare @intTicketIdAct int
+
+declare @intCurrentActivityNoAct int
+declare @intGeneratedActivityIdentityAct int
+
+SET @queryResultAct = CURSOR FOR
+
+	select
+		intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.strRecordNo = convert(nvarchar(50), tblHDProject.intProjectId) and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'CRM.view.Opportunity'))
+		,strType = 'Task'
+		,strSubject = tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject
+		,intEntityContactId = tblHDTicket.intCustomerContactId
+		,intEntityId = tblHDTicket.intCustomerId
+		,dtmStartDate = tblHDTicket.dtmDueDate
+		,dtmEndDate = tblHDTicket.dtmDueDate
+		,dtmStartTime = tblHDTicket.dtmDueDate
+		,dtmEndTime = tblHDTicket.dtmDueDate
+		,strStatus = (select top 1 tblHDTicketStatus.strStatus from tblHDTicketStatus where tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId)
+		,strPriority = (select top 1 tblHDTicketPriority.strPriority from tblHDTicketPriority where tblHDTicketPriority.intTicketPriorityId = tblHDTicket.intTicketPriorityId)
+		,strCategory = (select top 1 tblHDTicketType.strType from tblHDTicketType where tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId)
+		,intAssignedTo = tblHDTicket.intAssignedToEntity
+		,strActivityNo = (select top 1 tblSMStartingNumber.strPrefix from tblSMStartingNumber where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity')
+		,strDetails = '<p>'+tblHDTicket.strSubject+'</p>'
+		,ysnPublic = 1
+		,dtmCreated = tblHDTicket.dtmCreated
+		,dtmModified = tblHDTicket.dtmLastModified
+		,intCreatedBy = tblHDTicket.intCreatedUserEntityId
+		,intConcurrencyId = 1
+		,intTicketId = tblHDTicket.intTicketId
+	from tblHDProject, tblHDProjectTask, tblHDTicket
+	where tblHDProject.strType = 'CRM'
+		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
+		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+
+OPEN @queryResultAct
+FETCH NEXT
+FROM
+	@queryResultAct
+INTO
+	@intTransactionIdAct
+	,@strTypeAct
+	,@strSubjectAct
+	,@intEntityContactIdAct
+	,@intEntityIdAct
+	,@dtmStartDateAct
+	,@dtmEndDateAct
+	,@dtmStartTimeAct
+	,@dtmEndTimeAct
+	,@strStatusAct
+	,@strPriorityAct
+	,@strCategoryAct
+	,@intAssignedToAct
+	,@strActivityNoAct
+	,@strDetailsAct
+	,@ysnPublicAct
+	,@dtmCreatedAct
+	,@dtmModifiedAct
+	,@intCreatedByAct
+	,@intConcurrencyIdAct
+	,@intTicketIdAct
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMOpportunityActivityTmp'))
+	BEGIN
+		CREATE TABLE [dbo].[tblCRMOpportunityActivityTmp]
+		(
+			[intId] [int] IDENTITY(1,1) NOT NULL,
+			[intActivityId] [int] NOT NULL,
+			[intTicketIdId] [int] NULL,
+			[intTicketCommentId] [int] NULL,
+			[intTicketNoteId] [int] NULL,
+			CONSTRAINT [PK_tblCRMOpportunityActivityTmp] PRIMARY KEY CLUSTERED ([intId] ASC)
+		)
+	END
+
+	IF NOT EXISTS (select * from tblCRMOpportunityActivityTmp where intTicketIdId = @intTicketIdAct)
+	BEGIN
+		set @intCurrentActivityNoAct = (select top 1 tblSMStartingNumber.intNumber from tblSMStartingNumber where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity');
+		update tblSMStartingNumber set tblSMStartingNumber.intNumber = (@intCurrentActivityNoAct + 1) where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity';
+		set @strActivityNoAct = @strActivityNoAct + convert(nvarchar(50),@intCurrentActivityNoAct);
+
+		Insert into tblSMActivity
+		(
+			intTransactionId
+			,strType
+			,strSubject
+			,intEntityContactId
+			,intEntityId
+			,dtmStartDate
+			,dtmEndDate
+			,dtmStartTime
+			,dtmEndTime
+			,strStatus
+			,strPriority
+			,strCategory
+			,intAssignedTo
+			,strActivityNo
+			,strDetails
+			,ysnPublic
+			,dtmCreated
+			,dtmModified
+			,intCreatedBy
+			,intConcurrencyId
+		)
+		(
+			select 
+				intTransactionId = @intTransactionIdAct
+				,strType = @strTypeAct
+				,strSubject = SUBSTRING(@strSubjectAct, 1,97) + '...'
+				,intEntityContactId = @intEntityContactIdAct
+				,intEntityId = @intEntityIdAct
+				,dtmStartDate = @dtmEndDateAct
+				,dtmEndDate = @dtmEndDateAct
+				,dtmStartTime = @dtmEndDateAct
+				,dtmEndTime = @dtmEndTimeAct
+				,strStatus = @strStatusAct
+				,strPriority = @strPriorityAct
+				,strCategory = @strCategoryAct
+				,intAssignedTo = @intAssignedToAct
+				,strActivityNo = @strActivityNoAct
+				,strDetails = @strDetailsAct
+				,ysnPublic = @ysnPublicAct
+				,dtmCreated = @dtmCreatedAct
+				,dtmModified = @dtmModifiedAct
+				,intCreatedBy = @intCreatedByAct
+				,intConcurrencyId = @intConcurrencyIdAct
+		)
+		
+		set @intGeneratedActivityIdentityAct =  SCOPE_IDENTITY();
+
+		insert into tblCRMOpportunityActivityTmp
+		(
+			intActivityId
+			,intTicketIdId
+		)
+		(
+			select
+				intActivityId = @intGeneratedActivityIdentityAct
+				,intTicketIdId = @intTicketIdAct
+		)
+
+		insert into tblSMTransaction
+		(
+			intScreenId
+			,strRecordNo
+			,strTransactionNo
+			,intEntityId
+			,dtmDate
+			,strApprovalStatus
+			,intConcurrencyId
+		)
+		(
+			select
+				intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'GlobalComponentEngine.view.Activity' and strScreenName = 'Activity')
+				,strRecordNo = convert(nvarchar(50), @intGeneratedActivityIdentityAct)
+				,strTransactionNo = @strActivityNoAct
+				,intEntityId = @intEntityIdAct
+				,dtmDate = @dtmCreatedAct
+				,strApprovalStatus = null
+				,intConcurrencyId = 1
+		)
+
+	END
+				
+    FETCH NEXT
+    FROM
+		@queryResultAct
+	INTO
+		@intTransactionIdAct
+		,@strTypeAct
+		,@strSubjectAct
+		,@intEntityContactIdAct
+		,@intEntityIdAct
+		,@dtmStartDateAct
+		,@dtmEndDateAct
+		,@dtmStartTimeAct
+		,@dtmEndTimeAct
+		,@strStatusAct
+		,@strPriorityAct
+		,@strCategoryAct
+		,@intAssignedToAct
+		,@strActivityNoAct
+		,@strDetailsAct
+		,@ysnPublicAct
+		,@dtmCreatedAct
+		,@dtmModifiedAct
+		,@intCreatedByAct
+		,@intConcurrencyIdAct
+		,@intTicketIdAct
+END
+
+CLOSE @queryResultAct
+DEALLOCATE @queryResultAct
+
+update tblSMAttachment set tblSMAttachment.strScreen = 'GlobalComponentEngine.view.Activity', tblSMAttachment.strRecordNo = (select top 1 convert(nvarchar(50),tblCRMOpportunityActivityTmp.intActivityId) from tblCRMOpportunityActivityTmp where tblCRMOpportunityActivityTmp.intTicketIdId = convert(int,tblSMAttachment.strRecordNo)) where tblSMAttachment.strScreen = 'HelpDesk.Ticket' and tblSMAttachment.strRecordNo in (select convert(nvarchar(50),tblCRMOpportunityActivityTmp.intTicketIdId) from tblCRMOpportunityActivityTmp);
+
+PRINT N'Creating Activity Note from Activity Details...'
+
+DECLARE @queryResultComment CURSOR
+
+declare @strCommentComment nvarchar(max);
+declare @strScreenComment nvarchar(50);
+declare @strRecordNoComment nvarchar(50);
+declare @dtmAddedComment datetime;
+declare @dtmModifiedComment datetime;
+declare @ysnPublicComment bit;
+declare @ysnEditedComment bit;
+declare @intEntityIdComment int;
+declare @intTransactionIdComment int;
+declare @intActivityIdComment int;
+declare @intConcurrencyIdComment int;
+declare @intTicketCommentIdComment int;
+declare @intTicketNoteIdComment int;
+
+declare @intCommentIdComment int;
+
+SET @queryResultComment = CURSOR FOR
+
+	select
+		strComment = '<p>Comment : '+(case when tblHDTicketComment.ysnSent = 1 then 'Sent' else '<font color="red">Draft</font>' end)+'</p>'+(case when tblHDTicketComment.ysnEncoded = 1 then dbo.fnHDDecodeComment(substring(tblHDTicketComment.strComment,4,len(tblHDTicketComment.strComment)-3)) else tblHDTicketComment.strComment end)+'</br>'
+		,strScreen = ''
+		,strRecordNo = ''
+		,dtmAdded = tblHDTicketComment.dtmCreated
+		,dtmModified = tblHDTicketComment.dtmLastModified
+		,ysnPublic = convert(bit,1)
+		,ysnEdited = null
+		,intEntityId = tblHDTicketComment.intCreatedUserEntityId
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.strRecordNo = convert(nvarchar(50), tblCRMOpportunityActivityTmp.intActivityId) and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
+		,intConcurrencyId = 1
+		,tblHDTicketComment.intTicketCommentId
+	from tblHDProject, tblHDProjectTask, tblHDTicket, tblCRMOpportunityActivityTmp, tblHDTicketComment
+	where tblHDProject.strType = 'CRM'
+		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
+		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
+		and tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
+
+OPEN @queryResultComment
+FETCH NEXT
+FROM
+	@queryResultComment
+INTO
+	@strCommentComment
+	,@strScreenComment
+	,@strRecordNoComment
+	,@dtmAddedComment
+	,@dtmModifiedComment
+	,@ysnPublicComment
+	,@ysnEditedComment
+	,@intEntityIdComment
+	,@intTransactionIdComment
+	,@intActivityIdComment
+	,@intConcurrencyIdComment
+	,@intTicketCommentIdComment
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMOpportunityActivityTmp'))
+	BEGIN
+		CREATE TABLE [dbo].[tblCRMOpportunityActivityTmp]
+		(
+			[intId] [int] IDENTITY(1,1) NOT NULL,
+			[intActivityId] [int] NOT NULL,
+			[intTicketIdId] [int] NULL,
+			[intTicketCommentId] [int] NULL,
+			[intTicketNoteId] [int] NULL,
+			CONSTRAINT [PK_tblCRMOpportunityActivityTmp] PRIMARY KEY CLUSTERED ([intId] ASC)
+		)
+	END
+	IF NOT EXISTS (select * from tblCRMOpportunityActivityTmp where intTicketCommentId = @intTicketCommentIdComment)
+	BEGIN
+
+		Insert into tblSMComment
+		(
+			strComment
+			,strScreen
+			,strRecordNo
+			,dtmAdded
+			,dtmModified
+			,ysnPublic
+			,ysnEdited
+			,intEntityId
+			,intTransactionId
+			,intActivityId
+			,intConcurrencyId
+		)
+		(
+			select 
+				strComment = @strCommentComment
+				,strScreen = @strScreenComment
+				,strRecordNo = @strRecordNoComment
+				,dtmAdded = @dtmAddedComment
+				,dtmModified = @dtmModifiedComment
+				,ysnPublic = @ysnPublicComment
+				,ysnEdited = @ysnEditedComment
+				,intEntityId = @intEntityIdComment
+				,intTransactionId = @intTransactionIdComment
+				,intActivityId = @intActivityIdComment
+				,intConcurrencyId = @intConcurrencyIdComment
+		)
+		
+		set @intCommentIdComment =  SCOPE_IDENTITY();
+
+		insert into tblCRMOpportunityActivityTmp
+		(
+			intActivityId
+			,intTicketCommentId
+		)
+		(
+			select
+				intActivityId = @intCommentIdComment
+				,intTicketCommentId = @intTicketCommentIdComment
+		)
+
+	END
+				
+    FETCH NEXT
+    FROM
+		@queryResultComment
+	INTO
+		@strCommentComment
+		,@strScreenComment
+		,@strRecordNoComment
+		,@dtmAddedComment
+		,@dtmModifiedComment
+		,@ysnPublicComment
+		,@ysnEditedComment
+		,@intEntityIdComment
+		,@intTransactionIdComment
+		,@intActivityIdComment
+		,@intConcurrencyIdComment
+		,@intTicketCommentIdComment
+END
+
+CLOSE @queryResultComment
+DEALLOCATE @queryResultComment
+
+
+PRINT N'Creating Activity Note from Activity Internal Note...'
+
+DECLARE @queryResultNote CURSOR
+
+declare @strCommentNote nvarchar(max);
+declare @strScreenNote nvarchar(50);
+declare @strRecordNoNote nvarchar(50);
+declare @dtmAddedNote datetime;
+declare @dtmModifiedNote datetime;
+declare @ysnPublicNote bit;
+declare @ysnEditedNote bit;
+declare @intEntityIdNote int;
+declare @intTransactionIdNote int;
+declare @intActivityIdNote int;
+declare @intConcurrencyIdNote int;
+declare @intTicketCommentIdNote int;
+declare @intTicketNoteIdNote int;
+
+declare @intCommentIdNote int;
+
+SET @queryResultNote = CURSOR FOR
+
+	select
+		strComment = '<p>Internal Note:</p><p>'+tblHDTicketNote.strNote+'</p></br>'
+		,strScreen = ''
+		,strRecordNo = ''
+		,dtmAdded = tblHDTicketNote.dtmCreated
+		,dtmModified = tblHDTicketNote.dtmCreated
+		,ysnPublic = convert(bit,1)
+		,ysnEdited = null
+		,intEntityId = tblHDTicketNote.intCreatedUserEntityId
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.strRecordNo = convert(nvarchar(50), tblCRMOpportunityActivityTmp.intActivityId) and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
+		,intConcurrencyId = 1
+		,tblHDTicketNote.intTicketNoteId
+	from tblHDProject, tblHDProjectTask, tblHDTicket, tblCRMOpportunityActivityTmp, tblHDTicketNote
+	where tblHDProject.strType = 'CRM'
+		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
+		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
+		and tblHDTicketNote.intTicketId = tblHDTicket.intTicketId
+
+OPEN @queryResultNote
+FETCH NEXT
+FROM
+	@queryResultNote
+INTO
+	@strCommentNote
+	,@strScreenNote
+	,@strRecordNoNote
+	,@dtmAddedNote
+	,@dtmModifiedNote
+	,@ysnPublicNote
+	,@ysnEditedNote
+	,@intEntityIdNote
+	,@intTransactionIdNote
+	,@intActivityIdNote
+	,@intConcurrencyIdNote
+	,@intTicketNoteIdNote
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMOpportunityActivityTmp'))
+	BEGIN
+		CREATE TABLE [dbo].[tblCRMOpportunityActivityTmp]
+		(
+			[intId] [int] IDENTITY(1,1) NOT NULL,
+			[intActivityId] [int] NOT NULL,
+			[intTicketIdId] [int] NULL,
+			[intTicketCommentId] [int] NULL,
+			[intTicketNoteId] [int] NULL,
+			CONSTRAINT [PK_tblCRMOpportunityActivityTmp] PRIMARY KEY CLUSTERED ([intId] ASC)
+		)
+	END
+	IF NOT EXISTS (select * from tblCRMOpportunityActivityTmp where intTicketNoteId = @intTicketNoteIdNote)
+	BEGIN
+
+		Insert into tblSMComment
+		(
+			strComment
+			,strScreen
+			,strRecordNo
+			,dtmAdded
+			,dtmModified
+			,ysnPublic
+			,ysnEdited
+			,intEntityId
+			,intTransactionId
+			,intActivityId
+			,intConcurrencyId
+		)
+		(
+			select 
+				strComment = @strCommentNote
+				,strScreen = @strScreenNote
+				,strRecordNo = @strRecordNoNote
+				,dtmAdded = @dtmAddedNote
+				,dtmModified = @dtmModifiedNote
+				,ysnPublic = @ysnPublicNote
+				,ysnEdited = @ysnEditedNote
+				,intEntityId = @intEntityIdNote
+				,intTransactionId = @intTransactionIdNote
+				,intActivityId = @intActivityIdNote
+				,intConcurrencyId = @intConcurrencyIdNote
+		)
+
+		set @intCommentIdNote =  SCOPE_IDENTITY();
+
+		insert into tblCRMOpportunityActivityTmp
+		(
+			intActivityId
+			,intTicketNoteId
+		)
+		(
+			select
+				intActivityId = @intCommentIdNote
+				,intTicketNoteId = @intTicketNoteIdNote
+		)
+
+	END
+				
+    FETCH NEXT
+    FROM
+		@queryResultNote
+	INTO
+		@strCommentNote
+		,@strScreenNote
+		,@strRecordNoNote
+		,@dtmAddedNote
+		,@dtmModifiedNote
+		,@ysnPublicNote
+		,@ysnEditedNote
+		,@intEntityIdNote
+		,@intTransactionIdNote
+		,@intActivityIdNote
+		,@intConcurrencyIdNote
+		,@intTicketNoteIdNote
+END
+
+CLOSE @queryResultNote
+DEALLOCATE @queryResultNote
 
 
 GO
