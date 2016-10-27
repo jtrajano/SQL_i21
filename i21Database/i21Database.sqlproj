@@ -4369,7 +4369,6 @@
     <Build Include="dbo\Functions\fnARConvertLetterMessage.sql" />
     <Build Include="dbo\Functions\fnARGetRowsFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspARCollectionLetter.sql" />
-    <Build Include="dbo\Views\vyuARCollectionOverdueSummaryReport.sql" />
     <Build Include="dbo\Views\vyuARCollectionOverdueReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\23_AddDefaultCollectionLetters.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
@@ -4426,7 +4425,6 @@
     <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyOwnership.sql" />
     <Build Include="dbo\Stored Procedures\uspICBeforeShipmentDelete.sql" />
-    <Build Include="dbo\Views\vyuARCollectionOverdueDetailReport.sql" />
     <Build Include="dbo\Views\vyuAPClaimsDetails.sql" />
     <Build Include="dbo\Tables\tblTFIntegrationTransaction.sql" />
     <Build Include="dbo\Tables\tblTFIntegrationItemProductCode.sql" />
