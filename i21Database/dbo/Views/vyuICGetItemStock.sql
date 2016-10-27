@@ -30,31 +30,31 @@ SELECT
 	strStockUOMType = StockUOM.strUnitType,
 	dblStockUnitQty = StockUOM.dblUnitQty,
 	ItemLocation.intReceiveUOMId,
-	dblReceiveUOMConvFactor = ISNULL(ReceiveUOM.dblUnitQty, 0),
-	ItemLocation.intIssueUOMId,
-	dblIssueUOMConvFactor = ISNULL(IssueUOM.dblUnitQty, 0),
-	strReceiveUOMType = rUOM.strUnitType,
-	strIssueUOMType = iUOM.strUnitType,
-	strReceiveUOM = rUOM.strUnitMeasure,
-	strReceiveUPC = ISNULL(ReceiveUOM.strUpcCode, ''),
-	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblReceiveLastCost = ISNULL(ItemPricing.dblLastCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblReceiveStandardCost = ISNULL(ItemPricing.dblStandardCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblReceiveAverageCost = ISNULL(ItemPricing.dblAverageCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	ysnReceiveUOMAllowPurchase = ISNULL(ReceiveUOM.ysnAllowPurchase, dbo.fnICCheckAllowPurchase(Item.intItemId)),
-	ysnReceiveUOMAllowSale = ISNULL(ReceiveUOM.ysnAllowSale, dbo.fnICCheckAllowSale(Item.intItemId)),
-	strIssueUOM = iUOM.strUnitMeasure,
-	strIssueUPC = ISNULL(IssueUOM.strUpcCode, ''),
-	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblIssueMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblIssueLastCost = ISNULL(ItemPricing.dblLastCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblIssueStandardCost = ISNULL(ItemPricing.dblStandardCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblIssueAverageCost = ISNULL(ItemPricing.dblAverageCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	dblIssueEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
-	ysnIssueUOMAllowPurchase = ISNULL(IssueUOM.ysnAllowPurchase, dbo.fnICCheckAllowPurchase(Item.intItemId)),
-	ysnIssueUOMAllowSale = ISNULL(IssueUOM.ysnAllowSale, dbo.fnICCheckAllowSale(Item.intItemId)),
+	dblReceiveUOMConvFactor = ISNULL(COALESCE(ReceiveUOM.dblUnitQty, ReceiveUOMStock.dblUnitQty), 0),
+	COALESCE(ItemLocation.intIssueUOMId, ReceiveUOMStock.intItemUOMId) intIssueUOMId,
+	dblIssueUOMConvFactor = ISNULL(COALESCE(IssueUOM.dblUnitQty, IssueUOMStock.dblUnitQty), 0),
+	strReceiveUOMType = COALESCE(rUOM.strUnitType, rUOMStock.strUnitType),
+	strIssueUOMType = COALESCE(iUOM.strUnitType, iUOMStock.strUnitType),
+	strReceiveUOM = COALESCE(rUOM.strUnitMeasure, rUOMStock.strUnitMeasure),
+	strReceiveUPC = ISNULL(COALESCE(ReceiveUOM.strUpcCode, ReceiveUOMStock.strUpcCode), ''),
+	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * ISNULL(COALESCE(ReceiveUOM.dblUnitQty, ReceiveUOMStock.dblUnitQty), 0),
+	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * ISNULL(COALESCE(ReceiveUOM.dblUnitQty, ReceiveUOMStock.dblUnitQty), 0),
+	dblReceiveLastCost = ISNULL(ItemPricing.dblLastCost, 0) * ISNULL(COALESCE(ReceiveUOM.dblUnitQty, ReceiveUOMStock.dblUnitQty), 0),
+	dblReceiveStandardCost = ISNULL(ItemPricing.dblStandardCost, 0) * ISNULL(COALESCE(ReceiveUOM.dblUnitQty, ReceiveUOMStock.dblUnitQty), 0),
+	dblReceiveAverageCost = ISNULL(ItemPricing.dblAverageCost, 0) * ISNULL(COALESCE(ReceiveUOM.dblUnitQty, ReceiveUOMStock.dblUnitQty), 0),
+	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * ISNULL(COALESCE(ReceiveUOM.dblUnitQty, ReceiveUOMStock.dblUnitQty), 0),
+	ysnReceiveUOMAllowPurchase = ISNULL(COALESCE(ReceiveUOM.ysnAllowPurchase, ReceiveUOMStock.ysnAllowPurchase), dbo.fnICCheckAllowPurchase(Item.intItemId)),
+	ysnReceiveUOMAllowSale = ISNULL(COALESCE(ReceiveUOM.ysnAllowSale, ReceiveUOMStock.ysnAllowSale), dbo.fnICCheckAllowSale(Item.intItemId)),
+	strIssueUOM = COALESCE(iUOM.strUnitMeasure, iUOMStock.strUnitMeasure),
+	strIssueUPC = ISNULL(COALESCE(IssueUOM.strUpcCode, IssueUOMStock.strUpcCode), ''),
+	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * ISNULL(COALESCE(IssueUOM.dblUnitQty, IssueUOMStock.dblUnitQty), 0),
+	dblIssueMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * ISNULL(COALESCE(IssueUOM.dblUnitQty, IssueUOMStock.dblUnitQty), 0),
+	dblIssueLastCost = ISNULL(ItemPricing.dblLastCost, 0) * ISNULL(COALESCE(IssueUOM.dblUnitQty, IssueUOMStock.dblUnitQty), 0),
+	dblIssueStandardCost = ISNULL(ItemPricing.dblStandardCost, 0) * ISNULL(COALESCE(IssueUOM.dblUnitQty, IssueUOMStock.dblUnitQty), 0),
+	dblIssueAverageCost = ISNULL(ItemPricing.dblAverageCost, 0) * ISNULL(COALESCE(IssueUOM.dblUnitQty, IssueUOMStock.dblUnitQty), 0),
+	dblIssueEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * ISNULL(COALESCE(IssueUOM.dblUnitQty, IssueUOMStock.dblUnitQty), 0),
+	ysnIssueUOMAllowPurchase = ISNULL(COALESCE(IssueUOM.ysnAllowPurchase, IssueUOMStock.ysnAllowPurchase), dbo.fnICCheckAllowPurchase(Item.intItemId)),
+	ysnIssueUOMAllowSale = ISNULL(COALESCE(IssueUOM.ysnAllowSale, IssueUOMStock.ysnAllowSale), dbo.fnICCheckAllowSale(Item.intItemId)),
 	dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0),
 	dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0),
 	ItemLocation.intAllowNegativeInventory,
@@ -117,9 +117,13 @@ SELECT
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
+LEFT JOIN tblICItemUOM ReceiveUOMStock ON ReceiveUOMStock.intItemId = Item.intItemId AND ReceiveUOMStock.ysnStockUnit = 1
 LEFT JOIN tblICUnitMeasure rUOM ON rUOM.intUnitMeasureId = ReceiveUOM.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure rUOMStock ON rUOMStock.intUnitMeasureId = ReceiveUOMStock.intUnitMeasureId
 LEFT JOIN tblICItemUOM IssueUOM ON IssueUOM.intItemUOMId = ItemLocation.intIssueUOMId
+LEFT JOIN tblICItemUOM IssueUOMStock ON IssueUOMStock.intItemId = Item.intItemId AND IssueUOMStock.ysnStockUnit = 1
 LEFT JOIN tblICUnitMeasure iUOM ON iUOM.intUnitMeasureId = IssueUOM.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure iUOMStock ON iUOMStock.intUnitMeasureId = IssueUOMStock.intUnitMeasureId
 LEFT JOIN tblICItemPricing ItemPricing ON ItemLocation.intItemId = ItemPricing.intItemId AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId
 LEFT JOIN tblICStorageLocation StorageLocation ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
