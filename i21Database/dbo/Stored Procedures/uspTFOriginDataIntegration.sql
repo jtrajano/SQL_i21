@@ -11,7 +11,7 @@
 
 AS
 
-DECLARE @query NVARCHAR(max)
+DECLARE @query NVARCHAR(MAX)
 
 TRUNCATE TABLE tblTFIntegrationError
 
@@ -43,7 +43,7 @@ INSERT INTO tblTFIntegrationItemProductCode
 EXEC (@query)
 
 --START ERROR INTEGRATION--
-DECLARE @qPCException NVARCHAR(max)
+DECLARE @qPCException NVARCHAR(MAX)
 
 
 SET @qPCException = 'SELECT * FROM (
@@ -276,58 +276,59 @@ dtmTransactionDate
   AND NOT EXISTS (SELECT
     strSourceRecordConcatKey
   FROM tblTFIntegrationError AS err
-  WHERE (strSourceRecordConcatKey = CONVERT(nvarchar(30), px.pxrpt_trans_rev_dt) + '_' + REPLACE(px.pxrpt_ord_no COLLATE Latin1_General_CI_AS, '   ', '') + '_' + px.pxrpt_trans_type + '_' + CONVERT(NVARCHAR(50), px.pxrpt_seq_no)))
+  WHERE (strSourceRecordConcatKey = CONVERT(NVARCHAR(30), px.pxrpt_trans_rev_dt) + '_' + REPLACE(px.pxrpt_ord_no COLLATE Latin1_General_CI_AS, '   ', '') + '_' + px.pxrpt_trans_type + '_' + CONVERT(NVARCHAR(50), px.pxrpt_seq_no)))
 
-INSERT INTO tblTFTransactions (uniqTransactionGuid,
-intTaxAuthorityId,
-strTaxAuthority,
-strFormCode,
-strScheduleCode,
-strProductCode,
-strType,
-intProductCodeId,
-intItemId,
-dblQtyShipped,
-dblGross,
-dblNet,
-dblBillQty,
-dblTax,
-dblTaxExempt,
-strInvoiceNumber,
-strPONumber,
-strBOLNumber,
-dtmDate,
-strDestinationCity,
-strDestinationState,
-strOriginCity,
-strOriginState,
---strAccountStatusCode,
-strShipVia,
-strTransporterLicense,
-strTransportationMode,
-strTransporterName,
-strTransporterFederalTaxId,
-strConsignorName,
-strConsignorFederalTaxId,
-strCustomerName,
-strCustomerFederalTaxId,
---strTaxCategory,
-strTerminalControlNumber,
-strVendorName,
-strVendorFederalTaxId,
-strTaxPayerName,
-strTaxPayerAddress,
-strCity,
-strState,
-strZipCode,
-strTelephoneNumber,
-strTaxPayerIdentificationNumber,
-strTaxPayerFEIN,
-dtmReportingPeriodBegin,
-dtmReportingPeriodEnd,
-strItemNo,
-intIntegrationError,
-leaf)
+	TRUNCATE TABLE tblTFTransactions
+	INSERT INTO tblTFTransactions (uniqTransactionGuid,
+	intTaxAuthorityId,
+	strTaxAuthority,
+	strFormCode,
+	strScheduleCode,
+	strProductCode,
+	strType,
+	intProductCodeId,
+	intItemId,
+	dblQtyShipped,
+	dblGross,
+	dblNet,
+	dblBillQty,
+	dblTax,
+	dblTaxExempt,
+	strInvoiceNumber,
+	strPONumber,
+	strBOLNumber,
+	dtmDate,
+	strDestinationCity,
+	strDestinationState,
+	strOriginCity,
+	strOriginState,
+	--strAccountStatusCode,
+	strShipVia,
+	strTransporterLicense,
+	strTransportationMode,
+	strTransporterName,
+	strTransporterFederalTaxId,
+	strConsignorName,
+	strConsignorFederalTaxId,
+	strCustomerName,
+	strCustomerFederalTaxId,
+	--strTaxCategory,
+	strTerminalControlNumber,
+	strVendorName,
+	strVendorFederalTaxId,
+	strTaxPayerName,
+	strTaxPayerAddress,
+	strCity,
+	strState,
+	strZipCode,
+	strTelephoneNumber,
+	strTaxPayerIdentificationNumber,
+	strTaxPayerFEIN,
+	dtmReportingPeriodBegin,
+	dtmReportingPeriodEnd,
+	strItemNo,
+	intIntegrationError,
+	leaf)
 
   SELECT
     @Guid,
@@ -383,4 +384,3 @@ leaf)
   LEFT OUTER JOIN tblTFIntegrationItemProductCode
   ON tr.strSourceRecordConcatKey = tblTFIntegrationItemProductCode.strSourceRecordConcatKey
   CROSS JOIN tblSMCompanySetup AS cl
-
