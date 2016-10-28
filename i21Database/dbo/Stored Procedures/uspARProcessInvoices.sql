@@ -1801,6 +1801,7 @@ BEGIN TRY
 		SET
 			 [ysnProcessed]	= 1
 			,[ysnPost]		= @Post
+			,[ysnRecap] 	= @Recap
 		WHERE		
 			[intInvoiceId] = @ExistingInvoiceId
 			AND ISNULL([ysnForUpdate],0) = 1
