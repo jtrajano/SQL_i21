@@ -83,7 +83,19 @@ Harness.start(
                 ]
             }
         ]
+    },
+
+    { group: 'ProductionProcess',
+        items: [
+            {
+                url: '../ProductionProcess/AddProductionProcess.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
     }
+
 
 
 
