@@ -299,7 +299,7 @@ BEGIN
 		FROM tblPOPurchaseDetail PODetails
 		WHERE intPurchaseDetailId = B.intLineNo
 	) POContractItems
-	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
+	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1 AND B.dblUnitCost != 0
 	UNION ALL
 	--CHARGES
 	SELECT
