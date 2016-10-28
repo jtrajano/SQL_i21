@@ -17,9 +17,7 @@
 );
 GO 
 
-CREATE NONCLUSTERED INDEX [IX_tblSMCurrency_intMainCurrencyId]
-    ON [dbo].[tblSMCurrency]([intMainCurrencyId] ASC);
-GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblSMCurrency_intMainCurrencyId] ON [tblSMCurrency]([intMainCurrencyId] ASC) WHERE [intMainCurrencyId] IS NOT NULL;
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
