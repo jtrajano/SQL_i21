@@ -172,7 +172,7 @@ SELECT intItemId					= SOD.intItemId
 	 , dblItemTermDiscount			= 0
 	 , strItemTermDiscountBy		= 0
 	 , dblPrice						= 0
-	 , strPricing					= NULL 
+	 , strPricing					= SOD.strPricing 
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
@@ -267,7 +267,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblItemTermDiscount			= 0
 	 , strItemTermDiscountBy		= NULL
 	 , dblPrice						= ARSI.dblPrice 
-	 , strPricing					= ''
+	 , strPricing					= ARSI.strPricing
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= NULL
 	 , intInventoryShipmentItemId	= NULL
@@ -488,6 +488,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblQtyShipped]
 					,[dblDiscount]
 					,[dblPrice]
+					,[strPricing]
 					,[dblTotalTax]
 					,[dblTotal]
 					,[intAccountId]
@@ -517,6 +518,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblQtyOrdered]			--[dblQtyShipped]
 					,0							--[dblDiscount]
 					,[dblMaintenanceAmount]		--[dblPrice]
+					,[strPricing] 
 					,0							--[dblTotalTax]
 					,[dblMaintenanceAmount] * [dblQtyOrdered] --[dblTotal]
 					,[intAccountId]				--[intAccountId]
