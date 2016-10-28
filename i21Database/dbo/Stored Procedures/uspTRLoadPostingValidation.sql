@@ -1,7 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRLoadPostingValidation]
-	 @intLoadHeaderId AS INT
-	 ,@ysnPostOrUnPost AS BIT
-	 ,@intUserId AS int 
+	@intLoadHeaderId AS INT
+	, @ysnPostOrUnPost AS BIT
+	, @intUserId AS INT
+
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -10,512 +11,501 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ErrorMessage NVARCHAR(4000);
-DECLARE @ErrorSeverity INT;
-DECLARE @ErrorState INT;
+DECLARE @ErrorMessage NVARCHAR(4000)
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
 
 BEGIN TRY
-DECLARE @dtmLoadDateTime DATETIME,
-        @intShipVia int,
-		@intSeller int,
-		@intInvoiceId int,
-		@InvoiceDeleteCount int,		
-		@incInvoiceDeleteval int,
-		@ReceiptDeleteCount int,
-		@incReceiptDeleteval int,
-		@intInventoryTransferId int,
-		@TransferDeleteCount int,		
-		@incTransferDeleteval int,	
-		@intLoadReceiptId int,
-		@intInventoryReceiptId int,
-		@intEntityUserSecurityId int,
-		@intStockUOMId int,
-		@err nvarchar(150),
-		@strItem nvarchar(50),
-		@strItemLocation nvarchar(50),
-		@intDriver int,
-		@ReceiptCount int,
-		@incReceiptval int,
-		@strOrigin nvarchar(50),
-		@strBOL nvarchar(50),
-		@intTerminal int,
-		@intSupplyPoint int,
-		@intCompanyLocation int,
-		@intItem int,
-		@dblNet DECIMAL(18, 6) = 0,
-		@dblGross DECIMAL(18, 6) = 0,
-		@dblUnitCost DECIMAL(18, 6) = 0,
-		@dblTotalGross DECIMAL(18, 6) = 0,
-		@dblTotalNet DECIMAL(18, 6) = 0,
-		@GrossorNet nvarchar(50),
-		@intLoadReceipt int,
-		@DistCount int = 0,
-		@incDistDetailval int = 0,
-        @intLoadDistributionHeaderId int,
-        @intLoadDistributionDetailId int,
-        @intDistributionItemId int,
-        @dblUnits DECIMAL(18, 6) = 0,
-        @dblPrice DECIMAL(18, 6) = 0,
-		@strDestination nvarchar(50),
-		@intEntityCustomerId int,
-		@intEntitySalespersonId int,
-		@intShipToLocationId int,
-		@intCompanyLocationId int,
-		@dtmInvoiceDateTime DATETIME,	
-		@strresult NVARCHAR(MAX),	
-		@strDescription NVARCHAR(100),
-        @dblReveivedQuantity DECIMAL(18, 6) = 0,
-        @dblDistributedQuantity DECIMAL(18, 6) = 0;
+	DECLARE @dtmLoadDateTime DATETIME
+		, @intShipVia INT
+		, @intSeller INT
+		, @intLoadReceiptId INT
+		, @intInventoryReceiptId INT
+		, @intInventoryTransferId INT
+		, @intLoadDistributionHeaderId INT
+		, @intLoadDistributionDetailId INT
+		, @intInvoiceId INT
+		, @intEntityUserSecurityId INT
+		, @intStockUOMId INT
+		, @err NVARCHAR(150)
+		, @strItem NVARCHAR(50)
+		, @strItemLocation NVARCHAR(50)
+		, @intDriver INT
+		, @strOrigin NVARCHAR(50)
+		, @strBOL NVARCHAR(50)
+		, @intTerminal INT
+		, @intSupplyPoint INT
+		, @intCompanyLocation INT
+		, @intItem INT
+		, @dblNet DECIMAL(18, 6) = 0
+		, @dblGross DECIMAL(18, 6) = 0
+		, @dblUnitCost DECIMAL(18, 6) = 0
+		, @dblTotalGross DECIMAL(18, 6) = 0
+		, @dblTotalNet DECIMAL(18, 6) = 0
+		, @dblFreight DECIMAL(18, 6) = 0
+		, @dblSurcharge DECIMAL(18, 6) = 0
+		, @GrossorNet NVARCHAR(50)
+		, @intDistributionItemId INT
+		, @dblUnits DECIMAL(18, 6) = 0
+		, @dblPrice DECIMAL(18, 6) = 0
+		, @strDestination NVARCHAR(50)
+		, @intEntityCustomerId INT
+		, @intEntitySalespersonId INT
+		, @intShipToLocationId INT
+		, @intCompanyLocationId INT
+		, @dtmInvoiceDateTime DATETIME
+		, @strresult NVARCHAR(MAX)
+		, @strDescription NVARCHAR(100)
+		, @dblReveivedQuantity DECIMAL(18, 6) = 0
+		, @dblDistributedQuantity DECIMAL(18, 6) = 0
+		, @intFreightItemId INT
+		, @intSurchargeItemId INT
+		, @ysnItemizeSurcharge BIT
+	
+	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
+		, @intShipVia = TL.intShipViaId
+		, @intSeller = TL.intSellerId
+		, @intDriver = TL.intDriverId
+	FROM tblTRLoadHeader TL
+	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 
-DECLARE @ReceiptTable TABLE
-    (
-	intReceiptId INT IDENTITY PRIMARY KEY CLUSTERED,
-	intLoadHeaderId INT NULL,
-	intLoadReceiptId int NULL,
-    strOrigin nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	strBOL nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	intTerminalId int NULL,
-	intSupplyPointId int NULL,
-	intCompanyLocationId int NULL,
-	intItemId int NULL,
-	dblNet DECIMAL(18, 6) NULL DEFAULT 0,
-	dblGross DECIMAL(18, 6) NULL DEFAULT 0,
-	dblUnitCost DECIMAL(18, 6) NULL DEFAULT 0
-    )
+	IF (ISDATE(@dtmLoadDateTime) = 0 )
+	BEGIN
+		RAISERROR('Invalid Load Date/Time', 16, 1)
+	END
+	IF (@intShipVia IS NULL)
+	BEGIN
+		RAISERROR('Invalid Ship Via', 16, 1)
+	END
+	IF (@intSeller IS NULL)
+	BEGIN
+		RAISERROR('Invalid Seller', 16, 1)
+	END
+	IF (@intDriver IS NULL)
+	BEGIN
+		RAISERROR('Invalid Driver', 16, 1)
+	END
 
-DECLARE @DistributionHeaderTable TABLE
-(
-    intDistHeadId INT IDENTITY PRIMARY KEY CLUSTERED,
-	[intLoadHeaderId] INT NULL,
-	[intLoadDistributionHeaderId] INT NULL,
-	[strDestination] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[intEntityCustomerId] INT NULL,	
-	[intShipToLocationId] INT NULL,
-    [intCompanyLocationId] INT NULL,	
-	[intEntitySalespersonId] INT NULL,	
-	[dtmInvoiceDateTime]  DATETIME   NULL
-)
+	SELECT TOP 1 @intFreightItemId = intItemForFreightId
+		, @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
+	FROM tblTRCompanyPreference
 
-DECLARE @DistributionDetailTable TABLE
-(
-    intDistDetailId INT IDENTITY PRIMARY KEY CLUSTERED,
-	[intLoadHeaderId] INT NULL,
-	[intLoadDistributionDetailId] INT NULL,
-	[intLoadDistributionHeaderId] INT NULL,
-	[intItemId] INT NULL,		
-	[dblUnits] DECIMAL(18, 6) NULL DEFAULT 0, 
-	[dblPrice] DECIMAL(18, 6) NULL DEFAULT 0	
-)
+	IF (@ysnItemizeSurcharge = 0)
+		SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+	ELSE
+		SELECT TOP 1 @intSurchargeItemId = intSurchargeItemId FROM tblTRCompanyPreference
 
-DECLARE @ReceiptDeleteTable TABLE
-(
-    intId INT IDENTITY PRIMARY KEY CLUSTERED,
-	[intLoadReceiptId] INT NULL,
-	[intInventoryReceiptId] INT NULL	
-)
-DECLARE @TransferDeleteTable TABLE
-(
-    intId INT IDENTITY PRIMARY KEY CLUSTERED,
-	[intLoadReceiptId] INT NULL,
-	[intInventoryTransferId] INT NULL	
-)
-DECLARE @InvoiceDeleteTable TABLE
-(
-    intId INT IDENTITY PRIMARY KEY CLUSTERED,
-	[intLoadDistributionHeaderId] INT NULL,
-	[intInvoiceId] INT NULL	
-)
-
-select  @dtmLoadDateTime = TL.dtmLoadDateTime,
-        @intShipVia = TL.intShipViaId,
-		@intSeller = TL.intSellerId,
-		@intDriver = TL.intDriverId
- from dbo.tblTRLoadHeader TL
-      where TL.intLoadHeaderId = @intLoadHeaderId
-
-if (isdate(@dtmLoadDateTime) = 0 )
-BEGIN
-    RAISERROR('Invalid Load Date/Time', 16, 1);
-END
-
-if (@intShipVia is null  )
-BEGIN
-    RAISERROR('Invalid Ship Via', 16, 1);
-END
-
-if (@intSeller is null  )
-BEGIN
-    RAISERROR('Invalid Seller', 16, 1);
-END
-
-if (@intDriver is null  )
-BEGIN
-    RAISERROR('Invalid Driver', 16, 1);
-END
-
-INSERT into @ReceiptTable
-(
-  intLoadHeaderId,
-  intLoadReceiptId,
-  strOrigin,
-  strBOL,
-  intTerminalId,
-  intSupplyPointId,
-  intCompanyLocationId,
-  intItemId,
-  dblNet,
-  dblGross,
-  dblUnitCost
-)
-select TL.intLoadHeaderId,
-       TR.intLoadReceiptId,
-       TR.strOrigin,
-	   TR.strBillOfLading,
-	   TR.intTerminalId,
-	   TR.intSupplyPointId,
-	   TR.intCompanyLocationId,
-	   TR.intItemId,
-	   TR.dblNet,
-	   TR.dblGross,
-	   TR.dblUnitCost
- from dbo.tblTRLoadHeader TL
-      join dbo.tblTRLoadReceipt TR on TL.intLoadHeaderId = TR.intLoadHeaderId
-      where TL.intLoadHeaderId = @intLoadHeaderId
-	  
-INSERT into @DistributionHeaderTable
-(
-   intLoadHeaderId,
-   intLoadDistributionHeaderId,
---   intLoadReceiptId,
-   strDestination,
-   intEntityCustomerId,	
-   intShipToLocationId,
-   intCompanyLocationId,	
-   intEntitySalespersonId,	
-   dtmInvoiceDateTime  
-)
-select 
-    TL.intLoadHeaderId,
-    DH.intLoadDistributionHeaderId,
-	DH.strDestination,
-	DH.intEntityCustomerId,	
-	DH.intShipToLocationId,
-    DH.intCompanyLocationId,	
-	DH.intEntitySalespersonId,	
-	DH.dtmInvoiceDateTime  
- from dbo.tblTRLoadHeader TL
-	  join dbo.tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
-      where TL.intLoadHeaderId = @intLoadHeaderId
-
-
-INSERT into @DistributionDetailTable
-(
-  intLoadHeaderId,
-  intLoadDistributionDetailId,
-  intLoadDistributionHeaderId,
-  intItemId,		
-  dblUnits, 
-  dblPrice	
-)
-select 
-  TL.intLoadHeaderId,
-  DD.intLoadDistributionDetailId,
-  DD.intLoadDistributionHeaderId,
-  DD.intItemId,		
-  DD.dblUnits, 
-  DD.dblPrice	
- from dbo.tblTRLoadHeader TL    
-	  join dbo.tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
-	  join dbo.tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-      where TL.intLoadHeaderId = @intLoadHeaderId
-
-select @ReceiptCount = count(intReceiptId) from @ReceiptTable
-
-if (@ReceiptCount = 0)
-BEGIN
-    RAISERROR('Receipt entries not present', 16, 1);
-END
-
-set @incReceiptval = 1 
-WHILE @incReceiptval <=@ReceiptCount 
-BEGIN
-
-  select @intLoadReceipt = RT.intLoadReceiptId,
-         @strOrigin = RT.strOrigin,
-		 @strBOL = RT.strBOL,
-         @intTerminal = RT.intTerminalId,
-		 @intSupplyPoint = RT.intSupplyPointId,
-		 @intCompanyLocation = RT.intCompanyLocationId,
-		 @intItem = RT.intItemId,
-		 @dblNet = RT.dblNet,
-		 @dblGross = RT.dblGross,
-		 @dblUnitCost = RT.dblUnitCost 
-  from @ReceiptTable RT where @incReceiptval = intReceiptId
-  
-  if(@strOrigin = 'Terminal')
-      BEGIN
-	     if @ysnPostOrUnPost = 1 and (@strBOL is NULL or LTRIM(RTRIM(@strBOL)) = '')
-		    BEGIN
-			   RAISERROR('Bill of Lading is required', 16, 1);
-			END
-         if (@intTerminal is null  )
-         BEGIN
-             RAISERROR('Invalid Terminal', 16, 1);
-         END
-	     if (@intSupplyPoint is null )
-         BEGIN
-             RAISERROR('Invalid Supply Point', 16, 1);
-         END
-	     if (@intCompanyLocation is null)
-         BEGIN
-             RAISERROR('Invalid Bulk Location', 16, 1);
-         END
-	     if (@intItem is null)
-         BEGIN
-             RAISERROR('Invalid Purchase Item', 16, 1);
-         END
-		 select @intStockUOMId = intStockUOMId, @strItem = strItemNo from vyuICGetItemStock where intItemId = @intItem and intLocationId = @intCompanyLocation
-		 if (@intStockUOMId is null)
-         BEGIN
-		     set @err = 'Stock UOM is not setup for item ' + @strItem 
-             RAISERROR(@err , 16, 1);
-         END
-	     select @GrossorNet = strGrossOrNet from dbo.tblTRSupplyPoint where intSupplyPointId = @intSupplyPoint
-	     if (@GrossorNet is null)
-         BEGIN
-             RAISERROR('Gross or Net is not setup for Supply Point', 16, 1);
-         END
-	     if(@GrossorNet = 'Gross')
-	        BEGIN
-	            if(@dblGross is null or @dblGross = 0)
-	      	    BEGIN   
-	      	       RAISERROR('Gross Quantity cannot be 0', 16, 1);
-	      	    END
-	        END
-	     else
-	         BEGIN
-	    	     if(@dblNet is null or @dblNet = 0)
-	      	        BEGIN   
-	      	           RAISERROR('Net Quantity cannot be 0', 16, 1);
-	      	        END
-	         END
-      END
-  ELSE
-      BEGIN
-	       if (@intCompanyLocation is null)
-           BEGIN
-               RAISERROR('Invalid Bulk Location', 16, 1);
-           END
-	       if (@intItem is null)
-           BEGIN
-               RAISERROR('Invalid Purchase Item', 16, 1);
-           END	   
-		   select @intStockUOMId = intStockUOMId, @strItem = strItemNo from vyuICGetItemStock where intItemId = @intItem and intLocationId = @intCompanyLocation
-		   if (@intStockUOMId is null)
-           BEGIN
-		       set @err = 'Stock UOM is not setup for item ' + @strItem 
-               RAISERROR(@err , 16, 1);
-           END     
-	       if((@dblGross is null or @dblGross = 0) and (@dblNet is null or @dblNet = 0))
-	       BEGIN	               
-	           RAISERROR('Gross and Net Quantity cannot be 0', 16, 1);	         	    
-	       END
-
-	  END
-
-
-    select @dblTotalGross = sum(TR.dblGross) ,@dblTotalNet = sum(TR.dblNet)  from dbo.tblTRLoadReceipt TR
-    where TR.intLoadHeaderId = @intLoadHeaderId
-	      and TR.intItemId = @intItem
-	group by TR.intItemId
-
-
-	select @dblDistributedQuantity = sum(DD.dblUnits) from dbo.tblTRLoadDistributionHeader DH
-                                  join dbo.tblTRLoadDistributionDetail DD on DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
-    where intLoadHeaderId = @intLoadHeaderId
-	      and DD.intItemId = @intItem
-	group by DD.intItemId
-
-  if(@GrossorNet = 'Gross')
-      BEGIN
-	   set @dblReveivedQuantity = @dblTotalGross
-      END
-  else
-      BEGIN
-	   if(@GrossorNet = 'Net')
-	     BEGIN
-		    set @dblReveivedQuantity = @dblTotalNet
-	     END
-       else
-	     BEGIN
-		    set @dblReveivedQuantity = @dblTotalGross
-	     END
-	  END
-
-      if (@dblReveivedQuantity != @dblDistributedQuantity)
+	IF (ISNULL(@intSurchargeItemId, '') <> '')
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId)
 		BEGIN
-		    select top 1 @strDescription = strDescription from vyuICGetItemStock IC where IC.intItemId = @intItem 
-		    SET @strresult = @strDescription + ' received quantity ' + ltrim(@dblReveivedQuantity)  + ' does not match distributed quantity ' + ltrim(@dblDistributedQuantity)
-		    RAISERROR(@strresult, 16, 1);
-		 END
+			RAISERROR('Surcharge Item is not setup for the Freight Item specified from Company Configuration', 16, 1)
+		END
+	END
 
-   SET @incReceiptval = @incReceiptval + 1;
-END;
+	SELECT TL.intLoadHeaderId
+		, TR.intLoadReceiptId
+		, TR.strOrigin
+		, strBOL = TR.strBillOfLading
+		, TR.intTerminalId
+		, TR.intSupplyPointId
+		, TR.intCompanyLocationId
+		, TR.intItemId
+		, TR.dblNet
+		, TR.dblGross
+		, TR.dblUnitCost
+		, dblFreight = TR.dblFreightRate
+		, dblSurcharge = TR.dblPurSurcharge
+	INTO #ReceiptList
+	FROM tblTRLoadHeader TL
+	LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
+	WHERE TL.intLoadHeaderId = @intLoadHeaderId
+	  
+	IF NOT EXISTS(SELECT TOP 1 1 FROM #ReceiptList)
+	BEGIN
+		RAISERROR('Receipt entries not present', 16, 1);
+	END
 
-select @DistCount = count(intDistDetailId) from @DistributionDetailTable
+	SET @intLoadReceiptId = NULL
 
-set @incDistDetailval = 1 
-WHILE @incDistDetailval <=@DistCount 
-BEGIN
-    select @intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId,
-           @intLoadDistributionDetailId = DD.intLoadDistributionDetailId,
-           @intDistributionItemId = DD.intItemId,
-		   @dblUnits = DD.dblUnits,
-		   @dblPrice = DD.dblPrice		
-    from @DistributionDetailTable DD where @incDistDetailval = intDistDetailId and intLoadHeaderId = @intLoadHeaderId
+	WHILE EXISTS (SELECT TOP 1 1 FROM #ReceiptList)
+	BEGIN
+		SELECT TOP 1 @intLoadReceiptId = RT.intLoadReceiptId
+			, @strOrigin = RT.strOrigin
+			, @strBOL = RT.strBOL
+			, @intTerminal = RT.intTerminalId
+			, @intSupplyPoint = RT.intSupplyPointId
+			, @intCompanyLocation = RT.intCompanyLocationId
+			, @intItem = RT.intItemId
+			, @dblNet = RT.dblNet
+			, @dblGross = RT.dblGross
+			, @dblUnitCost = RT.dblUnitCost
+			, @dblFreight = RT.dblFreight
+			, @dblSurcharge = RT.dblSurcharge
+		FROM #ReceiptList RT
+		
+		IF(@strOrigin = 'Terminal')
+		BEGIN
+			IF @ysnPostOrUnPost = 1 AND (@strBOL IS NULL OR LTRIM(RTRIM(@strBOL)) = '')
+			BEGIN
+				RAISERROR('Bill of Lading is required', 16, 1)
+			END
+			IF (@intTerminal IS NULL)
+			BEGIN
+				RAISERROR('Invalid Terminal', 16, 1)
+			END
+			IF (@intSupplyPoint IS NULL)
+			BEGIN
+				RAISERROR('Invalid Supply Point', 16, 1)
+			END
+			IF (@intCompanyLocation IS NULL)
+			BEGIN
+				RAISERROR('Invalid Bulk Location', 16, 1)
+			END
+			IF (@intItem IS NULL)
+			BEGIN
+				RAISERROR('Invalid Purchase Item', 16, 1)
+			END
+			IF (ISNULL(@dblFreight, 0) > 0 AND ISNULL(@intFreightItemId, '') = '')
+			BEGIN
+				RAISERROR('Freight Item not found. Please setup in Company Configuration', 16, 1)
+			END
+			IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
+			BEGIN
+				IF ISNULL(@intSurchargeItemId, '') = ''
+					SET @err = ' Surcharge Item is null. Please setup in Company Configuration'
+				ELSE
+					SET @err = CAST(@intSurchargeItemId AS NVARCHAR(10)) + ' Surcharge Item not found. Please setup in Company Configuration'
 
-	select @strDestination = DH.strDestination,
-           @intEntityCustomerId = DH.intEntityCustomerId,
-           @intEntitySalespersonId = DH.intEntitySalespersonId,
-		   @intShipToLocationId = DH.intShipToLocationId,
-		   @intCompanyLocationId = DH.intCompanyLocationId,
-		   @dtmInvoiceDateTime = DH.dtmInvoiceDateTime		
-    from @DistributionHeaderTable DH where DH.intLoadDistributionHeaderId = @intLoadDistributionHeaderId and intLoadHeaderId = @intLoadHeaderId
+				RAISERROR(@err, 16, 1)
+			END
+			
+			SELECT @intStockUOMId = intStockUOMId
+				, @strItem = strItemNo
+			FROM vyuICGetItemStock
+			WHERE intItemId = @intItem
+				AND intLocationId = @intCompanyLocation
+			IF (@intStockUOMId IS NULL)
+			BEGIN
+				SET @err = 'Stock UOM is not setup for item ' + @strItem
+				RAISERROR(@err , 16, 1)
+			END
+			
+			SELECT @GrossorNet = strGrossOrNet
+			FROM tblTRSupplyPoint
+			WHERE intSupplyPointId = @intSupplyPoint
+			IF (@GrossorNet IS NULL)
+			BEGIN
+				RAISERROR('Gross or Net is not setup for Supply Point', 16, 1)
+			END
+			IF (@GrossorNet = 'Gross')
+			BEGIN
+				IF(@dblGross is null or @dblGross = 0)
+				BEGIN
+					RAISERROR('Gross Quantity cannot be 0', 16, 1)
+				END
+			END
+			ELSE
+			BEGIN
+				IF (@dblNet IS NULL OR @dblNet = 0)
+				BEGIN
+					RAISERROR('Net Quantity cannot be 0', 16, 1)
+				END
+			END
+		END
+		ELSE
+		BEGIN
+			IF (@intCompanyLocation IS NULL)
+			BEGIN
+				RAISERROR('Invalid Bulk Location', 16, 1)
+			END
+			IF (@intItem IS NULL)
+			BEGIN
+				RAISERROR('Invalid Purchase Item', 16, 1)
+			END
+			
+			SELECT @intStockUOMId = intStockUOMId
+				, @strItem = strItemNo
+			FROM vyuICGetItemStock
+			WHERE intItemId = @intItem
+				AND intLocationId = @intCompanyLocation
+			
+			IF (@intStockUOMId IS NULL)
+			BEGIN
+				SET @err = 'Stock UOM is not setup for item ' + @strItem
+				RAISERROR(@err , 16, 1)
+			END
+			IF ((@dblGross IS NULL OR @dblGross = 0) AND (@dblNet IS NULL OR @dblNet = 0))
+			BEGIN
+				RAISERROR('Gross and Net Quantity cannot be 0', 16, 1)
+			END
+		END
 
-	if (@strDestination is NULL)
-	BEGIN
-       RAISERROR('Destination is invalid', 16, 1);
-    END
-	if (@strDestination = 'Customer')
-	BEGIN
-	   if(@intEntityCustomerId is NULL)
-	   BEGIN
-          RAISERROR('Customer is invalid', 16, 1); 
-       END
-	   if(@intEntitySalespersonId is NULL)
-	   BEGIN
-          RAISERROR('Salesperson is invalid', 16, 1); 
-       END
-	   if(@intShipToLocationId is NULL)
-	   BEGIN
-          RAISERROR('Ship To is invalid', 16, 1); 
-       END
-	   
-    END
-	if(@intCompanyLocationId is NULL)
-	BEGIN
-       RAISERROR('Location is invalid', 16, 1); 
-    END
-	if(isdate(@dtmInvoiceDateTime) = 0)
-	BEGIN
-       RAISERROR('Invoice Date is invalid', 16, 1); 
-    END
-	if(@intDistributionItemId is NULL)
-	BEGIN
-       RAISERROR('Distribution Item is invalid', 16, 1); 
-    END
-	select @intStockUOMId = intIssueUOMId, @strItem = strItemNo, @strItemLocation = strLocationName from vyuICGetItemStock where intItemId = @intDistributionItemId and intLocationId = @intCompanyLocationId
-	if (@intStockUOMId is null)
-    BEGIN
-	    set @err = 'Default Issue UOM is not setup for item ' + @strItem + ' under location ' + @strItemLocation
-        RAISERROR(@err , 16, 1);
-    END 
-	if(@dblUnits = 0)
-	BEGIN
-       RAISERROR('Distribution Units cannot be 0', 16, 1); 
-    END
+		IF EXISTS (SELECT TOP 1 1 FROM tblTRLoadReceipt
+		WHERE strBillOfLading = @strBOL
+			AND intLoadHeaderId != @intLoadHeaderId)
+		BEGIN
+			SET @err = 'BOL ' + @strBOL + ' already exists on another Transport Load'
+			RAISERROR(@err, 16, 1)
+		END
+
+		SELECT @dblTotalGross = sum(TR.dblGross)
+			, @dblTotalNet = sum(TR.dblNet)
+		FROM tblTRLoadReceipt TR
+		WHERE TR.intLoadHeaderId = @intLoadHeaderId
+			AND TR.intItemId = @intItem
+		GROUP BY TR.intItemId
+		
+		SELECT @dblDistributedQuantity = sum(DD.dblUnits)
+		FROM tblTRLoadDistributionHeader DH
+		JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+		WHERE intLoadHeaderId = @intLoadHeaderId
+			AND DD.intItemId = @intItem
+		GROUP BY DD.intItemId
+		
+		IF(@GrossorNet = 'Gross')
+		BEGIN
+			SET @dblReveivedQuantity = @dblTotalGross
+		END
+		ELSE
+		BEGIN
+			IF (@GrossorNet = 'Net')
+			BEGIN
+				SET @dblReveivedQuantity = @dblTotalNet
+			END
+			ELSE
+			BEGIN
+				SET @dblReveivedQuantity = @dblTotalGross
+			END
+		END
+		
+		IF (@dblReveivedQuantity != @dblDistributedQuantity)
+		BEGIN
+			SELECT TOP 1 @strDescription = strDescription
+			FROM vyuICGetItemStock IC
+			WHERE IC.intItemId = @intItem
+			
+			SET @strresult = @strDescription + ' received quantity ' + LTRIM(@dblReveivedQuantity)  + ' does not match distributed quantity ' + LTRIM(@dblDistributedQuantity)
+			RAISERROR(@strresult, 16, 1)
+		END
+		
+		DELETE FROM #ReceiptList WHERE intLoadReceiptId = @intLoadReceiptId
+	END
+
+	SELECT TL.intLoadHeaderId
+		, DH.intLoadDistributionHeaderId
+		, DH.strDestination
+		, DH.intEntityCustomerId
+		, DH.intShipToLocationId
+		, DH.intCompanyLocationId
+		, DH.intEntitySalespersonId
+		, DH.dtmInvoiceDateTime
+	INTO #DistributionHeaderTable
+	FROM tblTRLoadHeader TL
+	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
+	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 	
+	SELECT TL.intLoadHeaderId
+		, DD.intLoadDistributionDetailId
+		, DD.intLoadDistributionHeaderId
+		, DD.intItemId
+		, DD.dblUnits
+		, DD.dblPrice
+		, dblFreight = DD.dblFreightRate
+		, dblSurcharge = DD.dblDistSurcharge
+	INTO #DistributionDetailTable
+	FROM tblTRLoadHeader TL
+	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
+	LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	WHERE TL.intLoadHeaderId = @intLoadHeaderId
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #DistributionDetailTable)
+	BEGIN
+		SELECT TOP 1 @intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+			, @intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+			, @intDistributionItemId = DD.intItemId
+			, @dblUnits = DD.dblUnits
+			, @dblPrice = DD.dblPrice
+			, @dblFreight = DD.dblFreight
+			, @dblSurcharge = DD.dblSurcharge
+		FROM #DistributionDetailTable DD
+		WHERE intLoadHeaderId = @intLoadHeaderId
+		
+		SELECT @strDestination = DH.strDestination
+			, @intEntityCustomerId = DH.intEntityCustomerId
+			, @intEntitySalespersonId = DH.intEntitySalespersonId
+			, @intShipToLocationId = DH.intShipToLocationId
+			, @intCompanyLocationId = DH.intCompanyLocationId
+			, @dtmInvoiceDateTime = DH.dtmInvoiceDateTime
+		FROM #DistributionHeaderTable DH
+		WHERE DH.intLoadDistributionHeaderId = @intLoadDistributionHeaderId
+			AND intLoadHeaderId = @intLoadHeaderId
+		
+		IF (@strDestination IS NULL)
+		BEGIN
+			RAISERROR('Destination is invalid', 16, 1)
+		END
+		IF (@strDestination = 'Customer')
+		BEGIN
+			IF(@intEntityCustomerId IS NULL)
+			BEGIN
+				RAISERROR('Customer is invalid', 16, 1)
+			END
+			IF(@intEntitySalespersonId IS NULL)
+			BEGIN
+				RAISERROR('Salesperson is invalid', 16, 1)
+			END
+			IF (@intShipToLocationId IS NULL)
+			BEGIN
+				RAISERROR('Ship To is invalid', 16, 1)
+			END
+			IF (ISNULL(@dblFreight, 0) > 0 AND ISNULL(@intFreightItemId, '') = '')
+			BEGIN
+				RAISERROR('Freight Item not found. Please setup in Company Configuration', 16, 1)
+			END
+			IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
+			BEGIN
+				RAISERROR('Surcharge Item not found. Please setup in Company Configuration', 16, 1)
+			END
+		END
+		IF (@intCompanyLocationId IS NULL)
+		BEGIN
+			RAISERROR('Location is invalid', 16, 1)
+		END
+		IF (ISDATE(@dtmInvoiceDateTime) = 0)
+		BEGIN
+			RAISERROR('Invoice Date is invalid', 16, 1)
+		END
+		IF (@intDistributionItemId IS NULL)
+		BEGIN
+			RAISERROR('Distribution Item is invalid', 16, 1)
+		END
+		
+		SELECT @intStockUOMId = intIssueUOMId
+			, @strItem = strItemNo
+			, @strItemLocation = strLocationName
+		FROM vyuICGetItemStock
+		WHERE intItemId = @intDistributionItemId
+			AND intLocationId = @intCompanyLocationId
+		
+		IF (@intStockUOMId IS NULL)
+		BEGIN
+			SET @err = 'Default Issue UOM is not setup for item ' + @strItem + ' under location ' + @strItemLocation
+			RAISERROR(@err , 16, 1)
+		END
+		IF (@dblUnits = 0)
+		BEGIN
+			RAISERROR('Distribution Units cannot be 0', 16, 1)
+		END
+		
+		DELETE FROM #DistributionDetailTable WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
+	END
 	
-   SET @incDistDetailval = @incDistDetailval + 1;
-END
+	SELECT intLoadReceiptId
+		, intInventoryReceiptId
+	INTO #ReceiptDeleteTable
+	FROM tblTRLoadReceipt TR
+	JOIN vyuICGetItemStock IC ON TR.intItemId = IC.intItemId
+		AND TR.intCompanyLocationId = IC.intLocationId
+	WHERE (IC.strType = 'Non-Inventory' 
+		OR (TR.strOrigin ='Terminal'
+			AND (TR.dblUnitCost = 0
+				AND TR.dblFreightRate = 0
+				AND TR.dblPurSurcharge = 0)))
+		AND ISNULL(intInventoryReceiptId, 0) <> 0
+		AND intLoadHeaderId = @intLoadHeaderId
+	UNION ALL
+	SELECT intLoadReceiptId
+		, intInventoryReceiptId
+	FROM tblTRLoadReceipt TR
+	WHERE TR.strOrigin = 'Location'
+		AND ISNULL(intInventoryReceiptId, 0) <> 0
+		AND intLoadHeaderId = @intLoadHeaderId
+		
+	SELECT intLoadReceiptId
+		, intInventoryTransferId
+	INTO #TransferDeleteTable
+	FROM tblTRLoadReceipt TR
+	JOIN vyuICGetItemStock IC ON TR.intItemId = IC.intItemId
+		AND TR.intCompanyLocationId = IC.intLocationId
+	WHERE (IC.strType = 'Non-Inventory' 
+		OR (TR.strOrigin ='Terminal'
+			AND (TR.dblUnitCost = 0
+				AND TR.dblFreightRate = 0
+				AND TR.dblPurSurcharge = 0)))
+		AND ISNULL(intInventoryTransferId,0) <> 0
+		AND intLoadHeaderId = @intLoadHeaderId
+	UNION ALL
+	SELECT intLoadReceiptId
+		,TR.intInventoryTransferId
+	FROM tblTRLoadDistributionHeader DH
+	JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+	JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = DH.intLoadHeaderId
+		AND TR.strReceiptLine IN (SELECT Item FROM dbo.fnTRSplit(DD.strReceiptLink,','))
+	WHERE ((TR.strOrigin = 'Terminal'
+		AND DH.strDestination = 'Location'
+		AND TR.intCompanyLocationId = DH.intCompanyLocationId)
+		OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId = DH.intCompanyLocationId)
+		OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId = DH.intCompanyLocationId))
+		AND ISNULL(TR.intInventoryTransferId,0) != 0 AND DH.intLoadHeaderId = @intLoadHeaderId
 
-INSERT into @ReceiptDeleteTable
-(
-  intLoadReceiptId,
-  intInventoryReceiptId
-)
-select intLoadReceiptId,intInventoryReceiptId from dbo.tblTRLoadReceipt TR
-            join vyuICGetItemStock IC on TR.intItemId = IC.intItemId and TR.intCompanyLocationId = IC.intLocationId
-			where (IC.strType = 'Non-Inventory' or (TR.strOrigin ='Terminal' AND (TR.dblUnitCost = 0 and TR.dblFreightRate = 0 and TR.dblPurSurcharge = 0))) and isNull(intInventoryReceiptId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
-Union ALL
-select intLoadReceiptId,intInventoryReceiptId from dbo.tblTRLoadReceipt  TR          
-			where TR.strOrigin = 'Location' and isNull(intInventoryReceiptId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
+	SELECT intLoadDistributionHeaderId
+		, intInvoiceId
+	INTO #InvoiceDeleteTable
+	FROM tblTRLoadDistributionHeader DH
+	WHERE strDestination = 'Location'
+		AND ISNULL(intInvoiceId,0) != 0
+		AND DH.intLoadHeaderId = @intLoadHeaderId
+		
+	SELECT TOP 1 @intEntityUserSecurityId = intEntityUserSecurityId
+	FROM tblSMUserSecurity
+	WHERE intEntityUserSecurityId = @intUserId
+	
+	SET @intLoadReceiptId = NULL
+	WHILE EXISTS (SELECT TOP 1 1 FROM #ReceiptDeleteTable)
+	BEGIN
+		SELECT TOP 1 @intLoadReceiptId = intLoadReceiptId
+			, @intInventoryReceiptId = intInventoryReceiptId
+		FROM #ReceiptDeleteTable
+		
+		UPDATE tblTRLoadReceipt
+		SET intInventoryReceiptId = NULL
+		WHERE intLoadReceiptId = @intLoadReceiptId
+		
+		EXEC uspICDeleteInventoryReceipt @intInventoryReceiptId, @intEntityUserSecurityId
+		
+		DELETE FROM #ReceiptDeleteTable WHERE intLoadReceiptId = @intLoadReceiptId
+	END
+	
+	WHILE EXISTS (SELECT TOP 1 1 FROM #TransferDeleteTable)
+	BEGIN
+		SELECT TOP 1 @intLoadReceiptId = intLoadReceiptId
+			, @intInventoryTransferId = intInventoryTransferId
+		FROM #TransferDeleteTable
+		
+		UPDATE tblTRLoadReceipt
+		set intInventoryTransferId = NULL
+		where intLoadReceiptId = @intLoadReceiptId
+		
+		EXEC uspICDeleteInventoryTransfer @intInventoryTransferId, @intEntityUserSecurityId
+		
+		DELETE FROM #TransferDeleteTable WHERE intLoadReceiptId = @intLoadReceiptId
+	END
+	
+	WHILE EXISTS (SELECT TOP 1 1 FROM #InvoiceDeleteTable)
+	BEGIN
+		SELECT TOP 1 @intLoadDistributionHeaderId = intLoadDistributionHeaderId
+			, @intInvoiceId = intInvoiceId
+		FROM #InvoiceDeleteTable
+		
+		UPDATE tblTRLoadDistributionHeader
+		SET intInvoiceId = NULL
+		WHERE intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 
-INSERT into @TransferDeleteTable
-(
-  intLoadReceiptId,
-  intInventoryTransferId
-)
-select intLoadReceiptId,intInventoryTransferId from dbo.tblTRLoadReceipt TR
-            join vyuICGetItemStock IC on TR.intItemId = IC.intItemId and TR.intCompanyLocationId = IC.intLocationId
-			where (IC.strType = 'Non-Inventory' or (TR.strOrigin ='Terminal' AND (TR.dblUnitCost = 0 and TR.dblFreightRate = 0 and TR.dblPurSurcharge = 0))) and isNull(intInventoryTransferId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
-UNION ALL
-select intLoadReceiptId,TR.intInventoryTransferId FROM		        
-			 dbo.tblTRLoadDistributionHeader DH 					
-			JOIN dbo.tblTRLoadDistributionDetail DD 
-				ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
-			JOIN dbo.tblTRLoadReceipt TR 
-				ON TR.intLoadHeaderId = DH.intLoadHeaderId	and TR.strReceiptLine in (select Item from dbo.fnTRSplit(DD.strReceiptLink,',')) 			
-    WHERE ((TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId = DH.intCompanyLocationId)
-      or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId = DH.intCompanyLocationId)
-	  or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId = DH.intCompanyLocationId))
-	  and isNull(TR.intInventoryTransferId,0) != 0 and DH.intLoadHeaderId = @intLoadHeaderId
+	   EXEC dbo.uspARDeleteInvoice @intInvoiceId,@intUserId
 
-INSERT into @InvoiceDeleteTable
-(
-  intLoadDistributionHeaderId,
-  intInvoiceId
-)
-select intLoadDistributionHeaderId,intInvoiceId from dbo.tblTRLoadDistributionHeader DH 
-            where strDestination = 'Location' and isNull(intInvoiceId,0) != 0 and DH.intLoadHeaderId = @intLoadHeaderId
-
-
-SELECT	TOP 1 @intEntityUserSecurityId = [intEntityUserSecurityId] 
-		FROM	dbo.tblSMUserSecurity 
-		WHERE	[intEntityUserSecurityId] = @intUserId
-
-select @ReceiptDeleteCount = count(intId) from @ReceiptDeleteTable
-set @incReceiptDeleteval = 1 
-WHILE @incReceiptDeleteval <= @ReceiptDeleteCount 
-BEGIN
-   select @intLoadReceiptId = intLoadReceiptId,@intInventoryReceiptId = intInventoryReceiptId from @ReceiptDeleteTable where intId = @incReceiptDeleteval
-
-   update dbo.tblTRLoadReceipt 
-   set intInventoryReceiptId = null
-   where intLoadReceiptId = @intLoadReceiptId
-   EXEC dbo.uspICDeleteInventoryReceipt @intInventoryReceiptId,@intEntityUserSecurityId
-
-   SET @incReceiptDeleteval = @incReceiptDeleteval + 1;
-END
-
-select @TransferDeleteCount = count(intId) from @TransferDeleteTable
-set @incTransferDeleteval = 1 
-WHILE @incTransferDeleteval <= @TransferDeleteCount 
-BEGIN
-   select @intLoadReceiptId = intLoadReceiptId,@intInventoryTransferId = intInventoryTransferId from @TransferDeleteTable where intId = @incTransferDeleteval
-
-   update dbo.tblTRLoadReceipt 
-   set intInventoryTransferId = null
-   where intLoadReceiptId = @intLoadReceiptId
-   EXEC dbo.uspICDeleteInventoryTransfer @intInventoryTransferId,@intEntityUserSecurityId
-
-   SET @incTransferDeleteval = @incTransferDeleteval + 1;
-END
-
-select @InvoiceDeleteCount = count(intId) from @InvoiceDeleteTable
-set @incInvoiceDeleteval = 1 
-WHILE @incInvoiceDeleteval <= @InvoiceDeleteCount 
-BEGIN
-   select @intLoadDistributionHeaderId = intLoadDistributionHeaderId,@intInvoiceId = intInvoiceId from @InvoiceDeleteTable where intId = @incInvoiceDeleteval
-
-   update dbo.tblTRLoadDistributionHeader 
-   set intInvoiceId = null
-   where intLoadDistributionHeaderId = @intLoadDistributionHeaderId
-
-   EXEC dbo.uspARDeleteInvoice @intInvoiceId,@intUserId
-
-   SET @incInvoiceDeleteval = @incInvoiceDeleteval + 1;
-END
+	   DELETE FROM #InvoiceDeleteTable WHERE intLoadDistributionHeaderId = @intLoadDistributionHeaderId
+	END
 
 END TRY
 BEGIN CATCH
