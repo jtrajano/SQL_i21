@@ -1,132 +1,116 @@
-/**
- * Created by RQuidato on 10/29/14.
- */
 StartTest (function (t) {
+    new iRely.FunctionalTest().start(t)
 
-    var engine = new iRely.TestEngine();
-    engine.start(t)
+        //region Scenario 1: Feed Stock - Add a Record
+        .displayText('===== Scenario 1: Feed Stock - Add a Record  =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Fuel Types','Screen')
+        .clickButton('Close')
+        .clickButton('FuelCode')
+        .waitTillLoaded('icfuelcode')
+        .enterGridData('GridTemplate', 1, 'colRinFuelCode', 'Test Fuel Code 1')
+        .enterGridData('GridTemplate', 1, 'colDescription', 'Test Description 1')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        .markSuccess('===== Add a record successful  =====')
 
-        /*1. Open screen and check default control's state*/
-        .login('ssiadmin','summit','ag').wait(1500)
-        .addFunction(function(next){t.diag("1. Open screen and check default control's state"); next();}).wait(100)
-        .expandMenu('Inventory').wait(100)
-        .expandMenu('Maintenance').wait(200)
-        .expandMenu('RIN').wait(100)
-        .openScreen('Fuel Code').wait(200)
-        .checkScreenShown ('fuelcode').wait(100)
-        .checkScreenWindow({alias: 'fuelcode', title: 'Fuel Code', collapse: true, maximize: true, minimize: false, restore: false, close: true })
-        .checkToolbarButton({new: false, save: true, search: false, delete: false, undo: true, close: true})
-        .checkControlVisible(['#colRinFuelCode', '#colDescription'], true)
-        .checkControlVisible('#btnDelete', true)
-        .checkControlVisible(['#btnHelp', '#btnSupport', '#btnFieldName'], true)
-        .checkStatusBar()
-        .checkStatusMessage('Ready')
-
-
-        /*2. Add multiple data*/
-        .addFunction(function(next){t.diag("2. Add multiple data"); next();}).wait(100)
-        .enterGridData('#grdGridTemplate', 0, 'colRinFuelCode', 'f01').wait(100)
-        .enterGridData('#grdGridTemplate', 0, 'colDescription', 'fuel 01').wait(100)
-        .enterGridData('#grdGridTemplate', 1, 'colRinFuelCode', 'f02').wait(100)
-        .enterGridData('#grdGridTemplate', 1, 'colDescription', 'fuel 02').wait(100)
-        .checkStatusMessage('Edited')
-        .clickButton('#btnSave').wait(100)
-        .checkStatusMessage('Saved').wait(100)
-        .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('fuelcode').wait(100)
-
-
-//        verify records added
-        .openScreen('Fuel Code').wait(200)
-        .checkScreenShown ('fuelcode').wait(100)
-        .checkGridData('#grdGridTemplate', 0, 'colRinFuelCode','f02')
-        .checkGridData('#grdGridTemplate', 0, 'colDescription','fuel 02')
-//        .checkGridData('#grdGridTemplate', 1, 'colRinFuelCode','f01')
-//        .checkGridData('#grdGridTemplate', 1, 'colDescription','fuel 01')
-        .checkStatusMessage('Ready')
-        .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('fuelcode').wait(100)
-
-        /*3. Add another record, Click Close button, do NOT save the changes*/
-        .addFunction(function(next){t.diag("3. Add another record, Click Close button, do NOT save the changes"); next();}).wait(100)
-        .openScreen('Fuel Code').wait(200)
-        .checkScreenShown ('fuelcode').wait(100)
-        .enterGridData('#grdGridTemplate', 2, 'colRinFuelCode', 'f03').wait(100)
-        .enterGridData('#grdGridTemplate', 2, 'colDescription', 'fuel 03').wait(100)
-        .clickButton('#btnClose').wait(100)
-        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
-        .clickMessageBoxButton('no').wait(10)
-        .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('fuelcode').wait(100)
+        //region Scenario 2: Fuel Category - Add Multiple Records
+        .displayText('===== Scenario 2: Fuel Category - Add Multiple Records  =====')
+        .clickButton('FuelCode')
+        .waitTillLoaded('icfuelcode')
+        .enterGridData('GridTemplate', 2, 'colRinFuelCode', 'Test Fuel Code 2')
+        .enterGridData('GridTemplate', 2, 'colDescription', 'Test Description 2')
+        .enterGridData('GridTemplate', 3, 'colRinFuelCode', 'Test Fuel Code 3')
+        .enterGridData('GridTemplate', 3, 'colDescription', 'Test Description 3')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        .markSuccess('===== Add multiple records successful  =====')
+        //endregion
 
 
-        /*4. Add another record, click Close, Cancel*/
-        .addFunction(function(next){t.diag("4. Add another record, click Close, Cancel"); next();}).wait(100)
-        .openScreen('Fuel Code').wait(200)
-        .checkScreenShown ('fuelcode').wait(100)
-        .enterGridData('#grdGridTemplate', 2, 'colRinFuelCode', 'f03').wait(100)
-        .enterGridData('#grdGridTemplate', 2, 'colDescription', 'fuel 03').wait(100)
-        .clickButton('#btnClose').wait(100)
-        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
-        .clickMessageBoxButton('cancel').wait(10)
-        .clickButton('#btnClose').wait(100)
+        //region Scenario 3: Add another record, Click Close button, do NOT save the changes
+        .displayText('===== Scenario 3:  Add another record, Click Close button, do NOT save the changes =====')
+        .clickButton('FuelCode')
+        .waitTillLoaded('icfuelcode')
+        .enterGridData('GridTemplate', 4, 'colRinFuelCode', 'Test Fuel Code 4')
+        .enterGridData('GridTemplate', 4, 'colDescription', 'Test Description 4')
+        .clickButton('Close')
+        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+        .clickMessageBoxButton('no').wait(500)
+        .clickButton('FuelCode')
+        .waitTillLoaded('icfuelcode')
+        .verifyGridData('GridTemplate', 3, 'colRinFuelCode', '')
+        .verifyGridData('GridTemplate', 3, 'colDescription', '')
+        .clickButton('Close')
+        .markSuccess('===== Click Close and not save record successful =====')
+        //endregion
 
 
-        /*5. Add another record, Click Close button, SAVE the changes*/
-        .addFunction(function(next){t.diag("5. Add another record, Click Close button, SAVE the changes"); next();}).wait(100)
-        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
-        .clickMessageBoxButton('yes').wait(500)
-        .checkIfScreenClosed('fuelcode').wait(100) /*issue - FRM-1547 or TS-445 or FRM-1560*/
-
-//        Verify record added
-        .openScreen('Fuel Code').wait(200)
-        .checkScreenShown ('fuelcode').wait(100)
-        .checkGridData('#grdGridTemplate', 0, 'colRinFuelCode','f03')
-        .checkGridData('#grdGridTemplate', 0, 'colDescription','fuel 03')
-        .checkStatusMessage('Ready')
-        .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('fuelcode').wait(100)
-
-
-        /*6. Add duplicate record*/
-        .addFunction(function(next){t.diag("6. Add duplicate record"); next();}).wait(100)
-        .openScreen('Fuel Code').wait(200)
-        .checkScreenShown ('fuelcode').wait(100)
-        .enterGridData('#grdGridTemplate', 3, 'colRinFuelCode', 'f03').wait(100)
-        .enterGridData('#grdGridTemplate', 3, 'colDescription', 'fuel 04').wait(100)
-        .clickButton('#btnSave').wait(100)
-        .checkMessageBox('iRely i21','Fuel Code already exists.','ok','error') /*issue - IC-84 */
-        .clickMessageBoxButton('ok').wait(10)
-
-//        Modify duplicate record to correct it
-        .addFunction(function(next){t.diag("6. Add duplicate record > Modify duplicate record to correct it"); next();}).wait(100)
-        .enterGridData('#grdGridTemplate', 3, 'colRinFuelCode', 'f04').wait(100) /*issue - IC-81 */
-        .clickButton('#btnClose').wait(100)
-        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question').wait(100)
-        .clickMessageBoxButton('yes').wait(10)
-        .checkIfScreenClosed('fuelcode').wait(100)
+        //region Scenario 4: Add another record, click Close, Cancel
+        .displayText('===== Scenario 4: Add another record, click Close, Cancel  =====')
+        .clickButton('FuelCode')
+        .waitTillLoaded('icfuelcode')
+        .enterGridData('GridTemplate', 4, 'colRinFuelCode', 'Test Fuel Code 4')
+        .enterGridData('GridTemplate', 4, 'colDescription', 'Test Description 4')
+        .clickButton('Close')
+        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+        .clickMessageBoxButton('cancel').wait(500)
+        .verifyGridData('GridTemplate', 3, 'colRinFuelCode', 'Test Fuel Code 4')
+        .verifyGridData('GridTemplate', 3, 'colDescription', 'Test Description 4')
+        .clickButton('Close')
+        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+        .clickMessageBoxButton('no').wait(500)
+        .markSuccess('===== Click close cancel record successful  =====')
+        //endregion
 
 
+        //region Scenario 5: Fuel Category - Add duplicate Record
+        .displayText('===== Scenario 5: Fuel Category - Add duplicate Record =====')
+        .clickButton('FuelCode')
+        .waitTillLoaded('icfuelcode')
+        .enterGridData('GridTemplate', 4, 'colRinFuelCode', 'Test Fuel Code 1')
+        .enterGridData('GridTemplate', 4, 'colDescription', 'Test Description 1')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save').wait(500)
+        .verifyMessageBox('iRely i21','Fuel Code must be unique.','ok','error')
+        .clickMessageBoxButton('ok')
+        .clickButton('Close')
+        .markSuccess('===== Add Duplicate record scenario successful  =====')
+        //endregion
 
-//        Verify record added
-        .openScreen('Fuel Code').wait(200)
-        .checkScreenShown ('fuelcode').wait(100)
-        .checkGridData('#grdGridTemplate', 0, 'colRinFuelCode','f04')
-        .checkGridData('#grdGridTemplate', 0, 'colDescription','fuel 04')
-        .checkStatusMessage('Ready')
-        .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('fuelcode').wait(100)
 
-        /*7. Add primary key only then SAVE*/
-        .addFunction(function(next){t.diag("7. Add primary key only then SAVE"); next();}).wait(100)
-        .openScreen('Fuel Code').wait(200)
-        .checkScreenShown ('fuelcode').wait(100)
-        .enterGridData('#grdGridTemplate', 4, 'colRinFuelCode', 'f05').wait(100)
-        .clickButton('#btnSave').wait(100)
-        .checkStatusMessage('Saved')
-        .clickButton('#btnClose').wait(100)
-        .checkIfScreenClosed('fuelcode').wait(100)
+        //region Scenario 6: Add Description only
+        .displayText('===== Scenario 6: Add Description only =====')
+        .clickButton('FuelCode')
+        .waitTillLoaded('icfuelcode')
+        .enterGridData('GridTemplate', 4, 'colDescription', 'Test Description 4')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .clickButton('Close').wait(500)
+        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+        .clickMessageBoxButton('no').wait(500)
+        .markSuccess('===== Add description or equivalence value only is successful =====')
+        //endregion
 
-        .done()
+
+        //region Scenario 7: Add Primary Key only
+        .displayText('===== Scenario 7: Add Primary Key only=====')
+        .clickButton('FuelCode')
+        .waitTillLoaded('icfuelcode')
+        .enterGridData('GridTemplate', 4, 'colRinFuelCode', 'Test Fuel Code 4')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close').wait(500)
+        .markSuccess('===== Add primary key only successful  =====')
+        //endregion*/
+
+
+
+        .done();
+
 })
-

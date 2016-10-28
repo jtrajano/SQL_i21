@@ -72,6 +72,17 @@ Harness.start(
                 ]
             }
         ]
+    },
+
+    { group: 'FuelCode',
+        items: [
+            {
+                url: '../FuelCode/AddFuelCode.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
     }
 
 
