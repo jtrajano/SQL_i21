@@ -50,6 +50,18 @@ Harness.start(
                 ]
             }
         ]
+    },
+
+
+    { group: 'FuelCategory',
+        items: [
+            {
+                url: '../FuelCategory/AddFuelCategory.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
     }
 
 
