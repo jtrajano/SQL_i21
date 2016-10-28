@@ -744,5 +744,36 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public SaveResult GetStatusUnitCost(int receiptId, out int? newStatus)
+        {
+            SaveResult saveResult = new SaveResult();
+            int? newStatusResult = null;
+
+            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            {
+                var connection = _db.ContextManager.Database.Connection;
+                try
+                {
+                    var idParameter = new SqlParameter("intReceiptId", receiptId);
+                    var outParam = new SqlParameter("@intReceiptItemsStatusId", newStatusResult);
+                    outParam.Direction = System.Data.ParameterDirection.Output;
+                    outParam.DbType = System.Data.DbType.Int32;
+                    outParam.SqlDbType = System.Data.SqlDbType.Int;
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICGetStatusUnitCost @intReceiptId, @intReceiptItemsStatusId OUTPUT", idParameter, outParam);
+                    newStatusResult = (int)outParam.Value;
+                    saveResult = _db.Save(false);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                }
+            }
+            newStatus = newStatusResult;
+            return saveResult;
+        }
     }
 }

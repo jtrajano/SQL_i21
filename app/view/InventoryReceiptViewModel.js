@@ -805,25 +805,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
            else {
                return false;
            }
-       },
-       hideBtnBill: function (get) {
-           var  receiptItems = get('current.tblICInventoryReceiptItems'),
-                countReceiptItems = receiptItems.getRange().length,
-                hideVoucher = false;
-
-           if (get('!current.ysnPosted')) {
-               return true;
-           }
-           else {
-                for(var i=0; i < countReceiptItems; i++) {
-                    if (receiptItems.data.items[i].get('strItemNo') !== null) {
-                        if(receiptItems.data.items[i].get('dblUnitCost') == 0) {
-                            hideVoucher = true;
-                        }
-                    }
-                }
-                return hideVoucher;
-           }
-        }
+       }
     }
 });

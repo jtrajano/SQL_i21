@@ -361,7 +361,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{current.ysnPosted}'
             },
             btnBill: {
-                hidden: '{hideBtnBill}',
+                hidden: '{!current.ysnPosted}',
                 disabled: '{current.ysnOrigin}'
             },
             btnQuality: {
@@ -2338,28 +2338,72 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         i21.ModuleMgr.Inventory.showScreen(value, 'ReceiptNo');
     },
 
-    onViewVoucher: function (value, record, dashboard) {                
+    onViewVoucher: function (value, record, dashboard) {    
+        var me = this;
+
         if (value === 'New Voucher') {
             if(record.get('strReceiptType') === 'Transfer Order') {
                 iRely.Functions.showErrorDialog('Invalid receipt type. A voucher is not applicable to transfer orders.');
                 return;
             }
-            this.processReceiptToVoucher(record.get('intInventoryReceiptId'), function(data) {
-                iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
-                    filters: [
-                        {
-                            column: 'intBillId',
-                            value: data.message.BillId
+
+            Ext.Ajax.request({
+                timeout: 120000,
+                url: '../Inventory/api/InventoryReceipt/GetStatusUnitCost?id=' + record.get('intInventoryReceiptId'),
+                method: 'post',
+                success: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    if (jsonData.success)
+                        var receiptStatusId = jsonData.message.receiptItemsStatusId;
+
+                        var createNewVoucher = function() {
+                            me.processReceiptToVoucher(record.get('intInventoryReceiptId'), function(data) {
+                                    iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                                        filters: [
+                                            {
+                                                column: 'intBillId',
+                                                value: data.message.BillId
+                                            }
+                                        ],
+                                        action: 'view',
+                                        showAddReceipt: false,
+                                        listeners: {
+                                            close: function(e) {
+                                                dashboard.$initParent.grid.controller.reload();  
+                                            }
+                                        }
+                                    });        
+                                });
                         }
-                    ],
-                    action: 'view',
-                    showAddReceipt: false,
-                    listeners: {
-                        close: function(e) {
-                            dashboard.$initParent.grid.controller.reload();  
+
+                        //All items have zero cost
+                        if (receiptStatusId == 1) {
+                            iRely.Functions.showCustomDialog('information','ok','Cannot process voucher for items with zero cost.');
                         }
-                    }
-                });        
+                        
+                        //Some items have zero cost
+                        else if (receiptStatusId == 2) {
+                            var buttonAction = function (button) {
+                                if (button == 'yes') {
+                                    // Create Voucher for receipt containing items with cost and ignore items with zero cost
+                                    createNewVoucher();
+                                }
+                            }
+
+                            iRely.Functions.showCustomDialog('question','yesno','Items with zero cost will not be processed to voucher. Continue?', buttonAction);
+                        }
+
+                        //No items have zero cost
+                        else if (receiptStatusId == 3) {
+                            // Create voucher for receipt containing cost for all items
+                            createNewVoucher();
+                        }
+
+                },
+                failure: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                }
             });
         }
         else {
@@ -2652,11 +2696,51 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onBillClick: function (button, e, eOpts) {
-        var win = button.up('window');
-        var current = win.viewModel.data.current;
-
+        var win = button.up('window'),
+            current = win.viewModel.data.current,
+            me = this,
+		    receiptItems = current.tblICInventoryReceiptItems(),
+            countReceiptItems = receiptItems.getRange().length,
+            countPerLine = 0,
+            countItemsToProcess = 0;
+            countItemsWithZeroCost = 0;
+		
         if (current) {
-            this.receiptToVoucherClick(current, button, win);
+            Ext.Array.each(receiptItems.data.items, function (item) {
+                if (!item.dummy) {
+                    countPerLine++;
+
+                    if (item.get('dblUnitCost') == 0) {
+                        countItemsWithZeroCost++;
+                    }
+                    else {
+                        countItemsToProcess++;
+                    }
+
+					if(countPerLine == countReceiptItems - 1) {
+                       var buttonAction = function (button) {
+                            if (button == 'yes') {
+                                // Create Voucher for receipt containing items with cost and ignore items with zero cost
+                                me.receiptToVoucherClick(current, button, win);	
+                            }
+                        }
+
+						if(countItemsToProcess > 0) {
+                            if (countItemsWithZeroCost > 0) {
+                                iRely.Functions.showCustomDialog('question','yesno','Items with zero cost will not be processed to voucher. Continue?', buttonAction);
+                            }
+                            else {
+                                 // Create voucher for receipt containing cost for all items
+                                 me.receiptToVoucherClick(current, button, win);
+                            }
+                        }
+
+                        if(countItemsToProcess == 0 && countItemsWithZeroCost > 0) {
+                            iRely.Functions.showCustomDialog('information','ok','Cannot process voucher for items with zero cost.');
+                        }
+					}
+                }         
+            }); 
         }
     },
 

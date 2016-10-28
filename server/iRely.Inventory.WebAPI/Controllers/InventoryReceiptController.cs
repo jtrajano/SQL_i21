@@ -176,5 +176,25 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetChargeTaxDetails(param, ChargeId, ReceiptId));
         }
+
+        [HttpPost]
+        [ActionName("GetStatusUnitCost")]
+        public HttpResponseMessage GetStatusUnitCost(int id)
+        {
+            int? newStatus = null;
+            var result = _bl.GetStatusUnitCost(id, out newStatus);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    receiptItemsStatusId = newStatus,
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 }
