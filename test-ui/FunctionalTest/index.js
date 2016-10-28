@@ -94,8 +94,18 @@ Harness.start(
                 ]
             }
         ]
-    }
+    },
 
+    { group: 'FeedStockUOM',
+        items: [
+            {
+                url: '../FeedStockUOM/AddFeedStockUOM.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
+    }
 
 
 
