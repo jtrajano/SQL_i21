@@ -19,7 +19,7 @@ SELECT	CS.intCustomerStockId,
 		CS.dtmTransferredDate,
 		CS.dblParValue,
 		CS.dblFaceValue,
-		CS.ysnPosted,
+		ysnPosted = CASE WHEN ISNULL(CS.ysnPosted, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 		CS.intConcurrencyId
 	FROM tblPATCustomerStock CS
 	INNER JOIN tblEMEntity C
