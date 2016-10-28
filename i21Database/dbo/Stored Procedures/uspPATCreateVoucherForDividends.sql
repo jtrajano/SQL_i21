@@ -7,7 +7,7 @@
 	@successfulCount INT = 0 OUTPUT,
 	@strErrorMessage NVARCHAR(MAX) = NULL OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
-	@success BIT = 0 OUTPUT 
+	@bitSuccess BIT = 0 OUTPUT 
 
 AS
 
@@ -58,7 +58,7 @@ BEGIN TRY
 			FROM @dividendCustomerIds Div INNER JOIN #tempDivCust T ON T.intDividendCustomerId = Div.intId
 
 		INSERT INTO @voucherDetailNonInventory([intAccountId],[intItemId],[strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost],[intTaxGroupId])
-			VALUES(@intAPClearingId,NULL,'Patronage Dividend Voucher (Tax Inclusive)', 1, 0, @dblDividentAmt, NULL)
+			VALUES(@intAPClearingId,NULL,'Patronage Dividend', 1, 0, @dblDividentAmt, NULL)
 			
 		EXEC [dbo].[uspAPCreateBillData]
 			@userId	= @intUserId
@@ -71,6 +71,19 @@ BEGIN TRY
 			,@billId = @intCreatedBillId OUTPUT
 
 		UPDATE tblAPBillDetail SET int1099Form = 5, int1099Category= 0 WHERE intBillId = @intCreatedBillId
+
+		EXEC [dbo].[uspAPPostBill]
+			@batchId = @intCreatedBillId,
+			@billBatchId = NULL,
+			@transactionType = NULL,
+			@post = 1,
+			@recap = 0,
+			@isBatch = 0,
+			@param = NULL,
+			@userId = @intUserId,
+			@beginTransaction = @intCreatedBillId,
+			@endTransaction = @intCreatedBillId,
+			@success = @bitSuccess OUTPUT
 
 		DELETE FROM @dividendCustomerIds WHERE intId = @intDivCustId;
 		DELETE FROM @voucherDetailNonInventory;
@@ -100,13 +113,13 @@ END CATCH
 
 Post_Commit:
 	COMMIT TRANSACTION
-	SET @success = 1
+	SET @bitSuccess = 1
 	SET @successfulCount = @totalRecords
 	GOTO Post_Exit
 
 Post_Rollback:
 	ROLLBACK TRANSACTION	
-	SET @success = 0
+	SET @bitSuccess = 0
 	GOTO Post_Exit
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempDivCust')) DROP TABLE #tempDivCust
