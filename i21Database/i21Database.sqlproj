@@ -4481,6 +4481,7 @@
     <Build Include="dbo\Tables\tblMFInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAdjustInventory.sql" />
     <Build Include="dbo\Views\vyuAP1099PATR.sql" />
+    <Build Include="dbo\Views\vyuETDeliveryMetrics.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

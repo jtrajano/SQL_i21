@@ -360,5 +360,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateForPrintDeliveryTicketView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateLeaseCodeView.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
+    <None Include="dbo\Stored Procedures\uspETRecreateDeliveryMetricsView.sql" />
   </ItemGroup>
 </Project>

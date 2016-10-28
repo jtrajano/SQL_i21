@@ -216,6 +216,8 @@
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
 
+-- EnergyTrac
+:r "..\dbo\Stored Procedures\uspETRecreateDeliveryMetricsView.sql"
 
 -- C-Store
 :r "..\dbo\Views\vyustpbkmst.sql"
