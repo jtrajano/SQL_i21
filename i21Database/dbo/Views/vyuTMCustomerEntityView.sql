@@ -75,6 +75,7 @@ SELECT
 	,strFullCustomerName = Ent.strName
 	,intCustomerPricingLevel = Cus.intCompanyLocationPricingLevelId
 	,strCustomerContactEmail = Con.strEmail
+	,intCustomerDeliveryTermId = Loc.intTermsId
 FROM tblEMEntity Ent
 INNER JOIN tblARCustomer Cus 
 	ON Ent.intEntityId = Cus.intEntityCustomerId
