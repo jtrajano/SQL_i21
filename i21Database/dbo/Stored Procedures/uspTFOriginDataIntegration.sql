@@ -5,14 +5,13 @@
 @System NVARCHAR(100),
 @State NVARCHAR(20),
 @DateFrom NVARCHAR(80),
-@DateTo NVARCHAR(80)
-
---exec uspTFOriginDataInteration 'E0950FA1-8E42-42C5-8BBC-253FB84B9D40','20120101','20160101'
+@DateTo NVARCHAR(80),
+@ImportedCount INT OUTPUT,
+@ErrorCount INT OUTPUT
 
 AS
 
 DECLARE @query NVARCHAR(MAX)
-
 TRUNCATE TABLE tblTFIntegrationError
 
 SET @query = 'SELECT DISTINCT CONVERT(NVARCHAR(30), pxrpt_trans_rev_dt) + ''_'' + REPLACE(pxrpt_ord_no, ''   '', '''')  + ''_'' + pxrpt_trans_type + ''_'' + CONVERT(NVARCHAR(50), pxrpt_seq_no) AS strSourceRecordConcatKey, 
@@ -65,12 +64,10 @@ SET @qPCException = 'SELECT * FROM (
 									AND convert(datetime, convert(varchar(20), pxrpt_trans_rev_dt), 112) <= CONVERT(NVARCHAR(20), ''' + @DateTo + ''')
 									AND NOT EXISTS (select * from tblTFProductCode where strProductCode COLLATE Latin1_General_CI_AS = ProductCode)) t
 									WHERE rn = 1'
-
 INSERT INTO tblTFIntegrationError
 EXEC (@qPCException)
-
+SELECT @ErrorCount = @@ROWCOUNT
 --END ERROR INTEGRATION--
-
 
 INSERT tblTFIntegrationTransaction (strTransactionGuid,
 strSourceRecordConcatKey,
@@ -167,7 +164,6 @@ dtmTransactionDate
 , dblTransactionOutboundSETExemptGals
 , strDiversionNumber
 , strDiversionOriginalDestinationState)
-
   SELECT
     @Guid,
     (CONVERT(NVARCHAR(30), pxrpt_trans_rev_dt) + '_' + REPLACE(pxrpt_ord_no, '   ', '') + '_' + pxrpt_trans_type + '_' + CONVERT(NVARCHAR(20), pxrpt_seq_no)),
@@ -277,6 +273,7 @@ dtmTransactionDate
     strSourceRecordConcatKey
   FROM tblTFIntegrationError AS err
   WHERE (strSourceRecordConcatKey = CONVERT(NVARCHAR(30), px.pxrpt_trans_rev_dt) + '_' + REPLACE(px.pxrpt_ord_no COLLATE Latin1_General_CI_AS, '   ', '') + '_' + px.pxrpt_trans_type + '_' + CONVERT(NVARCHAR(50), px.pxrpt_seq_no)))
+  SELECT @ImportedCount = @@ROWCOUNT
 
 	TRUNCATE TABLE tblTFTransactions
 	INSERT INTO tblTFTransactions (uniqTransactionGuid,
@@ -329,7 +326,6 @@ dtmTransactionDate
 	strItemNo,
 	intIntegrationError,
 	leaf)
-
   SELECT
     @Guid,
     (SELECT TOP 1 intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'),
@@ -354,7 +350,6 @@ dtmTransactionDate
     tr.strCustomerState AS strDestinationState,
     tr.strVendorCity AS strOriginCity,
     tr.strVendorState AS strOriginState,
-    --tr.strVendorAccountStatusCode AS strAccountStatusCode,
     tr.strCarrierTransportationMode AS strShipVia,
     tr.strCarrierLicenseNumber1 AS strTransporterLicense,
     tr.strCarrierTransportationMode AS strTransportationMode,
@@ -384,3 +379,4 @@ dtmTransactionDate
   LEFT OUTER JOIN tblTFIntegrationItemProductCode
   ON tr.strSourceRecordConcatKey = tblTFIntegrationItemProductCode.strSourceRecordConcatKey
   CROSS JOIN tblSMCompanySetup AS cl
+
