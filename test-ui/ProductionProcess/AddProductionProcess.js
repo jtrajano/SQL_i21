@@ -1,7 +1,7 @@
 StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
-        //region Scenario 1: Feed Stock - Add a Record
+        //region Scenario 1: Production Process - Add a Record
         .displayText('===== Scenario 1: Production Process - Add a Record  =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Fuel Types','Screen')
@@ -16,8 +16,8 @@ StartTest (function (t) {
         .clickButton('Close')
         .markSuccess('===== Add a record successful  =====')
 
-        //region Scenario 2: Fuel Category - Add Multiple Records
-        .displayText('===== Scenario 2: Fuel Category - Add Multiple Records  =====')
+        //region Scenario 2: Production Process - Add Multiple Records
+        .displayText('===== Scenario 2: Production Process - Add Multiple Records  =====')
         .clickButton('ProductionProcess')
         .waitTillLoaded('icprocesscode')
         .enterGridData('GridTemplate', 2, 'colRinProcessCode', 'Test Process Code 2')
