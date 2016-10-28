@@ -42,11 +42,149 @@ BEGIN
 			,ysnUpdated
 			,intConcurrencyId
 		from tblHDTicketPriority
-		where intTicketPriorityId in (select distinct intTicketPriorityId from tblHDTicket where strType = 'CRM')
+		where intTicketPriorityId in (select distinct intTicketPriorityId from tblHDTicket where strType = 'CRM' union all select distinct intTicketPriorityId from tblHDTicketPriority where ysnActivity = 1 or ysnOpportunity = 1)
 			and intTicketPriorityId not in (select intPriorityId from tblCRMPriority)
-			and (ysnActivity = 1 or ysnOpportunity = 1)
 	)
 	SET IDENTITY_INSERT tblCRMPriority OFF
+END
+
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDSalesPipeStatus'))
+BEGIN
+
+	PRINT N'Begin splitting Sales Pipe Status...'
+
+	SET IDENTITY_INSERT tblCRMSalesPipeStatus ON
+	insert into tblCRMSalesPipeStatus (
+		intSalesPipeStatusId
+		,strStatus
+		,strDescription
+		,strOrder
+		,strProjectStatus
+		,dblProbability
+		,intStatusId
+		,intConcurrencyId
+	)(
+		select
+			intSalesPipeStatusId
+			,strStatus
+			,strDescription
+			,strOrder
+			,strProjectStatus
+			,dblProbability
+			,intStatusId = intTicketStatusId
+			,intConcurrencyId
+		from tblHDSalesPipeStatus
+		where intSalesPipeStatusId not in (select intSalesPipeStatusId from tblCRMSalesPipeStatus)
+	)
+	SET IDENTITY_INSERT tblCRMSalesPipeStatus OFF
+
+	--update tblCRMSalesPipeStatus set tblCRMSalesPipeStatus.intStatusId = (select tblCRMStatus.intStatusId from tblCRMStatus where tblCRMStatus.strStatus = tblCRMSalesPipeStatus.strProjectStatus)
+
+END
+
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketType'))
+BEGIN
+
+	PRINT N'Begin splitting Type...'
+
+	SET IDENTITY_INSERT tblCRMType ON
+	insert into tblCRMType (
+		intTypeId
+		,strType
+		,strDescription
+		,strJIRAType
+		,strIcon
+		,ysnActivity
+		,ysnOpportunity
+		,ysnCampaign
+		,ysnSupported
+		,intSort
+		,intConcurrencyId
+	)(
+		select
+			intTicketTypeId
+			,strType
+			,strDescription
+			,strJIRAType
+			,strIcon
+			,ysnActivity
+			,ysnOpportunity
+			,ysnCampaign
+			,ysnSupported
+			,intSort
+			,intConcurrencyId
+		from tblHDTicketType
+		where intTicketTypeId in (select distinct intTicketTypeId from tblHDTicket where strType = 'CRM' union all select distinct intTicketTypeId from tblHDProject where strType = 'CRM' union all select distinct intTicketTypeId from tblHDTicketType where ysnActivity = 1 or ysnOpportunity = 1 or ysnCampaign = 1)
+			and intTicketTypeId not in (select intTypeId from tblCRMType)
+	)
+
+	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMCampaign'))
+	begin
+		insert into tblCRMType (
+		intTypeId
+		,strType
+		,strDescription
+		,strJIRAType
+		,strIcon
+		,ysnActivity
+		,ysnOpportunity
+		,ysnCampaign
+		,ysnSupported
+		,intSort
+		,intConcurrencyId
+	)(
+		select
+			intTicketTypeId
+			,strType
+			,strDescription
+			,strJIRAType
+			,strIcon
+			,ysnActivity
+			,ysnOpportunity
+			,ysnCampaign
+			,ysnSupported
+			,intSort
+			,intConcurrencyId
+		from tblHDTicketType
+		where intTicketTypeId in (select distinct intTypeId from tblCRMCampaign union all select distinct intTicketTypeId from tblHDTicketType where ysnActivity = 1 or ysnOpportunity = 1 or ysnCampaign = 1)
+			and intTicketTypeId not in (select intTypeId from tblCRMType)
+	)
+	end
+
+	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityCampaign'))
+	begin
+		insert into tblCRMType (
+		intTypeId
+		,strType
+		,strDescription
+		,strJIRAType
+		,strIcon
+		,ysnActivity
+		,ysnOpportunity
+		,ysnCampaign
+		,ysnSupported
+		,intSort
+		,intConcurrencyId
+	)(
+		select
+			intTicketTypeId
+			,strType
+			,strDescription
+			,strJIRAType
+			,strIcon
+			,ysnActivity
+			,ysnOpportunity
+			,ysnCampaign
+			,ysnSupported
+			,intSort
+			,intConcurrencyId
+		from tblHDTicketType
+		where intTicketTypeId in (select distinct intTicketTypeId from tblHDOpportunityCampaign union all select distinct intTicketTypeId from tblHDTicketType where ysnActivity = 1 or ysnOpportunity = 1 or ysnCampaign = 1)
+			and intTicketTypeId not in (select intTypeId from tblCRMType)
+	)
+	end
+
+	SET IDENTITY_INSERT tblCRMType OFF
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketStatus'))
@@ -87,53 +225,12 @@ BEGIN
 			,ysnUpdated
 			,intConcurrencyId
 		from tblHDTicketStatus
-		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM')
+		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select intStatusId from tblCRMSalesPipeStatus union all select distinct intTicketStatusId from tblHDTicketStatus where ysnActivity = 1 or ysnOpportunity = 1)
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-			--and (ysnActivity = 1 or ysnOpportunity = 1)
 	)
-
-	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDSalesPipeStatus'))
-	BEGIN
-		insert into tblCRMStatus (
-			intStatusId
-			,strStatus
-			,strDescription
-			,ysnActivity
-			,ysnOpportunity
-			,ysnDefaultActivity
-			,ysnDefaultOpportunity
-			,strIcon
-			,strFontColor
-			,strBackColor
-			,ysnSupported
-			,intSort
-			,ysnUpdated
-			,intConcurrencyId
-		)(
-			select
-				intTicketStatusId
-				,strStatus
-				,strDescription
-				,ysnActivity
-				,ysnOpportunity
-				,ysnDefaultActivity
-				,ysnDefaultOpportunity
-				,strIcon
-				,strFontColor
-				,strBackColor
-				,ysnSupported
-				,intSort
-				,ysnUpdated
-				,intConcurrencyId
-			from tblHDTicketStatus
-			where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select distinct intTicketStatusId from tblHDSalesPipeStatus)
-				and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-				--and (ysnActivity = 1 or ysnOpportunity = 1)
-		)
-	END
 
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityCampaign'))
-	BEGIN
+	begin
 		insert into tblCRMStatus (
 			intStatusId
 			,strStatus
@@ -166,111 +263,51 @@ BEGIN
 				,ysnUpdated
 				,intConcurrencyId
 			from tblHDTicketStatus
-			where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select distinct intCampaignStatusId from tblHDOpportunityCampaign)
+			where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select intStatusId from tblCRMSalesPipeStatus union all select distinct intTicketStatusId from tblHDTicketStatus where ysnActivity = 1 or ysnOpportunity = 1 union all select distinct intTicketStatusId from tblHDOpportunityCampaign)
 				and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-				--and (ysnActivity = 1 or ysnOpportunity = 1)
 		)
-	END
+	end
 
-	SET IDENTITY_INSERT tblCRMStatus OFF
-END
-
-IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDSalesPipeStatus'))
-BEGIN
-
-	PRINT N'Begin splitting Sales Pipe Status...'
-
-	SET IDENTITY_INSERT tblCRMSalesPipeStatus ON
-	insert into tblCRMSalesPipeStatus (
-		intSalesPipeStatusId
-		,strStatus
-		,strDescription
-		,strOrder
-		,strProjectStatus
-		,dblProbability
-		,intStatusId
-		,intConcurrencyId
-	)(
-		select
-			intSalesPipeStatusId
+		IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDCampaign'))
+	begin
+		insert into tblCRMStatus (
+			intStatusId
 			,strStatus
 			,strDescription
-			,strOrder
-			,strProjectStatus
-			,dblProbability
-			,intStatusId = intTicketStatusId
-			,intConcurrencyId
-		from tblHDSalesPipeStatus
-		where intSalesPipeStatusId not in (select intSalesPipeStatusId from tblCRMSalesPipeStatus)
-	)
-	SET IDENTITY_INSERT tblCRMSalesPipeStatus OFF
-
-	--update tblCRMSalesPipeStatus set tblCRMSalesPipeStatus.intStatusId = (select tblCRMStatus.intStatusId from tblCRMStatus where tblCRMStatus.strStatus = tblCRMSalesPipeStatus.strProjectStatus)
-
-END
-
-IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunitySource'))
-BEGIN
-
-	PRINT N'Begin splitting Source...'
-
-	SET IDENTITY_INSERT tblCRMSource ON
-	insert tblCRMSource
-	(
-		intSourceId
-		,strSource
-		,intConcurrencyId
-	)
-	(
-		select
-			intSourceId = intOpportunitySourceId
-			,strSource
-			,intConcurrencyId
-		from
-			tblHDOpportunitySource
-		where
-			intOpportunitySourceId not in (select intSourceId from tblCRMSource)
-	)
-	SET IDENTITY_INSERT tblCRMSource OFF
-END
-
-IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketType'))
-BEGIN
-
-	PRINT N'Begin splitting Type...'
-
-	SET IDENTITY_INSERT tblCRMType ON
-	insert into tblCRMType (
-		intTypeId
-		,strType
-		,strDescription
-		,strJIRAType
-		,strIcon
-		,ysnActivity
-		,ysnOpportunity
-		,ysnCampaign
-		,ysnSupported
-		,intSort
-		,intConcurrencyId
-	)(
-		select
-			intTicketTypeId
-			,strType
-			,strDescription
-			,strJIRAType
-			,strIcon
 			,ysnActivity
 			,ysnOpportunity
-			,ysnCampaign
+			,ysnDefaultActivity
+			,ysnDefaultOpportunity
+			,strIcon
+			,strFontColor
+			,strBackColor
 			,ysnSupported
 			,intSort
+			,ysnUpdated
 			,intConcurrencyId
-		from tblHDTicketType
-		where intTicketTypeId in (select distinct intTicketTypeId from tblHDTicket where strType = 'CRM' union all select distinct intTicketTypeId from tblHDProject where strType = 'CRM' union all select distinct intTicketTypeId from tblHDOpportunityCampaign)
-			and intTicketTypeId not in (select intTypeId from tblCRMType)
-			and (ysnActivity = 1 or ysnOpportunity = 1 or ysnCampaign = 1)
-	)
-	SET IDENTITY_INSERT tblCRMType OFF
+		)(
+			select
+				intTicketStatusId
+				,strStatus
+				,strDescription
+				,ysnActivity
+				,ysnOpportunity
+				,ysnDefaultActivity
+				,ysnDefaultOpportunity
+				,strIcon
+				,strFontColor
+				,strBackColor
+				,ysnSupported
+				,intSort
+				,ysnUpdated
+				,intConcurrencyId
+			from tblHDTicketStatus
+			where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM' union all select distinct intTicketStatusId from tblHDProject where strType = 'CRM' union all select intStatusId from tblCRMSalesPipeStatus union all select distinct intTicketStatusId from tblHDTicketStatus where ysnActivity = 1 or ysnOpportunity = 1 union all select distinct intStatusId from tblHDCampaign)
+				and intTicketStatusId not in (select intStatusId from tblCRMStatus)
+		)
+	end
+
+	SET IDENTITY_INSERT tblCRMStatus OFF
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityCampaign'))
@@ -324,6 +361,31 @@ BEGIN
 		where intOpportunityCampaignId not in (select intCampaignId from tblCRMCampaign)
 	)
 	SET IDENTITY_INSERT tblCRMCampaign OFF
+END
+
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunitySource'))
+BEGIN
+
+	PRINT N'Begin splitting Source...'
+
+	SET IDENTITY_INSERT tblCRMSource ON
+	insert tblCRMSource
+	(
+		intSourceId
+		,strSource
+		,intConcurrencyId
+	)
+	(
+		select
+			intSourceId = intOpportunitySourceId
+			,strSource
+			,intConcurrencyId
+		from
+			tblHDOpportunitySource
+		where
+			intOpportunitySourceId not in (select intSourceId from tblCRMSource)
+	)
+	SET IDENTITY_INSERT tblCRMSource OFF
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDMilestone'))
@@ -1305,6 +1367,71 @@ END
 CLOSE @queryResultNote
 DEALLOCATE @queryResultNote
 
+insert into tblSMTypeValue
+(
+	strType, strValue, ysnDefault, intConcurrencyId
+)
+(
+	select strType = 'Status', strValue = strStatus, ysnDefault = convert(bit, 1), intConcurrencyId = 1 from
+	(
+		select distinct strStatus from tblSMActivity where intTransactionId in
+		(
+			select intTransactionId from tblSMTransaction where strRecordNo in
+			(
+				select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity
+			)
+			and intScreenId = 
+			(
+				select intScreenId from tblSMScreen where strModule = 'CRM' and strNamespace = 'CRM.view.Opportunity'
+			)
+		)
+		and strStatus not in (select strValue from tblSMTypeValue where strType = 'Status')
+	) as statusType
+)
+
+insert into tblSMTypeValue
+(
+	strType, strValue, ysnDefault, intConcurrencyId
+)
+(
+	select strType = 'Priority', strValue = strPriority, ysnDefault = convert(bit, 1), intConcurrencyId = 1 from
+	(
+		select distinct strPriority from tblSMActivity where intTransactionId in
+		(
+			select intTransactionId from tblSMTransaction where strRecordNo in
+			(
+				select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity
+			)
+			and intScreenId = 
+			(
+				select intScreenId from tblSMScreen where strModule = 'CRM' and strNamespace = 'CRM.view.Opportunity'
+			)
+		)
+		and strPriority not in (select strValue from tblSMTypeValue where strType = 'Priority')
+	) as priorityType
+)
+
+insert into tblSMTypeValue
+(
+	strType, strValue, ysnDefault, intConcurrencyId
+)
+(
+	select strType = 'Category', strValue = strCategory, ysnDefault = convert(bit, 1), intConcurrencyId = 1 from
+	(
+		select distinct strCategory from tblSMActivity where intTransactionId in
+		(
+			select intTransactionId from tblSMTransaction where strRecordNo in
+			(
+				select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity
+			)
+			and intScreenId = 
+			(
+				select intScreenId from tblSMScreen where strModule = 'CRM' and strNamespace = 'CRM.view.Opportunity'
+			)
+		)
+		and strCategory not in (select strValue from tblSMTypeValue where strType = 'Category')
+	) as priorityType
+)
 
 GO
 	PRINT N'End splitting CRM and Help Desk data..'
