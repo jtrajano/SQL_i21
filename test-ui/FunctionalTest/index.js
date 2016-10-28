@@ -52,7 +52,6 @@ Harness.start(
         ]
     },
 
-
     { group: 'FuelCategory',
         items: [
             {
@@ -62,7 +61,19 @@ Harness.start(
                 ]
             }
         ]
+    },
+
+    { group: 'FeedStock',
+        items: [
+            {
+                url: '../FeedStock/AddFeedStock.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
     }
+
 
 
 );
