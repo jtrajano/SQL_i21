@@ -107,7 +107,7 @@ DECLARE
 	,@AccountId			INT				= NULL
 	,@BankAccountId		INT				= NULL
 	,@AmountPaid		NUMERIC(18,6)	= 0.000000
-	,@PaymentMethodId	INT				= NULL
+	,@PaymentMethodId	INT
 	,@PaymentInfo		NVARCHAR(50)	= NULL
 	,@ApplytoBudget		BIT				= 0
 	,@ApplyOnAccount	BIT				= 0
@@ -120,8 +120,6 @@ DECLARE
 	,@Interest			NUMERIC(18,6)	= 0.000000	
 
 BEGIN TRY
-	SET @PaymentMethodId = (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod WHERE [strPaymentMethod] = 'Prepay' AND [ysnActive] = 1)
-
 	SELECT TOP 1
 		 @EntityCustomerId	= ARI.[intEntityCustomerId]
 		,@CompanyLocationId	= ARI.[intCompanyLocationId]
@@ -132,7 +130,7 @@ BEGIN TRY
 									(SELECT TOP 1 intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId IN (SELECT TOP 1 intDepositAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = ARI.intCompanyLocationId))
 								ELSE NULL END
 		,@AmountPaid		= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-		,@PaymentMethodId	=  ISNULL(@PaymentMethodId, ARI.[intPaymentMethodId])
+		,@PaymentMethodId	=  ISNULL(ARI.[intPaymentMethodId], (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod ORDER BY [ysnActive] DESC, [strPaymentMethod]))
 		,@PaymentInfo		= ''
 		,@ApplytoBudget		= 0
 		,@ApplyOnAccount	= 0
