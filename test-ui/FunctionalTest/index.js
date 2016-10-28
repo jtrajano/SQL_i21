@@ -105,8 +105,17 @@ Harness.start(
                 ]
             }
         ]
+    },
+
+    { group: 'FuelType',
+        items: [
+            {
+                url: '../FuelType/AddFuelType.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
     }
-
-
 
 );
