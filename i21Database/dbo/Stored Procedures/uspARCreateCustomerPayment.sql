@@ -147,7 +147,7 @@ BEGIN TRY
 		,[dtmDatePaid]					= @DatePaid
 		,[intAccountId]					= @AccountId
 		,[intBankAccountId]				= @BankAccountId
-		,[intPaymentMethodId]			= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 0 ELSE @PaymentMethodId END
+		,[intPaymentMethodId]			= @PaymentMethodId
 		,[intLocationId]				= @CompanyLocationId
 		,[dblAmountPaid]				= @AmountPaid
 		,[dblUnappliedAmount]			= @AmountPaid

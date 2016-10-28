@@ -123,7 +123,7 @@ SELECT TOP 1
 	,@EntitySalespersonId				= NULL				
 	,@FreightTermId						= NULL
 	,@ShipViaId							= NULL
-	,@PaymentMethodId					= ARP.[intPaymentMethodId]
+	,@PaymentMethodId					= ISNULL((SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod WHERE [strPaymentMethod] = 'Prepay' AND [ysnActive] = 1), ARP.[intPaymentMethodId])
 	,@InvoiceOriginId					= NULL
 	,@PONumber							= ''
 	,@BOLNumber							= ''
