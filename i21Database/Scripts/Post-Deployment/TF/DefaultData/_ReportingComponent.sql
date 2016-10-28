@@ -189,7 +189,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -256,7 +256,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -323,7 +323,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -390,7 +390,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -457,7 +457,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -524,7 +524,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -591,7 +591,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -658,7 +658,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -725,7 +725,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -792,7 +792,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -859,7 +859,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -940,7 +940,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1007,7 +1007,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1088,7 +1088,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1155,7 +1155,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1222,7 +1222,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1291,7 +1291,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strShipVia', N'strTransportationMode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1358,7 +1358,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1425,7 +1425,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1492,7 +1492,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1559,7 +1559,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1626,7 +1626,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1693,7 +1693,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1760,7 +1760,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1827,7 +1827,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1894,7 +1894,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -1961,7 +1961,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2028,7 +2028,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2096,7 +2096,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2163,7 +2163,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2230,7 +2230,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2297,7 +2297,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2364,7 +2364,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2431,7 +2431,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2498,7 +2498,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2565,7 +2565,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
@@ -2632,7 +2632,7 @@ BEGIN
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
-		VALUES (@MasterPk, N'strShipVia', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
+		VALUES (@MasterPk, N'strTransportationMode', N'Mode', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 
 		SELECT @ScheduleFieldTemplateMasterPk  = SCOPE_IDENTITY();
 		INSERT [dbo].[tblTFScheduleFields] ([intReportingComponentId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) 
