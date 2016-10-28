@@ -116,6 +116,20 @@ Harness.start(
                 ]
             }
         ]
+    },
+
+
+    { group: 'InventoryUOM',
+        items: [
+            {
+                url: '../InventoryUOM/AddInventoryUOM.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
     }
+
+
 
 );
