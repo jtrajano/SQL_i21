@@ -102,7 +102,7 @@ sd.intContractHeaderId,sd.intContractDetailId,cv.strContractNumber,cv.intContrac
 ISNULL(dbo.fnMFConvertCostToTargetItemUOM((Select intItemUOMId From tblICItemUOM Where intItemId=ri.intItemId AND ysnStockUnit=1),ri.intItemUOMId,
 ISNULL(ip.dblStandardCost,0.0)
 ),0) AS dblStandardCost, 
-ISNULL(cm.dblUnitMargin,0.0) AS dblUnitMargin,ri.intSequenceNo
+ISNULL(cm.dblUnitMargin,0.0) AS dblUnitMargin,ri.intSequenceNo,ri.strDocumentNo
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
 Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId --AND iu.ysnStockUnit=1
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -120,7 +120,8 @@ i.strType AS strItemType,0 dblQuantity,0 dblCalculatedQuantity,
 0 AS dblCost,0 AS intCostSourceId,'' AS strCostSource,0.0 AS dblRetailPrice,
 0 dblUnitQty,0 dblCalculatedLowerTolerance,0 dblCalculatedUpperTolerance,0 dblLowerTolerance,0 dblUpperTolerance,
 ri.intCommentTypeId,ct.strName strCommentType,
-null intContractHeaderId,null intContractDetailId,null strContractNumber,null intContractSeq,null strSequenceNumber,0.0 AS dblStandardCost,0.0 AS dblUnitMargin,ri.intSequenceNo
+null intContractHeaderId,null intContractDetailId,null strContractNumber,null intContractSeq,null strSequenceNumber,0.0 AS dblStandardCost,0.0 AS dblUnitMargin,ri.intSequenceNo,
+ri.strDocumentNo
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
 Join tblMFCommentType ct on ri.intCommentTypeId=ct.intCommentTypeId
 Left Join tblSOSalesOrderDetail sd on sd.intRecipeItemId=ri.intRecipeItemId AND sd.intRecipeId=@intRecipeId AND sd.intSalesOrderId=@intSalesOrderId

@@ -30,6 +30,7 @@
 	[dblMargin] NUMERIC(18,6) NULL,
 	[ysnCostAppliedAtInvoice] BIT,
 	[intCommentTypeId] INT NULL,
+	[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intSequenceNo] INT NULL,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dtmCreated] DEFAULT GetDate(),
