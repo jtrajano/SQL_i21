@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFAutoBlend]
 	@intSalesOrderDetailId int=0,
 	@intInvoiceDetailId int=0,
+	@intLoadDistributionDetailId int=0,
 	@intItemId int,
 	@dblQtyToProduce numeric(38,20),
 	@intItemUOMId INT,
@@ -113,14 +114,18 @@ DECLARE @tblWorkOrderPickedLot TABLE(
 	,intStorageLocationId INT
 )
 
-If (ISNULL(@intSalesOrderDetailId,0)>0 AND ISNULL(@intInvoiceDetailId,0)>0) OR (ISNULL(@intSalesOrderDetailId,0)=0 AND ISNULL(@intInvoiceDetailId,0)=0)
-	RaisError('Supply either Sales Order Detail Id or Invoice Detail Id.',16,1)
+If (ISNULL(@intSalesOrderDetailId,0)>0 AND ISNULL(@intInvoiceDetailId,0)>0 AND ISNULL(@intLoadDistributionDetailId,0)>0) 
+OR (ISNULL(@intSalesOrderDetailId,0)=0 AND ISNULL(@intInvoiceDetailId,0)=0 AND ISNULL(@intLoadDistributionDetailId,0)=0)
+	RaisError('Supply either Sales Order Detail Id or Invoice Detail Id or Load Distribution Detail Id.',16,1)
 
 If ISNULL(@intSalesOrderDetailId,0)>0
 	Set @strOrderType='SALES ORDER'
 
 If ISNULL(@intInvoiceDetailId,0)>0
 	Set @strOrderType='INVOICE'
+
+If ISNULL(@intLoadDistributionDetailId,0)>0
+Set @strOrderType='LOAD DISTRIBUTION'
 
 If ISNULL(@dblQtyToProduce,0)=0
 	RaisError('Quantity to produce should be greater than 0.',16,1)
@@ -173,6 +178,28 @@ Begin
 
 	If @intBlendItemId <> ISNULL(@intItemId,0)
 		RaisError('Invoice detail item is not same as supplied item.',16,1)
+End
+
+If @strOrderType='LOAD DISTRIBUTION'
+Begin
+	If ISNULL(@intLoadDistributionDetailId,0)=0 OR NOT EXISTS (Select 1 From tblTRLoadDistributionDetail Where intLoadDistributionDetailId=ISNULL(@intLoadDistributionDetailId,0))
+		RaisError('Load Distribution Detail does not exist.',16,1)
+
+	If Exists (Select 1 From tblMFWorkOrder Where intLoadDistributionDetailId=ISNULL(@intLoadDistributionDetailId,0))
+		If Exists(Select 1 From tblMFWorkOrderProducedLot Where intWorkOrderId in 
+		(Select intWorkOrderId From tblMFWorkOrder Where intLoadDistributionDetailId=ISNULL(@intLoadDistributionDetailId,0)) 
+		AND ISNULL(ysnProductionReversed,0)=0)
+			RaisError('Load Distribution Detail item is already blended.',16,1)
+
+	Select @intSalesOrderLocationId=h.intCompanyLocationId,@intBlendItemId=d.intItemId
+	From tblTRLoadDistributionDetail d Join tblTRLoadDistributionHeader h on d.intLoadDistributionHeaderId=h.intLoadDistributionHeaderId
+	Where d.intLoadDistributionDetailId=@intLoadDistributionDetailId
+
+	If @intSalesOrderLocationId <> ISNULL(@intLocationId,0)
+		RaisError('Load Distribution location is not same as supplied location.',16,1)
+
+	If @intBlendItemId <> ISNULL(@intItemId,0)
+		RaisError('Load Distribution detail item is not same as supplied item.',16,1)
 End
 
 Select TOP 1 @intRecipeId=intRecipeId,@intBlendItemUOMId=intItemUOMId 
@@ -243,6 +270,7 @@ End
 
 Select @dblQtyToProduce=dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId,@intBlendItemUOMId,@dblQtyToProduce)
 
+If @strOrderType IN ('SALES ORDER','INVOICE')
 INSERT INTO @tblInputItem (
 	intRecipeId
 	,intRecipeItemId
@@ -304,6 +332,24 @@ JOIN tblMFRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
 WHERE r.intRecipeId = @intRecipeId
 	AND rs.intRecipeItemTypeId = 1
 ORDER BY ysnIsSubstitute
+
+If @strOrderType = 'LOAD DISTRIBUTION'
+INSERT INTO @tblInputItem (
+	intRecipeId
+	,intRecipeItemId
+	,intItemId
+	,dblRequiredQty
+	,intItemUOMId
+	,ysnIsSubstitute
+	,ysnMinorIngredient
+	,intConsumptionMethodId
+	,intConsumptionStoragelocationId
+	,intParentItemId
+	,dblCalculatedQuantity
+	)
+Select @intRecipeId,ri.intRecipeItemId,ri.intItemId,v.dblQuantity,ri.intItemUOMId,0,0,ri.intConsumptionMethodId,ri.intStorageLocationId,0,ri.dblCalculatedQuantity
+From tblTRLoadBlendIngredient v Join tblMFRecipeItem ri on v.intItemId=ri.intItemId 
+Where intLoadDistributionDetailId=@intLoadDistributionDetailId AND ri.intRecipeId=@intRecipeId AND ri.intRecipeItemTypeId=1
 
 Select @dblRecipeQty=dblQuantity From tblMFRecipe Where intRecipeId=@intRecipeId
 
@@ -451,6 +497,7 @@ Begin Tran
 Set @strXml = '<root>'
 Set @strXml += '<intSalesOrderDetailId>' + ISNULL(CONVERT(VARCHAR,@intSalesOrderDetailId),'') + '</intSalesOrderDetailId>'
 Set @strXml += '<intInvoiceDetailId>' + ISNULL(CONVERT(VARCHAR,@intInvoiceDetailId),'') + '</intInvoiceDetailId>'
+Set @strXml += '<intLoadDistributionDetailId>' + ISNULL(CONVERT(VARCHAR,@intLoadDistributionDetailId),'') + '</intLoadDistributionDetailId>'
 Set @strXml += '<strOrderType>' + CONVERT(VARCHAR,@strOrderType) + '</strOrderType>'
 Set @strXml += '<intLocationId>' + CONVERT(VARCHAR,@intLocationId) + '</intLocationId>'
 Set @strXml += '<intRecipeId>' + CONVERT(VARCHAR,@intRecipeId) + '</intRecipeId>'
@@ -483,6 +530,9 @@ If @strOrderType='SALES ORDER'
 
 If @strOrderType='INVOICE'
 	Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intInvoiceDetailId=@intInvoiceDetailId AND intWorkOrderId>@intMaxWorkOrderId
+
+If @strOrderType='LOAD DISTRIBUTION'
+	Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intLoadDistributionDetailId=@intLoadDistributionDetailId AND intWorkOrderId>@intMaxWorkOrderId
 
 While @intWorkOrderId is not null
 Begin
@@ -617,6 +667,9 @@ Begin
 
 	If @strOrderType='INVOICE'
 		Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intInvoiceDetailId=@intInvoiceDetailId AND intWorkOrderId > @intWorkOrderId
+
+	If @strOrderType='LOAD DISTRIBUTION'
+		Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intLoadDistributionDetailId=@intLoadDistributionDetailId AND intWorkOrderId > @intWorkOrderId
 End
 
 Commit Tran

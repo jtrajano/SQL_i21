@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFReverseAutoBlend]
-	@intSalesOrderDetailId int,
+	@intSalesOrderDetailId int=0,
 	@intInvoiceDetailId int=0,
+	@intLoadDistributionDetailId int=0,
 	@intUserId int
 AS
 BEGIN TRY
@@ -24,14 +25,18 @@ Declare @tblWO AS table
 	intWorkOrderId int
 )
 
-If (ISNULL(@intSalesOrderDetailId,0)>0 AND ISNULL(@intInvoiceDetailId,0)>0) OR (ISNULL(@intSalesOrderDetailId,0)=0 AND ISNULL(@intInvoiceDetailId,0)=0)
-	RaisError('Supply either Sales Order Detail Id or Invoice Detail Id.',16,1)
+If (ISNULL(@intSalesOrderDetailId,0)>0 AND ISNULL(@intInvoiceDetailId,0)>0 AND ISNULL(@intLoadDistributionDetailId,0)>0) 
+OR (ISNULL(@intSalesOrderDetailId,0)=0 AND ISNULL(@intInvoiceDetailId,0)=0 AND ISNULL(@intLoadDistributionDetailId,0)=0)
+	RaisError('Supply either Sales Order Detail Id or Invoice Detail Id or Load Distribution Detail Id.',16,1)
 
 If ISNULL(@intSalesOrderDetailId,0)>0
 	Set @strOrderType='SALES ORDER'
 
 If ISNULL(@intInvoiceDetailId,0)>0
 	Set @strOrderType='INVOICE'
+
+If ISNULL(@intLoadDistributionDetailId,0)>0
+	Set @strOrderType='LOAD DISTRIBUTION'
 
 If @strOrderType='SALES ORDER'
 Begin
@@ -59,6 +64,19 @@ Begin
 		RaisError('Invoice Line is already reversed.',16,1)
 End
 
+If @strOrderType='LOAD DISTRIBUTION'
+Begin
+	If ISNULL(@intLoadDistributionDetailId,0)=0 OR NOT EXISTS (Select 1 From tblTRLoadDistributionDetail Where intLoadDistributionDetailId=ISNULL(@intLoadDistributionDetailId,0))
+		RaisError('Load Distribution Detail does not exist.',16,1)
+
+	If Not Exists (Select 1 From tblMFWorkOrder Where intLoadDistributionDetailId=@intLoadDistributionDetailId)
+		RaisError('No blends produced using the Load Distribution Detail.',16,1)
+
+	If Not Exists (Select 1 From tblMFWorkOrderProducedLot Where intWorkOrderId IN 
+	(Select intWorkOrderId From tblMFWorkOrder Where intLoadDistributionDetailId=@intLoadDistributionDetailId) AND ISNULL(ysnProductionReversed,0)=0)
+		RaisError('Load Distribution Line is already reversed.',16,1)
+End
+
 If @strOrderType='SALES ORDER'
  Insert Into @tblWO(intWorkOrderId)
  Select intWorkOrderId From tblMFWorkOrderProducedLot Where intWorkOrderId in (Select intWorkOrderId From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId)
@@ -67,6 +85,11 @@ If @strOrderType='SALES ORDER'
 If @strOrderType='INVOICE'
  Insert Into @tblWO(intWorkOrderId)
  Select intWorkOrderId From tblMFWorkOrderProducedLot Where intWorkOrderId in (Select intWorkOrderId From tblMFWorkOrder Where intInvoiceDetailId=@intInvoiceDetailId)
+ AND ISNULL(ysnProductionReversed,0)=0
+
+If @strOrderType='LOAD DISTRIBUTION'
+ Insert Into @tblWO(intWorkOrderId)
+ Select intWorkOrderId From tblMFWorkOrderProducedLot Where intWorkOrderId in (Select intWorkOrderId From tblMFWorkOrder Where intLoadDistributionDetailId=@intLoadDistributionDetailId)
  AND ISNULL(ysnProductionReversed,0)=0
 
 Select @intWorkOrderId=MIN(intWorkOrderId) From @tblWO
