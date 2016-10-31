@@ -38,7 +38,7 @@ AS
 					intCompanyLocationId,
 					'Unpriced' AS strStatus,
 					CAST(0 AS INT) AS dblLotsFixed,
-					CAST(dblNoOfLots AS INT) AS dblBalanceNoOfLots,
+					dblNoOfLots AS dblBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
