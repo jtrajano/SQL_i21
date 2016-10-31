@@ -365,10 +365,20 @@ BEGIN TRY
 				)
 	END
 
-	DECLARE @tblICItem TABLE (intItemId INT)
+	DECLARE @tblICItem TABLE (
+		intItemId INT
+		,intConsumptionMethodId INT
+		,intStorageLocationId INT
+		)
 
-	INSERT INTO @tblICItem (intItemId)
+	INSERT INTO @tblICItem (
+		intItemId
+		,intConsumptionMethodId
+		,intStorageLocationId
+		)
 	SELECT ri.intItemId
+		,ri.intConsumptionMethodId
+		,ri.intStorageLocationId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND (
@@ -384,11 +394,16 @@ BEGIN TRY
 				)
 			)
 		AND ri.intRecipeItemTypeId = 1
-		AND ri.intConsumptionMethodId = 1
+		AND ri.intConsumptionMethodId IN (
+			1
+			,2
+			)
 	
 	UNION
 	
 	SELECT RSI.intSubstituteItemId
+		,RI.intConsumptionMethodId
+		,RI.intStorageLocationId
 	FROM dbo.tblMFWorkOrderRecipeItem RI
 	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 		AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -406,7 +421,10 @@ BEGIN TRY
 				)
 			)
 		AND RI.intRecipeItemTypeId = 1
-		AND RI.intConsumptionMethodId = 1
+		AND RI.intConsumptionMethodId IN (
+			1
+			,2
+			)
 
 	IF @ysnIncludeOutputItem = 1
 	BEGIN
@@ -435,22 +453,6 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intProductionStagingId
 
-	DECLARE @tblMFStagedQty TABLE (
-		intItemId INT
-		,dblStagedQty NUMERIC(18, 6)
-		)
-
-	INSERT INTO @tblMFStagedQty (
-		intItemId
-		,dblStagedQty
-		)
-	SELECT I.intItemId
-		,SUM(WI.dblQuantity)
-	FROM @tblICItem I
-	LEFT JOIN tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
-		AND WI.intWorkOrderId = @intWorkOrderId
-	GROUP BY I.intItemId
-
 	DECLARE @tblMFQtyInProductionStagingLocation TABLE (
 		intItemId INT
 		,dblQtyInProductionStagingLocation NUMERIC(18, 6)
@@ -467,15 +469,17 @@ BEGIN TRY
 							THEN L.dblQty
 						ELSE L.dblWeight
 						END
-					), 0)) - IsNULL(SQ.dblStagedQty, 0)
+					), 0))
 	FROM @tblICItem I
 	LEFT JOIN tblICLot L ON L.intItemId = I.intItemId
 		AND L.intLotStatusId = 1
 		AND L.dtmExpiryDate > GETDATE()
-		AND L.intStorageLocationId = @intProductionStageLocationId
-	LEFT JOIN @tblMFStagedQty SQ ON SQ.intItemId = I.intItemId
+		AND L.intStorageLocationId = CASE 
+			WHEN I.intConsumptionMethodId = 2
+				THEN I.intStorageLocationId
+			ELSE @intProductionStageLocationId
+			END
 	GROUP BY I.intItemId
-		,SQ.dblStagedQty
 
 	--BEGIN TRANSACTION
 	INSERT INTO dbo.tblMFProcessCycleCountSession (
@@ -514,20 +518,9 @@ BEGIN TRY
 		,I.intItemId
 		,NULL
 		,(
-			SELECT TOP 1 CASE 
-					WHEN CC.dblQuantity >= PS.dblQtyInProductionStagingLocation
-						THEN PS.dblQtyInProductionStagingLocation
-					ELSE CC.dblQuantity
-					END
-			FROM dbo.tblMFProcessCycleCount AS CC
-			JOIN dbo.tblMFProcessCycleCountSession AS CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
-			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = CS.intWorkOrderId
-			LEFT JOIN @tblMFQtyInProductionStagingLocation PS ON PS.intItemId = CC.intItemId
-			WHERE CC.intItemId = I.intItemId
-				AND CC.intMachineId = MP.intMachineId
-				AND W.dtmPlannedDate <= @dtmPlannedDate
-			ORDER BY W.dtmPlannedDate DESC
-				,CC.dtmLastModified DESC
+			SELECT PS.dblQtyInProductionStagingLocation
+			FROM @tblMFQtyInProductionStagingLocation PS
+			WHERE PS.intItemId = I.intItemId
 			)
 		,@intUserId
 		,@dtmCurrentDateTime

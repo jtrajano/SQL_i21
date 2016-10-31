@@ -1664,3 +1664,26 @@ BEGIN
         ,'SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
 END
 GO
+
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 79
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 79
+        ,'Add yield cost to output item'
+        ,5
+        ,1
+        ,0
+        ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO

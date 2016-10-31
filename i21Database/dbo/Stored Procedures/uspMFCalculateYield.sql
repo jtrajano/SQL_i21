@@ -24,6 +24,8 @@ BEGIN TRY
 		,@strWorkOrderNo NVARCHAR(50)
 		,@intProductionStagingId INT
 		,@intProductionStageLocationId INT
+		,@intAttributeId INT
+		,@strAttributeValue NVARCHAR(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -66,6 +68,16 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intProductionStagingId
+
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Add yield cost to output item'
+
+	SELECT @strAttributeValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
 
 	INSERT INTO @tblInputItem (
 		intItemId
@@ -299,7 +311,13 @@ BEGIN TRY
 						AND intItemId = @intItemId
 						AND intLotStatusId = 1
 						AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					) AND NOT EXISTS(SELECT *FROM tblMFWorkOrderInputLot WHERE intWorkOrderId =@intWorkOrderId AND intItemId=@intItemId)
+					)
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblMFWorkOrderInputLot
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intItemId = @intItemId
+					) --and @strAttributeValue='False'
 			BEGIN
 				PRINT 'CREATE A LOT'
 
@@ -449,23 +467,27 @@ BEGIN TRY
 
 			SELECT @intLotId = intLotId
 			FROM tblMFWorkOrderInputLot
-			WHERE intWorkOrderId=@intWorkOrderId and intItemId = @intItemId
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intItemId = @intItemId
 
 			SELECT @strLotNumber = strLotNumber
 			FROM dbo.tblICLot
-			Where intLotId=@intLotId
+			WHERE intLotId = @intLotId
 
-			Select @intLotId=intLotId from tblICLot Where strLotNumber=@strLotNumber and intStorageLocationId = @intStorageLocationId
+			SELECT @intLotId = intLotId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = @intStorageLocationId
 
 			SELECT @strLotNumber = strLotNumber
-					,@intLotId = intLotId
-					,@dblQty = dblQty
-					,@intItemUOMId = intItemUOMId
-					,@intSubLocationId = intSubLocationId
-					,@intWeightUOMId = intWeightUOMId
-					,@dblWeightPerQty = dblWeightPerQty
-				FROM dbo.tblICLot
-				Where intLotId=@intLotId
+				,@intLotId = intLotId
+				,@dblQty = dblQty
+				,@intItemUOMId = intItemUOMId
+				,@intSubLocationId = intSubLocationId
+				,@intWeightUOMId = intWeightUOMId
+				,@dblWeightPerQty = dblWeightPerQty
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
 
 			IF @intLotId IS NULL
 			BEGIN
@@ -529,23 +551,26 @@ BEGIN TRY
 								END
 							)
 
-					EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
-						-- Parameters for filtering:
-						@intItemId = @intItemId
-						,@dtmDate = @dtmCurrentDateTime
-						,@intLocationId = @intLocationId
-						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId
-						,@strLotNumber = @strLotNumber
-						-- Parameters for the new values: 
-						,@dblAdjustByQuantity = @dblAdjustByQuantity
-						,@dblNewUnitCost = NULL
-						,@intItemUOMId = @intItemUOMId
-						-- Parameters used for linking or FK (foreign key) relationships
-						,@intSourceId = 1
-						,@intSourceTransactionTypeId = 8
-						,@intEntityUserSecurityId = @intUserId
-						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+					IF @strAttributeValue = 'False'
+					BEGIN
+						EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+							-- Parameters for filtering:
+							@intItemId = @intItemId
+							,@dtmDate = @dtmCurrentDateTime
+							,@intLocationId = @intLocationId
+							,@intSubLocationId = @intSubLocationId
+							,@intStorageLocationId = @intStorageLocationId
+							,@strLotNumber = @strLotNumber
+							-- Parameters for the new values: 
+							,@dblAdjustByQuantity = @dblAdjustByQuantity
+							,@dblNewUnitCost = NULL
+							,@intItemUOMId = @intItemUOMId
+							-- Parameters used for linking or FK (foreign key) relationships
+							,@intSourceId = 1
+							,@intSourceTransactionTypeId = 8
+							,@intEntityUserSecurityId = @intUserId
+							,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+					END
 
 					SELECT @intShiftId = intShiftId
 					FROM dbo.tblMFShift
@@ -577,7 +602,7 @@ BEGIN TRY
 						,GetDate()
 						,@intManufacturingProcessId
 						,@intShiftId
-					
+
 					PRINT 'Call Adjust Qty procedure'
 				END
 			END

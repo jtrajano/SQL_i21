@@ -53,7 +53,8 @@ BEGIN
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = wocl.intItemUOMId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = wocl.intCreatedUserId
+	JOIN tblMFManufacturingProcess MP on MP.intManufacturingProcessId =wo.intManufacturingProcessId 
 	LEFT JOIN tblICLot l ON l.intLotId = wocl.intLotId
-	WHERE IsNULL(wocl.intBatchId, @intBatchId) = @intBatchId
+	WHERE Case When MP.intAttributeTypeId =5 then 1 else IsNULL(wocl.intBatchId, @intBatchId) end = Case When MP.intAttributeTypeId =5 then 1 else @intBatchId end
 		AND wocl.intWorkOrderId = @intWorkOrderId
 END
