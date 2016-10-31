@@ -19,7 +19,8 @@ BEGIN TRY
 			@strCountry				NVARCHAR(500),
 			@intContractHeaderId	INT,
 			@xmlDocumentId			INT,
-			@strContractDocuments	NVARCHAR(MAX)
+			@strContractDocuments	NVARCHAR(MAX),
+			@strContractConditions	NVARCHAR(MAX)
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -80,6 +81,19 @@ BEGIN TRY
 	FROM tblCTContractHeader CH						
 	WHERE CH.intContractHeaderId = @intContractHeaderId
 
+	SELECT	@strContractConditions = STUFF(								
+			(
+					SELECT	CHAR(13)+CHAR(10) + DM.strConditionDesc
+					FROM	tblCTContractCondition	CD	
+					JOIN	tblCTCondition			DM	ON DM.intConditionId = CD.intConditionId	
+					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
+					ORDER BY DM.strConditionName		
+					FOR XML PATH(''), TYPE				
+			   ).value('.','varchar(max)')
+			   ,1,2, ''						
+			)  				
+	FROM	tblCTContractHeader CH						
+	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
 	SELECT	CH.intContractHeaderId,
 
@@ -133,7 +147,8 @@ BEGIN TRY
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 			PR.strName AS strProducer,
 			PO.strPosition,
-			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' strCaller
+			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' strCaller,
+			@strContractConditions AS strContractConditions
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId

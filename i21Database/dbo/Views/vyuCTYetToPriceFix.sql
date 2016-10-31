@@ -197,7 +197,7 @@ AS
 					CD.ysnMultiplePriceFixation,
 					CAST(NULL AS NUMERIC(12,4)) AS  dblHeaderQuantity,
 					QM.strUnitMeasure			AS	strHeaderUnitMeasure,
-					PF.[dblTotalLots]				AS	dblNoOfLots,
+					PF.[dblTotalLots]			AS	dblNoOfLots,
 					LTRIM(NULL)					AS	strLocationName,
 					CAST (NULL AS INT)			AS	intItemId,
 					CAST (NULL AS INT)			AS	intItemUOMId,

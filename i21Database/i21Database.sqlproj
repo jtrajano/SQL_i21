@@ -4484,6 +4484,8 @@
     <Build Include="dbo\Views\vyuETDeliveryMetrics.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetStatusUnitCost.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateSalesOrderItemsPrice.sql" />
+    <Build Include="dbo\Tables\tblCTCondition.sql" />
+    <Build Include="dbo\Tables\tblCTContractCondition.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
