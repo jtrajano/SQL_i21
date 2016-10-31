@@ -10,11 +10,11 @@ DECLARE @tblResult TABLE
 (Id INT identity(1,1),
 	dtmDate datetime,
 	strItemNo nvarchar(50),
-	dblUnpaidIn numeric(18, 6),
-	dblUnpaidOut numeric(18, 6),
-	dblUnpaidBalance numeric(18, 6),
+	dblUnpaidIn numeric(24,10),
+	dblUnpaidOut numeric(24,10),
+	dblUnpaidBalance numeric(24,10),
 	strDistributionOption nvarchar(50),
-	InventoryBalanceCarryForward numeric(18, 6)
+	InventoryBalanceCarryForward numeric(24,10)
 )
 INSERT INTO @tblResult (strItemNo,dtmDate,dblUnpaidIn,dblUnpaidOut,dblUnpaidBalance,InventoryBalanceCarryForward)
 select  null,null, null,null,sum(dblUnpaidBalance),sum(InventoryBalanceCarryForward)  from (
