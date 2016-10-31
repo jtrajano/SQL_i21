@@ -29,4 +29,4 @@
 			  inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 			  left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
 			  inner join tblEMEntityToContact etcc on etcc.intEntityContactId = ec.intEntityId
-			  inner join tblEMEntityLocation el on el.intEntityLocationId = etcc.intEntityLocationId
+			  left join tblEMEntityLocation el on el.intEntityLocationId = etcc.intEntityLocationId
