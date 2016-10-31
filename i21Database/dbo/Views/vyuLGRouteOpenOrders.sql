@@ -46,6 +46,7 @@ SELECT
 	,strOrderType = 'Outbound'
 	,intPriority = TMO.intPriority
 	,ysnLeakCheckRequired = TMO.ysnLeakCheckRequired
+	,dblPercentLeft = TMO.dblPercentLeft
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
@@ -97,6 +98,7 @@ SELECT
 	,strOrderType = 'Outbound'
 	,intPriority = -1
 	,ysnLeakCheckRequired = Cast(0 as Bit)
+	,dblPercentLeft = 0.0
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
@@ -150,6 +152,7 @@ SELECT
 	,strOrderType = 'Inbound'
 	,intPriority = -1
 	,ysnLeakCheckRequired = Cast(0 as Bit)
+	,dblPercentLeft = 0.0
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
@@ -203,6 +206,7 @@ SELECT
 	,strOrderType = ''
 	,intPriority = -1
 	,ysnLeakCheckRequired = Cast(0 as Bit)
+	,dblPercentLeft = 0.0
 
 FROM vyuTMCustomerConsumptionSiteInfo TMO
 
@@ -252,6 +256,7 @@ SELECT
 	,strOrderType = ''
 	,intPriority = -1
 	,ysnLeakCheckRequired = Cast(0 as Bit)
+	,dblPercentLeft = 0.0
 
 FROM tblEMEntityLocation EL
 JOIN vyuEMEntity EN ON EN.intEntityId = EL.intEntityId

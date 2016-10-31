@@ -40,6 +40,7 @@ SELECT
  ,Rte.intLoadId
  ,Rte.strEntityType
  ,Rte.ysnLeakCheckRequired
+ ,Rte.dblPercentLeft
 
 FROM tblLGRouteOrder Rte
 JOIN vyuLGRoute R ON R.intRouteId = Rte.intRouteId

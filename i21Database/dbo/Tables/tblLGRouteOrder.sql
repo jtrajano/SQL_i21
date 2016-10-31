@@ -38,6 +38,7 @@
 	[intLoadId] INT NULL, 
 	[strSubLocation] [NVARCHAR](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strEntityType] [NVARCHAR](MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dblPercentLeft] NUMERIC(18, 6) NULL,
 
     CONSTRAINT [PK_tblLGRouteOrder] PRIMARY KEY ([intRouteOrderId]),
     CONSTRAINT [FK_tblLGRouteOrder_tblLGRoute_intRouteId] FOREIGN KEY ([intRouteId]) REFERENCES [tblLGRoute]([intRouteId]) ON DELETE CASCADE,
