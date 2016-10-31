@@ -4483,6 +4483,7 @@
     <Build Include="dbo\Views\vyuAP1099PATR.sql" />
     <Build Include="dbo\Views\vyuETDeliveryMetrics.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetStatusUnitCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateSalesOrderItemsPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
