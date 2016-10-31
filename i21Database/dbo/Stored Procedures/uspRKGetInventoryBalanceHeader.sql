@@ -33,31 +33,31 @@ DECLARE @tblResult TABLE
        intRowNum int,
        dtmDate datetime,
        [Distribution] nvarchar(50),
-       [Unpaid IN] numeric(18, 6),
-       [Unpaid Out] numeric(18, 6),
-       [Unpaid Balance] numeric(18, 6),
-       [InventoryBalanceCarryForward] numeric(18, 6)
+       [Unpaid IN] numeric(24,10),
+       [Unpaid Out] numeric(24,10),
+       [Unpaid Balance] numeric(24,10),
+       [InventoryBalanceCarryForward] numeric(24,10)
 )
 
 DECLARE @tblFirstResult TABLE
 (Id INT identity(1,1),
        intRowNum int,
        dtmDate datetime,
-       tranShipQty numeric(18, 6),
-       tranRecQty numeric(18, 6),
-       dblAdjustmentQty numeric(18, 6),
-       BalanceForward numeric(18, 6)
+       tranShipQty numeric(24,10),
+       tranRecQty numeric(24,10),
+       dblAdjustmentQty numeric(24,10),
+       BalanceForward numeric(24,10)
 )
 
 DECLARE @tblResultFinal TABLE
 (Id INT identity(1,1),
        dtmDate datetime,
        strItemNo nvarchar(50),
-       dblUnpaidIn numeric(18, 6),
-       dblUnpaidOut numeric(18, 6),
-       dblUnpaidBalance numeric(18, 6),
-   BalanceForward numeric(18, 6),
-       InventoryBalanceCarryForward numeric(18, 6)
+       dblUnpaidIn numeric(24,10),
+       dblUnpaidOut numeric(24,10),
+       dblUnpaidBalance numeric(24,10),
+   BalanceForward numeric(24,10),
+       InventoryBalanceCarryForward numeric(24,10)
 )
 
 INSERT INTO @tblResult (intRowNum ,dtmDate ,    [Distribution] ,     [Unpaid IN] , [Unpaid Out] ,       [Unpaid Balance],InventoryBalanceCarryForward )
@@ -76,16 +76,16 @@ FROM @tblResult T1 GROUP BY dtmDate
 DECLARE @tblConsolidatedResult TABLE
 (Id INT identity(1,1),
        dtmDate datetime,
-       [Receive In] numeric(18, 6),
-       [Ship Out] numeric(18, 6),
-       [Adjustments] numeric(18, 6),
-       BalanceForward numeric(18, 6),
-       InventoryBalanceCarryForward numeric(18, 6),
-       [Unpaid In] numeric(18, 6),
-       [Unpaid Out] numeric(18, 6),
-       dblUnpaidOut numeric(18, 6),
-       [Balance] numeric(18, 6),
-       [Unpaid Balance] numeric(18, 6)
+       [Receive In] numeric(24,10),
+       [Ship Out] numeric(24,10),
+       [Adjustments] numeric(24,10),
+       BalanceForward numeric(24,10),
+       InventoryBalanceCarryForward numeric(24,10),
+       [Unpaid In] numeric(24,10),
+       [Unpaid Out] numeric(24,10),
+       dblUnpaidOut numeric(24,10),
+       [Balance] numeric(24,10),
+       [Unpaid Balance] numeric(24,10)
 )
 insert into @tblConsolidatedResult(dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward,InventoryBalanceCarryForward ,
               [Unpaid In],[Unpaid Out],[Balance], [Unpaid Balance])
@@ -97,14 +97,17 @@ SELECT isnull(a.dtmDate,b.dtmDate) [Date],isnull(a.tranRecQty,0) [Receive In],  
 FROM @tblFirstResult a
 FULL JOIN @tblResultFinal b on a.dtmDate=b.dtmDate order by b.dtmDate,a.dtmDate asc
 
-SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum, dtmDate,[Receive In] as [dblReceiveIn],[Ship Out] as [dblShipOut],Adjustments as dblAdjustments,[InventoryBalance] as [dblInventoryBalance],
+select convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,* from(
+SELECT distinct dtmDate,[Receive In] as [dblReceiveIn],[Ship Out] as [dblShipOut],Adjustments as dblAdjustments,isnull([InventoryBalance],0) as [dblInventoryBalance],
 [Unpaid In] as dblUnpaidIn,[Unpaid Out] dblUnpaidOut,[Balance] dblBalance,    
           ISNULL([InventoryBalance],0) - isnull( [Balance] ,0) [dblPaidBalance], 
           ISNULL([Balance],0) + (isnull([InventoryBalance],0) - isnull( [Balance] ,0)) [dblTotalCompanyOwned],
-           [Unpaid In]-[Unpaid Out] dblUnpaidBalance
+           isnull(isnull([Unpaid In],0)-isnull([Unpaid Out],0),0) dblUnpaidBalance
 FROM (
 SELECT dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryBalanceCarryForward,
-              (SELECT SUM(InventoryBalanceCarryForward) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900')) AS 
+              (SELECT SUM(BalanceForward) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900')
+				--and dtmDate is null and BalanceForward <> 0 
+				) AS 
                        [InventoryBalance],
               
                        (case when isnull([Unpaid In],0)=0 and isnull([Unpaid Out],0)=0 then
@@ -116,6 +119,5 @@ FROM(
 SELECT DateData dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryBalanceCarryForward,
               [Unpaid In],[Unpaid Out],[Balance]
 FROM @tblConsolidatedResult T1
-RIGHT JOIN @tblDateList list on T1.dtmDate=list.DateData
-
-  )t )t1 order by dtmDate
+full JOIN @tblDateList list on T1.dtmDate=list.DateData
+  )t )t1)t2 order by dtmDate
