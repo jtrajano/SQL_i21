@@ -74,6 +74,7 @@ SELECT Lot.intLotId
 	, EY.strEntityName as strVendor
 	, L.strLoadNumber
 	, L.dtmPostedDate
+	, Receipt.strWarehouseRefNo
 
 FROM tblICLot Lot
 JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId

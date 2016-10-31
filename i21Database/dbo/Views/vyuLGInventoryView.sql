@@ -29,6 +29,7 @@ SELECT
 	,dblQtyInStockUOM = (Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0)) * dbo.fnICConvertUOMtoStockUnit (Shipment.intItemId, Shipment.intItemUOMId, 1)
 	,Shipment.intItemId
 	,intWeightItemUOMId = (SELECT U.intItemUOMId FROM tblICItemUOM U WHERE U.intItemId = Shipment.intItemId AND U.intUnitMeasureId=Shipment.intWeightUOMId)
+	,strWarehouseRefNo = ''
 
 FROM vyuLGInboundShipmentView Shipment
 WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 AND Shipment.ysnInventorized = 1
@@ -59,6 +60,8 @@ SELECT
 	,dblQtyInStockUOM = Spot.dblQty * dbo.fnICConvertUOMtoStockUnit (Spot.intItemId, Spot.intItemUOMId, 1)
 	,Spot.intItemId
 	,intWeightItemUOMId = Spot.intItemWeightUOMId
+	,Spot.strWarehouseRefNo
+
 FROM vyuLGPickOpenInventoryLots Spot
 WHERE Spot.dblQty > 0.0
 ) t1

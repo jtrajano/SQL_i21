@@ -23,6 +23,8 @@ BEGIN
 		  ,CLSL.strSubLocationName
 		  ,LDL.strWarehouseCargoNumber
 		  ,PCH.strContractNumber + '/' + CONVERT(NVARCHAR,PCD.intContractSeq) strOurRef
+		  ,R.strWarehouseRefNo
+
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
@@ -38,6 +40,7 @@ BEGIN
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LOT.intLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = IRI.intInventoryReceiptId
 	LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IRI.intOrderId
 	LEFT JOIN tblCTContractDetail PCD ON PCD.intContractHeaderId = PCH.intContractHeaderId
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
