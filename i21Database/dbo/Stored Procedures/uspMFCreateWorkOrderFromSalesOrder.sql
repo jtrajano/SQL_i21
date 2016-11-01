@@ -48,6 +48,8 @@ Declare @strItemNo nvarchar(50)
 Declare @strOrderType nvarchar(50)
 Declare @intInvoiceDetailId int
 Declare @intLoadDistributionDetailId int
+Declare @dtmPlannedDate DateTime
+Declare @intPlannedShiftId int
 
 Declare @tblWO As table
 (
@@ -56,7 +58,9 @@ Declare @tblWO As table
 	dtmDueDate datetime,
 	intCellId int,
 	intMachineId int,
-	dblMachineCapacity numeric(18,6)
+	dblMachineCapacity numeric(18,6),
+	dtmPlannedDate datetime,
+	intPlannedShiftId int
 )
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
@@ -76,20 +80,24 @@ EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml
 	intUserId int
 	)
 
-Insert Into @tblWO(dblQuantity,dtmDueDate,intCellId,intMachineId,dblMachineCapacity)
- Select dblQuantity,dtmDueDate,intCellId,intMachineId,dblMachineCapacity
+Insert Into @tblWO(dblQuantity,dtmDueDate,intCellId,intMachineId,dblMachineCapacity,dtmPlannedDate,intPlannedShiftId)
+ Select dblQuantity,dtmDueDate,intCellId,intMachineId,dblMachineCapacity,dtmPlannedDate,intPlannedShiftId
  FROM OPENXML(@idoc, 'root/wo', 2)  
  WITH ( 
 	dblQuantity numeric(18,6), 
 	dtmDueDate datetime,
 	intCellId int,
 	intMachineId int,
-	dblMachineCapacity numeric(18,6)
+	dblMachineCapacity numeric(18,6),
+	dtmPlannedDate datetime,
+	intPlannedShiftId int
 	)
 
 If @intSalesOrderDetailId=0 Set @intSalesOrderDetailId=NULL
 If @intInvoiceDetailId=0 Set @intInvoiceDetailId=NULL
 If @intLoadDistributionDetailId=0 Set @intLoadDistributionDetailId=NULL
+
+Update @tblWO Set intPlannedShiftId=NULL where intPlannedShiftId=0
 
 Select @intItemUOMId=intItemUOMId From tblMFRecipe Where intRecipeId=@intRecipeId
 
@@ -114,7 +122,7 @@ Begin
 
 	While(@intMinWO is not null)
 	Begin
-		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@intMachineId=intMachineId,@dblBlendBinSize=dblMachineCapacity From @tblWO Where intRowNo=@intMinWO
+		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@intMachineId=intMachineId,@dblBlendBinSize=dblMachineCapacity,@dtmPlannedDate=dtmPlannedDate,@intPlannedShiftId=intPlannedShiftId From @tblWO Where intRowNo=@intMinWO
 
 		If ISNULL(@intMachineId,0)=0
 			Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
@@ -217,9 +225,9 @@ Begin
 		Set @intExecutionOrder=@intExecutionOrder+1
 
 		insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
-		intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,intKitStatusId,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId,intSalesOrderLineItemId,intInvoiceDetailId,intLoadDistributionDetailId,intConcurrencyId)
+		intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,intKitStatusId,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId,intSalesOrderLineItemId,intInvoiceDetailId,intLoadDistributionDetailId,dtmPlannedDate,intPlannedShiftId,intConcurrencyId)
 		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,@intWorkOrderStatusId,@intCellId,@intMachineId,@intLocationId,@dblBlendBinSize,@dtmDueDate,@intExecutionOrder,1,
-		@dblQuantity,@intBlendRequirementId,@ysnKittingEnabled,@intKitStatusId,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,@intSalesOrderDetailId,@intInvoiceDetailId,@intLoadDistributionDetailId,1
+		@dblQuantity,@intBlendRequirementId,@ysnKittingEnabled,@intKitStatusId,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,@intSalesOrderDetailId,@intInvoiceDetailId,@intLoadDistributionDetailId,@dtmPlannedDate,@intPlannedShiftId,1
 
 		Select @intWokrOrderId=SCOPE_IDENTITY()
 
@@ -240,7 +248,7 @@ Begin
 
 	While(@intMinWO is not null)
 	Begin
-		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@dtmDueDate=dtmDueDate From @tblWO Where intRowNo=@intMinWO
+		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@dtmDueDate=dtmDueDate,@dtmPlannedDate=dtmPlannedDate,@intPlannedShiftId=intPlannedShiftId From @tblWO Where intRowNo=@intMinWO
 
 		--Get Work Order No
 		If ISNULL(@strWorkOrderNo,'') = ''
@@ -269,10 +277,10 @@ Begin
 
 		insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dtmExpectedDate,intExecutionOrder,
 		intProductionTypeId,dblPlannedQuantity,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intManufacturingProcessId,intSalesOrderLineItemId,
-		dtmOrderDate,dtmPlannedDate,intSupervisorId,intSubLocationId,intCustomerId,strSalesOrderNo,intConcurrencyId)
+		dtmOrderDate,dtmPlannedDate,intSupervisorId,intSubLocationId,intCustomerId,strSalesOrderNo,intPlannedShiftId,intConcurrencyId)
 		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,1,@intCellId,null,@intLocationId,@dtmDueDate,1,1,
 		null,0,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@intManufacturingProcessId,@intSalesOrderDetailId,
-		@dtmCurrentDate,@dtmDueDate,@intUserId,@intSubLocationId,@intCustomerId,@strSalesOrderNo,1
+		@dtmCurrentDate,@dtmPlannedDate,@intUserId,@intSubLocationId,@intCustomerId,@strSalesOrderNo,@intPlannedShiftId,1
 
 		Select @intWokrOrderId=SCOPE_IDENTITY()
 		
