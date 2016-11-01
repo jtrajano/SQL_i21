@@ -4486,6 +4486,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateSalesOrderItemsPrice.sql" />
     <Build Include="dbo\Tables\tblCTCondition.sql" />
     <Build Include="dbo\Tables\tblCTContractCondition.sql" />
+    <Build Include="dbo\Views\vyuCRMActivitySearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
