@@ -2337,72 +2337,90 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = combo.up('window');
         var grid = combo.up('grid');
         var selection = grid.getSelectionModel().getSelection();
-        var copyLocation = records[0];
+        var current = win.viewModel.data.current;
+        
+        var filter = [
+            {
+                c: 'intItemLocationId',
+                v: records[0].data.intItemLocationId,
+                cj: 'and',
+                g: 'g0'
+            }
+        ];
+        Ext.Ajax.request({
+            timeout: 120000,
+            url: '../Inventory/api/ItemLocation/Search?page=1&start=0&limit=50&sort=[]&filter=' +
+                JSON.stringify(filter),
+            method: 'GET',
+            success: function(response) {
+                var json = JSON.parse(response.responseText);
+                var copyLocation = json.data[0];
+                Ext.Array.each(selection, function (location) {
+                    if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
+                        location.set('intVendorId', copyLocation.intVendorId);
+                        location.set('strDescription', copyLocation.strDescription);
+                        location.set('intCostingMethod', copyLocation.intCostingMethod);
+                        location.set('strCostingMethod', copyLocation.strCostingMethod);
+                        location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
+                        location.set('intSubLocationId', copyLocation.intSubLocationId);
+                        location.set('intStorageLocationId', copyLocation.intStorageLocationId);
+                        location.set('intIssueUOMId', copyLocation.intIssueUOMId);
+                        location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
+                        location.set('intFamilyId', copyLocation.intFamilyId);
+                        location.set('intClassId', copyLocation.intClassId);
+                        location.set('intProductCodeId', copyLocation.intProductCodeId);
+                        location.set('intFuelTankId', copyLocation.intFuelTankId);
+                        location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
+                        location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
+                        location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
+                        location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
+                        location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
+                        location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
+                        location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
+                        location.set('intMixMatchId', copyLocation.intMixMatchId);
+                        location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
+                        location.set('intDepositPLUId', copyLocation.intDepositPLUId);
+                        location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
+                        location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
+                        location.set('ysnScaleItem', copyLocation.ysnScaleItem);
+                        location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
+                        location.set('ysnReturnable', copyLocation.ysnReturnable);
+                        location.set('ysnPrePriced', copyLocation.ysnPrePriced);
+                        location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
+                        location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
+                        location.set('strVendorCategory', copyLocation.strVendorCategory);
+                        location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
+                        location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
+                        location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
+                        location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
+                        location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
+                        location.set('intMinimumAge', copyLocation.intMinimumAge);
+                        location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
+                        location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
+                        location.set('ysnCarWash', copyLocation.ysnCarWash);
+                        location.set('intItemTypeCode', copyLocation.intItemTypeCode);
+                        location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
+                        location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
+                        location.set('intFreightMethodId', copyLocation.intFreightMethodId);
+                        location.set('dblFreightRate', copyLocation.dblFreightRate);
+                        location.set('intShipViaId', copyLocation.intShipViaId);
+                        location.set('intNegativeInventory', copyLocation.intNegativeInventory);
+                        location.set('dblReorderPoint', copyLocation.dblReorderPoint);
+                        location.set('dblMinOrder', copyLocation.dblMinOrder);
+                        location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
+                        location.set('dblLeadTime', copyLocation.dblLeadTime);
+                        location.set('strCounted', copyLocation.strCounted);
+                        location.set('intCountGroupId', copyLocation.intCountGroupId);
+                        location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
+                        location.set('strVendorId', copyLocation.strVendorId);
+                        location.set('strCategory', copyLocation.strCategory);
+                        location.set('strUnitMeasure', copyLocation.strUnitMeasure);
+                    }
+                });
 
-        Ext.Array.each(selection, function(location) {
-            if (location.get('intItemLocationId') !== copyLocation.get('intItemLocationId')) {
-                location.set('intVendorId', copyLocation.get('intVendorId'));
-                location.set('strDescription', copyLocation.get('strDescription'));
-                location.set('intCostingMethod', copyLocation.get('intCostingMethod'));
-                location.set('strCostingMethod', copyLocation.get('strCostingMethod'));
-                location.set('intAllowNegativeInventory', copyLocation.get('intAllowNegativeInventory'));
-                location.set('intSubLocationId', copyLocation.get('intSubLocationId'));
-                location.set('intStorageLocationId', copyLocation.get('intStorageLocationId'));
-                location.set('intIssueUOMId', copyLocation.get('intIssueUOMId'));
-                location.set('intReceiveUOMId', copyLocation.get('intReceiveUOMId'));
-                location.set('intFamilyId', copyLocation.get('intFamilyId'));
-                location.set('intClassId', copyLocation.get('intClassId'));
-                location.set('intProductCodeId', copyLocation.get('intProductCodeId'));
-                location.set('intFuelTankId', copyLocation.get('intFuelTankId'));
-                location.set('strPassportFuelId1', copyLocation.get('strPassportFuelId2'));
-                location.set('strPassportFuelId2', copyLocation.get('strPassportFuelId2'));
-                location.set('strPassportFuelId3', copyLocation.get('strPassportFuelId3'));
-                location.set('ysnTaxFlag1', copyLocation.get('ysnTaxFlag1'));
-                location.set('ysnTaxFlag2', copyLocation.get('ysnTaxFlag2'));
-                location.set('ysnTaxFlag3', copyLocation.get('ysnTaxFlag3'));
-                location.set('ysnPromotionalItem', copyLocation.get('ysnPromotionalItem'));
-                location.set('intMixMatchId', copyLocation.get('intMixMatchId'));
-                location.set('ysnDepositRequired', copyLocation.get('ysnDepositRequired'));
-                location.set('intDepositPLUId', copyLocation.get('intDepositPLUId'));
-                location.set('intBottleDepositNo', copyLocation.get('intBottleDepositNo'));
-                location.set('ysnQuantityRequired', copyLocation.get('ysnQuantityRequired'));
-                location.set('ysnScaleItem', copyLocation.get('ysnScaleItem'));
-                location.set('ysnFoodStampable', copyLocation.get('ysnFoodStampable'));
-                location.set('ysnReturnable', copyLocation.get('ysnReturnable'));
-                location.set('ysnPrePriced', copyLocation.get('ysnPrePriced'));
-                location.set('ysnOpenPricePLU', copyLocation.get('ysnOpenPricePLU'));
-                location.set('ysnLinkedItem', copyLocation.get('ysnLinkedItem'));
-                location.set('strVendorCategory', copyLocation.get('strVendorCategory'));
-                location.set('ysnCountBySINo', copyLocation.get('ysnCountBySINo'));
-                location.set('strSerialNoBegin', copyLocation.get('strSerialNoBegin'));
-                location.set('strSerialNoEnd', copyLocation.get('strSerialNoEnd'));
-                location.set('ysnIdRequiredLiquor', copyLocation.get('ysnIdRequiredLiquor'));
-                location.set('ysnIdRequiredCigarette', copyLocation.get('ysnIdRequiredCigarette'));
-                location.set('intMinimumAge', copyLocation.get('intMinimumAge'));
-                location.set('ysnApplyBlueLaw1', copyLocation.get('ysnApplyBlueLaw1'));
-                location.set('ysnApplyBlueLaw2', copyLocation.get('ysnApplyBlueLaw2'));
-                location.set('ysnCarWash', copyLocation.get('ysnCarWash'));
-                location.set('intItemTypeCode', copyLocation.get('intItemTypeCode'));
-                location.set('intItemTypeSubCode', copyLocation.get('intItemTypeSubCode'));
-                location.set('ysnAutoCalculateFreight', copyLocation.get('ysnAutoCalculateFreight'));
-                location.set('intFreightMethodId', copyLocation.get('intFreightMethodId'));
-                location.set('dblFreightRate', copyLocation.get('dblFreightRate'));
-                location.set('intShipViaId', copyLocation.get('intShipViaId'));
-                location.set('intNegativeInventory', copyLocation.get('intNegativeInventory'));
-                location.set('dblReorderPoint', copyLocation.get('dblReorderPoint'));
-                location.set('dblMinOrder', copyLocation.get('dblMinOrder'));
-                location.set('dblSuggestedQty', copyLocation.get('dblSuggestedQty'));
-                location.set('dblLeadTime', copyLocation.get('dblLeadTime'));
-                location.set('strCounted', copyLocation.get('strCounted'));
-                location.set('intCountGroupId', copyLocation.get('intCountGroupId'));
-                location.set('ysnCountedDaily', copyLocation.get('ysnCountedDaily'));
-                location.set('strVendorId', copyLocation.get('strVendorId'));
-                location.set('strCategory', copyLocation.get('strCategory'));
-                location.set('strUnitMeasure', copyLocation.get('strUnitMeasure'));
+                win.context.data.saveRecord();
             }
         });
-
-        win.context.data.saveRecord();
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
