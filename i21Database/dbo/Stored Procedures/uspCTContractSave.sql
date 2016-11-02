@@ -10,6 +10,7 @@ BEGIN TRY
 			@intContractDetailId		INT,
 			@dblCashPrice				NUMERIC(18,6),
 			@intPricingTypeId			INT,
+			@intLastModifiedById		INT,
 			@ysnMultiplePriceFixation	BIT,
 			@strContractNumber			NVARCHAR(100),
 			@dblBasis					NUMERIC(18,6),
@@ -32,7 +33,8 @@ BEGIN TRY
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
 				@dblCashPrice		=	dblCashPrice,
 				@dblBasis			=	dblBasis,
-				@dblOriginalBasis	=	dblOriginalBasis
+				@dblOriginalBasis	=	dblOriginalBasis,
+				@intLastModifiedById=	intLastModifiedById
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
@@ -44,6 +46,8 @@ BEGIN TRY
 		END
 
 		EXEC uspLGUpdateLoadItem @intContractDetailId
+
+		EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END

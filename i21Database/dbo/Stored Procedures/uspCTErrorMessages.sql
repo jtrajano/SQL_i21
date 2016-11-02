@@ -25,3 +25,15 @@ AS
 	 EXEC sp_dropmessage 110004, 'us_english'	
 	SET @strmessage = 'Remaining quantity for Collateral %s cannot be more than original quantity.'
 	EXEC sp_addmessage   110004,16,@strmessage,'us_english','False'
+
+	IF EXISTS(SELECT 1 FROM sys.messages 
+	 WHERE message_id =  110005) 
+	 EXEC sp_dropmessage 110005, 'us_english'	
+	SET @strmessage = 'Multiple details are available for the pricing of sequence %s. Cannot slice sequence %s.'
+	EXEC sp_addmessage   110005,16,@strmessage,'us_english','False'
+
+	IF EXISTS(SELECT 1 FROM sys.messages 
+	 WHERE message_id =  110006) 
+	 EXEC sp_dropmessage 110006, 'us_english'	
+	SET @strmessage = 'Pricing status for sequence %s is partial. Cannot slice sequence %s.'
+	EXEC sp_addmessage   110006,16,@strmessage,'us_english','False'

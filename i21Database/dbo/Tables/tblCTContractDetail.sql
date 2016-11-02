@@ -1,6 +1,7 @@
 CREATE TABLE [dbo].[tblCTContractDetail]
 (
 	[intContractDetailId] [int] IDENTITY(1,1) NOT NULL,
+	[intSplitFromId] [int],
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractHeaderId] [int] NOT NULL,
 	[intContractStatusId] [int] NULL,
