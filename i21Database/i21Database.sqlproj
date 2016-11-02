@@ -4487,6 +4487,7 @@
     <Build Include="dbo\Tables\tblCTCondition.sql" />
     <Build Include="dbo\Tables\tblCTContractCondition.sql" />
     <Build Include="dbo\Views\vyuCRMActivitySearch.sql" />
+    <None Include="Scripts\Post-Deployment\EM\034_UpdateEntityEmail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
