@@ -29,7 +29,7 @@ SELECT A.strInvoiceNumber
 	 , A.intEntityCustomerId
 	 , A.strCustomerNumber
 	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
-	 , dblTotalAR			= B.dblTotalDue - B.dblAvailableCredit
+	 , dblTotalAR			= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
 	 , dblFuture			= 0.000000
 	 , dbl0Days				= B.dbl0Days
 	 , dbl10Days			= B.dbl10Days
@@ -37,7 +37,7 @@ SELECT A.strInvoiceNumber
 	 , dbl60Days			= B.dbl60Days
 	 , dbl90Days			= B.dbl90Days
 	 , dbl91Days			= B.dbl91Days
-	 , dblTotalDue			= B.dblTotalDue - B.dblAvailableCredit
+	 , dblTotalDue			= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
 	 , dblAmountPaid		= A.dblAmountPaid
 	 , dblInvoiceTotal		= A.dblInvoiceTotal
 	 , dblCredits			= B.dblAvailableCredit * -1

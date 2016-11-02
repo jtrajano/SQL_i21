@@ -5,7 +5,7 @@ SELECT A.strCustomerName
      , A.intEntityCustomerId
 	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , dblTotalAR			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
-	 , dblTotalARDiscount	= SUM(B.dblTotalDue) - SUM(B.dblDiscountTerm) - SUM(B.dblAvailableCredit)
+	 , dblTotalARDiscount	= SUM(B.dblTotalDue) - SUM(B.dblDiscountTerm) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
 	 , dblFuture			= 0.000000
 	 , dbl0Days				= SUM(B.dbl0Days)
      , dbl10Days			= SUM(B.dbl10Days)
@@ -13,7 +13,7 @@ SELECT A.strCustomerName
 	 , dbl60Days			= SUM(B.dbl60Days)
 	 , dbl90Days			= SUM(B.dbl90Days)
 	 , dbl91Days			= SUM(B.dbl91Days)
-	 , dblTotalDue			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
+	 , dblTotalDue			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
 	 , dblAmountPaid		= SUM(A.dblAmountPaid)
 	 , dblInvoiceTotal		= SUM(A.dblInvoiceTotal)
 	 , dblCredits			= SUM(B.dblAvailableCredit) * -1
