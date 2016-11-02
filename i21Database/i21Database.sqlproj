@@ -4440,6 +4440,7 @@
     <Build Include="dbo\Functions\fnGetDaysInMonth.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFutureAndBasisPrice.sql" />
     <Build Include="dbo\Views\vyuARCollectionCustomerReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBudgetMaintenance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
