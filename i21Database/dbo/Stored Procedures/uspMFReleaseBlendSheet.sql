@@ -49,6 +49,8 @@ BEGIN TRY
 		,@dtmProductionDate DATETIME
 	Declare @intCategoryId int
 	Declare @strInActiveItems nvarchar(max)
+	DECLARE @dtmDate DATETIME=Convert(DATE, GetDate())
+	DECLARE @intDayOfYear INT=DATEPART(dy, @dtmDate)
 
 	SELECT @dtmCurrentDateTime = GetDate()
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -373,6 +375,19 @@ End
 		From tblMFRecipeItem ri 
 		Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
 		where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
+		AND (
+		(
+			ri.ysnYearValidationRequired = 1
+			AND @dtmDate BETWEEN ri.dtmValidFrom
+				AND ri.dtmValidTo
+			)
+		OR (
+			ri.ysnYearValidationRequired = 0
+			AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+				AND DATEPART(dy, ri.dtmValidTo)
+			)
+		)
+		AND ri.intConsumptionMethodId IN (1,2,3)
 		UNION
 		Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblPlannedQuantity/r.dblQuantity)) AS RequiredQty,1 AS ysnIsSubstitute,0,0,rs.intItemId
 		From tblMFRecipeSubstituteItem rs 
