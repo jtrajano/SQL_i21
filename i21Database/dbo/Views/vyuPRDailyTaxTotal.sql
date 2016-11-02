@@ -10,11 +10,12 @@ SELECT
 	,dblLiabilityMed = ISNULL(LiabilityMed.dblTotal, 0)
 	,dblTaxTotalSS = ISNULL(TaxTotalSS.dblTotal, 0)
 	,dblTaxTotalMed = ISNULL(TaxTotalMed.dblTotal, 0)
-	,dblTaxTotalAddMed = ISNULL(TaxTotalAddMed.dblTotal, 0)
+	,dblTaxTotalAddMed = ISNULL(TaxTotalMed.dblAddMedTotal, 0)
 	,dblDayTotal = ISNULL(LiabilitySS.dblTotal, 0) 
 					+ ISNULL(LiabilityMed.dblTotal, 0) 
 					+ ISNULL(TaxTotalSS.dblTotal, 0) 
 					+ ISNULL(TaxTotalMed.dblTotal, 0)
+					+ ISNULL(TaxTotalMed.dblAddMedTotal, 0)
 					+ ISNULL(FIT.dblTotal, 0)
 FROM 
 	(SELECT 
@@ -92,6 +93,7 @@ FROM
 		,intMonth	= DATEPART(MM, vyuPRPaycheckTax.dtmPayDate)
 		,intDay		= DATEPART(DD, vyuPRPaycheckTax.dtmPayDate)
 		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+		,dblAddMedTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblAdditionalMed))
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
 			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
@@ -101,26 +103,6 @@ FROM
 		DATEPART(MM, vyuPRPaycheckTax.dtmPayDate),
 		DATEPART(DD, vyuPRPaycheckTax.dtmPayDate)
 	) AS TaxTotalMed
-	ON Months.intMonth = TaxTotalMed.intMonth 
-		AND Months.intQuarter = TaxTotalMed.intQuarter
-		AND Months.intYear = TaxTotalMed.intYear
-		AND Months.intDay = TaxTotalMed.intDay
-	LEFT JOIN
-	(SELECT 
-		intYear		= DATEPART(YY, vyuPRPaycheckTax.dtmPayDate)
-		,intQuarter = DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate)
-		,intMonth	= DATEPART(MM, vyuPRPaycheckTax.dtmPayDate)
-		,intDay		= DATEPART(DD, vyuPRPaycheckTax.dtmPayDate)
-		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblAdditionalMed))
-	 FROM vyuPRPaycheckTax
-	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
-			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
-	 GROUP BY 
-		DATEPART(YY, vyuPRPaycheckTax.dtmPayDate), 
-		DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate), 
-		DATEPART(MM, vyuPRPaycheckTax.dtmPayDate),
-		DATEPART(DD, vyuPRPaycheckTax.dtmPayDate)
-	) AS TaxTotalAddMed
 	ON Months.intMonth = TaxTotalMed.intMonth 
 		AND Months.intQuarter = TaxTotalMed.intQuarter
 		AND Months.intYear = TaxTotalMed.intYear

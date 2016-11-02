@@ -360,7 +360,7 @@ BEGIN
 			AND dbl121Days  <> 0
 		) ABC
 	END
- 						
+								
 		WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
 		BEGIN
 			DECLARE @PlaceHolderId				INT
@@ -391,7 +391,7 @@ BEGIN
 						,@NotTableQuery	VARCHAR(MAX)
 
 				SET @NotTableQuery = 'DECLARE @SetQuery				VARCHAR(MAX)
-												,@InsertQuery		VARCHAR(MAX)							 
+												,@InsertQuery		VARCHAR(MAX)							 						
 
 										IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
 										CREATE TABLE #Records(
@@ -421,7 +421,14 @@ BEGIN
 										WHERE 
 											[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))	+ '  
 
-										INSERT INTO #Records (RowId, intEntityCustomerId, strValues, strDataType)
+										INSERT INTO 
+											#Records 
+										(
+											RowId
+											, intEntityCustomerId
+											, strValues
+											, strDataType
+										)
 
 										SELECT TOP 1 
 											RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
@@ -585,18 +592,52 @@ BEGIN
 
 				SET @PHQueryTable = '
 				DECLARE @HTMLTableValue NVARCHAR(MAX)
-				IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
+				IF OBJECT_ID(''tempdb..#TempRecords'') IS NOT NULL DROP TABLE #TempRecords
 				SELECT 
 					RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
 					, ' + @SourceColumn + ' 
 				INTO 
-					#Records
+					#TempRecords
 				FROM 
 					' + @SourceTable + ' 
 				WHERE 
 					[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
 				+ ' AND strInvoiceNumber IN (SELECT strInvoiceNumber FROM #TransactionLetterDetail) ORDER BY intInvoiceId DESC
-											 
+
+
+ 				IF OBJECT_ID(''tempdb..#RecordsNoRowId'') IS NOT NULL DROP TABLE #RecordsNoRowId
+				SELECT 		
+					RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))						
+					, strInvoiceNumber
+					, SUM(dblTotalDue) dblTotalDue 
+				INTO
+					#RecordsNoRowId
+				FROM 
+					#TempRecords 
+				GROUP BY strInvoiceNumber				
+								
+				IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
+				SELECT 
+					  RowId
+					, INV.dtmDate
+					, #RecordsNoRowId.strInvoiceNumber
+					, #RecordsNoRowId.dblTotalDue 
+				INTO
+					#Records
+				FROM 
+					#RecordsNoRowId
+				INNER JOIN (SELECT 
+									strInvoiceNumber
+									, dtmDate
+							FROM 
+								tblARInvoice
+							WHERE 
+								strInvoiceNumber IN (SELECT 
+															strInvoiceNumber 
+													 FROM 
+														#RecordsNoRowId) ) INV ON #RecordsNoRowId.strInvoiceNumber = INV.strInvoiceNumber				
+				ORDER BY INV.dtmDate 			
+																		 
 				DECLARE @HTMLTableRows VARCHAR(MAX)
 				SET @HTMLTableRows = ''''
 
@@ -604,13 +645,13 @@ BEGIN
 				BEGIN
 					DECLARE @RowId INT,
 						' + @Declaration + '
-					SELECT TOP 1
-						@RowId = RowId,
+					SELECT TOP 1	
+						@RowId = RowId,				
 						' + @Select + '
 					FROM 
 						#Records
 					ORDER BY
-						strInvoiceNumber		 
+						dtmDate		 
 
 					SET @HTMLTableRows = @HTMLTableRows + ''<tr> ''
 

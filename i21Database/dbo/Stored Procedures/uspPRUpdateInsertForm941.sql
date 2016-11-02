@@ -20,6 +20,7 @@ BEGIN
 			,dblTaxableSS
 			,dblTaxableSSTips
 			,dblTaxableMed
+			,dblTaxableAddMed
 			,dblTaxDueUnreported
 			,dblAdjustFractionCents
 			,dblAdjustSickPay
@@ -68,7 +69,8 @@ BEGIN
 								) <= 0) THEN 1 ELSE 0 END
 			,dblTaxableSS = (SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)) / 0.124
 			,dblTaxableSSTips = (SSTAX.dblTotal * TIPS.dblTipsPercent) / 0.124
-			,dblTaxableMed = (SSMED.dblTotal) / 0.029
+			,dblTaxableMed = ((SSMED.dblTotal) - (ADDMED.dblTotal)) / 0.029
+			,dblTaxableAddMed = (ADDMED.dblTotal) / 0.009
 			,dblTaxDueUnreported = 0
 			,dblAdjustFractionCents = 0
 			,dblAdjustSickPay = 0
@@ -107,6 +109,7 @@ BEGIN
 		FROM (SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) FIT,
 			 (SELECT dblTotal = SUM(dblTaxTotalSS) + SUM(dblLiabilitySS) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) SSTAX,
 			 (SELECT dblTotal = SUM(dblTaxTotalMed) + SUM(dblLiabilityMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) SSMED,
+			 (SELECT dblTotal = SUM(dblTaxTotalAddMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) ADDMED,
 			 (SELECT dblMonthTotal = SUM(dblMonthTotal) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (1, 4, 7, 10)) MONTH1,
 			 (SELECT dblMonthTotal = SUM(dblMonthTotal) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (2, 5, 8, 11)) MONTH2,
 			 (SELECT dblMonthTotal = SUM(dblMonthTotal) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (3, 6, 9, 12)) MONTH3,
@@ -146,12 +149,14 @@ BEGIN
 			,dblTaxableSS = (SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)) / 0.124
 			,dblTaxableSSTips = (SSTAX.dblTotal * TIPS.dblTipsPercent) / 0.124
 			,dblTaxableMed = (SSMED.dblTotal) / 0.029
+			,dblTaxableAddMed = (ADDMED.dblTotal) / 0.009
 			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotal, 0))
 			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotal, 0))
 			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotal, 0))
 		FROM (SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) FIT,
 			 (SELECT dblTotal = SUM(dblTaxTotalSS) + SUM(dblLiabilitySS) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) SSTAX,
 			 (SELECT dblTotal = SUM(dblTaxTotalMed) + SUM(dblLiabilityMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) SSMED,
+			 (SELECT dblTotal = SUM(dblTaxTotalAddMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) ADDMED,
 			 (SELECT dblMonthTotal = SUM(dblMonthTotal) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (1, 4, 7, 10)) MONTH1,
 			 (SELECT dblMonthTotal = SUM(dblMonthTotal) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (2, 5, 8, 11)) MONTH2,
 			 (SELECT dblMonthTotal = SUM(dblMonthTotal) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (3, 6, 9, 12)) MONTH3,
