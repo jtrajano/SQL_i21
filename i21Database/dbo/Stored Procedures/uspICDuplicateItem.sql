@@ -160,7 +160,8 @@ BEGIN
 		strExternalGroup,
 		ysnSellableItem,
 		dblMinStockWeeks,
-		dblFullContainerSize)
+		dblFullContainerSize,
+		strCostType)
 	SELECT @NewItemNo,
 		strType,
 		strDescription,
@@ -290,7 +291,8 @@ BEGIN
 		strExternalGroup,
 		ysnSellableItem,
 		dblMinStockWeeks,
-		dblFullContainerSize
+		dblFullContainerSize,
+		strCostType
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
