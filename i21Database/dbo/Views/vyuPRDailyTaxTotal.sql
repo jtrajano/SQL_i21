@@ -15,6 +15,7 @@ SELECT
 					+ ISNULL(LiabilityMed.dblTotal, 0) 
 					+ ISNULL(TaxTotalSS.dblTotal, 0) 
 					+ ISNULL(TaxTotalMed.dblTotal, 0)
+					+ ISNULL(TaxTotalMed.dblAddMedTotal, 0)
 					+ ISNULL(FIT.dblTotal, 0)
 FROM 
 	(SELECT 
