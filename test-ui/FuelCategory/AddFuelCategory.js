@@ -8,14 +8,14 @@ StartTest (function (t) {
         .clickButton('Close')
         .clickButton('FuelCategory')
         .waitTillLoaded('icfuelcategory')
-        .enterGridData('GridTemplate', 0, 'colRinFuelCategoryCode', 'Test Fuel Category1')
-        .enterGridData('GridTemplate', 0, 'colDescription', 'Test Description 1')
-        .enterGridData('GridTemplate', 0, 'colEquivalenceValue', 'Test Equivalence Value1')
+        .enterGridData('GridTemplate', 1, 'colRinFuelCategoryCode', 'Test Fuel Category1')
+        .enterGridData('GridTemplate', 1, 'colDescription', 'Test Description 1')
+        .enterGridData('GridTemplate', 1, 'colEquivalenceValue', 'Test Equivalence Value1')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
-        .markSuccess('===== Add a record successful  =====')
+        .logSuccess('===== Add a record successful  =====')
 
         //region Scenario 2: Fuel Category - Add Multiple Records
         .displayText('===== Scenario 2: Fuel Category - Add Multiple Records  =====')
@@ -34,7 +34,7 @@ StartTest (function (t) {
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
-        .markSuccess('===== Add multiple record successful  =====')
+        .logSuccess('===== Add multiple record successful  =====')
         //endregion
 
         //region Scenario 3: Add another record, Click Close button, do NOT save the changes
@@ -46,13 +46,14 @@ StartTest (function (t) {
         .enterGridData('GridTemplate', 5, 'colEquivalenceValue', 'Test Equivalence Value5')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('no').wait(500)
+        .clickMessageBoxButton('no')
+        .waitTillLoaded()
         .clickButton('FuelCategory')
-        .verifyGridData('GridTemplate', 4, 'colRinFuelCategoryCode', '')
-        .verifyGridData('GridTemplate', 4, 'colDescription', '')
-        .verifyGridData('GridTemplate', 4, 'colEquivalenceValue', '')
+        .verifyGridData('GridTemplate', 5, 'colRinFuelCategoryCode', '')
+        .verifyGridData('GridTemplate', 5, 'colDescription', '')
+        .verifyGridData('GridTemplate', 5, 'colEquivalenceValue', '')
         .clickButton('Close')
-        .markSuccess('===== Click Close and not save record successful =====')
+        .logSuccess('===== Click Close and not save record successful =====')
         //endregion
 
         //region Scenario 4: Add another record, click Close, Cancel
@@ -64,14 +65,15 @@ StartTest (function (t) {
         .enterGridData('GridTemplate', 5, 'colEquivalenceValue', 'Test Equivalence Value5')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('cancel').wait(500)
-        .verifyGridData('GridTemplate', 4, 'colRinFuelCategoryCode', 'Test Fuel Category5')
-        .verifyGridData('GridTemplate', 4, 'colDescription', 'Test Description 5')
-        .verifyGridData('GridTemplate', 4, 'colEquivalenceValue', 'Test Equivalence Value5')
+        .clickMessageBoxButton('cancel')
+        .verifyGridData('GridTemplate', 5, 'colRinFuelCategoryCode', 'Test Fuel Category5')
+        .verifyGridData('GridTemplate', 5, 'colDescription', 'Test Description 5')
+        .verifyGridData('GridTemplate', 5, 'colEquivalenceValue', 'Test Equivalence Value5')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('no').wait(500)
-        .markSuccess('===== Click close cancel record successful  =====')
+        .clickMessageBoxButton('no')
+        .waitTillLoaded()
+        .logSuccess('===== Click close cancel record successful  =====')
         //endregion
 
 
@@ -83,11 +85,11 @@ StartTest (function (t) {
         .enterGridData('GridTemplate', 5, 'colDescription', 'Test Description 1')
         .enterGridData('GridTemplate', 5, 'colEquivalenceValue', 'Test Equivalence Value1')
         .verifyStatusMessage('Edited')
-        .clickButton('Save').wait(500)
+        .clickButton('Save')
         .verifyMessageBox('iRely i21','Fuel Category must be unique.','ok','error')
         .clickMessageBoxButton('ok')
         .clickButton('Close')
-        .markSuccess('===== Add Duplicate record scenario successful  =====')
+        .logSuccess('===== Add Duplicate record scenario successful  =====')
         //endregion
 
 
@@ -99,10 +101,11 @@ StartTest (function (t) {
         .enterGridData('GridTemplate', 5, 'colEquivalenceValue', 'Test Equivalence Value5')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
-        .clickButton('Close').wait(500)
+        .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('no').wait(500)
-        .markSuccess('===== Add description or equivalence value only is successful =====')
+        .clickMessageBoxButton('no')
+        .waitTillLoaded()
+        .logSuccess('===== Add description or equivalence value only is successful =====')
         //endregion
 
         //region Scenario 7: Add Primary Key only
@@ -113,8 +116,8 @@ StartTest (function (t) {
         .verifyStatusMessage('Edited')
         .clickButton('Save')
         .verifyStatusMessage('Saved')
-        .clickButton('Close').wait(500)
-        .markSuccess('===== Add primary key only successful  =====')
+        .clickButton('Close')
+        .logSuccess('===== Add primary key only successful  =====')
         //endregion
 
 
