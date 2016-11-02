@@ -44,6 +44,7 @@ BEGIN
 		,[dtmDate]
 		,[intCurrencyId]
 		,[dblExchangeRate]
+		,[intEntityCustomerId]
 
 		-- Detail 
 		,[intInventoryShipmentItemId]
@@ -65,6 +66,7 @@ BEGIN
 		,[intOrderId]
 		,[intSourceId]
 		,[intLineNo]
+		,[intStorageScheduleTypeId]
 	)
 	EXEC dbo.uspICGetItemsFromItemShipment
 		@intShipmentId = @intTransactionId
@@ -85,26 +87,25 @@ BEGIN
 	WHERE	intInventoryShipmentId = @intTransactionId 
 END 
 
--- Update the Grain bank if the item is coming from Sales Order or Direct type. 
--- and it is not coming from Scale. 
+-- Call the Grain stored procedures. 
 BEGIN 
-	IF	@OrderType IN (@INT_ORDER_TYPE_SALES_ORDER, @INT_ORDER_TYPE_DIRECT)
-		AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) <> @INT_SOURCE_TYPE_SCALE		
+
+	IF @ysnPost = 1 --AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_SCALE		
 	BEGIN 
-		IF @ysnPost = 1
-		BEGIN 
-			EXEC dbo.uspGRShipped 
-				@ItemsFromInventoryShipment
-				,@intEntityUserSecurityId
-		END 
-		ELSE IF @ysnPost = 0 
-		BEGIN 
-			EXEC uspGRReverseTicketOpenBalance
-				   @strSourceType = 'InventoryShipment'
-				  ,@IntSourceKey = @intTransactionId 
-				  ,@intUserId = @intEntityUserSecurityId
-		END 
-	END
+		-- Call this to generate the Other Charges coming from Grain. 
+		EXEC dbo.uspGRShipped 
+			@ItemsFromInventoryShipment
+			,@intEntityUserSecurityId
+	END 
+
+	IF @ysnPost = 0 --AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_SCALE
+	BEGIN 
+		-- Call this to reverse the ticket open balance. 
+		EXEC uspGRReverseTicketOpenBalance
+				@strSourceType = 'InventoryShipment'
+				,@IntSourceKey = @intTransactionId 
+				,@intUserId = @intEntityUserSecurityId
+	END 
 END 
 
 _Exit: 

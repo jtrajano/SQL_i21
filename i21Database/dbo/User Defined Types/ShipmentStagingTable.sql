@@ -38,6 +38,8 @@
 	intOwnershipType INT NOT NULL,
 	dblQuantity NUMERIC(38, 20) NOT NULL CHECK(dblQuantity > 0),
 	intItemUOMId INT NOT NULL,
+	intStorageScheduleTypeId INT NULL,
+
 	-- This is used to group lots for lotted items
 	intItemLotGroup INT NULL,
 

@@ -22,7 +22,7 @@ SELECT
 , dtmLastStatementDate		= (SELECT TOP 1 [dtmLastStatementDate] FROM [tblARStatementOfAccount] WHERE strEntityNo = CAR.strEntityNo)
 , dtmNextPaymentDate		= CB.dtmBudgetDate
 , dblUnappliedCredits		= CAR.dblCredits
-, dblPrepaids				= CAR.dblPrepaids
+, dblPrepaids				= CAR.dblPrepaids + CAR.dblPrepayments
 , dblFuture					= CAR.dblFuture
 , dblBudgetAmount			= ISNULL(dbo.fnARGetCustomerBudget(CAR.intEntityCustomerId, GETDATE()), 0.000000) 
 , dblBudgetMonth			= ISNULL((SELECT dblMonthlyBudget FROM tblARCustomer WHERE intEntityCustomerId = CAR.intEntityCustomerId), 0.000000)

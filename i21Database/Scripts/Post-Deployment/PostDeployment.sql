@@ -328,6 +328,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\031_UpdatePhoneAreaLength.sql
 :r .\EM\032_MigrateVendorApprovalList.sql
 :r .\EM\033_UpdateUserSecurityAdmin.sql
+:r .\EM\034_UpdateEntityEmail.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
@@ -355,6 +356,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_TaxReportSProc.sql
 :r .\TF\DefaultData\_TaxReportTemplate.sql
 :r .\TF\DefaultData\_TerminalControlNumber.sql
+:r .\TF\DefaultData\_IntegrationSystem.sql
 
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql

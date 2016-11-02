@@ -35,15 +35,14 @@ DECLARE @intContractDetailId AS INT,
 
 BEGIN 
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId
-	FROM	dbo.tblSCTicket SC	        
-			JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+	FROM	dbo.tblSCTicket SC 
+	LEFT JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
 	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 END
 
 BEGIN 
 	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId, @intContractDetailId = SC.intContractId
-		FROM	dbo.tblICItemUOM UM	
-	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
 
@@ -122,10 +121,10 @@ SELECT
 		--									WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
 		--										AND ItemUOM.intItemId = SC.intItemId
 		--							 )
-		,intCostUOMId				= (select intPriceItemUOMId from tblCTContractDetail  where intContractDetailId = LI.intTransactionDetailId)	   
+		,intCostUOMId				= CNT.intPriceItemUOMId
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
-										WHEN LI.intTransactionDetailId IS NOT NULL THEN (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = LI.intTransactionDetailId)
+										WHEN LI.intTransactionDetailId IS NOT NULL THEN CNT.intContractHeaderId
 									  END
 		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
@@ -152,7 +151,7 @@ SELECT
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId 
 		AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+		LEFT JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 

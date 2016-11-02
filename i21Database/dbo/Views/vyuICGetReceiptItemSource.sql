@@ -11,6 +11,7 @@ SELECT
 		CASE WHEN Receipt.intSourceType = 1 THEN 'Scale'
 			WHEN Receipt.intSourceType = 2 THEN 'Inbound Shipment'
 			WHEN Receipt.intSourceType = 3 THEN 'Transport'
+			WHEN Receipt.intSourceType = 4 THEN 'Settle Storage'
 			WHEN Receipt.intSourceType = 0 THEN 'None'
 		END),
 	strOrderNumber = 
@@ -47,6 +48,8 @@ SELECT
 				THEN ISNULL(LogisticsView.strLoadNumber, '')
 			WHEN Receipt.intSourceType = 3 -- Transport
 				THEN ISNULL(TransportView_New.strTransaction, TransportView_Old.strTransaction) 
+			WHEN Receipt.intSourceType = 4 -- Settle Storage
+				THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 
 			ELSE NULL
 			END
 		),
@@ -197,9 +200,11 @@ SELECT
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+
 LEFT JOIN vyuCTContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Contract'
+
 LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
 	ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
 		AND intLoadContainerId = ReceiptItem.intContainerId
@@ -209,7 +214,6 @@ LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
 LEFT JOIN vyuTRTransportReceipt_New TransportView_New
 	ON TransportView_New.intTransportReceiptId = ReceiptItem.intSourceId
 		AND Receipt.intSourceType = 3
-
 LEFT JOIN vyuTRTransportReceipt_Old TransportView_Old
 	ON TransportView_Old.intTransportReceiptId = ReceiptItem.intSourceId
 	AND Receipt.intSourceType = 3
@@ -217,6 +221,11 @@ LEFT JOIN vyuTRTransportReceipt_Old TransportView_Old
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Order'
+
 LEFT JOIN vyuICGetInventoryTransferDetail TransferView
 	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Transfer Order'
+
+LEFT JOIN vyuGRStorageSearchView
+	ON vyuGRStorageSearchView.intCustomerStorageId = ReceiptItem.intSourceId
+	AND Receipt.intSourceType = 4

@@ -6,7 +6,7 @@ AS
 		,strManufacturerID = A.strManufacturerID
 		,strManufacturerName = A.strManufacturerName
 		,strInventoryStatusType = E.strInventoryStatusType
-		,strSiteNumber = RIGHT('000'+ CAST(C.intSiteNumber AS VARCHAR(3)),3)
+		,strSiteNumber = RIGHT('000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
 		,strSiteAddress = C.strSiteAddress
 		,strCustomerID = G.strEntityNo
 		,strCustomerName = G.strName

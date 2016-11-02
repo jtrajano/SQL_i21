@@ -61,5 +61,4 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ShipmentItem.intGradeId
 	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ShipmentItem.intDiscountSchedule
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ShipmentItem.intCurrencyId
-	LEFT JOIN tblGRCustomerStorage CustomerStorage ON CustomerStorage.intCustomerStorageId = ShipmentItem.intCustomerStorageId
-	LEFT JOIN tblGRStorageType StorageType ON StorageType.intStorageScheduleTypeId = CustomerStorage.intStorageTypeId
+	LEFT JOIN tblGRStorageType StorageType ON StorageType.intStorageScheduleTypeId = ShipmentItem.intStorageScheduleTypeId

@@ -4369,7 +4369,6 @@
     <Build Include="dbo\Functions\fnARConvertLetterMessage.sql" />
     <Build Include="dbo\Functions\fnARGetRowsFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspARCollectionLetter.sql" />
-    <Build Include="dbo\Views\vyuARCollectionCreditViewReport.sql" />
     <Build Include="dbo\Views\vyuARCollectionOverdueReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\23_AddDefaultCollectionLetters.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
@@ -4420,6 +4419,29 @@
     <Build Include="dbo\Functions\fnCTGetFranchiseReweights.sql" />
     <Build Include="dbo\Functions\fnCreateCostAdjGLDescription.sql" />
     <Build Include="dbo\Functions\fnTMComputeNewBurnRateTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalanceHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetGrainInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetInventoryBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCompanyOwnership.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBeforeShipmentDelete.sql" />
+    <Build Include="dbo\Views\vyuAPClaimsDetails.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationTransaction.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationItemProductCode.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationSystem.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationError.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFOriginDataIntegration.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_IntegrationSystem.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistributionOutbound.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCollectionOverdueDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSearchLetterCustomer.sql" />
+    <Build Include="dbo\Tables\tblARCollectionOverdue.sql" />
+    <Build Include="dbo\Tables\tblARCollectionOverdueDetail.sql" />
+    <Build Include="dbo\Functions\fnGetDaysInMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutureAndBasisPrice.sql" />
+    <Build Include="dbo\Views\vyuARCollectionCustomerReport.sql" />
+    <None Include="Scripts\Post-Deployment\EM\034_UpdateEntityEmail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBudgetMaintenance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

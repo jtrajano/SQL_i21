@@ -177,16 +177,13 @@ BEGIN
 
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
 	SELECT 3 AS intSeqId,'Purchase In-Transit',@strDescription,'Purchase In-Transit' AS [strType],
-	dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ReserveQty, 0) - isnull(dblContractPQty,0)) 
+	dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ReserveQty, 0)) 
 	 AS dblTotal,strLocationName,strItemNo,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
 	FROM (
 			SELECT i.intUnitMeasureId,			
 			isnull(i.dblPurchaseContractShippedQty, 0) as ReserveQty,
 			i.strLocationName,i.strItemNo,
-			i.strContractNumber,
-			 (SELECT SUM(isnull(sri.dblOpenReceive, 0)) from tblICInventoryReceiptItem sri 
-                                  WHERE i.intContractDetailId=sri.intLineNo 
-                                  )  dblContractPQty 			 
+			i.strContractNumber			 
 			FROM vyuRKPurchaseIntransitView i
 			WHERE i.intCommodityId = @intCommodityId
 			AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end					
@@ -514,16 +511,13 @@ BEGIN
 
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
 	SELECT 3 AS intSeqId,'Purchase In-Transit',@strDescription,'Purchase In-Transit' AS [strType],
-	dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ReserveQty, 0) - isnull(dblContractPQty,0)) 
+	dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ReserveQty, 0)) 
 	 AS dblTotal,strLocationName,strItemNo,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
 	FROM (
 			SELECT i.intUnitMeasureId,			
 			isnull(i.dblPurchaseContractShippedQty, 0) as ReserveQty,
 			i.strLocationName,i.strItemNo,
-			i.strContractNumber,
-			 (SELECT SUM(isnull(sri.dblOpenReceive, 0)) from tblICInventoryReceiptItem sri 
-                                  WHERE i.intContractDetailId=sri.intLineNo 
-                                  )  dblContractPQty 			 
+			i.strContractNumber
 			FROM vyuRKPurchaseIntransitView i
 			WHERE i.intCommodityId = @intCommodityId
 			AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end
@@ -773,7 +767,7 @@ FROM @Final  t
 END
 
 SELECT @mRowNumber = MIN(intCommodityIdentity)	FROM @Commodity	WHERE intCommodityIdentity > @mRowNumber
-END
+END  
 END
 
 if isnull(@intVendorId,0) = 0

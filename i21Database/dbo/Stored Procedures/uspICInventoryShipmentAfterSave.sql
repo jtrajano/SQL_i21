@@ -66,7 +66,7 @@ BEGIN
 	FROM	tblICInventoryShipment
 	WHERE	intInventoryShipmentId = @ShipmentId
 END
-			
+
 -- Create snapshot of Shipment Items before Save
 SELECT	intInventoryShipmentId = intTransactionId
 		,intInventoryShipmentItemId = intTransactionDetailId

@@ -24,8 +24,12 @@ SELECT DISTINCT
 							CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0))   
  ,dblTotalTaxableMed =		/* box5c2 = box5c1 x 0.029*/ 
 							CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)
+ ,dblTaxableAddMed =			/* box5c1 */ 
+							CONVERT(NUMERIC(18,2), ISNULL(dblTaxableAddMed, 0))   
+ ,dblTotalTaxableAddMed =		/* box5c2 = box5c1 x 0.029*/ 
+							CONVERT(NUMERIC(18,2), ISNULL(dblTaxableAddMed, 0) * 0.009)
  ,dblTotalSSMed =			/* box5e = box5a2 + box5b2 + box5c2 + box5d2 */ 
-							CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029))
+							CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029) + (ISNULL(dblTaxableAddMed, 0) * 0.009))
  ,dblTaxDueUnreported =		/* box5f */ 
 							CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
  ,dblAdjustSickPay =		/* box7 */ 
@@ -37,32 +41,32 @@ SELECT DISTINCT
  ,dblAdjustedToSSMed =		/* (total adjustments) = box7 + box8 + box9 */
 							ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0)
  ,dblAdjSSMedTaxes =		/* box5e + total adjustments */
-							(CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029))
+							CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029) + (ISNULL(dblTaxableAddMed, 0) * 0.009))
 							+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0)
  ,dblTotalTaxes =			/* box6 = box3 + box5f + box5e */
 							ISNULL(dblFIT, 0)
 							+ ISNULL(dblTaxDueUnreported, 0)
-							+ (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029))
+							+ CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029) + (ISNULL(dblTaxableAddMed, 0) * 0.009))
  ,dblNetTaxes =				/* box10 = box6 + (total adjustments) */
 							ISNULL(dblFIT, 0)
-							+ (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) 
+							+ CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029) + (ISNULL(dblTaxableAddMed, 0) * 0.009)) 
 							+ ISNULL(dblTaxDueUnreported, 0)
 							+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0)
  ,dblTotalDeposit =			/* box11 */ 
 							CONVERT(NUMERIC(18,2), ISNULL(dblTotalDeposit,0))
  ,dblBalanceDue =			/* box12 = if box10 > box 11 then box10 - box11 */
-							CASE WHEN ((CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) + ISNULL(dblFIT, 0) 
+							CASE WHEN (CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029) + (ISNULL(dblTaxableAddMed, 0) * 0.009)) + ISNULL(dblFIT, 0) 
 										+ CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
 										+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0)) > ISNULL(dblTotalDeposit,0)   
-								 THEN ((CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) + ISNULL(dblFIT, 0) 
+								 THEN (CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029) + (ISNULL(dblTaxableAddMed, 0) * 0.009)) + ISNULL(dblFIT, 0) 
 										+ CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
 										+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0)) - ISNULL(dblTotalDeposit,0)
 								 ELSE 0 END
  ,dblOverPayment =			/* box13 = if box10 < box 11 then box10 - box11 */
-							CASE WHEN ISNULL(dblTotalDeposit,0) > ((CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) + ISNULL(dblFIT, 0) 
+							CASE WHEN ISNULL(dblTotalDeposit,0) > (CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029) + (ISNULL(dblTaxableAddMed, 0) * 0.009)) + ISNULL(dblFIT, 0) 
 										+ CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
 										+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0))
-								 THEN ISNULL(dblTotalDeposit,0) - ((CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) + ISNULL(dblFIT, 0) 
+								 THEN ISNULL(dblTotalDeposit,0) - (CONVERT(NUMERIC(18,2), (ISNULL(dblTaxableSS, 0) * 0.124) + (ISNULL(dblTaxableSSTips, 0) * 0.124) + (ISNULL(dblTaxableMed, 0) * 0.029) + (ISNULL(dblTaxableAddMed, 0) * 0.009)) + ISNULL(dblFIT, 0) 
 										+ CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
 										+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0))
 								 ELSE 0 END

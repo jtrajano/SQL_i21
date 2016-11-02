@@ -3,7 +3,7 @@ AS
 	SELECT 
 	strKey = C.strEntityNo
 	,strCustomerName = C.strName
-	,strPhone = G.strPhone
+	,strPhone = EP.strPhone
 	,intCustomerID = B.intCustomerID 
 	,strDescription = A.strDescription
 	,strLocation = E.strLocationName
@@ -87,5 +87,7 @@ AS
 		ON A.intRouteId = P.intRouteId
 	LEFT JOIN tblSMTaxGroup Q
 		ON A.intTaxStateID = Q.intTaxGroupId
+	LEFT JOIN tblEMEntityPhoneNumber EP
+		ON G.intEntityId = EP.intEntityId  
 	WHERE ISNULL(D.ysnActive,0) = 1
 GO

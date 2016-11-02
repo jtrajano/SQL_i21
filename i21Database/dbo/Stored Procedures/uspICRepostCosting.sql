@@ -454,6 +454,11 @@ BEGIN
 										ELSE 
 											ItemPricing.dblStandardCost
 									END 
+					,dblSalePrice = 
+						CASE	WHEN StockToUpdate.Qty > 0 AND ISNULL(ItemPricing.dblStandardCost, 0) = 0 AND ItemPricing.strPricingMethod = 'Markup Standard Cost' THEN 
+									StockToUpdate.Cost + (StockToUpdate.Cost * (ItemPricing.dblAmountPercent / 100))
+								ELSE ItemPricing.dblSalePrice
+						END 
 
 		-- If none found, insert a new item pricing record
 		WHEN NOT MATCHED THEN 

@@ -53,6 +53,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[dtmCreated] DATETIME NULL, 
 		[strDescription] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 
 		[intFobPointId] TINYINT NULL,
+		[ysnNoGLPosting] BIT NULL DEFAULT 0, 
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 

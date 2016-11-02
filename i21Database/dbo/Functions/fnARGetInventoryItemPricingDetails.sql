@@ -210,7 +210,10 @@ BEGIN
 		tblICItemPricingLevel ICPL
 	INNER JOIN vyuICGetItemStock ICGIS
 			ON ICPL.intItemId = ICGIS.intItemId
-			AND ICPL.intItemLocationId = ICGIS.intItemLocationId					
+			AND ICPL.intItemLocationId = ICGIS.intItemLocationId
+	INNER JOIN tblSMCompanyLocationPricingLevel SMPL
+			ON ICGIS.intLocationId = SMPL.intCompanyLocationId 
+			AND ICPL.strPriceLevel = SMPL.strPricingLevelName							
 	INNER JOIN
 		tblEMEntityLocation EMEL
 			ON ICGIS.intLocationId = EMEL.intWarehouseId 
@@ -218,11 +221,10 @@ BEGIN
 	INNER JOIN
 		tblARCustomer ARC
 			ON EMEL.intEntityId = ARC.intEntityCustomerId 
-			AND ICPL.intItemPricingLevelId = ARC.intCompanyLocationPricingLevelId
-			
+			AND SMPL.intCompanyLocationPricingLevelId  = ARC.intCompanyLocationPricingLevelId			
 	INNER JOIN vyuICGetItemStock VIS
 			ON ICPL.intItemId = VIS.intItemId
-			AND ICPL.intItemLocationId = VIS.intItemLocationId												
+			AND ICPL.intItemLocationId = VIS.intItemLocationId											
 	WHERE
 		ARC.intEntityCustomerId = @CustomerId
 		AND ICPL.intItemId = @ItemId

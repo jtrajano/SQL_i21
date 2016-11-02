@@ -261,7 +261,9 @@ DECLARE
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
 		,[ysnClearDetailTaxes]
-		,[intTempDetailIdForTaxes])
+		,[intTempDetailIdForTaxes]
+		,[intSubCurrencyId]
+		,[dblSubCurrencyRate])
 	SELECT
 		 [strSourceTransaction]					= 'Load Schedule'
 		,[intSourceId]							= @intLoadId
@@ -355,6 +357,8 @@ DECLARE
 		,[ysnVirtualMeterReading]				= 0
 		,[ysnClearDetailTaxes]					= 0
 		,[intTempDetailIdForTaxes]				= NULL
+		,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
+		,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 	FROM vyuARShippedItems ARSI
 	WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 	  AND ARSI.[intLoadId] = @intLoadId

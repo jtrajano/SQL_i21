@@ -18,9 +18,10 @@ DECLARE @log TABLE
 (
 	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
-DECLARE @intPayablesCategory INT
+DECLARE @intPayablesCategory INT, @prepaymentCategory INT;
 
 SELECT @intPayablesCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account'
+SELECT @prepaymentCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Vendor Prepayments'
 
 --GET THE BALANCE
 IF OBJECT_ID(N'tempdb..#tmpAPGLAccountBalance') IS NOT NULL DROP TABLE #tmpAPGLAccountBalance
@@ -33,7 +34,7 @@ SELECT
 FROM tblGLDetail A
 INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
-WHERE D.intAccountCategoryId = 1
+WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
 AND A.ysnIsUnposted = 0
 GROUP BY B.strAccountId
 

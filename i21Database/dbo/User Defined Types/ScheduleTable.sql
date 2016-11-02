@@ -45,4 +45,10 @@
 	,intThirdPreferenceCellId INT
 	,intNoOfFlushes int
 	,intScheduleId int
+	,intNoOfOrgUnit INT
+	,intRequiredDuration int
+	,intAvailableDuration int
+	,ysnUnableToSchedule bit
+	,intCalendarDetailId int
+	,intPickedWorkOrder int
 )

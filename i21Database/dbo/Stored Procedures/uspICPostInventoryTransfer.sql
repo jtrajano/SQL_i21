@@ -129,6 +129,53 @@ BEGIN
 	GOTO Post_Exit
 END
 
+-- Check if transferring to the same company location and shipment is required
+IF @ysnPost = 1
+BEGIN
+	IF EXISTS(SELECT TOP 1 1
+		FROM tblICInventoryTransfer tf
+			INNER JOIN tblICInventoryTransferDetail tfd ON tfd.intInventoryTransferId = tf.intInventoryTransferId
+		WHERE tf.intInventoryTransferId = @intTransactionId
+			AND (tf.ysnShipmentRequired = 1 AND tf.intFromLocationId = tf.intToLocationId)
+	)
+	BEGIN
+		RAISERROR('Posting is not allowed when shipping items within the same company location.', 11, 1)
+		GOTO Post_Exit
+	END
+
+	-- Check if transferring to the same storage or sub location in one company location.
+	DECLARE @SameSubLoc BIT
+	DECLARE @SameStorageLoc BIT
+	DECLARE @HaveStorageLoc BIT
+	DECLARE @HaveSubLoc BIT
+
+	SELECT TOP 1 @SameSubLoc = CASE WHEN tfd.intFromSubLocationId = tfd.intToSubLocationId THEN 1 ELSE 0 END,
+		@SameStorageLoc	= CASE WHEN tfd.intFromStorageLocationId = tfd.intToStorageLocationId THEN 1 ELSE 0 END,
+		@HaveStorageLoc = CASE WHEN tfd.intFromStorageLocationId IS NOT NULL AND tfd.intToStorageLocationId IS NOT NULL AND NOT (tfd.intFromStorageLocationId IS NULL AND tfd.intToStorageLocationId IS NULL) THEN 1 ELSE 0 END,
+		@HaveSubLoc = CASE WHEN tfd.intFromSubLocationId IS NOT NULL AND tfd.intToSubLocationId IS NOT NULL AND NOT (tfd.intFromSubLocationId IS NULL AND tfd.intToSubLocationId IS NULL) THEN 1 ELSE 0 END
+	FROM tblICInventoryTransfer tf
+		INNER JOIN tblICInventoryTransferDetail tfd ON tfd.intInventoryTransferId = tf.intInventoryTransferId
+	WHERE tf.intInventoryTransferId = @intTransactionId
+		AND tf.intFromLocationId IS NOT NULL
+		AND tf.intToLocationId IS NOT NULL
+		AND ((tfd.intFromSubLocationId IS NOT NULL AND tfd.intToSubLocationId IS NOT NULL)
+		OR (tfd.intFromStorageLocationId IS NOT NULL AND tfd.intToStorageLocationId IS NOT NULL))
+
+	IF @HaveStorageLoc = 1 OR @HaveSubLoc = 1
+	BEGIN
+		IF (@SameSubLoc = 1 AND @SameStorageLoc = 1) OR (@SameSubLoc = 1 AND @HaveStorageLoc = 0)
+		BEGIN
+			RAISERROR('Transferring items within the same location is not allowed.', 11, 1)
+			GOTO Post_Exit
+		END
+	END
+	ELSE
+	BEGIN
+		RAISERROR('Please specify the sublocations or storage locations.', 11, 1)
+		GOTO Post_Exit
+	END
+END
+
 IF EXISTS(SELECT TOP 1 1 FROM #tempValidateItemLocation)
 BEGIN
 	DECLARE @ItemId NVARCHAR(100),

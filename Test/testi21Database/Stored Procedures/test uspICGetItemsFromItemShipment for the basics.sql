@@ -37,6 +37,7 @@ BEGIN
 			,[dtmDate]
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[intEntityCustomerId]
 			-- Detail 
 			,[intInventoryShipmentItemId]
 			,[intItemId]
@@ -57,6 +58,7 @@ BEGIN
 			,[intOrderId]
 			,[intSourceId]
 			,[intLineNo]
+			,[intStorageScheduleId]
 		)
 		SELECT 
 			-- Header
@@ -67,6 +69,7 @@ BEGIN
 			,[dtmDate]
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[intEntityCustomerId]
 			-- Detail 
 			,[intInventoryShipmentItemId]
 			,[intItemId]
@@ -87,6 +90,7 @@ BEGIN
 			,[intOrderId]
 			,[intSourceId]
 			,[intLineNo]
+			,[intStorageScheduleId]
 		FROM @result
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

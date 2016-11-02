@@ -28,7 +28,7 @@ SELECT A.strCustomerName
      , A.strEntityNo
      , A.intEntityCustomerId
      , dblCreditLimit       = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
-     , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
+     , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
      , dblFuture            = 0.000000
 	 , dbl0Days				= SUM(B.dbl0Days)
      , dbl10Days            = SUM(B.dbl10Days)
@@ -36,9 +36,10 @@ SELECT A.strCustomerName
      , dbl60Days            = SUM(B.dbl60Days)
      , dbl90Days            = SUM(B.dbl90Days)
      , dbl91Days            = SUM(B.dbl91Days)
-     , dblTotalDue          = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
+     , dblTotalDue          = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
      , dblAmountPaid        = SUM(A.dblAmountPaid)
      , dblCredits           = SUM(B.dblAvailableCredit) * -1
+	 , dblPrepayments		= SUM(B.dblPrepayments) * -1
      , dblPrepaids          = 0.000000
      , dtmAsOfDate          = @dtmDateToLocal
      , strSalespersonName   ='strSalespersonName' 
@@ -66,6 +67,7 @@ FROM
 	    			  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 THEN 'Over 90' END    
       , I.ysnPosted
       , dblAvailableCredit		= 0
+	  , dblPrepayments			= 0
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
@@ -101,7 +103,8 @@ SELECT dtmPostDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) <= 90 THEN '61 - 90 Days'
 	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 90 THEN 'Over 90' END
      , I.ysnPosted
-     , dblAvailableCredit		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+     , dblAvailableCredit		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit') THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
+	 , dblPrepayments			= CASE WHEN I.strTransactionType = 'Customer Prepayment' THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
@@ -145,6 +148,7 @@ SELECT P.dtmDatePaid
                       WHEN DATEDIFF(DAYOFYEAR, P.dtmDatePaid, @dtmDateToLocal) > 90 THEN 'Over 90' END
      , I.ysnPosted
      , dblAvailableCredit       = ISNULL(PD.dblPayment, 0)
+	 , dblPrepayments			= 0
 FROM tblARPayment P
     INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
     LEFT JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
@@ -185,6 +189,7 @@ SELECT I.dtmPostDate
 	 					WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 THEN 'Over 90' END
         , ysnPosted				= ISNULL(I.ysnPosted, 1)
         , dblAvailableCredit	= 0 
+		, dblPrepayments		= 0
 FROM tblARInvoice I 
         INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
         INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId    
@@ -209,6 +214,7 @@ LEFT JOIN
     , dblDiscount
 	, dblInterest
     , dblAvailableCredit
+	, dblPrepayments
     , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) <= 0
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest), 0) ELSE 0 END dbl0Days
 	, CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) <= 10
@@ -231,6 +237,7 @@ FROM
       , I.dtmDueDate    
       , I.intEntityCustomerId
       , dblAvailableCredit	= 0
+	  , dblPrepayments		= 0
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
@@ -251,7 +258,8 @@ SELECT I.intInvoiceId
 	 , dblInterest			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
-     , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+     , dblAvailableCredit	= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit') THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
+	 , dblPrepayments		= CASE WHEN I.strTransactionType = 'Customer Prepayment' THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -279,7 +287,8 @@ SELECT I.intInvoiceId
      , dblInterest              = 0     
      , dtmDueDate               = P.dtmDatePaid
      , I.intEntityCustomerId
-     , dblAvailableCredit        = ISNULL(PD.dblPayment, 0)
+     , dblAvailableCredit       = ISNULL(PD.dblPayment, 0)
+	 , dblPrepayments			= 0
 FROM tblARPayment P
     INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
     LEFT JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId 
@@ -305,6 +314,7 @@ SELECT I.intInvoiceId
     , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
     , I.intEntityCustomerId
     , dblAvailableCredit	= 0
+	, dblPrepayments		= 0
 FROM tblARInvoice I 
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
@@ -323,6 +333,7 @@ AND A.intInvoiceId		 = B.intInvoiceId
 AND A.dblInvoiceTotal	 = B.dblInvoiceTotal
 AND A.dblAmountPaid		 = B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
+AND A.dblPrepayments	 = B.dblPrepayments
 
 WHERE
 	(A.intEntityCustomerId = @intEntityCustomerIdLocal AND ISNULL(@intEntityCustomerIdLocal,0) <> 0)

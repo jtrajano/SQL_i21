@@ -136,6 +136,8 @@ DECLARE @CostBucketId AS INT
 		,@InventoryTransactionIdentityId AS INT
 		,@OriginalCost AS NUMERIC(38,20)
 		,@dblNewCalculatedCost AS NUMERIC(38,20)
+		,@InventoryTransactionIdentityId_SoldOrUsed AS INT 
+		,@ysnNoGLPosting_ForInvTransfer AS BIT = 0 
 
 DECLARE @InvTranId AS INT
 		,@InvTranQty AS NUMERIC(38,20)
@@ -164,7 +166,6 @@ DECLARE @dblRemainingQty AS NUMERIC(38,20)
 		,@AdjustedQty AS NUMERIC(38,20) 
 		,@AdjustableQty AS NUMERIC(38,20)
 		,@dblNewCost AS NUMERIC(38,20)
-		,@strLotNumber AS NVARCHAR(50)
 
 		,@dblAdjustQty AS NUMERIC(38,20)
 		,@intInventoryTrnasactionId_EscalateValue AS INT 
@@ -386,6 +387,31 @@ BEGIN
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 
+		-- Check if gl entries are required for inventory transfer
+		IF @CostAdjustmentTransactionType = @INV_TRANS_TYPE_Revalue_Transfer 
+		BEGIN 
+			SET @ysnNoGLPosting_ForInvTransfer = 1
+			SELECT	TOP 1 
+					@ysnNoGLPosting_ForInvTransfer = 0
+			FROM	tblICInventoryTransaction t_lvl_0
+					OUTER APPLY (
+						SELECT	intCount = COUNT(1)  
+						FROM	tblICInventoryTransaction t_lvl_1
+						WHERE	t_lvl_1.strTransactionId = t_lvl_0.strTransactionId
+								AND t_lvl_1.strBatchId = t_lvl_0.strBatchId
+								AND t_lvl_1.ysnIsUnposted = 0 
+								AND t_lvl_1.intInventoryTransactionId <> t_lvl_0.intInventoryTransactionId
+								AND ISNULL(t_lvl_1.intItemLocationId, 0) <> ISNULL(t_lvl_0.intItemLocationId, 0)
+					) non_matching_location
+			WHERE	t_lvl_0.strTransactionId = @CostBucketStrTransactionId
+					AND t_lvl_0.ysnIsUnposted = 0 
+					AND ISNULL(non_matching_location.intCount, 0) > 0 
+
+			UPDATE	tblICInventoryTransaction
+			SET		ysnNoGLPosting = @ysnNoGLPosting_ForInvTransfer
+			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+		END 
+
 		-- Log original cost to tblICInventoryActualCostAdjustmentLog
 		IF NOT EXISTS (
 				SELECT	TOP 1 1 
@@ -449,11 +475,11 @@ BEGIN
 	BEGIN 
 		-- Get the Lot Out records. 
 		DECLARE @ActualCostOutId AS INT 
-				,@ActualCostOutInventoryLotId AS INT 
+				,@ActualCostOutInventoryActualCostId AS INT 
 				,@ActualCostOutInventoryTransactionId AS INT 
 				,@ActualCostOutRevalueLotId AS INT 
 				,@ActualCostOutQty AS NUMERIC(38,20)
-				,@LotCostAdjustQty AS NUMERIC(38,20)
+				,@ActualCostAdjustQty AS NUMERIC(38,20)
 
 				,@StockQtyAvailableToRevalue AS NUMERIC(38,20) = @dblAdjustQty
 				,@StockQtyToRevalue AS NUMERIC(38,20) = @dblAdjustQty
@@ -492,11 +518,11 @@ BEGIN
 		-- Initial fetch attempt
 		FETCH NEXT FROM loopActualCostOut INTO 
 				@ActualCostOutId
-				,@ActualCostOutInventoryLotId 
+				,@ActualCostOutInventoryActualCostId 
 				,@ActualCostOutInventoryTransactionId 
 				,@ActualCostOutRevalueLotId 
 				,@ActualCostOutQty 
-				,@LotCostAdjustQty
+				,@ActualCostAdjustQty
 		;
 		-----------------------------------------------------------------------------------------------------------------------------
 		-- Start of the loop for sold/produced items. 
@@ -544,7 +570,7 @@ BEGIN
 
 			-- Calculate the available 'out' stocks that the system can revalue. 
 			SELECT @StockQtyAvailableToRevalue = 
-						CASE	WHEN @dblNewValue IS NULL THEN ISNULL(@ActualCostOutQty, 0) - ISNULL(@LotCostAdjustQty, 0)
+						CASE	WHEN @dblNewValue IS NULL THEN ISNULL(@ActualCostOutQty, 0) - ISNULL(@ActualCostAdjustQty, 0)
 								ELSE ISNULL(@ActualCostOutQty, 0)
 						END 
 		
@@ -555,6 +581,14 @@ BEGIN
 								ELSE 0 
 						END
 			BEGIN 
+				-- Flag the escalated inventory transaction not to create the gl entries if it has a lot out. 
+				UPDATE t
+				SET		ysnNoGLPosting = 1
+				FROM	tblICInventoryTransaction t
+				WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId
+						AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
+						AND ISNULL(t.ysnNoGLPosting, 0) = 0 
+
 				-- Calculate the revalue amount for the lot-out qty. 
 				SET @InvTranValue = NULL 
 				SELECT	@InvTranValue =
@@ -605,7 +639,7 @@ BEGIN
 						,@strTransactionForm					= @strTransactionForm
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @ACTUALCOST
-						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId_SoldOrUsed OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 				END 	
@@ -678,7 +712,7 @@ BEGIN
 						,@strTransactionForm					= @strTransactionForm
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @ACTUALCOST
-						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId_SoldOrUsed OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 					
@@ -718,7 +752,7 @@ BEGIN
 							UPDATE	t
 							SET		t.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold
 							FROM	tblICInventoryTransaction t
-							WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId
+							WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId_SoldOrUsed
 									AND @intInventoryTrnasactionId_EscalateValue IS NULL 
 						END 
 					END 
@@ -798,6 +832,12 @@ BEGIN
 								,[intInTransitSourceLocationId]	= InvTran.intInTransitSourceLocationId
 						FROM	tblICInventoryTransaction InvTran
 						WHERE	intInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
+
+						-- Flag the inventory transaction not to create the gl entries
+						UPDATE t
+						SET		ysnNoGLPosting = 1
+						FROM	tblICInventoryTransaction t
+						WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId_SoldOrUsed
 					END 
 				END 
 
@@ -820,11 +860,11 @@ BEGIN
 			-- Attempt to fetch the next row from cursor. 
 			FETCH NEXT FROM loopActualCostOut INTO 
 					@ActualCostOutId
-					,@ActualCostOutInventoryLotId 
+					,@ActualCostOutInventoryActualCostId 
 					,@ActualCostOutInventoryTransactionId 
 					,@ActualCostOutRevalueLotId 
 					,@ActualCostOutQty
-					,@LotCostAdjustQty
+					,@ActualCostAdjustQty
 			; 
 		END;
 	END;

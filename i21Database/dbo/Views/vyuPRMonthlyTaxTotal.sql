@@ -9,10 +9,12 @@ SELECT
 	,dblLiabilityMed = ISNULL(LiabilityMed.dblTotal, 0)
 	,dblTaxTotalSS = ISNULL(TaxTotalSS.dblTotal, 0)
 	,dblTaxTotalMed = ISNULL(TaxTotalMed.dblTotal, 0)
+	,dblTaxTotalAddMed = ISNULL(TaxTotalMed.dblAddMedTotal, 0)
 	,dblMonthTotal = ISNULL(LiabilitySS.dblTotal, 0) 
 					+ ISNULL(LiabilityMed.dblTotal, 0) 
 					+ ISNULL(TaxTotalSS.dblTotal, 0) 
 					+ ISNULL(TaxTotalMed.dblTotal, 0)
+					+ ISNULL(TaxTotalMed.dblAddMedTotal, 0)
 					+ ISNULL(FIT.dblTotal, 0)
 FROM 
 	(SELECT 
@@ -79,6 +81,7 @@ FROM
 		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
 		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
 		,dblTotal	= SUM(vyuPRPaycheckTax.dblTotal)
+		,dblAddMedTotal = SUM(vyuPRPaycheckTax.dblAdditionalMed)
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
 			AND vyuPRPaycheckTax.strPaidBy = 'Employee'

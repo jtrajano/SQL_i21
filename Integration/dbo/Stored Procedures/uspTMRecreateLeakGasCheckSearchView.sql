@@ -78,7 +78,7 @@ BEGIN
 					INNER JOIN tblTMSiteDevice H
 						ON A.intSiteID = H.intSiteID
 					INNER JOIN tblTMDevice I
-						ON H.intSiteDeviceID = I.intDeviceId
+						ON H.intDeviceId = I.intDeviceId
 					LEFT JOIN tblTMTankType J
 						ON I.intTankTypeId = J.intTankTypeId
 					LEFT JOIN tblTMDeviceType K
