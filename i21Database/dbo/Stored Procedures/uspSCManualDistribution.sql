@@ -160,7 +160,11 @@ OPEN intListCursor;
 							IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 							BEGIN
 								IF	ISNULL(@intLoopContractId,0) != 0
-								--EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+								UPDATE tblSCTicket SET intContractId = @intLoopContractId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
+								UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
+								, intContractSequence = CT.intContractSeq
+								, strContractLocation = CT.strLocationName
+								FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
 						INSERT INTO @ItemsForItemReceipt (

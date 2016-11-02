@@ -31,15 +31,16 @@ DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
-DECLARE @strTicketInOutFlag AS NVARCHAR(1) = NULL
+DECLARE @strTicketInOutFlag AS NVARCHAR(1) = NULL,
+		@intFutureMarketId AS INT;
 
 
 BEGIN TRY
 		BEGIN 
-			SELECT	@intTicketUOM = UOM.intUnitMeasureId
+			SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId
 			FROM	dbo.tblSCTicket SC	        
-					--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
 					JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
+					LEFT JOIN dbo.tblICCommodity IC On SC.intCommodityId = IC.intCommodityId
 			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 		END
 
@@ -59,7 +60,10 @@ BEGIN TRY
 						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 						,dblQty = LI.dblUnitsDistributed 
 						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = LI.dblCost
+						,dblCost = CASE
+										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,ScaleTicket.intCommodityId,LEFT(DATENAME(MONTH, CNT.dtmEndDate), 3) + ' ' + RIGHT('0' + DATENAME(YEAR, CNT.dtmEndDate), 4),2,@intFutureMarketId,ScaleTicket.intProcessingLocationId,LI.dblCost),0)
+										ELSE LI.dblCost
+									END
 						,dblSalesPrice = 0
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
@@ -75,10 +79,10 @@ BEGIN TRY
 				FROM	@LineItems LI 
 				JOIN dbo.tblSCTicket ScaleTicket On ScaleTicket.intTicketId = LI.intTicketId
 				JOIN dbo.tblICItemUOM ItemUOM	ON ScaleTicket.intItemId = ItemUOM.intItemId AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-				JOIN dbo.tblICItemLocation ItemLocation
-				ON ScaleTicket.intItemId = ItemLocation.intItemId
+				JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId
 				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 				AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				LEFT JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = LI.intContractDetailId
 				WHERE	LI.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 			END
 		END

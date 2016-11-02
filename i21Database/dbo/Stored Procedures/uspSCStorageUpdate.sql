@@ -147,40 +147,37 @@ BEGIN TRY
 			AND ysnCustomerStorage = 0
 		IF (@dblAvailableGrainOpenBalance > 0)
 		BEGIN			  
-			    IF @dblAvailableGrainOpenBalance > @dblUnits
-				 SET @dblAvailableGrainOpenBalance = @dblUnits
-								
-				WHILE @dblAvailableGrainOpenBalance > 0
-				BEGIN
-						IF @dblAvailableGrainOpenBalance >= @dblUnits
-						BEGIN
-						SELECT	intItemId = ScaleTicket.intItemId
-								,intLocationId = ItemLocation.intItemLocationId 
-								,intItemUOMId = ItemUOM.intItemUOMId
-								,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-								,dblQty = @dblUnits 
-								,dblUOMQty = ItemUOM.dblUnitQty
-								,dblCost = 0
-								,dblSalesPrice = 0
-								,intCurrencyId = ScaleTicket.intCurrencyId
-								,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-								,intTransactionId = ScaleTicket.intTicketId
-								,intTransactionDetailId = NULL
-								,strTransactionId = ScaleTicket.strTicketNumber
-								,intTransactionTypeId = @intDirectType 
-								,intLotId = NULL 
-								,intSubLocationId = ScaleTicket.intSubLocationId
-								,intStorageLocationId = ScaleTicket.intStorageLocationId
-								,ysnIsStorage = 1
-						FROM	dbo.tblSCTicket ScaleTicket
-								INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
-								INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
-								AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-						WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
-						SET @dblAvailableGrainOpenBalance = @dblAvailableGrainOpenBalance-@dblUnits
-						GOTO CONTINUEISH
-						END
-				END
+			WHILE @dblAvailableGrainOpenBalance > 0
+			BEGIN
+				SELECT	intItemId = ScaleTicket.intItemId
+						,intLocationId = ItemLocation.intItemLocationId 
+						,intItemUOMId = ItemUOM.intItemUOMId
+						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+						,dblQty = CASE
+									WHEN @dblUnits >= @dblAvailableGrainOpenBalance THEN @dblAvailableGrainOpenBalance
+									ELSE @dblUnits
+								END
+						,dblUOMQty = ItemUOM.dblUnitQty
+						,dblCost = 0
+						,dblSalesPrice = 0
+						,intCurrencyId = ScaleTicket.intCurrencyId
+						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+						,intTransactionId = ScaleTicket.intTicketId
+						,intTransactionDetailId = NULL
+						,strTransactionId = ScaleTicket.strTicketNumber
+						,intTransactionTypeId = @intDirectType 
+						,intLotId = NULL 
+						,intSubLocationId = ScaleTicket.intSubLocationId
+						,intStorageLocationId = ScaleTicket.intStorageLocationId
+						,ysnIsStorage = 1
+				FROM	dbo.tblSCTicket ScaleTicket
+						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
+						AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+				SET @dblAvailableGrainOpenBalance = @dblAvailableGrainOpenBalance-@dblUnits
+				GOTO CONTINUEISH
+			END
 		END
 	END
 
@@ -414,7 +411,7 @@ BEGIN TRY
 				,dblUOMQty = ItemUOM.dblUnitQty
 				,dblCost = 
 				CASE 
-					WHEN ISNULL(@intDPContractId,0) > 0 THEN (ScaleTicket.dblUnitPrice - ScaleTicket.dblUnitBasis)
+					WHEN ISNULL(@intDPContractId,0) > 0 THEN ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,ScaleTicket.intCommodityId,LEFT(DATENAME(MONTH, CNT.dtmEndDate), 3) + ' ' + RIGHT('0' + DATENAME(YEAR, CNT.dtmEndDate), 4),3,IC.intFutureMarketId,ScaleTicket.intProcessingLocationId,0),0)
 					WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
 				END
 				,dblSalesPrice = 0
@@ -440,6 +437,8 @@ BEGIN TRY
 		FROM	dbo.tblSCTicket ScaleTicket
 				INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
 				INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				LEFT JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = ScaleTicket.intContractId
+				LEFT JOIN dbo.tblICCommodity IC ON IC.intCommodityId = ScaleTicket.intCommodityId
 		WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 	
 	CONTINUEISH:
