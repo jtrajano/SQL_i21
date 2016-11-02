@@ -6,3 +6,4 @@ FROM tblMFItemSubstitution s
 Join tblMFItemSubstitutionType st on s.intItemSubstitutionTypeId=st.intItemSubstitutionTypeId
 Join tblICItem i on s.intItemId=i.intItemId
 Join tblSMCompanyLocation cl on s.intLocationId=cl.intCompanyLocationId
+Where s.ysnCancelled=0
