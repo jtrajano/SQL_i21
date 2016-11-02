@@ -197,6 +197,19 @@ GO
 				ysnActivity = 1
 			WHERE strNamespace = 'CRM.view.Opportunity'
 		END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CRM.view.Campaign')
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnCustomTab], [intConcurrencyId])
+			VALUES (N'Campaign', N'Campaign', N'CRM.view.Campaign', N'CRM', N'tblCRMCampaign', 1, 1, 0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET  ysnApproval = 1, ysnCustomTab = 1
+			WHERE strNamespace = 'CRM.view.Campaign'
+		END
+
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO
