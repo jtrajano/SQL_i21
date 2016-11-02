@@ -14,7 +14,8 @@ StartTest (function (t) {
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
-        .markSuccess('===== Add a record successful  =====')
+        .logSuccess('===== Add a record successful  =====')
+        //endregion
 
         //region Scenario 2: Feed Stock UOM - Add Multiple Records
         .displayText('===== Scenario 2: Feed Stock UOM - Add Multiple Records  =====')
@@ -28,7 +29,7 @@ StartTest (function (t) {
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
-        .markSuccess('===== Add multiple records successful  =====')
+        .logSuccess('===== Add multiple records successful  =====')
         //endregion
 
 
@@ -40,13 +41,14 @@ StartTest (function (t) {
         .enterGridData('GridTemplate', 4, 'colRinFeedStockUOMCode', 'Test UOM Code4')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('no').wait(500)
+        .clickMessageBoxButton('no')
+        .waitTillLoaded()
         .clickButton('FeedStockUOM')
         .waitTillLoaded('icfeedstockuom')
-        .verifyGridData('GridTemplate', 3, 'colUOM', '')
-        .verifyGridData('GridTemplate', 3, 'colRinFeedStockUOMCode', '')
+        .verifyGridData('GridTemplate', 4, 'colUOM', '')
+        .verifyGridData('GridTemplate', 4, 'colRinFeedStockUOMCode', '')
         .clickButton('Close')
-        .markSuccess('===== Click Close and not save record successful =====')
+        .logSuccess('===== Click Close and not save record successful =====')
         //endregion
 
 
@@ -58,13 +60,14 @@ StartTest (function (t) {
         .enterGridData('GridTemplate', 4, 'colRinFeedStockUOMCode', 'Test UOM Code4')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('cancel').wait(500)
-        .verifyGridData('GridTemplate', 3, 'colUOM', '50 kg bag')
-        .verifyGridData('GridTemplate', 3, 'colRinFeedStockUOMCode', 'Test UOM Code4')
+        .clickMessageBoxButton('cancel') 
+        .verifyGridData('GridTemplate', 4, 'colUOM', '50 kg bag')
+        .verifyGridData('GridTemplate', 4, 'colRinFeedStockUOMCode', 'Test UOM Code4')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('no').wait(500)
-        .markSuccess('===== Click close cancel record successful  =====')
+        .clickMessageBoxButton('no')
+        .waitTillLoaded()
+        .logSuccess('===== Click close cancel record successful  =====')
         //endregion
 
 
@@ -75,11 +78,11 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('GridTemplate',4,'strUnitMeasure','LB','strUnitMeasure')
         .enterGridData('GridTemplate', 4, 'colRinFeedStockUOMCode', 'Test UOM Code 1')
         .verifyStatusMessage('Edited')
-        .clickButton('Save').wait(500)
+        .clickButton('Save') 
         .verifyMessageBox('iRely i21','Feed Stock UOM must be unique.','ok','error')
         .clickMessageBoxButton('ok')
         .clickButton('Close')
-        .markSuccess('===== Add Duplicate record scenario successful  =====')
+        .logSuccess('===== Add Duplicate record scenario successful  =====')
         //endregion
 
 
@@ -90,10 +93,11 @@ StartTest (function (t) {
         .enterGridData('GridTemplate', 4, 'colRinFeedStockUOMCode', 'Test UOM Code 4')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
-        .clickButton('Close').wait(500)
+        .clickButton('Close') 
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('no').wait(500)
-        .markSuccess('===== Add description or equivalence value only is successful =====')
+        .clickMessageBoxButton('no')
+        .waitTillLoaded()
+        .logSuccess('===== Add description or equivalence value only is successful =====')
         //endregion
 
 
@@ -105,8 +109,8 @@ StartTest (function (t) {
         .verifyStatusMessage('Edited')
         .clickButton('Save')
         .verifyStatusMessage('Saved')
-        .clickButton('Close').wait(500)
-        .markSuccess('===== Add primary key only successful  =====')
+        .clickButton('Close') 
+        .logSuccess('===== Add primary key only successful  =====')
         //endregion*/
 
 
