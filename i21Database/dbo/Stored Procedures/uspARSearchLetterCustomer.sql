@@ -211,6 +211,8 @@ BEGIN
 					vyuARCustomer) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
 	WHERE 
 		(ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	ORDER BY 
+		strCustomerName
 END
 
 IF @strLetterName = '30 Day Overdue Collection Letter'
@@ -230,6 +232,8 @@ BEGIN
 					vyuARCustomer) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
 	WHERE 
 		(ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	ORDER BY 
+		strCustomerName
 END
 
 IF @strLetterName = '60 Day Overdue Collection Letter'
@@ -248,6 +252,8 @@ BEGIN
 					vyuARCustomer) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
 	WHERE 
 		(ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	ORDER BY 
+		strCustomerName
 END
 
 IF @strLetterName = '90 Day Overdue Collection Letter'
@@ -266,6 +272,8 @@ BEGIN
 					vyuARCustomer) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
 	WHERE 
 		(ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	ORDER BY 
+		strCustomerName
 END
 
 IF @strLetterName = 'Final Overdue Collection Letter'
@@ -284,13 +292,22 @@ BEGIN
 					vyuARCustomer) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
 	WHERE 
 		(ISNULL(dbl121DaysSum,0) <> 0)
+	ORDER BY 
+		strCustomerName
 END
 
 IF @strLetterName = 'Credit Suspension'
 BEGIN
 	SELECT 
 		intEntityCustomerId
-		, strCustomerNumber, strName AS strCustomerName FROM vyuARCustomer WHERE dblCreditLimit = 0 AND ysnActive = 1	
+		, strCustomerNumber
+		, strName AS strCustomerName 
+	FROM 
+		vyuARCustomer 
+	WHERE 
+		dblCreditLimit = 0 AND ysnActive = 1	
+	ORDER BY 
+		strName
 END
 
 IF @strLetterName = 'Expired Credit Card'
@@ -302,6 +319,8 @@ BEGIN
 		vyuARCustomer 
 	WHERE 
 		ysnActive = 1
+	ORDER BY 
+		strName
 END
 
 IF @strLetterName = 'Credit Review'
@@ -314,5 +333,7 @@ BEGIN
 		vyuARCustomer 
 	WHERE 
 		dblCreditLimit > 0 AND ysnActive = 1
+	ORDER BY 
+		strName
 END
  
