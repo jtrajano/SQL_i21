@@ -25,20 +25,20 @@ FROM (
 				, intTermsId 
 			FROM 
 				vyuARCustomer) Cus 
-INNER JOIN (
+LEFT JOIN (
 			SELECT 
 				intEntityId
 					, [intEntityContactId]
 					, ysnDefaultContact 
 			FROM 
 				[tblEMEntityToContact]) CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId AND CusToCon.ysnDefaultContact = 1
- LEFT JOIN (
+LEFT JOIN (
 			SELECT 
 				intEntityId
 				, strPhone 
 			FROM 
 				tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
-INNER JOIN (SELECT intTermID, 
+LEFT JOIN (SELECT intTermID, 
 				strTerm  
 			FROM 
 				tblSMTerm) Term ON Cus.intTermsId = Term.intTermID
