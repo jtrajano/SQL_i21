@@ -63,12 +63,16 @@ Select @intMachineCapacityItemUOMId=intItemUOMId From tblICItemUOM Where intItem
 Select @strMachineName=strName From tblMFMachine Where intMachineId=@intMachineId
 
 --Convert Qty to Capacity UOM
-If ISNULL(@intMachineCapacityItemUOMId,0) >0
+If @intAttributeTypeId=2 --Blending
 Begin
-	Select @dblQuantity=dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId,@intMachineCapacityItemUOMId,@dblQuantity)
-	Select @strUOM=strUnitMeasure From tblICUnitMeasure Where intUnitMeasureId=@intMachineCapacityUOMId
+	If ISNULL(@intMachineCapacityItemUOMId,0) >0
+	Begin
+		Select @dblQuantity=dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId,@intMachineCapacityItemUOMId,@dblQuantity)
+		Select @strUOM=strUnitMeasure From tblICUnitMeasure Where intUnitMeasureId=@intMachineCapacityUOMId
+	End
+	Else
+		Select @strUOM=strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where iu.intItemUOMId=@intItemUOMId
 End
-Else
 	Select @strUOM=strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where iu.intItemUOMId=@intItemUOMId
 
 --Existing WOs
