@@ -116,7 +116,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 {
                     title: 'Pricing',
                     api: {
-                        read: '../Inventory/api/ItemPricing/GetItemPricingViews'
+                        read: '../Inventory/api/ItemPricing/GetItemStockPricingViews'
                     },
                     columns: [
                         {dataIndex: 'intPricingKey', text: 'Pricing Key', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },

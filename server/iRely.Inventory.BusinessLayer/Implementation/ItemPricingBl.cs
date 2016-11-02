@@ -18,6 +18,7 @@ namespace iRely.Inventory.BusinessLayer
         public ItemPricingBl(IRepository db) : base(db)
         {
             _db = db;
+            _db.ContextManager.Database.CommandTimeout = 60000;
         }
         #endregion
 
@@ -25,6 +26,20 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemPricing>()
                 .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> GetItemStockPricingViews(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemPricing>()
+                .Filter(param, true)
+                .Where(p => p.ysnStockUnit == true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()
