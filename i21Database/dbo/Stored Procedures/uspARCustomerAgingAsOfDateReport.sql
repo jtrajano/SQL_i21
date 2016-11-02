@@ -103,8 +103,8 @@ SELECT dtmPostDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) <= 90 THEN '61 - 90 Days'
 	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 90 THEN 'Over 90' END
      , I.ysnPosted
-     , dblAvailableCredit		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit') THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
-	 , dblPrepayments			= CASE WHEN I.strTransactionType = 'Customer Prepayment' THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
+     , dblAvailableCredit		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+	 , dblPrepayments			= 0
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
@@ -119,7 +119,51 @@ FROM tblARInvoice I
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-    AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+    AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+    AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+    AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+
+UNION ALL
+                                    
+SELECT dtmPostDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
+     , I.intInvoiceId
+     , dblAmountPaid			= 0
+     , dblInvoiceTotal			= 0
+     , dblAmountDue				= 0    
+     , dblDiscount				= 0
+	 , dblInterest				= 0
+     , I.strTransactionType		   
+     , I.intEntityCustomerId	
+     , dtmDueDate				= ISNULL(P.dtmDatePaid, I.dtmDueDate)
+     , I.intTermId
+     , T.intBalanceDue
+     , strCustomerName			= E.strName
+     , E.strEntityNo
+     , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) <= 0 THEN 'Current'
+	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) <= 10 THEN '1 - 10 Days'
+	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) <= 30 THEN '11 - 30 Days'
+	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) <= 60 THEN '31 - 60 Days'
+	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) <= 90 THEN '61 - 90 Days'
+	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 90 THEN 'Over 90' END
+     , I.ysnPosted
+     , dblAvailableCredit		= 0
+	 , dblPrepayments			= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+FROM tblARInvoice I
+    INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+    INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+    INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	INNER JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	LEFT JOIN (
+		(SELECT SUM(dblPayment) AS dblPayment
+				 , PD.intInvoiceId
+			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND P.ysnInvoicePrepayment = 0 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+			GROUP BY PD.intInvoiceId) 
+		) PD ON I.intInvoiceId = PD.intInvoiceId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+WHERE I.ysnPosted = 1
+    AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+    AND I.strTransactionType = 'Customer Prepayment'
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
@@ -258,8 +302,8 @@ SELECT I.intInvoiceId
 	 , dblInterest			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
-     , dblAvailableCredit	= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit') THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
-	 , dblPrepayments		= CASE WHEN I.strTransactionType = 'Customer Prepayment' THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
+     , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+	 , dblPrepayments		= 0
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -272,7 +316,36 @@ FROM tblARInvoice I
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-    AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+    AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+    AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+    AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+
+UNION ALL
+
+SELECT I.intInvoiceId
+     , dblAmountPaid		= 0
+     , dblInvoiceTotal		= 0
+     , dblAmountDue			= 0    
+     , dblDiscount			= 0    
+	 , dblInterest			= 0    
+     , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
+     , I.intEntityCustomerId
+     , dblAvailableCredit	= 0
+	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+FROM tblARInvoice I
+    INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	INNER JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	LEFT JOIN (
+		(SELECT SUM(dblPayment) AS dblPayment
+				 , PD.intInvoiceId
+			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND P.ysnInvoicePrepayment = 0 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+			GROUP BY PD.intInvoiceId) 
+		) PD ON I.intInvoiceId = PD.intInvoiceId 
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+WHERE I.ysnPosted = 1
+    AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+    AND I.strTransactionType = 'Customer Prepayment'
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))

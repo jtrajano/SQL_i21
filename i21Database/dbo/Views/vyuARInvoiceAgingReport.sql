@@ -82,8 +82,8 @@ SELECT dtmDate					= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) <= 90 THEN '61 - 90 Days'    
 				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 90 THEN 'Over 90' END
 	 , I.ysnPosted
-	 , dblAvailableCredit		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit') THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
-	 , dblPrepayments			= CASE WHEN I.strTransactionType = 'Customer Prepayment' THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
+	 , dblAvailableCredit		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+	 , dblPrepayments			= 0
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
@@ -97,7 +97,50 @@ FROM tblARInvoice I
 		) PD ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
- AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+ AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
+ AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+
+UNION ALL
+						
+SELECT dtmDate					= ISNULL(P.dtmDatePaid, I.dtmPostDate)
+	 , I.strInvoiceNumber
+	 , I.intCompanyLocationId
+	 , I.intInvoiceId
+	 , I.strBOLNumber
+     , dblAmountPaid			= 0
+     , dblInvoiceTotal			= 0
+	 , dblAmountDue				= 0
+	 , dblDiscount				= 0
+	 , I.strTransactionType	  
+	 , I.intEntityCustomerId
+	 , I.dtmDueDate
+	 , I.intTermId
+	 , T.intBalanceDue
+	 , strCustomerName			= E.strName
+	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) <= 0 THEN 'Current'
+					 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 0  AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) <= 10 THEN '1 - 10 Days'
+			         WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 10 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) <= 30 THEN '11 - 30 Days'
+				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 30 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) <= 60 THEN '31 - 60 Days'     
+				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) <= 90 THEN '61 - 90 Days'    
+				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 90 THEN 'Over 90' END
+	 , I.ysnPosted
+	 , dblAvailableCredit		= 0
+	 , dblPrepayments			= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+FROM tblARInvoice I
+	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	INNER JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
+	LEFT JOIN (
+		(SELECT SUM(dblPayment) AS dblPayment
+				 , PD.intInvoiceId 
+			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND P.ysnInvoicePrepayment = 0 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
+			GROUP BY PD.intInvoiceId) 
+		) PD ON I.intInvoiceId = PD.intInvoiceId
+WHERE I.ysnPosted = 1
+ AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+ AND I.strTransactionType = 'Customer Prepayment'
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 
@@ -237,8 +280,8 @@ SELECT I.strInvoiceNumber
 	  , dblInterest			= 0
 	  , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	  , I.intEntityCustomerId
-	  , dblAvailableCredit	= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit') THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
-	  , dblPrepayments		= CASE WHEN I.strTransactionType = 'Customer Prepayment' THEN ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) ELSE 0 END
+	  , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+	  , dblPrepayments		= 0
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
@@ -250,7 +293,37 @@ FROM tblARInvoice I
 		) PD ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
- AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+ AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+ AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
+ AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+
+UNION ALL
+
+SELECT I.strInvoiceNumber
+	  , I.intInvoiceId
+	  , I.strBOLNumber
+      , dblAmountPaid		= 0
+      , dblInvoiceTotal		= 0
+	  , dblAmountDue		= 0
+	  , dblDiscount			= 0
+	  , dblInterest			= 0
+	  , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
+	  , I.intEntityCustomerId
+	  , dblAvailableCredit	= 0
+	  , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+FROM tblARInvoice I
+	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	INNER JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
+	LEFT JOIN (
+		(SELECT SUM(dblPayment) AS dblPayment
+				 , PD.intInvoiceId 
+			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND P.ysnInvoicePrepayment = 0 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
+			GROUP BY PD.intInvoiceId) 
+		) PD ON I.intInvoiceId = PD.intInvoiceId
+WHERE I.ysnPosted = 1
+ AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+ AND I.strTransactionType = 'Customer Prepayment'
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
@@ -307,11 +380,11 @@ WHERE I.ysnPosted  = 1
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))) AS TBL) AS B   
     
 ON
-A.intEntityCustomerId		= B.intEntityCustomerId
-AND A.strInvoiceNumber		= B.strInvoiceNumber
-AND A.dblInvoiceTotal		= B.dblInvoiceTotal
-AND A.dblAmountPaid			= B.dblAmountPaid
-AND A.dblAvailableCredit	= B.dblAvailableCredit
-AND B.dblPrepayments		= B.dblPrepayments
+A.intEntityCustomerId	 = B.intEntityCustomerId
+AND A.intInvoiceId		 = B.intInvoiceId
+AND A.dblInvoiceTotal	 = B.dblInvoiceTotal
+AND A.dblAmountPaid		 = B.dblAmountPaid
+AND A.dblAvailableCredit = B.dblAvailableCredit
+AND A.dblPrepayments	 = B.dblPrepayments
 
 GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.strCustomerName, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId
