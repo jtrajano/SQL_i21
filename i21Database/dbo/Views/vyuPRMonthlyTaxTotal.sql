@@ -9,7 +9,7 @@ SELECT
 	,dblLiabilityMed = ISNULL(LiabilityMed.dblTotal, 0)
 	,dblTaxTotalSS = ISNULL(TaxTotalSS.dblTotal, 0)
 	,dblTaxTotalMed = ISNULL(TaxTotalMed.dblTotal, 0)
-	,dblTaxTotalAddMed = ISNULL(TaxTotalAddMed.dblTotal, 0)
+	,dblTaxTotalAddMed = ISNULL(TaxTotalMed.dblAddMedTotal, 0)
 	,dblMonthTotal = ISNULL(LiabilitySS.dblTotal, 0) 
 					+ ISNULL(LiabilityMed.dblTotal, 0) 
 					+ ISNULL(TaxTotalSS.dblTotal, 0) 
@@ -80,6 +80,7 @@ FROM
 		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
 		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
 		,dblTotal	= SUM(vyuPRPaycheckTax.dblTotal)
+		,dblAddMedTotal = SUM(vyuPRPaycheckTax.dblAdditionalMed)
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
 			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
@@ -88,23 +89,6 @@ FROM
 		DATEPART(Q, vyuPRPaycheckTax.dtmPayDate), 
 		DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
 	) AS TaxTotalMed
-	ON Months.intMonth = TaxTotalMed.intMonth 
-		AND Months.intQuarter = TaxTotalMed.intQuarter
-		AND Months.intYear = TaxTotalMed.intYear
-	LEFT JOIN
-	(SELECT 
-		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
-		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
-		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
-		,dblTotal	= SUM(vyuPRPaycheckTax.dblAdditionalMed)
-	 FROM vyuPRPaycheckTax
-	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
-			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
-	 GROUP BY 
-		DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate), 
-		DATEPART(Q, vyuPRPaycheckTax.dtmPayDate), 
-		DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
-	) AS TaxTotalAddMed
 	ON Months.intMonth = TaxTotalMed.intMonth 
 		AND Months.intQuarter = TaxTotalMed.intQuarter
 		AND Months.intYear = TaxTotalMed.intYear
