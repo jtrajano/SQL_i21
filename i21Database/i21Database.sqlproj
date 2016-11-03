@@ -4442,6 +4442,7 @@
     <Build Include="dbo\Views\vyuARCollectionCustomerReport.sql" />
     <None Include="Scripts\Post-Deployment\EM\034_UpdateEntityEmail.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDBudgetMaintenance.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureAndBasisPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
