@@ -10,8 +10,21 @@ var prettify = require('gulp-js-prettify');
 var os = require('os');
 var open = require('gulp-open');
 var changed = require('gulp-changed');
-
+var test_ui_dest = '../../../QC1630/Inventory/test-ui';
 var Server = require('karma').Server;
+
+
+gulp.task('publish-test-ui', function () {
+    gulp.src(['test-ui/**/*.*'])
+        .pipe(changed(test_ui_dest))
+        .pipe(gulp.dest(test_ui_dest));
+});
+
+gulp.task('watch-test-ui', function () {
+    gulp.watch('test-ui/**/*.*', ['publish-test-ui']);
+});
+
+gulp.task('test-ui', ['watch-test-ui']);
 
 gulp.task('publish', function () {
     gulp.src(['app/**/*.js'])

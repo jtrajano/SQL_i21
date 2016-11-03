@@ -14,7 +14,6 @@ StartTest (function (t) {
          .clickButton('Save')
          .verifyStatusMessage('Saved')
          .clickButton('Close')
-         .logSuccess('===== Add a record successful  =====')
 
          //region Scenario 2: Fuel Category - Add Multiple Records
          .displayText('===== Scenario 2: Fuel Category - Add Multiple Records  =====')
@@ -28,7 +27,6 @@ StartTest (function (t) {
          .clickButton('Save')
          .verifyStatusMessage('Saved')
          .clickButton('Close')
-         .logSuccess('===== Add multiple records successful  =====')
          //endregion
 
 
@@ -47,7 +45,6 @@ StartTest (function (t) {
          .verifyGridData('GridTemplate', 4, 'colRinFeedStockCode', '')
          .verifyGridData('GridTemplate', 4, 'colDescription', '')
          .clickButton('Close')
-         .logSuccess('===== Click Close and not save record successful =====')
          //endregion
 
 
@@ -66,7 +63,6 @@ StartTest (function (t) {
          .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
          .clickMessageBoxButton('no')
          .waitTillLoaded()
-         .logSuccess('===== Click close cancel record successful  =====')
          //endregion
 
 
@@ -81,7 +77,6 @@ StartTest (function (t) {
          .verifyMessageBox('iRely i21','Feed Stock must be unique.','ok','error')
          .clickMessageBoxButton('ok')
          .clickButton('Close')
-         .logSuccess('===== Add Duplicate record scenario successful  =====')
          //endregion
 
 
@@ -96,7 +91,6 @@ StartTest (function (t) {
          .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
          .clickMessageBoxButton('no')
          .waitTillLoaded()
-         .logSuccess('===== Add description or equivalence value only is successful =====')
          //endregion
 
 
@@ -109,7 +103,6 @@ StartTest (function (t) {
          .clickButton('Save')
          .verifyStatusMessage('Saved')
          .clickButton('Close')
-         .logSuccess('===== Add primary key only successful  =====')
          //endregion*/
 
 

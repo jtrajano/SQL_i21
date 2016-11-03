@@ -23,8 +23,7 @@ StartTest (function (t) {
         .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
         .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
         .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '56')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')
-        .logSuccess('Setup Item UOM Successful!')
+        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')    
 
         .displayText('===== Setup Item GL Accounts=====')
         .clickTab('Setup')
@@ -43,7 +42,6 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
         .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
         .selectGridComboBoxRowValue('GlAccounts', 7, 'strAccountId', '16010-0000-000', 'strAccountId')
-        .logSuccess('Setup Item GL Accounts Successful!')
 
         .displayText('===== Setup Item Location=====')
         .clickTab('Location')
@@ -54,8 +52,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
         .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
         .clickButton('Save')
-        .clickButton('Close')
-        .logSuccess('Setup Item Location Successful!')
+        .clickButton('Close')       
 
         .displayText('===== Setup Item Pricing=====')
         .clickTab('Pricing')
@@ -67,7 +64,6 @@ StartTest (function (t) {
         .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
         .clickButton('Save')
         .clickButton('Close')
-        .logSuccess('Setup Item Pricing Successful!')
 
 
         //region Scenario 2: Add Lotted Yes Manual Item
@@ -90,8 +86,7 @@ StartTest (function (t) {
         .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
         .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
         .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '56')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')
-        .logSuccess('Setup Item UOM Successful!')
+        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')     
 
         .displayText('===== Setup Item GL Accounts=====')
         .clickTab('Setup')
@@ -110,7 +105,6 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
         .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
         .selectGridComboBoxRowValue('GlAccounts', 7, 'strAccountId', '16010-0000-000', 'strAccountId')
-        .logSuccess('Setup Item GL Accounts Successful!')
 
         .displayText('===== Setup Item Location=====')
         .clickTab('Location')
@@ -122,7 +116,6 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
         .clickButton('Save')
         .clickButton('Close')
-        .logSuccess('Setup Item Location Successful!')
 
         .displayText('===== Setup Item Pricing=====')
         .clickTab('Pricing')
@@ -134,8 +127,6 @@ StartTest (function (t) {
         .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
         .clickButton('Save')
         .clickButton('Close')
-        .logSuccess('Setup Item Pricing Successful!')
-
 
 
         //region Scenario 3: Add Non Lotted Item
@@ -159,7 +150,6 @@ StartTest (function (t) {
         .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
         .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '56')
         .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')
-        .logSuccess('Setup Item UOM Successful!')
 
         .displayText('===== Setup Item GL Accounts=====')
         .clickTab('Setup')
@@ -178,7 +168,6 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
         .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
         .selectGridComboBoxRowValue('GlAccounts', 7, 'strAccountId', '16010-0000-000', 'strAccountId')
-        .logSuccess('Setup Item GL Accounts Successful!')
 
         .displayText('===== Setup Item Location=====')
         .clickTab('Location')
@@ -190,7 +179,6 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
         .clickButton('Save')
         .clickButton('Close')
-        .logSuccess('Setup Item Location Successful!')
 
         .displayText('===== Setup Item Pricing=====')
         .clickTab('Pricing')
@@ -202,7 +190,6 @@ StartTest (function (t) {
         .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
         .clickButton('Save')
         .clickButton('Close')
-        .logSuccess('Setup Item Pricing Successful!')
 
 
         //region Scenario 4: Update an Item

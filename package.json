@@ -9,8 +9,9 @@
     "postinstall": "npm install -g gulp-cli"
   },
   "dependencies": {
-    "karma-cli": "^1.0.1",
-    "gulp-cli": "^1.2.2"
+    "gulp": "^3.9.1",
+    "gulp-cli": "^1.2.2",
+    "karma-cli": "^1.0.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
