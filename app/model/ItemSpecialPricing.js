@@ -11,8 +11,9 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
     idProperty: 'intItemSpecialPricingId',
 
     fields: [
-        { name: 'intItemSpecialPricingId', type: 'int'},
-        { name: 'intItemId', type: 'int',
+        { name: 'intItemSpecialPricingId', type: 'int' },
+        {
+            name: 'intItemId', type: 'int',
             reference: {
                 type: 'Inventory.model.Item',
                 inverse: {
@@ -55,18 +56,29 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
         { name: 'dblAccumulatedAmount', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strLocationName', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'},
-        { name: 'strUPC', type: 'string'}
+        { name: 'strLocationName', type: 'string' },
+        { name: 'strUnitMeasure', type: 'string' },
+        { name: 'strUPC', type: 'string' }
     ],
 
     validators: [
-        {type: 'presence', field: 'strLocationName'},
-        {type: 'presence', field: 'strPromotionType'},
-        {type: 'presence', field: 'strUnitMeasure'},
-        {type: 'presence', field: 'dblUnit'},
-        {type: 'presence', field: 'dblDiscount'},
-        {type: 'presence', field: 'dblUnitAfterDiscount'},
-        {type: 'presence', field: 'dtmBeginDate'}
-    ]
+        { type: 'presence', field: 'strLocationName' },
+        { type: 'presence', field: 'strPromotionType' },
+        { type: 'presence', field: 'strUnitMeasure' },
+        { type: 'presence', field: 'dblUnit' },
+        { type: 'presence', field: 'dblDiscount' },
+        { type: 'presence', field: 'dblUnitAfterDiscount' },
+        { type: 'presence', field: 'dtmBeginDate' }
+    ],
+    validate: function (options) {
+        var errors = this.callParent(arguments);
+        if (this.get('dtmBeginDate') > this.get('dtmEndDate')) {
+            errors.add({
+                field: 'dtmEndDate',
+                message: 'End Date should be after or the same to Begin Date.'
+            });
+        }
+
+        return errors;
+    }
 });
