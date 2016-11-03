@@ -1687,3 +1687,46 @@ BEGIN
         ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 80
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 80
+        ,'Source Location'
+        ,5
+        ,1
+        ,1
+        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation Order by strName'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 81
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 81
+        ,'Transfer To Location'
+        ,5
+        ,1
+        ,1
+        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation Order by strName'
+END
