@@ -882,7 +882,17 @@ GROUP BY sthssmst.sthss_store_name, sthssmst.sthss_pmp_id, sthssmst.sthss_rec_ty
 HAVING (sthssmst.sthss_rec_type=''PMP'')', N'', N'@DATE@', N'', N'', N'Track your gallons sold of each fuel product for any timeframe.  
 -C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'16.3', NULL, 2, 134, NULL)
 
-
+INSERT INTO #TempCannedPanels VALUES (15565, 0, 10, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'Origin - Load Scheduling', N'Grid', N'', N'Origin - Load Scheduling', N'Bar', N'outside', N'Chameleon', N'i21 Demo', N'None', N'None', N'', N'', N'select galds_cus_no, 
+agcus_last_name, 
+agcus_first_name, 
+galds_com_cd, 
+galds_cnt_no, 
+galds_sched_un, 
+galds_sched_rev_dt, 
+galds_pur_sls_ind, 
+galds_dlvd_rev_dt 
+from galdsmst, agcusmst where galds_cus_no = agcus_key',
+N'', N'@DATE@', N'@DATE@', N'', N'Origin - Load Scheduling', N'', N'', N'', N'None', N'', N'', N'', N'', N'', N'', N'', 0, 0, NULL, NULL, N'16.4', NULL, 2, 135, NULL)
 
 
 

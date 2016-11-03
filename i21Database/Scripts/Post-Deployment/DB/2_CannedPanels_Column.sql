@@ -1423,6 +1423,16 @@ INSERT INTO #TempCannedPanelColumn VALUES (79204, 15564, N'',					N'',		0, N'Ser
 INSERT INTO #TempCannedPanelColumn VALUES (79205, 15564, N'c',					N'Gallons',	0, N'Series1AxisY', N'', N'',		N'Currency',	2,	N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 134, NULL)
 INSERT INTO #TempCannedPanelColumn VALUES (79206, 15564, N'',					N'',		0, N'Series2AxisY', N'', N'',		N'',			2,	N'', N'', N'', 0, N'Chart', N'Series2AxisY', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 134, NULL)
 
+INSERT INTO #TempCannedPanelColumn VALUES (79207, 15565, N'galds_cus_no',			N'Cust. #',			100, N'Left', N'', N'',		N'',			2,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.String')
+INSERT INTO #TempCannedPanelColumn VALUES (79209, 15565, N'agcus_first_name',		N'First Name',		100, N'Left', N'', N'',		N'',			3,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.String')
+INSERT INTO #TempCannedPanelColumn VALUES (79208, 15565, N'agcus_last_name',		N'Last Name',		100, N'Left', N'', N'',		N'',			4,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.String')
+INSERT INTO #TempCannedPanelColumn VALUES (79210, 15565, N'galds_com_cd',			N'Commodity',		100, N'Left', N'', N'',		N'',			5,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.String')
+INSERT INTO #TempCannedPanelColumn VALUES (79211, 15565, N'galds_cnt_no',			N'Contract #',		100, N'Left', N'', N'',		N'',			6,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.String')
+INSERT INTO #TempCannedPanelColumn VALUES (79212, 15565, N'galds_sched_un',			N'Units # of loads',100, N'Left', N'', N'',		N'',			7,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.String')
+INSERT INTO #TempCannedPanelColumn VALUES (79213, 15565, N'galds_sched_rev_dt',		N'Date Scheduled',	100, N'Left', N'', N'',		N'Date',		8,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.Int32')
+INSERT INTO #TempCannedPanelColumn VALUES (79214, 15565, N'galds_pur_sls_ind',		N'Purchase-Sale',	100, N'Left', N'', N'',		N'',			9,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.String')
+INSERT INTO #TempCannedPanelColumn VALUES (79215, 15565, N'galds_dlvd_rev_dt',		N'Date dispatched',	100, N'Left', N'', N'',		N'Date',		10,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 135, N'System.Int32')
+
 
 
 
