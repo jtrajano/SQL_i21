@@ -1718,100 +1718,112 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Comment Maintenance' AND strMo
 
 
 /* CRM - Customer Relation Management */
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'CRM' AND strModuleName = 'Help Desk' AND intParentMenuID = 0)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'CRM' AND strModuleName = 'CRM' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'CRM', N'Help Desk', 0, N'Customer Relation Management', NULL, N'Folder', N'', N'small-folder', 1, 1, 0, 0, 22, 0)
+	VALUES (N'CRM', N'CRM', 0, N'Customer Relation Management', NULL, N'Folder', N'', N'small-folder', 1, 1, 0, 0, 22, 0)
 ELSE
-	UPDATE tblSMMasterMenu SET  intSort = 22 WHERE strMenuName = 'CRM' AND strModuleName = 'Help Desk' AND intParentMenuID = 0
+	UPDATE tblSMMasterMenu SET  intSort = 22 WHERE strMenuName = 'CRM' AND strModuleName = 'CRM' AND intParentMenuID = 0
 
 DECLARE @CRMParentMenuId INT
-SELECT @CRMParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'CRM' AND strModuleName = 'Help Desk' AND intParentMenuID = 0
+SELECT @CRMParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'CRM' AND strModuleName = 'CRM' AND intParentMenuID = 0
 
 /* START OF RENAMING  */
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Opportunities' WHERE strMenuName = 'Opportunity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName IN ('Prospects', 'Prospects and Customers') AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Sales Entities', strDescription = 'Sales Entities' WHERE strMenuName IN ('Prospects', 'Prospects and Customers') AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitor Search' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Competitors', strDescription = 'Competitors' WHERE strMenuName = 'Competitor Search' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lead' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Leads', strDescription = 'Leads' WHERE strMenuName = 'Lead' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Opportunities' WHERE strMenuName = 'Opportunity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName IN ('Prospects', 'Prospects and Customers') AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Sales Entities', strDescription = 'Sales Entities' WHERE strMenuName IN ('Prospects', 'Prospects and Customers') AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitor Search' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Competitors', strDescription = 'Competitors' WHERE strMenuName = 'Competitor Search' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lead' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Leads', strDescription = 'Leads' WHERE strMenuName = 'Lead' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 /* END OF RENAMING  */
 
---IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 --	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
---	VALUES (N'Create Activity', N'Help Desk', @CRMParentMenuId, N'CRM Create Activity', N'Activity', N'Screen', N'HelpDesk.view.Ticket', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+--	VALUES (N'Create Activity', N'CRM', @CRMParentMenuId, N'CRM Create Activity', N'Activity', N'Screen', N'HelpDesk.view.Ticket', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 --ELSE 
---	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Ticket' WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+--	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Ticket' WHERE strMenuName = 'Create Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Activities', N'Help Desk', @CRMParentMenuId, N'CRM Activity List', N'Activity', N'Screen', N'HelpDesk.view.Ticket:searchConfigAllActivities', N'small-menu-activity', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Activities', N'CRM', @CRMParentMenuId, N'CRM Opportunity Activities', N'Activity', N'Screen', N'CRM.view.Opportunity?searchCommand=searchConfigAllActivities', N'small-menu-activity', 0, 0, 0, 1, 1, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Ticket:searchConfigAllActivities' WHERE strMenuName = 'Activities' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CRM.view.Opportunity?searchCommand=searchConfigAllActivities', strDescription = N'CRM Opportunity Activities' WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunities' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Opportunities', N'Help Desk', @CRMParentMenuId, N'CRM Opportunity', N'Activity', N'Screen', N'HelpDesk.view.Project:searchConfigAllOpportunity', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Opportunities', N'CRM', @CRMParentMenuId, N'CRM Opportunity', N'Activity', N'Screen', N'CRM.view.Opportunity?searchCommand=searchConfigAllOpportunity', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Project:searchConfigAllOpportunity' WHERE strMenuName = 'Opportunities' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CRM.view.Opportunity?searchCommand=searchConfigAllOpportunity' WHERE strMenuName = 'Opportunities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Campaigns' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Campaigns' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Campaigns', N'Help Desk', @CRMParentMenuId, N'CRM Campaigns', N'Activity', N'Screen', N'HelpDesk.view.Campaign', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
+	VALUES (N'Campaigns', N'CRM', @CRMParentMenuId, N'CRM Campaigns', N'Activity', N'Screen', N'CRM.view.Campaign', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Campaign' WHERE strMenuName = 'Campaigns' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CRM.view.Campaign' WHERE strMenuName = 'Campaigns' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Sales Pipe Statuses', N'Help Desk', @CRMParentMenuId, N'CRM Sales Pipe Statuses', N'Activity', N'Screen', N'HelpDesk.view.SalesPipeStatus', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Sales Pipe Statuses', N'CRM', @CRMParentMenuId, N'CRM Sales Pipe Statuses', N'Activity', N'Screen', N'CRM.view.SalesPipeStatus?searchCommand=searchConfig', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'HelpDesk.view.SalesPipeStatus' WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'CRM.view.SalesPipeStatus?searchCommand=searchConfig' WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lost Revenues' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lost Revenues' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Lost Revenues', N'Help Desk', @CRMParentMenuId, N'Lost Revenues', N'Activity', N'Screen', N'HelpDesk.view.LostRevenue', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Lost Revenues', N'CRM', @CRMParentMenuId, N'CRM Lost Revenue', N'Activity', N'Screen', N'CRM.view.LostRevenue', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'HelpDesk.view.LostRevenue' WHERE strMenuName = 'Lost Revenues' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'CRM.view.LostRevenue', strDescription = N'CRM Lost Revenue' WHERE strMenuName = 'Lost Revenues' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lines of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lines of Business' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Lines of Business', N'Help Desk', @CRMParentMenuId, N'Lines of Business', N'Activity', N'Screen', N'i21.view.LineOfBusiness', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
+	VALUES (N'Lines of Business', N'CRM', @CRMParentMenuId, N'SM Lines of Business', N'Activity', N'Screen', N'i21.view.LineOfBusiness', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'i21.view.LineOfBusiness' WHERE strMenuName = 'Lines of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'i21.view.LineOfBusiness', strDescription = N'SM Lines of Business' WHERE strMenuName = 'Lines of Business' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sources' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sources' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Sources', N'Help Desk', @CRMParentMenuId, N'Opportunity Sources', N'Activity', N'Screen', N'HelpDesk.view.OpportunitySource', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
+	VALUES (N'Sources', N'CRM', @CRMParentMenuId, N'CRM Source', N'Activity', N'Screen', N'CRM.view.Source', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'HelpDesk.view.OpportunitySource' WHERE strMenuName = 'Sources' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'CRM.view.Source', strDescription = N'CRM Source' WHERE strMenuName = 'Sources' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Types' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Types', N'CRM', @CRMParentMenuId, N'CRM Type', N'Activity', N'Screen', N'CRM.view.Type', N'small-menu-activity', 0, 0, 0, 1, 8, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'CRM.view.Type' WHERE strMenuName = 'Types' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Statuses' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Statuses', N'CRM', @CRMParentMenuId, N'CRM Status', N'Activity', N'Screen', N'CRM.view.Status', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'CRM.view.Status' WHERE strMenuName = 'Statuses' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Sales Entities', N'Help Desk', @CRMParentMenuId, N'Sales Entities', N'Activity', N'Screen', N'EntityManagement.view.Entity:searchEntityProspect', N'small-menu-activity', 0, 0, 0, 1, 8, 1)
+	VALUES (N'Sales Entities', N'CRM', @CRMParentMenuId, N'Sales Entities', N'Activity', N'Screen', N'EntityManagement.view.Entity:searchEntityProspect', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'EntityManagement.view.Entity:searchEntityProspect' WHERE strMenuName = 'Sales Entities' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'EntityManagement.view.Entity:searchEntityProspect' WHERE strMenuName = 'Sales Entities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
---IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitors' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitors' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 --	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
---	VALUES (N'Competitors', N'Help Desk', @CRMParentMenuId, N'Competitors', N'Activity', N'Screen', N'EntityManagement.view.Entity?searchCommand=searchEntityCompetitor', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
+--	VALUES (N'Competitors', N'CRM', @CRMParentMenuId, N'Competitors', N'Activity', N'Screen', N'EntityManagement.view.Entity?searchCommand=searchEntityCompetitor', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
 --ELSE
---	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'EntityManagement.view.Entity?searchCommand=searchEntityCompetitor' WHERE strMenuName = 'Competitors' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+--	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'EntityManagement.view.Entity?searchCommand=searchEntityCompetitor' WHERE strMenuName = 'Competitors' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Sales Entity Contacts', N'Help Desk', @CRMParentMenuId, N'Sales Entity Contacts', N'Activity', N'Screen', N'EntityManagement.view.SalesEntityContact', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Sales Entity Contacts', N'CRM', @CRMParentMenuId, N'Sales Entity Contacts', N'Activity', N'Screen', N'EntityManagement.view.SalesEntityContact', N'small-menu-activity', 0, 0, 0, 1, 11, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'EntityManagement.view.SalesEntityContact' WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'EntityManagement.view.SalesEntityContact' WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Leads' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Leads' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Leads', N'Help Desk', @CRMParentMenuId, N'Leads', N'Activity', N'Screen', N'EntityManagement.view.Entity?searchCommand=searchEntityLead', N'small-menu-activity', 0, 0, 0, 1, 11, 1)
+	VALUES (N'Leads', N'CRM', @CRMParentMenuId, N'Leads', N'Activity', N'Screen', N'EntityManagement.view.Entity?searchCommand=searchEntityLead', N'small-menu-activity', 0, 0, 0, 1, 12, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'EntityManagement.view.Entity?searchCommand=searchEntityLead' WHERE strMenuName = 'Leads' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'EntityManagement.view.Entity?searchCommand=searchEntityLead' WHERE strMenuName = 'Leads' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
 /* START OF DELETING */
-DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 /* END OF DELETING */
 
 /* HELP DESK */
