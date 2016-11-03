@@ -104,3 +104,7 @@ EXEC sp_addmessage 90021,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90022) EXEC sp_dropmessage 90022, 'us_english'	
 SET @strmessage = '%s has failed the quality test. Cannot proceed further.'
 EXEC sp_addmessage 90022,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90023) EXEC sp_dropmessage 90023, 'us_english'	
+SET @strmessage = 'There have been subsequent transactions on Lot %s. Unposting will not be allowed to proceed unless these subsequent transactions are each reversed (starting with the most recent).'
+EXEC sp_addmessage 90023,11,@strmessage,'us_english','False'
