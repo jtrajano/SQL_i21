@@ -29,7 +29,7 @@ SELECT L.intLoadId
 		WHEN 3
 			THEN 'Drop Ship'
 		END COLLATE Latin1_General_CI_AS
-	,strTransportationMode = CASE intTransportationMode
+	,strTransportationMode = CASE L.intTransportationMode
 		WHEN 1 
 			THEN 'Truck'
 		WHEN 2
@@ -86,6 +86,18 @@ SELECT L.intLoadId
 	,L.ysnDispatchMailSent
 	,L.dtmDispatchMailSent
 	,L.dtmCancelDispatchMailSent
+	,L.intLoadShippingInstructionId
+	,L.intShipmentType
+	,LSI.strLoadNumber AS strShippingInstructionNo
+	,strShipmentType = CASE L.intShipmentType
+		WHEN 1
+			THEN 'Shipment'
+		WHEN 2
+			THEN 'Shipping Instructions'
+		WHEN 3
+			THEN 'Vessel Nomination'
+		ELSE ''
+		END COLLATE Latin1_General_CI_AS
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -95,3 +107,4 @@ LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
+LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
