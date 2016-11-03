@@ -2821,6 +2821,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var context = win.context;
         var current = win.viewModel.data.current;
         var btnReceive = win.down('#btnReceive');
+        var pnlLotTracking = win.down('#pnlLotTracking');
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+
+        //Hide Lot Grid
+        pnlLotTracking.setVisible(false);
+        //Deselect all rows in Item Grid
+        grdInventoryReceipt.getSelectionModel().deselectAll();
 
         var postReceipt = function () {
             var doPost = function () {
@@ -2948,6 +2955,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var cboCurrency = win.down('#cboCurrency');
         var context = win.context;
+        var pnlLotTracking = win.down('#pnlLotTracking');
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+
+        //Hide Lot Tracking Grid
+        pnlLotTracking.setVisible(false);
+        //Deselect all rows in Item Grid
+        grdInventoryReceipt.getSelectionModel().deselectAll();
 
         var doRecap = function (recapButton, currentRecord, currency) {
 
