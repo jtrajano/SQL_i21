@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCTContractSearchView2]
+﻿CREATE VIEW [dbo].[vyuCTSearchContract]
 
 AS	
 	SELECT	CH.intContractHeaderId,				
@@ -8,11 +8,11 @@ AS
 			CH.dblHeaderQuantity,			
 			CH.strContractNumber,  
 			CH.ysnPrinted,						
-			BL.dblBalance,
+			BL.dblTotalBalance,
 			CH.intEntityId,					
 			CH.strCustomerContract,	
 			CH.ysnSigned,		
-			BL.dblAppliedQty,
+			BL.dblTotalAppliedQty,
 			CH.dtmCreated,		
 			CH.dtmSigned,
 			CASE WHEN CH.ysnLoad = 1 THEN CH.strHeaderUnitMeasure + '/Load' ELSE CH.strHeaderUnitMeasure END strHeaderUnitMeasure,
@@ -45,7 +45,7 @@ AS
 			CH.strCommodityCode,
 			CH.strApprovalBasis,
 			CH.strContractBasis,
-			CH.strPricingType,
+			CH.strPricingType strHeaderPricingType,
 			CH.strPricingLevelName,
 			CH.strLoadUnitMeasure,
 			CH.strINCOLocation,
@@ -63,13 +63,13 @@ AS
 					ELSE	CH.strStatuses
 			END		strStatuses
 
-	FROM	vyuCTContractHeaderView2 CH	LEFT
+	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN
 	 (
 		SELECT 
 			HV.intContractHeaderId,
-			dblBalance = SUM(F.dblBalance),
-			dblAppliedQty = SUM(F.dblAppliedQuantity)
+			dblTotalBalance = SUM(F.dblBalance),
+			dblTotalAppliedQty = SUM(F.dblAppliedQuantity)
 		FROM tblCTContractHeader HV 
 			LEFT JOIN tblICCommodityUnitMeasure UM 
 				ON UM.intCommodityUnitMeasureId = HV.intCommodityUOMId 

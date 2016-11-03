@@ -4010,10 +4010,10 @@
     <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBasis.sql" />
     <Build Include="dbo\Tables\tblIPSecondaryStepDetail.sql" />
-    <Build Include="dbo\Views\vyuCTContractSearchView2.sql" />
-    <Build Include="dbo\Views\vyuCTContractHeaderView2.sql" />
+    <Build Include="dbo\Views\vyuCTSearchContract.sql" />
+    <Build Include="dbo\Views\vyuCTSearchContractHeader.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM2.sql" />
-    <Build Include="dbo\Views\vyuCTContractDetailView2.sql" />
+    <Build Include="dbo\Views\vyuCTSearchContractDetail.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntitySalesEntityContact.sql" />
     <Build Include="dbo\Tables\tblCRMWinLossReason.sql" />
     <Build Include="dbo\Views\vyuEMSearchVendorMin.sql" />
@@ -4043,8 +4043,6 @@
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckSettlement.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettleStorage.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailGrid.sql" />
-    <Build Include="dbo\Views\vyuCTContractSearchView2.sql" />
-    <Build Include="dbo\Views\vyuCTContractHeaderView2.sql" />
     <Build Include="dbo\Views\vyuICLoadContainerReceiptContracts.sql" />
     <Build Include="dbo\Views\vyuAPPurchaseOrderPayables.sql" />
     <Build Include="dbo\Views\vyuAPReceiptPayables.sql" />

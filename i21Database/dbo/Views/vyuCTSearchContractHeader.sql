@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCTContractHeaderView2]
+﻿CREATE VIEW [dbo].[vyuCTSearchContractHeader]
 AS
 SELECT	CH.intContractHeaderId,			
 		CH.strContractNumber,			

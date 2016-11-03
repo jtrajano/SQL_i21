@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCTContractDetailView2]
+﻿CREATE VIEW [dbo].[vyuCTSearchContractDetail]
 AS
 
 	SELECT	CD.intContractDetailId,		 	
@@ -63,21 +63,14 @@ AS
 			ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)											AS	dblAllocatedQty,
 			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)				AS	dblUnAllocatedQty,
 
-			--Header Detail
+			--Header
+	
+			CH.*
+			
 
-			TP.strContractType,
-			CH.intContractHeaderId,		
-			CH.intEntityId,	
-			CH.ysnPrinted,		
-			CH.strCustomerContract,
-			CY.strCommodityCode,		
-			CY.strDescription AS strCommodityDescription,
-			CH.strContractNumber						
 	FROM	tblCTContractDetail				CD LEFT	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
-	JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT		
-	JOIN	tblCTContractType				TP	ON	TP.intContractTypeId		=	CH.intContractTypeId		LEFT
-	JOIN	tblICCommodity					CY	ON	CY.intCommodityId			=	CH.intCommodityId		LEFT
+	JOIN	vyuCTSearchContract				CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT		
 	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
 	JOIN	tblCTIndex						IX	ON	IX.intIndexId				=	CD.intIndexId				LEFT
@@ -89,7 +82,7 @@ AS
 	JOIN	tblICItemUOM					AU	ON	AU.intItemUOMId				=	CD.intAdjItemUOMId			LEFT
 	JOIN	tblICUnitMeasure				U3	ON	U3.intUnitMeasureId			=	AU.intUnitMeasureId			LEFT	
 	JOIN	tblICItemUOM					SM	ON	SM.intItemId				=	CD.intItemId				AND														
-												SM.ysnStockUnit				=	1								LEFT
+													SM.ysnStockUnit				=	1							LEFT
 	JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		LEFT
 	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
 	JOIN	tblSMShipVia					SV	ON	SV.intEntityShipViaId		=	CD.intShipViaId				LEFT
