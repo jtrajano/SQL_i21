@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKSummaryPnL
+﻿CREATE PROC [dbo].[uspRKSummaryPnL]
     @dtmToDate datetime,
 	@intCommodityId int = null,
 	@ysnExpired bit,
@@ -73,6 +73,44 @@ FROM (
 			where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
 			and intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
 			and ysnExpired=@ysnExpired
+
+			union
+
+			SELECT distinct GrossPnL
+				,LongWaitedPrice
+				,dblLong
+				,dblShort
+				,ShortWaitedPrice
+				,t.dblFutCommission
+				,intNet
+				,t.intFutOptTransactionId
+				,t.strFutMarketName
+				,t.strFutureMonth
+				,t.intFutureMonthId
+				,t.intCommodityId
+				,t.intFutureMarketId
+				,p.dtmTradeDate
+				,p.intOriginalQty
+				,p.Long1
+				,Sell1
+				,intNet1
+				,dblActual
+				,(SELECT dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, getdate())
+				  ) AS dblClosing1
+				,dblPrice
+				,t.dblContractSize
+				,0.intConcurrencyId
+				,t.dblFutCommission1
+				,MatchLong
+				,MatchShort
+				,NetPnL,t.ysnExpired
+			FROM vyuRKRealizedPnL t
+			LEFT JOIN vyuRKUnrealizedPnL p on t.intFutureMarketId=p.intFutureMarketId and t.intFutureMonthId=p.intFutureMonthId
+WHERE t.intCommodityId=case when isnull(@intCommodityId,0)=0 then t.intCommodityId else @intCommodityId end 
+	AND t.intFutureMarketId=case when isnull(@intFutureMarketId,0)=0 then t.intFutureMarketId else @intFutureMarketId end 
+	and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
+	AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end  )
+	and t.ysnExpired=@ysnExpired			
 			) t
 		) u
 	GROUP BY intFutureMonthId
@@ -112,7 +150,8 @@ ELSE
 				FROM vyuRKRealizedPnL r
 				WHERE u.intFutureMarketId = r.intFutureMarketId
 					AND u.intFutureMonthId = r.intFutureMonthId
-				), 0) AS dblRealized,ysnExpired
+				), 0) AS dblRealized,
+				ysnExpired
 	FROM (
 		SELECT *
 			,(isnull(GrossPnL, 0) * (isnull(dblClosing1,0) - isnull(dblPrice,0)))-isnull(dblFutCommission,0) AS dblClosing
@@ -147,6 +186,43 @@ ELSE
 				,NetPnL,ysnExpired
 			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
 			and intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
+
+			union
+
+			SELECT distinct GrossPnL
+				,LongWaitedPrice
+				,dblLong
+				,dblShort
+				,ShortWaitedPrice
+				,t.dblFutCommission
+				,intNet
+				,t.intFutOptTransactionId
+				,t.strFutMarketName
+				,t.strFutureMonth
+				,t.intFutureMonthId
+				,t.intCommodityId
+				,t.intFutureMarketId
+				,p.dtmTradeDate
+				,p.intOriginalQty
+				,p.Long1
+				,Sell1
+				,intNet1
+				,dblActual
+				,(SELECT dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, getdate())
+				  ) AS dblClosing1
+				,dblPrice
+				,t.dblContractSize
+				,0.intConcurrencyId
+				,t.dblFutCommission1
+				,MatchLong
+				,MatchShort
+				,NetPnL,t.ysnExpired
+			FROM vyuRKRealizedPnL t
+			LEFT JOIN vyuRKUnrealizedPnL p on t.intFutureMarketId=p.intFutureMarketId and t.intFutureMonthId=p.intFutureMonthId
+WHERE t.intCommodityId=case when isnull(@intCommodityId,0)=0 then t.intCommodityId else @intCommodityId end 
+	AND t.intFutureMarketId=case when isnull(@intFutureMarketId,0)=0 then t.intFutureMarketId else @intFutureMarketId end 
+	and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
+	AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end  )
 			) t
 		) u
 	GROUP BY intFutureMonthId
