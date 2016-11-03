@@ -860,6 +860,19 @@ END
 
 PRINT N'Moving Opportunity activity...'
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMOpportunityActivityTmp'))
+BEGIN
+	CREATE TABLE [dbo].[tblCRMOpportunityActivityTmp]
+	(
+		[intId] [int] IDENTITY(1,1) NOT NULL,
+		[intActivityId] [int] NOT NULL,
+		[intTicketIdId] [int] NULL,
+		[intTicketCommentId] [int] NULL,
+		[intTicketNoteId] [int] NULL,
+		CONSTRAINT [PK_tblCRMOpportunityActivityTmp] PRIMARY KEY CLUSTERED ([intId] ASC)
+	)
+END
+
 DECLARE @queryResultAct CURSOR
 
 declare @intTransactionIdAct int
