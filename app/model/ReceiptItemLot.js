@@ -14,40 +14,41 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'intInventoryReceiptItemLotId', type: 'int'},
         { name: 'intInventoryReceiptItemId', type: 'int',
             reference: {
-                type: 'Inventory.model.ReceiptItem',
-                role: 'tblICInventoryReceiptItem',
-                inverse: {
-                    role: 'tblICInventoryReceiptItemLots',
-                    storeConfig: {
-                        complete: true,
-                        sortOnLoad: true,
-                        sorters: {
-                            direction: 'DESC',
-                            property: 'intSort'
-                        },
-                        autoLoad: true,
-                        pruneModifiedRecords: false,
-                        proxy: {
-                            api: {
-                                create: '../Inventory/api/InventoryReceiptItemLot/Post',
-                                read: '../Inventory/api/InventoryReceiptItemLot/GetLots',
-                                update: '../Inventory/api/InventoryReceiptItemLot/Put',
-                                destroy: '../Inventory/api/InventoryReceiptItemLot/Delete'
+                    type: 'Inventory.model.ReceiptItem',
+                    //role: 'tblICInventoryReceiptItem',
+                    inverse: {
+                        role: 'tblICInventoryReceiptItemLots',
+                        storeConfig: {
+                            complete: true,
+                            remoteFilter: true,
+                            //autoLoad: true,
+                            //pruneModifiedRecords: false,
+                            proxy: {
+                                type: 'rest',
+                                api: {
+                                    create: '../Inventory/api/InventoryReceiptItemLot/Post',
+                                    read: '../Inventory/api/InventoryReceiptItemLot/GetLots',
+                                    update: '../Inventory/api/InventoryReceiptItemLot/Put',
+                                    destroy: '../Inventory/api/InventoryReceiptItemLot/Delete'
+                                },
+                                reader: {
+                                    type: 'json',
+                                    rootProperty: 'data',
+                                    messageProperty: 'message'
+                                },
+                                writer: {
+                                    type: 'json',
+                                    allowSingle: false
+                                }
                             },
-                            type: 'rest',
-                            reader: {
-                                type: 'json',
-                                rootProperty: 'data',
-                                messageProperty: 'message'
-                            },
-                            writer: {
-                                type: 'json',
-                                allowSingle: false
+                            sortOnLoad: true,
+                            sorters: {
+                                direction: 'DESC',
+                                property: 'intSort'
                             }
                         }
                     }
                 }
-            }
         },
         { name: 'intLotId', type: 'int', allowNull: true },
         { name: 'strLotNumber', type: 'string' },
