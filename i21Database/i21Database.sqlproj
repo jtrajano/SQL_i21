@@ -4490,6 +4490,7 @@
     <None Include="Scripts\Post-Deployment\EM\034_UpdateEntityEmail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitSequencePricing.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099PATR.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCostSources.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
