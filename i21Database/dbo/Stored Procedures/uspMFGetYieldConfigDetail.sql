@@ -26,8 +26,8 @@ BEGIN
 			,intConcurrencyId
 			)
 		SELECT @intManufacturingProcessId
-			,'Input+Opening Quantity'
-			,'Output+Output Opening Quantity+Output Count Quantity+Count Quantity'
+			,'Input+Opening Quantity-Count Quantity'
+			,'Output+Output Opening Quantity+Output Count Quantity'
 			,'Output/Input'
 			,@intUserId
 			,GetDate()

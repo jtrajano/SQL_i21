@@ -1682,13 +1682,13 @@ BEGIN
 	SELECT 9
 		,'Count Quantity'
 		,1
-		,0
+		,1
 END
 ELSE
 
 BEGIN
 	UPDATE tblMFYieldTransaction
-	SET ysnInputTransaction = 0
+	SET ysnInputTransaction = 1
 	WHERE intYieldTransactionId = 9
 END
 
