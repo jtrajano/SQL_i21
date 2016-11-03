@@ -165,7 +165,7 @@ AS
 						BEGIN
 							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
 
-							SELECT @dblTotalAR = SUM(dblTotalAR) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
+							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
 							SELECT TOP 1 @dblMinimumSC = dblMinimumCharge FROM tblARCustomer C 
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.intEntityCustomerId = @entityId
 			
@@ -178,31 +178,19 @@ AS
 										 , strInvoiceNumber		= AGING.strInvoiceNumber
 										 , strBudgetDescription = NULL
 										 , dblAmountDue			= @dblTotalAR
-										 , dblTotalAmount		= CASE WHEN SC.strCalculationType = 'Percent'
-						 												THEN
-						 													CASE WHEN SC.dblServiceChargeAPR > 0
-						 														THEN ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
-																																						THEN I.dtmDueDate 
-																																						ELSE I.dtmCalculated 
-																																					END, ISNULL(PD.dtmDatePaid, @asOfDate)) * @dblTotalAR
-						 														ELSE 0
-						 													END
-						 												ELSE 
-						 													SC.dblPercentage
+										 , dblTotalAmount       = CASE WHEN SC.strCalculationType = 'Percent'
+																		THEN
+																			CASE WHEN SC.dblServiceChargeAPR > 0
+																				THEN
+																					((SC.dblServiceChargeAPR/12) * @dblTotalAR) / 100
+																				ELSE 0
+																			END
+																		ELSE
+																			SC.dblPercentage
 						 											END
 									FROM @temp_aging_table AGING
-										INNER JOIN tblARInvoice I ON AGING.intInvoiceId = I.intInvoiceId
 										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
-										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
-										LEFT JOIN (SELECT PD.intInvoiceId
-														, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
-														, dtmDatePaid   = MAX(dtmDatePaid)
-													FROM tblARPaymentDetail PD INNER JOIN tblARPayment P 
-														ON PD.intPaymentId = P.intPaymentId 
-														AND P.ysnPosted = 1 
-														AND P.dtmDatePaid <= @asOfDate
-													GROUP BY PD.intInvoiceId
-										) AS PD ON PD.intInvoiceId = I.intInvoiceId
+										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
 									WHERE AGING.intEntityCustomerId = @entityId
 								END					
 						END
@@ -264,17 +252,23 @@ AS
 								 , @entityId
 								 , 'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
 								 , NULL
-								 , SUM(dblAmountDue)
-								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > SUM(dblTotalAmount) THEN @dblMinimumSC ELSE SUM(dblTotalAmount) END
+								 , AVG(dblAmountDue)
+								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > AVG(dblTotalAmount) THEN @dblMinimumSC ELSE AVG(dblTotalAmount) END
 							FROM @tempTblTypeServiceCharge 
 								GROUP BY intEntityCustomerId 
-								HAVING SUM(dblAmountDue) > @zeroDecimal 
-								   AND SUM(dblTotalAmount) > @zeroDecimal
+								HAVING AVG(dblAmountDue) > @zeroDecimal 
+								   AND AVG(dblTotalAmount) > @zeroDecimal
 						END
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN
-							SET @totalAmount = @totalAmount + (SELECT SUM(dblTotalAmount) FROM @tblTypeServiceCharge)
+							SET @totalAmount = @totalAmount + CASE WHEN @calculation = 'By Invoice' 
+																THEN 
+																	(SELECT SUM(dblTotalAmount) FROM @tblTypeServiceCharge)
+																ELSE 
+																	(SELECT AVG(dblTotalAmount) FROM @tblTypeServiceCharge)
+																END
+
 							DELETE FROM @tempTblTypeServiceCharge WHERE ISNULL(dblAmountDue, @zeroDecimal) = @zeroDecimal OR ISNULL(dblTotalAmount, @zeroDecimal) = @zeroDecimal
 
 							EXEC dbo.uspARInsertInvoiceServiceCharge @isRecap, @batchId, @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @calculation, @tblTypeServiceCharge, @tempTblTypeServiceCharge
