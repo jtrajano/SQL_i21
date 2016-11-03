@@ -18,6 +18,7 @@ SELECT
 	,intDriverId = E.intDriverID
 	,intConcurrencyId = E.intConcurrencyId
 	,intClockId = K.intClockID
+	,intEntityUserSecurityId = E.intUserID
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
