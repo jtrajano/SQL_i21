@@ -19,6 +19,17 @@ localStorage.setItem('i21RememberMe', true);
 
 Harness.start(
 
+    { group: 'FunctionalTest',
+        items: [
+            {
+                url: '../FunctionalTest/PreSetup.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
+    },
+
     { group: 'Item',
         items: [
             {
@@ -118,7 +129,6 @@ Harness.start(
         ]
     },
 
-
     { group: 'InventoryUOM',
         items: [
             {
@@ -128,8 +138,17 @@ Harness.start(
                 ]
             }
         ]
+    },
+
+    { group: 'StorageLocation',
+        items: [
+            {
+                url: '../StorageLocation/AddStorageLocation.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
     }
-
-
 
 );
