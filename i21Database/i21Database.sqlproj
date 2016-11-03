@@ -4490,6 +4490,8 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099PATR.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCostSources.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUnpostProducedLot.sql" />
+    <Build Include="dbo\Views\vyuQMTestResultNotMapped.sql" />
+    <Build Include="dbo\Views\vyuQMSampleNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
