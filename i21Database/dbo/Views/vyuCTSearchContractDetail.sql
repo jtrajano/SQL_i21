@@ -33,7 +33,7 @@ AS
 			CD.strReference,	
 			CD.strBuyerSeller,
 			CD.dblOriginalQty,
-
+			CD.intPricingTypeId,
 			IM.strItemNo,						
 			FT.strFreightTerm,				
 			IM.strDescription				AS	strItemDescription,
