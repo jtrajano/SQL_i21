@@ -89,7 +89,7 @@ BEGIN TRY
 		,[intInvoiceDetailId]					= NULL
 		,[intItemId]							= DD.intItemId
 		,[ysnInventory]							= [dbo].[fnIsStockTrackingItem](DD.intItemId)
-		,[strItemDescription]					= Item.strDescription
+		,[strItemDescription]					= Item.strItemDescription
 		,[intOrderUOMId]						= Item.intIssueUOMId
 		,[intItemUOMId]							= Item.intIssueUOMId
 		,[dblQtyOrdered]						= DD.dblUnits
