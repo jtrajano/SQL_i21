@@ -77,7 +77,7 @@ Harness.start(
     { group: 'InventoryReceipt',
         items: [
             {
-                url: 'InventoryReceipt/AddInventoryReceiptDirect.js',  // url of the js file, containing actual test code
+                url: 'InventoryReceipt/AddInventoryReceipt.js',  // url of the js file, containing actual test code
                 preload: [
                     testEnginePath,
                     functionalTest,
@@ -211,13 +211,13 @@ Harness.start(
     { group: 'FeedStockCode',
         items: [
             {
-                url: 'FeedStockCode/AddFeedStock.js',  // url of the js file, containing actual test code
+                url: 'FeedStock/AddFeedStock.js',  // url of the js file, containing actual test code
                 preload: [
                     testEnginePath
                 ]
             },
             {
-                url: 'FeedStockCode/DeleteFeedStock.js',  // url of the js file, containing actual test code
+                url: 'FeedStock/DeleteFeedStock.js',  // url of the js file, containing actual test code
                 preload: [
                     testEnginePath
                 ]

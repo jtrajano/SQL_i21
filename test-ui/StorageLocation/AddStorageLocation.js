@@ -6,7 +6,7 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Storage Locations','Screen')
         .clickButton('New')
-        .waitTillLoaded('icstorageunit','')
+        .waitUntilLoaded('icstorageunit')
         .enterData('Text Field','Name','Test SL - SH - 001')
         .enterData('Text Field','Description','Test SL - SH - 001')
         .selectComboBoxRowValue('UnitType', 'Bin', 'UnitType',0)
@@ -24,7 +24,7 @@ StartTest (function (t) {
         .clickButton('Close')
 
         .clickButton('New')
-        .waitTillLoaded('icstorageunit','')
+        .waitUntilLoaded('icstorageunit')
         .enterData('Text Field','Name','Test SL - SH - 001')
         .enterData('Text Field','Description','Test SL - SH - 001')
         .selectComboBoxRowValue('UnitType', 'Bin', 'UnitType',0)
@@ -46,7 +46,7 @@ StartTest (function (t) {
         //region Scenario 2: Add New Storage Location - Allow bin of the same name to be used in a different Sub Location.
         .displayText('===== Scenario 2: Add New Storage Location - Allow bin of the same name to be used in a different Sub Location. =====')
         .clickButton('New')
-        .waitTillLoaded('icstorageunit','')
+        .waitUntilLoaded('icstorageunit')
         .enterData('Text Field','Name','Test SL - SH - 002')
         .enterData('Text Field','Description','Test SL - SH - 002')
         .selectComboBoxRowValue('UnitType', 'Bin', 'UnitType',0)
@@ -64,7 +64,7 @@ StartTest (function (t) {
         .clickButton('Close')
 
         .clickButton('New')
-        .waitTillLoaded('icstorageunit','')
+        .waitUntilLoaded('icstorageunit')
         .enterData('Text Field','Name','Test SL - SH - 002')
         .enterData('Text Field','Description','Test SL - SH - 002')
         .selectComboBoxRowValue('UnitType', 'Bin', 'UnitType',0)
@@ -86,7 +86,7 @@ StartTest (function (t) {
         //region Scenario 3: Update Storage Location
         .displayText('===== Scenario 3: Update Storage Location =====')
         .doubleClickSearchRowValue('Test SL - SH - 001', 'strUnitMeasure', 1)
-        .waitTillLoaded('icstorageunit','')
+        .waitUntilLoaded('icstorageunit')
         .enterData('Text Field','Description','Test SL - SH Updated')
         .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
         .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
@@ -97,7 +97,7 @@ StartTest (function (t) {
         .clickButton('Close')
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
-        .waitTillLoaded('icstorageunit','')
+        .waitUntilLoaded('icstorageunit')
         .verifyData('Text Field','Description','Test SL - SH Updated')
         .verifyData('Combo Box','Location','0002 - Indianapolis')
         .verifyData('Combo Box','SubLocation','Indy')
@@ -110,7 +110,7 @@ StartTest (function (t) {
         //region Scenario 4: Add Duplicate Storage Location
         .displayText('===== Scenario 4: Add Duplicate Storage Location =====')
         .clickButton('New')
-        .waitTillLoaded('icstorageunit','')
+        .waitUntilLoaded('icstorageunit')
         .enterData('Text Field','Name','Test SL - SH - 002')
         .enterData('Text Field','Description','Test SL - SH - 002')
         .selectComboBoxRowValue('UnitType', 'Bin', 'UnitType',0)
@@ -125,14 +125,14 @@ StartTest (function (t) {
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
         .clickMessageBoxButton('no')
-        .waitTillLoaded('')
+        .waitUntilLoaded('')
         //endregion
 
 
         //region Scenario 5: Check Required Fields
         .displayText('===== Scenario 5: Check Required Fields =====')
         .clickButton('New')
-        .waitTillLoaded('icstorageunit','')
+        .waitUntilLoaded('icstorageunit')
         .clickButton('Save')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')

@@ -6,7 +6,7 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Commodities','Screen')
         .clickButton('New')
-        .waitTillLoaded('iccommodity','')
+        .waitUntilLoaded('iccommodity')
         .enterData('Text Field','CommodityCode','AAA - Commodity 1')
         .enterData('Text Field','Description','Commodity with No UOM and Attribute')
         .clickCheckBox('ExchangeTraded',true)
@@ -21,7 +21,7 @@ StartTest (function (t) {
         //region Scenario 2: Add new Commodity with UOM but NO Attribute setup
         .displayText('===== Scenario 2: Add new Commodity with UOM but NO Attribute setup =====')
         .clickButton('New')
-        .waitTillLoaded('iccommodity','')
+        .waitUntilLoaded('iccommodity')
         .enterData('Text Field','CommodityCode','AAA - Commodity 2')
         .enterData('Text Field','Description','Commodity with UOM and No Attribute Setup')
         .clickCheckBox('ExchangeTraded',true)
@@ -45,7 +45,7 @@ StartTest (function (t) {
         //region Scenario 3: Add new Commodity with UOM and Attribute setup
         .displayText('===== Scenario 3: Add new Commodity with UOM and Attribute setup =====')
         .clickButton('New')
-        .waitTillLoaded('iccommodity','')
+        .waitUntilLoaded('iccommodity')
         .enterData('Text Field','CommodityCode','AAA - Commodity 3')
         .enterData('Text Field','Description','Commodity with UOM and Attribute Setup')
         .clickCheckBox('ExchangeTraded',true)
@@ -81,7 +81,7 @@ StartTest (function (t) {
         .displayText('===== Scenario 4: Update Commodity =====')
         .selectSearchRowNumber(11)
         .clickButton('OpenSelected')
-        .waitTillLoaded('iccommodity','')
+        .waitUntilLoaded('iccommodity')
         .enterData('Text Field','Description','Updated Commodity')
         .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','LB','strUnitMeasure')
         .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
@@ -99,7 +99,7 @@ StartTest (function (t) {
 
         .selectSearchRowNumber(11)
         .clickButton('OpenSelected')
-        .waitTillLoaded('iccommodity','')
+        .waitUntilLoaded('iccommodity')
         .verifyData('Text Field','Description','Updated Commodity')
         .verifyGridData('Uom', 1, 'colUOMUnitQty', '1')
         .verifyGridData('Uom', 2, 'colUOMUnitQty', '50')
@@ -112,7 +112,7 @@ StartTest (function (t) {
         //region Scenario 5: Check Required Fields
         .displayText('===== Scenario 5: Check Required Fields =====')
         .clickButton('New')
-        .waitTillLoaded('iccommodity','')
+        .waitUntilLoaded('iccommodity')
         .clickButton('Save')
         .clickButton('Close')
         //endregion
@@ -120,7 +120,7 @@ StartTest (function (t) {
         //region Scenario 6: Save Duplicate Commodity Code
         .displayText('===== Scenario 6: Save Duplicate Commodity Code =====')
         .clickButton('New')
-        .waitTillLoaded('iccommodity','')
+        .waitUntilLoaded('iccommodity')
         .enterData('Text Field','CommodityCode','AAA - Commodity 1')
         .enterData('Text Field','Description','Commodity with No UOM and Attribute')
         .clickCheckBox('ExchangeTraded',true)
@@ -132,7 +132,7 @@ StartTest (function (t) {
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
         .clickMessageBoxButton('yes')
-        .waitTillLoaded()
+        .waitUntilLoaded()
         .verifyMessageBox('iRely i21','Commodity Code must be unique.','ok','error')
         .clickMessageBoxButton('ok')
         .enterData('Text Field','CommodityCode','AAA - Commodity 4')

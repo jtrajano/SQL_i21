@@ -7,7 +7,7 @@ StartTest (function (t) {
         .clickMenuScreen('Fuel Types','Screen')
         .clickButton('Close')
         .clickButton('FuelCode')
-        .waitTillLoaded('icfuelcode')
+        .waitUntilLoaded('icfuelcode')
         .enterGridData('GridTemplate', 1, 'colRinFuelCode', 'Test Fuel Code 1')
         .enterGridData('GridTemplate', 1, 'colDescription', 'Test Description 1')
         .verifyStatusMessage('Edited')
@@ -18,7 +18,7 @@ StartTest (function (t) {
         //region Scenario 2: Fuel Category - Add Multiple Records
         .displayText('===== Scenario 2: Fuel Category - Add Multiple Records  =====')
         .clickButton('FuelCode')
-        .waitTillLoaded('icfuelcode')
+        .waitUntilLoaded('icfuelcode')
         .enterGridData('GridTemplate', 2, 'colRinFuelCode', 'Test Fuel Code 2')
         .enterGridData('GridTemplate', 2, 'colDescription', 'Test Description 2')
         .enterGridData('GridTemplate', 3, 'colRinFuelCode', 'Test Fuel Code 3')
@@ -33,15 +33,15 @@ StartTest (function (t) {
         //region Scenario 3: Add another record, Click Close button, do NOT save the changes
         .displayText('===== Scenario 3:  Add another record, Click Close button, do NOT save the changes =====')
         .clickButton('FuelCode')
-        .waitTillLoaded('icfuelcode')
+        .waitUntilLoaded('icfuelcode')
         .enterGridData('GridTemplate', 4, 'colRinFuelCode', 'Test Fuel Code 4')
         .enterGridData('GridTemplate', 4, 'colDescription', 'Test Description 4')
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
         .clickMessageBoxButton('no')
-        .waitTillLoaded()
+        .waitUntilLoaded()
         .clickButton('FuelCode')
-        .waitTillLoaded('icfuelcode')
+        .waitUntilLoaded('icfuelcode')
         .verifyGridData('GridTemplate', 4, 'colRinFuelCode', '')
         .verifyGridData('GridTemplate', 4, 'colDescription', '')
         .clickButton('Close')
@@ -51,7 +51,7 @@ StartTest (function (t) {
         //region Scenario 4: Add another record, click Close, Cancel
         .displayText('===== Scenario 4: Add another record, click Close, Cancel  =====')
         .clickButton('FuelCode')
-        .waitTillLoaded('icfuelcode')
+        .waitUntilLoaded('icfuelcode')
         .enterGridData('GridTemplate', 4, 'colRinFuelCode', 'Test Fuel Code 4')
         .enterGridData('GridTemplate', 4, 'colDescription', 'Test Description 4')
         .clickButton('Close')
@@ -62,14 +62,14 @@ StartTest (function (t) {
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
         .clickMessageBoxButton('no')
-        .waitTillLoaded()
+        .waitUntilLoaded()
         //endregion
 
 
         //region Scenario 5: Fuel Category - Add duplicate Record
         .displayText('===== Scenario 5: Fuel Category - Add duplicate Record =====')
         .clickButton('FuelCode')
-        .waitTillLoaded('icfuelcode')
+        .waitUntilLoaded('icfuelcode')
         .enterGridData('GridTemplate', 4, 'colRinFuelCode', 'Test Fuel Code 1')
         .enterGridData('GridTemplate', 4, 'colDescription', 'Test Description 1')
         .verifyStatusMessage('Edited')
@@ -83,21 +83,21 @@ StartTest (function (t) {
         //region Scenario 6: Add Description only
         .displayText('===== Scenario 6: Add Description only =====')
         .clickButton('FuelCode')
-        .waitTillLoaded('icfuelcode')
+        .waitUntilLoaded('icfuelcode')
         .enterGridData('GridTemplate', 4, 'colDescription', 'Test Description 4')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
         .clickButton('Close') 
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
         .clickMessageBoxButton('no')
-        .waitTillLoaded()
+        .waitUntilLoaded()
         //endregion
 
 
         //region Scenario 7: Add Primary Key only
         .displayText('===== Scenario 7: Add Primary Key only=====')
         .clickButton('FuelCode')
-        .waitTillLoaded('icfuelcode')
+        .waitUntilLoaded('icfuelcode')
         .enterGridData('GridTemplate', 4, 'colRinFuelCode', 'Test Fuel Code 4')
         .verifyStatusMessage('Edited')
         .clickButton('Save')

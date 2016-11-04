@@ -6,7 +6,7 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Categories','Screen')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','001 - Inventory Category')
         .enterData('Text Field','Description','Test Inventory Category')
         .selectComboBoxRowNumber('InventoryType',2,0)
@@ -29,7 +29,7 @@ StartTest (function (t) {
         //region Scenario 2: Add New Category - Bundle
         .displayText('===== Scenario 2: Add New Category - Bundle =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','002 - Bundle Category')
         .enterData('Text Field','Description','Test Bundle Category')
         .selectComboBoxRowNumber('InventoryType',1,0)
@@ -48,7 +48,7 @@ StartTest (function (t) {
         //region Scenario 3: Add New Category - Kit
         .displayText('===== Scenario 3: Add New Category - Kit =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','003 - Kit Category')
         .enterData('Text Field','Description','Test Kit Category')
         .selectComboBoxRowNumber('InventoryType',3,0)
@@ -66,7 +66,7 @@ StartTest (function (t) {
         //region Scenario 4: Add New Category - Finished Good Type
         .displayText('===== Scenario 4: Add New Category - Finished Good Type =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','004 - Finished Good Category')
         .enterData('Text Field','Description','Test Finished Good Category')
         .selectComboBoxRowNumber('InventoryType',4,0)
@@ -86,7 +86,7 @@ StartTest (function (t) {
         //region Scenario 5: Add New Category - Non Inventory
         .displayText('===== Scenario 5: Add New Category - Non Inventory =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','005 - Non Inventory Category')
         .enterData('Text Field','Description','Test Non Inventory Category')
         .selectComboBoxRowNumber('InventoryType',5,0)
@@ -105,7 +105,7 @@ StartTest (function (t) {
         //region Scenario 6: Add New Category - Other Charge Type
         .displayText('===== Scenario 6: Add New Category - Other Charge Type =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','006 - Other Charge Category')
         .enterData('Text Field','Description','Test Inventory Category')
         .selectComboBoxRowNumber('InventoryType',6,0)
@@ -127,7 +127,7 @@ StartTest (function (t) {
         //region Scenario 7: Add New Category - Raw Material Type
         .displayText('===== Scenario 7: Add New Category - Raw Material Type =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','007 - Raw Material Category')
         .enterData('Text Field','Description','Test Raw Material Category')
         .selectComboBoxRowNumber('InventoryType',7,0)
@@ -150,7 +150,7 @@ StartTest (function (t) {
         //region Scenario 8: Add New Category - Service
         .displayText('===== Scenario 8: Add New Category - Service =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','008 - Service Category')
         .enterData('Text Field','Description','Test Non Inventory Category')
         .selectComboBoxRowNumber('InventoryType',8,0)
@@ -169,7 +169,7 @@ StartTest (function (t) {
         //region Scenario 9: Add New Category - Software
         .displayText('===== Scenario 9: Add New Category - Software =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','009 - Software Category')
         .enterData('Text Field','Description','Test Non Inventory Category')
         .selectComboBoxRowNumber('InventoryType',9,0)
@@ -189,7 +189,7 @@ StartTest (function (t) {
         .displayText('===== Scenario 4: Update Category =====')
         .clickMenuScreen('Categories','Screen')
         .doubleClickSearchRowValue('001 - Inventory Category', 'strCategoryCode', 1)
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','Description','Updated Test Category Code')
         .selectComboBoxRowNumber('CostingMethod',2,0)
         .selectGridComboBoxRowValue('Tax',1,'strTaxClass','Checkoff','strTaxClass')
@@ -205,7 +205,7 @@ StartTest (function (t) {
 
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .verifyData('Text Field','Description','Updated Test Category Code')
         .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
         .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
@@ -217,7 +217,7 @@ StartTest (function (t) {
         //region Scenario 11: Check Required Fields
         .displayText('===== Scenario 5: Check Required Fields =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .clickButton('Save')
         .clickButton('Close')
         //endregion
@@ -226,7 +226,7 @@ StartTest (function (t) {
         //region Scenario 12: Save Duplicate Category Code
         .displayText('===== Scenario 12: Save Duplicate Category Code =====')
         .clickButton('New')
-        .waitTillLoaded('iccategory','')
+        .waitUntilLoaded('iccategory')
         .enterData('Text Field','CategoryCode','001 - Inventory Category')
         .enterData('Text Field','Description','Test Inventory Category')
         .selectComboBoxRowNumber('InventoryType',2,0)
@@ -237,7 +237,7 @@ StartTest (function (t) {
         .clickButton('Close')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
         .clickMessageBoxButton('yes')
-        .waitTillLoaded()
+        .waitUntilLoaded()
         .verifyMessageBox('iRely i21','Category must be unique.','ok','error')
         .clickMessageBoxButton('ok')
         .enterData('Text Field','CategoryCode','010 - Inventory Category')
