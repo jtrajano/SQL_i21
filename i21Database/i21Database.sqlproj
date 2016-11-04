@@ -4497,6 +4497,7 @@
     <Build Include="dbo\Functions\fnPATCreateRetireStockGLEntries.sql" />
     <Build Include="dbo\Functions\fnPATCreateIssueStockGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostIssueStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRUpdateLoadBlendIngredient.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
