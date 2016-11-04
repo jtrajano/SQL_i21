@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFCompleteWorkOrder] (
 	@strXML NVARCHAR(MAX)
-	,@strOutputLotNumber NVARCHAR(50) OUTPUT
-	,@intParentLotId INT = NULL OUTPUT
+	,@strOutputLotNumber NVARCHAR(50) = '' OUTPUT
+	,@intParentLotId INT = 0 OUTPUT
 	)
 AS
 BEGIN TRY
@@ -286,6 +286,7 @@ BEGIN TRY
 	BEGIN
 		PRINT 'Move the selected lot''s container to Audit container'
 	END
+
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Is Instant Consumption'
@@ -297,11 +298,11 @@ BEGIN TRY
 		AND intAttributeId = @intAttributeId
 
 	IF @strInstantConsumption = 'False'
-	Begin
+	BEGIN
 		SELECT @intBatchId = intBatchID
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
-	End
+	END
 
 	IF @intBatchId IS NULL
 		OR @intBatchId = 0
@@ -427,7 +428,6 @@ BEGIN TRY
 		--			,1
 		--			)
 		--END
-
 		SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
 		FROM dbo.tblMFWorkOrder
 		WHERE dtmExpectedDate = @dtmPlannedDate
@@ -497,7 +497,15 @@ BEGIN TRY
 
 		IF @strInputQuantityReadOnly = 'True'
 		BEGIN
-			SELECT @dblInputWeight = ri.dblCalculatedQuantity * ((Case When r.intItemUOMId=@intProduceUnitMeasureId Then @dblProduceQty Else @dblPhysicalCount End)/ r.dblQuantity)
+			SELECT @dblInputWeight = ri.dblCalculatedQuantity * (
+					(
+						CASE 
+							WHEN r.intItemUOMId = @intProduceUnitMeasureId
+								THEN @dblProduceQty
+							ELSE @dblPhysicalCount
+							END
+						) / r.dblQuantity
+					)
 			FROM dbo.tblMFRecipeItem ri
 			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			LEFT JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
@@ -645,7 +653,7 @@ BEGIN TRY
 	BEGIN
 		IF EXISTS (
 				SELECT *
-				FROM tblMFWorkOrderRecipe 
+				FROM tblMFWorkOrderRecipe
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intItemUOMId = @intProduceUnitMeasureId
 				)
@@ -696,11 +704,11 @@ BEGIN TRY
 			)
 	BEGIN
 		IF @strInstantConsumption = 'False'
-		Begin
+		BEGIN
 			SELECT @strRetBatchId = strBatchId
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
-		End
+		END
 
 		IF @strRetBatchId IS NULL
 		BEGIN
@@ -769,6 +777,7 @@ BEGIN TRY
 				WHERE intLotId = @intLotId
 					AND intLotStatusId = @intLotStatusId
 				)
+			AND @strLotTracking = 'Yes'
 		BEGIN
 			--UPDATE dbo.tblICLot
 			--SET intLotStatusId = @intLotStatusId
@@ -782,6 +791,12 @@ BEGIN TRY
 			,@intParentLotId = intParentLotId
 		FROM dbo.tblICLot
 		WHERE intLotId = @intLotId
+
+		IF @strOutputLotNumber IS NULL
+			SELECT @strOutputLotNumber = ''
+
+		IF @intParentLotId IS NULL
+			SELECT @intParentLotId = 0
 
 		SELECT @strOutputLotNumber AS strOutputLotNumber
 	END
