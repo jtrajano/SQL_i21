@@ -17,10 +17,10 @@ SELECT
 	,dblLimit
 	,dblTotal
 	,dblTotalYTD
-	,dblAdditionalMed = CASE WHEN (strCalculationType = 'USA Medicare' AND strPaidBy = 'Employee')
+	,dblAdditionalMed = CASE WHEN (strCalculationType = 'USA Medicare' AND strPaidBy = 'Employee' AND dblTotal > 0)
 					    THEN 
-							CASE WHEN (strFilingStatus = 'Married' AND dblTotalYTD > 2900) THEN ROUND(((dblTotalYTD - 2900) * 0.009), 2)
-								 WHEN (strFilingStatus <> 'Married' AND dblTotalYTD > 1812.5) THEN ROUND(((dblTotalYTD - 1812.5) * 0.009), 2)
+							CASE WHEN (strFilingStatus = 'Married' AND dblTotalYTD > 1812.5 AND ROUND(dblTotal - (dblAdjustedGross * 0.0145), 2) > 0) THEN ROUND(dblTotal - (dblAdjustedGross * 0.0145), 2)
+								 WHEN (strFilingStatus <> 'Married' AND dblTotalYTD > 2900 AND ROUND(dblTotal - (dblAdjustedGross * 0.0145), 2) > 0) THEN ROUND(dblTotal - (dblAdjustedGross * 0.0145), 2)
 								 ELSE 0 END
 					    ELSE 0 END
 	,intAccountId
