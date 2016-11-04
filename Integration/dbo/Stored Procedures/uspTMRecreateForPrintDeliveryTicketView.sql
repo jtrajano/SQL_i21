@@ -43,6 +43,7 @@ BEGIN
 				,intDriverID = E.intDriverID
 				,intConcurrencyId = E.intConcurrencyId
 				,intClockId = K.intClockID
+				,intEntityUserSecurityId = E.intUserID
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -91,6 +92,7 @@ BEGIN
 				,intDriverId = E.intDriverID
 				,intConcurrencyId = E.intConcurrencyId
 				,intClockId = K.intClockID
+				,intEntityUserSecurityId = E.intUserID
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID

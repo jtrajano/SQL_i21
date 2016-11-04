@@ -15,8 +15,37 @@ AS
 	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT)	
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
 	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]
-	DECLARE @zeroDecimal		NUMERIC(18, 6)
-	SET @zeroDecimal = 0.000000
+	DECLARE @temp_aging_table TABLE(
+		 [strInvoiceNumber]			NVARCHAR(100)
+		,[strRecordNumber]			NVARCHAR(100)
+		,[intInvoiceId]				INT
+		,[strCustomerName]			NVARCHAR(100)
+		,[strBOLNumber]				NVARCHAR(100)
+		,[intEntityCustomerId]		INT
+		,[strCustomerNumber]		NVARCHAR(100)			
+		,[dblCreditLimit]			NUMERIC(18,6)
+		,[dblTotalAR]				NUMERIC(18,6)
+		,[dblFuture]				NUMERIC(18,6)
+		,[dbl0Days]					NUMERIC(18,6)
+		,[dbl10Days]				NUMERIC(18,6)
+		,[dbl30Days]				NUMERIC(18,6)
+		,[dbl60Days]				NUMERIC(18,6)
+		,[dbl90Days]				NUMERIC(18,6)
+		,[dbl91Days]				NUMERIC(18,6)
+		,[dblTotalDue]				NUMERIC(18,6)
+		,[dblAmountPaid]			NUMERIC(18,6)
+		,[dblInvoiceTotal]			NUMERIC(18,6)
+		,[dblCredits]				NUMERIC(18,6)
+		,[dblPrepayments]			NUMERIC(18,6)
+		,[dblPrepaids]				NUMERIC(18,6)
+		,[dtmDate]					DATETIME
+		,[dtmDueDate]				DATETIME
+		,[dtmAsOfDate]				DATETIME
+		,[strSalespersonName]		NVARCHAR(100)
+		,[intCompanyLocationId]		INT
+	)
+	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
+	      , @dblMinimumSC		NUMERIC(18, 6) = 0
 
 	--VALIDATION
 	IF ISNULL(@arAccountId, 0) = 0
@@ -66,6 +95,13 @@ AS
 			WHERE intEntityId NOT IN (SELECT intEntityCustomerId FROM tblARCustomerAccountStatus WHERE intAccountStatusId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@statusIds)))
 		END
 
+	--GET CUSTOMER AGING IF CALCULATION IS BY CUSTOMER BALANCE
+	IF (@calculation = 'By Customer Balance')
+		BEGIN
+			INSERT INTO @temp_aging_table
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDate, NULL
+		END
+
 	--PROCESS EACH CUSTOMER
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomers)
 		BEGIN
@@ -78,51 +114,87 @@ AS
 			IF (@serviceChargeId > 0)
 				BEGIN
 					--GET INVOICES DUE
-					INSERT INTO @tempTblTypeServiceCharge
-					SELECT I.intInvoiceId
-						 , NULL
-						 , @entityId
-						 , I.strInvoiceNumber
-						 , NULL
-						 , dblAmountDue = I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)
-						 , dblTotalAmount = CASE WHEN SC.strCalculationType = 'Percent'
-						 						THEN
-						 							CASE WHEN SC.dblServiceChargeAPR > 0
+					IF (@calculation = 'By Invoice')
+						BEGIN
+							INSERT INTO @tempTblTypeServiceCharge
+							SELECT I.intInvoiceId
+								 , NULL
+								 , @entityId
+								 , I.strInvoiceNumber
+								 , NULL
+								 , dblAmountDue = I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)
+								 , dblTotalAmount = CASE WHEN SC.strCalculationType = 'Percent'
 						 								THEN
-						 									CASE WHEN SC.dblMinimumCharge > ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
-																																					THEN I.dtmDueDate 
-																																					ELSE I.dtmCalculated 
-																																				 END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
-						 		  								THEN SC.dblMinimumCharge
-						 		  								ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
-																															  THEN I.dtmDueDate 
-																															  ELSE I.dtmCalculated 
-																														   END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))
+						 									CASE WHEN SC.dblServiceChargeAPR > 0
+						 										THEN
+						 											CASE WHEN SC.dblMinimumCharge > ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+																																							THEN I.dtmDueDate 
+																																							ELSE I.dtmCalculated 
+																																						 END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
+						 		  										THEN SC.dblMinimumCharge
+						 		  										ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
+																																	  THEN I.dtmDueDate 
+																																	  ELSE I.dtmCalculated 
+																																   END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))
+						 											END
+						 										ELSE 0
 						 									END
-						 								ELSE 0
+						 								ELSE 
+						 									SC.dblPercentage
 						 							END
-						 						ELSE 
-						 							SC.dblPercentage
-						 					END
-					FROM tblARInvoice I
-						INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
-						INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
-						LEFT JOIN (SELECT PD.intInvoiceId
-										, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
-										, dtmDatePaid   = MAX(dtmDatePaid)
-								   FROM tblARPaymentDetail PD INNER JOIN tblARPayment P 
-										ON PD.intPaymentId = P.intPaymentId 
-										AND P.ysnPosted = 1 
-										AND P.dtmDatePaid <= @asOfDate
-								  GROUP BY PD.intInvoiceId
-						) AS PD ON PD.intInvoiceId = I.intInvoiceId 
-					WHERE I.ysnPosted = 1 							  
-						AND I.strTransactionType = 'Invoice'
-						AND I.strType IN ('Standard', 'Transport Delivery')
-						AND I.intEntityCustomerId = @entityId
-						AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < @asOfDate
-						AND I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal) > @zeroDecimal
-					
+							FROM tblARInvoice I
+								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
+								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
+								LEFT JOIN (SELECT PD.intInvoiceId
+												, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
+												, dtmDatePaid   = MAX(dtmDatePaid)
+										   FROM tblARPaymentDetail PD INNER JOIN tblARPayment P 
+												ON PD.intPaymentId = P.intPaymentId 
+												AND P.ysnPosted = 1 
+												AND P.dtmDatePaid <= @asOfDate
+										  GROUP BY PD.intInvoiceId
+								) AS PD ON PD.intInvoiceId = I.intInvoiceId 
+							WHERE I.ysnPosted = 1 							  
+								AND I.strTransactionType = 'Invoice'
+								AND I.strType IN ('Standard', 'Transport Delivery')
+								AND I.intEntityCustomerId = @entityId
+								AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < @asOfDate
+								AND I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal) > @zeroDecimal					
+						END
+					ELSE
+						BEGIN
+							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
+
+							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
+							SELECT TOP 1 @dblMinimumSC = dblMinimumCharge FROM tblARCustomer C 
+								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.intEntityCustomerId = @entityId
+			
+							IF ISNULL(@dblTotalAR, 0) > 0
+								BEGIN
+									INSERT INTO @tempTblTypeServiceCharge
+									SELECT intInvoiceId			= AGING.intInvoiceId
+										 , intBudgetId			= NULL
+										 , intEntityCustomerId	= AGING.intEntityCustomerId
+										 , strInvoiceNumber		= AGING.strInvoiceNumber
+										 , strBudgetDescription = NULL
+										 , dblAmountDue			= @dblTotalAR
+										 , dblTotalAmount       = CASE WHEN SC.strCalculationType = 'Percent'
+																		THEN
+																			CASE WHEN SC.dblServiceChargeAPR > 0
+																				THEN
+																					((SC.dblServiceChargeAPR/12) * @dblTotalAR) / 100
+																				ELSE 0
+																			END
+																		ELSE
+																			SC.dblPercentage
+						 											END
+									FROM @temp_aging_table AGING
+										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
+										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
+									WHERE AGING.intEntityCustomerId = @entityId
+								END					
+						END
+
 					--GET CUSTOMER BUDGET DUE
 					IF ISNULL(@isIncludeBudget, 0) = 1
 						BEGIN
@@ -180,17 +252,23 @@ AS
 								 , @entityId
 								 , 'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
 								 , NULL
-								 , SUM(dblAmountDue)
-								 , SUM(dblTotalAmount) 
+								 , AVG(dblAmountDue)
+								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > AVG(dblTotalAmount) THEN @dblMinimumSC ELSE AVG(dblTotalAmount) END
 							FROM @tempTblTypeServiceCharge 
 								GROUP BY intEntityCustomerId 
-								HAVING SUM(dblAmountDue) > @zeroDecimal 
-								   AND SUM(dblTotalAmount) > @zeroDecimal
+								HAVING AVG(dblAmountDue) > @zeroDecimal 
+								   AND AVG(dblTotalAmount) > @zeroDecimal
 						END
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN
-							SET @totalAmount = @totalAmount + (SELECT SUM(dblTotalAmount) FROM @tblTypeServiceCharge)
+							SET @totalAmount = @totalAmount + CASE WHEN @calculation = 'By Invoice' 
+																THEN 
+																	(SELECT SUM(dblTotalAmount) FROM @tblTypeServiceCharge)
+																ELSE 
+																	(SELECT AVG(dblTotalAmount) FROM @tblTypeServiceCharge)
+																END
+
 							DELETE FROM @tempTblTypeServiceCharge WHERE ISNULL(dblAmountDue, @zeroDecimal) = @zeroDecimal OR ISNULL(dblTotalAmount, @zeroDecimal) = @zeroDecimal
 
 							EXEC dbo.uspARInsertInvoiceServiceCharge @isRecap, @batchId, @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @calculation, @tblTypeServiceCharge, @tempTblTypeServiceCharge
