@@ -830,8 +830,15 @@ BEGIN
 								,[intRelatedInventoryTransactionId] = InvTran.intInventoryTransactionId	
 								,[intFobPointId]				= InvTran.intFobPointId
 								,[intInTransitSourceLocationId]	= InvTran.intInTransitSourceLocationId
-						FROM	tblICInventoryTransaction InvTran
-						WHERE	intInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
+						FROM	dbo.tblICInventoryTransaction InvTran 
+								OUTER APPLY (
+									SELECT TOP 1 
+											intInventoryTransactionId
+									FROM	#tmpRevalueProducedItems 
+									WHERE	intRelatedInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
+								) e									
+						WHERE	InvTran.intInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
+								AND e.intInventoryTransactionId IS NULL 	
 
 						-- Flag the inventory transaction not to create the gl entries
 						UPDATE t
