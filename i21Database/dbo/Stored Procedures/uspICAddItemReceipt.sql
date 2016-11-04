@@ -339,12 +339,12 @@ BEGIN
 
 		--  Flush out existing detail detail data for re-insertion
 		BEGIN 
-			DELETE FROM dbo.tblICInventoryReceiptItem
-			WHERE intInventoryReceiptId = @inventoryReceiptId
-
 			DELETE FROM dbo.tblICInventoryReceiptCharge
 			WHERE intInventoryReceiptId = @inventoryReceiptId
-		END 
+
+			DELETE FROM dbo.tblICInventoryReceiptItem
+			WHERE intInventoryReceiptId = @inventoryReceiptId
+		END
 
 		-- Insert the Inventory Receipt Detail. 
 		INSERT INTO dbo.tblICInventoryReceiptItem (
