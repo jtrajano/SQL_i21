@@ -31,12 +31,14 @@ DECLARE @intContractDetailId AS INT,
 		@intLoadCostId AS INT,
 		@intHaulerId AS INT,
 		@ysnAccrue AS BIT,
-		@ysnPrice AS BIT;
+		@ysnPrice AS BIT,
+		@intFutureMarketId AS INT;
 
 BEGIN 
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId
+	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId
 	FROM	dbo.tblSCTicket SC 
 	LEFT JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+	LEFT JOIN dbo.tblICCommodity IC On SC.intCommodityId = IC.intCommodityId
 	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 END
 
@@ -129,7 +131,11 @@ SELECT
 		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
 		,dblQty						= LI.dblQty
-		,dblCost					= LI.dblCost
+		--,dblCost					= LI.dblCost
+		,dblCost					= CASE
+										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,SC.intCommodityId,LEFT(DATENAME(MONTH, CNT.dtmEndDate), 3) + ' ' + RIGHT('0' + DATENAME(YEAR, CNT.dtmEndDate), 4),2,@intFutureMarketId,SC.intProcessingLocationId,LI.dblCost),0)
+										ELSE LI.dblCost
+									END
 		,dblExchangeRate			= 1 -- Need to check this
 		,intLotId					= NULL --No LOTS from scale
 		,intSubLocationId			= SC.intSubLocationId
