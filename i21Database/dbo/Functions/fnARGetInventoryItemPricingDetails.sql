@@ -60,26 +60,27 @@ BEGIN
 			,NULL
 		);													
 					
-	--Item Promotional Pricing
-	SELECT TOP 1 
+	--Item Promotional Pricing 
+	SELECT TOP 1
 		@Price			= @UOMQuantity *
-							(CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICIP.dblSalePrice
+							(CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblUnitAfterDiscount
 							ELSE
 								(CASE
 									WHEN ICISP.strDiscountBy = 'Amount'
-										THEN ICIP.dblSalePrice - ISNULL(ICISP.dblDiscount, 0.00)
+										THEN ICISP.dblUnitAfterDiscount - ISNULL(ICISP.dblDiscount, 0.00)
 									ELSE	
-										ICIP.dblSalePrice - (ICIP.dblSalePrice * (ISNULL(ICISP.dblDiscount, 0.00)/100.00) )
+										ICISP.dblUnitAfterDiscount - (ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, 0.00)/100.00) )
 								END)
 							END)
-		,@PriceBasis	= ICIP.dblSalePrice		
+				 
+		,@PriceBasis	= ICISP.dblUnitAfterDiscount	
 		,@Deviation		= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblDiscount
 							ELSE
 								(CASE
 									WHEN ICISP.strDiscountBy = 'Amount'
 										THEN ISNULL(ICISP.dblDiscount, 0.00)
 									ELSE	
-										(ICIP.dblSalePrice * (ISNULL(ICISP.dblDiscount, 0.00)/100.00) )
+										(ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, 0.00)/100.00) )
 								END)
 							END) 									
 		,@DiscountBy	= ICISP.strDiscountBy
@@ -88,16 +89,12 @@ BEGIN
 		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + ICISP.strPromotionType + ')','')	
 	FROM
 		tblICItemSpecialPricing ICISP
-	INNER JOIN
-		tblICItemPricing ICIP
-			ON ICISP.intItemId = ICIP.intItemId 
-			AND ICISP.intItemLocationId = ICIP.intItemLocationId 
 	WHERE
 		ICISP.intItemId = @ItemId 
 		AND ICISP.intItemLocationId = @ItemLocationId 
 		AND ICISP.intItemUnitMeasureId = @ItemUOMId
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ICISP.dtmBeginDate AS DATE) AND CAST(ISNULL(ICISP.dtmEndDate,@TransactionDate) AS DATE)
-	ORDER BY
+ 	ORDER BY
 		dtmBeginDate DESC
 	
 	IF(ISNULL(@Price,0) <> 0)
@@ -164,7 +161,7 @@ BEGIN
 		END
 	
 	--Item Pricing Level
-
+	SET @Price = 0
 	IF ISNULL(@PricingLevelId,0) <> 0
 	BEGIN
 
@@ -201,6 +198,7 @@ BEGIN
 			END	
 	END
 
+	SET @Price = 0
 	SELECT TOP 1 
 		@Price			= @UOMQuantity * ICPL.dblUnitPrice
 		,@PriceBasis	= ICPL.dblUnitPrice		
@@ -241,7 +239,7 @@ BEGIN
 			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity, @intSort
 			IF @GetAllAvailablePricing = 0 RETURN;
 		END		
-		
+		 
 	SELECT TOP 1 
 		@Price			= @UOMQuantity * PL.dblUnitPrice
 		,@PriceBasis	= PL.dblUnitPrice		
