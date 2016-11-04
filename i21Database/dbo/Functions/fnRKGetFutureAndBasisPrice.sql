@@ -6,7 +6,7 @@
 	@intSequenceTypeId int, -- 1.	‘01’ – Returns, Basis($) and Unit of Measure 2.	‘02’ – Returns, Futures($) and Unit of Measure   3. 	‘03’ – Returns, Futures($), Basis ($) and Unit of Measure
 	@intFutureMarketId int, 
 	@intLocationId int = null,
-	@dblBasisCost decimal
+	@dblBasisCost NUMERIC(18, 6)
 )
 RETURNS NUMERIC(18, 6)
 AS
@@ -26,7 +26,7 @@ BEGIN
 	END
 	ELSE IF @intSequenceTypeId = 2
 		BEGIN
-		SELECT TOP 1 @calculatedValue=isnull(dblLastSettle,0) - @dblBasisCost
+		SELECT TOP 1 @calculatedValue=isnull(dblLastSettle,0) + @dblBasisCost
 		FROM tblRKFuturesSettlementPrice sp
 		INNER JOIN tblRKFutSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 		INNER JOIN tblRKFutureMarket m on sp.intFutureMarketId=m.intFutureMarketId
@@ -73,7 +73,7 @@ BEGIN
 		 AND  RIGHT(CONVERT(NVARCHAR,dtmFutureMonthsDate,106),8)  = @strSeqMonth AND dblLastSettle IS NOT NULL
 	ORDER BY dtmPriceDate DESC
 
-	SELECT @calculatedValue=isnull(dblSettlementPrice,0)-isnull(dblBasis,0) FROM @tblRKFutureBasis t
+	SELECT @calculatedValue=isnull(dblSettlementPrice,0)+isnull(dblBasis,0) FROM @tblRKFutureBasis t
 	full join @tblRKFuturePrice t1 on t.strMonth=t1.strMonth
 
  END
