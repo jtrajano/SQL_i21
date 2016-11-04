@@ -127,7 +127,7 @@ GO
 GO
 	PRINT 'BEGIN OF EXECUTE uspETRecreateDeliveryMetricsView'
 GO 
-	EXEC ('uspETRecreatDeliveryMetricsView')
+	EXEC ('uspETRecreateDeliveryMetricsView')
 GO 
 	PRINT 'END OF EXECUTE uspETRecreateDeliveryMetricsView'
 GO
