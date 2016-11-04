@@ -146,6 +146,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\20_CleanCustomerSpecialPrice.sql" />
     <None Include="Scripts\Pre-Deployment\21_PR\1_1620_to_1630.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Charges.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
