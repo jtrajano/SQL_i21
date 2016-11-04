@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @strPassword NVARCHAR(100)
 	DECLARE @IntinterfaceSystem INT
 	DECLARE @StrQuoteProvider NVARCHAR(100)
+	DECLARE @strProviderAccessType NVARCHAR(30)
 	DECLARE @URL NVARCHAR(1000)
 	
 
@@ -27,16 +28,20 @@ BEGIN TRY
 	SELECT @StrQuoteProvider = strQuoteProvider
 	FROM tblGRUserPreference
 	WHERE [intEntityUserSecurityId] = @intUserId
+	
+	SELECT @strProviderAccessType=ISNULL(strProviderAccessType,'') 
+	FROM tblGRUserPreference 
+	WHERE intEntityUserSecurityId=@intUserId
 
 	SELECT @IntinterfaceSystem = intInterfaceSystemId
 	FROM tblSMCompanyPreference
 
-	IF  (	    @IntinterfaceSystem <> 1
+	IF  ((	    @IntinterfaceSystem <> 1
 			AND @IntinterfaceSystem <> 2
 		)
 		OR (ISNULL(@strUserName, '') = '')
 		OR (ISNULL(@URL, '') = '')
-		OR (ISNULL(@StrQuoteProvider, '') <> 'DTN/Agricharts')
+		OR (ISNULL(@StrQuoteProvider, '') <> 'DTN/Agricharts')) AND @strProviderAccessType <>'History Only'
 		
 		BEGIN
 			SET @ElectronicPricingSetUp = 0
