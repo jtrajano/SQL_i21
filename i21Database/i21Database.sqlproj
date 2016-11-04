@@ -4492,6 +4492,11 @@
     <Build Include="dbo\Stored Procedures\uspMFUnpostProducedLot.sql" />
     <Build Include="dbo\Views\vyuQMTestResultNotMapped.sql" />
     <Build Include="dbo\Views\vyuQMSampleNotMapped.sql" />
+    <Build Include="dbo\Functions\fnPATReverseRetireStockGLEntries.sql" />
+    <Build Include="dbo\Functions\fnPATReverseIssueStockGLEntries.sql" />
+    <Build Include="dbo\Functions\fnPATCreateRetireStockGLEntries.sql" />
+    <Build Include="dbo\Functions\fnPATCreateIssueStockGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATPostIssueStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
