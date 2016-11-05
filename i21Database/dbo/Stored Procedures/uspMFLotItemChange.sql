@@ -23,6 +23,10 @@ BEGIN TRY
 		,@intUnitMeasureId INT
 		,@strUnitMeasure NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
+		,@intFromItemCategory INT
+		,@intToItemCategory INT
+		,@strFromItemCategory NVARCHAR(50)
+		,@strToItemCategory NVARCHAR(50)
 		,@intNewLotId INT
 		,@dblAdjustByQuantity NUMERIC(16, 8)
 		,@dblLotReservedQty NUMERIC(16, 8)
@@ -50,6 +54,24 @@ BEGIN TRY
 				,16
 				,1
 				)
+	END
+
+	SELECT @strFromItemCategory = C.strCategoryCode,
+			@intFromItemCategory  = C.intCategoryId
+	FROM dbo.tblICItem I
+	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
+	WHERE I.intItemId = @intItemId
+
+	SELECT @strToItemCategory = C.strCategoryCode,
+			@intToItemCategory  = C.intCategoryId
+	FROM dbo.tblICItem I
+	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
+	WHERE I.intItemId = @intNewItemId
+
+	IF NOT EXISTS(SELECT 1 FROM tblMFItemChangeMap WHERE intFromItemCategoryId = @intFromItemCategory AND intToItemCategoryId = @intToItemCategory)
+	BEGIN
+		SET @strErrMsg = 'Item change not allowed from category ' + @strFromItemCategory + ' to ' + @strToItemCategory +'.'
+		RAISERROR (@strErrMsg,16,1)
 	END
 
 	SELECT @intUnitMeasureId = intUnitMeasureId
