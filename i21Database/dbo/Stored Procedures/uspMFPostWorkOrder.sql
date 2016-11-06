@@ -471,6 +471,9 @@ BEGIN TRY
 			EXEC uspGLBookEntries @GLEntries
 				,1
 		END
+
+		Update tblMFWorkOrder Set strCostAdjustmentBatchId=@strBatchId Where intWorkOrderId=@intWorkOrderId
+
 	END
 
 	IF @intTransactionCount = 0

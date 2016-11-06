@@ -4503,6 +4503,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesPrice.sql" />
     <Build Include="dbo\Tables\tblRKElectronicUserInformation.sql" />
     <Build Include="dbo\Tables\tblMFItemChangeMap.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUnpostCycleCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
