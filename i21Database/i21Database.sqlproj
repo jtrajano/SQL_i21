@@ -4504,6 +4504,8 @@
     <Build Include="dbo\Tables\tblRKElectronicUserInformation.sql" />
     <Build Include="dbo\Tables\tblMFItemChangeMap.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUnpostCycleCount.sql" />
+    <Build Include="dbo\Tables\tblMFHandheldMenuItem.sql" />
+    <Build Include="dbo\Tables\tblMFHaldheldUserMenuItemMap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
