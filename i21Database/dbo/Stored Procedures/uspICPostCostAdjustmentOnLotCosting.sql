@@ -108,13 +108,14 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
+		,@INV_TRANS_TYPE_Invoice AS INT = 33
 
 		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
 		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
 		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
 		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39		
 		,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
-
+		
 		,@INV_TRANS_TYPE_Consume AS INT = 8
 		,@INV_TRANS_TYPE_Produce AS INT = 9
 		,@INV_TRANS_TYPE_Build_Assembly AS INT = 11
@@ -666,6 +667,42 @@ BEGIN
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId_SoldOrUsed OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+
+					IF	@InvTranTypeId = @INV_TRANS_TYPE_Invoice 
+						AND @intFobPointId = @FOB_DESTINATION
+					BEGIN 
+						SET @InvTranValue = -@InvTranValue
+						EXEC [dbo].[uspICPostInventoryTransaction]
+							@intItemId								= @intItemId
+							,@intItemLocationId						= @intItemLocationId
+							,@intItemUOMId							= @intItemUOMId
+							,@intSubLocationId						= @InvTranSubLocationId 
+							,@intStorageLocationId					= @InvTranStorageLocationId 
+							,@dtmDate								= @dtmDate
+							,@dblQty								= 0
+							,@dblUOMQty								= 0
+							,@dblCost								= 0
+							,@dblValue								= @InvTranValue
+							,@dblSalesPrice							= 0
+							,@intCurrencyId							= @InvTranCurrencyId
+							,@dblExchangeRate						= @InvTranExchangeRate
+							,@intTransactionId						= @intTransactionId
+							,@intTransactionDetailId				= @intTransactionDetailId
+							,@strTransactionId						= @strTransactionId
+							,@strBatchId							= @strBatchId
+							,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Shipment
+							,@intLotId								= @intLotId 
+							,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
+							,@intRelatedTransactionId				= @InvTranIntTransactionId 
+							,@strRelatedTransactionId				= @InvTranStringTransactionId 
+							,@strTransactionForm					= @strTransactionForm
+							,@intEntityUserSecurityId				= @intEntityUserSecurityId
+							,@intCostingMethod						= @LOTCOST
+							,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId_SoldOrUsed OUTPUT
+							,@intFobPointId							= @intFobPointId 
+							,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+					END 
+
 				END 	
 
 				---------------------------------------------------------------------------
@@ -679,7 +716,7 @@ BEGIN
 							, @INV_TRANS_TYPE_ADJ_Split_Lot
 							, @INV_TRANS_TYPE_ADJ_Lot_Merge
 							, @INV_TRANS_TYPE_ADJ_Lot_Move
-							, @INV_TRANS_TYPE_Inventory_Shipment						
+							, @INV_TRANS_TYPE_Inventory_Shipment		
 						)
 						AND @InvTranValue <> 0 
 				BEGIN 
@@ -842,7 +879,7 @@ BEGIN
 								,[intSubLocationId]				= InvTran.intSubLocationId
 								,[intStorageLocationId]			= InvTran.intStorageLocationId
 								,[ysnIsStorage]					= NULL 
-								,[strActualCostId]				= NULL 
+								,[strActualCostId]				= NULL -- CASE WHEN InvTran.intFobPointId = @FOB_DESTINATION THEN @InvTranStringTransactionId ELSE NULL END  
 								,[intSourceTransactionId]		= InvTran.intTransactionId
 								,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
 								,[strSourceTransactionId]		= InvTran.strTransactionId
