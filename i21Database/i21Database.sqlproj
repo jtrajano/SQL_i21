@@ -4516,6 +4516,7 @@
     <Build Include="dbo\Views\vyuGRStorageScheduleRuleNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRCustomerStorageNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRStorageHistoryNotMapped.sql" />
+    <Build Include="dbo\Views\vyuLGDeliveryOpenPickLotHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

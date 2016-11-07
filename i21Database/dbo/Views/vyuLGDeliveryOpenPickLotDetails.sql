@@ -54,10 +54,11 @@ SELECT PL.intPickLotDetailId,
   Lot.dblAvailableQty,
   dblItemUOMConv = (SELECT IU.dblUnitQty from tblICItemUOM IU WHERE IU.intItemUOMId = Lot.intItemUOMId),
   dblWeightItemUOMConv = (SELECT IU.dblUnitQty from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId),
-  PLH.strCustomerNo
+  PLH.strCustomerNo, 
+  Receipt.strWarehouseRefNo
 
 FROM tblLGPickLotDetail  PL
-JOIN vyuLGDeliveryOpenPickLots PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
+JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
 JOIN tblICItem    IM ON IM.intItemId    = Lot.intItemId
 JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PL.intAllocationDetailId
@@ -68,4 +69,7 @@ JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderI
 JOIN tblICUnitMeasure  UM ON UM.intUnitMeasureId   = PL.intLotUnitMeasureId
 JOIN tblICUnitMeasure SaleUOM ON SaleUOM.intUnitMeasureId = PL.intSaleUnitMeasureId
 JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
+LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
+LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
+LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 WHERE PL.intPickLotDetailId NOT IN (SELECT IsNull(LD.intPickLotDetailId, 0) FROM tblLGLoadDetail LD)
