@@ -4517,6 +4517,7 @@
     <Build Include="dbo\Views\vyuGRCustomerStorageNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRStorageHistoryNotMapped.sql" />
     <Build Include="dbo\Views\vyuLGDeliveryOpenPickLotHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleCopy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

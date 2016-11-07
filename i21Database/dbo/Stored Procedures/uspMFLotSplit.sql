@@ -177,10 +177,9 @@ BEGIN TRY
 		,@intEntityUserSecurityId = @intUserId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
-	SELECT @strSplitLotNumber = strLotNumber
-		,@intNewLotId = intLotId
-	FROM tblICLot
-	WHERE intSplitFromLotId = @intLotId
+	SELECT TOP 1 @strSplitLotNumber = strLotNumber
+				,@intNewLotId = intLotId
+	FROM tblICLot ORDER BY intLotId DESC
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 17
@@ -250,6 +249,10 @@ BEGIN TRY
 			,@strReasonCode = 'Residue qty clean up'
 			,@strNotes = 'Residue qty clean up'
 	END
+
+	EXEC uspQMSampleCopy @intOldLotId = @intLotId
+		,@intNewLotId = @intNewLotId
+		,@intLocationId = @intLocationId
 
 	COMMIT TRANSACTION
 END TRY
