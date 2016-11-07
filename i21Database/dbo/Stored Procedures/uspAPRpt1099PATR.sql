@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspAPRpt1099PATR]
+﻿CREATE PROCEDURE [dbo].[uspAPRpt1099PATR]
 	@xmlParam NVARCHAR(MAX) = NULL
 	--@vendorFrom NVARCHAR(100) = NULL,
 	--@vendorTo NVARCHAR(100) = NULL,
@@ -74,7 +73,7 @@ DECLARE @xmlDocumentId AS INT;
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT *, NULL AS strCorrected FROM dbo.vyuAP1099PATR WHERE intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT *, NULL AS strCorrected FROM dbo.vyuAP1099PATR A WHERE A.intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 -- Create a table variable to hold the XML data. 		

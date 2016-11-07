@@ -4509,6 +4509,7 @@
     <Build Include="dbo\Views\vyuICGetItemStockUOMTotals.sql" />
     <Build Include="dbo\Tables\tblLGLoadStorageCost.sql" />
     <Build Include="dbo\Views\vyuMFGetWorkOrderItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099PATRTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
