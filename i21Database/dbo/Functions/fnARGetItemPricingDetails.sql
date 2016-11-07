@@ -62,6 +62,9 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@SubCurrencyId		INT
 		,@SubCurrency		NVARCHAR(40)
 		,@PriceUOM			NVARCHAR(50)
+		,@OriginalItemUOMId	INT
+
+	SET @OriginalItemUOMId = @ItemUOMId
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
@@ -144,7 +147,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						 @ItemId
 						,@CustomerId
 						,@LocationId
-						,@ItemUOMId
+						,@OriginalItemUOMId
 						,@TransactionDate
 						,@Quantity
 						,@VendorId
@@ -197,7 +200,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						 @ItemId
 						,@CustomerId
 						,@LocationId
-						,@ItemUOMId
+						,@OriginalItemUOMId
 						,@TransactionDate
 						,@Quantity
 						,@VendorId
@@ -229,7 +232,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						 @ItemId
 						,@CustomerId
 						,@LocationId
-						,@ItemUOMId
+						,@OriginalItemUOMId
 						,@TransactionDate
 						,@Quantity
 						,@VendorId
@@ -281,7 +284,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						 @ItemId
 						,@CustomerId
 						,@LocationId
-						,@ItemUOMId
+						,@OriginalItemUOMId
 						,@TransactionDate
 						,@Quantity
 						,@VendorId
@@ -330,7 +333,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 			 @ItemId
 			,@CustomerId
 			,@LocationId
-			,@ItemUOMId
+			,@OriginalItemUOMId
 			,@VendorId
 			,NULL
 			,NULL

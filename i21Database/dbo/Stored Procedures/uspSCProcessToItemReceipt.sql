@@ -204,8 +204,12 @@ BEGIN TRY
 				   -- process the table variable row-by-row. This example simply
 				   -- uses a PRINT statement as that action (not a very good
 				   -- example).
-				   IF	ISNULL(@intLoopContractId,0) != 0
-				   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+				   IF ISNULL(@intLoopContractId,0) != 0
+					UPDATE tblSCTicket SET intContractId = @intLoopContractId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
+					UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
+					, intContractSequence = CT.intContractSeq
+					, strContractLocation = CT.strLocationName
+					FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 				   
 				   -- Attempt to fetch next row from cursor
@@ -403,7 +407,7 @@ BEGIN TRY
 						-- uses a PRINT statement as that action (not a very good
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
-							UPDATE tblSCTicket SET intContractId = @intDPContractId WHERE intTicketId = @intTicketId
+							UPDATE tblSCTicket SET intContractId = @intDPContractId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
 							UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
 							, intContractSequence = CT.intContractSeq
 							, strContractLocation = CT.strLocationName

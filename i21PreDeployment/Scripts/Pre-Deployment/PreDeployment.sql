@@ -1,4 +1,4 @@
-﻿/*
+/*
  Pre-Deployment Script Template							
 --------------------------------------------------------------------------------------
  This file contains SQL statements that will be executed before the build script.	
@@ -61,7 +61,6 @@
 -- AR
 :r .\7_AR\1_1410_to_1420.sql
 :r .\7_AR\2_DropTableScript.sql
-:r .\7_AR\3_FixARTransactionsAccounts.sql
 :r .\7_AR\4_InvoicePaymentMethodCleanUp.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql
 
@@ -97,6 +96,9 @@
 -- IC
 :r .\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql
 :r .\11_IC\Remove_Duplicate_Storage_Unit_Type.sql
+--:r .\11_IC\01_Delete_Charges_No_Shipment.sql
+:r .\11_IC\Rename_IC_Database_Objects.sql 
+:r .\11_IC\Remove_Unused_Shipment_Charges.sql
 --:r .\11_IC\01_Delete_Charges_No_Shipment.sql
 
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql

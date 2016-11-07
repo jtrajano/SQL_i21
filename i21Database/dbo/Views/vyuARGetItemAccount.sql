@@ -29,3 +29,4 @@ FROM
 LEFT OUTER JOIN
 	dbo.tblICItemLocation AS IL 
 		ON IL.intItemId = I.intItemId
+		AND IL.intLocationId IS NOT NULL 

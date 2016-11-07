@@ -86,8 +86,9 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnLockedInventory
 	, ItemLocation.intSort
 FROM tblICItemLocation ItemLocation
-	LEFT JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
-	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
+	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
+	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
+	
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = ItemLocation.intVendorId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ItemLocation.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemLocation.intStorageLocationId

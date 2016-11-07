@@ -587,7 +587,28 @@ SET @batchIdUsed = @batchId
 				WHERE
 					(A.dblAmountPaid) <> 0
 					AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0	
-					AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)							
+					AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)		
+					
+					
+				--Prepaid Account
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'The Customer Prepaid account in Company Location - ' + CL.strLocationName  + ' was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblSMCompanyLocation CL
+						ON A.intLocationId = CL.intCompanyLocationId 
+				INNER JOIN
+					@ARPrepayment P
+						ON A.intPaymentId = P.intPaymentId						 
+				WHERE
+					ISNULL(CL.intPurchaseAdvAccount,0)  = 0										
 
 				--ALREADY POSTED
 				INSERT INTO
@@ -1250,7 +1271,7 @@ IF @post = 1
 			,intAccountId			=	CASE WHEN (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0) THEN 
 											CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
 										ELSE A.intAccountId END
-			,dblDebit					= A.dblAmountPaid
+			,dblDebit					= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
@@ -1320,18 +1341,20 @@ IF @post = 1
 		INNER JOIN
 			@AROverpayment P
 				ON A.intPaymentId = P.intPaymentId
+		WHERE
+			A.dblUnappliedAmount <> 0
 				
 		UNION ALL
 		--CREDIT Prepayment
 		SELECT
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
-			,intAccountId				= @ARAccount 
+			,intAccountId				= SMCL.intPurchaseAdvAccount 
 			,dblDebit					= 0
 			,dblCredit					= A.dblAmountPaid
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
-			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = SMCL.intPurchaseAdvAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
@@ -1355,8 +1378,13 @@ IF @post = 1
 			tblARCustomer C
 				ON A.[intEntityCustomerId] = C.intEntityCustomerId
 		INNER JOIN
+			tblSMCompanyLocation SMCL
+				ON A.intLocationId = SMCL.intCompanyLocationId 
+		INNER JOIN
 			@ARPrepayment P
 				ON A.intPaymentId = P.intPaymentId
+		WHERE
+			A.dblAmountPaid <> 0
 				
 				
 		UNION ALL
@@ -1468,6 +1496,7 @@ IF @post = 1
 			,dblCredit					= SUM((CASE WHEN (B.dblAmountDue = (B.dblPayment - B.dblInterest) + B.dblDiscount)
 												THEN (B.dblPayment - B.dblInterest)  + B.dblDiscount
 												ELSE B.dblPayment END))
+										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId) 
@@ -1507,7 +1536,8 @@ IF @post = 1
 			,B.intAccountId
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,A.intCurrencyId	
+			,A.intCurrencyId
+			,A.ysnInvoicePrepayment
 			
 		UNION ALL
 		
@@ -1832,7 +1862,7 @@ IF @recap = 0
 						ON A.intInvoiceId = C.intInvoiceId
 					WHERE
 						A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-						AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARID.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
+						AND ISNULL(B.ysnInvoicePrepayment,0) = 0
 					GROUP BY
 						A.intInvoiceId
 				) P
@@ -1852,7 +1882,7 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
+				AND ISNULL(A.ysnInvoicePrepayment,0) = 0
 				
 			UPDATE 
 				tblARInvoice
@@ -1867,7 +1897,7 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId				
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
+				AND ISNULL(A.ysnInvoicePrepayment,0) = 0
 				
 				
 			UPDATE 
@@ -1883,6 +1913,8 @@ IF @recap = 0
 			INNER JOIN 
 				tblARInvoice C
 					ON A.intInvoiceId = C.intInvoiceId
+			WHERE
+				ISNULL(B.[ysnInvoicePrepayment],0) = 0
 					
 			UPDATE 
 				tblARPaymentDetail
@@ -1896,7 +1928,9 @@ IF @recap = 0
 					AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 			INNER JOIN 
 				tblARInvoice C
-					ON A.intInvoiceId = C.intInvoiceId					
+					ON A.intInvoiceId = C.intInvoiceId
+			WHERE
+				ISNULL(B.[ysnInvoicePrepayment],0) = 0							
 					
 			UPDATE tblGLDetail
 				SET tblGLDetail.ysnIsUnposted = 1
@@ -2138,7 +2172,9 @@ IF @recap = 0
 					AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 			INNER JOIN 
 				tblARInvoice C
-					ON A.intInvoiceId = C.intInvoiceId					
+					ON A.intInvoiceId = C.intInvoiceId
+			WHERE
+				ISNULL(B.[ysnInvoicePrepayment],0) = 0					
 					
 			-- Delete zero payment temporarily
 			DELETE FROM A
@@ -2267,7 +2303,8 @@ IF @recap = 0
 			tblARInvoice C
 				ON A.intInvoiceId = C.intInvoiceId
 		WHERE
-			B.ysnPosted = 1		
+			B.ysnPosted = 1
+			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0		
 						
 		UPDATE 
 			tblARPaymentDetail
@@ -2284,6 +2321,7 @@ IF @recap = 0
 				ON A.intInvoiceId = C.intInvoiceId
 		WHERE
 			B.ysnPosted = 0
+			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
 				
 		UPDATE 
 			tblARPaymentDetail
@@ -2300,6 +2338,7 @@ IF @recap = 0
 				ON A.intInvoiceId = C.intInvoiceId
 		WHERE
 			B.ysnPosted = 0
+			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
 			
 		END TRY
 		BEGIN CATCH	

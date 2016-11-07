@@ -133,7 +133,7 @@ BEGIN
 		
 		--Update Accrued Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursAccrued = T.dblAccruedHours
+			SET dblHoursAccrued = CASE WHEN (T.dblAccruedHours > dblMaxEarned) THEN dblMaxEarned ELSE T.dblAccruedHours END
 		FROM
 		#tmpEmployees T
 		WHERE T.intEntityEmployeeId = @intEmployeeId

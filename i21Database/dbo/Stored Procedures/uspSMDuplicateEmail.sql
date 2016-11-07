@@ -15,7 +15,7 @@ BEGIN
 	SELECT @newImageId = NEWID()
 	SELECT @imageId = [strImageId] FROM tblSMActivity WHERE intActivityId = @intEmailId
 	SELECT @recordNo = CAST (intActivityId AS NVARCHAR(50)) FROM tblSMActivity WHERE intActivityId = @intEmailId
-	SELECT @entityId = intEntityId FROM tblSMActivity WHERE intActivityId = @intEmailId
+	SELECT @entityId = intCreatedBy FROM tblSMActivity WHERE intActivityId = @intEmailId
 
 	EXEC uspSMGetStartingNumber 103, @startingNo OUT
 

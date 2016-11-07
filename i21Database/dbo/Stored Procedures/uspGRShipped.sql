@@ -23,6 +23,7 @@ BEGIN
 		,[dtmDate]
 		,[intCurrencyId]
 		,[dblExchangeRate]
+		,[intEntityCustomerId]
 
 		-- Detail 
 		,[intInventoryShipmentItemId]
@@ -44,6 +45,7 @@ BEGIN
 		,[intOrderId]
 		,[intSourceId]
 		,[intLineNo]
+		,[intStorageScheduleTypeId]
 	)
 	SELECT 
 		-- Header
@@ -54,6 +56,7 @@ BEGIN
 		,[dtmDate]
 		,[intCurrencyId]
 		,[dblExchangeRate]
+		,[intEntityCustomerId]
 
 		-- Detail 
 		,[intInventoryShipmentItemId]
@@ -75,6 +78,7 @@ BEGIN
 		,[intOrderId]
 		,[intSourceId]
 		,[intLineNo]
+		,[intStorageScheduleTypeId]
 	FROM @ItemsFromInventoryShipment
 	-- TODO: Add a where clause if system only needs to process 'Storage' type stocks. 
 END 
@@ -111,7 +115,7 @@ BEGIN
 		,[intInventoryShipmentItemId] INT NULL 
 	)
 
-	DECLARE @intCustomerEntityId AS INT
+	DECLARE @intEntityCustomerId AS INT
 			,@intItemId AS INT 
 			,@intStorageTypeId AS INT 
 			,@dblUnits AS NUMERIC(38, 20) 
@@ -131,18 +135,14 @@ BEGIN
 								,dbo.fnGetItemStockUOM(storageItem.intItemId)
 								,storageItem.dblQty
 							))
-				,@intInventoryShipmentItemId = storageItem.intInventoryShipmentItemId		
+				,@intInventoryShipmentItemId = storageItem.intInventoryShipmentItemId
+				,@intStorageTypeId = intStorageScheduleTypeId
+				,@intInventoryShipmentId = intShipmentId
+				,@intEntityCustomerId = intEntityCustomerId
 		FROM	@StorageItems storageItem 
 
-		SELECT 	@intStorageTypeId = gcs.intStorageTypeId
-				,@intInventoryShipmentId = shipItem.intInventoryShipmentId
-		FROM	tblICInventoryShipmentItem shipItem	INNER JOIN tblGRCustomerStorage gcs
-					ON gcs.intCustomerStorageId = shipItem.intCustomerStorageId					
-		WHERE	shipItem.intInventoryShipmentItemId = @intInventoryShipmentItemId
-
-		SELECT @intCustomerEntityId=intEntityCustomerId FROM tblICInventoryShipment Where intInventoryShipmentId=@intInventoryShipmentId
 		-- Call the Grain sp. 
-		BEGIN TRY 
+		BEGIN 
 			-- Get the charges created by the Grain sp. 
 			INSERT INTO @StorageTicketInfoByFIFO 
 			(
@@ -159,7 +159,7 @@ BEGIN
 			EXEC uspGRUpdateGrainOpenBalanceByFIFO 
 				'Update'
 				,'InventoryShipment'
-				, @intCustomerEntityId
+				, @intEntityCustomerId
 				, @intItemId
 				, @intStorageTypeId
 				, @dblUnits
@@ -171,13 +171,7 @@ BEGIN
 			SET		intInventoryShipmentId = @intInventoryShipmentId
 					,intInventoryShipmentItemId = @intInventoryShipmentItemId
 			WHERE	intInventoryShipmentId IS NULL 
-		END TRY 
-		BEGIN CATCH 
-			DECLARE @ErrMsg	NVARCHAR(MAX)
-			SET @ErrMsg = ERROR_MESSAGE()  
-			RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
-			GOTO _Exit; 
-		END CATCH 
+		END 
 		
 		-- Delete the loop record. 
 		DELETE FROM @StorageItems WHERE intId = @intId

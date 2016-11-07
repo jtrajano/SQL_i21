@@ -172,7 +172,7 @@ SELECT intItemId					= SOD.intItemId
 	 , dblItemTermDiscount			= 0
 	 , strItemTermDiscountBy		= 0
 	 , dblPrice						= 0
-	 , strPricing					= NULL 
+	 , strPricing					= SOD.strPricing 
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
@@ -267,7 +267,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblItemTermDiscount			= 0
 	 , strItemTermDiscountBy		= NULL
 	 , dblPrice						= ARSI.dblPrice 
-	 , strPricing					= ''
+	 , strPricing					= ARSI.strPricing
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= NULL
 	 , intInventoryShipmentItemId	= NULL
@@ -488,6 +488,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblQtyShipped]
 					,[dblDiscount]
 					,[dblPrice]
+					,[strPricing]
 					,[dblTotalTax]
 					,[dblTotal]
 					,[intAccountId]
@@ -517,6 +518,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblQtyOrdered]			--[dblQtyShipped]
 					,0							--[dblDiscount]
 					,[dblMaintenanceAmount]		--[dblPrice]
+					,[strPricing] 
 					,0							--[dblTotalTax]
 					,[dblMaintenanceAmount] * [dblQtyOrdered] --[dblTotal]
 					,[intAccountId]				--[intAccountId]
@@ -837,7 +839,60 @@ IF ISNULL(@RaiseError,0) = 0
 				,@actionType		= 'Processed'						-- Action Type
 				,@changeDescription	= @SourceScreen						-- Description
 				,@fromValue			= @SalesOrderNumber					-- Previous Value
-				,@toValue			= @InvoiceNumber					-- New Value	
+				,@toValue			= @InvoiceNumber					-- New Value
+				
+				
+				
+				INSERT INTO tblARPricingHistory
+					([intSourceTransactionId]
+					,[intTransactionId]
+					,[intTransactionDetailId]
+					,[intEntityCustomerId]
+					,[intItemId]
+					,[intOriginalItemId]
+					,[dblPrice]
+					,[dblOriginalPrice]
+					,[strPricing]
+					,[strOriginalPricing]
+					,[dtmDate]
+					,[ysnApplied]
+					,[ysnDeleted]
+					,[intEntityId]
+					,[intConcurrencyId])
+				SELECT
+					 [intSourceTransactionId]	= 2
+					,[intTransactionId]			= ARID.[intInvoiceId] 
+					,[intTransactionDetailId]	= ARID.[intInvoiceDetailId]
+					,[intEntityCustomerId]		= ARI.[intEntityCustomerId] 
+					,[intItemId]				= ARID.[intItemId] 
+					,[intOriginalItemId]		= SOSOD.[intItemId]
+					,[dblPrice]					= ARID.[dblPrice] 
+					,[dblOriginalPrice]			= SOSOD.dblPrice 
+					,[strPricing]				= ARID.[strPricing] 
+					,[strOriginalPricing]		= SOSOD.[strPricing] 
+					,[dtmDate]					= GETDATE()
+					,[ysnApplied]				= ARPH.[ysnApplied]
+					,[ysnDeleted]				= ARPH.[ysnDeleted]
+					,[intEntityId]				= @UserId
+					,[intConcurrencyId]			= 1
+				FROM
+					tblARPricingHistory ARPH
+				INNER JOIN
+					tblSOSalesOrderDetail SOSOD
+						ON ARPH.[intTransactionDetailId] = SOSOD.[intSalesOrderDetailId]
+						AND ARPH.[intTransactionId] = SOSOD.[intSalesOrderId]
+						AND ARPH.[intSourceTransactionId] = 1
+						AND ARPH.[ysnDeleted] = 0
+						AND ARPH.[ysnApplied] = 1
+				INNER JOIN
+					tblARInvoiceDetail ARID
+						ON SOSOD.[intSalesOrderDetailId] = ARID.[intSalesOrderDetailId]
+				INNER JOIN
+					tblARInvoice ARI
+						ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
+				WHERE
+					SOSOD.[intSalesOrderId]	= @SalesOrderId
+
 		END	
 
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	

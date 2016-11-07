@@ -4404,7 +4404,6 @@
     <Build Include="dbo\Functions\fnARConvertLetterMessage.sql" />
     <Build Include="dbo\Functions\fnARGetRowsFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspARCollectionLetter.sql" />
-    <Build Include="dbo\Views\vyuARCollectionCreditViewReport.sql" />
     <Build Include="dbo\Views\vyuARCollectionOverdueReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\23_AddDefaultCollectionLetters.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
@@ -4426,6 +4425,21 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportDiscount.sql" />
     <Build Include="dbo\Functions\fnIsDue.sql" />
     <Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
+    <Build Include="dbo\Views\vyuETBEExportContract.sql" />
+    <Build Include="dbo\Views\vyuARLetterCustomerSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTax.sql" />
+    <Build Include="dbo\Views\vyuETBEContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTaxById.sql" />
+    <Build Include="dbo\Tables\tblICFOBPoint.sql" />
+    <None Include="Scripts\Post-Deployment\IC\18_FOBPointTypes.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemInTransitLocation.sql" />
+    <Build Include="dbo\Views\vyuICItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInTransitCosting.sql" />
+    <Build Include="dbo\User Defined Types\ItemInTransitCostingTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLotInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostActualCostInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForInTransitCosting.sql" />
+    
     <Build Include="dbo\Tables\tblICInventoryReceiptChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetChargeTaxDetails.sql" />
@@ -4518,6 +4532,24 @@
     <Build Include="dbo\Views\vyuGRStorageHistoryNotMapped.sql" />
     <Build Include="dbo\Views\vyuLGDeliveryOpenPickLotHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleCopy.sql" />
+    <Build Include="dbo\Functions\fnCreateCostAdjGLDescription.sql" />
+    <Build Include="dbo\Functions\fnTMComputeNewBurnRateTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBeforeShipmentDelete.sql" />
+    <Build Include="dbo\Views\vyuAPClaimsDetails.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationTransaction.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationItemProductCode.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationSystem.sql" />
+    <Build Include="dbo\Tables\tblTFIntegrationError.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFOriginDataIntegration.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_IntegrationSystem.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistributionOutbound.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCollectionOverdueDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSearchLetterCustomer.sql" />
+    <Build Include="dbo\Tables\tblARCollectionOverdue.sql" />
+    <Build Include="dbo\Tables\tblARCollectionOverdueDetail.sql" />
+    <Build Include="dbo\Functions\fnGetDaysInMonth.sql" />
+    <Build Include="dbo\Views\vyuARCollectionCustomerReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBudgetMaintenance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -16,6 +16,7 @@ CREATE TYPE [dbo].[ItemGLAccount] AS TABLE
 	,intRevalueProduced INT
 	,intRevalueTransfer INT
 	,intRevalueBuildAssembly INT
+	,intRevalueInTransit INT 
 	--,intRevalueAdjItemChange INT
 	--,intRevalueAdjSplitLot INT
 	--,intRevalueAdjLotMerge INT

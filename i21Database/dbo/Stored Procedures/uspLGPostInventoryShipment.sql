@@ -562,6 +562,7 @@ BEGIN
 				,[dtmDate]
 				,[intCurrencyId]
 				,[dblExchangeRate]
+				,[intEntityCustomerId]
 				-- Detail 
 				,[intInventoryShipmentItemId]
 				,[intItemId]
@@ -582,7 +583,7 @@ BEGIN
 				,[intOrderId]
 				,[intSourceId]
 				,[intLineNo]
-				)
+			)
 			SELECT L.intLoadId
 				,L.strLoadNumber
 				,1 AS intOrderType
@@ -590,6 +591,7 @@ BEGIN
 				,L.dtmScheduledDate
 				,intCurrencyId = NULL
 				,[dblExchangeRate] = 1
+				,L.intEntityId
 				,LD.intLoadDetailId
 				,LD.intItemId
 				,LDL.intLotId

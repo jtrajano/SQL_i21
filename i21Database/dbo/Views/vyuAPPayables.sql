@@ -79,7 +79,7 @@ INNER JOIN dbo.tblAPBill C ON B.intTransactionId = B.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityVendorId
 WHERE A.ysnPosted = 1
 UNION ALL
-SELECT 
+SELECT --OVERPAYMENT
 	A.dtmDate
 	, A.intBillId 
 	, A.strBillId 
@@ -98,5 +98,5 @@ SELECT
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
 	ON C1.[intEntityVendorId] = A.[intEntityVendorId]
-WHERE intTransactionType IN (8,3) AND A.ysnPaid != 1
+WHERE intTransactionType IN (8) AND A.ysnPaid != 1
 

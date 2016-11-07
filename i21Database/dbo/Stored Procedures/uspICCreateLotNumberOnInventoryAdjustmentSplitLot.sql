@@ -126,9 +126,9 @@ BEGIN
 			,[strLotAlias]				= SourceLot.strLotAlias
 			,[intLotStatusId]			= SourceLot.intLotStatusId
 										-- If target lot exists, do not overwrite the parent lot info. 
-			,[intParentLotId]			= TargetLot.intParentLotId 
-			,[strParentLotNumber]		= ParentLotTargetLot.strParentLotNumber 
-			,[strParentLotAlias]		= ParentLotTargetLot.strParentLotAlias 
+			,[intParentLotId]			= ISNULL(TargetLot.intParentLotId, SourceLot.intParentLotId)
+			,[strParentLotNumber]		= ISNULL(ParentLotTargetLot.strParentLotNumber, ParentLotSourceLot.strParentLotNumber)
+			,[strParentLotAlias]		= ISNULL(ParentLotTargetLot.strParentLotAlias, ParentLotSourceLot.strParentLotNumber)  
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
 			,[dblWeight]				=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 

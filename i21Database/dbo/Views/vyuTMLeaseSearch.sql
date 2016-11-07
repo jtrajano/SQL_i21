@@ -31,6 +31,7 @@ AS
 												ORDER BY tblTMLeaseMinimumUse.dblSiteCapacity ASC)
 			,dtmLastLeaseBillingDate = A.dtmLastLeaseBillingDate
 			,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intLeaseId)) AS INT)
+			,strSiteNumber = RIGHT('000'+ CAST(F.intSiteNumber AS VARCHAR(4)),4)
 		FROM tblTMLease A
 		LEFT JOIN tblTMLeaseCode B
 			ON A.intLeaseCodeId = B.intLeaseCodeId

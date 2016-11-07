@@ -229,21 +229,17 @@ BEGIN
 	END
 END
 
--- Check if locations are valid
-DECLARE @ysnValidLocation BIT
-EXEC dbo.uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT
-IF @ysnValidLocation = 0
+-- Check if sub location and storage locations are valid. 
 BEGIN
-	DECLARE @ToLocationName AS NVARCHAR(50)
+	DECLARE @ysnValidLocation BIT
+	EXEC dbo.uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT, @strItemNo OUTPUT 
 
-	SELECT @ToLocationName = toLocation.strLocationName
-	FROM tblICInventoryReceipt Receipt
-		 LEFT JOIN tblSMCompanyLocation toLocation ON toLocation.intCompanyLocationId = Receipt.intLocationId
-	WHERE Receipt.strReceiptNumber = @strTransactionId
-
-		-- 'Line item and Lot storage location is not under {To Location Name}.'
-		RAISERROR(80087, 11, 1, @ToLocationName)  
+	IF @ysnValidLocation = 0
+	BEGIN 
+		-- The sub location and storage location in {Item No} does not match.
+		RAISERROR(80087, 11, 1, @strItemNo)  
 		GOTO Post_Exit
+	END 
 END
 
 -- Get the next batch number

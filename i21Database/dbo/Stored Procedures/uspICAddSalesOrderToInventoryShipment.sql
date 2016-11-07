@@ -115,7 +115,7 @@ BEGIN
 			,strNotes
 			,intSort
 			,intOwnershipType 
-			,intCustomerStorageId
+			,intStorageScheduleTypeId
 			,intConcurrencyId
 	)
 	SELECT			
@@ -131,8 +131,8 @@ BEGIN
 			,intDockDoorId			= NULL
 			,strNotes				= SODetail.strComments
 			,intSort				= SODetail.intSalesOrderDetailId
-			,intOwnershipType		= CASE WHEN SODetail.intStorageScheduleTypeId = NULL THEN 1 ELSE 2 END
-			,intCustomerStorageId	= SODetail.intCustomerStorageId
+			,intOwnershipType		= CASE WHEN SODetail.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
+			,intStorageScheduleTypeId	= SODetail.intStorageScheduleTypeId
 			,intConcurrencyId		= 1
 	FROM	dbo.tblSOSalesOrderDetail SODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
 				ON ItemUOM.intItemId = SODetail.intItemId

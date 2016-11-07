@@ -17,6 +17,18 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Do not calculate if item location is an In-Transit
+IF EXISTS (
+	SELECT	TOP 1 1 
+	FROM	tblICItemLocation 
+	WHERE	intLocationId IS NULL 
+			AND strDescription = 'In-Transit' 
+			AND intItemLocationId = @intItemLocationId
+)
+BEGIN
+	RETURN 0;
+END 
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Update the average cost 
 -----------------------------------------------------------------------------------------------------------------------------
