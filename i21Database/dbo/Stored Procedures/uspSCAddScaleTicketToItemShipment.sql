@@ -98,6 +98,7 @@ BEGIN
 		,intWeightUOMId
 		,intSubLocationId
 		,intStorageLocationId
+		,intStorageScheduleTypeId
 		,intItemUOMId
 		,intItemLotGroup
 		
@@ -130,6 +131,14 @@ BEGIN
 		,intWeightUOMId				= SC.intItemUOMIdFrom
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
+		,intStorageScheduleTypeId	= CASE
+									  WHEN LI.ysnIsStorage = 0 THEN NULL
+									  WHEN LI.ysnIsStorage = 1 THEN 
+										CASE 
+											WHEN ISNULL(SC.intStorageScheduleTypeId,0) > 0 THEN SC.intStorageScheduleTypeId
+											WHEN ISNULL(SC.intStorageScheduleTypeId,0) = 0 THEN (SELECT intDefaultStorageTypeId FROM	tblSCScaleSetup WHERE intScaleSetupId = SC.intScaleSetupId)
+										END
+									  END
 		,intItemUOMId				= LI.intItemUOMId
 		,intItemLotGroup			= LI.intItemId
 		
@@ -357,7 +366,10 @@ ELSE
 		,[strCostMethod]					= 'Per Unit'
 		,[dblRate]							= SC.dblFreightRate
 		,[intCostUOMId]						= @intTicketItemUOMId
-		,[intOtherChargeEntityVendorId]		= @intHaulerId
+		,[intOtherChargeEntityVendorId]		= CASE
+												WHEN @intHaulerId > 0 THEN @intHaulerId
+												WHEN @intHaulerId = 0 THEN NULL
+											END
 		,[dblAmount]						= 0
 		,[ysnAccrue]						= @ysnAccrue
 		,[ysnPrice]							= @ysnPrice

@@ -22,6 +22,7 @@ DECLARE @temp_aging_table TABLE(
 	,[dblTotalDue]				NUMERIC(18,6)
 	,[dblAmountPaid]			NUMERIC(18,6)
 	,[dblCredits]				NUMERIC(18,6)
+	,[dblPrepayments]			NUMERIC(18,6)
 	,[dblPrepaids]				NUMERIC(18,6)
 	,[dtmAsOfDate]				DATETIME
 	,[strSalespersonName]		NVARCHAR(100))

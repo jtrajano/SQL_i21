@@ -31,14 +31,13 @@ DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
-DECLARE @strTicketInOutFlag AS NVARCHAR(1) = NULL
+DECLARE @strTicketInOutFlag AS NVARCHAR(1) = NULL;
 
 
 BEGIN TRY
 		BEGIN 
 			SELECT	@intTicketUOM = UOM.intUnitMeasureId
 			FROM	dbo.tblSCTicket SC	        
-					--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
 					JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 		END
@@ -75,10 +74,10 @@ BEGIN TRY
 				FROM	@LineItems LI 
 				JOIN dbo.tblSCTicket ScaleTicket On ScaleTicket.intTicketId = LI.intTicketId
 				JOIN dbo.tblICItemUOM ItemUOM	ON ScaleTicket.intItemId = ItemUOM.intItemId AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-				JOIN dbo.tblICItemLocation ItemLocation
-				ON ScaleTicket.intItemId = ItemLocation.intItemId
+				JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId
 				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 				AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				LEFT JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = LI.intContractDetailId
 				WHERE	LI.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 			END
 		END

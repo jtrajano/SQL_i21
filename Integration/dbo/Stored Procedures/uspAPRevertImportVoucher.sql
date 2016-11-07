@@ -85,18 +85,20 @@ BEGIN
 		SELECT 1 FROM aptrxmst B WHERE A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no
 	)
 	
-	DELETE A
-	FROM tblAPPayment A
-	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-	INNER JOIN tblAPaptrxmst D ON C.intBillId = D.intBillId
-	INNER JOIN tmp_aptrxmstImport E ON D.intId = E.intBackupId
+	--NO NEED AS WE DO NOT CREATE PAYMENT ON IMPORT ON-GOING
+	--DELETE A
+	--FROM tblAPPayment A
+	--INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+	--INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+	--INNER JOIN tblAPaptrxmst D ON C.intBillId = D.intBillId
+	--INNER JOIN tmp_aptrxmstImport E ON D.intId = E.intBackupId
 
 	--DELETE FIRST THE INSERTED VOUCHER
 	DELETE A
 	FROM tblAPBill A
 	INNER JOIN tblAPaptrxmst B ON A.intBillId = B.intBillId
 	INNER JOIN tmp_aptrxmstImport C ON B.intId = C.intBackupId
+	WHERE A.ysnPosted = 0
 
 	--DELETE BACK UP RECORDS FROM tblAPaptrxmst
 	DELETE A
@@ -137,19 +139,19 @@ BEGIN
 	FROM tblAPapeglmst A
 	INNER JOIN tmp_aptrxmstImport B ON A.intHeaderId= B.intBackupId
 
-	--DELETE REINSERTED RECORDS TO apivcmst
-	DELETE A
-	FROM apivcmst A
-	INNER JOIN tmp_aptrxmstImport B
-		ON A.apivc_vnd_no = B.aptrx_vnd_no AND A.apivc_ivc_no = B.aptrx_ivc_no
-	WHERE A.apivc_status_ind = 'R'
-
 	DELETE A
 	FROM aphglmst A
 	INNER JOIN apivcmst B ON A.aphgl_vnd_no = B.apivc_vnd_no AND A.aphgl_ivc_no = B.apivc_ivc_no
 	INNER JOIN tmp_aptrxmstImport C
 		ON A.aphgl_vnd_no = C.aptrx_vnd_no AND A.aphgl_ivc_no = C.aptrx_ivc_no
 	WHERE B.apivc_status_ind = 'R'
+
+	--DELETE REINSERTED RECORDS TO apivcmst
+	DELETE A
+	FROM apivcmst A
+	INNER JOIN tmp_aptrxmstImport B
+		ON A.apivc_vnd_no = B.aptrx_vnd_no AND A.apivc_ivc_no = B.aptrx_ivc_no
+	WHERE A.apivc_status_ind = 'R'
 
 	DELETE A
 	FROM tblAPapivcmst A

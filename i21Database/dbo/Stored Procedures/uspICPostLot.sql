@@ -82,6 +82,7 @@ BEGIN
 				FROM	dbo.tblICInventoryLot CostingLot INNER JOIN dbo.tblICLot Lot
 							ON CostingLot.intLotId = Lot.intLotId
 				WHERE	CostingLot.intLotId = @intLotId
+						AND CostingLot.intItemLocationId = @intItemLocationId
 						AND CostingLot.intItemUOMId = Lot.intWeightUOMId
 						AND CostingLot.intItemUOMId <> @intItemUOMId
 						AND Lot.intWeightUOMId IS NOT NULL 

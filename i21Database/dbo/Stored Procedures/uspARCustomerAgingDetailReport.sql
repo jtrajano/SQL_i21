@@ -34,6 +34,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			,[dblAmountPaid]			NUMERIC(18,6)
 			,[dblInvoiceTotal]			NUMERIC(18,6)
 			,[dblCredits]				NUMERIC(18,6)
+			,[dblPrepayments]			NUMERIC(18,6)
 			,[dblPrepaids]				NUMERIC(18,6)
 			,[dtmDate]					DATETIME
 			,[dtmDueDate]				DATETIME
@@ -145,6 +146,7 @@ SET @query = 'DECLARE @temp_aging_table TABLE(
 	,[dblAmountPaid]			NUMERIC(18,6)
 	,[dblInvoiceTotal]			NUMERIC(18,6)
 	,[dblCredits]				NUMERIC(18,6)
+	,[dblPrepayments]			NUMERIC(18,6)
 	,[dblPrepaids]				NUMERIC(18,6)
 	,[dtmDate]					DATETIME
 	,[dtmDueDate]				DATETIME

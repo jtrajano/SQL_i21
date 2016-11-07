@@ -14,6 +14,9 @@ BEGIN
 	--================================================
 	--     ONE TIME INVOICE SYNCHRONIZATION	
 	--================================================
+
+	DECLARE  @ZeroDecimal		DECIMAL(18,6)
+	SET @ZeroDecimal = 0.000000	
 	
 	IF (@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0)
 		BEGIN
@@ -37,11 +40,11 @@ BEGIN
 	
 	IF(@Checking = 0 and @Posted = 0)
 	BEGIN
-		IF @ysnAG		= 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agordmst')
-		DECLARE @totalDetailImported int
+	    DECLARE @totalDetailImported int
+		IF @ysnAG		= 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agordmst')	
 		BEGIN
 			DECLARE @totalagordmst int
-			EXEC [uspARImportInvoiceBackupAGORDMST] @StartDate ,@EndDate ,@totalagordmst OUTPUT
+			EXEC [uspARImportInvoiceBackupAGORDMST] @StartDate ,@EndDate ,@totalagordmst OUTPUT			
 			EXEC [uspARImportInvoiceFromAGORDMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT 			
 		END
 		
@@ -126,10 +129,10 @@ BEGIN
 				0,--[dblInvoiceSubtotal]
 				0,--[dblShipping]
 				0,--[dblTax]
-				agivc_slsmn_tot,--[dblInvoiceTotal]
-				agivc_disc_amt,--[dblDiscount]
-				agivc_bal_due,--[dblAmountDue]
-				agivc_amt_paid,--[dblPayment]
+				ROUND(ISNULL(agivc_slsmn_tot, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblInvoiceTotal]
+				ROUND(ISNULL(agivc_disc_amt, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblDiscount]
+				ROUND(ISNULL(agivc_bal_due, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblAmountDue]
+				ROUND(ISNULL(agivc_amt_paid, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblPayment]
 				(CASE 
 					WHEN agivc_type = 'I' 
 						THEN 'Invoice' 
@@ -215,9 +218,9 @@ BEGIN
 				0,--[dblInvoiceSubtotal]
 				0,--[dblShipping]
 				0,--[dblTax]
-				ptivc_sold_by_tot,--[dblInvoiceTotal]
-				ptivc_disc_amt,--[dblDiscount]
-				ptivc_bal_due,--[dblAmountDue]
+				ROUND(ISNULL(ptivc_sold_by_tot, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblInvoiceTotal]
+				ROUND(ISNULL(ptivc_disc_amt, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblDiscount]
+				ROUND(ISNULL(ptivc_bal_due, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblAmountDue]
 				(CASE 
 					WHEN ptivc_type = 'C' 
 					THEN ptivc_amt_applied * -1
@@ -370,7 +373,7 @@ BEGIN
 	--     GET TO BE IMPORTED RECORDS
 	--	This is checking if there are still records need to be import	
 	--================================================
-	IF(@Checking = 1 AND @Posted = 1)
+	IF(@Checking = 1)
 	BEGIN
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN

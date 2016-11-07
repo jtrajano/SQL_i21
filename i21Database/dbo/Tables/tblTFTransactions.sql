@@ -68,6 +68,7 @@
 	[strTaxPayerFEIN] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxPayerDBA] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxPayerAddress] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+	[intIntegrationError] int,
 	[leaf] [bit] NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblDummyTransaction] PRIMARY KEY CLUSTERED 

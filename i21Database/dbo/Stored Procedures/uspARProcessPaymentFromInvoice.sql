@@ -186,6 +186,7 @@ BEGIN TRY
 		,@ApplyTermDiscount	= @ApplyTermDiscount
 		,@Discount			= @Discount
 		,@Interest			= @Interest
+		,@InvoicePrepayment	= 1
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

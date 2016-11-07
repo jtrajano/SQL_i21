@@ -17,6 +17,7 @@ SELECT
 		,[dtmDate]						= Shipment.dtmShipDate
 		,[intCurrencyId]				= NULL 
 		,[dblExchangeRate]				= 1
+		,[intEntityCustomerId]			= Shipment.intEntityCustomerId
 
 		-- Detail 
 		,[intInventoryShipmentItemId]	= ShipmentItem.intInventoryShipmentItemId
@@ -42,6 +43,7 @@ SELECT
 		,[intOrderId]					= ShipmentItem.intOrderId
 		,[intSourceId]					= ShipmentItem.intSourceId
 		,[intLineNo]					= ISNULL(ShipmentItem.intLineNo, 0)
+		,[intStorageScheduleTypeId]		= ShipmentItem.intStorageScheduleTypeId
 FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 		INNER JOIN dbo.tblICItemLocation ItemLocation

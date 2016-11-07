@@ -180,6 +180,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateDYMOCustomerLabelReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateForPrintDeliveryTicketView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateLeaseCodeView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateCustomerContractSubReportView.sql"
 
 
 

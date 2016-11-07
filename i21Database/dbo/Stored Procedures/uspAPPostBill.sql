@@ -203,6 +203,8 @@ INSERT INTO @adjustedEntries (
 	,[intSourceTransactionId] 
 	,[intSourceTransactionDetailId] 
 	,[strSourceTransactionId] 
+	,[intFobPointId]
+	,[intInTransitSourceLocationId]
 )
 SELECT
 		[intItemId]							=	B.intItemId
@@ -227,11 +229,20 @@ SELECT
 		,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
 		,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
 		,[strSourceTransactionId] 			=	E1.strReceiptNumber
+		,[intFobPointId]					=	fp.intFobPointId
+		,[intInTransitSourceLocationId]		=	sourceLocation.intItemLocationId
 FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 			ON A.intBillId = B.intBillId
 		INNER JOIN (
 			tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
 				ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
+			LEFT JOIN tblICItemLocation sourceLocation
+				ON sourceLocation.intItemId = E2.intItemId
+				AND sourceLocation.intLocationId = E1.intLocationId
+			LEFT JOIN tblSMFreightTerms ft
+				ON ft.intFreightTermId = E1.intFreightTermId
+			LEFT JOIN tblICFobPoint fp
+				ON fp.strFobPoint = ft.strFreightTerm
 		)
 			ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
 		INNER JOIN tblICItem item 
@@ -244,6 +255,8 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		LEFT JOIN tblICItemUOM receiptCostUOM
 			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
+
+
 
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NULL 

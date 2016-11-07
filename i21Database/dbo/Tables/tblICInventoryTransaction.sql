@@ -52,6 +52,8 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[intInTransitSourceLocationId] INT NULL, 
 		[dtmCreated] DATETIME NULL, 
 		[strDescription] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 
+		[intFobPointId] TINYINT NULL,
+		[ysnNoGLPosting] BIT NULL DEFAULT 0, 
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
@@ -59,7 +61,8 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICInventoryTransactionType] FOREIGN KEY ([intTransactionTypeId]) REFERENCES [tblICInventoryTransactionType]([intTransactionTypeId]),
-		CONSTRAINT [FK_tblICInventoryTransaction_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]) 
+		CONSTRAINT [FK_tblICInventoryTransaction_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),
+		CONSTRAINT [FK_tblICInventoryTransaction_tblICFobPoint] FOREIGN KEY ([intFobPointId]) REFERENCES [tblICFobPoint]([intFobPointId])
 	)
 	GO
 

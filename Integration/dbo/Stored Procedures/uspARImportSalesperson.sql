@@ -134,7 +134,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 
 			SELECT TOP 1
 				@strSalespersonId = agsls_slsmn_id,
-				@strName = agsls_name,
+				@strName = ISNULL(agsls_name, ''''),
 				@strType = CASE WHEN agsls_et_driver_yn = ''Y'' THEN ''Driver'' ELSE ''Sales Representative'' END,
 				@strEmail = ISNULL(LTRIM(RTRIM(agsls_email)),''''),
 				@strAddress = ISNULL(agsls_addr1,'''') + CHAR(10) + ISNULL(agsls_addr2,''''),
@@ -392,7 +392,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 
 			SELECT TOP 1
 				@strSalespersonId = ptsls_slsmn_id,
-				@strName = ptsls_name,
+				@strName = ISNULL(ptsls_name, ''''),
 				@strType = CASE WHEN ptsls_et_driver_yn = ''Y'' THEN ''Driver'' ELSE ''Sales Representative'' END,
 				@strEmail = ISNULL(LTRIM(RTRIM(ptsls_email)),''''),
 				@strAddress = ISNULL(ptsls_addr1,'''') + CHAR(10) + ISNULL(ptsls_addr2,''''),

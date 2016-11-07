@@ -60,6 +60,7 @@ DECLARE @temp_aging_table TABLE(
     ,[dblTotalDue]              NUMERIC(18,6)
     ,[dblAmountPaid]            NUMERIC(18,6)
     ,[dblCredits]               NUMERIC(18,6)
+	,[dblPrepayments]			NUMERIC(18,6)
     ,[dblPrepaids]              NUMERIC(18,6)
     ,[dtmAsOfDate]              DATETIME
     ,[strSalespersonName]		NVARCHAR(100)
@@ -81,6 +82,7 @@ DECLARE @temp_balanceforward_table TABLE(
     ,[dblTotalDue]              NUMERIC(18,6)
     ,[dblAmountPaid]            NUMERIC(18,6)
     ,[dblCredits]               NUMERIC(18,6)
+	,[dblPrepayments]			NUMERIC(18,6)
     ,[dblPrepaids]              NUMERIC(18,6)
     ,[dtmAsOfDate]              DATETIME
     ,[strSalespersonName]		NVARCHAR(100)
@@ -260,6 +262,7 @@ SELECT STATEMENTREPORT.*
       ,dbl90Days            = ISNULL(AGINGREPORT.dbl90Days, 0)
       ,dbl91Days            = ISNULL(AGINGREPORT.dbl91Days, 0)
       ,dblCredits           = ISNULL(AGINGREPORT.dblCredits, 0)
+	  ,dblPrepayments		= ISNULL(AGINGREPORT.dblPrepayments, 0)
       ,dtmAsOfDate          = @dtmDateTo
       ,blbLogo              = dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT

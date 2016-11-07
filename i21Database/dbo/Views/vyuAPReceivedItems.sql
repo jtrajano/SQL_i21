@@ -48,7 +48,7 @@ FROM
 		,[intScaleTicketId]			=	NULL
 		,[strScaleTicketNumber]		=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]			=	0            
-		,[intLoadDetailId]	=	NULL
+		,[intLoadDetailId]			=	NULL
 		,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId
 		,[strUOM]					=	tblReceived.strUOM
 		,[intWeightUOMId]			=	tblReceived.intWeightUOMId
@@ -68,6 +68,12 @@ FROM
 		,[str1099Type]				=	D2.str1099Type
 		,[intStorageLocationId]		=	tblReceived.intStorageLocationId		 
 		,[strStorageLocationName]	=	tblReceived.strStorageLocationName
+	
+		,[dblNetShippedWeight]		=	0.00
+		,[dblWeightLoss]			=	0.00
+		,[dblFranchiseWeight]		=	0.00
+		,[dblClaimAmount]			=	0.00
+		,[intLocationId]			=	tblReceived.intLocationId
 	
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
@@ -116,6 +122,7 @@ FROM
 				,EL.strLocationName AS strVendorLocation
 				,B1.intStorageLocationId
 				,ISL.strName AS strStorageLocationName
+				,intLocationId = A1.intLocationId
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -131,12 +138,13 @@ FROM
 				LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 				LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A1.intCurrencyId
 				LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A1.intShipFromId
-				LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A1.intCurrencyId 
+				LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A1.intCurrencyId AND SubCurrency.ysnSubCurrency = 1
 				LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B1.intStorageLocationId
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
 			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
 			AND A1.strReceiptType = 'Purchase Order'
+			AND ISNULL(A1.ysnOrigin, 0) = 0
 			GROUP BY
 				A1.strReceiptNumber
 				,A1.strBillOfLading
@@ -167,6 +175,7 @@ FROM
 				,A1.intCurrencyId
 				,B1.intStorageLocationId
 				,ISL.strName
+				,A1.intLocationId
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -245,8 +254,12 @@ FROM
 	,[str1099Form]				=	D2.str1099Form			 
 	,[str1099Type]				=	D2.str1099Type
 	,[intStorageLocationId]		=	loc.intStorageLocationId	 
-	,[strStorageLocationName]	=	(SELECT TOP 1 strName FROM dbo.tblICStorageLocation WHERE intStorageLocationId =loc.intStorageLocationId) 
-
+	,[strStorageLocationName]	=	(SELECT TOP 1 strName FROM dbo.tblICStorageLocation WHERE intStorageLocationId =loc.intStorageLocationId)
+	,[dblNetShippedWeight]		=	0.00
+	,[dblWeightLoss]			=	0.00
+	,[dblFranchiseWeight]		=	0.00 
+	,[dblClaimAmount]			=	0.00
+	,[intLocationId]			=	A.intShipToId
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	FROM tblPOPurchase A
@@ -272,9 +285,9 @@ FROM
 	AND ((Billed.dblQty < B.dblQtyReceived) OR Billed.dblQty IS NULL)
 	UNION ALL
 	--DIRECT TYPE
-	SELECT
+	SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
-	,[dtmDate]					=	CASE WHEN (A.intSourceType = 1 AND G.intTicketId IS NOT NULL) THEN G.dtmTicketDateTime ELSE A.dtmReceiptDate END
+	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
 	,[strPurchaseOrderNumber]	=	NULL--A.strReceiptNumber
@@ -339,7 +352,17 @@ FROM
 	,[str1099Type]				=	D2.str1099Type
 	,[intStorageLocationId]		=	B.intStorageLocationId	 
 	,[strStorageLocationName]	=	ISL.strName
-
+	,[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0)
+	,[dblWeightLoss]			=	ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0)
+	,[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END
+	,[dblClaimAmount]			=	CASE WHEN (ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0) > 0) THEN 
+									(
+										(ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
+										(CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,6))) 
+											  WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * (CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,6))) 
+										  ELSE B.dblUnitCost END) / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END
+									) ELSE 0.00 END
+	,[intLocationId]			=	A.intLocationId
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	FROM tblICInventoryReceipt A
@@ -368,18 +391,29 @@ FROM
 	LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B.intStorageLocationId 
+	LEFT JOIN dbo.tblCTWeightGrade J ON CH.intWeightId = J.intWeightGradeId
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
 		GROUP BY H.intInventoryReceiptItemId
 	) Billed
+	OUTER APPLY (
+		SELECT 
+			K.dblNetWt AS dblNet
+		FROM tblLGLoadContainer K
+		WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
+							AND K.intLoadContainerId = B.intContainerId 
+						THEN 1
+						ELSE 0 END)
+	) Loads
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND ((Billed.dblQty < B.dblOpenReceive) OR Billed.dblQty IS NULL)
-	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL AND B.dblUnitCost != 0) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE AND 0 RECEIPT COST
+	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
+	AND ISNULL(A.ysnOrigin, 0) = 0
 	UNION ALL
 
 	--RECEIPT OTHER CHARGES
@@ -423,7 +457,7 @@ FROM
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
 		,[intShipmentId]							=	0      
-		,[intLoadDetailId]					=	NULL
+		,[intLoadDetailId]							=	NULL
   		,[intUnitMeasureId]							=	NULL
 		,[strUOM]									=	NULL
 		,[intWeightUOMId]							=	NULL
@@ -449,7 +483,11 @@ FROM
 		,[str1099Type]								=	D2.str1099Type
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
-
+		,[dblNetShippedWeight]						=	0.00
+		,[dblWeightLoss]							=	0.00
+		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
+		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 	FROM [vyuAPChargesForBilling] A
@@ -538,10 +576,11 @@ FROM
 		,[str1099Type]								=	D2.str1099Type 
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
-		--,[dblNetShippedWeight]						=	0.00
-		--,[dblWeightLoss]							=	0.00
-		--,[dblFranchiseWeight]						=	0.00
-		--,[intLocationId]							=	A.intLocationId
+		,[dblNetShippedWeight]						=	0.00
+		,[dblWeightLoss]							=	0.00
+		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
+		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 	FROM vyuLGShipmentPurchaseContracts A
@@ -626,7 +665,11 @@ FROM
 		,[str1099Type]								=	D2.str1099Type 
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
-
+		,[dblNetShippedWeight]						=	0.00
+		,[dblWeightLoss]							=	0.00
+		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
+		,[intLocationId]							=	NULL --Contract doesn't have location
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 	FROM		vyuCTContractCostView		CC
@@ -708,7 +751,11 @@ FROM
 		,[str1099Type]								=	D2.str1099Type 
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
-
+		,[dblNetShippedWeight]						=	0.00
+		,[dblWeightLoss]							=	0.00
+		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
+		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 	FROM vyuLGLoadPurchaseContracts A
@@ -721,77 +768,6 @@ FROM
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	WHERE A.ysnDirectShipment = 1 AND A.intLoadDetailId NOT IN (SELECT IsNull(intLoadDetailId, 0) FROM tblAPBillDetail) AND A.dtmPostedDate IS NOT NULL 
-	UNION ALL
-	SELECT 
-		 [intEntityVendorId]						=	CV.intEntityVendorId
-		,[dtmDate]									=	CV.dtmProcessDate
-		,[strReference]								=	''
-		,[strSourceNumber]							=	LTRIM(CV.strLoadNumber)
-		,[strPurchaseOrderNumber]					=	NULL
-		,[intPurchaseDetailId]						=	NULL
-		,[intItemId]								=	CV.intItemId
-		,[strMiscDescription]						=	CV.strItemDescription
-		,[strItemNo]								=	CV.strItemNo
-		,[strDescription]							=	CV.strItemDescription
-		,[intPurchaseTaxGroupId]					=	NULL
-		,[dblOrderQty]								=	ISNULL(CV.dblTotal,0)
-		,[dblPOOpenReceive]							=	0
-		,[dblOpenReceive]							=	ISNULL(CV.dblTotal,0)
-		,[dblQuantityToBill]						=	ISNULL(CV.dblTotal,0)
-		,[dblQuantityBilled]						=	0
-		,[intLineNo]								=	CV.intLoadDetailId
-		,[intInventoryReceiptItemId]				=	NULL
-		,[intInventoryReceiptChargeId]				=	NULL
-		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	ISNULL(CV.dblTotal,0)
-		,[dblTax]									=	0
-		,[dblRate]									=	0
-		,[ysnSubCurrency]							=	0
-		,[intSubCurrencyCents]						=	0
-		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CV.intItemId, IL.intItemLocationId, 'AP Clearing')
-		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CV.intItemId, IL.intItemLocationId, 'AP Clearing'))
-		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CV.intItemId, IL.intItemLocationId, 'AP Clearing'))
-		,[strName]									=	V.strVendorId
-		,[strVendorId]								=	LTRIM(CV.intEntityVendorId)
-		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
-		,[strContractNumber]						=	CAST(CV.strContractNumber AS NVARCHAR(50))
-		,[strBillOfLading]							=	NULL
-		,[intContractHeaderId]						=	CV.intContractHeaderId
-		,[intContractDetailId]						=	CV.intContractDetailId
-		,[intScaleTicketId]							=	NULL
-		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
-		,[intShipmentId]							=	CV.intLoadId
-		,[intShipmentContractQtyId]					=	CV.intLoadDetailId
-		,[intUnitMeasureId]							=	CV.intItemUOMId
-		,[strUOM]									=	UOM.strUnitMeasure
-		,[intWeightUOMId]							=	CV.intWeightItemUOMId
-		,[intCostUOMId]								=	CV.intPriceItemUOMId
-		,[dblNetWeight]								=	ISNULL(CV.dblNet,0)      
-		,[strCostUOM]								=	CV.strPriceUOM
-		,[strgrossNetUOM]							=	CV.strPriceUOM
-		,[dblWeightUnitQty]							=	ISNULL(WIU.dblUnitQty,1)
-		,[dblCostUnitQty]							=	NULL
-		,[dblUnitQty]								=	NULL
-		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE intCurrencyID = CV.intCurrencyId)
-		,[strCurrency]								=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CV.strCurrency,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))) 
-		,[intCostCurrencyId]						=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE intCurrencyID = CV.intCurrencyId)
-		,[strCostCurrency]							=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CV.strCurrency,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))) 
-		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	CV.str1099Form 
-		,[str1099Type]								=	CV.str1099Type 
-		,[intStorageLocationId]						=	NULL
-		,[strStorageLocationName]					=	NULL
-
-		,[intInventoryShipmentItemId]				=   NULL
-		,[intInventoryShipmentChargeId]				=	NULL
-	FROM vyuLGLoadCostForVendor CV
-	JOIN tblAPVendor V ON CV.intEntityVendorId = V.intEntityVendorId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = CV.intItemUOMId 
-	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN tblICItemUOM WIU ON WIU.intItemUOMId = CV.intWeightItemUOMId
-	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = WIU.intUnitMeasureId
-	LEFT JOIN tblICItemLocation IL ON IL.intItemId = CV.intItemId
 	UNION ALL
 
 	--SHIPMENT OTHER CHARGES
@@ -861,10 +837,11 @@ FROM
 		,[str1099Type]								=	D2.str1099Type
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
-		--,[dblNetShippedWeight]						=	0.00
-		--,[dblWeightLoss]							=	0.00
-		--,[dblFranchiseWeight]						=	0.00
-		--,[intLocationId]							=	A.intLocationId
+		,[dblNetShippedWeight]						=	0.00
+		,[dblWeightLoss]							=	0.00
+		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
+		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=	A.intInventoryShipmentItemId
 		,[intInventoryShipmentChargeId]				=	A.intInventoryShipmentChargeId
 	FROM vyuICShipmentChargesForBilling A
