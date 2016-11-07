@@ -4506,6 +4506,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUnpostCycleCount.sql" />
     <Build Include="dbo\Tables\tblMFHandheldMenuItem.sql" />
     <Build Include="dbo\Tables\tblMFHaldheldUserMenuItemMap.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMTotals.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
