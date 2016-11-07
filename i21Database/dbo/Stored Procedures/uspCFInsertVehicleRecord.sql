@@ -64,23 +64,12 @@ BEGIN
 		RETURN
 	END
 
-	---------------------------------------------------------
-	--			      DUPLICATE CARD NUMBER				   --
-	---------------------------------------------------------
-	SELECT @intDuplicateCard = COUNT(*) FROM tblCFVehicle WHERE strVehicleNumber = @strVehicleNumber
-	IF (@intDuplicateCard > 0)
-	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strVehicleNumber,'Duplicate vehicle for '+ @strVehicleNumber)
-		SET @ysnHasError = 1
-	END
 	
-	---------------------------------------------------------
 
-	IF(@ysnHasError = 1)
-	BEGIN
-		RETURN
-	END
+	--IF(@ysnHasError = 1)
+	--BEGIN
+	--	RETURN
+	--END
 
 	---------------------------------------------------------
 	--				VALID VALUE TO OTHER TABLE		       --
@@ -99,6 +88,21 @@ BEGIN
 				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 				VALUES (@strVehicleNumber,'Unable to find match for '+ @strAccountId +' on account list')
 				SET @ysnHasError = 1
+			END
+			ELSE
+			BEGIN
+				---------------------------------------------------------
+				--			      DUPLICATE VEHICLE NUMBER				   --
+				---------------------------------------------------------
+				SELECT @intDuplicateCard = COUNT(*) FROM tblCFVehicle WHERE strVehicleNumber = @strVehicleNumber AND intAccountId = @intAccountId 
+				IF (@intDuplicateCard > 0)
+				BEGIN
+					INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+					VALUES (@strVehicleNumber,'Duplicate vehicle for '+ @strVehicleNumber)
+					SET @ysnHasError = 1
+				END
+	
+				---------------------------------------------------------
 			END
 		END
 	ELSE

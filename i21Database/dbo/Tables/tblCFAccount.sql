@@ -4,6 +4,7 @@
     [intDiscountDays]             INT             NULL,
     [intDiscountScheduleId]       INT             NOT NULL,
     [intInvoiceCycle]             INT             NOT NULL,
+    [intImportMapperId]           INT             NULL,
     [intSalesPersonId]            INT             NOT NULL,
     [dtmBonusCommissionDate]      DATETIME        NULL,
     [dblBonusCommissionRate]      NUMERIC (18, 6) NULL,
@@ -47,8 +48,11 @@
     CONSTRAINT [FK_tblCFAccount_tblCFFeeProfile] FOREIGN KEY ([intFeeProfileId]) REFERENCES [dbo].[tblCFFeeProfile] ([intFeeProfileId]),
     CONSTRAINT [FK_tblCFAccount_tblCFInvoiceCycle] FOREIGN KEY ([intInvoiceCycle]) REFERENCES [dbo].[tblCFInvoiceCycle] ([intInvoiceCycleId]),
     CONSTRAINT [FK_tblCFAccount_tblCFPriceRuleGroup] FOREIGN KEY ([intPriceRuleGroup]) REFERENCES [dbo].[tblCFPriceRuleGroup] ([intPriceRuleGroupId]),
+    CONSTRAINT [FK_tblCFAccount_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]),
     CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 );
+
+
 
 
 
