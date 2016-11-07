@@ -4492,6 +4492,12 @@
     <Build Include="dbo\Tables\tblRKElectronicUserInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesBasis.sql" />
+    <Build Include="dbo\Views\vyuGRStorageHistoryNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRDiscountIdNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRDiscountScheduleNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRDiscountScheduleCodeNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRStorageScheduleRuleNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRCustomerStorageNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
