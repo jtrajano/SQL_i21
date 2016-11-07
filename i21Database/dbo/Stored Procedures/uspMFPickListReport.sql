@@ -71,6 +71,17 @@ Declare @ysnShowCostInSalesOrderPickList bit=0
 Declare @intMaxOtherChargeId int
 Declare @ysnIncludeEntityName bit=0
 Declare @strCustomerName nvarchar(250)
+Declare @intNoOfBatches INT
+Declare @intNoOfBatchesCopy INT
+Declare @dblBatchSize NUMERIC(38,20)
+Declare @intMinItem int
+Declare @intItemId int
+Declare @dblRequiredQty numeric(38,20)
+Declare @intMinLot int
+Declare @intLotId int
+Declare @dblAvailableQty numeric(38,20)
+Declare @intPickListDetailId int
+Declare @intBatchCounter INT=1
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -140,8 +151,22 @@ Declare @tblItems AS TABLE
 	[ysnLotTracking] bit null default 0,
 	[intSalesOrderDetailId] int null,
 	[strItemType] nvarchar(50) null,
-	[strFooterComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL
+	[strFooterComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[intBatchId] INT NULL default 0,
+	[dblBatchSize] [numeric](38, 20) NULL
 )
+
+DECLARE @tblLot TABLE (
+	 intRowNo INT IDENTITY
+    ,intPickListDetailId INT
+	,intLotId INT
+	,intItemId INT
+	,dblQty NUMERIC(38,20)
+	,intItemUOMId INT
+	,intLocationId INT
+	,intSubLocationId INT
+	,intStorageLocationId INT
+	)
 
 If ISNULL(@xmlParam,'')=''
 Begin
@@ -277,10 +302,16 @@ Begin --Sales Order Pick List
 	Select TOP 1 @ysnShowCostInSalesOrderPickList=ISNULL(ysnPrintPriceOnPrintTicket,0),@ysnIncludeEntityName=ISNULL(ysnIncludeEntityName,0) From tblARCustomer 
 	Where intEntityCustomerId=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 
-	Select TOP 1 @intPickListId=ISNULL(intPickListId,0) From tblMFPickList Where intSalesOrderId=@intSalesOrderId
+	Select TOP 1 @intPickListId=ISNULL(intPickListId,0),@dblBatchSize=ISNULL(dblBatchSize,0) From tblMFPickList Where intSalesOrderId=@intSalesOrderId
 
 	Select @dblTotalPickQty=SUM(dblQtyOrdered) From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId
-			 
+	
+	If @dblBatchSize > 0
+		Begin
+			Set @intNoOfBatches=ceiling(@dblTotalPickQty / @dblBatchSize)
+			Set @intNoOfBatchesCopy=@intNoOfBatches
+		End
+				 
 	Select TOP 1 @strUOM = um.strUnitMeasure 
 	From tblSOSalesOrderDetail sd Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId 
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where sd.intSalesOrderId=@intSalesOrderId
@@ -372,6 +403,8 @@ Begin --Sales Order Pick List
 					,sd.intSalesOrderDetailId
 					,i.strType
 					,@strFooterComments
+					,0
+					,0.0
 			FROM tblMFPickList pl  
 			JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 			JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -434,6 +467,8 @@ Begin --Sales Order Pick List
 			,sd.intSalesOrderDetailId
 			,i.strType
 			,@strFooterComments
+			,0
+			,0.0
 			FROM tblSOSalesOrderDetail sd  
 			JOIN tblICItem i on sd.intItemId=i.intItemId
 			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
@@ -498,7 +533,7 @@ Begin --Sales Order Pick List
 				,@strCompanyAddress AS strCompanyAddress
 				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 				,@strCountry AS strCompanyCountry 
-				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments
+				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments,0,0.0
 		From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
 		End
 
@@ -508,5 +543,226 @@ Begin --Sales Order Pick List
 	If @ysnShowCostInSalesOrderPickList=0 
 		Update @tblItems set dblTotalCost=null
 
-	Select * from @tblItems Order By intSalesOrderDetailId
+	--Generate Batches Data if available
+	If @intPickListId > 0 AND @intNoOfBatches > 1
+	Begin
+			--Get Lots/Items from PickList table
+			DELETE FROM @tblLot
+
+			INSERT INTO @tblLot (
+			intPickListDetailId
+			,intLotId
+			,intItemId
+			,dblQty
+			,intItemUOMId
+			,intLocationId
+			,intSubLocationId
+			,intStorageLocationId
+			)
+		SELECT intPickListDetailId 
+		    ,intLotId
+			,intItemId
+			,dblQuantity
+			,intItemUOMId
+			,intLocationId
+			,intSubLocationId
+			,intStorageLocationId
+		FROM tblMFPickListDetail
+			Where intPickListId=@intPickListId
+			ORDER BY dtmCreated
+
+			Delete From @tblInputItem
+
+			--Calculate Items Qty using batch size
+			Insert Into @tblInputItem(intItemId,dblRequiredQty)
+			Select sd.intItemId,SUM(sd.dblQtyOrdered)/@intNoOfBatches
+			From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId 
+			Where intSalesOrderId=@intSalesOrderId AND i.strType NOT IN ('Comment','Other Charge') Group By sd.intItemId
+
+		While (@intNoOfBatchesCopy>0) --Loop No Of Batches
+		Begin
+			
+			IF OBJECT_ID('tempdb..#tblTempItems') IS NOT NULL
+				DROP TABLE #tblTempItems
+
+			Select * into #tblTempItems from @tblItems Where intBatchId=0
+			Delete From #tblTempItems Where dblPickQuantity>0
+			Update #tblTempItems Set intBatchId=@intBatchCounter
+
+			Select @intMinItem = MIN(intRowNo) From @tblInputItem
+
+			While @intMinItem is not null --Loop Items
+			Begin
+				Select @intItemId=intItemId,@dblRequiredQty=dblRequiredQty
+				From @tblInputItem Where intRowNo=@intMinItem
+
+				Select @intMinLot=MIN(intRowNo) From @tblLot Where dblQty>0 AND intItemId=@intItemId
+				While @intMinLot is not null --Loop Lots
+				Begin
+					Select @intLotId=intLotId,@dblAvailableQty=dblQty From @tblLot Where intRowNo=@intMinLot
+
+					If @dblAvailableQty >= @dblRequiredQty 
+					Begin
+						Select @intPickListDetailId=intPickListDetailId From @tblLot Where intRowNo=@intMinLot
+
+						INSERT INTO #tblTempItems
+						SELECT pl.strPickListNo ,  
+								''  AS strBlendItemNoDesc,  
+								pl.strWorkOrderNo,  
+								l.strLotNumber,
+								l.strLotAlias,
+								sl.strName AS strStorageLocationName,
+								i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
+								ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+								dbo.fnRemoveTrailingZeroes(@dblRequiredQty) AS dblPickQuantity,
+								um.strUnitMeasure AS strPickUOM,
+								l.strGarden,
+								@intWorkOrderCount AS intWorkOrderCount,
+								'' strParentLotNumber,
+								dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
+								dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
+								@dblRequiredQty AS dblQuantity,
+								CASE WHEN ISNULL(pld.intLotId,0)>0 THEN (dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,@dblRequiredQty) * ISNULL(l.dblLastCost,0))
+								- ((dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,@dblRequiredQty) * ISNULL(l.dblLastCost,0) * ISNULL(sd.dblDiscount,0.0))/100)
+								Else (@dblRequiredQty * ISNULL(sd.dblPrice,0.0)) - ((@dblRequiredQty * ISNULL(sd.dblPrice,0.0) * ISNULL(sd.dblDiscount,0.0))/100) END AS dblCost,
+								@dblTotalCost AS dblTotalCost
+								,@strCompanyName AS strCompanyName
+								,@strCompanyAddress AS strCompanyAddress
+								,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+								,@strCountry AS strCompanyCountry
+								,c.strName AS strCustomerName
+								,cl.strLocationName
+								,so.strBOLNumber
+								,sp.strName AS strSalespersonName
+								,sv.strShipVia
+								,ft.strFreightTerm
+								,so.strPONumber
+								,tm.strTerm
+								,so.strOrderStatus
+								,so.dtmDate
+								,so.dtmDueDate
+								,so.strComments AS strSOComments
+								,@strShipTo AS strShipTo
+								,c.strPhone
+								,@strCustomerComments
+								,@ysnShowCostInSalesOrderPickList
+								,0
+								,sd.intSalesOrderDetailId
+								,i.strType
+								,@strFooterComments
+								,@intBatchCounter
+								,@dblBatchSize
+						FROM tblMFPickList pl  
+						JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
+						JOIN tblICItem i on pld.intItemId=i.intItemId
+						Left JOIN tblICLot l on l.intLotId=pld.intLotId
+						Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
+						Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
+						Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+						Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
+						Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+						Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
+						Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+						Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
+						Left Join tblSMTerm tm on so.intTermId=tm.intTermID
+						Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
+						WHERE pl.intPickListId=@intPickListId AND pld.intPickListDetailId=@intPickListDetailId
+
+						Update @tblLot Set dblQty=@dblAvailableQty - @dblRequiredQty Where intRowNo=@intMinLot
+
+						GOTO NEXT_ITEM
+					End
+					Else
+					Begin
+						Select @intPickListDetailId=intPickListDetailId From @tblLot Where intRowNo=@intMinLot
+
+						INSERT INTO #tblTempItems
+						SELECT pl.strPickListNo ,  
+								''  AS strBlendItemNoDesc,  
+								pl.strWorkOrderNo,  
+								l.strLotNumber,
+								l.strLotAlias,
+								sl.strName AS strStorageLocationName,
+								i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
+								ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+								dbo.fnRemoveTrailingZeroes(@dblAvailableQty) AS dblPickQuantity,
+								um.strUnitMeasure AS strPickUOM,
+								l.strGarden,
+								@intWorkOrderCount AS intWorkOrderCount,
+								'' strParentLotNumber,
+								dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
+								dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
+								@dblAvailableQty AS dblQuantity,
+								CASE WHEN ISNULL(pld.intLotId,0)>0 THEN (dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,@dblAvailableQty) * ISNULL(l.dblLastCost,0))
+								- ((dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,@dblAvailableQty) * ISNULL(l.dblLastCost,0) * ISNULL(sd.dblDiscount,0.0))/100)
+								Else (@dblAvailableQty * ISNULL(sd.dblPrice,0.0)) - ((@dblAvailableQty * ISNULL(sd.dblPrice,0.0) * ISNULL(sd.dblDiscount,0.0))/100) END AS dblCost,
+								@dblTotalCost AS dblTotalCost
+								,@strCompanyName AS strCompanyName
+								,@strCompanyAddress AS strCompanyAddress
+								,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+								,@strCountry AS strCompanyCountry
+								,c.strName AS strCustomerName
+								,cl.strLocationName
+								,so.strBOLNumber
+								,sp.strName AS strSalespersonName
+								,sv.strShipVia
+								,ft.strFreightTerm
+								,so.strPONumber
+								,tm.strTerm
+								,so.strOrderStatus
+								,so.dtmDate
+								,so.dtmDueDate
+								,so.strComments AS strSOComments
+								,@strShipTo AS strShipTo
+								,c.strPhone
+								,@strCustomerComments
+								,@ysnShowCostInSalesOrderPickList
+								,0
+								,sd.intSalesOrderDetailId
+								,i.strType
+								,@strFooterComments
+								,@intBatchCounter
+								,@dblBatchSize
+						FROM tblMFPickList pl  
+						JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
+						JOIN tblICItem i on pld.intItemId=i.intItemId
+						Left JOIN tblICLot l on l.intLotId=pld.intLotId
+						Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
+						Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
+						Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+						Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
+						Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+						Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
+						Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+						Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
+						Left Join tblSMTerm tm on so.intTermId=tm.intTermID
+						Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
+						WHERE pl.intPickListId=@intPickListId AND pld.intPickListDetailId=@intPickListDetailId
+
+						Set @dblRequiredQty = @dblRequiredQty - @dblAvailableQty
+
+						Update @tblLot Set dblQty=0 Where intRowNo=@intMinLot
+					End
+
+					Select @intMinLot = MIN(intRowNo) From @tblLot Where intRowNo>@intMinLot AND dblQty>0 AND intItemId=@intItemId
+				End
+
+				NEXT_ITEM:
+				Select @intMinItem = MIN(intRowNo) From @tblInputItem Where intRowNo>@intMinItem
+
+			End
+			Set @intNoOfBatchesCopy=@intNoOfBatchesCopy-1
+			Set @intBatchCounter=@intBatchCounter+1
+
+			Update #tblTempItems Set dblTotalCost=dblTotalCost/@intNoOfBatches
+			Update @tblItems Set dblBatchSize=@dblBatchSize
+
+			Insert Into @tblItems
+			Select * from #tblTempItems
+		End
+	End
+
+	Select * from @tblItems Order By intBatchId,intSalesOrderDetailId
 End

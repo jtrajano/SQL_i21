@@ -37,6 +37,7 @@ Declare @tblPickList table
 	intAssignedToId int,
 	intLocationId int,
 	intSalesOrderId int,
+	dblBatchSize numeric(38,20),
 	intUserId int
 )
 
@@ -61,8 +62,8 @@ Declare @tblPickListDetail table
 )
 
 INSERT INTO @tblPickList(
- intPickListId,strPickListNo,strWorkOrderNo,intAssignedToId,intLocationId,intSalesOrderId,intUserId)
- Select intPickListId,strPickListNo,strWorkOrderNo,intAssignedToId,intLocationId,intSalesOrderId,intUserId
+ intPickListId,strPickListNo,strWorkOrderNo,intAssignedToId,intLocationId,intSalesOrderId,dblBatchSize,intUserId)
+ Select intPickListId,strPickListNo,strWorkOrderNo,intAssignedToId,intLocationId,intSalesOrderId,dblBatchSize,intUserId
  FROM OPENXML(@idoc, 'root', 2)  
  WITH ( 
 	intPickListId int, 
@@ -71,6 +72,7 @@ INSERT INTO @tblPickList(
 	intAssignedToId int,
 	intLocationId int,
 	intSalesOrderId int,
+	dblBatchSize numeric(38,20),
 	intUserId int
 	)
 
@@ -128,8 +130,8 @@ Begin
 						,@ysnProposed = 0
 						,@strPatternString = @strPickListNo OUTPUT
 
-	Insert Into tblMFPickList(strPickListNo,strWorkOrderNo,intKitStatusId,intAssignedToId,intLocationId,intSalesOrderId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
-	Select @strPickListNo,@strSalesOrderNumber,7,intAssignedToId,@intLocationId,@intSalesOrderId,@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1 From @tblPickList
+	Insert Into tblMFPickList(strPickListNo,strWorkOrderNo,intKitStatusId,intAssignedToId,intLocationId,intSalesOrderId,dblBatchSize,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
+	Select @strPickListNo,@strSalesOrderNumber,7,intAssignedToId,@intLocationId,@intSalesOrderId,dblBatchSize,@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1 From @tblPickList
 
 	SET @intPickListId=SCOPE_IDENTITY()
 
@@ -144,6 +146,8 @@ Begin
 End
 Else
 Begin
+	Update tblMFPickList Set dblBatchSize=(Select dblBatchSize From @tblPickList) Where intPickListId=@intPickListId
+
 	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.dblQuantity=tpld.dblQuantity,pld.dblIssuedQuantity=tpld.dblIssuedQuantity,
 	pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,pld.intParentLotId=tpld.intParentLotId,
 	pld.intStorageLocationId=tpld.intStorageLocationId,pld.intSubLocationId=tpld.intSubLocationId,pld.intLocationId=tpld.intLocationId,

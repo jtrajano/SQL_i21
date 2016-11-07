@@ -7,6 +7,7 @@
     [intAssignedToId] INT NOT NULL, 
     [intLocationId] INT NOT NULL,
 	[intSalesOrderId] INT NULL,
+	[dblBatchSize] NUMERIC(18,6) NULL,
 	[dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL,
 	[dtmLastModified] DATETIME NULL, 
