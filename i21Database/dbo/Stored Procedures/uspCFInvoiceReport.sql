@@ -102,7 +102,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber,ysnNonDistibutionList',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -180,6 +180,25 @@ BEGIN
 		SELECT TOP 1
 			 @strPrintTimeStamp = [from]
 		FROM @temp_params WHERE [fieldname] = 'strPrintTimeStamp'
+
+		--NON DISTRIBUTION LIST
+		SELECT TOP 1
+			 @From = [from]
+			,@To = [to]
+			,@Condition = [condition]
+			,@Fieldname = [fieldname]
+		FROM @temp_params WHERE [fieldname] = 'ysnNonDistibutionList'
+
+		IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'TRUE' OR @From = 1))
+		BEGIN
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' NOT (strEmailDistributionOption like ''%CF Invoice%'' AND (strEmail IS NOT NULL AND strEmail != ''))'
+		END
+
+		SET @From = ''
+		SET @To = ''
+		SET @Condition = ''
+		SET @Fieldname = ''
 
 		--INCLUDE PRINTED TRANSACTION
 		SELECT TOP 1
@@ -330,7 +349,17 @@ BEGIN
 		END
 
 		--EXEC('SELECT * FROM vyuCFInvoiceReport ' + @whereClause)
-		SELECT * FROM vyuCFInvoiceReport where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+		--SELECT * FROM vyuCFInvoiceReport where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+
+		SELECT * FROM vyuCFInvoiceReport AS main 
+		INNER JOIN 
+		(	SELECT intAccountId AS intSubAccountId,SUM(dblCalculatedTotalAmount) AS dblInvoiceTotal 
+			FROM vyuCFInvoiceReport
+			WHERE intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+			GROUP BY intAccountId 
+		) AS sub
+		ON main.intAccountId = sub.intSubAccountId 
+		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 	END
     
 END
