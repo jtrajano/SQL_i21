@@ -5,6 +5,7 @@
     [intTaxClassId]				INT				NULL, 
     [strDescription]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL, 
     [strTaxAgency]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL, 
+	[intTaxAgencyId]			INT				NULL, 
     [strAddress]				NVARCHAR(150)	COLLATE Latin1_General_CI_AS NULL, 
     [strZipCode]				NVARCHAR (12)	COLLATE Latin1_General_CI_AS NOT NULL,
     [strState]					NVARCHAR (50)	COLLATE Latin1_General_CI_AS NOT NULL,
