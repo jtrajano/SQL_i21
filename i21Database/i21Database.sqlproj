@@ -4508,6 +4508,7 @@
     <Build Include="dbo\Tables\tblMFHaldheldUserMenuItemMap.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMTotals.sql" />
     <Build Include="dbo\Tables\tblLGLoadStorageCost.sql" />
+    <Build Include="dbo\Views\vyuMFGetWorkOrderItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

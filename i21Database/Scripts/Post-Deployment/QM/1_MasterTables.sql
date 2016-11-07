@@ -132,6 +132,13 @@ BEGIN
 	VALUES(11,'Line Sample','Line Sample')
 END
 GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 12)
+BEGIN
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(12,'WIP Sample','WIP Sample')
+END
+GO
 -- Analysis Type
 GO
 IF NOT EXISTS(SELECT 1 FROM tblQMAnalysisType WHERE strAnalysisTypeName = 'Physical')
