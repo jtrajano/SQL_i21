@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
+using System.Data.SqlClient;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -24,6 +25,19 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetItemStockUOMView(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOM>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+        
+        public async Task<SearchResult> GetItemStockUOMViewTotals(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockUOMTotals>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 

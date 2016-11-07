@@ -15,7 +15,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'Inventory.store.BufferedStatus',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemWeightUOM',
-        'Inventory.store.BufferedUnitMeasure'
+        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedItemStockUOMViewTotals'
     ],
 
     stores: {
@@ -90,10 +91,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             type: 'icbufferedlot'
         },
         fromSubLocation: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemstockuomviewtotals'
         },
         fromStorageLocation: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemstockuomviewtotals'
         },
         toSubLocation: {
             type: 'smcompanylocationsublocationbuffered'
