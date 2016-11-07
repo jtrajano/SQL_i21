@@ -4443,6 +4443,10 @@
     <None Include="Scripts\Post-Deployment\EM\034_UpdateEntityEmail.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDBudgetMaintenance.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPrice.sql" />
+    <Build Include="dbo\Views\vyuARCollectionOverdueDetailReport.sql" />
+    <Build Include="dbo\Tables\tblCFExportTaxMappingDetail.sql" />
+    <Build Include="dbo\Tables\tblCFExportTaxMapping.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
