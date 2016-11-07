@@ -3376,7 +3376,7 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intVendorId',
+                                                                                    dataIndex: 'intEntityVendorId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Vendor Id',
                                                                                     hidden: true
