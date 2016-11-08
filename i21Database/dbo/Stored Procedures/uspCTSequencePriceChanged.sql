@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTSequencePriceChanged]
 		
-	@intContractDetailId int
+	@intContractDetailId	INT,
+	@intUserId				INT = NULL
 	
 AS
 
@@ -14,7 +15,8 @@ BEGIN TRY
 			@intInventoryReceiptId	INT,
 			@intPricingTypeId		INT
 
-	SELECT	@dblCashPrice = dblCashPrice, @intPricingTypeId = intPricingTypeId, @intLastModifiedById = intLastModifiedById FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+	SELECT	@dblCashPrice = dblCashPrice, @intPricingTypeId = intPricingTypeId, @intLastModifiedById = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
 
 	IF 	@intPricingTypeId NOT IN (1,6)
 		RETURN
@@ -36,7 +38,7 @@ BEGIN TRY
 		BEGIN			
 			SELECT @ysnPosted = ysnPosted, @strReceiptNumber = strReceiptNumber FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-			EXEC uspICPostInventoryReceipt 0,0,@strReceiptNumber,@intLastModifiedById
+			EXEC uspICPostInventoryReceipt 0,0,@strReceiptNumber,@intUserId
 
 			SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE ysnPosted= 1 AND intInventoryReceiptId > @intInventoryReceiptId
 		END
@@ -49,7 +51,7 @@ BEGIN TRY
 		BEGIN			
 			SELECT @ysnPosted = ysnPosted, @strReceiptNumber = strReceiptNumber FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-			EXEC uspICPostInventoryReceipt 1,0,@strReceiptNumber,@intLastModifiedById
+			EXEC uspICPostInventoryReceipt 1,0,@strReceiptNumber,@intUserId
 
 			SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE ysnPosted= 1 AND intInventoryReceiptId > @intInventoryReceiptId 
 		END
