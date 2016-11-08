@@ -533,6 +533,58 @@ BEGIN
 					,[strModuleName]
 					,[intConcurrencyId]
 				)
+		--DEBIT Deffered Revenue	
+		SELECT
+			 dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
+			,strBatchID					= @BatchId
+			,intAccountId				= @DeferredRevenueAccountId
+			,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) ELSE 0 END
+			,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
+			,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END
+			,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END				
+			,strDescription				= A.strComments
+			,strCode					= @Code
+			,strReference				= C.strCustomerNumber
+			,intCurrencyId				= A.intCurrencyId 
+			,dblExchangeRate			= 1
+			,dtmDateEntered				= @PostDate
+			,dtmTransactionDate			= A.dtmDate
+			,strJournalLineDescription	= B.strItemDescription 
+			,intJournalLineNo			= B.intInvoiceDetailId
+			,ysnIsUnposted				= 0
+			,intUserId					= @UserId
+			,intEntityId				= @UserEntityId 			
+			,strTransactionId			= A.strInvoiceNumber
+			,intTransactionId			= A.intInvoiceId
+			,strTransactionType			= A.strTransactionType
+			,strTransactionForm			= @ScreenName 
+			,strModuleName				= @ModuleName 
+			,intConcurrencyId			= 1	
+		FROM
+			tblARInvoice A 
+		LEFT JOIN
+			tblARInvoiceDetail B
+				ON A.intInvoiceId = B.intInvoiceId
+		LEFT JOIN 
+			tblARCustomer C
+				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+		LEFT OUTER JOIN
+			vyuARGetItemAccount IST
+				ON B.intItemId = IST.intItemId 
+				AND A.intCompanyLocationId = IST.intLocationId
+		LEFT OUTER JOIN
+			vyuICGetItemStock ICIS
+				ON B.intItemId = ICIS.intItemId 
+				AND A.intCompanyLocationId = ICIS.intLocationId					
+		WHERE
+			A.intInvoiceId = @InvoiceId 
+			AND B.intInvoiceDetailId = @InvoiceDetailId
+			AND B.dblTotal <> @ZeroDecimal 
+			AND ((B.intItemId IS NULL OR B.intItemId = 0)
+				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
+			AND A.strType <> 'Debit Memo'
+
+		UNION ALL
 		--CREDIT	
 		SELECT
 			 dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
@@ -606,149 +658,27 @@ BEGIN
 				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
 			AND A.strType <> 'Debit Memo'
 
-		--CREDIT Software -- License
-			UNION ALL 
-			SELECT
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @BatchId
-				,intAccountId				= IST.intGeneralAccountId
-				,dblDebit					= CASE WHEN @AccrualPeriod > 1 
-												THEN 
-													CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
-												ELSE
-													CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
-											  END
-				,dblCredit					= CASE WHEN @AccrualPeriod > 1 
-												THEN 
-													CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
-												ELSE 
-													CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
-											  END
-
-				,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
-				,strDescription				= A.strComments
-				,strCode					= @Code
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= @PostDate
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= B.strItemDescription 
-				,intJournalLineNo			= B.intInvoiceDetailId
-				,ysnIsUnposted				= 0
-				,intUserId					= @UserId
-				,intEntityId				= @UserEntityId				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @ScreenName
-				,strModuleName				= @ModuleName
-				,intConcurrencyId			= 1	
-			FROM
-				tblARInvoiceDetail B
-			INNER JOIN
-				tblARInvoice A 
-					ON B.intInvoiceId = A.intInvoiceId
-			INNER JOIN
-				tblICItem I
-					ON B.intItemId = I.intItemId 				
-			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
-			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON B.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId
-			LEFT OUTER JOIN
-				vyuICGetItemStock ICIS
-					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 						
-			WHERE
-				B.dblLicenseAmount <> @ZeroDecimal
-				AND B.intInvoiceDetailId = @InvoiceDetailId 
-				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
-				AND I.strType = 'Software'
-				AND A.strTransactionType <> 'Debit Memo'
-				AND @AccrueLicense = 1
-
-
-
-			--CREDIT Software -- Maintenance
-			UNION ALL 
-			SELECT
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @BatchId
-				,intAccountId				= IST.intMaintenanceSalesAccountId
-				,dblDebit					= CASE WHEN @AccrualPeriod > 1 
-												THEN
-													CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
-												ELSE
-													CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
-											  END
-				,dblCredit					= CASE WHEN @AccrualPeriod > 1 
-												THEN 
-													CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
-												ELSE
-													CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
-											  END
-
-				,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
-				,strDescription				= A.strComments
-				,strCode					= @Code
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= @PostDate
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= B.strItemDescription 
-				,intJournalLineNo			= B.intInvoiceDetailId
-				,ysnIsUnposted				= 0
-				,intUserId					= @UserId
-				,intEntityId				= @UserEntityId				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @ScreenName
-				,strModuleName				= @ModuleName
-				,intConcurrencyId			= 1	
-			FROM
-				tblARInvoiceDetail B
-			INNER JOIN
-				tblARInvoice A 
-					ON B.intInvoiceId = A.intInvoiceId
-			INNER JOIN
-				tblICItem I
-					ON B.intItemId = I.intItemId 				
-			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
-			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON B.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId
-			LEFT OUTER JOIN
-				vyuICGetItemStock ICIS
-					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 						
-			WHERE
-				B.dblMaintenanceAmount <> @ZeroDecimal
-				AND B.intInvoiceDetailId = @InvoiceDetailId 
-				AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-				AND I.strType = 'Software'
-				AND A.strTransactionType <> 'Debit Memo'
-
-		UNION ALL
-		--DEBIT Deffered Revenue	
+		--DEBIT Software -- License
+		UNION ALL 
 		SELECT
-			 dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
+				dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
 			,strBatchID					= @BatchId
 			,intAccountId				= @DeferredRevenueAccountId
-			,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) ELSE 0 END
-			,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
-			,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END
-			,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END				
+			,dblDebit					= CASE WHEN @AccrualPeriod > 1 
+											THEN 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+											ELSE
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
+											END
+			,dblCredit					= CASE WHEN @AccrualPeriod > 1 
+											THEN 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+											ELSE 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
+											END
+
+			,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
+			,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -760,18 +690,21 @@ BEGIN
 			,intJournalLineNo			= B.intInvoiceDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @UserId
-			,intEntityId				= @UserEntityId 			
+			,intEntityId				= @UserEntityId				
 			,strTransactionId			= A.strInvoiceNumber
 			,intTransactionId			= A.intInvoiceId
 			,strTransactionType			= A.strTransactionType
-			,strTransactionForm			= @ScreenName 
-			,strModuleName				= @ModuleName 
+			,strTransactionForm			= @ScreenName
+			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1	
 		FROM
-			tblARInvoice A 
-		LEFT JOIN
 			tblARInvoiceDetail B
-				ON A.intInvoiceId = B.intInvoiceId
+		INNER JOIN
+			tblARInvoice A 
+				ON B.intInvoiceId = A.intInvoiceId
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 				
 		LEFT JOIN 
 			tblARCustomer C
 				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
@@ -782,14 +715,214 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuICGetItemStock ICIS
 				ON B.intItemId = ICIS.intItemId 
-				AND A.intCompanyLocationId = ICIS.intLocationId					
+				AND A.intCompanyLocationId = ICIS.intLocationId 						
 		WHERE
-			A.intInvoiceId = @InvoiceId 
-			AND B.intInvoiceDetailId = @InvoiceDetailId
-			AND B.dblTotal <> @ZeroDecimal 
-			AND ((B.intItemId IS NULL OR B.intItemId = 0)
-				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
-			AND A.strType <> 'Debit Memo'
+			B.dblLicenseAmount <> @ZeroDecimal
+			AND B.intInvoiceDetailId = @InvoiceDetailId 
+			AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
+			AND I.strType = 'Software'
+			AND A.strTransactionType <> 'Debit Memo'
+			AND @AccrueLicense = 1
+
+		
+
+		--CREDIT Software -- License
+		UNION ALL 
+		SELECT
+				dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
+			,strBatchID					= @BatchId
+			,intAccountId				= IST.intGeneralAccountId
+			,dblDebit					= CASE WHEN @AccrualPeriod > 1 
+											THEN 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+											ELSE
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
+											END
+			,dblCredit					= CASE WHEN @AccrualPeriod > 1 
+											THEN 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+											ELSE 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
+											END
+
+			,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
+			,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
+			,strDescription				= A.strComments
+			,strCode					= @Code
+			,strReference				= C.strCustomerNumber
+			,intCurrencyId				= A.intCurrencyId 
+			,dblExchangeRate			= 1
+			,dtmDateEntered				= @PostDate
+			,dtmTransactionDate			= A.dtmDate
+			,strJournalLineDescription	= B.strItemDescription 
+			,intJournalLineNo			= B.intInvoiceDetailId
+			,ysnIsUnposted				= 0
+			,intUserId					= @UserId
+			,intEntityId				= @UserEntityId				
+			,strTransactionId			= A.strInvoiceNumber
+			,intTransactionId			= A.intInvoiceId
+			,strTransactionType			= A.strTransactionType
+			,strTransactionForm			= @ScreenName
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1	
+		FROM
+			tblARInvoiceDetail B
+		INNER JOIN
+			tblARInvoice A 
+				ON B.intInvoiceId = A.intInvoiceId
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 				
+		LEFT JOIN 
+			tblARCustomer C
+				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+		LEFT OUTER JOIN
+			vyuARGetItemAccount IST
+				ON B.intItemId = IST.intItemId 
+				AND A.intCompanyLocationId = IST.intLocationId
+		LEFT OUTER JOIN
+			vyuICGetItemStock ICIS
+				ON B.intItemId = ICIS.intItemId 
+				AND A.intCompanyLocationId = ICIS.intLocationId 						
+		WHERE
+			B.dblLicenseAmount <> @ZeroDecimal
+			AND B.intInvoiceDetailId = @InvoiceDetailId 
+			AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
+			AND I.strType = 'Software'
+			AND A.strTransactionType <> 'Debit Memo'
+			AND @AccrueLicense = 1
+
+						
+
+		--DEBIT Software -- Maintenance
+		UNION ALL 
+		SELECT
+				dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
+			,strBatchID					= @BatchId
+			,intAccountId				= @DeferredRevenueAccountId
+			,dblDebit					= CASE WHEN @AccrualPeriod > 1 
+											THEN
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+											ELSE
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
+											END
+			,dblCredit					= CASE WHEN @AccrualPeriod > 1 
+											THEN 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+											ELSE
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
+											END
+
+			,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
+			,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
+			,strDescription				= A.strComments
+			,strCode					= @Code
+			,strReference				= C.strCustomerNumber
+			,intCurrencyId				= A.intCurrencyId 
+			,dblExchangeRate			= 1
+			,dtmDateEntered				= @PostDate
+			,dtmTransactionDate			= A.dtmDate
+			,strJournalLineDescription	= B.strItemDescription 
+			,intJournalLineNo			= B.intInvoiceDetailId
+			,ysnIsUnposted				= 0
+			,intUserId					= @UserId
+			,intEntityId				= @UserEntityId				
+			,strTransactionId			= A.strInvoiceNumber
+			,intTransactionId			= A.intInvoiceId
+			,strTransactionType			= A.strTransactionType
+			,strTransactionForm			= @ScreenName
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1	
+		FROM
+			tblARInvoiceDetail B
+		INNER JOIN
+			tblARInvoice A 
+				ON B.intInvoiceId = A.intInvoiceId
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 				
+		LEFT JOIN 
+			tblARCustomer C
+				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+		LEFT OUTER JOIN
+			vyuARGetItemAccount IST
+				ON B.intItemId = IST.intItemId 
+				AND A.intCompanyLocationId = IST.intLocationId
+		LEFT OUTER JOIN
+			vyuICGetItemStock ICIS
+				ON B.intItemId = ICIS.intItemId 
+				AND A.intCompanyLocationId = ICIS.intLocationId 						
+		WHERE
+			B.dblMaintenanceAmount <> @ZeroDecimal
+			AND B.intInvoiceDetailId = @InvoiceDetailId 
+			AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+			AND I.strType = 'Software'
+			AND A.strTransactionType <> 'Debit Memo'
+
+		--CREDIT Software -- Maintenance
+		UNION ALL 
+		SELECT
+				dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
+			,strBatchID					= @BatchId
+			,intAccountId				= IST.intMaintenanceSalesAccountId
+			,dblDebit					= CASE WHEN @AccrualPeriod > 1 
+											THEN
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+											ELSE
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
+											END
+			,dblCredit					= CASE WHEN @AccrualPeriod > 1 
+											THEN 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+											ELSE
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
+											END
+
+			,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
+			,dblCreditUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
+			,strDescription				= A.strComments
+			,strCode					= @Code
+			,strReference				= C.strCustomerNumber
+			,intCurrencyId				= A.intCurrencyId 
+			,dblExchangeRate			= 1
+			,dtmDateEntered				= @PostDate
+			,dtmTransactionDate			= A.dtmDate
+			,strJournalLineDescription	= B.strItemDescription 
+			,intJournalLineNo			= B.intInvoiceDetailId
+			,ysnIsUnposted				= 0
+			,intUserId					= @UserId
+			,intEntityId				= @UserEntityId				
+			,strTransactionId			= A.strInvoiceNumber
+			,intTransactionId			= A.intInvoiceId
+			,strTransactionType			= A.strTransactionType
+			,strTransactionForm			= @ScreenName
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1	
+		FROM
+			tblARInvoiceDetail B
+		INNER JOIN
+			tblARInvoice A 
+				ON B.intInvoiceId = A.intInvoiceId
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 				
+		LEFT JOIN 
+			tblARCustomer C
+				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+		LEFT OUTER JOIN
+			vyuARGetItemAccount IST
+				ON B.intItemId = IST.intItemId 
+				AND A.intCompanyLocationId = IST.intLocationId
+		LEFT OUTER JOIN
+			vyuICGetItemStock ICIS
+				ON B.intItemId = ICIS.intItemId 
+				AND A.intCompanyLocationId = ICIS.intLocationId 						
+		WHERE
+			B.dblMaintenanceAmount <> @ZeroDecimal
+			AND B.intInvoiceDetailId = @InvoiceDetailId 
+			AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+			AND I.strType = 'Software'
+			AND A.strTransactionType <> 'Debit Memo'
 
 		SET @LoopCounter = @LoopCounter + 1
 
