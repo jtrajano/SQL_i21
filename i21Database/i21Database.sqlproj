@@ -4553,6 +4553,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreate1099PATRFile.sql" />
     <Build Include="dbo\Functions\fnAP1099EFilePATRPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfPATR.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleCreateBySystem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
