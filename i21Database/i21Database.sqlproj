@@ -4439,6 +4439,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostLotInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostActualCostInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForInTransitCosting.sql" />
+    
     <Build Include="dbo\Tables\tblICInventoryReceiptChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetChargeTaxDetails.sql" />
@@ -4552,6 +4553,7 @@
     <Build Include="dbo\Views\vyuTMAssociateSiteSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
     <Build Include="dbo\Functions\fnPATValidateForPatronageTransactions.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerHasTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
