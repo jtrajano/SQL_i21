@@ -31,7 +31,7 @@ ELSE IF @post = 1
 BEGIN
 	UPDATE B
 		SET B.dblAmountDue = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-								THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END
+								THEN 0 ELSE CAST((B.dblAmountDue) - (B.dblPayment) AS DECIMAL(18,2)) END
 		--B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
 		--					THEN B.dblDiscount ELSE 0 END,
 		--B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 

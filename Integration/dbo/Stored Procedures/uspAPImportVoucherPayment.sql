@@ -203,6 +203,8 @@ LEFT JOIN apchkmst E ON A.apchk_A4GLIdentity = E.A4GLIdentity
 WHERE A.apivc_status_ind = 'P' AND A.apchk_A4GLIdentity IS NULL
 )
 
+--TODO CREATE PAYMENT FOR PREPAYMENT
+
 --CREATE PAYMENT
 MERGE INTO tblAPPayment AS destination
 USING
@@ -356,14 +358,15 @@ VALUES
 UPDATE A
 	SET A.ysnPrepay = CASE WHEN (SELECT intTransactionType 
 										FROM tblAPBill B INNER JOIN tblAPPaymentDetail C ON B.intBillId = C.intBillId 
-										WHERE C.intPaymentId = A.intPaymentId) = 2 
+										WHERE C.intPaymentId = B.intPaymentId) = 2 
 								THEN 1 ELSE 0 END
 FROM tblAPPayment A
+INNER JOIN #tmpPaymentCreated B ON A.intPaymentId = B.intPaymentId
 CROSS APPLY (
 	SELECT 
 		COUNT(intPaymentDetailId) AS intCount
 	FROM tblAPPaymentDetail E
-	WHERE E.intPaymentId = A.intPaymentId
+	WHERE E.intPaymentId = B.intPaymentId
 ) DetailCount
 WHERE DetailCount.intCount = 1
 

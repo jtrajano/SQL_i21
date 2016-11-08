@@ -4498,6 +4498,7 @@
     <Build Include="dbo\Views\vyuGRDiscountScheduleCodeNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRStorageScheduleRuleNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRCustomerStorageNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixAmount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
