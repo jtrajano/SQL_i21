@@ -2979,8 +2979,8 @@ IF @post = 1
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
-				AND Header.strTransactionType <> 'Debit Memo'
-				AND (Detail.intCustomerStorageId IS NULL OR ISNULL(Detail.intCustomerStorageId,0) = 0)				
+				AND Header.strTransactionType <> 'Debit Memo'							
+				AND (Detail.intStorageScheduleTypeId IS NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) = 0)				
 
 			UNION ALL
 
@@ -3040,7 +3040,7 @@ IF @post = 1
 				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 				AND ARI.[strTransactionType] <> 'Debit Memo'
 				AND ARIC.strType <> 'Finished Good'
-				AND (ARID.intCustomerStorageId IS NULL OR ISNULL(ARID.intCustomerStorageId,0) = 0)			
+				AND (ARID.intStorageScheduleTypeId IS NULL OR ISNULL(ARID.intStorageScheduleTypeId,0) = 0)			
 			
 		END TRY
 		BEGIN CATCH
@@ -3049,52 +3049,58 @@ IF @post = 1
 		END CATCH
 
 		-- Call the post routine 
-		BEGIN TRY
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-			)
-			EXEC	dbo.uspICPostCosting  
-					@ItemsForPost  
-					,@batchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@UserEntityID
+		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
+		BEGIN
+			BEGIN TRY
+				-- Call the post routine 
+				INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+				)
+				EXEC	dbo.uspICPostCosting  
+						@ItemsForPost  
+						,@batchId  
+						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+						,@UserEntityID
 					
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
+			END TRY
+			BEGIN CATCH
+				SELECT @ErrorMerssage = ERROR_MESSAGE()										
+				GOTO Do_Rollback
+			END CATCH
+		END
+
+
+
 
 		BEGIN TRY
 			-- Get the items to post  
@@ -3159,46 +3165,48 @@ IF @post = 1
 						ON i.[intInvoiceId] = p.[intInvoiceId]
 			WHERE	t.intFobPointId = @FOB_DESTINATION
 
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-			)
-			EXEC	dbo.uspICPostInTransitCosting  
-					@InTransitItems  
-					,@batchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@UserEntityID
-
+			IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
+			BEGIN 
+				-- Call the post routine 
+				INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+				)
+				EXEC	dbo.uspICPostInTransitCosting  
+						@InTransitItems  
+						,@batchId  
+						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+						,@UserEntityID
+			END
 		END TRY 
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
@@ -3303,7 +3311,7 @@ IF @post = 1
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
 				AND Header.strTransactionType <> 'Debit Memo'
-				AND (Detail.intCustomerStorageId IS NOT NULL OR ISNULL(Detail.intCustomerStorageId,0) <> 0)		
+				AND (Detail.intStorageScheduleTypeId IS NOT NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) <> 0)		
 		
 		END TRY
 		BEGIN CATCH
@@ -3312,51 +3320,54 @@ IF @post = 1
 		END CATCH
 
 		-- Call the post routine 
-		BEGIN TRY
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-			)
-			EXEC	dbo.uspICPostStorage  
-					@StorageItemsForPost  
-					,@batchId  		
-					,@UserEntityID
+		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
+		BEGIN 
+			BEGIN TRY
+				-- Call the post routine 
+				INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+				)
+				EXEC	dbo.uspICPostStorage  
+						@StorageItemsForPost  
+						,@batchId  		
+						,@UserEntityID
 					
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
+			END TRY
+			BEGIN CATCH
+				SELECT @ErrorMerssage = ERROR_MESSAGE()										
+				GOTO Do_Rollback
+			END CATCH
+		END
 
 		BEGIN TRY 
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
@@ -3531,8 +3542,8 @@ IF @post = 0
 				SELECT TOP 1 @intTransactionIdIC = intInvoiceId, @strTransactionIdIC = strTransactionId 
 				FROM	@UnPostICInvoiceData ORDER BY intInvoiceId
 
-				SELECT @WStorageCount = COUNT(1) FROM tblARInvoiceDetail WHERE intInvoiceId = @intTransactionIdIC AND (ISNULL(intItemId, 0) <> 0) AND (ISNULL(intCustomerStorageId,0) <> 0)	
-				SELECT @WOStorageCount = COUNT(1) FROM tblARInvoiceDetail WHERE intInvoiceId = @intTransactionIdIC AND (ISNULL(intItemId, 0) <> 0) AND (ISNULL(intCustomerStorageId,0) = 0)
+				SELECT @WStorageCount = COUNT(1) FROM tblARInvoiceDetail WHERE intInvoiceId = @intTransactionIdIC AND (ISNULL(intItemId, 0) <> 0) AND (ISNULL(intStorageScheduleTypeId,0) <> 0)	
+				SELECT @WOStorageCount = COUNT(1) FROM tblARInvoiceDetail WHERE intInvoiceId = @intTransactionIdIC AND (ISNULL(intItemId, 0) <> 0) AND (ISNULL(intStorageScheduleTypeId,0) = 0)
 				IF @WOStorageCount > 0
 				BEGIN
 					-- Unpost onhand stocks. 
