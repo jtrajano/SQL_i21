@@ -4439,7 +4439,6 @@
     <Build Include="dbo\Stored Procedures\uspICPostLotInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostActualCostInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForInTransitCosting.sql" />
-    
     <Build Include="dbo\Tables\tblICInventoryReceiptChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetChargeTaxDetails.sql" />
@@ -4551,6 +4550,9 @@
     <Build Include="dbo\Views\vyuARCollectionCustomerReport.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDBudgetMaintenance.sql" />
     <Build Include="dbo\Views\vyuEMCustomerHasTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099PATRFile.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFilePATRPayee.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfPATR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
