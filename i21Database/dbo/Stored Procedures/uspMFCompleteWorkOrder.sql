@@ -801,6 +801,12 @@ BEGIN TRY
 		SELECT @strOutputLotNumber AS strOutputLotNumber
 	END
 
+	EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId
+		,@intItemId = @intItemId
+		,@intOutputLotId = @intLotId
+		,@intLocationId = @intLocationId
+		,@intUserId = @intUserId
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 
