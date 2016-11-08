@@ -7,8 +7,8 @@ Harness.configure({
     forceDOMVisible: false,
     waitForExtReady: false,
     sandbox: false,
-    viewportWidth: 1200,
-    viewPortHeight: 1000
+    viewportWidth: 1800,
+    viewPortHeight: 1800
 
 });
 
@@ -144,6 +144,17 @@ Harness.start(
         items: [
             {
                 url: '../StorageLocation/AddStorageLocation.js',
+                preload: [
+                    functionalTest
+                ]
+            }
+        ]
+    },
+
+    { group: 'InventoryReceipt',
+        items: [
+            {
+                url: '../InventoryReceipt/AddInventoryReceipt.js',
                 preload: [
                     functionalTest
                 ]

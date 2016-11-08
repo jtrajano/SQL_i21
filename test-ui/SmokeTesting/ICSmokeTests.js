@@ -19,9 +19,10 @@ StartTest(function (t) {
         .markSuccess('Inventory successfully expanded').wait(300)
       
          //Inventory Receipt Screen
-        .displayText('"======== 1. Open Inventory Receipt Search Screen Check All Fields ========"').wait(300)
+        .displayText('"======== 1. Open Inventory Receipt Search Screen Check All Fields========"').wait(300)
         .openScreen('Inventory Receipts').wait(300)
         .waitTillLoaded('Open Inventory Receipts Search Screen Successful').wait(200)
+        
         .checkSearchToolbarButton(
             {
                 new: true
@@ -1489,9 +1490,9 @@ StartTest(function (t) {
         .checkScreenShown('icitem').wait(200)
         .checkStatusMessage('Ready')
 
-        .enterData('#txtItemNo', 'NLTI - 05').wait(200)
+        .enterData('#txtItemNo', 'NLTI - 06').wait(200)
         //.selectComboRowByIndex('#cboType',0).wait(200)
-        .enterData('#txtDescription', 'NLTI - 05').wait(200)
+        .enterData('#txtDescription', 'NLTI - 06').wait(200)
         .selectComboRowByFilter('#cboCategory', 'Grains', 500, 'cboCategory',0).wait(500)
         .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode',0).wait(500)
         .selectComboRowByIndex('#cboLotTracking', 2).wait(500)
@@ -1558,15 +1559,15 @@ StartTest(function (t) {
 
         .clickButton('#btnClose').wait(300)
 
-        //#1.2 Add Non Lotted Inventory Item
+        //#1.2 Add Lotted Inventory Item
         .clickButton('#btnNew').wait(500)
         .waitTillVisible('icitem', 'Open New Item Screen Successful').wait(500)
         .checkScreenShown('icitem').wait(200)
         .checkStatusMessage('Ready')
 
-        .enterData('#txtItemNo', 'LTI - 05').wait(200)
+        .enterData('#txtItemNo', 'LTI - 06').wait(200)
         //.selectComboRowByIndex('#cboType',0).wait(200)
-        .enterData('#txtDescription', 'LTI - 05').wait(200)
+        .enterData('#txtDescription', 'LTI - 06').wait(200)
         .selectComboRowByFilter('#cboCategory', 'Grains', 500, 'cboCategory',0).wait(500)
         .selectComboRowByFilter('#cboCommodity', 'Corn', 500, 'strCommodityCode',0).wait(500)
         .selectComboRowByIndex('#cboLotTracking', 0).wait(500)
@@ -1889,7 +1890,7 @@ StartTest(function (t) {
         .selectComboRowByFilter('#cboVendor', 'ABC Trucking', 500, 'strName', 0).wait(200)
         //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
         .selectComboRowByIndex('#cboLocation',0).wait(300)
-        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'NLTI - 05', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'NLTI - 06', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
         .enterGridData('#grdInventoryReceipt', 0, 'colQtyToReceive', '1000').wait(500)
         .checkGridData('#grdInventoryReceipt', 0, 'colItemSubCurrency', 'USD').wait(300)
@@ -1969,7 +1970,7 @@ StartTest(function (t) {
         .selectComboRowByFilter('#cboVendor', 'ABC Trucking', 500, 'strName', 0).wait(200)
         //.selectComboRowByFilter('#cboVendor','0001005057',500, 'intEntityVendorId').wait(500)
         .selectComboRowByIndex('#cboLocation',0).wait(300)
-        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'LTI - 05', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strItemNo', 'LTI - 06', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryReceipt', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
         .enterGridData('#grdInventoryReceipt', 0, 'colQtyToReceive', '1000').wait(500)
         .checkGridData('#grdInventoryReceipt', 0, 'colItemSubCurrency', 'USD').wait(300)
@@ -2063,7 +2064,7 @@ StartTest(function (t) {
         .selectComboRowByIndex('#cboShipFromAddress',0).wait(300)
         .selectComboRowByIndex('#cboShipToAddress',0).wait(300)
 
-        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'NLTI - 05', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'NLTI - 06', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
         .enterGridData('#grdInventoryShipment', 0, 'colQuantity', '100').wait(500)
         .enterGridData('#grdInventoryShipment', 0, 'colUnitPrice', '15').wait(500)
@@ -2105,7 +2106,7 @@ StartTest(function (t) {
         .selectComboRowByIndex('#cboShipFromAddress',0).wait(300)
         .selectComboRowByIndex('#cboShipToAddress',0).wait(300)
 
-        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'LTI - 05', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strItemNo', 'LTI - 06', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryShipment', 0, 'strUnitMeasure', 'Bushels', 300, 'strUnitMeasure').wait(1000)
         .enterGridData('#grdInventoryShipment', 0, 'colQuantity', '100').wait(500)
         .enterGridData('#grdInventoryShipment', 0, 'colUnitPrice', '15').wait(500)
@@ -2145,13 +2146,14 @@ StartTest(function (t) {
         .openScreen('Inventory Transfers').wait(1000)
         .waitTillLoaded('Open Inventory Transfers Search Screen Successful').wait(500)
         .clickButton('#btnNew').wait(500)
+        .waitTillVisible('icinventorytransfer','').wait(1000)
 
         .displayText('======== #2. Enter/Select Inventory Transfer Details and Check Fields========')
         .selectComboRowByFilter('#cboTransferType', 'Location to Location', 500, 'strTransferType', 0).wait(200)
         .selectComboRowByFilter('#cboFromLocation', '0001 - Fort Wayne', 500, 'intFromLocationId', 0).wait(200)
         .selectComboRowByFilter('#cboToLocation', '0001 - Fort Wayne', 500, 'intToLocationId', 0).wait(200)
 
-        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strItemNo', 'LTI - 05', 300, 'strItemNo').wait(500)
+        .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strItemNo', 'LTI - 06', 300, 'strItemNo').wait(500)
         .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strFromSubLocationName', 'Raw Station', 300, 'strFromSubLocationName').wait(500)
         .selectGridComboRowByFilter('#grdInventoryTransfer', 0, 'strFromStorageLocationName', 'RM Storage', 300, 'strFromStorageLocationName').wait(500)
         .checkGridData('#grdInventoryTransfer', 0, 'colOwnershipType', 'Own').wait(300)
@@ -2175,11 +2177,12 @@ StartTest(function (t) {
         .openScreen('Inventory Adjustments').wait(1000)
         .waitTillLoaded('Open Inventory Transfers Search Screen Successful').wait(500)
         .clickButton('#btnNew').wait(500)
+        .waitTillVisible('icinventoryadjustment','').wait(1000)
 
         .displayText('"======== #2 Quantity Change ========"').wait(500)
         .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
         .selectComboRowByIndex('#cboAdjustmentType',0).wait(300)
-        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 05', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 06', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strSubLocation', 'Raw Station', 300, 'strSubLocation').wait(500)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strStorageLocation', 'RM Storage', 300, 'strStorageLocation').wait(500)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strLotNumber', 'LOT-01', 300, 'strLotNumber').wait(500)
@@ -2207,11 +2210,12 @@ StartTest(function (t) {
 
         //#4.2 Lot Move
         .clickButton('#btnNew').wait(500)
+        .waitTillLoaded('')
 
         .displayText('"======== #4.2 Lot Move ========"').wait(500)
         .selectComboRowByFilter('#cboLocation', '0001 - Fort Wayne', 500, 'strName', 0).wait(200)
         .selectComboRowByIndex('#cboAdjustmentType',7).wait(300)
-        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 05', 300, 'strItemNo').wait(1000)
+        .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strItemNo', 'LTI - 06', 300, 'strItemNo').wait(1000)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strSubLocation', 'Raw Station', 300, 'strSubLocation').wait(500)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strStorageLocation', 'RM Storage', 300, 'strStorageLocation').wait(500)
         .selectGridComboRowByFilter('#grdInventoryAdjustment', 0, 'strLotNumber', 'LOT-01', 300, 'strLotNumber').wait(500)
