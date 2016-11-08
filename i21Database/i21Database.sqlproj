@@ -4557,6 +4557,7 @@
     <Build Include="dbo\Tables\tblCFExportTaxMappingDetail.sql" />
     <Build Include="dbo\Tables\tblCFExportTaxMapping.sql" />
     <Build Include="dbo\Views\vyuCFTransactionTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixAmount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
