@@ -247,6 +247,8 @@ BEGIN
 				WHERE D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 				GROUP BY D.intInventoryReceiptItemId
 			) Taxes
+
+
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
 	--COST ADJUSTMENT
@@ -255,10 +257,11 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'),--[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Variance'),
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2))
-												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / (CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END)
-												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency > 0  THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / (CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END) 
+		[dblDebit]						=	(CASE	WHEN A.intTransactionType IN (1) THEN (B.dblTotal - usingOldCost.dblTotal)
+													WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN (B.dblTotal - usingOldCost.dblTotal) / (CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END)
+													WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency > 0  THEN (B.dblTotal - usingOldCost.dblTotal) / (CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END)
 											 ELSE 0 END), 
+
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -300,6 +303,34 @@ BEGIN
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 			LEFT JOIN tblICInventoryReceiptCharge F
 				ON B.intInventoryReceiptChargeId = F.intInventoryReceiptChargeId
+			OUTER APPLY (
+				SELECT dblTotal = CAST (
+						CASE	
+							-- If there is a Gross/Net UOM, compute by the net weight. 
+							WHEN E.intWeightUOMId IS NOT NULL THEN 
+								-- Convert the Cost UOM to Gross/Net UOM. 
+								dbo.fnCalculateCostBetweenUOM(
+									ISNULL(E.intCostUOMId, E.intUnitMeasureId)
+									, E.intWeightUOMId
+									, E.dblUnitCost
+								) 
+								* B.dblNetWeight
+
+							-- If Gross/Net UOM is missing: compute by the receive qty. 
+							ELSE 
+								-- Convert the Cost UOM to Gross/Net UOM. 
+								dbo.fnCalculateCostBetweenUOM(
+									ISNULL(E.intCostUOMId, E.intUnitMeasureId)
+									, E.intUnitMeasureId
+									, E.dblUnitCost
+								) 
+								* B.dblQtyReceived
+						END				
+						AS DECIMAL(18, 2)
+					)
+			) usingOldCost 
+
+
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost AND B.intInventoryReceiptItemId IS NOT NULL
 	UNION ALL
