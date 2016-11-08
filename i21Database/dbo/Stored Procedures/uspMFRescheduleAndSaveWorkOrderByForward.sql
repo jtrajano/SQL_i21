@@ -238,12 +238,12 @@ BEGIN TRY
 		IF @intPreferenceId = 1
 		BEGIN
 			SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
-			FROM @tblMFWorkOrder
+			FROM @tblMFScheduleWorkOrder
 		END
 		ELSE
 		BEGIN
 			SELECT @intManufacturingCellId2 = MIN(W.intManufacturingCellId)
-			FROM @tblMFWorkOrder W
+			FROM @tblMFScheduleWorkOrder W
 			JOIN @tblMFManufacturingCell M ON M.intManufacturingCellId = W.intManufacturingCellId
 		END
 
@@ -728,7 +728,7 @@ BEGIN TRY
 
 					SELECT @intWODuration = @intNoOfUnit / @dblMachineCapacity
 
-					IF @dtmShiftStartTime > @dtmExpectedDate
+					IF Convert(datetime,Convert(char,@dtmShiftStartTime,101)) > @dtmExpectedDate
 						AND NOT EXISTS (
 							SELECT *
 							FROM @tblMFScheduleWorkOrderDetail
@@ -1458,9 +1458,9 @@ BEGIN TRY
 
 					IF @dtmPlannedStartDate IS NULL
 					BEGIN
-						SELECT @dtmPlannedStartDate = MIN(dtmPlannedStartDate)
-							,@intExecutionOrder = MIN(intExecutionOrder)
-							,@dtmExpectedDate = MIN(dtmExpectedDate)
+						SELECT @dtmPlannedStartDate = IsNULL(MIN(dtmPlannedStartDate),GETDATE())
+							,@intExecutionOrder = ISNULL(MIN(intExecutionOrder),0)
+							,@dtmExpectedDate = IsNULL(MIN(dtmExpectedDate),@dtmExpectedDate)
 						FROM @tblMFScheduleWorkOrder
 						WHERE intManufacturingCellId = @intNextManufacturingCellId
 							AND dtmExpectedDate >= @dtmExpectedDate
@@ -1489,7 +1489,7 @@ BEGIN TRY
 					IF @intAvailableDuration IS NULL
 						SELECT @intAvailableDuration = 0
 
-					IF @intAvailableDuration - @intAllocatedHours > @intRequiredDuration
+					IF @intAvailableDuration - @intAllocatedHours >= @intRequiredDuration
 					BEGIN
 						DELETE
 						FROM @tblMFScheduleWorkOrderDetail
