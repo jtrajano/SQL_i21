@@ -17,6 +17,13 @@ BEGIN TRY
 		,@strOldLotNumber NVARCHAR(50)
 	DECLARE @intOldSampleId INT
 		,@intSampleId INT
+	DECLARE @ysnEnableParentLot BIT
+
+	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+	FROM tblQMCompanyPreference
+
+	IF @ysnEnableParentLot = 1
+		RETURN;
 
 	SELECT @strOldLotNumber = strLotNumber
 	FROM tblICLot
