@@ -17,6 +17,7 @@ A.intBillId
 ,A.ysnOrigin
 ,Payments.ysnPrinted
 ,Payments.ysnVoid
+,Payments.ysnPrepay
 ,Payments.ysnPosted AS ysnPaymentPosted
 ,Payments.strPaymentInfo
 ,Payments.strBankAccountNo
@@ -43,6 +44,7 @@ FROM dbo.tblAPBill A
 			,ISNULL(H.ysnCheckVoid,0) AS ysnVoid
 			,ISNULL(H.ysnClr,0) AS ysnCleared
 			,B.dtmDatePaid
+			,B.ysnPrepay
 			,H.strLink AS strBatchId
 			,H.dtmDateReconciled
 		FROM dbo.tblAPPayment B 
@@ -52,6 +54,6 @@ FROM dbo.tblAPBill A
 		--WHERE B.ysnPosted = 1
 		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr,
 		 G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid, H.dtmDateReconciled, B.ysnPosted
-		 ,H.strLink
+		 ,H.strLink, B.ysnPrepay
 	) Payments
 	ON A.intBillId = Payments.intBillId
