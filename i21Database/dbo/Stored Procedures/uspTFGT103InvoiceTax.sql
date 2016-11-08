@@ -228,6 +228,17 @@ DECLARE @tblTempTransaction TABLE (
 				DECLARE @InvTransferQuery NVARCHAR(MAX)
 				DECLARE @InvQueryPart1 NVARCHAR(MAX)
 				DECLARE @InvQueryPart2 NVARCHAR(MAX)
+				DECLARE @CriteriaCount INT
+				DECLARE @Criteria NVARCHAR(200) = ''
+				SET @CriteriaCount = (SELECT COUNT(tblTFReportingComponent.intReportingComponentId)
+				FROM  tblTFReportingComponent INNER JOIN tblTFTaxCriteria 
+				ON tblTFReportingComponent.intReportingComponentId = tblTFTaxCriteria.intReportingComponentId
+				WHERE tblTFReportingComponent.intReportingComponentId = @RCId AND tblTFTaxCriteria.strCriteria = '= 0')
+
+				IF(@CriteriaCount > 0) 
+					BEGIN
+						SET @Criteria = 'AND tblTFTaxCriteria.strCriteria <> ''= 0'' AND tblTFTaxCriteria.strCriteria <> ''<> 0'''
+					END
 		
 				SET @InvQueryPart1 = 'SELECT DISTINCT 0, 
 						 tblICInventoryTransferDetail.intInventoryTransferDetailId, 
@@ -273,7 +284,9 @@ DECLARE @tblTempTransaction TABLE (
 						 tblSMCompanySetup.strStateTaxID,
 						 tblSMCompanySetup.strFederalTaxID '
 	
-				SET @InvQueryPart2 = 'FROM tblICInventoryTransferDetail INNER JOIN
+				SET @InvQueryPart2 = 'FROM tblTFTaxCategory INNER JOIN
+                         tblTFTaxCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFTaxCriteria.intTaxCategoryId RIGHT OUTER JOIN
+                         tblICInventoryTransferDetail INNER JOIN
                          tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId INNER JOIN
                          tblICItemMotorFuelTax INNER JOIN
                          tblTFValidProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFValidProductCode.intProductCode INNER JOIN
@@ -288,7 +301,8 @@ DECLARE @tblTempTransaction TABLE (
                          tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityVendorId = EntityAPVendor.intEntityId INNER JOIN
                          tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId INNER JOIN
                          tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId INNER JOIN
-                         tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId LEFT OUTER JOIN
+                         tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId ON 
+                         tblTFTaxCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId LEFT OUTER JOIN
                          tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId LEFT OUTER JOIN
                          tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId CROSS JOIN
                          tblSMCompanySetup
@@ -296,7 +310,7 @@ DECLARE @tblTempTransaction TABLE (
 					AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 					AND (tblARInvoice.strBOLNumber IS NULL)
 					AND (tblTRLoadHeader.dtmLoadDateTime BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
-					AND (tblICInventoryTransfer.ysnPosted = 1)'
+					AND (tblICInventoryTransfer.ysnPosted = 1) ' + @Criteria + ''
 
 					SET @InvTransferQuery = @InvQueryPart1 + @InvQueryPart2
 					INSERT INTO @tblTempTransaction
