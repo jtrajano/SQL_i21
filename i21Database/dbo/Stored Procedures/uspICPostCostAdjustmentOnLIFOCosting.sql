@@ -577,13 +577,13 @@ BEGIN
 								ELSE 0 
 						END
 			BEGIN 
-				-- Flag the escalated inventory transaction not to create the gl entries if it has a lot out. 
-				UPDATE t
-				SET		ysnNoGLPosting = 1
-				FROM	tblICInventoryTransaction t
-				WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId
-						AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
-						AND ISNULL(t.ysnNoGLPosting, 0) = 0 
+				---- Flag the escalated inventory transaction not to create the gl entries if it has a lot out. 
+				--UPDATE t
+				--SET		ysnNoGLPosting = 1
+				--FROM	tblICInventoryTransaction t
+				--WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId
+				--		AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
+				--		AND ISNULL(t.ysnNoGLPosting, 0) = 0 
 
 				-- Calculate the revalue amount for the lot-out qty. 
 				SET @InvTranValue = NULL 
@@ -837,10 +837,10 @@ BEGIN
 								AND e.intInventoryTransactionId IS NULL 	
 
 						-- Flag the inventory transaction not to create the gl entries
-						UPDATE t
-						SET		ysnNoGLPosting = 1
-						FROM	tblICInventoryTransaction t
-						WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId_SoldOrUsed
+						--UPDATE t
+						--SET		ysnNoGLPosting = 1
+						--FROM	tblICInventoryTransaction t
+						--WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId_SoldOrUsed
 					END 
 				END 
 
