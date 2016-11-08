@@ -208,7 +208,7 @@ BEGIN
 			,@Fieldname = [fieldname]
 		FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
 
-		DECLARE @tblCFTableCardIds TABLE ([intCardId]	INT)
+		DECLARE @tblCFTableCardIds TABLE ([intAccountId]	INT)
 		DECLARE @tblCFTableTransationIds TABLE ([intTransactionId]	INT)
 		DECLARE @tblCFFilterIds TABLE ([intTransactionId]	INT)
 		DECLARE @CFID NVARCHAR(MAX)
@@ -218,14 +218,14 @@ BEGIN
 		DECLARE @intTempCardCounter INT
 		DECLARE @intTempCardId	INT
 		DECLARE @tblCFInvoiceNunber TABLE (
-			[intCardId]	INT,
+			[intAccountId]	INT,
 			[strInvoiceNumber]	NVARCHAR(MAX)
 		)
 
 		---------GET DISTINCT CARD ID---------
-		SET @tblCFTempTableQuery = 'SELECT DISTINCT intCardId FROM vyuCFInvoiceReport ' + @whereClause
+		SET @tblCFTempTableQuery = 'SELECT DISTINCT intAccountId FROM vyuCFInvoiceReport ' + @whereClause
 
-		INSERT INTO  @tblCFTableCardIds (intCardId)
+		INSERT INTO  @tblCFTableCardIds (intAccountId)
 		EXEC (@tblCFTempTableQuery)
 		---------GET DISTINCT CARD ID---------
 
@@ -233,21 +233,21 @@ BEGIN
 		WHILE (EXISTS(SELECT 1 FROM @tblCFTableCardIds))
 		BEGIN
 
-			SELECT @intTempCardCounter = [intCardId] FROM @tblCFTableCardIds
-			SELECT @intTempCardId = [intCardId] FROM @tblCFTableCardIds WHERE [intCardId] = @intTempCardCounter
+			SELECT @intTempCardCounter = [intAccountId] FROM @tblCFTableCardIds
+			SELECT @intTempCardId = [intAccountId] FROM @tblCFTableCardIds WHERE [intAccountId] = @intTempCardCounter
 
 			EXEC uspSMGetStartingNumber 53, @CFID OUT
 
 			INSERT INTO @tblCFInvoiceNunber (
-					[intCardId]
+				[intAccountId]
 				,[strInvoiceNumber]
 			)
 			VALUES(
-					@intTempCardId
+				@intTempCardId
 				,@CFID
 			)
 
-			DELETE FROM @tblCFTableCardIds WHERE [intCardId] = @intTempCardCounter
+			DELETE FROM @tblCFTableCardIds WHERE [intAccountId] = @intTempCardCounter
 
 			-----------UPDATE INVOICE REPORT NUMBER ID---------
 			--EXEC uspSMGetStartingNumber 53, @CFID OUT
@@ -260,7 +260,6 @@ BEGIN
 
 		END
 		---------CREATE ID WITH INVOICE NUMBER--------
-
 
 		DECLARE @intTempTransactionCounter INT
 		DECLARE @intTempTransactionId INT
@@ -286,15 +285,16 @@ BEGIN
 
 				SELECT @intTempTransactionCounter = [intTransactionId] FROM @tblCFTableTransationIds
 				SELECT @intTempTransactionId = [intTransactionId] FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
-				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intCardId = (SELECT TOP 1 intCardId FROM tblCFTransaction WHERE intTransactionId = @intTempTransactionId)
+				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intAccountId = (SELECT TOP 1 cfCardAcct.intAccountId FROM tblCFTransaction as cfTrans
+																											INNER JOIN vyuCFCardAccount as cfCardAcct
+																											ON cfTrans.intCardId = cfCardAcct.intCardId
+																											WHERE cfTrans.intTransactionId = @intTempTransactionId)
 
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 				IF(@CFID IS NOT NULL)
 				BEGIN
-				
 					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
-					
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 
@@ -321,12 +321,15 @@ BEGIN
 
 				SELECT @intTempTransactionCounter = [intTransactionId] FROM @tblCFTableTransationIds
 				SELECT @intTempTransactionId = [intTransactionId] FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
-				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intCardId = (SELECT TOP 1 intCardId FROM tblCFTransaction WHERE intTransactionId = @intTempTransactionId)
+				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intAccountId = (SELECT TOP 1 cfCardAcct.intAccountId FROM tblCFTransaction as cfTrans
+																											INNER JOIN vyuCFCardAccount as cfCardAcct
+																											ON cfTrans.intCardId = cfCardAcct.intCardId
+																											WHERE cfTrans.intTransactionId = @intTempTransactionId)
 
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 				IF(@CFID IS NOT NULL)
 				BEGIN
-				
+
 					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
