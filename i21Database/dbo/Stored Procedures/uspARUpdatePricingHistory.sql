@@ -40,7 +40,7 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 					(
 						SOSOD.intItemId = ARTD.intItemId		
 						AND
-						SOSOD.dblPrice <> ARTD.dblPrice 
+						(SOSOD.dblPrice <> ARTD.dblPrice OR SOSOD.strPricing <> ARTD.strPricing) 
 					)
 				--OR
 				--	()
@@ -120,7 +120,7 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 			,[intItemId]				= SOSOD.[intItemId]
 			,[intOriginalItemId]		= ARTD.[intItemId]
 			,[dblPrice]					= SOSOD.[dblPrice]
-			,[dblOriginalPrice]			= ARTD.[dblPrice]
+			,[dblOriginalPrice]			= SOSOD.[dblPrice]
 			,[strPricing]				= SOSOD.[strPricing]
 			,[strOriginalPricing]		= ARTD.[strPricing]
 			,[dtmDate]					= @DateNow
@@ -150,7 +150,7 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 			,[intItemId]				= SOSOD.[intItemId]
 			,[intOriginalItemId]		= SOSOD.[intItemId]
 			,[dblPrice]					= SOSOD.[dblPrice]
-			,[dblOriginalPrice]			= NULL
+			,[dblOriginalPrice]			= SOSOD.[dblPrice]
 			,[strPricing]				= SOSOD.[strPricing]
 			,[strOriginalPricing]		= NULL
 			,[dtmDate]					= @DateNow
@@ -191,7 +191,7 @@ IF @SourceTransactionId = 2 -- INVOICE
 					(
 						ARID.intItemId = ARTD.intItemId		
 						AND
-						ARID.dblPrice <> ARTD.dblPrice 
+						(ARID.dblPrice <> ARTD.dblPrice OR ARID.strPricing <> ARTD.strPricing)
 					)
 				--OR
 				--	()
@@ -271,7 +271,7 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[intItemId]				= ARID.[intItemId]
 			,[intOriginalItemId]		= ARTD.[intItemId]
 			,[dblPrice]					= ARID.[dblPrice]
-			,[dblOriginalPrice]			= ARTD.[dblPrice]
+			,[dblOriginalPrice]			= ARID.[dblPrice]
 			,[strPricing]				= ARID.[strPricing]
 			,[strOriginalPricing]		= ARTD.[strPricing]
 			,[dtmDate]					= @DateNow
@@ -301,7 +301,7 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[intItemId]				= ARID.[intItemId]
 			,[intOriginalItemId]		= ARID.[intItemId]
 			,[dblPrice]					= ARID.[dblPrice]
-			,[dblOriginalPrice]			= NULL
+			,[dblOriginalPrice]			= ARID.[dblPrice]
 			,[strPricing]				= ARID.[strPricing]
 			,[strOriginalPricing]		= NULL
 			,[dtmDate]					= @DateNow

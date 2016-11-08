@@ -111,7 +111,6 @@ IF (@param IS NOT NULL)
 		END
 	END
 
-
 IF(@beginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
@@ -221,6 +220,132 @@ BEGIN CATCH
 		
 	GOTO Post_Exit
 END CATCH
+
+--Process Finished Good Items
+BEGIN TRY
+	IF @recap = 0
+		BEGIN
+			DECLARE @FinishedGoodItems TABLE(intInvoiceDetailId		INT
+										   , intItemId				INT
+										   , dblQuantity			NUMERIC(18,6)
+										   , intItemUOMId			INT
+										   , intLocationId			INT
+										   , intSublocationId		INT
+										   , intStorageLocationId	INT)
+
+			INSERT INTO @FinishedGoodItems
+			SELECT ID.intInvoiceDetailId
+				 , ID.intItemId
+				 , ID.dblQtyShipped
+				 , ID.intItemUOMId
+				 , I.intCompanyLocationId
+				 , ICL.intSubLocationId
+				 , ID.intStorageLocationId 
+			FROM tblARInvoice I
+				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+				INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
+				INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
+			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+			AND ID.ysnBlended <> @post
+			AND ICI.ysnAutoBlend = 1
+			AND ICI.strType = 'Finished Good'
+
+			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
+				BEGIN
+					DECLARE @intInvoiceDetailId		INT
+						  , @intItemId				INT
+						  , @dblQuantity			NUMERIC(18,6)
+						  , @dblMaxQuantity			NUMERIC(18,6) = 0
+						  , @intItemUOMId			INT
+						  , @intLocationId			INT
+						  , @intSublocationId		INT
+						  , @intStorageLocationId	INT
+			
+					SELECT TOP 1 
+						  @intInvoiceDetailId	= intInvoiceDetailId
+						, @intItemId			= intItemId
+						, @dblQuantity			= dblQuantity				
+						, @intItemUOMId			= intItemUOMId
+						, @intLocationId		= intLocationId
+						, @intSublocationId		= intSublocationId
+						, @intStorageLocationId	= intStorageLocationId
+					FROM @FinishedGoodItems 
+				  
+					BEGIN TRY
+					IF @post = 1
+						BEGIN
+							EXEC dbo.uspMFAutoBlend
+								@intSalesOrderDetailId	= NULL,
+								@intInvoiceDetailId		= @intInvoiceDetailId,
+								@intItemId				= @intItemId,
+								@dblQtyToProduce		= @dblQuantity,
+								@intItemUOMId			= @intItemUOMId,
+								@intLocationId			= @intLocationId,
+								@intSubLocationId		= @intSublocationId,
+								@intStorageLocationId	= @intStorageLocationId,
+								@intUserId				= @userId,
+								@dblMaxQtyToProduce		= @dblMaxQuantity OUT		
+
+							IF ISNULL(@dblMaxQuantity, 0) > 0
+								BEGIN
+									EXEC dbo.uspMFAutoBlend
+										@intSalesOrderDetailId	= NULL,
+										@intInvoiceDetailId		= @intInvoiceDetailId,
+										@intItemId				= @intItemId,
+										@dblQtyToProduce		= @dblMaxQuantity,
+										@intItemUOMId			= @intItemUOMId,
+										@intLocationId			= @intLocationId,
+										@intSubLocationId		= @intSublocationId,
+										@intStorageLocationId	= @intStorageLocationId,
+										@intUserId				= @userId,
+										@dblMaxQtyToProduce		= @dblMaxQuantity OUT
+								END
+						END
+					ELSE
+						BEGIN
+							EXEC dbo.uspMFReverseAutoBlend
+								@intSalesOrderDetailId	= NULL,
+								@intInvoiceDetailId		= @intInvoiceDetailId,
+								@intUserId				= @userId 
+						END						
+					END TRY
+					BEGIN CATCH
+						SELECT @ErrorMerssage = ERROR_MESSAGE()
+						IF @raiseError = 0
+							BEGIN
+								IF (XACT_STATE()) = -1
+									ROLLBACK TRANSACTION							
+								BEGIN TRANSACTION						
+								EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+								COMMIT TRANSACTION
+							END						
+						IF @raiseError = 1
+							RAISERROR(@ErrorMerssage, 11, 1)
+		
+						GOTO Post_Exit
+					END CATCH
+					UPDATE tblARInvoiceDetail SET ysnBlended = @post WHERE intInvoiceDetailId = @intInvoiceDetailId
+
+					DELETE FROM @FinishedGoodItems WHERE intInvoiceDetailId = @intInvoiceDetailId
+				END	
+		END	
+END TRY
+BEGIN CATCH
+	SELECT @ErrorMerssage = ERROR_MESSAGE()
+	IF @raiseError = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION							
+			BEGIN TRANSACTION						
+			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+			COMMIT TRANSACTION
+		END						
+	IF @raiseError = 1
+		RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
+END CATCH
+
 
 --Process Grain Bank Items
 BEGIN TRY
@@ -884,11 +1009,9 @@ END CATCH
 						AND D.intItemId = Acct.intItemId 		
 				LEFT OUTER JOIN
 					tblGLAccount GLA
-						--ON Acct.intGeneralAccountId = GLA.intAccountId
-						  ON ISNULL(Acct.intGeneralAccountId,Acct.intSalesAccountId) = GLA.intAccountId
+						ON Acct.intGeneralAccountId = GLA.intAccountId
 				WHERE
-					--(ISNULL(Acct.intGeneralAccountId,0) = 0 OR GLA.intAccountId IS NULL)
-					(ISNULL(Acct.intGeneralAccountId,Acct.intSalesAccountId) = 0 OR GLA.intAccountId IS NULL)
+					(ISNULL(Acct.intGeneralAccountId,0) = 0 OR GLA.intAccountId IS NULL)
 					AND I.strType IN ('Non-Inventory','Service')
 					
 				--Software - Maintenance Sales				
@@ -1725,133 +1848,6 @@ END CATCH
 if @recap = 1 AND @raiseError = 0
 	SAVE TRAN @TransactionName
 
---Process Finished Good Items
-BEGIN TRY
-	--IF @recap = 0
-		--BEGIN
-			DECLARE @FinishedGoodItems TABLE(intInvoiceDetailId		INT
-										   , intItemId				INT
-										   , dblQuantity			NUMERIC(18,6)
-										   , intItemUOMId			INT
-										   , intLocationId			INT
-										   , intSublocationId		INT
-										   , intStorageLocationId	INT)
-
-		
-			INSERT INTO @FinishedGoodItems
-			SELECT ID.intInvoiceDetailId
-				 , ID.intItemId
-				 , ID.dblQtyShipped
-				 , ID.intItemUOMId
-				 , I.intCompanyLocationId
-				 , ICL.intSubLocationId
-				 , ID.intStorageLocationId 
-			FROM tblARInvoice I
-				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-				INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
-				INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
-			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-			AND ID.ysnBlended <> @post
-			AND ICI.ysnAutoBlend = 1
-			AND ICI.strType = 'Finished Good'
-
-			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
-				BEGIN
-					DECLARE @intInvoiceDetailId		INT
-						  , @intItemId				INT
-						  , @dblQuantity			NUMERIC(18,6)
-						  , @dblMaxQuantity			NUMERIC(18,6) = 0
-						  , @intItemUOMId			INT
-						  , @intLocationId			INT
-						  , @intSublocationId		INT
-						  , @intStorageLocationId	INT
-			
-					SELECT TOP 1 
-						  @intInvoiceDetailId	= intInvoiceDetailId
-						, @intItemId			= intItemId
-						, @dblQuantity			= dblQuantity				
-						, @intItemUOMId			= intItemUOMId
-						, @intLocationId		= intLocationId
-						, @intSublocationId		= intSublocationId
-						, @intStorageLocationId	= intStorageLocationId
-					FROM @FinishedGoodItems 
-				  
-					BEGIN TRY
-					IF @post = 1
-						BEGIN
-							EXEC dbo.uspMFAutoBlend
-								@intSalesOrderDetailId	= NULL,
-								@intInvoiceDetailId		= @intInvoiceDetailId,
-								@intItemId				= @intItemId,
-								@dblQtyToProduce		= @dblQuantity,
-								@intItemUOMId			= @intItemUOMId,
-								@intLocationId			= @intLocationId,
-								@intSubLocationId		= @intSublocationId,
-								@intStorageLocationId	= @intStorageLocationId,
-								@intUserId				= @userId,
-								@dblMaxQtyToProduce		= @dblMaxQuantity OUT		
-
-							IF ISNULL(@dblMaxQuantity, 0) > 0
-								BEGIN
-									EXEC dbo.uspMFAutoBlend
-										@intSalesOrderDetailId	= NULL,
-										@intInvoiceDetailId		= @intInvoiceDetailId,
-										@intItemId				= @intItemId,
-										@dblQtyToProduce		= @dblMaxQuantity,
-										@intItemUOMId			= @intItemUOMId,
-										@intLocationId			= @intLocationId,
-										@intSubLocationId		= @intSublocationId,
-										@intStorageLocationId	= @intStorageLocationId,
-										@intUserId				= @userId,
-										@dblMaxQtyToProduce		= @dblMaxQuantity OUT
-								END
-						END
-					--ELSE
-					--	BEGIN
-					--		EXEC dbo.uspMFReverseAutoBlend
-					--			@intSalesOrderDetailId	= NULL,
-					--			@intInvoiceDetailId		= @intInvoiceDetailId,
-					--			@intUserId				= @userId 
-					--	END						
-					END TRY
-					BEGIN CATCH
-						SELECT @ErrorMerssage = ERROR_MESSAGE()
-						IF @raiseError = 0
-							BEGIN
-								IF (XACT_STATE()) = -1
-									ROLLBACK TRANSACTION							
-								BEGIN TRANSACTION						
-								EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
-								COMMIT TRANSACTION
-							END						
-						IF @raiseError = 1
-							RAISERROR(@ErrorMerssage, 11, 1)
-		
-						GOTO Post_Exit
-					END CATCH
-
-					IF @post = 1
-						UPDATE tblARInvoiceDetail SET ysnBlended = 1 WHERE intInvoiceDetailId = @intInvoiceDetailId
-
-					DELETE FROM @FinishedGoodItems WHERE intInvoiceDetailId = @intInvoiceDetailId
-				END	
-		--END	
-END TRY
-BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()
-	IF @raiseError = 0
-		BEGIN
-			IF (XACT_STATE()) = -1
-				ROLLBACK TRANSACTION							
-			BEGIN TRANSACTION						
-			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
-			COMMIT TRANSACTION
-		END						
-	IF @raiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)
-		
-	GOTO Post_Exit
-END CATCH
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
@@ -1886,8 +1882,6 @@ IF @post = 1
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
 		END CATCH		
-
-
 		
 		BEGIN TRY
 			-- Call the post routine 
@@ -3572,136 +3566,7 @@ IF @post = 0
 			GOTO Do_Rollback
 		END CATCH										
 				
-	END 
-	
-	
---Process Finished Good Items
-BEGIN TRY
-	--IF @recap = 0
-		--BEGIN
-			--DECLARE @FinishedGoodItems TABLE(intInvoiceDetailId		INT
-			--							   , intItemId				INT
-			--							   , dblQuantity			NUMERIC(18,6)
-			--							   , intItemUOMId			INT
-			--							   , intLocationId			INT
-			--							   , intSublocationId		INT
-			--							   , intStorageLocationId	INT)
-
-			DELETE FROM @FinishedGoodItems
-			INSERT INTO @FinishedGoodItems
-			SELECT ID.intInvoiceDetailId
-				 , ID.intItemId
-				 , ID.dblQtyShipped
-				 , ID.intItemUOMId
-				 , I.intCompanyLocationId
-				 , ICL.intSubLocationId
-				 , ID.intStorageLocationId 
-			FROM tblARInvoice I
-				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-				INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
-				INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
-			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-			AND ID.ysnBlended <> @post
-			AND ICI.ysnAutoBlend = 1
-			AND ICI.strType = 'Finished Good'
-
-			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
-				BEGIN
-					--DECLARE @intInvoiceDetailId		INT
-					--	  , @intItemId				INT
-					--	  , @dblQuantity			NUMERIC(18,6)
-					--	  , @dblMaxQuantity			NUMERIC(18,6) = 0
-					--	  , @intItemUOMId			INT
-					--	  , @intLocationId			INT
-					--	  , @intSublocationId		INT
-					--	  , @intStorageLocationId	INT
-			
-					SELECT TOP 1 
-						  @intInvoiceDetailId	= intInvoiceDetailId
-						, @intItemId			= intItemId
-						, @dblQuantity			= dblQuantity				
-						, @intItemUOMId			= intItemUOMId
-						, @intLocationId		= intLocationId
-						, @intSublocationId		= intSublocationId
-						, @intStorageLocationId	= intStorageLocationId
-					FROM @FinishedGoodItems 
-				  
-					BEGIN TRY
-					IF @post = 0
-					--	BEGIN
-					--		EXEC dbo.uspMFAutoBlend
-					--			@intSalesOrderDetailId	= NULL,
-					--			@intInvoiceDetailId		= @intInvoiceDetailId,
-					--			@intItemId				= @intItemId,
-					--			@dblQtyToProduce		= @dblQuantity,
-					--			@intItemUOMId			= @intItemUOMId,
-					--			@intLocationId			= @intLocationId,
-					--			@intSubLocationId		= @intSublocationId,
-					--			@intStorageLocationId	= @intStorageLocationId,
-					--			@intUserId				= @userId,
-					--			@dblMaxQtyToProduce		= @dblMaxQuantity OUT		
-
-					--		IF ISNULL(@dblMaxQuantity, 0) > 0
-					--			BEGIN
-					--				EXEC dbo.uspMFAutoBlend
-					--					@intSalesOrderDetailId	= NULL,
-					--					@intInvoiceDetailId		= @intInvoiceDetailId,
-					--					@intItemId				= @intItemId,
-					--					@dblQtyToProduce		= @dblMaxQuantity,
-					--					@intItemUOMId			= @intItemUOMId,
-					--					@intLocationId			= @intLocationId,
-					--					@intSubLocationId		= @intSublocationId,
-					--					@intStorageLocationId	= @intStorageLocationId,
-					--					@intUserId				= @userId,
-					--					@dblMaxQtyToProduce		= @dblMaxQuantity OUT
-					--			END
-					--	END
-					----ELSE
-						BEGIN
-							EXEC dbo.uspMFReverseAutoBlend
-								@intSalesOrderDetailId	= NULL,
-								@intInvoiceDetailId		= @intInvoiceDetailId,
-								@intUserId				= @userId 
-						END						
-					END TRY
-					BEGIN CATCH
-						SELECT @ErrorMerssage = ERROR_MESSAGE()
-						IF @raiseError = 0
-							BEGIN
-								IF (XACT_STATE()) = -1
-									ROLLBACK TRANSACTION							
-								BEGIN TRANSACTION						
-								EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
-								COMMIT TRANSACTION
-							END						
-						IF @raiseError = 1
-							RAISERROR(@ErrorMerssage, 11, 1)
-		
-						GOTO Post_Exit
-					END CATCH
-
-					IF @post = 0
-						UPDATE tblARInvoiceDetail SET ysnBlended = 0 WHERE intInvoiceDetailId = @intInvoiceDetailId
-
-					DELETE FROM @FinishedGoodItems WHERE intInvoiceDetailId = @intInvoiceDetailId
-				END	
-		--END	
-END TRY
-BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()
-	IF @raiseError = 0
-		BEGIN
-			IF (XACT_STATE()) = -1
-				ROLLBACK TRANSACTION							
-			BEGIN TRANSACTION						
-			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
-			COMMIT TRANSACTION
-		END						
-	IF @raiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)
-		
-	GOTO Post_Exit
-END CATCH	  
+	END   
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
@@ -3756,10 +3621,10 @@ IF @recap = 1
 			SELECT [dtmDate]  
 			  ,@batchId  
 			  ,[intAccountId]  
-			  ,[dblDebit]  
-			  ,[dblCredit]  
-			  ,[dblDebitUnit]  
-			  ,[dblCreditUnit]  
+			  ,[dblDebit]		= Debit.Value
+			  ,[dblCredit]		= Credit.Value 
+			  ,[dblDebit]		= DebitUnit.Value
+			  ,[dblCredit]		= CreditUnit.Value  
 			  ,[strDescription]  
 			  ,[strCode]  
 			  ,[strReference]  
@@ -3779,7 +3644,11 @@ IF @recap = 1
 			  ,[strModuleName]  
 			  ,[intConcurrencyId]  
 			FROM 
-				@GLEntries
+				@GLEntries GLEntries
+			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Credit
+			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) CreditUnit
 				
 		END TRY
 		BEGIN CATCH
