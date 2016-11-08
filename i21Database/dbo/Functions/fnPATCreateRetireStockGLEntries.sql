@@ -2,7 +2,8 @@
 (
 	@transactionIds NVARCHAR(MAX),
 	@voidRetire BIT,
-	@intUserId INT
+	@intUserId INT,
+	@batchId NVARCHAR(40)
 )
 RETURNS @returntable TABLE
 (
@@ -57,7 +58,7 @@ BEGIN
 		--AP CLEARING
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	'',
+			[strBatchID]					=	@batchId,
 			[intAccountId]					=	ComPref.intAPClearingGLAccount,
 			[dblDebit]						=	0,
 			[dblCredit]						=	A.dblFaceValue,
@@ -94,7 +95,7 @@ BEGIN
 		--TREASURY GL
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	'',
+			[strBatchID]					=	@batchId,
 			[intAccountId]					=	B.intTreasuryGLAccount, 
 			[dblDebit]						=	A.dblFaceValue,
 			[dblCredit]						=	0,
@@ -135,7 +136,7 @@ BEGIN
 		--AP CLEARING
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	'',
+			[strBatchID]					=	@batchId,
 			[intAccountId]					=	ComPref.intAPClearingGLAccount,
 			[dblDebit]						=	A.dblFaceValue,
 			[dblCredit]						=	0,
@@ -172,7 +173,7 @@ BEGIN
 		--TREASURY GL
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	'',
+			[strBatchID]					=	@batchId,
 			[intAccountId]					=	B.intTreasuryGLAccount, 
 			[dblDebit]						=	0,
 			[dblCredit]						=	A.dblFaceValue,

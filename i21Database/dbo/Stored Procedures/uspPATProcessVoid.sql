@@ -21,11 +21,15 @@ BEGIN TRANSACTION
 	DECLARE @GLEntries AS RecapTableType;
 	DECLARE @totalRecords INT = 0;
 	DECLARE @error NVARCHAR(MAX);
+	DECLARE @batchId NVARCHAR(40);
 
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@stockIds)
 	
+	IF(@batchId IS NULL)
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
+
 	INSERT INTO @GLEntries
-	SELECT * FROM [dbo].[fnPATCreateRetireStockGLEntries](@stockIds, 1, @intUserId)
+	SELECT * FROM [dbo].[fnPATCreateRetireStockGLEntries](@stockIds, 1, @intUserId, @batchId)
 
 	BEGIN TRY
 		SELECT * FROM @GLEntries

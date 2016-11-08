@@ -2,7 +2,8 @@
 (
 	@transactionIds NVARCHAR(MAX),
 	@votingStock BIT,
-	@intUserId INT
+	@intUserId INT,
+	@batchId NVARCHAR(40)
 )
 RETURNS @returntable TABLE
 (
@@ -58,7 +59,7 @@ BEGIN
 		--VOTING STOCK ISSUED
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	'',
+			[strBatchID]					=	@batchId,
 			[intAccountId]					=	ComPref.intVotingStockId,
 			[dblDebit]						=	0,
 			[dblCredit]						=	A.dblFaceValue,
@@ -95,7 +96,7 @@ BEGIN
 		--TREASURY GL
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	'',
+			[strBatchID]					=	@batchId,
 			[intAccountId]					=	B.intTreasuryGLAccount, 
 			[dblDebit]						=	A.dblFaceValue,
 			[dblCredit]						=	0,
@@ -136,7 +137,7 @@ BEGIN
 		--NON-VOTING/OTHER STOCK ISSUED
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	'',
+			[strBatchID]					=	@batchId,
 			[intAccountId]					=	ComPref.intNonVotingStockId,
 			[dblDebit]						=	0,
 			[dblCredit]						=	A.dblFaceValue,
@@ -173,7 +174,7 @@ BEGIN
 		--TREASURY GL
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	'',
+			[strBatchID]					=	@batchId,
 			[intAccountId]					=	B.intDividendsGLAccount, 
 			[dblDebit]						=	A.dblFaceValue,
 			[dblCredit]						=	0,

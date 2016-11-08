@@ -2,7 +2,8 @@
 (
 	@transactionIds		NVARCHAR(MAX),
 	@dtmDateReverse		DATETIME = NULL,
-	@intUserId			INT
+	@intUserId			INT,
+	@batchId			NVARCHAR(40)
 )
 RETURNS @returntable TABLE
 (
@@ -84,7 +85,7 @@ BEGIN
 		[strTransactionId]
 		,[intTransactionId]
 		,dtmDate = ISNULL(@dtmDateReverse, [dtmDate])
-		,[strBatchId]
+		,ISNULL(@batchId, [strBatchId])
 		,[intAccountId]
 		,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
 		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
