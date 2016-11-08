@@ -28,4 +28,4 @@ FROM         dbo.tblCFAccount AS A LEFT OUTER JOIN
                          dbo.vyuCFCustomerEntity AS Cus ON A.intCustomerId = Cus.intEntityCustomerId INNER JOIN
                          dbo.tblCFInvoiceCycle AS I ON I.intInvoiceCycleId = A.intInvoiceCycle INNER JOIN
                          dbo.vyuARCustomerContacts AS arCustCon ON A.intCustomerId = arCustCon.intCustomerEntityId
-
+GO
