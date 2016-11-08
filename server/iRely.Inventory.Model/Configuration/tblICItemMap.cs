@@ -593,6 +593,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCountGroup).HasColumnName("strCountGroup");
             this.Property(t => t.ysnCountedDaily).HasColumnName("ysnCountedDaily");
             this.Property(t => t.ysnLockedInventory).HasColumnName("ysnLockedInventory");
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
+            this.Property(t => t.strPaymentOn).HasColumnName("strPaymentOn");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblSTSubcategoryRegProd)

@@ -555,6 +555,8 @@ namespace iRely.Inventory.Model
         public string strCountGroup { get; set; }
         public bool? ysnCountedDaily { get; set; }
         public bool? ysnLockedInventory { get; set; }
+        public int? intPaymentOn { get; set; }
+        public string strPaymentOn { get; set; }
         public int? intSort { get; set; }
 
         public tblICItemLocation tblICItemLocation { get; set; }
@@ -812,6 +814,8 @@ namespace iRely.Inventory.Model
         public string strCountGroup { get; set; }
         public bool? ysnCountedDaily { get; set; }
         public bool? ysnLockedInventory { get; set; }
+        public int? intPaymentOn { get; set; }
+        public string strPaymentOn { get; set; }
         public int? intSort { get; set; }
 
         //Value from tblSTSubcategoryRegProd

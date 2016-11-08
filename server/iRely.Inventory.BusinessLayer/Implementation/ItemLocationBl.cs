@@ -124,7 +124,9 @@ namespace iRely.Inventory.BusinessLayer
                         ysnCountedDaily = ItemLocation.ysnCountedDaily,
                         ysnLockedInventory = ItemLocation.ysnLockedInventory,
                         intSort = ItemLocation.intSort,
-                        strRegProdCode = leftJoin.strRegProdCode
+                        strRegProdCode = leftJoin.strRegProdCode,
+                        intPaymentOn = ItemLocation.intPaymentOn,
+                        strPaymentOn = ItemLocation.strPaymentOn
                     } 
                 )
                 .Filter(param, true);
