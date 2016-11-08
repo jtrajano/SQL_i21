@@ -301,6 +301,15 @@ BEGIN
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
 	OUTER APPLY (
+		SELECT 
+			K.dblNetWt AS dblNet
+		FROM tblLGLoadContainer K
+		WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
+							AND K.intLoadContainerId = B.intContainerId 
+						THEN 1
+						ELSE 0 END)
+	) Loads
+	OUTER APPLY (
 		SELECT
 			PODetails.intContractDetailId
 			,PODetails.intContractHeaderId
