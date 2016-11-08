@@ -354,7 +354,7 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		EXEC	uspCTSequencePriceChanged @intContractDetailId
+		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId
 
 		IF	@ysnMultiplePriceFixation = 1
 		BEGIN
