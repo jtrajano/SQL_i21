@@ -449,8 +449,19 @@ BEGIN
 		WHERE strProductNumber = @strProductId
 		AND intNetworkId = @intNetworkId
 		AND intSiteId = @intSiteId
-		
 	END
+
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = @strProductId
+		AND intNetworkId = @intNetworkId
+		AND (intSiteId = 0 OR intSiteId IS NULL)
+	END
+
 
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
 								FROM tblCFSite 
