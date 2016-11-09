@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
-
 SELECT
 	 [strTransactionType]				= 'Sales Order'
 	,[strTransactionNumber]				= SO.[strSalesOrderNumber]
@@ -564,8 +563,8 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
-	,[intTicketId]						= NULL
+	,[strTicketNumber]					= SCT.strTicketNumber
+	,[intTicketId]						= SCT.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](ICISI.[intWeightUOMId],ICISI.[intItemUOMId],1) --ICIU1.[dblWeight]
@@ -678,7 +677,11 @@ LEFT OUTER JOIN
 		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN
 	tblSMCurrency SMC
-		ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]			
+		ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]	
+LEFT OUTER JOIN
+	tblSCTicket SCT
+		ON ICISI.[intSourceId] = SCT.[intTicketId]
+						
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 
 UNION ALL
