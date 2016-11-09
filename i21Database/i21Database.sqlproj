@@ -4511,7 +4511,6 @@
     <Build Include="dbo\Functions\fnPATCreateRetireStockGLEntries.sql" />
     <Build Include="dbo\Functions\fnPATCreateIssueStockGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostIssueStock.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRUpdateLoadBlendIngredient.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesPrice.sql" />

@@ -157,6 +157,76 @@ BEGIN TRY
 		WHERE TL.intLoadHeaderId = @intLoadHeaderId
 			AND DH.strDestination = 'Customer'
 
+
+	--Auto Blend
+	SELECT DistItem.intLoadDistributionDetailId
+		, DistItem.intItemId
+		, intRecipeId
+		, dblQty = dblUnits
+		, Recipe.intItemUOMId
+		, HeaderDistItem.intCompanyLocationId
+	INTO #tmpBlendDistributionItems
+	FROM tblTRLoadDistributionDetail DistItem
+	LEFT JOIN tblMFRecipe Recipe ON Recipe.intItemId = DistItem.intItemId
+	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+	WHERE HeaderDistItem.intLoadHeaderId = @intLoadHeaderId
+		AND ysnActive = 1
+
+	IF EXISTS(SELECT TOP 1 1 FROM #tmpBlendDistributionItems) AND @ysnRecap = 0
+	BEGIN
+		DECLARE @DistributionItemId INT
+			, @RecipeId INT
+			, @ItemId INT
+			, @ItemUOMId INT
+			, @LocationId INT
+			, @Qty NUMERIC(18, 6)
+			, @QtyBlended NUMERIC(18, 6)
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
+		BEGIN
+			SELECT TOP 1 @DistributionItemId = intLoadDistributionDetailId
+				, @RecipeId = intRecipeId
+				, @ItemId = intItemId
+				, @ItemUOMId = intItemUOMId
+				, @LocationId = intCompanyLocationId
+				, @Qty = dblQty
+			FROM #tmpBlendDistributionItems
+
+			IF (@ysnPostOrUnPost = 1)
+			BEGIN
+				EXEC uspMFAutoBlend
+					@intSalesOrderDetailId = NULL
+					, @intInvoiceDetailId = NULL
+					, @intLoadDistributionDetailId = @DistributionItemId
+					, @intItemId = @ItemId
+					, @dblQtyToProduce = @Qty
+					, @intItemUOMId = @ItemUOMId
+					, @intLocationId = @LocationId
+					, @intSubLocationId = NULL
+					, @intStorageLocationId = NULL
+					, @intUserId = @intUserId
+					, @dblMaxQtyToProduce = @QtyBlended OUTPUT
+				
+				IF (@Qty <> @QtyBlended)
+				BEGIN
+					RAISERROR('Cannot blend all distribution items', 16, 1)
+				END
+			END
+			ELSE
+			BEGIN
+				EXEC uspMFReverseAutoBlend
+					@intSalesOrderDetailId = NULL
+					, @intInvoiceDetailId = NULL
+					, @intLoadDistributionDetailId = @DistributionItemId
+					, @intUserId = @intUserId
+			END
+
+			DELETE FROM #tmpBlendDistributionItems WHERE intLoadDistributionDetailId = @DistributionItemId
+		END
+	END
+
+	DROP TABLE #tmpBlendDistributionItems
+
 	--VALIDATE FREIGHT AND SURCHARGE ITEM
 	DECLARE @intLocationId		INT
 	  , @intFreightItemUOMId	INT
