@@ -383,8 +383,6 @@ BEGIN TRY
 			WHERE
 				I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 				AND ID.intStorageScheduleTypeId IS NOT NULL
-				AND ID.intInventoryShipmentItemId IS NULL
-
 
 			WHILE EXISTS (SELECT NULL FROM @GrainItems)
 				BEGIN
