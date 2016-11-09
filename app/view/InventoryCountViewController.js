@@ -357,6 +357,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             window: win,
             store: store,
             enableActivity: true,
+            enableAttachment: true,
+            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+                type: 'Inventory.InventoryCount',
+                window: win
+            }),
             createTransaction: Ext.bind(me.createTransaction, me),
             include: 'tblICInventoryCountDetails.vyuICGetInventoryCountDetail',
             createRecord: me.createRecord,

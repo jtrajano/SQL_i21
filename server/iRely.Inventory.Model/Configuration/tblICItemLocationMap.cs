@@ -11,7 +11,7 @@ namespace iRely.Inventory.Model
             this.HasKey(t => t.intItemLocationId);
 
             // Table & Column Mappings
-            this.ToTable("tblICItemLocation");
+            this.ToTable("vyuICItemLocation");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");

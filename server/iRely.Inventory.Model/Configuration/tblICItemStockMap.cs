@@ -28,9 +28,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblLastCountRetail).HasColumnName("dblLastCountRetail").HasPrecision(38, 20);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
-            this.HasOptional(p => p.tblICItemLocation)
-                .WithMany(p => p.tblICItemStocks)
-                .HasForeignKey(p => p.intItemLocationId);
+            //this.HasOptional(p => p.tblICItemLocation)
+            //    .WithMany(p => p.tblICItemStocks)
+            //    .HasForeignKey(p => p.intItemLocationId);
+
+            this.HasRequired(p => p.tblICItemLocation)
+                    .WithMany(p => p.tblICItemStocks)
+                    .HasForeignKey(p => p.intItemLocationId); 
         }
     }
 }

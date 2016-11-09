@@ -98,11 +98,10 @@ namespace iRely.Inventory.BusinessLayer
 
                         // Update the SO or Scale status from deleted shipment records.
                         // Usually, deleted records will "open" the status of the SO or Scale Ticket. 
-                        // Call this sp before the _db.SaveAsync because uspICUpdateStatusOnShipmentSave is not reading it from the log table. 
+                        // Call this sp before the _db.SaveAsync because uspICBeforeShipmentDelete is not reading it from the log table. 
                         _db.ContextManager.Database.ExecuteSqlCommand(
-                            "uspICUpdateStatusOnShipmentSave @intShipmentId, @ysnOpenStatus",
-                            new SqlParameter("intShipmentId", shipment.Entity.intInventoryShipmentId),
-                             new SqlParameter("ysnOpenStatus", true)
+                            "uspICBeforeShipmentDelete @intShipmentId",
+                            new SqlParameter("intShipmentId", shipment.Entity.intInventoryShipmentId)
                         );
                     }
 
@@ -111,13 +110,7 @@ namespace iRely.Inventory.BusinessLayer
 
                     // Process the deleted records. 
                     foreach (var shipment in deletedShipments)
-                    {
-                        // Update the stock reservation for the deleted shipments                    
-                        //_db.ContextManager.Database.ExecuteSqlCommand(
-                        //    "uspICReserveStockForInventoryShipment @intTransactionId",
-                        //    new SqlParameter("intTransactionId", shipment.Entity.intInventoryShipmentId)
-                        //);
-                        
+                    {                        
                         // This will also update contract from deleted shipment records. 
                         _db.ContextManager.Database.ExecuteSqlCommand(
                                 "uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId",
@@ -127,7 +120,7 @@ namespace iRely.Inventory.BusinessLayer
                         );
                     }
                                         
-                    // Process the newly saved record. 
+                    // Process the new or updated records. 
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
                         var intShipmentId = new SqlParameter("intShipmentId", shipment.intInventoryShipmentId);

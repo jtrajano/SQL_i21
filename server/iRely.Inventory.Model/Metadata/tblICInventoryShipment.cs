@@ -197,7 +197,7 @@ namespace iRely.Inventory.Model
         public int? intGradeId { get; set; }
         public int? intDiscountSchedule { get; set; }
         public int? intSort { get; set; }
-        public int? intCustomerStorageId { get; set; }
+        public int? intStorageScheduleTypeId  { get; set; }
 
         private string _orderNumber;
         [NotMapped]
