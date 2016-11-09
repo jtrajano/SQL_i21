@@ -1881,30 +1881,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 netWgtCF = detailRecord.get('dblWeightUOMConvFactor'),
                 valueCostCF;
 
-            if(iRely.Functions.isEmpty(detailRecord.get('intPaymentOn'))) {
-                // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
-                if (iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))) {
-                    // Sanitize the cost conversion factor.
-                    costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
-                    costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-                    unitCost = unitCost * (qtyCF / costCF);
-                }
-
-                // Calculate Cost UOM Conversion Factor with respect to the Gross UOM..
-                else {
-                    var qtyOrdered = detailRecord.get('dblNet');
-                    var netWgtCF = detailRecord.get('dblWeightUOMConvFactor');
-
-                    // Sanitize the cost conversion factor.
-                    costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
-                    costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-                    unitCost = unitCost * (netWgtCF / costCF);
-                }
-            }
             //Calculate Taxes based on Net
-            else if(detailRecord.get('intPaymentOn') == 2) {
+            if(detailRecord.get('intPaymentOn') == 2 || 
+            ((iRely.Functions.isEmpty(detailRecord.get('intPaymentOn'))) && (!iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))))) {
                 var qtyOrdered = detailRecord.get('dblNet');
                 var netWgtCF = detailRecord.get('dblWeightUOMConvFactor');
 
@@ -2050,39 +2029,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (!isSubCurrency) {
             costCentsFactor = 1;
         }
-
-        if(iRely.Functions.isEmpty(currentReceiptItem.get('intPaymentOn'))) {
-            // Compute the line total with respect to the Item UOM
-            if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
-                // Sanitize the cost conversion factor.
-                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
-                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-                // Formula is:
-                // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
-                // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
-                // {Line Total} = ( {Qty in Item UOM} x {New Cost} )
-                lineTotal = (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
-            }
-
-            // Compute the line total with respect to the Gross UOM..
-            else {
-                var netWgt = currentReceiptItem.get('dblNet');
-                var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
-
-                // Sanitize the cost conversion factor.
-                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
-                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-                // Formula is:
-                // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
-                // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
-                // {Line Total} = ( {Net Qty in Gross/Net UOM} x {New Cost} )
-                lineTotal = (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
-            }
-        }
+        
         //Compute based on Net
-        else if (currentReceiptItem.get('intPaymentOn') == 2) {
+        if (currentReceiptItem.get('intPaymentOn') == 2 || 
+            ((iRely.Functions.isEmpty(currentReceiptItem.get('intPaymentOn'))) && (!iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))))) {
                 var netWgt = currentReceiptItem.get('dblNet');
                 var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
 
