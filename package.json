@@ -1,18 +1,13 @@
 {
   "name": "inventory",
   "version": "0.0.1",
-  "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-init": "^0.3.2",
-    "grunt-open": "^0.2.3",
-    "grunt-strip-code": "^1.0.4",
-    "grunt-template": "^1.0.0",
+  "dependencies": {
+    "extjs-dependencies-generator": "^1.0.1",
     "gulp": "^3.9.1",
-    "gulp-livereload": "^3.8.1",
+    "gulp-extjs-spec-generator": "^1.1.4",
     "karma": "^1.2.0",
     "karma-chai": "^0.1.0",
+    "karma-coverage": "^1.1.1",
     "karma-mocha": "^1.1.1",
     "karma-sinon": "^1.0.5",
     "mocha": "^3.0.2"

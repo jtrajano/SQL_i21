@@ -1,7 +1,7 @@
 Ext.define('Inventory.view.ItemViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icitem',
-    
+
     config: {
         helpURL: '/display/DOC/Items',
         searchConfig: {
@@ -11,18 +11,18 @@ Ext.define('Inventory.view.ItemViewController', {
                 read: '../Inventory/api/Item/Search'
             },
             columns: [
-                {dataIndex: 'intItemId', text: "Item Id", flex: 1, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strItemNo', text: 'Item No', flex: 1, defaultSort: true, sortOrder: 'ASC', dataType: 'string', minWidth: 150},
-                {dataIndex: 'strType', text: 'Type', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', minWidth: 250},
-                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strTracking', text: 'Inv Valuation', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strCategory', text: 'Category', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strCommodity', text: 'Commodity', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strManufacturer', text: 'Manufacturer', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strBrandCode', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150}
+                { dataIndex: 'intItemId', text: "Item Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                { dataIndex: 'strItemNo', text: 'Item No', flex: 1, defaultSort: true, sortOrder: 'ASC', dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strType', text: 'Type', flex: 1, dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', minWidth: 250 },
+                { dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strTracking', text: 'Inv Valuation', flex: 1, dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strCategory', text: 'Category', flex: 1, dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strCommodity', text: 'Commodity', flex: 1, dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strManufacturer', text: 'Manufacturer', flex: 1, dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strBrandCode', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150 },
+                { dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150 }
             ],
             searchConfig: [
                 {
@@ -32,85 +32,85 @@ Ext.define('Inventory.view.ItemViewController', {
                     },
                     columns: [
 
-                        {dataIndex: 'intItemLocationId', text: 'Item Location Id', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },
-                        {dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', key: true, hidden: true },
-                        {dataIndex: 'strItemNo', text: 'Item No', width: 150, dataType: 'string' },
-                        {dataIndex: 'strItemDescription', text: 'Item Description', width: 150, dataType: 'string' },
-                        {dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strLocationName', text: 'Location Name', width: 200, dataType: 'string' },
-                        {dataIndex: 'intVendorId', text: 'Vendor Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strVendorId', text: 'Vendor Id', width: 100, dataType: 'string' },
-                        {dataIndex: 'strVendorName', text: 'Vendor Name', width: 100, dataType: 'string' },
-                        {dataIndex: 'strDescription', text: 'Description', width: 100, dataType: 'string' },
-                        {dataIndex: 'intCostingMethod', text: 'Costing Method', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strCostingMethod', text: 'Costing Method', width: 120, dataType: 'string' },
-                        {dataIndex: 'intAllowNegativeInventory', text: 'Allow Negative Inventory', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strAllowNegativeInventory', text: 'Allow Negative Inventory', width: 150, dataType: 'string' },
-                        {dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strSubLocationName', text: 'SubLocation', width: 120, dataType: 'string' },
-                        {dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 120, dataType: 'string' },
-                        {dataIndex: 'intIssueUOMId', text: 'Issue UOM Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strIssueUOM', text: 'Issue UOM', width: 100, dataType: 'string' },
-                        {dataIndex: 'intReceiveUOMId', text: 'Receive UOM Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strReceiveUOM', text: 'Receive UOM', width: 100, dataType: 'string' },
-                        {dataIndex: 'intFamilyId', text: 'Family Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strFamily', text: 'Family', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'intClassId', text: 'Class Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strClass', text: 'Class', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'intProductCodeId', text: 'Product Code Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strRegProdCode', text: 'Product Code', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'strPassportFuelId1', text: 'Passport Fuel Id 1', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'strPassportFuelId2', text: 'Passport Fuel Id 2', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'strPassportFuelId3', text: 'Passport Fuel Id 3', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'ysnTaxFlag1', text: 'Tax Flag 1', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnTaxFlag2', text: 'Tax Flag 2', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnTaxFlag3', text: 'Tax Flag 3', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnTaxFlag4', text: 'Tax Flag 4', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnPromotionalItem', text: 'Promotional Item', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'intMixMatchId', text: 'Mix Match Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strPromoItemListId', text: 'PromoItemListId', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'ysnDepositRequired', text: 'Deposit Required', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'intDepositPLUId', text: 'Deposit PLU Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strDepositPLU', text: 'Deposit PLU', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'intBottleDepositNo', text: 'Bottle Deposit No', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'ysnSaleable', text: 'Saleable', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnQuantityRequired', text: 'Quantity Required', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnScaleItem', text: 'Scale Item', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnFoodStampable', text: 'Food Stampable', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnReturnable', text: 'Returnable', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnPrePriced', text: 'PrePriced', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnOpenPricePLU', text: 'Open Price PLU', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnLinkedItem', text: 'Linked Item', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'strVendorCategory', text: 'Vendor Category', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'ysnCountBySINo', text: 'Count By SI No', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'strSerialNoBegin', text: 'Serial No Begin', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'strSerialNoEnd', text: 'Serial No End', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'ysnIdRequiredLiquor', text: 'Id Required Liquor', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnIdRequiredCigarette', text: 'Id Required Cigarette', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'intMinimumAge', text: 'Minimum Age', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'ysnApplyBlueLaw1', text: 'Apply Blue Law 1', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnApplyBlueLaw2', text: 'Apply Blue Law 2', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnCarWash', text: 'Car Wash', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'intItemTypeCode', text: 'Item Type Code Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strItemTypeCode', text: 'Item Type Code', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'intItemTypeSubCode', text: 'Item Type Sub Code', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'ysnAutoCalculateFreight', text: 'Auto Calculate Freight', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'intFreightMethodId', text: 'Freight Method Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strFreightTerm', text: 'Freight Term', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'dblFreightRate', text: 'Freight Rate', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
-                        {dataIndex: 'intShipViaId', text: 'Ship Via Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strShipVia', text: 'Ship Via', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'dblReorderPoint', text: 'Reorder Point', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
-                        {dataIndex: 'dblMinOrder', text: 'Min Order', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
-                        {dataIndex: 'dblSuggestedQty', text: 'Suggested Qty', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
-                        {dataIndex: 'dblLeadTime', text: 'Lead Time', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
-                        {dataIndex: 'strCounted', text: 'Counted', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'intCountGroupId', text: 'Count Group Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strCountGroup', text: 'Count Group', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'ysnCountedDaily', text: 'Counted Daily', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnLockedInventory', text: 'Locked Inventory', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
+                        { dataIndex: 'intItemLocationId', text: 'Item Location Id', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },
+                        { dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', key: true, hidden: true },
+                        { dataIndex: 'strItemNo', text: 'Item No', width: 150, dataType: 'string' },
+                        { dataIndex: 'strItemDescription', text: 'Item Description', width: 150, dataType: 'string' },
+                        { dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strLocationName', text: 'Location Name', width: 200, dataType: 'string' },
+                        { dataIndex: 'intVendorId', text: 'Vendor Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strVendorId', text: 'Vendor Id', width: 100, dataType: 'string' },
+                        { dataIndex: 'strVendorName', text: 'Vendor Name', width: 100, dataType: 'string' },
+                        { dataIndex: 'strDescription', text: 'Description', width: 100, dataType: 'string' },
+                        { dataIndex: 'intCostingMethod', text: 'Costing Method', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strCostingMethod', text: 'Costing Method', width: 120, dataType: 'string' },
+                        { dataIndex: 'intAllowNegativeInventory', text: 'Allow Negative Inventory', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strAllowNegativeInventory', text: 'Allow Negative Inventory', width: 150, dataType: 'string' },
+                        { dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strSubLocationName', text: 'SubLocation', width: 120, dataType: 'string' },
+                        { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 120, dataType: 'string' },
+                        { dataIndex: 'intIssueUOMId', text: 'Issue UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strIssueUOM', text: 'Issue UOM', width: 100, dataType: 'string' },
+                        { dataIndex: 'intReceiveUOMId', text: 'Receive UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strReceiveUOM', text: 'Receive UOM', width: 100, dataType: 'string' },
+                        { dataIndex: 'intFamilyId', text: 'Family Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strFamily', text: 'Family', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'intClassId', text: 'Class Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strClass', text: 'Class', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'intProductCodeId', text: 'Product Code Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strRegProdCode', text: 'Product Code', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'strPassportFuelId1', text: 'Passport Fuel Id 1', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'strPassportFuelId2', text: 'Passport Fuel Id 2', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'strPassportFuelId3', text: 'Passport Fuel Id 3', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'ysnTaxFlag1', text: 'Tax Flag 1', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnTaxFlag2', text: 'Tax Flag 2', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnTaxFlag3', text: 'Tax Flag 3', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnTaxFlag4', text: 'Tax Flag 4', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnPromotionalItem', text: 'Promotional Item', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'intMixMatchId', text: 'Mix Match Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strPromoItemListId', text: 'PromoItemListId', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'ysnDepositRequired', text: 'Deposit Required', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'intDepositPLUId', text: 'Deposit PLU Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strDepositPLU', text: 'Deposit PLU', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'intBottleDepositNo', text: 'Bottle Deposit No', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'ysnSaleable', text: 'Saleable', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnQuantityRequired', text: 'Quantity Required', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnScaleItem', text: 'Scale Item', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnFoodStampable', text: 'Food Stampable', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnReturnable', text: 'Returnable', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnPrePriced', text: 'PrePriced', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnOpenPricePLU', text: 'Open Price PLU', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnLinkedItem', text: 'Linked Item', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'strVendorCategory', text: 'Vendor Category', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'ysnCountBySINo', text: 'Count By SI No', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'strSerialNoBegin', text: 'Serial No Begin', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'strSerialNoEnd', text: 'Serial No End', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'ysnIdRequiredLiquor', text: 'Id Required Liquor', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnIdRequiredCigarette', text: 'Id Required Cigarette', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'intMinimumAge', text: 'Minimum Age', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'ysnApplyBlueLaw1', text: 'Apply Blue Law 1', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnApplyBlueLaw2', text: 'Apply Blue Law 2', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnCarWash', text: 'Car Wash', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'intItemTypeCode', text: 'Item Type Code Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strItemTypeCode', text: 'Item Type Code', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'intItemTypeSubCode', text: 'Item Type Sub Code', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'ysnAutoCalculateFreight', text: 'Auto Calculate Freight', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'intFreightMethodId', text: 'Freight Method Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strFreightTerm', text: 'Freight Term', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'dblFreightRate', text: 'Freight Rate', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
+                        { dataIndex: 'intShipViaId', text: 'Ship Via Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strShipVia', text: 'Ship Via', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'dblReorderPoint', text: 'Reorder Point', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
+                        { dataIndex: 'dblMinOrder', text: 'Min Order', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
+                        { dataIndex: 'dblSuggestedQty', text: 'Suggested Qty', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
+                        { dataIndex: 'dblLeadTime', text: 'Lead Time', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
+                        { dataIndex: 'strCounted', text: 'Counted', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'intCountGroupId', text: 'Count Group Id', width: 100, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strCountGroup', text: 'Count Group', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'ysnCountedDaily', text: 'Counted Daily', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnLockedInventory', text: 'Locked Inventory', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
                     ]
                 },
                 {
@@ -119,32 +119,32 @@ Ext.define('Inventory.view.ItemViewController', {
                         read: '../Inventory/api/ItemPricing/GetItemPricingViews'
                     },
                     columns: [
-                        {dataIndex: 'intPricingKey', text: 'Pricing Key', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
-                        {dataIndex: 'strDescription', text: 'Description', width: 100, dataType: 'string' },
-                        {dataIndex: 'strVendorId', text: 'Vendor Id', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'strVendorName', text: 'Vendor Name', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'strUpcCode', text: 'Upc Code', width: 100, dataType: 'string' },
-                        {dataIndex: 'strLongUPCCode', text: 'Long UPC Code', width: 100, dataType: 'string' },
-                        {dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', key: true, hidden: true },
+                        { dataIndex: 'intPricingKey', text: 'Pricing Key', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
+                        { dataIndex: 'strDescription', text: 'Description', width: 100, dataType: 'string' },
+                        { dataIndex: 'strVendorId', text: 'Vendor Id', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'strVendorName', text: 'Vendor Name', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'strUpcCode', text: 'Upc Code', width: 100, dataType: 'string' },
+                        { dataIndex: 'strLongUPCCode', text: 'Long UPC Code', width: 100, dataType: 'string' },
+                        { dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', key: true, hidden: true },
 
-                        {dataIndex: 'strLocationName', text: 'Location Name', width: 100, dataType: 'string' },
-                        {dataIndex: 'strLocationType', text: 'Location Type', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'strUnitMeasure', text: 'Unit Measure', width: 100, dataType: 'string' },
-                        {dataIndex: 'strUnitType', text: 'Unit Type', width: 100, dataType: 'string', hidden: true },
-                        {dataIndex: 'ysnStockUnit', text: 'Stock Unit', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnAllowPurchase', text: 'Allow Purchase', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'ysnAllowSale', text: 'Allow Sale', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'dblUnitQty', text: 'Unit Qty', width: 100, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblAmountPercent', text: 'Amount/Percent', width: 100, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblSalePrice', text: 'Sale Price', width: 100, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblMSRPPrice', text: 'MSRP Price', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
-                        {dataIndex: 'strPricingMethod', text: 'Pricing Method', width: 100, dataType: 'string' },
-                        {dataIndex: 'dblLastCost', text: 'Last Cost', width: 100, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblStandardCost', text: 'Standard Cost', width: 100, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblAverageCost', text: 'Average Cost', width: 100, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblEndMonthCost', text: 'End Month Cost', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
-                        {dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
+                        { dataIndex: 'strLocationName', text: 'Location Name', width: 100, dataType: 'string' },
+                        { dataIndex: 'strLocationType', text: 'Location Type', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'strUnitMeasure', text: 'Unit Measure', width: 100, dataType: 'string' },
+                        { dataIndex: 'strUnitType', text: 'Unit Type', width: 100, dataType: 'string', hidden: true },
+                        { dataIndex: 'ysnStockUnit', text: 'Stock Unit', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnAllowPurchase', text: 'Allow Purchase', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'ysnAllowSale', text: 'Allow Sale', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                        { dataIndex: 'dblUnitQty', text: 'Unit Qty', width: 100, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblAmountPercent', text: 'Amount/Percent', width: 100, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblSalePrice', text: 'Sale Price', width: 100, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblMSRPPrice', text: 'MSRP Price', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
+                        { dataIndex: 'strPricingMethod', text: 'Pricing Method', width: 100, dataType: 'string' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', width: 100, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblStandardCost', text: 'Standard Cost', width: 100, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblAverageCost', text: 'Average Cost', width: 100, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblEndMonthCost', text: 'End Month Cost', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
+                        { dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
                     ]
                 }
             ],
@@ -191,7 +191,7 @@ Ext.define('Inventory.view.ItemViewController', {
             txtModelNo: {
                 value: '{current.strModelNo}',
                 readOnly: '{HideDisableForComment}'
-             },
+            },
             cboType: {
                 value: '{current.strType}',
                 store: '{itemTypes}',
@@ -224,7 +224,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     value: '{current.strType}',
                     conjunction: 'and'
                 }],
-                 readOnly: '{HideDisableForComment}'
+                readOnly: '{HideDisableForComment}'
             },
             cboCommodity: {
                 readOnly: '{readOnlyCommodity}',
@@ -402,13 +402,13 @@ Ext.define('Inventory.view.ItemViewController', {
                             column: 'strAccountCategory',
                             value: 'Write-Off Sold',
                             conjunction: 'and',
-                            condition: 'noteq'    
+                            condition: 'noteq'
                         },
                         {
                             column: 'strAccountCategory',
                             value: 'Revalue Sold',
                             conjunction: 'and',
-                            condition: 'noteq'    
+                            condition: 'noteq'
                         }]
                     }
                 },
@@ -597,7 +597,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.intWeightUOMId}',
                 store: '{weightUOMs}',
                 defaultFilters: [
-                    { 
+                    {
                         name: 'intUnitMeasureId',
                         condition: 'eq',
                         value: 0
@@ -819,7 +819,7 @@ Ext.define('Inventory.view.ItemViewController', {
             },
 
             grdDocumentAssociation: {
-                colDocument:  {
+                colDocument: {
                     dataIndex: 'strDocumentName',
                     editor: {
                         store: '{document}'
@@ -828,7 +828,7 @@ Ext.define('Inventory.view.ItemViewController', {
             },
 
             grdCertification: {
-                colCertification:  {
+                colCertification: {
                     dataIndex: 'strCertificationName',
                     editor: {
                         store: '{certification}'
@@ -1210,24 +1210,24 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colOwnerDefault: 'ysnActive'
             },
-            
+
             //----------//
             //Others Tab//
             //----------//
-            
+
             txtInvoiceComments: '{current.strInvoiceComments}',
             txtPickListComments: '{current.strPickListComments}'
         }
     },
 
-    deleteMessage: function() {
+    deleteMessage: function () {
         var win = Ext.WindowMgr.getActive();
         var itemNo = win.down("#txtItemNo").value;
         var msg = "Are you sure you want to delete Item <b>" + Ext.util.Format.htmlEncode(itemNo) + "</b>?";
         return msg;
     },
 
-    setupContext : function(options){
+    setupContext: function (options) {
         var me = this,
             win = options.window,
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
@@ -1259,10 +1259,10 @@ Ext.define('Inventory.view.ItemViewController', {
             grdKitDetails = win.down('#grdKitDetails');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
-            window : win,
-            store  : store,
-            createRecord : me.createRecord,
-            validateRecord : me.validateRecord,
+            window: win,
+            store: store,
+            createRecord: me.createRecord,
+            validateRecord: me.validateRecord,
             deleteMsg: me.deleteMessage,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
@@ -1278,14 +1278,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemUOMs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdUOM,
-                        deleteButton : grdUOM.down('#btnDeleteUom')
+                        deleteButton: grdUOM.down('#btnDeleteUom')
                     })
                 },
                 {
                     key: 'tblICItemLocations',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdLocationStore,
-                        deleteButton : grdLocationStore.down('#btnDeleteLocation'),
+                        deleteButton: grdLocationStore.down('#btnDeleteLocation'),
                         position: 'none'
                     })
                 },
@@ -1293,28 +1293,28 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemVendorXrefs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdVendorXref,
-                        deleteButton : grdVendorXref.down('#btnDeleteVendorXref')
+                        deleteButton: grdVendorXref.down('#btnDeleteVendorXref')
                     })
                 },
                 {
                     key: 'tblICItemCustomerXrefs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCustomerXref,
-                        deleteButton : grdCustomerXref.down('#btnDeleteCustomerXref')
+                        deleteButton: grdCustomerXref.down('#btnDeleteCustomerXref')
                     })
                 },
                 {
                     key: 'tblICItemContracts',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdContractItem,
-                        deleteButton : grdContractItem.down('#btnDeleteContractItem')
+                        deleteButton: grdContractItem.down('#btnDeleteContractItem')
                     }),
                     details: [
                         {
                             key: 'tblICItemContractDocuments',
                             component: Ext.create('iRely.mvvm.grid.Manager', {
                                 grid: grdDocumentAssociation,
-                                deleteButton : grdDocumentAssociation.down('#btnDeleteDocumentAssociation')
+                                deleteButton: grdDocumentAssociation.down('#btnDeleteDocumentAssociation')
                             })
                         }
                     ]
@@ -1330,28 +1330,28 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemCertifications',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCertification,
-                        deleteButton : grdCertification.down('#btnDeleteCertification')
+                        deleteButton: grdCertification.down('#btnDeleteCertification')
                     })
                 },
                 {
                     key: 'tblICItemPOSCategories',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCategory,
-                        deleteButton : win.down('#btnDeleteCategories')
+                        deleteButton: win.down('#btnDeleteCategories')
                     })
                 },
                 {
                     key: 'tblICItemPOSSLAs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdServiceLevelAgreement'),
-                        deleteButton : win.down('#btnDeleteSLA')
+                        deleteButton: win.down('#btnDeleteSLA')
                     })
                 },
                 {
                     key: 'tblICItemAccounts',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdGlAccounts,
-                        deleteButton : grdGlAccounts.down('#btnDeleteGlAccounts')
+                        deleteButton: grdGlAccounts.down('#btnDeleteGlAccounts')
                     })
                 },
                 {
@@ -1365,56 +1365,56 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemCommodityCosts',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCommodityCost,
-                        deleteButton : grdCommodityCost.down('#btnDeleteCommodityCost')
+                        deleteButton: grdCommodityCost.down('#btnDeleteCommodityCost')
                     })
                 },
                 {
                     key: 'tblICItemPricings',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdPricing,
-                        deleteButton : grdPricing.down('#btnDeletePricing')
+                        deleteButton: grdPricing.down('#btnDeletePricing')
                     })
                 },
                 {
                     key: 'tblICItemPricingLevels',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdPricingLevel,
-                        deleteButton : grdPricingLevel.down('#btnDeletePricingLevel')
+                        deleteButton: grdPricingLevel.down('#btnDeletePricingLevel')
                     })
                 },
                 {
                     key: 'tblICItemSpecialPricings',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdSpecialPricing,
-                        deleteButton : grdSpecialPricing.down('#btnDeleteSpecialPricing')
+                        deleteButton: grdSpecialPricing.down('#btnDeleteSpecialPricing')
                     })
                 },
                 {
                     key: 'tblICItemAssemblies',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdAssembly,
-                        deleteButton : grdAssembly.down('#btnDeleteAssembly')
+                        deleteButton: grdAssembly.down('#btnDeleteAssembly')
                     })
                 },
                 {
                     key: 'tblICItemBundles',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdBundle,
-                        deleteButton : grdBundle.down('#btnDeleteBundle')
+                        deleteButton: grdBundle.down('#btnDeleteBundle')
                     })
                 },
                 {
                     key: 'tblICItemKits',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdKit,
-                        deleteButton : grdKit.down('#btnDeleteKit')
+                        deleteButton: grdKit.down('#btnDeleteKit')
                     }),
                     details: [
                         {
                             key: 'tblICItemKitDetails',
                             component: Ext.create('iRely.mvvm.grid.Manager', {
                                 grid: grdKitDetails,
-                                deleteButton : grdKitDetails.down('#btnDeleteKitDetail')
+                                deleteButton: grdKitDetails.down('#btnDeleteKitDetail')
                             })
                         }
                     ]
@@ -1423,21 +1423,21 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemOwners',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdOwner,
-                        deleteButton : grdOwner.down('#btnDeleteOwner')
+                        deleteButton: grdOwner.down('#btnDeleteOwner')
                     })
                 },
                 {
                     key: 'tblICItemFactories',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdFactory,
-                        deleteButton : grdFactory.down('#btnDeleteFactory')
+                        deleteButton: grdFactory.down('#btnDeleteFactory')
                     }),
                     details: [
                         {
                             key: 'tblICItemFactoryManufacturingCells',
                             component: Ext.create('iRely.mvvm.grid.Manager', {
                                 grid: grdManufacturingCellAssociation,
-                                deleteButton : grdManufacturingCellAssociation.down('#btnDeleteManufacturingCellAssociation')
+                                deleteButton: grdManufacturingCellAssociation.down('#btnDeleteManufacturingCellAssociation')
                             })
                         }
                     ]
@@ -1448,7 +1448,7 @@ Ext.define('Inventory.view.ItemViewController', {
         me.subscribeLocationEvents(grdLocationStore, me);
 
         var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
-        if (cepPricingLevel){
+        if (cepPricingLevel) {
             cepPricingLevel.on({
                 edit: me.onEditPricingLevel,
                 scope: me
@@ -1456,7 +1456,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
 
         var cepPricing = grdPricing.getPlugin('cepPricing');
-        if (cepPricing){
+        if (cepPricing) {
             cepPricing.on({
                 edit: me.onEditPricing,
                 scope: me
@@ -1467,10 +1467,10 @@ Ext.define('Inventory.view.ItemViewController', {
         colStockUOM.renderer = this.onRenderStockUOM;
 
         var colLocationLocation = grdLocationStore.columns[0];
-        colLocationLocation.renderer = function(value, opt, record) {
+        colLocationLocation.renderer = function (value, opt, record) {
             return '<a style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration=\'none\'" onMouseOver="this.style.textDecoration=\'underline\'" href="javascript:void(0);">' + value + '</a>';
         };
-        
+
 
         var colStockOnOrder = grdStock.columns[2];
         colStockOnOrder.summaryRenderer = this.StockSummaryRenderer;
@@ -1502,7 +1502,7 @@ Ext.define('Inventory.view.ItemViewController', {
         return i21.ModuleMgr.Inventory.roundDecimalFormat(value, 2);
     },
 
-    createTransaction: function(config, action) {
+    createTransaction: function (config, action) {
         var me = this,
             current = me.getViewModel().get('current');
 
@@ -1514,7 +1514,7 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
 
-    createRecord: function(config, action) {
+    createRecord: function (config, action) {
         var me = this;
         var record = Ext.create('Inventory.model.Item');
         record.set('strStatus', 'Active');
@@ -1525,7 +1525,7 @@ Ext.define('Inventory.view.ItemViewController', {
         action(record);
     },
 
-    show : function(config) {
+    show: function (config) {
         "use strict";
 
         var me = this,
@@ -1533,7 +1533,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (config) {
             win.show();
-            var context = me.setupContext( {window : win} );
+            var context = me.setupContext({ window: win });
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -1551,21 +1551,21 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    validateRecord: function(config, action) {
+    validateRecord: function (config, action) {
         var win = config.window;
 
         var pricings = config.viewModel.data.current.tblICItemPricings();
-        if(pricings) {
+        if (pricings) {
             var items = pricings.data.items;
-            for(var i = 0; i < items.length; i++) {
+            for (var i = 0; i < items.length; i++) {
                 var p = items[i];
 
-                if((iRely.Functions.isEmpty(p.data.strLocationName, false) || p.data.intItemLocationId === null
+                if ((iRely.Functions.isEmpty(p.data.strLocationName, false) || p.data.intItemLocationId === null
                     || iRely.Functions.isEmpty(p.data.strPricingMethod, false)) && !p.dummy) {
                     var tabItem = win.down('#tabItem');
                     tabItem.setActiveTab('pgePricing');
                     var grid = win.down('#grdPricing');
-                     var gridColumns = grid.headerCt.getGridColumns();
+                    var gridColumns = grid.headerCt.getGridColumns();
                     for (var i = 0; i < gridColumns.length; i++) {
                         if (gridColumns[i].itemId == 'colPricingLocation' || gridColumns[i].itemId == 'colPricingMethod') {
                             grid.columnManager.columns[i].setVisible(true);
@@ -1602,7 +1602,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 }
                 else {
-//                    tabItem.setActiveTab('pgePricing');
+                    //                    tabItem.setActiveTab('pgePricing');
                     action(false);
                 }
             }
@@ -1611,7 +1611,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Details Tab Methods and Event Handlers">
 
-    onItemTabChange: function(tabPanel, newCard, oldCard, eOpts) {
+    onItemTabChange: function (tabPanel, newCard, oldCard, eOpts) {
         switch (newCard.itemId) {
             case 'pgeDetails':
                 var pgeDetails = tabPanel.down('#pgeDetails');
@@ -1722,8 +1722,7 @@ Ext.define('Inventory.view.ItemViewController', {
             case 'pgeStock':
                 var pgeStock = tabPanel.down('#pgeStock');
                 var grdStock = pgeStock.down('#grdStock');
-                if (grdStock.store.complete === true)
-                {
+                if (grdStock.store.complete === true) {
                     grdStock.store.reload();
                     grdStock.getView().refresh();
                 }
@@ -1790,7 +1789,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onInventoryTypeSelect: function(combo, record) {
+    onInventoryTypeSelect: function (combo, record) {
         if (record.length <= 0)
             return;
 
@@ -1816,7 +1815,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onLotTrackingSelect: function(combo, records) {
+    onLotTrackingSelect: function (combo, records) {
         if (records.length <= 0)
             return;
 
@@ -1854,12 +1853,12 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);
-            
+
             var itemStore = grid.store;
             var stockUnit = itemStore.findRecord('ysnStockUnit', true);
             if (stockUnit) {
                 var unitMeasureId = stockUnit.get('intUnitMeasureId');
-                me.getConversionValue(current.get('intUnitMeasureId'), unitMeasureId, function(value) {
+                me.getConversionValue(current.get('intUnitMeasureId'), unitMeasureId, function (value) {
                     current.set('dblUnitQty', value);
                 });
             }
@@ -1889,50 +1888,48 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         });
     },
-    
-    beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
-        if (obj.dataIndex === 'ysnStockUnit'){
+
+    beforeUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnStockUnit') {
             var grid = obj.up('grid');
             var win = obj.up('window');
             var current = win.viewModel.data.current;
-            
-            if (checked === false && current.get('intPatronageCategoryId') > 0)
-                {
-                   iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
-                   return false;
-                }
-        }  
+
+            if (checked === false && current.get('intPatronageCategoryId') > 0) {
+                iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
+                return false;
+            }
+        }
     },
-    
-    onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
+
+    onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
         var me = this;
-        if (obj.dataIndex === 'ysnStockUnit'){
+        if (obj.dataIndex === 'ysnStockUnit') {
             var grid = obj.up('grid');
             var win = obj.up('window');
             var current = grid.view.getRecord(rowIndex);
             var uomConversion = win.viewModel.storeInfo.uomConversion;
             var me = this;
             Ext.Ajax.request({
-            url: '../Inventory/api/Item/CheckStockUnit?ItemId=' + current.get('intItemId') + 
-            '&ItemStockUnit=' + current.get('ysnStockUnit') + '&ItemUOMId=' + current.get('intItemUOMId'),
-            method: 'post',
-            success: function (response) {
+                url: '../Inventory/api/Item/CheckStockUnit?ItemId=' + current.get('intItemId') +
+                '&ItemStockUnit=' + current.get('ysnStockUnit') + '&ItemUOMId=' + current.get('intItemUOMId'),
+                method: 'post',
+                success: function (response) {
                     var jsonData = Ext.decode(response.responseText);
-                    if (!jsonData.success) 
-                    {
-                       //iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                        
-                         var result = function (button) {
+                    if (!jsonData.success) {
+                        //iRely.Functions.showErrorDialog(jsonData.message.statusText);
+
+                        var result = function (button) {
                             if (button === 'yes') {
-                                
-                                    if (checked === true){
+
+                                if (checked === true) {
                                     var uoms = grid.store.data.items;
                                     if (uoms) {
-                                        uoms.forEach(function(uom){
-                                            if (uom === current){
+                                        uoms.forEach(function (uom) {
+                                            if (uom === current) {
                                                 current.set('dblUnitQty', 1);
                                             }
-                                            if (uom !== current){
+                                            if (uom !== current) {
                                                 uom.set('ysnStockUnit', false);
                                                 var unitMeasureId = current.get('intUnitMeasureId');
                                                 me.getConversionValue(unitMeasureId, uom.get('intUnitMeasureId'), function (value) {
@@ -1943,73 +1940,66 @@ Ext.define('Inventory.view.ItemViewController', {
                                     }
                                 }
                                 else {
-                                    if (current){
+                                    if (current) {
                                         current.set('dblUnitQty', 1);
                                     }
                                 }
-                                
+
                                 Ext.Ajax.request({
-                                 url: '../Inventory/api/Item/ConvertItemToNewStockUnit?ItemId=' + current.get('intItemId') + 
-                                '&ItemUOMId=' + current.get('intItemUOMId'),
-                                method: 'post',
-                                success: function (response) {
-                                    var jsonData = Ext.decode(response.responseText);
-                                        if (!jsonData.success) 
-                                            {
-                                                iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                                                
-                                            }
-                                        else
-                                            {
-                                                iRely.Functions.showCustomDialog('information', 'ok', 'Conversion to new stock unit has been completed.');
-                                                var context = me.view.context;
-                                                var vm = me.getViewModel();
-                                                vm.data.current.dirty = false;
-                                                context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
-                                            }
-                                },
-                                failure: function(response)
-                                    {
+                                    url: '../Inventory/api/Item/ConvertItemToNewStockUnit?ItemId=' + current.get('intItemId') +
+                                    '&ItemUOMId=' + current.get('intItemUOMId'),
+                                    method: 'post',
+                                    success: function (response) {
+                                        var jsonData = Ext.decode(response.responseText);
+                                        if (!jsonData.success) {
+                                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
+
+                                        }
+                                        else {
+                                            iRely.Functions.showCustomDialog('information', 'ok', 'Conversion to new stock unit has been completed.');
+                                            var context = me.view.context;
+                                            var vm = me.getViewModel();
+                                            vm.data.current.dirty = false;
+                                            context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
+                                        }
+                                    },
+                                    failure: function (response) {
                                         var jsonData = Ext.decode(response.responseText);
                                         iRely.Functions.showErrorDialog('Connection Failed!');
                                     }
                                 });
-                            } 
-                             
-                             else
-                                 {
-                                     current.set('ysnStockUnit', false);
-                                 }
+                            }
+
+                            else {
+                                current.set('ysnStockUnit', false);
+                            }
                         };
 
-                        if(current.get('ysnStockUnit') === false)
-                            {
-                                iRely.Functions.showErrorDialog("Item has already a transaction so Stock Unit is required.");
-                                current.set('ysnStockUnit', true);
-                            }
-                        else
-                            { 
-                                var msgBox = iRely.Functions;
-                                msgBox.showCustomDialog(
+                        if (current.get('ysnStockUnit') === false) {
+                            iRely.Functions.showErrorDialog("Item has already a transaction so Stock Unit is required.");
+                            current.set('ysnStockUnit', true);
+                        }
+                        else {
+                            var msgBox = iRely.Functions;
+                            msgBox.showCustomDialog(
                                 msgBox.dialogType.WARNING,
                                 msgBox.dialogButtonType.YESNOCANCEL,
                                 "Item has transaction/s so changing stock unit will convert the following to new stock unit:<br> <br>Existing Stock <br>Cost & Prices <br> Existing Entries in Inventory Transaction Tables<br><br><br>Conversion to new stock unit will be automatically saved. <br><br>Do you want to continue?",
                                 result
-                               );
-                            }
+                            );
+                        }
                     }
-                
-                else
-                    {
-                        
-                            if (checked === true){
+
+                    else {
+
+                        if (checked === true) {
                             var uoms = grid.store.data.items;
                             if (uoms) {
-                                uoms.forEach(function(uom){
-                                    if (uom === current){
+                                uoms.forEach(function (uom) {
+                                    if (uom === current) {
                                         current.set('dblUnitQty', 1);
                                     }
-                                    if (uom !== current){
+                                    if (uom !== current) {
                                         uom.set('ysnStockUnit', false);
                                         var unitMeasureId = current.get('intUnitMeasureId');
                                         me.getConversionValue(unitMeasureId, uom.get('intUnitMeasureId'), function (value) {
@@ -2020,19 +2010,18 @@ Ext.define('Inventory.view.ItemViewController', {
                             }
                         }
                         else {
-                            if (current){
+                            if (current) {
                                 current.set('dblUnitQty', 1);
                             }
                         }
                     }
                 },
-            failure: function(response)
-            {
-                var jsonData = Ext.decode(response.responseText);
-                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-            }
-        
-          }); 
+                failure: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                }
+
+            });
         }
     },
 
@@ -2046,12 +2035,12 @@ Ext.define('Inventory.view.ItemViewController', {
         if (colLocationCostingMethod) colLocationCostingMethod.renderer = me.CostingMethodRenderer;
     },
 
-    getDefaultUOM: function(win) {
+    getDefaultUOM: function (win) {
         var vm = win.getViewModel();
         var cboCategory = win.down('#cboCategory');
         var intCategoryId = cboCategory.getValue();
 
-        if (iRely.Functions.isEmpty(intCategoryId) === false){
+        if (iRely.Functions.isEmpty(intCategoryId) === false) {
             var category = vm.storeInfo.categoryList.findRecord('intCategoryId', intCategoryId);
             if (category) {
                 var defaultCategoryUOM = category.getDefaultUOM();
@@ -2069,24 +2058,26 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onLocationDoubleClick: function(view, record, item, index, e, eOpts){
+    onLocationDoubleClick: function (view, record, item, index, e, eOpts) {
         var win = view.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
 
-        if (!record){
+        if (!record) {
             iRely.Functions.showErrorDialog('Please select a location to edit.');
             return;
         }
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemLocationScreen('edit', win, record);
-                return;
-            } });
+            win.context.data.saveRecord({
+                successFn: function (batch, eOpts) {
+                    me.openItemLocationScreen('edit', win, record);
+                    return;
+                }
+            });
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord({ window: win }, function (valid) {
                 if (valid) {
                     me.openItemLocationScreen('edit', win, record);
                     return;
@@ -2095,7 +2086,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onAddLocationClick: function(button, e, eOpts) {
+    onAddLocationClick: function (button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
@@ -2103,13 +2094,15 @@ Ext.define('Inventory.view.ItemViewController', {
         me.getDefaultUOM(win);
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemLocationScreen('new', win);
-                return;
-            } });
+            win.context.data.saveRecord({
+                successFn: function (batch, eOpts) {
+                    me.openItemLocationScreen('new', win);
+                    return;
+                }
+            });
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord({ window: win }, function (valid) {
                 if (valid) {
                     me.openItemLocationScreen('new', win);
                     return;
@@ -2118,36 +2111,36 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onAddMultipleLocationClick: function(button, e, eOpts) {
+    onAddMultipleLocationClick: function (button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
         var defaultFilters = '';
 
-        Ext.Array.each(vm.data.current.tblICItemLocations().data.items, function(location) {
+        Ext.Array.each(vm.data.current.tblICItemLocations().data.items, function (location) {
             defaultFilters += '&intLocationId<>' + location.get('intLocationId');
         });
 
         me.getDefaultUOM(win);
 
-        var showAddScreen = function() {
+        var showAddScreen = function () {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
             search.url = '../i21/api/CompanyLocation/Search';
             search.columns = [
-                { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
-                { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
-                { dataIndex : 'strLocationType',text: 'Location Type', dataType: 'string', flex: 1 }
+                { dataIndex: 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort: true, hidden: true, key: true },
+                { dataIndex: 'strLocationName', text: 'Location Name', dataType: 'string', flex: 1 },
+                { dataIndex: 'strLocationType', text: 'Location Type', dataType: 'string', flex: 1 }
             ];
             search.title = "Add Item Locations";
             search.showNew = false;
             search.on({
                 scope: me,
-                openselectedclick: function(button, e, result) {
+                openselectedclick: function (button, e, result) {
                     var currentVM = this.getViewModel().data.current;
                     var win = this.getView();
 
-                    Ext.each(result, function(location) {
+                    Ext.each(result, function (location) {
                         var exists = Ext.Array.findBy(currentVM.tblICItemLocations().data.items, function (row) {
                             if (location.get('intCompanyLocationId') === row.get('intCompanyLocationId')) {
                                 return true;
@@ -2195,7 +2188,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     search.close();
                     win.context.data.saveRecord();
                 },
-                openallclick: function() {
+                openallclick: function () {
                     search.close();
                 }
             });
@@ -2204,25 +2197,27 @@ Ext.define('Inventory.view.ItemViewController', {
         showAddScreen();
     },
 
-    onEditLocationClick: function(button, e, eOpts) {
+    onEditLocationClick: function (button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
         var grd = button.up('grid');
         var selection = grd.getSelectionModel().getSelection();
 
-        if (selection.length <= 0){
+        if (selection.length <= 0) {
             iRely.Functions.showErrorDialog('Please select a location to edit.');
             return;
         }
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemLocationScreen('edit', win, selection[0]);
-            } });
+            win.context.data.saveRecord({
+                successFn: function (batch, eOpts) {
+                    me.openItemLocationScreen('edit', win, selection[0]);
+                }
+            });
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord({ window: win }, function (valid) {
                 if (valid) {
                     me.openItemLocationScreen('edit', win, selection[0]);
                 }
@@ -2235,11 +2230,11 @@ Ext.define('Inventory.view.ItemViewController', {
         var screenName = 'Inventory.view.ItemLocation';
 
         var current = win.getViewModel().data.current;
-        if (action === 'edit'){
+        if (action === 'edit') {
             iRely.Functions.openScreen(screenName, {
                 viewConfig: {
                     listeners: {
-                        destroy: function() {
+                        destroy: function () {
                             var grdLocation = win.down('#grdLocationStore');
                             var vm = win.getViewModel();
                             var itemId = vm.data.current.get('intItemId');
@@ -2250,7 +2245,7 @@ Ext.define('Inventory.view.ItemViewController', {
                             filterItem.initialConfig.value = itemId;
                             grdLocation.store.load({
                                 scope: win,
-                                callback: function(result) {
+                                callback: function (result) {
                                     if (result) {
                                         var me = this;
                                         Ext.Array.each(result, function (location) {
@@ -2262,18 +2257,18 @@ Ext.define('Inventory.view.ItemViewController', {
                                             });
                                             if (!exists) {
                                                 var newPrice = Ext.create('Inventory.model.ItemPricing', {
-                                                    intItemId : location.get('intItemId'),
-                                                    intItemLocationId : location.get('intItemLocationId'),
-                                                    strLocationName : location.get('strLocationName'),
-                                                    dblAmountPercent : 0.00,
-                                                    dblSalePrice : 0.00,
-                                                    dblMSRPPrice : 0.00,
-                                                    strPricingMethod : 'None',
-                                                    dblLastCost : 0.00,
-                                                    dblStandardCost : 0.00,
-                                                    dblAverageCost : 0.00,
-                                                    dblEndMonthCost : 0.00,
-                                                    intSort : location.get('intSort')
+                                                    intItemId: location.get('intItemId'),
+                                                    intItemLocationId: location.get('intItemLocationId'),
+                                                    strLocationName: location.get('strLocationName'),
+                                                    dblAmountPercent: 0.00,
+                                                    dblSalePrice: 0.00,
+                                                    dblMSRPPrice: 0.00,
+                                                    strPricingMethod: 'None',
+                                                    dblLastCost: 0.00,
+                                                    dblStandardCost: 0.00,
+                                                    dblAverageCost: 0.00,
+                                                    dblEndMonthCost: 0.00,
+                                                    intSort: location.get('intSort')
                                                 });
                                                 me.getViewModel().data.current.tblICItemPricings().add(newPrice);
                                             }
@@ -2293,7 +2288,7 @@ Ext.define('Inventory.view.ItemViewController', {
             iRely.Functions.openScreen(screenName, {
                 viewConfig: {
                     listeners: {
-                        destroy: function() {
+                        destroy: function () {
                             var grdLocation = win.down('#grdLocationStore');
                             var vm = win.getViewModel();
                             var itemId = vm.data.current.get('intItemId');
@@ -2304,7 +2299,7 @@ Ext.define('Inventory.view.ItemViewController', {
                             filterItem.initialConfig.value = itemId;
                             grdLocation.store.load({
                                 scope: win,
-                                callback: function(result) {
+                                callback: function (result) {
                                     if (result) {
                                         var me = this;
                                         Ext.Array.each(result, function (location) {
@@ -2316,18 +2311,18 @@ Ext.define('Inventory.view.ItemViewController', {
                                             });
                                             if (!exists) {
                                                 var newPrice = Ext.create('Inventory.model.ItemPricing', {
-                                                    intItemId : location.get('intItemId'),
-                                                    intItemLocationId : location.get('intItemLocationId'),
-                                                    strLocationName : location.get('strLocationName'),
-                                                    dblAmountPercent : 0.00,
-                                                    dblSalePrice : 0.00,
-                                                    dblMSRPPrice : 0.00,
-                                                    strPricingMethod : 'None',
-                                                    dblLastCost : 0.00,
-                                                    dblStandardCost : 0.00,
-                                                    dblAverageCost : 0.00,
-                                                    dblEndMonthCost : 0.00,
-                                                    intSort : location.get('intSort')
+                                                    intItemId: location.get('intItemId'),
+                                                    intItemLocationId: location.get('intItemLocationId'),
+                                                    strLocationName: location.get('strLocationName'),
+                                                    dblAmountPercent: 0.00,
+                                                    dblSalePrice: 0.00,
+                                                    dblMSRPPrice: 0.00,
+                                                    strPricingMethod: 'None',
+                                                    dblLastCost: 0.00,
+                                                    dblStandardCost: 0.00,
+                                                    dblAverageCost: 0.00,
+                                                    dblEndMonthCost: 0.00,
+                                                    intSort: location.get('intSort')
                                                 });
                                                 me.getViewModel().data.current.tblICItemPricings().add(newPrice);
                                             }
@@ -2345,7 +2340,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onCopyLocationSelect: function(combo, records, eOpts) {
+    onCopyLocationSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2354,7 +2349,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var selection = grid.getSelectionModel().getSelection();
         var copyLocation = records[0];
 
-        Ext.Array.each(selection, function(location) {
+        Ext.Array.each(selection, function (location) {
             if (location.get('intItemLocationId') !== copyLocation.get('intItemLocationId')) {
                 location.set('intVendorId', copyLocation.get('intVendorId'));
                 location.set('strDescription', copyLocation.get('strDescription'));
@@ -2441,7 +2436,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="GL Accounts Tab Methods and Event Handlers">
 
-    onGLAccountSelect: function(combo, records, eOpts) {
+    onGLAccountSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2461,7 +2456,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onAddRequiredAccountClick: function(button, e, eOpts) {
+    onAddRequiredAccountClick: function (button, e, eOpts) {
         var win = button.up('window');
         var me = win.getController()
         var current = win.getViewModel().data.current;
@@ -2526,10 +2521,10 @@ Ext.define('Inventory.view.ItemViewController', {
             case "Kit":
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 break;
-                
+
             case "Comment":
                 break;
-                
+
             default:
                 iRely.Functions.showErrorDialog('Please select an Inventory Type.');
                 break;
@@ -2537,7 +2532,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     },
 
-    addAccountCategory: function(current, category, categoryList) {
+    addAccountCategory: function (current, category, categoryList) {
         if (categoryList) {
             var exists = Ext.Array.findBy(current.tblICItemAccounts().data.items, function (row) {
                 if (category === row.get('strAccountCategory')) {
@@ -2546,7 +2541,7 @@ Ext.define('Inventory.view.ItemViewController', {
             });
             if (!exists) {
                 var category = categoryList.findRecord('strAccountCategory', category);
-                if(category) {
+                if (category) {
                     var newItemAccount = Ext.create('Inventory.model.ItemAccount', {
                         intItemId: current.get('intItemId'),
                         intAccountCategoryId: category.get('intAccountCategoryId'),
@@ -2562,25 +2557,24 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Point Of Sale Tab Methods and Event Handlers">
 
-    onPOSCategorySelect: function(combo, records, eOpts) {
-    if (records.length <= 0)
-        return;
+    onPOSCategorySelect: function (combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-    var grid = combo.up('grid');
-    var plugin = grid.getPlugin('cepPOSCategory');
-    var current = plugin.getActiveRecord();
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepPOSCategory');
+        var current = plugin.getActiveRecord();
 
-    if (combo.column.itemId === 'colPOSCategoryName')
-    {
-        current.set('intCategoryId', records[0].get('intCategoryId'));
-    }
-},
+        if (combo.column.itemId === 'colPOSCategoryName') {
+            current.set('intCategoryId', records[0].get('intCategoryId'));
+        }
+    },
 
     // </editor-fold>
 
     // <editor-fold desc="Cross Reference Tab Methods and Event Handlers">
 
-    onCustomerXrefSelect: function(combo, records, eOpts) {
+    onCustomerXrefSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2588,8 +2582,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepCustomerXref');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colCustomerXrefLocation')
-        {
+        if (combo.column.itemId === 'colCustomerXrefLocation') {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colCustomerXrefCustomer') {
@@ -2597,7 +2590,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onVendorXrefSelect: function(combo, records, eOpts) {
+    onVendorXrefSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2605,7 +2598,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepVendorXref');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colVendorXrefLocation'){
+        if (combo.column.itemId === 'colVendorXrefLocation') {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colVendorXrefVendor') {
@@ -2620,7 +2613,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Contract Item Tab Methods and Event Handlers">
 
-    onContractItemSelect: function(combo, records, eOpts) {
+    onContractItemSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2628,7 +2621,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepContractItem');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colContractLocation'){
+        if (combo.column.itemId === 'colContractLocation') {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colContractOrigin') {
@@ -2636,7 +2629,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onDocumentSelect: function(combo, records, eOpts) {
+    onDocumentSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2644,12 +2637,12 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepDocument');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colDocument'){
+        if (combo.column.itemId === 'colDocument') {
             current.set('intDocumentId', records[0].get('intDocumentId'));
         }
     },
 
-    onCertificationSelect: function(combo, records, eOpts) {
+    onCertificationSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2657,7 +2650,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepCertification');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colCertification'){
+        if (combo.column.itemId === 'colCertification') {
             current.set('intCertificationId', records[0].get('intCertificationId'));
         }
     },
@@ -2666,7 +2659,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Motor Fuel Tax Tab Methods and Event Handlers">
 
-    onMotorFuelTaxSelect: function(combo, records, eOpts) {
+    onMotorFuelTaxSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2674,7 +2667,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepMotorFuelTax');
         var current = plugin.getActiveRecord();
 
-        if (combo.itemId === 'cboTaxAuthorityCode'){
+        if (combo.itemId === 'cboTaxAuthorityCode') {
             current.set('strTaxAuthorityDescription', records[0].get('strDescription'));
         }
 
@@ -2688,7 +2681,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Pricing Tab Methods and Event Handlers">
 
-    onPricingLocationSelect: function(combo, records, eOpts) {
+    onPricingLocationSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2699,13 +2692,13 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepPricing');
         var current = plugin.getActiveRecord();
 
-        if (combo.itemId === 'cboPricingLocation'){
+        if (combo.itemId === 'cboPricingLocation') {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
         }
     },
 
-    onPricingLevelSelect: function(combo, records, eOpts) {
+    onPricingLevelSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2716,7 +2709,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepPricingLevel');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colPricingLevelLocation'){
+        if (combo.column.itemId === 'colPricingLevelLocation') {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intLocationId', records[0].get('intLocationId'));
         }
@@ -2724,16 +2717,16 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
 
-            if (grdUnitOfMeasure.store){
+            if (grdUnitOfMeasure.store) {
                 var record = grdUnitOfMeasure.store.findRecord('intItemUOMId', records[0].get('intItemUOMId'));
-                if (record){
+                if (record) {
                     current.set('dblUnit', record.get('dblUnitQty'));
                 }
             }
         }
     },
 
-    onSpecialPricingSelect: function(combo, records, eOpts) {
+    onSpecialPricingSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2743,12 +2736,12 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepSpecialPricing');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colSpecialPricingLocation'){
+        if (combo.column.itemId === 'colSpecialPricingLocation') {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
 
-            if (grdPricing.store){
+            if (grdPricing.store) {
                 var record = grdPricing.store.findRecord('intItemLocationId', records[0].get('intItemLocationId'));
-                if (record){
+                if (record) {
                     current.set('dblUnitAfterDiscount', record.get('dblSalePrice'));
                 }
             }
@@ -2759,9 +2752,9 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('strUPC', records[0].get('strUpcCode'));
             current.set('dblUnit', records[0].get('dblUnitQty'));
 
-            if (grdPricing.store){
+            if (grdPricing.store) {
                 var record = grdPricing.store.findRecord('intItemLocationId', current.get('intItemLocationId'));
-                if (record){
+                if (record) {
                     current.set('dblUnitAfterDiscount', (records[0].get('dblUnitQty') * record.get('dblSalePrice')));
                 }
             }
@@ -2786,7 +2779,97 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    /* TODO: Create unit test for getRetailPrice */
+    getRetailPrice: function (price) {
+        var unitPrice = price.salePrice;
+        var msrpPrice = price.msrpPrice;
+        var standardCost = price.standardCost;
+        var amt = price.amount;
+        var qty = price.qty;
+        var retailPrice = 0;
+        switch (price.pricingMethod) {
+            case 'Discount Retail Price':
+                unitPrice = unitPrice - (unitPrice * (amt / 100));
+                retailPrice = unitPrice * qty
+                break;
+            case 'MSRP Discount':
+                msrpPrice = msrpPrice - (msrpPrice * (amt / 100));
+                retailPrice = msrpPrice * qty
+                break;
+            case 'Percent of Margin (MSRP)':
+                var percent = amt / 100;
+                unitPrice = ((msrpPrice - standardCost) * percent) + standardCost;
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Fixed Dollar Amount':
+                unitPrice = (standardCost + amt);
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Markup Standard Cost':
+                var markup = (standardCost * (amt / 100));
+                unitPrice = (standardCost + markup);
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Percent of Margin':
+                unitPrice = (standardCost / (1 - (amt / 100)));
+                retailPrice = unitPrice * qty;
+                break;
+            case 'None':
+                break;
+            default:
+                retailPrice = 0;
+                break;
+        }
+        return retailPrice;
+    },
+
+    /* TODO:Create unit test for getSalePrice */
+    getSalePrice: function(price, errorCallback) {
+        var salePrice = 0;
+        switch(price.pricingMethod) {
+            case "None":
+                salePrice = price.cost;     
+                break;
+            case "Fixed Dollar Amount":
+                salePrice = price.cost + price.amount;
+                break;
+            case "Markup Standard Cost":
+                salePrice = (price.cost * (price.amount / 100)) + price.cost;
+                break;
+            case "Percent of Margin":
+                salePrice = price.amount < 100 ? (price.cost / (1 - (price.amount / 100))) : errorCallback();
+                break; 
+        }
+        return salePrice;
+    },
+
+    onPricingStandardCostChange: function (e, newValue, oldValue) {
+        var vm = this.view.viewModel;
+        var current = vm.data.current;
+        var cep = e.ownerCt.editingPlugin;
+        var record = cep.activeRecord;
+        var me = this;
+
+        var unitPrice = record.data.dblSalePrice;
+        var msrpPrice = record.data.dblMSRPPrice;
+        var standardCost = newValue;
+        _.each(current.tblICItemPricingLevels().data.items, function (p) {
+            if (p.data.intItemLocationId === record.data.intItemLocationId) {
+                var retailPrice = me.getRetailPrice({
+                    pricingMethod: p.data.strPricingMethod,
+                    salePrice: unitPrice,
+                    msrpPrice: msrpPrice,
+                    standardCost: standardCost,
+                    amount: p.data.dblAmountRate,
+                    qty: p.data.dblUnit
+                });
+                p.set('dblUnitPrice', retailPrice);
+            }
+        });
+    },
+
     onEditPricingLevel: function (editor, context, eOpts) {
+        var me = this;
         if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate') {
             if (context.record) {
                 var win = context.grid.up('window');
@@ -2815,39 +2898,15 @@ Ext.define('Inventory.view.ItemViewController', {
                             var msrpPrice = selectedLoc.get('dblMSRPPrice');
                             var standardCost = selectedLoc.get('dblStandardCost');
                             var qty = context.record.get('dblUnit');
-                            var retailPrice = 0;
-                            switch (pricingMethod) {
-                                case 'Discount Retail Price':
-                                    unitPrice = unitPrice - (unitPrice * (amount / 100));
-                                    retailPrice = unitPrice * qty
-                                    break;
-                                case 'MSRP Discount':
-                                    msrpPrice = msrpPrice - (msrpPrice * (amount / 100));
-                                    retailPrice = msrpPrice * qty
-                                    break;
-                                case 'Percent of Margin (MSRP)':
-                                    var percent = amount / 100;
-                                    unitPrice = ((msrpPrice - standardCost) * percent) + standardCost;
-                                    retailPrice = unitPrice * qty;
-                                    break;
-                                case 'Fixed Dollar Amount':
-                                    unitPrice = (standardCost + amount);
-                                    retailPrice = unitPrice * qty;
-                                    break;
-                                case 'Markup Standard Cost':
-                                    var markup = (standardCost * (amount / 100));
-                                    unitPrice = (standardCost + markup);
-                                    retailPrice = unitPrice * qty;
-                                    break;
-                                case 'Percent of Margin':
-                                    unitPrice = (standardCost / (1 - (amount / 100)));
-                                    retailPrice = unitPrice * qty;
-                                    break;
-                                case 'None':
-                                default:
-                                    retailPrice = 0;
-                                    break;
-                            }
+                            var retailPrice = me.getRetailPrice({
+                                pricingMethod: pricingMethod,
+                                salePrice: unitPrice,
+                                msrpPrice: msrpPrice,
+                                standardCost: standardCost,
+                                amount: amount,
+                                qty: qty
+                            });
+
                             context.record.set('dblUnitPrice', retailPrice);
                         }
                     }
@@ -2856,7 +2915,8 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onEditPricing: function(editor, context, eOpts) {
+    onEditPricing: function (editor, context, eOpts) {
+        var me = this;
         if (context.field === 'strPricingMethod' || context.field === 'dblAmountPercent' || context.field === 'dblStandardCost') {
             if (context.record) {
                 var win = context.grid.up('window');
@@ -2875,44 +2935,58 @@ Ext.define('Inventory.view.ItemViewController', {
                     cost = context.value;
                 }
 
-                if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'None'){
-                    context.record.set('dblSalePrice', cost);
-                    context.record.set('dblAmountPercent', 0.00);
+                if(iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'None') {
+                    context.record.set('dblAmountPercent', 0.00);    
                 }
-                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Fixed Dollar Amount'){
-                    context.record.set('dblSalePrice', (cost + amount));
-                }
-                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Markup Standard Cost'){
-                    var markup = (cost * (amount / 100));
-                    context.record.set('dblSalePrice', (cost + markup));
-                }
-                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Percent of Margin') {
-                    if (amount < 100){
-                        var markup = (cost / (1 - (amount / 100)));
-                        context.record.set('dblSalePrice', markup);
-                    }
-                    else {
-                        win.context.data.validator.validateGrid(grdPricing);
-                    }
-                }
+
+                var salePrice = me.getSalePrice({
+                    cost: cost,
+                    amount: amount,
+                    pricingMethod: pricingMethod
+                }, function() {
+                    win.context.data.validator.validateGrid(grdPricing);
+                });
+
+                context.record.set('dblSalePrice', salePrice);
+
+                // if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'None') {
+                //     context.record.set('dblSalePrice', cost);
+                //     context.record.set('dblAmountPercent', 0.00);
+                // }
+                // else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Fixed Dollar Amount') {
+                //     context.record.set('dblSalePrice', (cost + amount));
+                // }
+                // else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Markup Standard Cost') {
+                //     var markup = (cost * (amount / 100));
+                //     context.record.set('dblSalePrice', (cost + markup));
+                // }
+                // else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Percent of Margin') {
+                //     if (amount < 100) {
+                //         var markup = (cost / (1 - (amount / 100)));
+                //         context.record.set('dblSalePrice', markup);
+                //     }
+                //     else {
+                //         win.context.data.validator.validateGrid(grdPricing);
+                //     }
+                // }
             }
         }
     },
 
-    onPricingGridColumnBeforeRender: function(column) {
+    onPricingGridColumnBeforeRender: function (column) {
         "use strict";
         if (!column) return false;
         var me = this,
             win = column.up('window');
 
         // Show or hide the editor based on the selected Field type.
-        column.getEditor = function(record) {
+        column.getEditor = function (record) {
             var vm = win.viewModel;
             if (!record) return false;
             var columnId = column.itemId;
 
             switch (columnId) {
-                case 'colPricingAmount' :
+                case 'colPricingAmount':
                     if (record.get('strPricingMethod') === 'None') {
                         return false;
                     }
@@ -2933,16 +3007,16 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Stock Tab Methods and Event Handlers">
 
-    onRenderStockUOM: function(value, metadata, record) {
+    onRenderStockUOM: function (value, metadata, record) {
         var grid = metadata.column.up('grid');
         var win = grid.up('window');
         var currentMaster = win.viewModel.data.current;
 
         if (record) {
-            if(currentMaster) {
+            if (currentMaster) {
                 if (currentMaster.tblICItemUOMs()) {
                     var itemUOMs = currentMaster.tblICItemUOMs().data.items;
-                    var stockUnit = Ext.Array.findBy(itemUOMs, function(row) {
+                    var stockUnit = Ext.Array.findBy(itemUOMs, function (row) {
                         if (row.get('ysnStockUnit') === true) return true;
                     })
                     if (stockUnit) {
@@ -2957,7 +3031,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Bundle Tab Methods and Event Handlers">
 
-    onBundleSelect: function(combo, records, eOpts) {
+    onBundleSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2965,10 +3039,10 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepBundle');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colBundleUOM'){
+        if (combo.column.itemId === 'colBundleUOM') {
             current.set('dblUnit', records[0].get('dblUnitQty'));
         }
-        else if (combo.column.itemId === 'colBundleItem'){
+        else if (combo.column.itemId === 'colBundleItem') {
             current.set('strDescription', records[0].get('strDescription'));
         }
 
@@ -2978,7 +3052,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Assembly Tab Methods and Event Handlers">
 
-    onAssemblySelect: function(combo, records, eOpts) {
+    onAssemblySelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2986,7 +3060,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepAssembly');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colAssemblyComponent'){
+        if (combo.column.itemId === 'colAssemblyComponent') {
             current.set('intAssemblyItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
         }
@@ -3000,7 +3074,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Kit Details Tab Methods and Event Handlers">
 
-    onKitSelect: function(combo, records, eOpts) {
+    onKitSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -3008,7 +3082,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepKitDetail');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colKitItem'){
+        if (combo.column.itemId === 'colKitItem') {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strDescription', records[0].get('strDescription'));
         }
@@ -3021,7 +3095,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Factory & Lines Tab Methods and Event Handlers">
 
-    onManufacturingCellSelect: function(combo, records, eOpts) {
+    onManufacturingCellSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -3031,12 +3105,12 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepManufacturingCell');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colCellName'){
+        if (combo.column.itemId === 'colCellName') {
             current.set('intPreference', controller.getNewPreferenceNo(grid.store));
         }
     },
 
-    getNewPreferenceNo: function(store) {
+    getNewPreferenceNo: function (store) {
         "use strict";
 
         var max = 0;
@@ -3063,15 +3137,15 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     onManufacturingCellDefaultCheckChange: function (obj, rowIndex, checked, eOpts) {
-        if (obj.dataIndex === 'ysnDefault'){
+        if (obj.dataIndex === 'ysnDefault') {
             var grid = obj.up('grid');
             var current = grid.view.getRecord(rowIndex);
 
-            if (checked === true){
+            if (checked === true) {
                 var cells = grid.store.data.items;
                 if (cells) {
-                    cells.forEach(function(cell){
-                        if (cell !== current){
+                    cells.forEach(function (cell) {
+                        if (cell !== current) {
                             cell.set('ysnDefault', false);
                         }
                     });
@@ -3082,17 +3156,17 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
-    onSpecialKeyTab: function(component, e, eOpts) {
+    onSpecialKeyTab: function (component, e, eOpts) {
         var win = component.up('window');
-        if(win) {
+        if (win) {
             if (e.getKey() === Ext.event.Event.TAB) {
                 var gridObj = win.query('#grdUnitOfMeasure')[0],
                     sel = gridObj.getStore().getAt(0);
 
-                if(sel && gridObj){
+                if (sel && gridObj) {
                     gridObj.setSelection(sel);
 
-                    var task = new Ext.util.DelayedTask(function(){
+                    var task = new Ext.util.DelayedTask(function () {
                         gridObj.plugins[0].startEditByPosition({
                             row: 0,
                             column: 1
@@ -3107,7 +3181,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onSpecialPricingDiscountChange: function(obj, newValue, oldValue, eOpts){
+    onSpecialPricingDiscountChange: function (obj, newValue, oldValue, eOpts) {
         var grid = obj.up('grid');
         var plugin = grid.getPlugin('cepSpecialPricing');
         var record = plugin.getActiveRecord();
@@ -3150,27 +3224,27 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-   /* onUpcChange: function(obj, newValue, oldValue, eOpts) {
-        var grid = obj.up('grid');
-        var plugin = grid.getPlugin('cepDetailUOM');
-        var record = plugin.getActiveRecord();
+    /* onUpcChange: function(obj, newValue, oldValue, eOpts) {
+         var grid = obj.up('grid');
+         var plugin = grid.getPlugin('cepDetailUOM');
+         var record = plugin.getActiveRecord();
+ 
+         if (obj.itemId === 'txtShortUPCCode') {
+             if (!iRely.Functions.isEmpty(newValue))
+             {
+                 return record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(newValue))
+             }
+         }
+         else if (obj.itemId === 'txtFullUPCCode') {
+             if (!iRely.Functions.isEmpty(newValue))
+             {
+                 return record.set('strUpcCode', i21.ModuleMgr.Inventory.getShortUPCString(newValue))
+             }
+         }
+ 
+     },*/
 
-        if (obj.itemId === 'txtShortUPCCode') {
-            if (!iRely.Functions.isEmpty(newValue))
-            {
-                return record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(newValue))
-            }
-        }
-        else if (obj.itemId === 'txtFullUPCCode') {
-            if (!iRely.Functions.isEmpty(newValue))
-            {
-                return record.set('strUpcCode', i21.ModuleMgr.Inventory.getShortUPCString(newValue))
-            }
-        }
-
-    },*/
-
-    onDuplicateClick: function(button) {
+    onDuplicateClick: function (button) {
         var win = button.up('window');
         var context = win.context;
         var current = win.viewModel.data.current;
@@ -3180,7 +3254,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 timeout: 120000,
                 url: '../Inventory/api/Item/DuplicateItem?ItemId=' + current.get('intItemId'),
                 method: 'GET',
-                success: function(response){
+                success: function (response) {
                     var jsonData = Ext.decode(response.responseText);
                     context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
                     context.configuration.paging.moveFirst();
@@ -3189,7 +3263,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onBuildAssemblyClick: function(button) {
+    onBuildAssemblyClick: function (button) {
         var win = button.up('window');
         var current = win.viewModel.data.current;
 
@@ -3198,8 +3272,8 @@ Ext.define('Inventory.view.ItemViewController', {
 
             Ext.require([
                 screenName,
-                    screenName + 'ViewModel',
-                    screenName + 'ViewController'
+                screenName + 'ViewModel',
+                screenName + 'ViewController'
             ], function () {
                 var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
                 var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
@@ -3213,7 +3287,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onLoadUOMClick: function(button) {
+    onLoadUOMClick: function (button) {
         var win = button.up('window');
         var current = win.viewModel.data.current;
 
@@ -3228,21 +3302,21 @@ Ext.define('Inventory.view.ItemViewController', {
                         if (uoms) {
                             if (uoms.length > 0) {
                                 current.tblICItemUOMs().removeAll();
-                                uoms.forEach(function(uom){
+                                uoms.forEach(function (uom) {
                                     var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
-                                        intItemId : current.get('intItemId'),
+                                        intItemId: current.get('intItemId'),
                                         strUnitMeasure: uom.strUnitMeasure,
-                                        intUnitMeasureId : uom.intUnitMeasureId,
-                                        dblUnitQty : uom.dblUnitQty,
-                                        ysnStockUnit : uom.ysnStockUnit,
-                                        ysnAllowPurchase : true,
-                                        ysnAllowSale : true,
-                                        dblLength : 0.00,
-                                        dblWidth : 0.00,
-                                        dblHeight : 0.00,
-                                        dblVolume : 0.00,
-                                        dblMaxQty : 0.00,
-                                        intSort : uom.intSort
+                                        intUnitMeasureId: uom.intUnitMeasureId,
+                                        dblUnitQty: uom.dblUnitQty,
+                                        ysnStockUnit: uom.ysnStockUnit,
+                                        ysnAllowPurchase: true,
+                                        ysnAllowSale: true,
+                                        dblLength: 0.00,
+                                        dblWidth: 0.00,
+                                        dblHeight: 0.00,
+                                        dblVolume: 0.00,
+                                        dblMaxQty: 0.00,
+                                        intSort: uom.intSort
                                     });
                                     current.tblICItemUOMs().add(newItemUOM);
                                 });
@@ -3263,29 +3337,29 @@ Ext.define('Inventory.view.ItemViewController', {
                         if (uoms) {
                             if (uoms.length > 0) {
                                 current.tblICItemUOMs().removeAll();
-                                uoms.forEach(function(uom){
+                                uoms.forEach(function (uom) {
                                     var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
-                                        intItemId : current.get('intItemId'),
+                                        intItemId: current.get('intItemId'),
                                         strUnitMeasure: uom.get('strUnitMeasure'),
-                                        intUnitMeasureId : uom.get('intUnitMeasureId'),
-                                        dblUnitQty : uom.get('dblUnitQty'),
-                                        dblWeight : uom.get('dblWeight'),
+                                        intUnitMeasureId: uom.get('intUnitMeasureId'),
+                                        dblUnitQty: uom.get('dblUnitQty'),
+                                        dblWeight: uom.get('dblWeight'),
                                         strWeightUOM: uom.get('strWeightUOM'),
-                                        intWeightUOMId : uom.get('intWeightUOMId'),
-                                        strUpcCode : uom.get('strUpcCode'),
-                                        ysnStockUnit : uom.get('ysnStockUnit'),
-                                        ysnAllowPurchase : uom.get('ysnAllowPurchase'),
-                                        ysnAllowSale : uom.get('ysnAllowSale'),
-                                        dblLength : uom.get('dblLength'),
-                                        dblWidth : uom.get('dblWidth'),
-                                        dblHeight : uom.get('dblHeight'),
+                                        intWeightUOMId: uom.get('intWeightUOMId'),
+                                        strUpcCode: uom.get('strUpcCode'),
+                                        ysnStockUnit: uom.get('ysnStockUnit'),
+                                        ysnAllowPurchase: uom.get('ysnAllowPurchase'),
+                                        ysnAllowSale: uom.get('ysnAllowSale'),
+                                        dblLength: uom.get('dblLength'),
+                                        dblWidth: uom.get('dblWidth'),
+                                        dblHeight: uom.get('dblHeight'),
                                         strDimensionUOM: uom.get('strDimensionUOM'),
-                                        intDimensionUOMId : uom.get('intDimensionUOMId'),
-                                        dblVolume : uom.get('dblVolume'),
+                                        intDimensionUOMId: uom.get('intDimensionUOMId'),
+                                        dblVolume: uom.get('dblVolume'),
                                         strVolumeUOM: uom.get('strVolumeUOM'),
-                                        intVolumeUOMId : uom.get('intVolumeUOMId'),
-                                        dblMaxQty : uom.get('dblMaxQty'),
-                                        intSort : uom.get('intSort')
+                                        intVolumeUOMId: uom.get('intVolumeUOMId'),
+                                        dblMaxQty: uom.get('dblMaxQty'),
+                                        intSort: uom.get('intSort')
                                     });
                                     current.tblICItemUOMs().add(newItemUOM);
                                 });
@@ -3304,15 +3378,15 @@ Ext.define('Inventory.view.ItemViewController', {
     //<editor-fold desc="Search Drilldown Events">
 
     onInventoryUOMClick: function () {
-        iRely.Functions.openScreen('Inventory.view.InventoryUOM', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('Inventory.view.InventoryUOM', { action: 'new', viewConfig: { modal: true } });
     },
 
     onCategoryClick: function () {
-        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true } });
     },
 
     onCommodityClick: function () {
-        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true } });
     },
 
     onLotStatusClick: function () {
@@ -3323,169 +3397,168 @@ Ext.define('Inventory.view.ItemViewController', {
 
     //<editor-fold desc="Combo Box Drilldown Events">
 
-    onManufacturerDrilldown: function(combo) {
-        iRely.Functions.openScreen('Inventory.view.Manufacturer', {viewConfig: { modal: true }});
+    onManufacturerDrilldown: function (combo) {
+        iRely.Functions.openScreen('Inventory.view.Manufacturer', { viewConfig: { modal: true } });
     },
 
-    onBrandDrilldown: function(combo) {
-        iRely.Functions.openScreen('Inventory.view.Brand', {viewConfig: { modal: true }});
+    onBrandDrilldown: function (combo) {
+        iRely.Functions.openScreen('Inventory.view.Brand', { viewConfig: { modal: true } });
     },
 
-    onCommodityDrilldown: function(combo) {
+    onCommodityDrilldown: function (combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true } });
         }
         else {
             iRely.Functions.openScreen('Inventory.view.Commodity', combo.getValue());
         }
     },
 
-    onCategoryDrilldown: function(combo) {
+    onCategoryDrilldown: function (combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true } });
         }
         else {
             iRely.Functions.openScreen('Inventory.view.Category', combo.getValue());
         }
     },
 
-    onMedicationTaxDrilldown: function(combo) {
+    onMedicationTaxDrilldown: function (combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true } });
         }
         else {
             iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
         }
     },
 
-    onIngredientTagDrilldown: function(combo) {
+    onIngredientTagDrilldown: function (combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true } });
         }
         else {
             iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
         }
     },
 
-    onFuelCategoryDrilldown: function(combo) {
-        iRely.Functions.openScreen('Inventory.view.FuelCategory', {viewConfig: { modal: true }});
+    onFuelCategoryDrilldown: function (combo) {
+        iRely.Functions.openScreen('Inventory.view.FuelCategory', { viewConfig: { modal: true } });
     },
 
-    onPatronageDrilldown: function(combo) {
-        iRely.Functions.openScreen('Patronage.view.PatronageCategory', {viewConfig: { modal: true }});
+    onPatronageDrilldown: function (combo) {
+        iRely.Functions.openScreen('Patronage.view.PatronageCategory', { viewConfig: { modal: true } });
     },
 
-    onPatronageDirectDrilldown: function(combo) {
-        iRely.Functions.openScreen('Patronage.view.PatronageCategory', {viewConfig: { modal: true }});
+    onPatronageDirectDrilldown: function (combo) {
+        iRely.Functions.openScreen('Patronage.view.PatronageCategory', { viewConfig: { modal: true } });
     },
 
     //</editor-fold>
 
     //<editor-fold desc="Header Drilldown Events">
 
-    onUOMHeaderClick: function(menu, column) {
+    onUOMHeaderClick: function (menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.InventoryUOM', grid, 'intUnitMeasureId');
     },
 
-    onCategoryHeaderClick: function(menu, column) {
+    onCategoryHeaderClick: function (menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Category', grid, 'intCategoryId');
     },
 
-    onCountryHeaderClick: function(menu, column) {
+    onCountryHeaderClick: function (menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('i21.view.Country', grid, 'intCountryID');
     },
 
-    onDocumentHeaderClick: function(menu, column) {
+    onDocumentHeaderClick: function (menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.ContractDocument', grid, 'intDocumentId');
     },
 
-    onCertificationHeaderClick: function(menu, column) {
+    onCertificationHeaderClick: function (menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.CertificationProgram', grid, 'intCertificationId');
     },
 
-    onManufacturingCellHeaderClick: function(menu, column) {
+    onManufacturingCellHeaderClick: function (menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Manufacturing.view.ManufacturingCell', grid, 'intManufacturingCellId');
     },
 
-    onCustomerHeaderClick: function(menu, column) {
+    onCustomerHeaderClick: function (menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityCustomer', grid, 'intOwnerId');
     },
 
-    onPatronageBeforeSelect: function(combo, record) {
+    onPatronageBeforeSelect: function (combo, record) {
         if (record.length <= 0)
             return;
-		
-		var stockUnitExist = false;
+
+        var stockUnitExist = false;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
         if (current) {
-                if (current.tblICItemUOMs()) {
-                    Ext.Array.each(current.tblICItemUOMs().data.items, function (itemStock) {
-                        if (!itemStock.dummy) {
-                            if(itemStock.get('ysnStockUnit') == '1')
-								stockUnitExist = true;
-                        }
-                    });
-                }
-            
+            if (current.tblICItemUOMs()) {
+                Ext.Array.each(current.tblICItemUOMs().data.items, function (itemStock) {
+                    if (!itemStock.dummy) {
+                        if (itemStock.get('ysnStockUnit') == '1')
+                            stockUnitExist = true;
+                    }
+                });
+            }
+
         }
-		
-		if (stockUnitExist == false)
-		{
-			iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
+
+        if (stockUnitExist == false) {
+            iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
             return false;
-		}
+        }
     },
-    
-    onUPCEnterTab: function(field, e, eOpts) {
+
+    onUPCEnterTab: function (field, e, eOpts) {
         var win = field.up('window');
         var grd = field.up('grid');
         var plugin = grd.getPlugin('cepDetailUOM');
         var record = plugin.getActiveRecord();
 
-        if(win) {
+        if (win) {
             if (e.getKey() == e.ENTER || e.getKey() == e.TAB) {
-               var task = new Ext.util.DelayedTask(function(){
-                     if(field.itemId === 'txtShortUPCCode') {
-                         record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')));
-                     }
-                     else if(field.itemId === 'txtFullUPCCode') {
+                var task = new Ext.util.DelayedTask(function () {
+                    if (field.itemId === 'txtShortUPCCode') {
+                        record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')));
+                    }
+                    else if (field.itemId === 'txtFullUPCCode') {
                         record.set('strUpcCode', i21.ModuleMgr.Inventory.getShortUPCString(record.get('strLongUPCCode')));
-                        if(record.get('strUpcCode') !== null) {
+                        if (record.get('strUpcCode') !== null) {
                             record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')));
-                        }  
-                     }   
+                        }
+                    }
                 });
 
                 task.delay(10);
-            }  
+            }
         }
     },
-    
+
     //</editor-fold>
-    onLocationCellClick: function(view, cell, cellIndex, record, row, rowIndex, e) {
+    onLocationCellClick: function (view, cell, cellIndex, record, row, rowIndex, e) {
         var linkClicked = (e.target.tagName == 'A');
         var clickedDataIndex =
             view.panel.headerCt.getHeaderAtIndex(cellIndex).dataIndex;
@@ -3495,19 +3568,21 @@ Ext.define('Inventory.view.ItemViewController', {
             var me = win.controller;
             var vm = win.getViewModel();
 
-            if (!record){
+            if (!record) {
                 iRely.Functions.showErrorDialog('Please select a location to edit.');
                 return;
             }
 
             if (vm.data.current.phantom === true) {
-                win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                    me.openItemLocationScreen('edit', win, record);
-                    return;
-                } });
+                win.context.data.saveRecord({
+                    successFn: function (batch, eOpts) {
+                        me.openItemLocationScreen('edit', win, record);
+                        return;
+                    }
+                });
             }
             else {
-                win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                win.context.data.validator.validateRecord({ window: win }, function (valid) {
                     if (valid) {
                         me.openItemLocationScreen('edit', win, record);
                         return;
@@ -3517,7 +3592,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    init: function(application) {
+    init: function (application) {
         this.control({
             "#cboType": {
                 select: this.onInventoryTypeSelect
@@ -3635,6 +3710,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
             },
+            "#txtStandardCost": {
+                change: this.onPricingStandardCostChange
+            },
             "#txtShortUPCCode": {
                 specialKey: this.onUPCEnterTab
             },
@@ -3706,6 +3784,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 drilldown: this.onPatronageDirectDrilldown
             }
         });
-        
+
     }
 });
