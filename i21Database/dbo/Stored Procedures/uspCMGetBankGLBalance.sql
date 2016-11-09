@@ -12,7 +12,7 @@ SET ANSI_WARNINGS OFF
 			
 SELECT	totalDebit = ISNULL(SUM(ISNULL(dblDebit, 0)), 0)
 		,totalCredit = ISNULL(SUM(ISNULL(dblCredit, 0)), 0)
-		,totalGL = ISNULL(SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0)), 0)
+		,totalGL = ROUND(ISNULL(SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0)), 0),2)
 FROM	[dbo].[tblGLDetail] INNER JOIN [dbo].[tblCMBankAccount]
 			ON [dbo].[tblGLDetail].intAccountId = [dbo].[tblCMBankAccount].intGLAccountId
 WHERE	tblCMBankAccount.intBankAccountId = @intBankAccountId

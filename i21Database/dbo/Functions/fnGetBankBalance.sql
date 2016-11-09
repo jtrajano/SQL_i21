@@ -92,6 +92,6 @@ WHERE	ysnPosted = 1
 -- Add the opening balance to the return balance. 
 SET @returnBalance = ISNULL(@openingBalance, 0) + @returnBalance
 
-RETURN ISNULL(@returnBalance, 0)
+RETURN ROUND(ISNULL(@returnBalance, 0),2)
 
 END 
