@@ -597,6 +597,8 @@ var inventoryFiles = [{
 }, {
     "pattern": "app/view/InventoryReceiptTaxes.js"
 }, {
+    "pattern": "app/view/InventoryReceiptViewController.js"
+}, {
     "pattern": "app/model/EquipmentLength.js"
 }, {
     "pattern": "app/store/BufferedEquipmentLength.js"
@@ -823,7 +825,7 @@ var mockFiles = [
 ];
 var testFiles = [
     {pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true},
-    {pattern: 'test/specs/**/*.js', watched: true}
+    {pattern: 'test/specs/**/*.spec.js', watched: true}
 ];
 
 var libs = [
@@ -855,13 +857,13 @@ module.exports = function (config) {
 
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-       preprocessors: { 'app/**/*.js': ['coverage'] },
+       //preprocessors: { 'app/**/*.js': ['coverage'] },
 
 
         // test results reporter to use
         // possible values: 'dots', 'progress'
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['coverage', 'mocha'],
+        reporters: ['mocha'],
 
 
         // web server port

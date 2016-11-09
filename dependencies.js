@@ -555,6 +555,8 @@
 }, {
     "pattern": "app/view/InventoryReceiptTaxes.js"
 }, {
+    "pattern": "app/view/InventoryReceiptViewController.js"
+}, {
     "pattern": "app/model/EquipmentLength.js"
 }, {
     "pattern": "app/store/BufferedEquipmentLength.js"

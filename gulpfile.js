@@ -45,6 +45,22 @@ gulp.task('spec-s', function() {
         .pipe(gen(config2))
         .pipe(gulp.dest(config2.destDir));
 });
+
+var config3 = {
+    type: "viewcontroller",
+    moduleName: "Inventory",
+    dependencyDir: "app/**/*.js",
+    resolveModuleDependencies: true,
+    destDir: "test/specs",
+    formatContent: true,
+    dependencyDestDir: "test/mock"
+};
+
+gulp.task('spec-vc', function() {
+    gulp.src('app/view/**/*.js')
+        .pipe(gen(config3))
+        .pipe(gulp.dest(config3.destDir));
+});
 /**
  * **************************************************************************
  * *       *           *           *           *              *             *
