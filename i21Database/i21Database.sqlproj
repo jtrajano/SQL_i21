@@ -4557,6 +4557,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGeneratePutAwayTask.sql" />
     <Build Include="dbo\Views\vyuARPrepaymentContractDefault.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertRecurringSalesOrder.sql" />
+    <Build Include="dbo\Functions\fnARGetAccountUsedInLineItemAsTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
