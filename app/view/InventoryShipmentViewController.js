@@ -1092,7 +1092,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
 
         else if (combo.itemId === 'cboCustomerStorage') {
-            current.set('intCustomerStorageId', records[0].get('intCustomerStorageId'));
+            current.set('intStorageScheduleTypeId', records[0].get('intStorageTypeId'));
 
         }
     },
@@ -1331,12 +1331,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice successfully processed. Do you want to view this Invoice?', buttonAction);
                     }
                     else {
-                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        var jsonData = Ext.decode(response.responseText);
+                        var msg = jsonData.ExceptionMessage;
+                        if(!jsonData.success) {
+                            if(jsonData.message.statusText === " " && jsonData.message.status === 9998)
+                                msg = "Can't process Invoice for Items that don't have order number.";
+                        }
+                        iRely.Functions.showErrorDialog(msg);
                     }
                 },
                 failure: function(response) {
                     var jsonData = Ext.decode(response.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    var msg = jsonData.ExceptionMessage;
+                    if(!jsonData.success) {
+                        if(jsonData.message.statusText === " " && jsonData.message.status === 9998)
+                                msg = "Can't process Invoice for Items that don't have order number.";
+                    }
+                    iRely.Functions.showErrorDialog(msg);
                 }
             });
         }

@@ -24,7 +24,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'ContractManagement.store.ContractHeaderViewBuffered',
         'i21.store.CurrencyBuffered',
         'Logistics.store.PickedLots',
-        'Grain.store.BufferedStorageTransferTicket'
+        'Grain.store.BufferedStorageTakeOut'
     ],
 
     data: {
@@ -211,7 +211,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             type: 'lgpickedlots'
         },
         customerStorage: {
-            type: 'bufferedstoragetransferticket',
+            type: 'grbufferedstoragetakeout',
             pageSize: 25 // Override the pageSize of the Grain store.
         }
     },
