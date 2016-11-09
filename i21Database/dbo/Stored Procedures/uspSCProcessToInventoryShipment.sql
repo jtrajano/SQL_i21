@@ -277,7 +277,7 @@ BEGIN TRY
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage 
 				)
-				EXEC dbo.uspSCGetScaleItemForItemReceipt 
+				EXEC dbo.uspSCGetScaleItemForItemShipment 
 					 @intTicketId
 					,@strSourceType
 					,@intUserId
