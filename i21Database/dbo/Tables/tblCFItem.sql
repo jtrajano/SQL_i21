@@ -43,3 +43,10 @@
 
 
 
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFItem_intItemId]
+    ON [dbo].[tblCFItem]([intItemId] ASC);
+

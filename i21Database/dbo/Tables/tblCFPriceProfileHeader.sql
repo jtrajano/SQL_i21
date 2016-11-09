@@ -8,3 +8,10 @@
     CONSTRAINT [PK_tblCFPriceProfileHeader] PRIMARY KEY CLUSTERED ([intPriceProfileHeaderId] ASC)
 );
 
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFPriceProfileHeader_intPriceProfileHeaderId]
+    ON [dbo].[tblCFPriceProfileHeader]([intPriceProfileHeaderId] ASC);
+
