@@ -4559,6 +4559,7 @@
     <Build Include="dbo\Stored Procedures\uspAPFixAmount.sql" />
     <Build Include="dbo\Tables\tblQMProductPropertyFormulaProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidate1099Config.sql" />
+    <Build Include="dbo\Views\vyuTMAssociateSiteSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
