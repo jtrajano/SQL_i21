@@ -85,6 +85,10 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnCountedDaily
 	, ItemLocation.ysnLockedInventory
 	, ItemLocation.intSort
+	, ItemLocation.intPaymentOn
+	, strPaymentOn = (CASE WHEN ItemLocation.intPaymentOn = 1 THEN 'Quantity'
+						   WHEN ItemLocation.intPaymentOn = 2 THEN 'Net' 
+						   ELSE '' END)
 FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
