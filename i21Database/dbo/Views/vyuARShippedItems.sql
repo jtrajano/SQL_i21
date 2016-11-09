@@ -336,7 +336,7 @@ SELECT
 	,[strPricing]						= SOD.[strPricing]
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
-	,[intStorageLocationId]				= SOD.[intStorageLocationId]
+	,[intStorageLocationId]				= ISNULL(SHP.intStorageLocationId, SOD.[intStorageLocationId])
 	,[strStorageLocationName]			= SL.[strName]
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
@@ -359,7 +359,7 @@ SELECT
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= SOD.[ysnBlended]
 	,[intRecipeId]						= SOD.[intRecipeId]
-	,[intSubLocationId]					= SOD.[intSubLocationId]
+	,[intSubLocationId]					= ISNULL(SHP.intSubLocationId, SOD.[intSubLocationId])
 	,[intCostTypeId]					= SOD.[intCostTypeId]
 	,[intMarginById]					= SOD.[intMarginById]
 	,[intCommentTypeId]					= SOD.[intCommentTypeId]
@@ -403,9 +403,6 @@ LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]		
 LEFT OUTER JOIN
-	tblICStorageLocation SL
-		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
-LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId] 
 LEFT OUTER JOIN
@@ -431,6 +428,8 @@ CROSS APPLY
 		,CL.[strLocationName]
 		,ISH.[intFreightTermId]
 		,ISI.[intWeightUOMId]
+		,ISI.intSubLocationId
+		,ISI.intStorageLocationId
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -469,6 +468,8 @@ CROSS APPLY
 		,CL.[strLocationName]
 		,ISH.[intFreightTermId]
 		,ISI.[intWeightUOMId]
+		,ISI.intSubLocationId
+		,ISI.intStorageLocationId
 	) SHP
 LEFT OUTER JOIN
 	tblSCTicket SCT
@@ -504,6 +505,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCurrency SMC
 		ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN
+	tblICStorageLocation SL
+		ON ISNULL(SHP.[intStorageLocationId], SOD.[intStorageLocationId]) = SL.[intStorageLocationId]
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0			
 	
 UNION ALL
