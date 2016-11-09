@@ -54,5 +54,19 @@ namespace iRely.Inventory.BusinessLayer
             }
             return result;
         }
+
+        public override BusinessResult<tblICRinFeedStockUOM> Validate(IEnumerable<tblICRinFeedStockUOM> entities, ValidateAction action)
+        {
+            if (entities.Where(p => string.IsNullOrEmpty(p.strUnitMeasure)).Count() > 0)
+            {
+                return new BusinessResult<tblICRinFeedStockUOM>()
+                {
+                    data = entities,
+                    message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "UOM must not be blank." },
+                    success = false
+                };
+            }
+            return base.Validate(entities, action);
+        }
     }
 }
