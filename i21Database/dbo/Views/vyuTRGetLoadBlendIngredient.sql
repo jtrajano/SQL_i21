@@ -3,10 +3,14 @@
 
 SELECT LoadIngredient.intLoadBlendIngredientId
 	, LoadIngredient.intLoadDistributionDetailId
+	, LoadDetail.intLoadDistributionHeaderId
+	, Recipe.intRecipeId
+	, Recipe.strItemNo
+	, Recipe.strDescription
 	, intLoadDistributionItemId = LoadDetail.intItemId
 	, dblLoadDistributionQty = LoadDetail.dblUnits
 	, intIngredientItemId = Recipe.intRecipeIngredientItemId
-	, dblIngredientQty = LoadIngredient.dblQuantity
+	, LoadIngredient.dblQuantity
 	, Recipe.dblLowerTolerance
 	, Recipe.dblUpperTolerance
 	, dblRecipeQty = Recipe.dblQuantity
