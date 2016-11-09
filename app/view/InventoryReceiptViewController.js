@@ -5264,13 +5264,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                           dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
                       if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
                           dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
-
-                    if (iRely.Functions.isEmpty(item.get('dblNet'))) item.get('dblNet') = 0.00;
-                    if (iRely.Functions.isEmpty(item.get('dblOrderQty'))) item.get('dblOrderQty') = 0.00;
-                    if (iRely.Functions.isEmpty(item.get('dblContainerWeightPerQty'))) item.get('dblContainerWeightPerQty') = 0.00;
+                    var net = 0.00, orderQty = 0.00, wgtQty = 0.00;
+                    if (!iRely.Functions.isEmpty(item.get('dblNet'))) net = item.get('dblNet');
+                    if (!iRely.Functions.isEmpty(item.get('dblOrderQty'))) orderQty = item.get('dblOrderQty');
+                    if (!iRely.Functions.isEmpty(item.get('dblContainerWeightPerQty'))) wgtQty = item.get('dblContainerWeightPerQty');
                     
-                    dblNetReceivedWt = item.get('dblNet');
-                    dblNetShippedWt = item.get('dblOrderQty') * item.get('dblContainerWeightPerQty');
+                    dblNetReceivedWt = net;
+                    dblNetShippedWt = orderQty * wgtQty;
                     dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
                 }
             });

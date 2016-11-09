@@ -29,6 +29,22 @@ gulp.task('spec-m', function() {
         .pipe(gen(config))
         .pipe(gulp.dest(config.destDir));
 });
+
+var config2 = {
+    type: "store",
+    moduleName: "Inventory",
+    dependencyDir: "app/**/*.js",
+    resolveModuleDependencies: true,
+    destDir: "test/specs",
+    formatContent: true,
+    dependencyDestDir: "test/mock"
+};
+
+gulp.task('spec-s', function() {
+    gulp.src('app/store/**/*.js')
+        .pipe(gen(config2))
+        .pipe(gulp.dest(config2.destDir));
+});
 /**
  * **************************************************************************
  * *       *           *           *           *              *             *
