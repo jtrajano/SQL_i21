@@ -14,7 +14,21 @@ var gen = require('gulp-extjs-spec-generator');
  * *       *           *           *           *              *             *
  * ************************************************************************** 
  */
+var config = {
+    type: "model",
+    moduleName: "Inventory",
+    dependencyDir: "app/**/*.js",
+    resolveModuleDependencies: true,
+    destDir: "test/specs",
+    formatContent: true,
+    dependencyDestDir: "test/mock"
+};
 
+gulp.task('spec-m', function() {
+    gulp.src('app/model/**/*.js')
+        .pipe(gen(config))
+        .pipe(gulp.dest(config.destDir));
+});
 /**
  * **************************************************************************
  * *       *           *           *           *              *             *

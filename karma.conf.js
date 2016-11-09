@@ -9,15 +9,6 @@ var extJs = [
     // load the override for Ext.data.Connection.
     {pattern: '../resources/test/override/Ext.data.Connection.js', watched: false},
 
-     // Load the application dependencies, similar on how SM did it.
-     {pattern: '../SystemManager/app/controller/UtilityManager.js', watched: false},
-     {pattern: '../SystemManager/app/controller/PreferenceManager.js', watched: false},
-     {pattern: '../SystemManager/app/controller/ModuleManager.js', watched: false},
-     {pattern: '../SystemManager/app/controller/Module.js', watched: false},
-     {pattern: '../SystemManager/app/model/*.js', watched: false},
-     {pattern: '../SystemManager/app/store/*.js', watched: false},
-     {pattern: '../SystemManager/app/data/validator/*.js', watched: false},
-
      {pattern: '../GlobalComponentEngine/iRely/BaseEntity.js', watched: false},
      {pattern: '../GlobalComponentEngine/iRely/model/EntityCredential.js', watched: false},
      {pattern: '../GlobalComponentEngine/iRely/model/EntityToContact.js', watched: false},
@@ -31,6 +22,15 @@ var extJs = [
      {pattern: '../GlobalComponentEngine/iRely/Configuration.js', watched: false},
      {pattern: '../GlobalComponentEngine/iRely/Exporter.js', watched: false},
      {pattern: '../GlobalComponentEngine/iRely/writer/JsonBatch.js', watched: false},
+
+     // Load the application dependencies, similar on how SM did it.
+     {pattern: '../SystemManager/app/controller/UtilityManager.js', watched: false},
+     {pattern: '../SystemManager/app/controller/PreferenceManager.js', watched: false},
+     {pattern: '../SystemManager/app/controller/ModuleManager.js', watched: false},
+     {pattern: '../SystemManager/app/controller/Module.js', watched: false},
+     {pattern: '../SystemManager/app/model/*.js', watched: false},
+     {pattern: '../SystemManager/app/store/*.js', watched: false},
+     {pattern: '../SystemManager/app/data/validator/*.js', watched: false},
 
      {pattern: '../resources/js/deft/deft.js', watched: false},
      {pattern: '../resources/js/filesaver/filesaver.js', watched: false},
@@ -818,7 +818,11 @@ var inventoryFiles = [{
     "pattern": "app/view/StorageUnitViewModel.js"
 }];
 
+var mockFiles = [
+    {pattern: 'test/mock/**/*.js', watched: true}
+];
 var testFiles = [
+    {pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true},
     {pattern: 'test/specs/**/*.js', watched: true}
 ];
 
@@ -826,7 +830,7 @@ var libs = [
     {pattern: 'app/lib/**/*.js', watched: true }
 ];
 
-var files = libs.concat(extJs).concat(inventoryFiles).concat(testFiles);
+var files = libs.concat(extJs).concat(mockFiles).concat(inventoryFiles).concat(testFiles);
 
 module.exports = function (config) {
     config.set({
@@ -851,7 +855,7 @@ module.exports = function (config) {
 
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-        preprocessors: {},
+       preprocessors: { 'app/**/*.js': ['coverage'] },
 
 
         // test results reporter to use
