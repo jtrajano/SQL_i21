@@ -8,9 +8,8 @@
 @Refresh NVARCHAR(5)
 
 AS
-
-
 --===================================================== i21 INVENTORY TRANSFER =====================================================
+
 DECLARE @CountRC INT
 DECLARE @QueryRC NVARCHAR(MAX)
 DECLARE @RCId NVARCHAR(50)
@@ -356,7 +355,7 @@ DECLARE @tblTempTransaction TABLE (
 		--		INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 		--	END
 
---===================================================== i21 INVENTORY TRANSFER =====================================================
+--===================================================== ORIGIN INVENTORY TRANSFER =====================================================
 -- ORIGIN/DESTINATION
 DECLARE @TRIncludeOriginState NVARCHAR(250)
 DECLARE @TRExcludeOriginState NVARCHAR(250)
@@ -552,6 +551,7 @@ DECLARE @tblTRTempTransaction TABLE (
 							  WHERE (RC.intReportingComponentId IN(' + @TRRCId + ')) 
 							  AND TR.strSourceSystem NOT IN (''F'')
 							  AND TR.strTransactionType IN (''T'', ''O'')
+							  AND TR.strCarrierCompanyOwnedIndicator = ''Y''
 							  AND TR.dtmTransactionDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							  ' + @TRIncludeOriginState + ' ' + @TRExcludeOriginState + '
 							  ' + @TRIncludeDestinationState + ' ' + @TRExcludeDestinationState + ' ' + @Criteria + ''
@@ -566,5 +566,4 @@ DECLARE @tblTRTempTransaction TABLE (
 		IF(@TRHasResult IS NULL AND @IsEdi = 'false')
 			BEGIN
 				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, 'SF-401', 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
-		
 			END
