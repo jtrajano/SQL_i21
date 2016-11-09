@@ -174,7 +174,7 @@ BEGIN
 				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 				WHERE H.strCurrentSeason IS NOT NULL 
 					AND vwcus_active_yn = ''Y'' 
-					AND (C.ysnOnHold = 0 OR dtmOnHoldEndDate < DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)) AND C.ysnActive = 1
+					AND C.ysnActive = 1
 				')
 		END
 		ELSE
@@ -306,7 +306,7 @@ BEGIN
 				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 				WHERE H.strCurrentSeason IS NOT NULL 
 					AND vwcus_active_yn = ''Y'' 
-					AND (C.ysnOnHold = 0 OR dtmOnHoldEndDate < DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)) AND C.ysnActive = 1
+					AND C.ysnActive = 1
 		')
 	END
 END
