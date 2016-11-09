@@ -241,7 +241,8 @@ namespace iRely.Inventory.Model
         public DateTime? dtmExportedDate { get; set; }
         public int? intSort { get; set; }
         public bool? ysnSubCurrency { get; set; }
-        
+        public int? intPaymentOn { get; set; }
+
         private string _orderNumber;
         [NotMapped]
         public string strOrderNumber

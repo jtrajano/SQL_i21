@@ -431,6 +431,8 @@ namespace iRely.Inventory.Model
         public string strLifeTimeType { get; set; }
         public bool? ysnListBundleSeparately { get; set; }
         public decimal? dblExtendedCost { get; set; }
+        public int? intPaymentOn { get; set; }
+        public string strPaymentOn { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }

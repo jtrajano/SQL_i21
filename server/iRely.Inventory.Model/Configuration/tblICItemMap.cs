@@ -451,6 +451,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
             this.Property(t => t.ysnListBundleSeparately).HasColumnName("ysnListBundleSeparately");
             this.Property(t => t.dblExtendedCost).HasColumnName("dblExtendedCost");
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
+            this.Property(t => t.strPaymentOn).HasColumnName("strPaymentOn");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)

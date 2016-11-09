@@ -1635,6 +1635,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
             current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
             current.set('strSubCurrency', cboCurrency.getDisplayValue());
+            current.set('intPaymentOn', records[0].get('intPaymentOn'));
 
             var intUOM = null;
             var strUOM = '';
@@ -1880,17 +1881,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 netWgtCF = detailRecord.get('dblWeightUOMConvFactor'),
                 valueCostCF;
 
-            // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
-            if (iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))) {
-                // Sanitize the cost conversion factor.
-                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
-                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+            if(iRely.Functions.isEmpty(detailRecord.get('intPaymentOn'))) {
+                // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
+                if (iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))) {
+                    // Sanitize the cost conversion factor.
+                    costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+                    costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
-                unitCost = unitCost * (qtyCF / costCF);
+                    unitCost = unitCost * (qtyCF / costCF);
+                }
+
+                // Calculate Cost UOM Conversion Factor with respect to the Gross UOM..
+                else {
+                    var qtyOrdered = detailRecord.get('dblNet');
+                    var netWgtCF = detailRecord.get('dblWeightUOMConvFactor');
+
+                    // Sanitize the cost conversion factor.
+                    costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
+                    costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+                    unitCost = unitCost * (netWgtCF / costCF);
+                }
             }
-
-            // Calculate Cost UOM Conversion Factor with respect to the Gross UOM..
-            else {
+            //Calculate Taxes based on Net
+            else if(detailRecord.get('intPaymentOn') == 2) {
                 var qtyOrdered = detailRecord.get('dblNet');
                 var netWgtCF = detailRecord.get('dblWeightUOMConvFactor');
 
@@ -1899,6 +1913,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
                 unitCost = unitCost * (netWgtCF / costCF);
+            }
+            //Calculate Taxes based on Quantity
+            else {
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+                unitCost = unitCost * (qtyCF / costCF);
             }
 
 
@@ -2029,35 +2051,64 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             costCentsFactor = 1;
         }
 
+        if(iRely.Functions.isEmpty(currentReceiptItem.get('intPaymentOn'))) {
+            // Compute the line total with respect to the Item UOM
+            if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
-        // Compute the line total with respect to the Item UOM
-        if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
-            // Sanitize the cost conversion factor.
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+                // Formula is:
+                // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+                // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
+                // {Line Total} = ( {Qty in Item UOM} x {New Cost} )
+                lineTotal = (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
+            }
 
-            // Formula is:
-            // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
-            // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
-            // {Line Total} = ( {Qty in Item UOM} x {New Cost} )
-            lineTotal = (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
+            // Compute the line total with respect to the Gross UOM..
+            else {
+                var netWgt = currentReceiptItem.get('dblNet');
+                var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
+
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+                // Formula is:
+                // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+                // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
+                // {Line Total} = ( {Net Qty in Gross/Net UOM} x {New Cost} )
+                lineTotal = (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
+            }
         }
+        //Compute based on Net
+        else if (currentReceiptItem.get('intPaymentOn') == 2) {
+                var netWgt = currentReceiptItem.get('dblNet');
+                var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
 
-        // Compute the line total with respect to the Gross UOM..
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+                // Formula is:
+                // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+                // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
+                // {Line Total} = ( {Net Qty in Gross/Net UOM} x {New Cost} )
+                lineTotal = (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
+        }
+        //Compute based on Quantity Received
         else {
-            var netWgt = currentReceiptItem.get('dblNet');
-            var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
-            // Sanitize the cost conversion factor.
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-            // Formula is:
-            // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
-            // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
-            // {Line Total} = ( {Net Qty in Gross/Net UOM} x {New Cost} )
-            lineTotal = (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
+                // Formula is:
+                // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+                // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
+                // {Line Total} = ( {Qty in Item UOM} x {New Cost} )
+                lineTotal = (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
         }
+
 
         return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
     },

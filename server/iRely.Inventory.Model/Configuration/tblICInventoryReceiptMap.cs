@@ -230,6 +230,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
 
             this.HasOptional(p => p.vyuICInventoryReceiptItemLookUp)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
