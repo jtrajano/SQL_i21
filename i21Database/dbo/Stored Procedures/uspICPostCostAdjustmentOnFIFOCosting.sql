@@ -135,8 +135,6 @@ DECLARE @CostBucketId AS INT
 		,@InventoryTransactionIdentityId AS INT
 		,@OriginalCost AS NUMERIC(38,20)
 		,@dblNewCalculatedCost AS NUMERIC(38,20)
-		,@InventoryTransactionIdentityId_SoldOrUsed AS INT 
-		,@ysnNoGLPosting_ForInvTransfer AS BIT = 0 
 
 DECLARE @InvTranId AS INT
 		,@InvTranQty AS NUMERIC(38,20)
@@ -165,6 +163,7 @@ DECLARE @dblRemainingQty AS NUMERIC(38,20)
 		,@AdjustedQty AS NUMERIC(38,20) 
 		,@AdjustableQty AS NUMERIC(38,20)
 		,@dblNewCost AS NUMERIC(38,20)
+		,@strLotNumber AS NVARCHAR(50)
 
 		,@dblAdjustQty AS NUMERIC(38,20)
 		,@intInventoryTrnasactionId_EscalateValue AS INT 
@@ -262,7 +261,7 @@ BEGIN
 	BEGIN 
 		-- Get the original cost. 
 		BEGIN 
-			-- Get the original cost from the FIFO cost adjustment log table. 
+			-- Get the original cost from the Lot cost adjustment log table. 
 			SET @OriginalCost = NULL
 			 
 			SELECT	@OriginalCost = dblCost
@@ -383,31 +382,6 @@ BEGIN
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 
-		-- Check if gl entries are required for inventory transfer
-		IF @CostAdjustmentTransactionType = @INV_TRANS_TYPE_Revalue_Transfer 
-		BEGIN 
-			SET @ysnNoGLPosting_ForInvTransfer = 1
-			SELECT	TOP 1 
-					@ysnNoGLPosting_ForInvTransfer = 0
-			FROM	tblICInventoryTransaction t_lvl_0
-					OUTER APPLY (
-						SELECT	intCount = COUNT(1)  
-						FROM	tblICInventoryTransaction t_lvl_1
-						WHERE	t_lvl_1.strTransactionId = t_lvl_0.strTransactionId
-								AND t_lvl_1.strBatchId = t_lvl_0.strBatchId
-								AND t_lvl_1.ysnIsUnposted = 0 
-								AND t_lvl_1.intInventoryTransactionId <> t_lvl_0.intInventoryTransactionId
-								AND ISNULL(t_lvl_1.intItemLocationId, 0) <> ISNULL(t_lvl_0.intItemLocationId, 0)
-					) non_matching_location
-			WHERE	t_lvl_0.strTransactionId = @CostBucketStrTransactionId
-					AND t_lvl_0.ysnIsUnposted = 0 
-					AND ISNULL(non_matching_location.intCount, 0) > 0 
-
-			UPDATE	tblICInventoryTransaction
-			SET		ysnNoGLPosting = @ysnNoGLPosting_ForInvTransfer
-			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
-		END 
-
 		-- Log original cost to tblICInventoryFIFOCostAdjustmentLog
 		IF NOT EXISTS (
 				SELECT	TOP 1 1 
@@ -471,11 +445,11 @@ BEGIN
 	BEGIN 
 		-- Get the Lot Out records. 
 		DECLARE @FIFOOutId AS INT 
-				,@FIFOOutInventoryFIFOId AS INT 
+				,@FIFOOutInventoryLotId AS INT 
 				,@FIFOOutInventoryTransactionId AS INT 
 				,@FIFOOutRevalueFifoId AS INT 
 				,@FIFOOutQty AS NUMERIC(38,20)
-				,@FIFOCostAdjustQty AS NUMERIC(38,20)
+				,@LotCostAdjustQty AS NUMERIC(38,20)
 
 				,@StockQtyAvailableToRevalue AS NUMERIC(38,20) = @dblAdjustQty
 				,@StockQtyToRevalue AS NUMERIC(38,20) = @dblAdjustQty
@@ -514,11 +488,11 @@ BEGIN
 		-- Initial fetch attempt
 		FETCH NEXT FROM loopFIFOOut INTO 
 				@FIFOOutId
-				,@FIFOOutInventoryFIFOId 
+				,@FIFOOutInventoryLotId 
 				,@FIFOOutInventoryTransactionId 
 				,@FIFOOutRevalueFifoId
 				,@FIFOOutQty 
-				,@FIFOCostAdjustQty
+				,@LotCostAdjustQty
 		;
 		-----------------------------------------------------------------------------------------------------------------------------
 		-- Start of the loop for sold/produced items. 
@@ -566,7 +540,7 @@ BEGIN
 
 			-- Calculate the available 'out' stocks that the system can revalue. 
 			SELECT @StockQtyAvailableToRevalue = 
-						CASE	WHEN @dblNewValue IS NULL THEN ISNULL(@FIFOOutQty, 0) - ISNULL(@FIFOCostAdjustQty, 0)
+						CASE	WHEN @dblNewValue IS NULL THEN ISNULL(@FIFOOutQty, 0) - ISNULL(@LotCostAdjustQty, 0)
 								ELSE ISNULL(@FIFOOutQty, 0)
 						END 
 		
@@ -577,15 +551,7 @@ BEGIN
 								ELSE 0 
 						END
 			BEGIN 
-				---- Flag the escalated inventory transaction not to create the gl entries if it has a lot out. 
-				--UPDATE t
-				--SET		ysnNoGLPosting = 1
-				--FROM	tblICInventoryTransaction t
-				--WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId
-				--		AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
-				--		AND ISNULL(t.ysnNoGLPosting, 0) = 0 
-
-				-- Calculate the revalue amount for the fifp-out qty. 
+				-- Calculate the revalue amount for the lot-out qty. 
 				SET @InvTranValue = NULL 
 				SELECT	@InvTranValue =
 							-
@@ -635,7 +601,7 @@ BEGIN
 						,@strTransactionForm					= @strTransactionForm
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @FIFO
-						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId_SoldOrUsed OUTPUT
+						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 				END 	
@@ -707,7 +673,7 @@ BEGIN
 						,@strTransactionForm					= @strTransactionForm
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @FIFO
-						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId_SoldOrUsed OUTPUT
+						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 					
@@ -747,7 +713,7 @@ BEGIN
 							UPDATE	t
 							SET		t.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold
 							FROM	tblICInventoryTransaction t
-							WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId_SoldOrUsed
+							WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId
 									AND @intInventoryTrnasactionId_EscalateValue IS NULL 
 						END 
 					END 
@@ -826,25 +792,12 @@ BEGIN
 								,[intRelatedInventoryTransactionId] = InvTran.intInventoryTransactionId	
 								,[intFobPointId]				= InvTran.intFobPointId
 								,[intInTransitSourceLocationId]	= InvTran.intInTransitSourceLocationId
-						FROM	dbo.tblICInventoryTransaction InvTran 
-								OUTER APPLY (
-									SELECT TOP 1 
-											intInventoryTransactionId
-									FROM	#tmpRevalueProducedItems 
-									WHERE	intRelatedInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
-								) e									
-						WHERE	InvTran.intInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
-								AND e.intInventoryTransactionId IS NULL 	
-
-						-- Flag the inventory transaction not to create the gl entries
-						--UPDATE t
-						--SET		ysnNoGLPosting = 1
-						--FROM	tblICInventoryTransaction t
-						--WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId_SoldOrUsed
+						FROM	tblICInventoryTransaction InvTran
+						WHERE	intInventoryTransactionId = @intInventoryTrnasactionId_EscalateValue
 					END 
 				END 
 
-				-- Update the dblCostAdjustQty field in the FIFO Out table. 
+				-- Update the dblCostAdjustQty field in the Lot Out table. 
 				UPDATE	FIFOOut
 				SET		dblCostAdjustQty =	ISNULL(FIFOOut.dblCostAdjustQty, 0) + 
 											CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
@@ -863,11 +816,11 @@ BEGIN
 			-- Attempt to fetch the next row from cursor. 
 			FETCH NEXT FROM loopFIFOOut INTO 
 					@FIFOOutId
-					,@FIFOOutInventoryFIFOId 
+					,@FIFOOutInventoryLotId 
 					,@FIFOOutInventoryTransactionId 
 					,@FIFOOutRevalueFifoId 
 					,@FIFOOutQty
-					,@FIFOCostAdjustQty
+					,@LotCostAdjustQty
 			; 
 		END;
 	END;
