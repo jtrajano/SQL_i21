@@ -65,7 +65,6 @@ SELECT C.intManufacturingCellId
 	,BR.strDemandNo
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
-	AND W.intStatusId <> 13
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICCategory IC ON IC.intCategoryId = I.intCategoryId
