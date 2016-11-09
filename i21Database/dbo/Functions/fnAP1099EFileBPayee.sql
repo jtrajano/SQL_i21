@@ -30,12 +30,12 @@ BEGIN
 		+ REPLICATE ('0',12)
 		+ REPLICATE ('0',12)
 		+ REPLICATE ('0',12)
-		+ CASE WHEN A.dbl1099B > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dbl1099B AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dbl1099B AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+		+ CASE WHEN ISNULL(A.dbl1099B,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dbl1099B,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dbl1099B,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dbl1099B AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dbl1099B AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dbl1099B,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dbl1099B,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
 		+ REPLICATE('0',144)
 		+ ' '
