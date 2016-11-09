@@ -2,7 +2,7 @@
   "name": "inventory",
   "version": "0.0.1",
   "dependencies": {
-    "extjs-dependencies-generator": "^1.0.1",
+    "extjs-dependencies-generator": "^1.0.2",
     "gulp": "^3.9.1",
     "gulp-extjs-spec-generator": "^1.1.4",
     "karma": "^1.2.0",
