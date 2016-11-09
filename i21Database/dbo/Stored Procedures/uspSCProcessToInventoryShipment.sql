@@ -45,6 +45,7 @@ DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @totalShipment AS INT
+DECLARE @totalContract AS INT
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -276,7 +277,7 @@ BEGIN TRY
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage 
 				)
-				EXEC dbo.uspSCGetScaleItemForItemReceipt 
+				EXEC dbo.uspSCGetScaleItemForItemShipment 
 					 @intTicketId
 					,@strSourceType
 					,@intUserId
@@ -292,7 +293,8 @@ BEGIN TRY
 		END
 		ELSE
 			BEGIN
-			SET @dblRemainingUnitStorage = (@dblRemainingUnits * -1);
+			IF(@dblRemainingUnits IS NULL)
+				SET @dblRemainingUnits = @dblNetUnits
 			INSERT INTO @ItemsForItemShipment (
 				intItemId
 				,intItemLocationId
@@ -313,10 +315,10 @@ BEGIN TRY
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 				,ysnIsStorage 
 			)
-			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnitStorage , @intEntityId, @strDistributionOption, NULL
+			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
 			SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
-			SET @dblRemainingUnitStorage = (@dblRemainingUnits - @dblRemainingUnitStorage)
-			IF(@dblRemainingUnitStorage IS NULL OR @dblRemainingUnitStorage > 0)
+			SET @dblRemainingUnits = (@dblRemainingUnits + ISNULL(@dblRemainingUnitStorage, 0)) * -1
+			IF (@dblRemainingUnits > 0)
 			BEGIN
 				INSERT INTO @LineItems (
 				intContractDetailId,
@@ -358,14 +360,30 @@ BEGIN TRY
 					CLOSE intListCursor;
 					DEALLOCATE intListCursor;
 				END
-				SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
-				IF(@dblRemainingUnits IS NULL)
-				BEGIN
-					SET @dblRemainingUnits = @dblNetUnits
-				END
-				IF(@dblRemainingUnits != @dblNetUnits)
+				SELECT @totalContract = COUNT(intContractDetailId) FROM @LineItems
+				IF(@totalContract > 0)
 				BEGIN
 					UPDATE @LineItems set intTicketId = @intTicketId
+					INSERT INTO @ItemsForItemShipment (
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+						,ysnIsStorage 
+					)
 					EXEC dbo.uspSCGetScaleItemForItemShipment
 						@intTicketId
 						,@strSourceType
@@ -379,29 +397,36 @@ BEGIN TRY
 				END
 				IF(@dblRemainingUnits > 0)
 				BEGIN
-					SELECT	intItemId = ScaleTicket.intItemId
-							,intLocationId = ItemLocation.intItemLocationId 
-							,intItemUOMId = ItemUOM.intItemUOMId
-							,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-							,dblQty = @dblRemainingUnits 
-							,dblUOMQty = ItemUOM.dblUnitQty
-							,dblCost = ScaleTicket.dblUnitBasis + dblUnitPrice
-							,dblSalesPrice = 0
-							,intCurrencyId = ScaleTicket.intCurrencyId
-							,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-							,intTransactionId = ScaleTicket.intTicketId
-							,strTransactionId = ScaleTicket.strTicketNumber
-							,intTransactionTypeId = @intDirectType
-							,intTransactionDetailId = NULL
-							,intLotId = NULL 
-							,intSubLocationId = ScaleTicket.intSubLocationId
-							,intStorageLocationId = ScaleTicket.intStorageLocationId
-							,ysnIsStorage = 0
-					FROM	dbo.tblSCTicket ScaleTicket
-							INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
-							INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-					WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+					INSERT INTO @ItemsForItemShipment (
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+						,ysnIsStorage 
+					)
+					EXEC dbo.uspSCGetScaleItemForItemShipment
+						@intTicketId
+						,@strSourceType
+						,@intUserId
+						,@dblRemainingUnits
+						,0
+						,@intEntityId
+						,NULL
+						,'SPT'
+						,@LineItems
 				END
 				SET @dblRemainingUnits = 0
 			END
