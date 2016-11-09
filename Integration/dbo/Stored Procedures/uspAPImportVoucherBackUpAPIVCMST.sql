@@ -245,6 +245,10 @@ BEGIN
 	WHERE 1 = CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 	AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U'
 	AND A.apivc_trans_type IN ('I', 'C', 'A')
+	AND NOT EXISTS(
+		SELECT 1 FROM tblAPapivcmst H
+		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
+	) --MAKE SURE TO IMPORT CCD IF NOT YET IMPORTED
 END
 
 IF OBJECT_ID('tempdb..#tmpPostedBackupId') IS NOT NULL DROP TABLE #tmpPostedBackupId
