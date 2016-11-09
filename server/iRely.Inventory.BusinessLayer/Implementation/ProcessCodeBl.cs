@@ -27,5 +27,19 @@ namespace iRely.Inventory.BusinessLayer
             }
             return result;
         }
+
+        public override BusinessResult<tblICRinProcess> Validate(IEnumerable<tblICRinProcess> entities, ValidateAction action)
+        {
+            if(entities.Where(p => string.IsNullOrEmpty(p.strRinProcessCode)).Count() > 0)
+            {
+                return new BusinessResult<tblICRinProcess>()
+                {
+                    data = entities,
+                    message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "Code must not be blank." },
+                    success = false
+                };
+            }
+            return base.Validate(entities, action);
+        }
     }
 }

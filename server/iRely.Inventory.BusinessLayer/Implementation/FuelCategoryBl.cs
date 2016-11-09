@@ -28,5 +28,19 @@ namespace iRely.Inventory.BusinessLayer
             }
             return result;
         }
+
+        public override BusinessResult<tblICRinFuelCategory> Validate(IEnumerable<tblICRinFuelCategory> entities, ValidateAction action)
+        {
+            if (entities.Where(p => string.IsNullOrEmpty(p.strRinFuelCategoryCode)).Count() > 0)
+            {
+                return new BusinessResult<tblICRinFuelCategory>()
+                {
+                    data = entities,
+                    message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "Fuel Category must not be blank." },
+                    success = false
+                };
+            }
+            return base.Validate(entities, action);
+        }
     }
 }
