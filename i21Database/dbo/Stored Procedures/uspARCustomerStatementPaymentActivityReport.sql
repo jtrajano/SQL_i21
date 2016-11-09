@@ -214,6 +214,9 @@ SELECT STATEMENTREPORT.*
       ,dtmAsOfDate          = @dtmDateTo
       ,blbLogo              = dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
-LEFT JOIN @temp_aging_table AS AGINGREPORT 
-ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-WHERE ISNULL(dblTotalAR, 0) <> 0
+INNER JOIN @temp_aging_table AS AGINGREPORT 
+	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+INNER JOIN tblARCustomer CUSTOMER 
+	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+WHERE AGINGREPORT.dblTotalAR <> 0
+AND CUSTOMER.strStatementFormat = 'Payment Activity'
