@@ -27,78 +27,78 @@ BEGIN
 		+ dbo.fnTrim(A.strVendorId) + SPACE(20 - LEN(dbo.fnTrim(A.strVendorId))) -- 21-40
 		+ SPACE(4) -- 41-44
 		+ SPACE(10) -- 45-54
-		+ CASE WHEN A.dblDividends IS NOT NULL THEN REPLICATE('0',192) -- ALL ZEROS WHEN DIRECT SALES SEE PAGE 53
+		+ CASE WHEN ISNULL(A.dblDividends,0) IS NOT NULL THEN REPLICATE('0',192) -- ALL ZEROS WHEN DIRECT SALES SEE PAGE 53
 		  ELSE
-			 CASE WHEN A.dblDividends > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblDividends AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblDividends AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			 CASE WHEN ISNULL(A.dblDividends,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblDividends AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblDividends AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ CASE WHEN A.dblNonpatronage > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblNonpatronage AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblNonpatronage AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblNonpatronage,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblNonpatronage AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblNonpatronage AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ CASE WHEN A.dblPerUnit > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblPerUnit AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblPerUnit AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblPerUnit,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblPerUnit AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblPerUnit AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ CASE WHEN A.dblFederalTax > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblFederalTax AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblFederalTax AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblFederalTax,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblFederalTax AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblFederalTax AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ CASE WHEN A.dblRedemption > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblRedemption AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblRedemption AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblRedemption,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblRedemption AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblRedemption AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ CASE WHEN A.dblDomestic > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblDomestic AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblDomestic AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblDomestic,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblDomestic AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblDomestic AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ CASE WHEN A.dblInvestment > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblInvestment AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblInvestment AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblInvestment,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblInvestment AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblInvestment AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ CASE WHEN A.dblOpportunity > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblOpportunity AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblOpportunity AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblOpportunity,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblOpportunity AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblOpportunity AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
 			+ REPLICATE('0',12) --Payment Amount 9
-			+ CASE WHEN A.dblAMT > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblAMT AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblAMT AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblAMT,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblAMT AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblAMT AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ CASE WHEN A.dblOther > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblOther AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dblOther AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			+ CASE WHEN ISNULL(A.dblOther,0) > @maxAmount 
+				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblOther AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dblOther AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
 		+ ' '
 		+ REPLICATE('0',12) --Section 409A deferals

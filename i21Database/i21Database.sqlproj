@@ -4558,6 +4558,7 @@
     <Build Include="dbo\Views\vyuCFTransactionTax.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixAmount.sql" />
     <Build Include="dbo\Tables\tblQMProductPropertyFormulaProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidate1099Config.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
