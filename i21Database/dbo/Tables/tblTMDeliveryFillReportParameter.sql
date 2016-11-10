@@ -32,6 +32,7 @@
 	[ysnPrintFillGroupInfo] BIT NOT NULL DEFAULT 1, 
 	[ysnPrintTotalOnly] BIT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
+    [strDeliveryFillSort] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     CONSTRAINT [PK_tblTMDeliveryFillReportParameter] PRIMARY KEY CLUSTERED ([intDeliveryFillReportParameterId] ASC),
 )
 
