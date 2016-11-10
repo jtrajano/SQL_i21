@@ -1511,6 +1511,7 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+        public int? intPaymentOn { get; set; }
     }
 
     public class vyuICGetInventoryReceiptVoucher
@@ -1594,6 +1595,7 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+        public int? intPaymentOn { get; set; }
     }
 
     public class vyuICGetReceiptAddPurchaseContract
@@ -1653,6 +1655,7 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+        public int? intPaymentOn { get; set; }
     }
 
     public class vyuICGetReceiptAddLGInboundShipment
@@ -1712,6 +1715,7 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+        public int? intPaymentOn { get; set; }
     }
 
     public class tblICInventoryReceiptChargeTax : BaseEntity
