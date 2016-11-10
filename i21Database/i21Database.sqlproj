@@ -4685,6 +4685,7 @@
     <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
     <None Include="Scripts\Post-Deployment\CRM\SplitCRMData.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
