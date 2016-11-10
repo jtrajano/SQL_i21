@@ -2441,6 +2441,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         location.set('strVendorId', copyLocation.strVendorId);
                         location.set('strCategory', copyLocation.strCategory);
                         location.set('strUnitMeasure', copyLocation.strUnitMeasure);
+                        location.set('intPaymentOn', copyLocation.intPaymentOn);
                     }
                 });
 
