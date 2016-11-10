@@ -5,7 +5,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 , * 
 FROM (
 	SELECT 	
-		intLocationId
+		POView.intLocationId
 		, intEntityVendorId
 		, strVendorId
 		, strVendorName = strName
@@ -20,7 +20,7 @@ FROM (
 		, strSourceNumber = NULL
 		, POView.intItemId
 		, strItemNo
-		, strItemDescription = strDescription
+		, strItemDescription = POView.strDescription
 		, dblQtyToReceive = dblQtyOrdered - dblQtyReceived
 		, intLoadToReceive = NULL
 		, dblUnitCost = dblCost
@@ -30,9 +30,9 @@ FROM (
 		, intCommodityId
 		, intContainerId = NULL
 		, strContainer = NULL
-		, intSubLocationId
+		, POView.intSubLocationId
 		, strSubLocationName
-		, intStorageLocationId
+		, POView.intStorageLocationId
 		, strStorageLocationName = strStorageName
 		, intOrderUOMId = intUnitOfMeasureId
 		, strOrderUOM = ItemUnitMeasure.strUnitMeasure
@@ -62,6 +62,7 @@ FROM (
 		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) 
 		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from PO
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from PO
+		, intPaymentOn	= ItemLocation.intPaymentOn
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -75,6 +76,8 @@ FROM (
                 ON GrossNetUOM.intItemUOMId = DefaultGrossNetUOM.intGrossNetUOMId
             LEFT JOIN dbo.tblICUnitMeasure GrossNetName 
                 ON GrossNetName.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
+			LEFT JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = POView.intItemId AND ItemLocation.intLocationId = POView.intLocationId
 	WHERE ysnCompleted = 0
 		
 ) tblAddOrders
