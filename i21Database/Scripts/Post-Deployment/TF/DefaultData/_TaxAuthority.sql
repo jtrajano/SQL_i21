@@ -163,7 +163,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('IA','Iowa', 'FALSE', 'FALSE', 'TRUE')
+				VALUES('IA','Iowa', 'TRUE', 'TRUE', 'TRUE')
 			END
 		ELSE
 		BEGIN
