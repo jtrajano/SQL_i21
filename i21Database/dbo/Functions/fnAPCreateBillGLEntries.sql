@@ -186,7 +186,7 @@ BEGIN
 																				ELSE 
 																					B.dblTotal 
 																		END																		
-																		+ CAST(ISNULL(Taxes.dblTotalICTax + @OtherChargeTaxes, 0) AS DECIMAL(18,2)) --IC Tax
+																		+ CAST(ISNULL(Taxes.dblTotalICTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
 															END
 															/ 
 															CASE WHEN B.dblRate > 0 AND @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END 
