@@ -5,12 +5,11 @@
 AS
 BEGIN
 
-	DECLARE @intCount NVARCHAR
+	DECLARE @intCount INT
 
 	SELECT @intCount = COUNT(*) FROM [tblARCustomerLicenseInformation] WHERE [strDescription] LIKE 'DUP: ' + (SELECT [strDescription] FROM [tblARCustomerLicenseInformation] WHERE intCustomerLicenseInformationId = @intCustomerLicenseInformationId) + '%' 
 
 	INSERT tblARCustomerLicenseInformation([strUniqueId],
-	[strVersion],
 	[intEntityCustomerId],
 	[strCompanyId],
 	[intNumberOfUser],
@@ -22,13 +21,12 @@ BEGIN
 	[strLicenseKey],
 	[ysnNew])
 	SELECT @strUniqueId,
-	[strVersion],
 	[intEntityCustomerId],
 	[strCompanyId],
 	[intNumberOfUser],
 	CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strDescription] 
-		   ELSE 'DUP: ' + [strDescription] + ' (' + @intCount + ')' END,
+		   ELSE 'DUP: ' + [strDescription] + ' (' + CAST(@intCount AS NVARCHAR) + ')' END,
 	[intNumberOfSite],
 	GETDATE(),
 	[dtmDateExpiration],
