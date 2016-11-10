@@ -1086,7 +1086,7 @@ SET @queryResultAct = CURSOR FOR
 		,dtmStartTime = tblHDTicket.dtmDueDate
 		,dtmEndTime = tblHDTicket.dtmDueDate
 		,strStatus = (select top 1 tblHDTicketStatus.strStatus from tblHDTicketStatus where tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId)
-		,strPriority = (select top 1 tblHDTicketPriority.strPriority from tblHDTicketPriority where tblHDTicketPriority.intTicketPriorityId = tblHDTicket.intTicketPriorityId)
+		,strPriority = (select top 1 (case when tblHDTicketPriority.strPriority = 'Sev 1 - Blocker' then 'High' when tblHDTicketPriority.strPriority = 'Sev 2 - Major' then 'High' else 'Normal' end) from tblHDTicketPriority where tblHDTicketPriority.intTicketPriorityId = tblHDTicket.intTicketPriorityId)
 		,strCategory = (select top 1 tblHDTicketType.strType from tblHDTicketType where tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId)
 		,intAssignedTo = tblHDTicket.intAssignedToEntity
 		,strActivityNo = (select top 1 tblSMStartingNumber.strPrefix from tblSMStartingNumber where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity')
@@ -1178,7 +1178,7 @@ BEGIN
 			select 
 				intTransactionId = @intTransactionIdAct
 				,strType = @strTypeAct
-				,strSubject = SUBSTRING(@strSubjectAct, 1,97) + '...'
+				,strSubject = (case when len(@strSubjectAct) > 100 then SUBSTRING(@strSubjectAct, 1,97) + '...' else @strSubjectAct end)
 				,intEntityContactId = @intEntityContactIdAct
 				,intEntityId = @intEntityIdAct
 				,dtmStartDate = @dtmEndDateAct
@@ -1186,7 +1186,7 @@ BEGIN
 				,dtmStartTime = @dtmEndDateAct
 				,dtmEndTime = @dtmEndTimeAct
 				,strStatus = @strStatusAct
-				,strPriority = @strPriorityAct
+				,strPriority = (case when @strPriorityAct is null then 'Normal' else @strPriorityAct end)
 				,strCategory = @strCategoryAct
 				,intAssignedTo = @intAssignedToAct
 				,strActivityNo = @strActivityNoAct
