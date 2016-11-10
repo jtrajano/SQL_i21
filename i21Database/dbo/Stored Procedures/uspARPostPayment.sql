@@ -1164,7 +1164,7 @@ IF @post = 1
 					UPDATE 
 						tblARPayment
 					SET 
-						intAccountId = @ARAccount
+						intAccountId = C.intUndepositedFundsId
 						,intWriteOffAccountId = @intWriteOffAccount
 					FROM
 						tblARPayment P								
@@ -1180,7 +1180,7 @@ IF @post = 1
 					UPDATE 
 						tblARPayment
 					SET 
-						intAccountId = @ARAccount
+						intAccountId = C.intUndepositedFundsId
 						,intWriteOffAccountId = @WriteOffAccount
 					FROM
 						tblARPayment P								
