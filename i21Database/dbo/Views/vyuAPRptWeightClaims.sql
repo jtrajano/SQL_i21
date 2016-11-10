@@ -69,116 +69,61 @@ FROM (
 		strCostCurrency,
 		ysnSubCurrency
 	FROM (
-		SELECT
-			 BillClaim.intBillId 
-			,IRI.dblNet AS dblNetQtyReceived--Receipts.dblNetQtyReceived
-			,IRI.dblGross AS dblGrossQtyReceived--Receipts.dblGrossQtyReceived
-			,J.dblAmountApplied AS dblAppliedPrepayment
-			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
-					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty / B.dblCostUnitQty) ELSE B.dblCost END AS dblCost
-			,B.dblQtyReceived
-			,B.dblQtyOrdered AS dblQtyBillCreated
-			,B.intCostUOMId AS intUnitOfMeasureId
-			,UM.strUnitMeasure
-			,B.intCostUOMId
-			,B.intWeightUOMId
-			,B.dblCostUnitQty
-			,B.dblWeightUnitQty
-			,G.strItemNo
-			,G.intItemId
-			,E.intContractDetailId
-			,E.intContractHeaderId
-			,E.intContractSeq
-			,E.dblTotalCost AS dblAmountPaid
-			,E.dblQuantity AS dblContractItemQty
-			,H.strContractNumber
-			,I.dblFranchise
+		SELECT 
+			 A.intBillId
+			,A.dblCost
+			,A.dblBillCost
+			,A.dblGrossShippedWeight
+		    ,A.dblNetShippedWeight
+			,A.dblTareShippedWeight
+			,A.dblNetQtyReceived
+			,A.dblGrossQtyReceived
+			,A.dblAppliedPrepayment
+			,A.dblQtyReceived
+			,A.dblQtyBillCreated
+			,A.intUnitOfMeasureId
+			,A.strUnitMeasure
+			,A.intCostUOMId
+			,A.strCostUOM
+			,A.intWeightUOMId
+			,A.strgrossNetUOM
+			,A.dblCostUnitQty
+			,A.dblWeightUnitQty 
+			,A.dblUnitQty 
+			,A.strItemNo
+			,A.intItemId
+			,A.intContractDetailId
+			,A.intContractHeaderId
+			,A.intContractSeq
+			,A.dblAmountPaid
+			,A.dblContractItemQty
+			,A.strContractNumber
+			,A.dblFranchise
 			,A.intEntityVendorId
 			,A.intShipToId
-			,L.dblTotal + L.dblTax AS dblPrepaidTotal
-			,LGC.dblGrossWt AS dblGrossShippedWeight
-			,LGC.dblNetWt AS dblNetShippedWeight--Loads.dblNetShippedWeight
-			,LGC.dblTareWt AS dblTareShippedWeight
-			,Container.strContainerNumber
-			,M.strVendorId
-			,M.intGLAccountExpenseId AS intAccountId
-			,M3.strAccountId
-			,M3.strDescription AS strAccountDesc
-			,M2.strName
-			,M2.str1099Form
-			,M2.str1099Type
-			,G.strDescription
-			,BillClaim.strVendorOrderNumber
-			,BillClaim.dtmDueDate
-			,BillClaim.dtmDate
-			,ISNULL(BillClaim.strComment, 'N/A') AS strComment
-			,D.strBillOfLading
-			,N.strCurrency
-			,I.strWeightGradeDesc
-			,ISNULL(H1.intCent,1) AS intCent
-			,ISNULL(E.intCurrencyId,ISNULL(H1.intMainCurrencyId,A.intCurrencyId)) AS intCurrencyId
-			,ISNULL(H1.strCurrency,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)) AS strCostCurrency
-			,ISNULL(H1.ysnSubCurrency,0) AS ysnSubCurrency
-			--,Payments.strBankAccountNo
-			--,Payments.strBankName
-			--,Payments.strBankAddress
-			--,ISNULL(Payments.strNotes, 'N/A') AS strNotes
-		FROM tblAPBill A
-		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN (tblICItemUOM IUOM INNER JOIN tblICUnitMeasure UM ON IUOM.intUnitMeasureId = UM.intUnitMeasureId) ON B.intCostUOMId = IUOM.intItemUOMId
-		INNER JOIN (tblAPVendor M INNER JOIN tblEMEntity M2 ON M.intEntityVendorId = M2.intEntityId LEFT JOIN tblGLAccount M3 ON M.intGLAccountExpenseId = M3.intAccountId) ON A.intEntityVendorId = M.intEntityVendorId
-		INNER JOIN tblICInventoryReceiptItem IRI ON B.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-		INNER JOIN tblICInventoryReceipt D ON IRI.intInventoryReceiptId = D.intInventoryReceiptId
-		INNER JOIN tblCTContractDetail E ON IRI.intLineNo = E.intContractDetailId
-		INNER JOIN tblCTContractHeader H ON H.intContractHeaderId = E.intContractHeaderId
-		INNER JOIN tblCTWeightGrade I ON H.intWeightId = I.intWeightGradeId
-		INNER JOIN tblICItem G ON B.intItemId = G.intItemId
-		INNER JOIN tblAPAppliedPrepaidAndDebit J ON J.intContractHeaderId = E.intContractHeaderId AND B.intBillDetailId = J.intBillDetailApplied
-		INNER JOIN tblAPBill K ON J.intTransactionId = K.intBillId
-		INNER JOIN tblLGLoadContainer LGC ON LGC.intLoadContainerId = IRI.intContainerId
-		LEFT JOIN dbo.tblSMCurrency N ON A.intCurrencyId = N.intCurrencyID
-		INNER JOIN tblAPBillDetail L ON K.intBillId = L.intBillId 
-					AND B.intItemId = L.intItemId 
-					AND E.intContractDetailId = L.intContractDetailId
-					AND E.intContractHeaderId = L.intContractHeaderId
-		INNER JOIN dbo.tblAPBillDetail P ON P.intContractHeaderId = H.intContractHeaderId
-		INNER JOIN dbo.tblAPBill BillClaim ON BillClaim.intBillId = P.intBillId
-		LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = E.intCurrencyId
-		--CROSS APPLY (
-		--	SELECT SUM(F.dblGross) AS dblNetShippedWeight
-		--	FROM tblLGLoadDetail F
-		--	WHERE IRI.intSourceId = F.intLoadDetailId
-		--	) Loads
-		CROSS APPLY (
-			SELECT TOP 1 GLC.strContainerNumber
-			FROM tblLGLoadDetail F
-			INNER JOIN tblLGLoadDetailContainerLink GLCL ON GLCL.intLoadId = F.intLoadId
-			INNER JOIN tblLGLoadContainer GLC ON GLC.intLoadContainerId = GLCL.intLoadContainerId
-			WHERE IRI.intSourceId = F.intLoadDetailId
-		) Container
-		--CROSS APPLY (
-		--	SELECT 
-		--		SUM(C.dblNet) AS dblNetQtyReceived,
-		--		SUM(C.dblGross) AS dblGrossQtyReceived
-		--	FROM tblICInventoryReceiptItem C 
-		--	WHERE C.intLineNo = IRI.intLineNo AND C.intOrderId = IRI.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
-		--) Receipts
-		/*CROSS APPLY (
-			SELECT 
-				TOP 1 strBankAccountNo,
-				strBankName,
-				dbo.[fnAPFormatAddress](NULL, NULL, NULL, CBA.strAddress, CBA.strCity, CBA.strState, CBA.strZipCode, CBA.strCountry, NULL) as strBankAddress,
-				strNotes
-			FROM dbo.tblAPPaymentDetail PD
-			INNER JOIN dbo.tblAPPayment P ON P.intPaymentId = PD.intPaymentId
-			INNER JOIN dbo.tblCMBankAccount CBA ON CBA.intBankAccountId = P.intBankAccountId
-			INNER JOIN dbo.tblCMBank CB ON CB.intBankId = CBA.intBankId
-			WHERE PD.intBillId = K.intBillId
-		) Payments*/
-		WHERE A.ysnPosted = 1 
-		AND D.intSourceType = 2 --Inbound Shipment
-		AND E.intContractStatusId = 5
-		AND BillClaim.intTransactionType = 11 --Only Show Claims 
+			,A.dblPrepaidTotal
+			,A.strVendorId
+			,A.intAccountId
+			,A.strAccountId
+			,A.strAccountDesc
+			,A.strName
+			,A.str1099Form
+			,A.str1099Type
+			,A.strDescription
+			,A.intCent
+			,A.intCurrencyId
+			,A.strCostCurrency
+			,A.ysnSubCurrency
+			,A.strContainerNumber
+			,A.strWeightGradeDesc
+			,A.strVendorOrderNumber
+			,A.strBillOfLading
+			,A.strCurrency
+			,A.dtmDueDate
+			,A.dtmDate
+			,A.strComment
+			
+		FROM [vyuAPClaimsRptDetails] A
 		
 	) tmpClaim
 	GROUP BY dblCost,
