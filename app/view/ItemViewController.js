@@ -2385,8 +2385,8 @@ Ext.define('Inventory.view.ItemViewController', {
                         location.set('intCostingMethod', copyLocation.intCostingMethod);
                         location.set('strCostingMethod', copyLocation.strCostingMethod);
                         location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
-                        location.set('intSubLocationId', copyLocation.intSubLocationId);
-                        location.set('intStorageLocationId', copyLocation.intStorageLocationId);
+                        //location.set('intSubLocationId', copyLocation.intSubLocationId);
+                        //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
                         location.set('intIssueUOMId', copyLocation.intIssueUOMId);
                         location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
                         location.set('intFamilyId', copyLocation.intFamilyId);
