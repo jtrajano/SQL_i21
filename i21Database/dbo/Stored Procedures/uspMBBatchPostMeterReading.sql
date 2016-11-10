@@ -22,7 +22,7 @@ BEGIN
 	DECLARE @UserEntityId INT
 	SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), @UserId)
 
-	SELECT DISTINCT RecordKey = intMeterReadingId INTO #tmpMeterReadings FROM vyuMBGetMeterReading
+	SELECT DISTINCT RecordKey = intMeterReadingId INTO #tmpMeterReadings FROM vyuMBGetMeterReading WHERE ysnPosted = 0
 
 	IF @TransactionId != 'ALL'
 	BEGIN
@@ -34,9 +34,9 @@ BEGIN
 
 	SET @SuccessfulCount = 0
 
-	WHILE (EXISTS(SELECT 1 FROM #tmpMeterReadings))
+	WHILE (EXISTS(SELECT TOP 1 1 FROM #tmpMeterReadings))
 	BEGIN
-		SELECT @intRecordKey = RecordKey FROM #tmpMeterReadings
+		SELECT TOP 1 @intRecordKey = RecordKey FROM #tmpMeterReadings
 
 		INSERT INTO @EntriesForInvoice(
 			[strType]
@@ -121,7 +121,7 @@ BEGIN
 			,[strSourceTransaction]					= 'Meter Billing'
 			,[intSourceId]							= MRDetail.intMeterReadingId
 			,[strSourceId]							= MRDetail.strTransactionId
-			,[intInvoiceId]							= NULL --NULL Value will create new invoice
+			,[intInvoiceId]							= MRDetail.intInvoiceId
 			,[intEntityCustomerId]					= MRDetail.intEntityCustomerId
 			,[intCompanyLocationId]					= MRDetail.intCompanyLocationId
 			,[intCurrencyId]						= 1
@@ -209,6 +209,7 @@ BEGIN
 			, MADetail.intTermId
 			, MRDetail.dtmTransaction
 			, Customer.intSalespersonId
+			, MRDetail.intInvoiceId
 
 		DELETE FROM #tmpMeterReadings WHERE RecordKey = @intRecordKey
 	END
@@ -220,7 +221,7 @@ BEGIN
 	EXEC [dbo].[uspARProcessInvoices]
 		@InvoiceEntries	= @EntriesForInvoice
 		,@UserId					= @UserId
-		,@GroupingOption			= 0
+		,@GroupingOption			= 11
 		,@RaiseError				= 1
 		,@ErrorMessage				= @ErrorMessage OUTPUT
 		,@CreatedIvoices			= @CreatedInvoices OUTPUT
@@ -229,7 +230,7 @@ BEGIN
 		,@BatchIdForNewPostRecap	= @BatchId OUTPUT
 
 	DECLARE @InvoiceId INT
-
+	
 	IF (@ErrorMessage IS NULL)
 	BEGIN
 		IF (@CreatedInvoices IS NOT NULL)
@@ -240,7 +241,7 @@ BEGIN
 			SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
 			FROM #tmpCreatedInvoice
 
-			WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+			WHILE (EXISTS(SELECT TOP 1 1 FROM #tmpCreatedInvoice ))
 			BEGIN
 				SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpCreatedInvoice
 				
@@ -274,9 +275,9 @@ BEGIN
 			SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
 			FROM #tmpUpdatedInvoice
 
-			WHILE (EXISTS(SELECT 1 FROM #tmpUpdatedInvoice ))
+			WHILE (EXISTS(SELECT TOP 1 1 FROM #tmpUpdatedInvoice ))
 			BEGIN
-				SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdatedInvoice WHERE Item = @InvoiceId
+				SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdatedInvoice
 				
 				UPDATE tblMBMeterReading 
 					SET ysnPosted = (CASE WHEN @Recap = 1 THEN 0 ELSE 1 END)
