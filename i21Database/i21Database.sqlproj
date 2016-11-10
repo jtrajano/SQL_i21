@@ -4451,6 +4451,7 @@
     <Build Include="dbo\Functions\fnARGetAccountUsedInLineItemAsTable.sql" />
     <Build Include="dbo\Views\vyuTMAssociateSiteSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemPricingLevelDetail.sql" />
+    <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
