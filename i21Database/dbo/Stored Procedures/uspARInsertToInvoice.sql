@@ -369,7 +369,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				  , dtmDate				= @DateOnly
 				  , ysnRecurring		= 1
 				  , strType				= 'Software'
-				  , ysnPosted			= 1
+				  , ysnPosted			= 0
 				WHERE intInvoiceId = @SoftwareInvoiceId
 			END
 		ELSE
@@ -460,7 +460,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strBillToZipCode]
 					,[strBillToCountry]
 					,1
-					,1
+					,0
 					,[intEntityContactId]
 				FROM
 				tblSOSalesOrder
