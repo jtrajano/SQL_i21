@@ -825,7 +825,7 @@ var mockFiles = [
 ];
 var testFiles = [
     {pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true},
-    {pattern: 'test/specs/**/*.spec.js', watched: true}
+    {pattern: 'test/specs/item.viewcontroller.spec.js', watched: true}
 ];
 
 var libs = [
