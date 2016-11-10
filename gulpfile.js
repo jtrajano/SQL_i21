@@ -14,53 +14,65 @@ var gen = require('gulp-extjs-spec-generator');
  * *       *           *           *           *              *             *
  * ************************************************************************** 
  */
-var config = {
-    type: "model",
-    moduleName: "Inventory",
-    dependencyDir: "app/**/*.js",
-    resolveModuleDependencies: true,
-    destDir: "test/specs",
-    formatContent: true,
-    dependencyDestDir: "test/mock"
-};
+
+var destDir = 'test/specs';
+function getConfig(type) {
+    return {
+        type: type,
+        moduleName: "Inventory",
+        dependencyDir: "app/**/*.js",
+        resolveModuleDependencies: true,
+        destDir: destDir,
+        formatContent: true,
+        dependencyDestDir: "test/mock"    
+    };
+}
+
+/**
+ * ===================================================
+ *            Generate Specs Asynchronuously
+ * ===================================================
+ */
 
 gulp.task('spec-m', function() {
-    gulp.src('app/model/**/*.js')
-        .pipe(gen(config))
-        .pipe(gulp.dest(config.destDir));
+    return gulp.src('app/model/**/*.js')
+        .pipe(gen(getConfig("model")))
+        .pipe(gulp.dest(destDir));
 });
-
-var config2 = {
-    type: "store",
-    moduleName: "Inventory",
-    dependencyDir: "app/**/*.js",
-    resolveModuleDependencies: true,
-    destDir: "test/specs",
-    formatContent: true,
-    dependencyDestDir: "test/mock"
-};
 
 gulp.task('spec-s', function() {
-    gulp.src('app/store/**/*.js')
-        .pipe(gen(config2))
-        .pipe(gulp.dest(config2.destDir));
+    return gulp.src('app/store/**/*.js')
+        .pipe(gen(getConfig("store")))
+        .pipe(gulp.dest(destDir));
 });
-
-var config3 = {
-    type: "viewcontroller",
-    moduleName: "Inventory",
-    dependencyDir: "app/**/*.js",
-    resolveModuleDependencies: true,
-    destDir: "test/specs",
-    formatContent: true,
-    dependencyDestDir: "test/mock"
-};
 
 gulp.task('spec-vc', function() {
-    gulp.src('app/view/**/*.js')
-        .pipe(gen(config3))
-        .pipe(gulp.dest(config3.destDir));
+    return gulp.src('app/view/**/*.js')
+        .pipe(gen(getConfig("viewcontroller")))
+        .pipe(gulp.dest(destDir));
 });
+
+gulp.task("spec",["spec-m", "spec-s", "spec-vc"]);
+
+/**
+ * ===================================================
+ *            Generate Specs Synchronuously
+ * ===================================================
+ */
+gulp.task('spec-s-sync', ['spec-m'], function() {
+    return gulp.src('app/store/**/*.js')
+        .pipe(gen(getConfig("store")))
+        .pipe(gulp.dest(destDir));
+});
+
+gulp.task('spec-vc-sync', ['spec-s-sync'], function() {
+    return gulp.src('app/view/**/*.js')
+        .pipe(gen(getConfig("viewcontroller")))
+        .pipe(gulp.dest(destDir));
+});
+
+gulp.task("spec-sync",["spec-vc-sync"]);
+
 /**
  * **************************************************************************
  * *       *           *           *           *              *             *
