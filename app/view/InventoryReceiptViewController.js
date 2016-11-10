@@ -1660,6 +1660,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
             current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
             current.set('strSubCurrency', cboCurrency.getDisplayValue());
+            current.set('intPaymentOn', records[0].get('intPaymentOn'));
 
             var intUOM = null;
             var strUOM = '';
@@ -1905,17 +1906,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 netWgtCF = detailRecord.get('dblWeightUOMConvFactor'),
                 valueCostCF;
 
-            // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
-            if (iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))) {
-                // Sanitize the cost conversion factor.
-                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
-                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-                unitCost = unitCost * (qtyCF / costCF);
-            }
-
-            // Calculate Cost UOM Conversion Factor with respect to the Gross UOM..
-            else {
+            //Calculate Taxes based on Net
+            if(detailRecord.get('intPaymentOn') == 2 || 
+            ((iRely.Functions.isEmpty(detailRecord.get('intPaymentOn'))) && (!iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))))) {
                 var qtyOrdered = detailRecord.get('dblNet');
                 var netWgtCF = detailRecord.get('dblWeightUOMConvFactor');
 
@@ -1924,6 +1917,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
                 unitCost = unitCost * (netWgtCF / costCF);
+            }
+            //Calculate Taxes based on Quantity
+            else {
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+                unitCost = unitCost * (qtyCF / costCF);
             }
 
 
@@ -2053,36 +2054,36 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (!isSubCurrency) {
             costCentsFactor = 1;
         }
+        
+        //Compute based on Net
+        if (currentReceiptItem.get('intPaymentOn') == 2 || 
+            ((iRely.Functions.isEmpty(currentReceiptItem.get('intPaymentOn'))) && (!iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))))) {
+                var netWgt = currentReceiptItem.get('dblNet');
+                var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
 
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
-        // Compute the line total with respect to the Item UOM
-        if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
-            // Sanitize the cost conversion factor.
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-            // Formula is:
-            // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
-            // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
-            // {Line Total} = ( {Qty in Item UOM} x {New Cost} )
-            lineTotal = (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
+                // Formula is:
+                // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+                // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
+                // {Line Total} = ( {Net Qty in Gross/Net UOM} x {New Cost} )
+                lineTotal = (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
         }
-
-        // Compute the line total with respect to the Gross UOM..
+        //Compute based on Quantity Received
         else {
-            var netWgt = currentReceiptItem.get('dblNet');
-            var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
-            // Sanitize the cost conversion factor.
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-            // Formula is:
-            // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
-            // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
-            // {Line Total} = ( {Net Qty in Gross/Net UOM} x {New Cost} )
-            lineTotal = (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
+                // Formula is:
+                // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+                // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
+                // {Line Total} = ( {Qty in Item UOM} x {New Cost} )
+                lineTotal = (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
         }
+
 
         return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
     },
@@ -4694,8 +4695,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true },
 
                 { xtype: 'numbercolumn', dataIndex: 'dblGross', text: 'Gross', width: 100, dataType: 'float' },
-                { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' }
-
+                { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' },
+                { dataIndex: 'intPaymentOn', text: 'Payment On Id', width: 100, dataType: 'string', hidden: true }
             ];
             search.title = "Add Orders";
             search.showNew = false;
@@ -4759,7 +4760,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             ysnSubCurrency: order.get('ysnSubCurrency'),
                             strSubCurrency: order.get('strSubCurrency'),
                             dblGross: order.get('dblGross'),
-                            dblNet: order.get('dblNet')
+                            dblNet: order.get('dblNet'),
+                            intPaymentOn: order.get('intPaymentOn')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
 

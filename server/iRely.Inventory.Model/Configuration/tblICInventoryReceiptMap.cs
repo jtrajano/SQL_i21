@@ -232,6 +232,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
 
             this.HasOptional(p => p.vyuICInventoryReceiptItemLookUp)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
@@ -781,6 +782,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
             this.Property(t => t.dblGross).HasColumnName("dblGross").HasPrecision(38, 20);
             this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(38, 20);
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
         }
     }
 
@@ -880,6 +882,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
             this.Property(t => t.dblGross).HasColumnName("dblGross").HasPrecision(38, 20);
             this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(38, 20);
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
         }
     }
 
@@ -947,6 +950,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
             this.Property(t => t.dblGross).HasColumnName("dblGross").HasPrecision(38, 20);
             this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(38, 20);
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
         }
     }
 
@@ -1014,6 +1018,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
             this.Property(t => t.dblGross).HasColumnName("dblGross").HasPrecision(38, 20);
             this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(38, 20);
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
         }
     }
 

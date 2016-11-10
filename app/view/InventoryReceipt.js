@@ -1068,6 +1068,16 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataIndex: 'strStatus',
                                                                                             dataType: 'string',
                                                                                             hidden: true
+                                                                                        },
+																						{
+                                                                                            dataIndex: 'intPaymentOn',
+                                                                                            dataType: 'int',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strPaymentOn',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboItem',

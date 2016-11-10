@@ -70,6 +70,7 @@ namespace iRely.Inventory.Model
         public string strCounted { get; set; }
         public int? intCountGroupId { get; set; }
         public bool? ysnCountedDaily { get; set; }
+        public int? intPaymentOn { get; set; }
         public int? intSort { get; set; }
 
         private string _location;
@@ -162,6 +163,27 @@ namespace iRely.Inventory.Model
             set
             {
                 _subLocationName = value;
+            }
+        }
+        [NotMapped]
+        public string strPaymentOn
+        {
+            get
+            {
+                var paymentOnValue = "";
+                switch (intPaymentOn)
+                {
+                    case 1:
+                        paymentOnValue = "Quantity";
+                        break;
+                    case 2:
+                        paymentOnValue = "Net";
+                        break;
+                    default:
+                        paymentOnValue = "";
+                        break;
+                }
+                return paymentOnValue;
             }
         }
         

@@ -32,6 +32,10 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 value: '{current.intCostingMethod}',
                 store: '{costingMethods}'
             },
+            cboPaymentOn: {
+                value: '{current.intPaymentOn}',
+                store: '{paymentOn}'
+            },
             txtDescription: '{current.strDescription}',
             cboSubLocation: {
                 value: '{current.intSubLocationId}',
@@ -247,6 +251,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             record.set('intIssueUOMId', me.defaultUOM.get('intItemUOMId'));
             record.set('intReceiveUOMId', me.defaultUOM.get('intItemUOMId'));
         }
+        record.set('intPaymentOn', 1);
         action(record);
     },
 

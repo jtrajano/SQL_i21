@@ -453,6 +453,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
             this.Property(t => t.ysnListBundleSeparately).HasColumnName("ysnListBundleSeparately");
             this.Property(t => t.dblExtendedCost).HasColumnName("dblExtendedCost");
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
+            this.Property(t => t.strPaymentOn).HasColumnName("strPaymentOn");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)
@@ -595,6 +597,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCountGroup).HasColumnName("strCountGroup");
             this.Property(t => t.ysnCountedDaily).HasColumnName("ysnCountedDaily");
             this.Property(t => t.ysnLockedInventory).HasColumnName("ysnLockedInventory");
+            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
+            this.Property(t => t.strPaymentOn).HasColumnName("strPaymentOn");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblSTSubcategoryRegProd)
