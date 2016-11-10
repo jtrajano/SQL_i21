@@ -174,7 +174,7 @@ BEGIN
 		INSERT INTO @tblToProcess(intLoadHeaderId, intTransactionId, strTransactionType, intActivity, dblQuantity, intContractDetailId)
 
 		SELECT DISTINCT previousSnapshot.intTransactionId
-			, previousSnapshot.intTransactionDetailId
+			, previousSnapshot.intSourceId
 			, @SourceType_InventoryReceipt
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
@@ -193,7 +193,7 @@ BEGIN
 
 		-- Check and Delete Deleted Inventory Transfer line items
 		SELECT DISTINCT previousSnapshot.intTransactionId
-			, previousSnapshot.intTransactionDetailId
+			, previousSnapshot.intSourceId
 			, @SourceType_InventoryTransfer
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
@@ -212,7 +212,7 @@ BEGIN
 
 		-- Check and Delete Deleted Invoice line items
 		SELECT DISTINCT previousSnapshot.intTransactionId
-			, previousSnapshot.intTransactionDetailId
+			, previousSnapshot.intSourceId
 			, @SourceType_Invoice
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
