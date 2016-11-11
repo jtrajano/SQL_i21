@@ -2779,8 +2779,8 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    /* TODO: Create unit test for getRetailPrice */
-    getRetailPrice: function (price) {
+    /* TODO: Create unit test for getPricingLevelUnitPrice */
+    getPricingLevelUnitPrice: function (price) {
         var unitPrice = price.salePrice;
         var msrpPrice = price.msrpPrice;
         var standardCost = price.standardCost;
@@ -2824,11 +2824,11 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     /* TODO:Create unit test for getSalePrice */
-    getSalePrice: function(price, errorCallback) {
+    getSalePrice: function (price, errorCallback) {
         var salePrice = 0;
-        switch(price.pricingMethod) {
+        switch (price.pricingMethod) {
             case "None":
-                salePrice = price.cost;     
+                salePrice = price.cost;
                 break;
             case "Fixed Dollar Amount":
                 salePrice = price.cost + price.amount;
@@ -2838,34 +2838,62 @@ Ext.define('Inventory.view.ItemViewController', {
                 break;
             case "Percent of Margin":
                 salePrice = price.amount < 100 ? (price.cost / (1 - (price.amount / 100))) : errorCallback();
-                break; 
+                break;
         }
         return salePrice;
     },
 
-    onPricingStandardCostChange: function (e, newValue, oldValue) {
-        var vm = this.view.viewModel;
-        var current = vm.data.current;
-        var cep = e.ownerCt.editingPlugin;
-        var record = cep.activeRecord;
+    updatePricing: function (pricing, data, validationCallback) {
         var me = this;
+        var salePrice = me.getSalePrice({
+            cost: data.standardCost,
+            amount: data.amount,
+            pricingMethod: data.pricingMethod
+        }, validationCallback);
 
-        var unitPrice = record.data.dblSalePrice;
-        var msrpPrice = record.data.dblMSRPPrice;
-        var standardCost = newValue;
-        _.each(current.tblICItemPricingLevels().data.items, function (p) {
-            if (p.data.intItemLocationId === record.data.intItemLocationId) {
-                var retailPrice = me.getRetailPrice({
+        if (iRely.Functions.isEmpty(data.pricingMethod) || data.pricingMethod === 'None') {
+            pricing.set('dblAmountPercent', 0.00);
+        }
+        pricing.set('dblSalePrice', salePrice);
+    },
+
+    updatePricingLevel: function (item, pricing, data) {
+        var me = this;
+        _.each(item.tblICItemPricingLevels().data.items, function (p) {
+            if (p.data.intItemLocationId === pricing.data.intItemLocationId) {
+                var retailPrice = me.getPricingLevelUnitPrice({
                     pricingMethod: p.data.strPricingMethod,
-                    salePrice: unitPrice,
-                    msrpPrice: msrpPrice,
-                    standardCost: standardCost,
+                    salePrice: data.unitPrice,
+                    msrpPrice: data.msrpPrice,
+                    standardCost: data.standardCost,
                     amount: p.data.dblAmountRate,
                     qty: p.data.dblUnit
                 });
                 p.set('dblUnitPrice', retailPrice);
             }
         });
+    },
+
+    onPricingStandardCostChange: function (e, newValue, oldValue) {
+        var vm = this.view.viewModel;
+        var currentItem = vm.data.current;
+        var cep = e.ownerCt.editingPlugin;
+        var currentPricing = cep.activeRecord;
+        var me = this;
+        var win = cep.grid.up('window');
+        var grdPricing = win.down('#grdPricing');
+
+        var data = {
+            unitPrice: currentPricing.data.dblSalePrice,
+            msrpPrice: currentPricing.data.dblMSRPPrice,
+            standardCost: newValue,
+            pricingMethod: currentPricing.data.strPricingMethod,
+            amount: currentPricing.data.dblAmountPercent
+        };
+        this.updatePricing(currentPricing, data, function () {
+            win.context.data.validator.validateGrid(grdPricing);
+        });
+        this.updatePricingLevel(currentItem, currentPricing, data);
     },
 
     onEditPricingLevel: function (editor, context, eOpts) {
@@ -2898,7 +2926,7 @@ Ext.define('Inventory.view.ItemViewController', {
                             var msrpPrice = selectedLoc.get('dblMSRPPrice');
                             var standardCost = selectedLoc.get('dblStandardCost');
                             var qty = context.record.get('dblUnit');
-                            var retailPrice = me.getRetailPrice({
+                            var retailPrice = me.getPricingLevelUnitPrice({
                                 pricingMethod: pricingMethod,
                                 salePrice: unitPrice,
                                 msrpPrice: msrpPrice,
@@ -2935,40 +2963,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     cost = context.value;
                 }
 
-                if(iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'None') {
-                    context.record.set('dblAmountPercent', 0.00);    
-                }
-
-                var salePrice = me.getSalePrice({
-                    cost: cost,
-                    amount: amount,
-                    pricingMethod: pricingMethod
-                }, function() {
+                var data = {
+                    standardCost: cost,
+                    pricingMethod: pricingMethod,
+                    amount: amount
+                };
+                this.updatePricing(context.record, data, function () {
                     win.context.data.validator.validateGrid(grdPricing);
                 });
-
-                context.record.set('dblSalePrice', salePrice);
-
-                // if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'None') {
-                //     context.record.set('dblSalePrice', cost);
-                //     context.record.set('dblAmountPercent', 0.00);
-                // }
-                // else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Fixed Dollar Amount') {
-                //     context.record.set('dblSalePrice', (cost + amount));
-                // }
-                // else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Markup Standard Cost') {
-                //     var markup = (cost * (amount / 100));
-                //     context.record.set('dblSalePrice', (cost + markup));
-                // }
-                // else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Percent of Margin') {
-                //     if (amount < 100) {
-                //         var markup = (cost / (1 - (amount / 100)));
-                //         context.record.set('dblSalePrice', markup);
-                //     }
-                //     else {
-                //         win.context.data.validator.validateGrid(grdPricing);
-                //     }
-                // }
             }
         }
     },
