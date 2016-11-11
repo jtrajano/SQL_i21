@@ -39,6 +39,15 @@ DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
+DECLARE @intInventoryReceiptItemId AS INT
+		,@intOrderId INT
+		,@intPricingTypeId INT
+		,@intBillId AS INT
+		,@successfulCount AS INT
+		,@invalidCount AS INT
+		,@success AS INT
+		,@batchIdUsed AS INT
+		,@recapId AS INT;
 
 BEGIN
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
@@ -378,6 +387,43 @@ END
 	IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+			
+			--VOUCHER intergration
+			CREATE TABLE #tmpItemReceiptIds (
+				[intInventoryReceiptItemId] [INT] PRIMARY KEY,
+				[intOrderId] [INT],
+				UNIQUE ([intInventoryReceiptItemId])
+			);
+			INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId) SELECT intInventoryReceiptItemId,intOrderId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
+
+			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+			FOR
+			SELECT intInventoryReceiptItemId, intOrderId
+			FROM #tmpItemReceiptIds;
+
+			OPEN intListCursor;
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId;
+
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+			SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
+			IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1
+				EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
+				SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+				IF ISNULL(@intBillId , 0) != 0
+				BEGIN
+					EXEC [dbo].[uspAPPostBill]
+					@post = 1
+					,@recap = 0
+					,@isBatch = 0
+					,@param = @intBillId
+					,@userId = @intUserId
+					,@success = @success OUTPUT
+				END
+			FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId;
+			END
 		END
 _Exit:
 	

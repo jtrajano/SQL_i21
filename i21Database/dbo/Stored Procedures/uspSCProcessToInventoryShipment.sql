@@ -46,7 +46,12 @@ DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @totalShipment AS INT
 DECLARE @totalContract AS INT
-
+DECLARE @intInvoiceId AS INT
+		,@successfulCount AS INT
+		,@invalidCount AS INT
+		,@success AS INT
+		,@batchIdUsed AS INT
+		,@recapId AS INT;
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
@@ -446,6 +451,34 @@ BEGIN TRY
 	--IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+			--jira ticket for destination weight should be done first before implement this
+			/*
+			EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+
+			SELECT @intInvoiceId = intInvoiceId FROM tblARInvoice WHERE intShipmentId = @InventoryShipmentId
+			IF ISNULL(@intInvoiceId , 0) != 0
+			BEGIN
+				EXEC dbo.uspARPostInvoice
+				@batchId			= NULL,
+				@post				= 1,
+				@recap				= 0,
+				@param				= @intInvoiceId,
+				@userId				= @intUserId,
+				@beginDate			= NULL,
+				@endDate			= NULL,
+				@beginTransaction	= NULL,
+				@endTransaction		= NULL,
+				@exclude			= NULL,
+				@successfulCount	= @successfulCount OUTPUT,
+				@invalidCount		= @invalidCount OUTPUT,
+				@success			= @success OUTPUT,
+				@batchIdUsed		= @batchIdUsed OUTPUT,
+				@recapId			= @recapId OUTPUT,
+				@transType			= N'all',
+				@accrueLicense		= 0,
+				@raiseError			= 1
+			END
+			*/
 		END
 	_Exit:
 

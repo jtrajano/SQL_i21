@@ -40,6 +40,12 @@ DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
+DECLARE @intInvoiceId AS INT
+		,@successfulCount AS INT
+		,@invalidCount AS INT
+		,@success AS INT
+		,@batchIdUsed AS INT
+		,@recapId AS INT;
 
 BEGIN
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
@@ -382,6 +388,31 @@ BEGIN
 	--IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+
+			EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+
+			SELECT @intInvoiceId = intInvoiceId FROM tblARInvoice WHERE intShipmentId = @InventoryShipmentId
+			IF ISNULL(@intInvoiceId , 0) != 0
+			BEGIN
+				EXEC dbo.uspARPostInvoice
+				@batchId			= NULL,
+				@post				= 1,
+				@recap				= 0,
+				@param				= @intInvoiceId,
+				@userId				= @intUserId,
+				@beginDate			= NULL,
+				@endDate			= NULL,
+				@beginTransaction	= NULL,
+				@endTransaction		= NULL,
+				@exclude			= NULL,
+				@successfulCount	= @successfulCount OUTPUT,
+				@invalidCount		= @invalidCount OUTPUT,
+				@success			= @success OUTPUT,
+				@batchIdUsed		= @batchIdUsed OUTPUT,
+				@recapId			= @recapId OUTPUT,
+				@accrueLicense		= 0,
+				@raiseError			= 1
+			END
 		END
 _Exit:
 	
