@@ -390,7 +390,6 @@ BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
 			EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
-
 			SELECT @intInvoiceId = intInvoiceId FROM tblARInvoice WHERE intShipmentId = @InventoryShipmentId
 			IF ISNULL(@intInvoiceId , 0) != 0
 			BEGIN
@@ -410,6 +409,7 @@ BEGIN
 				@success			= @success OUTPUT,
 				@batchIdUsed		= @batchIdUsed OUTPUT,
 				@recapId			= @recapId OUTPUT,
+				@transType			= N'all',
 				@accrueLicense		= 0,
 				@raiseError			= 1
 			END

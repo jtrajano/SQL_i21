@@ -451,10 +451,8 @@ BEGIN TRY
 	--IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
-			--jira ticket for destination weight should be done first before implement this
-			/*
+			
 			EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
-
 			SELECT @intInvoiceId = intInvoiceId FROM tblARInvoice WHERE intShipmentId = @InventoryShipmentId
 			IF ISNULL(@intInvoiceId , 0) != 0
 			BEGIN
@@ -478,7 +476,6 @@ BEGIN TRY
 				@accrueLicense		= 0,
 				@raiseError			= 1
 			END
-			*/
 		END
 	_Exit:
 
