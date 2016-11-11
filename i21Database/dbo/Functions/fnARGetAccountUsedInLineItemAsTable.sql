@@ -76,7 +76,12 @@ BEGIN
 							(
 								RTRIM(LTRIM(ISNULL(@SoftWareItemType, ''))) = 'License' 
 							AND
-								EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'General')
+								(
+									EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'General')
+								OR
+									EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'Sales Account')
+								)
+								
 							)
 
 						)
