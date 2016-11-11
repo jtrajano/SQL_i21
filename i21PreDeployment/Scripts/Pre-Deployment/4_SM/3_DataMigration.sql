@@ -280,7 +280,11 @@ GO
 				
 					ALTER TABLE tblAPPayment DROP CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId]
 					ALTER TABLE tblCCSite DROP CONSTRAINT FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId
-					ALTER TABLE tblARInvoice DROP CONSTRAINT FK_tblARInvoice_tblSMPaymentMethod_intPaymentMethodId
+
+					IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where CONSTRAINT_NAME = ''FK_tblARInvoice_tblSMPaymentMethod_intPaymentMethodId'')
+					BEGIN
+						ALTER TABLE tblARInvoice DROP CONSTRAINT FK_tblARInvoice_tblSMPaymentMethod_intPaymentMethodId
+					END
 					
 					IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblSMPaymentMethod'' AND [COLUMN_NAME] = ''strPrefix'') 
 					BEGIN
