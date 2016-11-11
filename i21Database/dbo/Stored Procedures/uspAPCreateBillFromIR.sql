@@ -96,7 +96,7 @@ BEGIN
 		--GOTO DONE
 	END
 		
-	SELECT @receiptAmount = A.dblInvoiceAmount FROM tblICInventoryReceipt A WHERE A.intInventoryReceiptId = @receiptId;
+	SELECT @receiptAmount = SUM(A.dblLineTotal) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
 
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -146,7 +146,7 @@ BEGIN
 		[strVendorOrderNumber] 	=	A.strVendorRefNo,
 		[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt')),
 		[intShipViaId]			=	A.intShipViaId,
-		[intShipFromId]			=	A.intShipFromId,
+		[intShipFromId]			=	NULLIF(A.intShipFromId,0),
 		[intShipToId]			=	A.intLocationId,
 		[dtmDate] 				=	GETDATE(),
 		[dtmDateCreated] 		=	GETDATE(),
