@@ -29,6 +29,8 @@ BEGIN TRY
 
 		FETCH NEXT FROM the_cursor INTO @intRefundCustomerId,@intCustomerId,@dblCheckAmount,@dblServiceFee
 	END
+	
+	UPDATE tblPATRefund SET ysnVoucherProcessed = 1 WHERE intRefundID = @intRefundId
 
 	CLOSE the_cursor
 	DEALLOCATE the_cursor
