@@ -607,7 +607,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLineTotal: 'dblLineTotal',
-                colGrossMargin: 'dblGrossMargin'
+                colGrossMargin: 'dblGrossMargin',
+                colPaymentOn: {
+                    dataIndex: 'strPaymentOn',
+                     editor: {
+                        origValueField: 'intPaymentOn',
+                        origUpdateField: 'intPaymentOn',
+                        store: '{paymenOnOptions}'
+                    }
+                }
             },
 
             /*pnlLotTracking: {
@@ -1661,6 +1669,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
             current.set('strSubCurrency', cboCurrency.getDisplayValue());
             current.set('intPaymentOn', records[0].get('intPaymentOn'));
+            
+            if(current.get('intPaymentOn') == 1) {
+                current.set('strPaymentOn', 'Quantity');
+            }
+            else if (current.get('intPaymentOn') == 2){
+                current.set('strPaymentOn', 'Net');
+            }
 
             var intUOM = null;
             var strUOM = '';
@@ -4779,11 +4794,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                             }
                         }
+
                         // Add the item record.
                         var newReceiptItems = currentVM.tblICInventoryReceiptItems().add(newRecord);
+                        var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
+
+                        // Set string value for Payment On
+                        if (order.get('intPaymentOn') == 1) {
+                            newReceiptItem.set('strPaymentOn', 'Quantity');
+                        }
+                        else if (order.get('intPaymentOn') == 2) {
+                            newReceiptItem.set('strPaymentOn', 'Net');
+                        }
 
                         // Calculate the line total
-                        var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
                         newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
 
                         // Calculate the taxes

@@ -1548,6 +1548,32 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 100,
                                                                                 dataIndex: 'strDescription',
                                                                                 text: 'Lot Tracking'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colPaymentOn',
+                                                                                width: 100,
+                                                                                dataIndex: 'strPaymentOn',
+                                                                                text: 'Payment On',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intPaymentOn',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strPaymentOn',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Payment On',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboPaymentOn',
+                                                                                    displayField: 'strPaymentOn',
+                                                                                    valueField: 'strPaymentOn'
+                                                                                }
                                                                             }
                                                                         ],
                                                                         plugins: [

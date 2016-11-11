@@ -71,7 +71,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'ysnSubCurrency', type: 'boolean', allowNull: true },
         { name: 'strSubCurrency', type: 'string'},
         { name: 'strPricingType', type: 'string'},
-        { name: 'intPaymentOn', type: 'int', allowNull: true}
+        { name: 'intPaymentOn', type: 'int', allowNull: true},
+        { name: 'strPaymentOn', type: 'string'}
     ],
 
     validators: [

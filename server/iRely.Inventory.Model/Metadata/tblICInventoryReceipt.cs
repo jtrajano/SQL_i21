@@ -836,6 +836,27 @@ namespace iRely.Inventory.Model
                 _pricingType = value;
             }
         }
+        private string _paymentOn;
+        [NotMapped]
+        public string strPaymentOn
+        {
+            get
+            {
+                switch (intPaymentOn)
+                {
+                    case 1:
+                        return "Quantity";
+                    case 2:
+                        return "Net";
+                    default:
+                        return "";
+                }
+            }
+            set
+            {
+                _paymentOn = value;
+            }
+        }
         /* private decimal _franchise;
          [NotMapped]
          public decimal dblFranchise

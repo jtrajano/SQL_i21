@@ -327,6 +327,23 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             fields: {
                 name: 'strDescription'
             }
+        },
+        paymenOnOptions: {
+            autoLoad: true,
+            data: [
+                {
+                    intPaymentOn: 1,
+                    strPaymentOn: 'Quantity'
+                },
+                {
+                    intPaymentOn: 2,
+                    strPaymentOn: 'Net'
+                }
+            ],
+            fields: {
+                name: 'intPaymentOn',
+                name: 'strPaymentOn'
+            }
         }
     },
 
