@@ -184,7 +184,7 @@ BEGIN TRY
 
 		IF ISNULL(@intSurchargeItemUOMId, 0) = 0
 		BEGIN
-			SELECT TOP 1 @intSurchargeItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId ORDER BY ysnStockUnit DESC
+			SELECT TOP 1 @intSurchargeItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intSurchargeItemId ORDER BY ysnStockUnit DESC
 		END
 		IF ISNULL(@intSurchargeItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM #tmpSourceTable WHERE ISNULL(dblSurcharge, 0.000000) > 0.000000)
 		BEGIN
@@ -665,7 +665,7 @@ BEGIN TRY
 			,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 		FROM #tmpSourceTable IE
-		INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
+		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE ISNULL(IE.dblFreightRate, 0) != 0
 	END
 
