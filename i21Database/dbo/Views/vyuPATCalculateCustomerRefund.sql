@@ -17,7 +17,7 @@ SELECT	Total.intCustomerId,
 		strCustomerName = ENT.strName,
 		strStockStatus = AC.strStockStatus,
 		Total.dblCashPayout,
-		Total.dtmLastActivityDate,
+		AC.dtmLastActivityDate,
 		TC.strTaxCode,
 		ysnEligibleRefund = CASE WHEN Total.dblRefundAmount >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
 		dblTotalPurchases = Total.dblTotalPurchases,
@@ -32,7 +32,6 @@ SELECT	Total.intCustomerId,
 			SELECT	B.intCustomerPatronId as intCustomerId,
 			B.intFiscalYear,
 			CompLoc.intCompanyLocationId,
-			B.dtmLastActivityDate,
 			B.ysnRefundProcessed,
 			RR.intRefundTypeId,
 			RR.dblCashPayout,
@@ -51,7 +50,7 @@ SELECT	Total.intCustomerId,
 			INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 			CROSS APPLY ComPref
-			CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) CompLoc
+			CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId=2) CompLoc 
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 		) Total
 	INNER JOIN tblARCustomer AC
