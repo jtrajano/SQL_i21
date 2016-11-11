@@ -61,6 +61,8 @@ SELECT L.intLoadId
 			THEN 'Outbound transit'
 		WHEN 6
 			THEN 'Delivered'
+		WHEN 7
+			THEN 'Instruction created'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS
 	,strEquipmentType = EQ.strEquipmentType

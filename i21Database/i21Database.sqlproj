@@ -4560,6 +4560,8 @@
     <Build Include="dbo\Tables\tblQMProductPropertyFormulaProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidate1099Config.sql" />
     <Build Include="dbo\Views\vyuTMAssociateSiteSearch.sql" />
+    <Build Include="dbo\Views\vyuCRMActivitySearch2.sql" />
+    <Build Include="dbo\Functions\fnARGetAccountUsedInLineItemAsTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4685,6 +4687,8 @@
     <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
     <None Include="Scripts\Post-Deployment\CRM\SplitCRMData.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
+    <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -12,6 +12,7 @@ SELECT Receipt.intLoadReceiptId
 	, Receipt.intSupplyPointId
 	, strSupplyPoint = SupplyPoint.strSupplyPoint
 	, SupplyPoint.intEntityLocationId
+	, SupplyPoint.strGrossOrNet
 	, Receipt.intCompanyLocationId
 	, CompanyLocation.strLocationName
 	, Receipt.strBillOfLading

@@ -29,9 +29,9 @@ SELECT
 	strStockUOM = StockUOM.strUnitMeasure,
 	strStockUOMType = StockUOM.strUnitType,
 	dblStockUnitQty = StockUOM.dblUnitQty,
-	ItemLocation.intReceiveUOMId,
+	intReceiveUOMId = COALESCE(ItemLocation.intReceiveUOMId, ReceiveUOMStock.intItemUOMId),
 	dblReceiveUOMConvFactor = ISNULL(COALESCE(ReceiveUOM.dblUnitQty, ReceiveUOMStock.dblUnitQty), 0),
-	COALESCE(ItemLocation.intIssueUOMId, ReceiveUOMStock.intItemUOMId) intIssueUOMId,
+	intIssueUOMId = COALESCE(ItemLocation.intIssueUOMId, IssueUOMStock.intItemUOMId),
 	dblIssueUOMConvFactor = ISNULL(COALESCE(IssueUOM.dblUnitQty, IssueUOMStock.dblUnitQty), 0),
 	strReceiveUOMType = COALESCE(rUOM.strUnitType, rUOMStock.strUnitType),
 	strIssueUOMType = COALESCE(iUOM.strUnitType, iUOMStock.strUnitType),
@@ -113,7 +113,11 @@ SELECT
 	Item.intLifeTime,
 	Item.strLifeTimeType,
 	Item.ysnListBundleSeparately,
-	dblExtendedCost = ISNULL(ItemStock.dblUnitOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0)
+	dblExtendedCost = ISNULL(ItemStock.dblUnitOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0),
+	ItemLocation.intPaymentOn,
+	strPaymentOn = (CASE WHEN ItemLocation.intPaymentOn = 1 THEN 'Quantity'
+						   WHEN ItemLocation.intPaymentOn = 2 THEN 'Net' 
+						   ELSE '' END)
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId

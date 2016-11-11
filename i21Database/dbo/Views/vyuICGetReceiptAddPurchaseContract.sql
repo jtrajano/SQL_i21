@@ -32,7 +32,7 @@ FROM (
 		, strContainer				= CAST(NULL AS NVARCHAR(50)) 
 		, intSubLocationId			= intCompanyLocationSubLocationId
 		, strSubLocationName		= strSubLocationName
-		, intStorageLocationId		= intStorageLocationId
+		, intStorageLocationId		= ContractView.intStorageLocationId
 		, strStorageLocationName	= strStorageLocationName
 		, intOrderUOMId				= ItemUOM.intItemUOMId
 		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
@@ -63,6 +63,7 @@ FROM (
 		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(ContractView.intContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(0 AS NUMERIC(38, 20))-- There is no gross from contracts.
 		, dblNet					= CAST(ContractView.dblAvailableNetWeight AS NUMERIC(38, 20))
+		, intPaymentOn				= ItemLocation.intPaymentOn
 	FROM	vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -75,6 +76,8 @@ FROM (
 				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, intPriceItemUOMId)
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
+			INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = ContractView.intItemId AND ItemLocation.intLocationId = ContractView.intCompanyLocationId
 	WHERE	ysnAllowedToShow = 1
 			AND strContractType = 'Purchase'
 	

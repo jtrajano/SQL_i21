@@ -1,6 +1,10 @@
-﻿CREATE PROCEDURE [dbo].uspMFSaveCalendar (@strXML NVARCHAR(MAX),@intCalendarId INT OUTPUT,@intConcurrencyId INT OUTPUT)
+﻿CREATE PROCEDURE [dbo].uspMFSaveCalendar (
+	@strXML NVARCHAR(MAX)
+	,@intCalendarId INT OUTPUT
+	,@intConcurrencyId INT OUTPUT
+	)
 AS
-BEGIN Try
+BEGIN TRY
 	DECLARE @strCalendarName NVARCHAR(50)
 		,@intManufacturingCellId INT
 		,@dtmFromDate DATETIME
@@ -19,12 +23,12 @@ BEGIN Try
 		,@ErrMsg NVARCHAR(MAX)
 		,@intCalendarDetailId INT
 		,@ysnHoliday BIT
-		,@intShiftBreakTypeDuration int
-		,@intMachineId int
-		,@strCalendarDate nvarchar(50)
-		,@strShiftName nvarchar(50)
-		,@strName nvarchar(50)
-		,@strShiftId nvarchar(50)
+		,@intShiftBreakTypeDuration INT
+		,@intMachineId INT
+		,@strCalendarDate NVARCHAR(50)
+		,@strShiftName NVARCHAR(50)
+		,@strName NVARCHAR(50)
+		,@strShiftId NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -51,7 +55,7 @@ BEGIN Try
 		,@intUserId = intUserId
 		,@intLocationId = intLocationId
 		,@intConcurrencyId = intConcurrencyId
-		,@strShiftId=strShiftIds
+		,@strShiftId = strShiftIds
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intCalendarId INT
 			,strCalendarName NVARCHAR(50)
@@ -65,14 +69,21 @@ BEGIN Try
 			,strShiftIds NVARCHAR(50)
 			)
 
-	IF EXISTS(SELECT *FROM dbo.tblMFScheduleCalendar WHERE strName=@strCalendarName AND intManufacturingCellId=@intManufacturingCellId AND intLocationId=@intLocationId and intCalendarId<>isNULL(@intCalendarId,0))
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblMFScheduleCalendar
+			WHERE strName = @strCalendarName
+				AND intManufacturingCellId = @intManufacturingCellId
+				AND intLocationId = @intLocationId
+				AND intCalendarId <> isNULL(@intCalendarId, 0)
+			)
 	BEGIN
 		RAISERROR (
 				90002
 				,11
 				,1
 				,@strCalendarName
-				)	
+				)
 	END
 
 	DECLARE @TRANSACTION_COUNT INT
@@ -82,9 +93,16 @@ BEGIN Try
 	IF @TRANSACTION_COUNT = 0
 		BEGIN TRANSACTION
 
-	DELETE FROM dbo.tblMFScheduleCalendarDetail 
-	WHERE dtmCalendarDate BETWEEN @dtmFromDate AND @dtmToDate AND intCalendarId = @intCalendarId
-	AND NOT EXISTS(SELECT *FROM dbo.fnSplitString(@strShiftId, ',') S WHERE S.Item =tblMFScheduleCalendarDetail.intShiftId)
+	DELETE
+	FROM dbo.tblMFScheduleCalendarDetail
+	WHERE dtmCalendarDate BETWEEN @dtmFromDate
+			AND @dtmToDate
+		AND intCalendarId = @intCalendarId
+		AND NOT EXISTS (
+			SELECT *
+			FROM dbo.fnSplitString(@strShiftId, ',') S
+			WHERE S.Item = tblMFScheduleCalendarDetail.intShiftId
+			)
 
 	IF @ysnStandardCalendar = 1
 	BEGIN
@@ -125,7 +143,7 @@ BEGIN Try
 	ELSE
 	BEGIN
 		UPDATE dbo.tblMFScheduleCalendar
-		SET strName=@strCalendarName
+		SET strName = @strCalendarName
 			,dtmToDate = CASE 
 				WHEN @dtmToDate IS NOT NULL
 					THEN @dtmToDate
@@ -138,11 +156,11 @@ BEGIN Try
 				END
 			,dtmLastModified = @dtmCurrentDate
 			,intLastModifiedUserId = @intUserId
-			,intConcurrencyId=intConcurrencyId+1
+			,intConcurrencyId = intConcurrencyId + 1
 		WHERE intCalendarId = @intCalendarId
 	END
 
-	SELECT @intConcurrencyId=intConcurrencyId
+	SELECT @intConcurrencyId = intConcurrencyId
 	FROM dbo.tblMFScheduleCalendar
 	WHERE intCalendarId = @intCalendarId
 
@@ -183,8 +201,8 @@ BEGIN Try
 			,@dtmShiftEndTime = NULL
 			,@intNoOfMachine = NULL
 			,@ysnHoliday = NULL
-			,@intShiftBreakTypeDuration=NULL
-			,@intCalendarDetailId=NULL
+			,@intShiftBreakTypeDuration = NULL
+			,@intCalendarDetailId = NULL
 
 		SELECT @dtmCalendarDate = dtmCalendarDate
 			,@intShiftId = intShiftId
@@ -201,12 +219,12 @@ BEGIN Try
 			AND dtmCalendarDate = @dtmCalendarDate
 			AND intShiftId = @intShiftId
 
-		SELECT @intShiftBreakTypeDuration=SUM(intShiftBreakTypeDuration) 
+		SELECT @intShiftBreakTypeDuration = SUM(intShiftBreakTypeDuration)
 		FROM dbo.tblMFShiftDetail
-		WHERE intShiftId=@intShiftId 
+		WHERE intShiftId = @intShiftId
 
 		IF @intShiftBreakTypeDuration IS NULL
-		SELECT @intShiftBreakTypeDuration=0
+			SELECT @intShiftBreakTypeDuration = 0
 
 		IF @intCalendarDetailId IS NULL
 		BEGIN
@@ -229,7 +247,7 @@ BEGIN Try
 				,@dtmCalendarDate
 				,@dtmShiftStartTime
 				,@dtmShiftEndTime
-				,DATEDIFF(mi, @dtmShiftStartTime, @dtmShiftEndTime)-@intShiftBreakTypeDuration
+				,DATEDIFF(mi, @dtmShiftStartTime, @dtmShiftEndTime) - @intShiftBreakTypeDuration
 				,@intShiftId
 				,@intNoOfMachine
 				,@ysnHoliday
@@ -252,81 +270,112 @@ BEGIN Try
 					,intShiftId INT
 					,dtmCalendarDate DATETIME
 					)
-			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId
-
+			WHERE dtmCalendarDate = @dtmCalendarDate
+				AND intShiftId = @intShiftId
 		END
 		ELSE
 		BEGIN
 			UPDATE dbo.tblMFScheduleCalendarDetail
 			SET dtmShiftStartTime = @dtmShiftStartTime
 				,dtmShiftEndTime = @dtmShiftEndTime
-				,intDuration = DATEDIFF(mi, @dtmShiftStartTime, @dtmShiftEndTime)-@intShiftBreakTypeDuration
+				,intDuration = DATEDIFF(mi, @dtmShiftStartTime, @dtmShiftEndTime) - @intShiftBreakTypeDuration
 				,intNoOfMachine = @intNoOfMachine
 				,ysnHoliday = @ysnHoliday
 				,dtmLastModified = @dtmCurrentDate
 				,intLastModifiedUserId = @intUserId
-				,intConcurrencyId=intConcurrencyId+1
+				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intCalendarDetailId = @intCalendarDetailId
 
-			If EXISTS(SELECT *FROM dbo.tblMFScheduleMachineDetail MD 
-			JOIN dbo.tblMFScheduleCalendarMachineDetail CMD on MD.intCalendarMachineId=CMD.intCalendarMachineId
-			WHERE MD.intCalendarDetailId = @intCalendarDetailId
-			AND NOT EXISTS(SELECT *
-			FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
-					intMachineId INT
-					,intShiftId INT
-					,dtmCalendarDate DATETIME
-					)x
-			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND x.intMachineId=CMD.intMachineId))
+			IF EXISTS (
+					SELECT *
+					FROM dbo.tblMFScheduleMachineDetail MD
+					JOIN dbo.tblMFScheduleCalendarMachineDetail CMD ON MD.intCalendarMachineId = CMD.intCalendarMachineId
+					WHERE MD.intCalendarDetailId = @intCalendarDetailId
+						AND NOT EXISTS (
+							SELECT *
+							FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
+									intMachineId INT
+									,intShiftId INT
+									,dtmCalendarDate DATETIME
+									) x
+							WHERE dtmCalendarDate = @dtmCalendarDate
+								AND intShiftId = @intShiftId
+								AND x.intMachineId = CMD.intMachineId
+							)
+					)
 			BEGIN
-				SELECT @intMachineId=intMachineId 
+				SELECT @intMachineId = intMachineId
 				FROM dbo.tblMFScheduleMachineDetail MD
-				JOIN dbo.tblMFScheduleCalendarMachineDetail CMD on MD.intCalendarMachineId=CMD.intCalendarMachineId
+				JOIN dbo.tblMFScheduleCalendarMachineDetail CMD ON MD.intCalendarMachineId = CMD.intCalendarMachineId
 				WHERE MD.intCalendarDetailId = @intCalendarDetailId
-				AND NOT EXISTS(SELECT *
-				FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
-						intMachineId INT
-						,intShiftId INT
-						,dtmCalendarDate DATETIME
-						)x
-				WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND x.intMachineId=CMD.intMachineId)
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
+								intMachineId INT
+								,intShiftId INT
+								,dtmCalendarDate DATETIME
+								) x
+						WHERE dtmCalendarDate = @dtmCalendarDate
+							AND intShiftId = @intShiftId
+							AND x.intMachineId = CMD.intMachineId
+						)
 
-				SELECT @strName=strName
+				SELECT @strName = strName
 				FROM dbo.tblMFMachine
-				WHERE intMachineId=@intMachineId
+				WHERE intMachineId = @intMachineId
 
-				SELECT @strCalendarDate=@dtmCalendarDate
+				SELECT @strCalendarDate = @dtmCalendarDate
 
-				SELECT @strShiftName=strShiftName
+				SELECT @strCalendarDate = Replace(@strCalendarDate, ' 12:00AM', '')
+
+				SELECT @strShiftName = strShiftName
 				FROM dbo.tblMFShift
-				WHERE intShiftId=@intShiftId
+				WHERE intShiftId = @intShiftId
 
-				RAISERROR(90001,14,1,@strName,@strCalendarDate,@strShiftName)
+				RAISERROR (
+						90001
+						,14
+						,1
+						,@strName
+						,@strCalendarDate
+						,@strShiftName
+						)
 			END
 
 			DELETE
 			FROM dbo.tblMFScheduleCalendarMachineDetail
 			WHERE intCalendarDetailId = @intCalendarDetailId
-			AND NOT EXISTS(SELECT *
-			FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
-					intMachineId INT
-					,intShiftId INT
-					,dtmCalendarDate DATETIME
-					)x
-			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND x.intMachineId=tblMFScheduleCalendarMachineDetail.intMachineId)
+				AND NOT EXISTS (
+					SELECT *
+					FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
+							intMachineId INT
+							,intShiftId INT
+							,dtmCalendarDate DATETIME
+							) x
+					WHERE dtmCalendarDate = @dtmCalendarDate
+						AND intShiftId = @intShiftId
+						AND x.intMachineId = tblMFScheduleCalendarMachineDetail.intMachineId
+					)
 
 			INSERT INTO dbo.tblMFScheduleCalendarMachineDetail (
 				intCalendarDetailId
 				,intMachineId
 				)
-			SELECT @intCalendarDetailId,intMachineId
+			SELECT @intCalendarDetailId
+				,intMachineId
 			FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
 					intMachineId INT
 					,intShiftId INT
 					,dtmCalendarDate DATETIME
-					)x
-			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId 
-			AND NOT EXISTS(SELECT *FROM tblMFScheduleCalendarMachineDetail MD WHERE MD.intCalendarDetailId=@intCalendarDetailId AND MD.intMachineId=x.intMachineId)
+					) x
+			WHERE dtmCalendarDate = @dtmCalendarDate
+				AND intShiftId = @intShiftId
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblMFScheduleCalendarMachineDetail MD
+					WHERE MD.intCalendarDetailId = @intCalendarDetailId
+						AND MD.intMachineId = x.intMachineId
+					)
 		END
 
 		SELECT @intRecordId = MIN(intRecordId)
@@ -359,4 +408,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-

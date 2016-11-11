@@ -96,7 +96,7 @@ BEGIN
 		--GOTO DONE
 	END
 		
-	SELECT @receiptAmount = A.dblInvoiceAmount FROM tblICInventoryReceipt A WHERE A.intInventoryReceiptId = @receiptId;
+	SELECT @receiptAmount = SUM(A.dblLineTotal) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
 
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -146,7 +146,7 @@ BEGIN
 		[strVendorOrderNumber] 	=	A.strVendorRefNo,
 		[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt')),
 		[intShipViaId]			=	A.intShipViaId,
-		[intShipFromId]			=	A.intShipFromId,
+		[intShipFromId]			=	NULLIF(A.intShipFromId,0),
 		[intShipToId]			=	A.intLocationId,
 		[dtmDate] 				=	GETDATE(),
 		[dtmDateCreated] 		=	GETDATE(),
@@ -229,11 +229,11 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[dblTotal]					=	ABS(CASE WHEN B.ysnSubCurrency > 0 --SubCur True
-											 THEN (CASE WHEN B.dblNet > 0 
+											 THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
 														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)) *  (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2))  --Calculate Sub-Cur 
 												   END) 
-											 ELSE (CASE WHEN B.dblNet > 0 --SubCur False
+											 ELSE (CASE WHEN B.intWeightUOMId > 0 --SubCur False
 														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2))--Base Gross/Net UOM 
 														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Orig Calculation
 												   END)

@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
+﻿
+
+CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 SELECT 
 arInv.strCustomerName,
@@ -8,7 +10,7 @@ cfCardAccount.strCardDescription,
 CASE WHEN cfCardAccount.strDepartment = '' OR cfCardAccount.strDepartment IS NULL THEN 'Unknown' ELSE cfCardAccount.strDepartment END AS strDepartment,
 cfCardAccount.strDepartmentDescription,
 CASE WHEN cfTrans.strMiscellaneous = '' OR cfTrans.strMiscellaneous IS NULL THEN 'Unknown' ELSE cfTrans.strMiscellaneous END AS strMiscellaneous,
-CASE WHEN cfVehicle.strVehicleNumber = '' OR cfVehicle.strVehicleNumber IS NULL OR cfVehicle.strVehicleNumber = 0 THEN 'Unknown' ELSE cfVehicle.strVehicleNumber END AS strVehicleNumber,   
+CASE WHEN cfVehicle.strVehicleNumber = '' OR cfVehicle.strVehicleNumber IS NULL OR cfVehicle.strVehicleNumber = '0' THEN 'Unknown' ELSE cfVehicle.strVehicleNumber END AS strVehicleNumber,   
 cfVehicle.strVehicleDescription,
 cfSiteItem.strProductNumber, 
 cfSiteItem.strProductDescription, 
@@ -86,6 +88,4 @@ GROUP BY cfCardAccount.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId
              cfSiteItem.strProductDescription, cfCardAccount.strDepartment,cfCardAccount.strDepartmentDescription, cfSiteItem.strTaxState, cfSiteItem.ysnIncludeInQuantityDiscount, cfVehicle.strVehicleNumber, cfVehicle.strVehicleDescription, cfCardAccount.intDiscountScheduleId, cfCardAccount.intTermsCode, 
              cfCardAccount.intTermsId, cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.strNetwork, arInv.dtmPostDate, cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, cfTrans.strInvoiceReportNumber, cfTrans.strPrintTimeStamp,arInv.strCustomerNumber,cfSiteItem.strItemNo,cfSiteItem.strDescription,
 			 cfSiteItem.strSiteNumber,cfSiteItem.strSiteAddress,cfSiteItem.strSiteCity,cfTrans.strTransactionId,cfTrans.intOdometer
-
-
 
