@@ -4981,11 +4981,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Initialize the target tare weight.
             var addedTareWeight = 0.00;
+            var excessTareWeight = 0.00;
 
             // If Unit-Type is a 'Packed' type, get the ceiling value. A packaging can't have a fractional value.
             if (strUnitType == "Packed") {
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
                 lastQty = Math.ceil(lastQty);
+            //Process Excess Lot
+                //Add another line for excess lot if the last replicated lot is more than one
+                if (addedTareWeight > 0 && lastQty > 1) {
+                    //Compute Tare Weight for the Excess Lot
+                    excessTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
+                    //Subtract 1 from lastQty because the excess lot will be added later
+                    lastQty = lastQty - 1;
+                }
+                //Just add tare if the last replicated lot is equal to 1
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
                 // addedTareWeight = i21.ModuleMgr.Inventory.roundDecimalValue(addedTareWeight, 6);
             }
@@ -5085,10 +5095,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 */
             }
 
+            var countReplicateLot = 0;
+            if (excessTareWeight > 0) {
+                countReplicateLot = replicaCount + 1;
+            }
+            else {
+                countReplicateLot = replicaCount;
+            }
             // Show a progress message box.
             Ext.MessageBox.show({
                 title: "Please wait.",
-                msg: "Replicating as " + replicaCount + " copies of the lot.",
+                msg: "Replicating as " + countReplicateLot + " copies of the lot.",
                 progressText: "Initializing...",
                 width: 300,
                 progress: true,
@@ -5183,8 +5200,72 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                             }, Ext.MessageBox.YESNO, win);*/
                     } else {
-                       //currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
-                       grdLotTracking.store.add(newLot);
+                        //currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+                        grdLotTracking.store.add(newLot);
+
+                        //Notify user if the last lot has excess/loss
+                        if(ctr == replicaCount - 1 && addedTareWeight > 0) {
+                            iRely.Functions.showCustomDialog('information','ok','Excess tare/loss noticed for the last lot. Please verify and correct if required.');
+                        }
+                        //Add Excess Lot
+                        if(ctr == replicaCount - 1 && excessTareWeight > 0) {
+                            // Calculate the last Gross and Tare weights.
+                            if ((replicaCount * lotQty) < convertedItemQty) {
+                                // Compute the last gross qty.
+                                if (lastGrossWgt > 0) {
+                                    lastGrossWgt = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
+                                }
+
+                                // Compute the last net weight.
+                                lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
+                                lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt + excessTareWeight : excessTareWeight;
+                                lastNetWgt = lastGrossWgt - lastTareWgt;
+                            }
+
+                            var lastNewLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                strUnitMeasure: currentLot.get('strUnitMeasure'),
+                                intItemUnitMeasureId: currentLot.get('intItemUnitMeasureId'),
+                                dblNetWeight: ctr === replicaCount - 1 ? lastNetWgt : lotNetWgt,
+                                dblStatedNetPerUnit: currentLot.get('dblStatedNetPerUnit'),
+                                dblPhyVsStated: currentLot.get('dblPhyVsStated'),
+                                strOrigin: currentLot.get('strOrigin'),
+                                intSubLocationId: currentLot.get('intSubLocationId'),
+                                intStorageLocationId: currentLot.get('intStorageLocationId'),
+                                dblQuantity: 1,
+                                dblGrossWeight: ctr === replicaCount - 1 ? lastGrossWgt : lotGrossWgt,
+                                dblTareWeight: ctr === replicaCount - 1 ? lastTareWgt : lotTareWgt,
+                                dblCost: currentLot.get('dblCost'),
+                                intUnitPallet: currentLot.get('intUnitPallet'),
+                                dblStatedGrossPerUnit: currentLot.get('dblStatedGrossPerUnit'),
+                                dblStatedTarePerUnit: currentLot.get('dblStatedTarePerUnit'),
+                                strContainerNo: currentLot.get('strContainerNo'),
+                                intEntityVendorId: currentLot.get('intEntityVendorId'),
+                                strGarden: currentLot.get('strGarden'),
+                                strMarkings: currentLot.get('strMarkings'),
+                                strGrade: currentLot.get('strGrade'),
+                                intOriginId: currentLot.get('intOriginId'),
+                                intSeasonCropYear: currentLot.get('intSeasonCropYear'),
+                                strVendorLotId: currentLot.get('strVendorLotId:'),
+                                dtmManufacturedDate: currentLot.get('dtmManufacturedDate'),
+                                strRemarks: currentLot.get('strRemarks'),
+                                strCondition: currentLot.get('strCondition'),
+                                dtmCertified: currentLot.get('dtmCertified'),
+                                dtmExpiryDate: currentLot.get('dtmExpiryDate'),
+                                intSort: currentLot.get('intSor:'),
+                                strWeightUOM: currentLot.get('strWeightUOM'),
+                                intParentLotId: currentLot.get('intParentLotId'),
+                                strParentLotNumber: currentLot.get('strParentLotNumber'),
+                                strParentLotAlias: currentLot.get('strParentLotAlias'),
+                                strStorageLocation: currentLot.get('strStorageLocation'),
+                                strSubLocationName: currentLot.get('strSubLocationName'),
+                                dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
+                            });
+                                        
+                                //currentReceiptItem.tblICInventoryReceiptItemLots().add(lastNewLot);
+                                grdLotTracking.store.add(lastNewLot);
+                                //Notify user that the last lot has excess/loss
+                                iRely.Functions.showCustomDialog('information','ok','Excess tare/loss noticed for the last lot. Please verify and correct if required.');
+                            }
                     }
 
                     // call f function from above within a setTimeout.
