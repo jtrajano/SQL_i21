@@ -8,6 +8,6 @@
     [dblRate] NUMERIC(18, 6) NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATRefundRateDetail] PRIMARY KEY ([intRefundTypeDetailId]), 
-    CONSTRAINT [FK_tblPATRefundRateDetail_tblPATRefundRate] FOREIGN KEY ([intRefundTypeId]) REFERENCES [tblPATRefundRate]([intRefundTypeId]), 
+    CONSTRAINT [FK_tblPATRefundRateDetail_tblPATRefundRate] FOREIGN KEY ([intRefundTypeId]) REFERENCES [tblPATRefundRate]([intRefundTypeId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblPATRefundRateDetail_tblPATPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]) 
 )
