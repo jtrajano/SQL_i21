@@ -2469,6 +2469,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intShipToCompanyLocationId', null);
             current.set('intShipToLocationId', null);
             current.set('strShipToAddress', null);
+
+            //Change Source Type to "None" for "Direct" Order Type
+            if(current.get('intOrderType') == 4) {
+                current.set('intSourceType', 0);
+                current.set('strSourceType', 'None');
+            }
         }
     },
 

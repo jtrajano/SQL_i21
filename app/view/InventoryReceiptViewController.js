@@ -5737,6 +5737,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onReceiptTypeSelect: function (combo, records, eOpts) {
+        var win = combo.up('window'),
+            current = win.viewModel.data.current;
+
+            if (current) {
+                //Change Source Type to "None" for "Direct" Receipt Type
+                if(current.get('strReceiptType') == 'Direct') {
+                    current.set('intSourceType', 0);
+                    current.set('strSourceType', 'None');
+                }
+            }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -5907,6 +5920,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnChargeTaxDetails": {
                 click: this.onChargeTaxDetailsClick
             },
+            "#cboReceiptType": {
+                select: this.onReceiptTypeSelect
+            }
         })
     }
 
