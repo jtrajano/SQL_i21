@@ -4110,7 +4110,8 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 0.8,
                                                         format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            itemId: 'txtStandardCost'
                                                         }
                                                     },
                                                     {
