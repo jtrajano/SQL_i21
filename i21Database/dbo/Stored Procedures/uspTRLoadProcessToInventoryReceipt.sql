@@ -99,6 +99,7 @@ END
 			,strVendorRefNo
 			,strSourceId
 			,strSourceScreenName
+			,intPaymentOn
 	)	
 	SELECT 
 			strReceiptType				=	CASE	WHEN min(TR.intContractDetailId) IS NULL THEN 'Direct'
@@ -143,6 +144,7 @@ END
 			,strVendorRefNo				= min(TR.strBillOfLading)
 			,strSourceId				= min(TL.strTransaction)
 			,strSourceScreenName		= 'Transport Loads'
+			,intPaymentOn				= 1 -- Compute on Qty to Receive
 	FROM	tblTRLoadHeader TL
 	        JOIN tblTRLoadReceipt TR 
 				ON TR.intLoadHeaderId = TL.intLoadHeaderId			
