@@ -167,7 +167,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IA', strDescription = 'Iowa', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'IA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IA', strDescription = 'Iowa', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'IA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'KS')
