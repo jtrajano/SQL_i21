@@ -62,7 +62,7 @@ AS
 			ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0)											AS	dblUnReservedQuantity,
 			ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)											AS	dblAllocatedQty,
 			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)				AS	dblUnAllocatedQty,
-
+			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,IU.intUnitMeasureId,CH.intStockCommodityUnitMeasureId,CD.dblQuantity)			AS	dblQtyInCommodityStockUOM,
 			--Header
 	
 			CH.*
