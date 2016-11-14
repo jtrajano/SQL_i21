@@ -61,7 +61,9 @@ AS
 					WHEN	CH.strStatuses LIKE '%Complete%'
 					THEN	'Complete'
 					ELSE	CH.strStatuses
-			END		strStatuses
+			END		strStatuses,
+			CH.intStockCommodityUnitMeasureId,
+			CH.strStockCommodityUnitMeasure
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN
