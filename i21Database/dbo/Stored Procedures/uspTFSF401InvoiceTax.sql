@@ -230,7 +230,7 @@ DECLARE @tblTempTransaction TABLE (
                          tblSMCompanySetup
 					WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + ')) 
 					AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
-					AND (tblARInvoice.strBOLNumber IS NULL)
+					--AND (tblARInvoice.strBOLNumber IS NULL)
 					AND (tblTRLoadHeader.dtmLoadDateTime BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
 					AND (tblICInventoryTransfer.ysnPosted = 1) 
 					AND tblSMShipVia.ysnCompanyOwnedCarrier = 1' + @Criteria + ''
@@ -444,7 +444,7 @@ DECLARE @TRRCId NVARCHAR(50)
 							  dblBillQty, dblTax, dblTaxExempt, strInvoiceNumber, strPONumber, strBOLNumber, dtmDate, strDestinationCity, strDestinationState, strOriginCity, strOriginState, strShipVia, strTransporterLicense,
 							  strTransportationMode, strTransporterName, strTransporterFederalTaxId, strConsignorName, strConsignorFederalTaxId, strTerminalControlNumber, strVendorName, strVendorFederalTaxId,strCustomerName,strCustomerFederalTaxId,
 							  strTaxPayerName, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strTaxPayerIdentificationNumber, strTaxPayerFEIN, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strItemNo,intIntegrationError,leaf)
-							  SELECT ''' + @Guid + ''', RC.intReportingComponentId,
+							  SELECT DISTINCT ''' + @Guid + ''', RC.intReportingComponentId,
 								RC.intTaxAuthorityId,
 								IPC.strTaxAuthority,
 								RC.strFormCode,
@@ -492,7 +492,7 @@ DECLARE @TRRCId NVARCHAR(50)
 								TR.strItemNumber,
 								(SELECT COUNT(*) FROM tblTFIntegrationError),
 								0
-							  FROM tblTFTaxCriteria INNER JOIN
+							  FROM tblTFTaxCriteria RIGHT OUTER JOIN
 							  tblTFValidProductCode AS VPC INNER JOIN
 							  tblTFReportingComponent AS RC ON VPC.intReportingComponentId = RC.intReportingComponentId INNER JOIN
 							  tblTFIntegrationItemProductCode AS IPC ON VPC.strProductCode = IPC.strProductCode INNER JOIN
