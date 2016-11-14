@@ -247,5 +247,10 @@ BEGIN
     SET IDENTITY_INSERT [dbo].[tblGRStorageType] OFF
 
 END
-
+GO
+IF EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode IN ('DEF','CNT','SPT','SPL','HLD','LOD'))
+BEGIN
+	UPDATE tblSCTicket set intStorageScheduleTypeId = GR.intStorageScheduleTypeId FROM tblSCTicket SC LEFT JOIN tblGRStorageType GR ON SC.strDistributionOption = GR.strStorageTypeCode
+	WHERE GR.intStorageScheduleTypeId < 0
+END
 GO
