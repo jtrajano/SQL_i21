@@ -4563,6 +4563,7 @@
     <Build Include="dbo\Views\vyuCRMActivitySearch2.sql" />
     <Build Include="dbo\Functions\fnARGetAccountUsedInLineItemAsTable.sql" />
     <Build Include="dbo\Stored Procedures\uspLGValidateUpdatePickedLot.sql" />
+    <Build Include="dbo\Views\vyuRKGetItemList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
