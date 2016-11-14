@@ -61,6 +61,7 @@ DECLARE @DateEnd DATETIME
 DECLARE @LicenseNumber NVARCHAR(50)
 DECLARE @MotorCarrier NVARCHAR(50)
 DECLARE @EIN NVARCHAR(50)
+DECLARE @FaxNumber NVARCHAR(50)
 
 --SET @FormCodeParam = (SELECT TOP 1 strFormCode FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
@@ -71,13 +72,14 @@ SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransactions WHERE 
 SET @LicenseNumber = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND strTemplateItemId = 'SF-401-LicenseNumber')
 SET @MotorCarrier = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND strTemplateItemId = 'SF-401-MotorCarrier')
 SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
+SET @FaxNumber = (SELECT TOP 1 strFax FROM tblSMCompanySetup)
 
 
 	INSERT INTO tblTFTaxReportSummary (strSummaryGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strSegment, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, 
-		 		strFEINSSN, strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName, strLicenseNumber, strMotorCarrier)
+		 		strFEINSSN, strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName, strLicenseNumber, strMotorCarrier, strFaxNumber)
 
 	SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, strCompanyName,
-					@EIN, strContactEmail, strTaxAddress, strCity, strState, strZipCode, strContactPhone, strContactName, @LicenseNumber, @MotorCarrier from tblTFCompanyPreference
+					@EIN, strContactEmail, strTaxAddress, strCity, strState, strZipCode, strContactPhone, strContactName, @LicenseNumber, @MotorCarrier, @FaxNumber from tblTFCompanyPreference
 
 -- ======================== DETAIL ==============================
 	DECLARE @ItemTotal NVARCHAR(MAX)
