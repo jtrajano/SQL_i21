@@ -5,7 +5,6 @@
     [strUpdateNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL, 
     [dtmLastActivityDate] DATETIME NULL, 
     [strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS  NULL, 
-	[ysnPosted] BIT NULL DEFAULT 0,
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATChangeStatus] PRIMARY KEY ([intChangeStatusId]) 
 )
