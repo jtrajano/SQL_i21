@@ -4452,6 +4452,7 @@
     <Build Include="dbo\Views\vyuTMAssociateSiteSearch.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuARGetItemPricingLevelDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetItemList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
