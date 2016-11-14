@@ -55,6 +55,7 @@ AS
 		WHERE		intPricingTypeId = 2 
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 		AND			intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
+		AND			CD.intContractStatusId <> 3
 		
 		UNION ALL
 		
