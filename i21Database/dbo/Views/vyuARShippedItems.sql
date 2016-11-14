@@ -20,7 +20,7 @@ SELECT
 	,[intLoadId]						= NULL
 	,[intLoadDetailId]					= NULL
 	,[strLoadNumber]					= NULL
-	,[intRecipeItemId]					= NULL
+	,[intRecipeItemId]					= SOD.[intRecipeItemId]
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
 	,[strContractNumber]				= ARCR.[strContractNumber]
 	,[intContractDetailId]				= SOD.[intContractDetailId]
@@ -1009,7 +1009,7 @@ SELECT
 	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= NULL
-	,[intRecipeId]						= NULL
+	,[intRecipeId]						= MFR.intRecipeId
 	,[intSubLocationId]					= NULL
 	,[intCostTypeId]					= NULL
 	,[intMarginById]					= NULL
@@ -1054,6 +1054,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblARInvoiceDetail	ARID
 		ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+LEFT OUTER JOIN
+	tblMFRecipeItem MFR
+		ON MFG.intRecipeItemId = MFR.intRecipeItemId
 LEFT OUTER JOIN
 	(SELECT D.[intOrderId] FROM tblICInventoryShipmentItem D INNER JOIN tblICInventoryShipment H ON H.[intInventoryShipmentId] = D.[intInventoryShipmentId] WHERE H.[intOrderType] = 2) ISD
 		ON SO.[intSalesOrderId] = ISD.[intOrderId] 
