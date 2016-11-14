@@ -4450,8 +4450,8 @@
     <Build Include="dbo\Stored Procedures\uspAPFixAmount.sql" />
     <Build Include="dbo\Functions\fnARGetAccountUsedInLineItemAsTable.sql" />
     <Build Include="dbo\Views\vyuTMAssociateSiteSearch.sql" />
-    <Build Include="dbo\Stored Procedures\uspARGetItemPricingLevelDetail.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
+    <Build Include="dbo\Views\vyuARGetItemPricingLevelDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
