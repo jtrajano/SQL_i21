@@ -9,7 +9,7 @@ SELECT	CV.intCustomerVolumeId,
 		TC.strTaxCode,
 		dblPurchase = sum(CASE WHEN PC.strPurchaseSale = 'Purchase' THEN CV.dblVolume ELSE 0 END),
 		dblSale = sum(CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolume ELSE 0 END),
-		dtmLastActivityDate = max(CV.dtmLastActivityDate),
+		dtmLastActivityDate = max(AR.dtmLastActivityDate),
 		dblVolume = sum(CV.dblVolume),
 		CV.ysnRefundProcessed,
 		CV.intConcurrencyId

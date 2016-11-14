@@ -72,8 +72,9 @@ BEGIN
 		ELSE
 		BEGIN
 			
-
-			--select * from #tempItem
+			UPDATE tblARCustomer SET dtmLastActivityDate = GETDATE() 
+				WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM #tempItem)
+			
 			MERGE tblPATCustomerVolume AS PAT
 			USING #tempItem AS B
 			   ON (PAT.intCustomerPatronId = B.intEntityCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.fiscalYear)
@@ -83,8 +84,8 @@ BEGIN
 				  THEN UPDATE SET PAT.dblVolume = CASE WHEN B.ysnPosted = 1 THEN (PAT.dblVolume + B.dblVolume) 
 													   ELSE (PAT.dblVolume - B.dblVolume) END
 			 WHEN NOT MATCHED BY TARGET
-				  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
-					   VALUES (B.intEntityCustomerId, B.intPatronageCategoryId, @intFiscalYear, GETDATE(),  B.dblVolume, 1);
+				  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dblVolume, intConcurrencyId)
+					   VALUES (B.intEntityCustomerId, B.intPatronageCategoryId, @intFiscalYear, B.dblVolume, 1);
 
 			DROP TABLE #tempItem
 		END
