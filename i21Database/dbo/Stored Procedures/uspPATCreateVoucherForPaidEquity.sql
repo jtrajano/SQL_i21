@@ -77,7 +77,7 @@ BEGIN TRY
 
 	END
 
-	UPDATE tblPATCustomerEquity SET ysnEquityPaid = 1,dtmLastActivityDate = GETDATE() WHERE intCustomerEquityId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@equityCustomer))
+	UPDATE tblPATCustomerEquity SET ysnEquityPaid = 1 WHERE intCustomerEquityId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@equityCustomer))
 
 	IF @@ERROR <> 0	GOTO Post_Rollback;
 
