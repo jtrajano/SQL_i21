@@ -533,8 +533,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
     onLocationSelect: function(combo, records, eOpts) {
         var vm = this.view.viewModel;
         var current = vm.data.current;
+        var hasItems = false;
+
         if(current) {
-            if(records[0] && current.intFromLocationId === records[0].intCompanyLocationId) {
+            if(!current.tblICInventoryTransferDetails().data.items[0].dummy)
+                hasItems = true;
+            if(hasItems && records[0] && current.intFromLocationId === records[0].intCompanyLocationId) {
                 iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', function(button) {
                     if (current.tblICInventoryTransferDetails()) {
                         if (button === 'yes') {

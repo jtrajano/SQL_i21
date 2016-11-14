@@ -16,6 +16,14 @@
             "request": "attach",
             "name": "Attach to Process",
             "port": 5858
+        },
+        {
+            "name": "Attach to Chrome",
+            "type": "chrome",
+            "request": "attach",
+            "port": 9222,
+            "url": "http://localhost/16.3/i21/#/IC/InventoryTransfer?action=new&searchTab=InventoryTransfer",
+            "webRoot": "${workspaceRoot}"
         }
     ]
 }
