@@ -51,7 +51,8 @@ WHERE	NOT EXISTS (
 					AND AUDIT.intTransactionId = F.intTransactionId
 					AND AUDIT.intCheckNoStatus = 4
 		)
-		AND F.strReferenceNo NOT IN ('Cash')		
+		AND F.strReferenceNo NOT IN ('Cash')	
+		AND F.intBankTransactionTypeId = 21	
 		AND ISNULL(F.strReferenceNo, '') <> ''
 		AND F.dtmCheckPrinted IS NOT NULL
 
