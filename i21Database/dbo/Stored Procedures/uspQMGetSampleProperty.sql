@@ -100,16 +100,8 @@ BEGIN
 		,PRT.intListId
 		,L.strListName
 		,T.intReplications
-		,ISNULL((
-				SELECT strFormula
-				FROM tblQMProperty
-				WHERE intPropertyId = TP.intPropertyId
-				), '') AS strFormula
-		,ISNULL((
-				SELECT strFormulaParser
-				FROM tblQMProperty
-				WHERE intPropertyId = TP.intPropertyId
-				), '') AS strFormulaParser
+		,PP.strFormulaField AS strFormula
+		,PP.strFormulaParser
 		,0 AS intPropertyValidityPeriodId
 		,'' AS strConditionalResult
 	FROM dbo.tblQMProduct AS PRD
