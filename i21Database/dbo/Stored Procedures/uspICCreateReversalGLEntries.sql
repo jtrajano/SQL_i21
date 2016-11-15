@@ -143,15 +143,16 @@ BEGIN
 			,dblForeignRate				= GLEntries.dblForeignRate
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
 				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
+				--AND GLEntries.strTransactionId = Reversal.strTransactionId
 				AND (
 						(
 							GLEntries.intTransactionId = Reversal.intTransactionId
 							AND GLEntries.strTransactionId = Reversal.strTransactionId
 						)
-						OR (
-							GLEntries.intTransactionId = Reversal.intRelatedTransactionId
-							AND GLEntries.strTransactionId = Reversal.strRelatedTransactionId					
-						)					
+						--OR (
+						--	GLEntries.intTransactionId = Reversal.intRelatedTransactionId
+						--	AND GLEntries.strTransactionId = Reversal.strRelatedTransactionId					
+						--)					
 				)
 	WHERE	Reversal.strBatchId = @strBatchId
 			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
