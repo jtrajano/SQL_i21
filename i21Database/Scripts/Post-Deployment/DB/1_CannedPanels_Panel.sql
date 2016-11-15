@@ -584,14 +584,47 @@ WHERE sthssmst.sthss_key_refund_amt <> 0
 and @DATE@', N'', N'@DATE@', N'', N'', N'See only your department refund totals for each store.
 -C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.4', NULL, 1, 103, NULL)
  
-INSERT INTO #TempCannedPanels VALUES (88, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 15560, N'Master', N'iRely Store - Sales by Store', N'Grid', N'', N'iRely Store - Sales by Store', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'select sthssmst.sthss_store_name as ''store name'', 
-	sthssmst.sthss_key_deptno as ''dept #'', 
-	sum(sthssmst.sthss_key_total_sales) as ''total sales'', dept.stdpt_desc
-from sthssmst
-inner join stdptmst dept on sthssmst.sthss_key_deptno = dept.stdpt_id_n and sthssmst.sthss_store_name = dept.stdpt_store_name
-where @DATE@
-group by sthssmst.sthss_store_name, sthssmst.sthss_key_deptno, dept.stdpt_desc
-', N'', N'@DATE@', N'', N'', N'Track and compare each sales by store and  each department.
+INSERT INTO #TempCannedPanels VALUES (88, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 15560, N'Master', N'iRely Store - Sales by Store', N'Grid', N'', N'iRely Store - Sales by Store', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', 
+N'select store.sthss_store_name as ''store name'', 
+	store.sthss_key_deptno as ''dept #'',
+	sum(store.sthss_key_total_sales) as ''total sales'', 
+	dept.stdpt_desc,
+	avg(store.sthss_key_gp_pct) as ''gross margin'',
+	lastWeek.[last week total sales],
+	nextWeek.[next week total sales]
+	from sthssmst store
+	inner join stdptmst dept on store.sthss_key_deptno = dept.stdpt_id_n and store.sthss_store_name = dept.stdpt_store_name
+	left join (
+		select sthssmst.sthss_store_name as ''store name'',
+		sthssmst.sthss_key_deptno,
+		sum(sthssmst.sthss_key_total_sales) as ''last week total sales'',
+		dept.stdpt_desc
+		from sthssmst
+		inner join stdptmst dept on sthssmst.sthss_key_deptno = dept.stdpt_id_n and sthssmst.sthss_store_name = dept.stdpt_store_name
+		where convert(datetime, CAST(sthssmst.sthss_rev_dt as CHAR(100)))  >= (dateadd(wk, datediff(wk, 0, GETDATE()) - 1, -1))
+			and convert(datetime, CAST(sthssmst.sthss_rev_dt as CHAR(100)))  <= dateadd(wk, datediff(wk, 0, GETDATE()) - 1, 0) + 5
+		group by sthssmst.sthss_store_name, dept.stdpt_desc, sthssmst.sthss_key_deptno
+	) lastWeek
+	on  store.sthss_store_name = lastWeek.[store name] 
+		and store.sthss_key_deptno = lastWeek.sthss_key_deptno
+	left join (
+		select sthssmst.sthss_store_name as ''store name'', 
+		sum(sthssmst.sthss_key_total_sales) as ''next week total sales'',
+		dept.stdpt_desc,
+		sthssmst.sthss_key_deptno
+		from sthssmst
+		inner join stdptmst dept 
+		on sthssmst.sthss_key_deptno = dept.stdpt_id_n and sthssmst.sthss_store_name = dept.stdpt_store_name
+		where convert(datetime, CAST(sthssmst.sthss_rev_dt as CHAR(100)))  >= (dateadd(wk, datediff(wk, 0, GETDATE()) + 1, -1))
+			and convert(datetime, CAST(sthssmst.sthss_rev_dt as CHAR(100)))  <= dateadd(wk, datediff(wk, 0, GETDATE()) + 1, 0) + 5
+		group by sthssmst.sthss_store_name, dept.stdpt_desc, sthssmst.sthss_key_deptno
+	) nextWeek
+	on store.sthss_store_name = nextWeek.[store name] 
+		and store.sthss_key_deptno = nextWeek.sthss_key_deptno
+	where @DATE@	
+	group by store.sthss_store_name, dept.stdpt_desc, store.sthss_key_deptno, lastWeek.[last week total sales], nextWeek.[next week total sales]
+	order by [store name], [dept #]', 
+	N'', N'@DATE@', N'', N'', N'Track and compare each sales by store and  each department.
 -C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4.5', NULL, 6, 104, NULL)
  
 INSERT INTO #TempCannedPanels VALUES (89, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Shift Physicals Overview', N'Grid', N'', N'iRely Store - Shift Physicals Overview', N'', N'', N'', N'i21 Demo', N'None', N'', N'', N'', N'Select stphymst.stphy_store_name, 
