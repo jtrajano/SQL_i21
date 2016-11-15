@@ -745,8 +745,8 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
-	,[intTicketId]						= NULL
+	,[strTicketNumber]					= SCT.strTicketNumber
+	,[intTicketId]						= SCT.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblWeight]						= 0.00
@@ -779,6 +779,9 @@ INNER JOIN
 		ON ICISC.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 		AND ICIS.[ysnPosted] = 1
 		AND ISNULL(ICISC.[ysnPrice],0) = 1
+INNER JOIN	
+		tblICInventoryShipmentItem ICISI 
+			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 LEFT OUTER JOIN 
 	vyuARCustomerContract ARCC	
 		ON ICISC.[intContractId] = ARCC.[intContractHeaderId]
@@ -806,6 +809,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCurrency SMC
 		ON ICISC.[intCurrencyId] = SMC.[intCurrencyID] 
+LEFT OUTER JOIN
+    tblSCTicket SCT
+        ON ICISI.[intSourceId] = SCT.[intTicketId]
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 
 UNION ALL
