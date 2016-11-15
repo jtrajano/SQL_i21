@@ -4551,6 +4551,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDBudgetMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleCreateBySystem.sql" />
     <Build Include="dbo\Views\vyuTMAssociateSiteSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

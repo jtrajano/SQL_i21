@@ -870,7 +870,11 @@ BEGIN
 			
 			-- Allocate the other charges and surcharges. 
 			EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
-				@inventoryReceiptId			
+				@inventoryReceiptId		
+				
+			-- Calculate Other Charges Taxes
+			EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
+				@inventoryReceiptId
 		END 
 
 		-- Calculate the tax per line item 
