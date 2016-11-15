@@ -28,6 +28,8 @@ SELECT Header.intQuoteHeaderId
 	, dblMargin = ISNULL(Detail.dblMargin, 0.000000)
 	, dblQtyOrdered = ISNULL(Detail.dblQtyOrdered, 0.000000)
 	, dblExtProfit = ISNULL(Detail.dblExtProfit, 0.000000)
+	, Detail.intTaxGroupId
+	, TaxGroup.strTaxGroup
 	, dblTax = ISNULL(Detail.dblTax, 0.000000)
 	, Detail.intShipToLocationId
 	, strShipTo = ShipToLocation.strLocationName
@@ -37,4 +39,5 @@ LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Header.intEnt
 LEFT JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 LEFT JOIN vyuAPVendor Terminal ON Terminal.intEntityVendorId = Detail.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SupplyPoint ON SupplyPoint.intSupplyPointId = Detail.intSupplyPointId
-LEFT JOIN [tblEMEntityLocation] ShipToLocation ON ShipToLocation.intEntityLocationId = Detail.intShipToLocationId
+LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = Detail.intShipToLocationId
+LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Detail.intTaxGroupId
