@@ -51,12 +51,14 @@ BEGIN
 						,strContractNumber = A.vwcnt_cnt_no COLLATE Latin1_General_CI_AS 
 						,dblUnitBalance = ISNULL(A.vwcnt_un_bal,0.0)
 						,dblUnitPrice =  ISNULL(A.vwcnt_un_prc,0.0)
+						,strItemNo = vwcnt_itm_or_cls COLLATE Latin1_General_CI_AS 
 					FROM vwcntmst A
 					INNER JOIN vwcusmst B
 						ON A.vwcnt_cus_no = B.vwcus_key
 					INNER JOIN tblTMCustomer C
 						ON B.A4GLIdentity = C.intCustomerNumber
 					WHERE CAST (A.vwcnt_due_rev_dt as datetime)>= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
+						AND ISNULL(A.vwcnt_un_bal,0.0) > 0
 				')
 		END
 		ELSE
@@ -75,6 +77,7 @@ BEGIN
 					,strContractNumber = A.strContractNumber
 					,dblUnitBalance = ISNULL(B.dblBalance,0.0)
 					,dblUnitPrice =  ISNULL(B.dblCashPrice,0.0)
+					,strItemNo = E.strItemNo
 				FROM tblCTContractHeader A
 				INNER JOIN tblCTContractDetail B
 					ON A.intContractHeaderId = B.intContractHeaderId
@@ -82,7 +85,10 @@ BEGIN
 					ON A.intEntityId = D.intEntityId
 				INNER JOIN tblTMCustomer C
 					ON D.intEntityId = C.intCustomerNumber
+				LEFT JOIN tblICItem E
+					ON B.intItemId = E.intItemId
 				WHERE DATEADD(dd, DATEDIFF(dd, 0, B.dtmEndDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
+					AND ISNULL(B.dblBalance,0.0) > 0
 		')
 	END
 END
