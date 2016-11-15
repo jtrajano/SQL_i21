@@ -9,7 +9,7 @@ SELECT
 FROM tblSMScreen A
 CROSS APPLY (
 	SELECT
-		B.strTransactionNo, CAST(B.strRecordNo AS INT) intTransactionId
+		B.strTransactionNo, B.intRecordId intTransactionId
 	FROM tblSMTransaction B
 	WHERE A.intScreenId = B.intScreenId
 	AND (B.strApprovalStatus IS NOT NULL AND B.strApprovalStatus NOT IN ('No Need for Approval','Approved'))

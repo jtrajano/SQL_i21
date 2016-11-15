@@ -10,7 +10,7 @@
 			,strContactName = c.strName
 			,strEntityName = b.strName
 			,strRelatedTo = e.strScreenName
-			,strRecordNo = d.strRecordNo
+			,strRecordNo = d.intRecordId
 			,strCreatedBy = f.strName
 			,strAssignedTo = g.strName
 			,a.strStatus

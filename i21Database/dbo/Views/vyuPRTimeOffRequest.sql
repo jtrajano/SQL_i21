@@ -22,8 +22,8 @@ FROM
 	LEFT JOIN tblPRTypeTimeOff TOFF ON REQ.intTypeTimeOffId = TOFF.intTypeTimeOffId
 	LEFT JOIN tblPRDepartment DEP ON REQ.intDepartmentId = DEP.intDepartmentId 
 	LEFT JOIN 
-		(SELECT strRecordNo, strApprovalStatus FROM tblSMTransaction TRN
+		(SELECT intRecordId, strApprovalStatus FROM tblSMTransaction TRN
 			INNER JOIN tblSMScreen SCR 
 			ON TRN.intScreenId = SCR.intScreenId 
 			AND SCR.strNamespace = 'Payroll.view.TimeOffRequest') TRANS 
-		ON REQ.intTimeOffRequestId = CAST(TRANS.strRecordNo AS INT)
+		ON REQ.intTimeOffRequestId = TRANS.intRecordId

@@ -82,7 +82,7 @@ FROM
 		INNER JOIN dbo.tblSMApproval J ON I.intTransactionId = J.intTransactionId
 		INNER JOIN dbo.tblEMEntity K ON J.intApproverId = K.intEntityId
 		WHERE H.strScreenName = 'Voucher' AND H.strModule = 'Accounts Payable' AND J.ysnCurrent = 1
-		AND A.intBillId = CAST(I.strRecordNo AS INT)
+		AND A.intBillId = I.intRecordId
 	) Approvals
 	OUTER APPLY 
 	(
