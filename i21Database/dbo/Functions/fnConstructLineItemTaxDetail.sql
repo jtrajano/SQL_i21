@@ -137,8 +137,8 @@ BEGIN
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
 		,[ysnCheckoffTax]		
-		,[ysnTaxExempt]
 		,[strTaxCode]
+		,[ysnTaxExempt]		
 		,[ysnTaxAdjusted]
 		,[ysnComputed]
 	)
