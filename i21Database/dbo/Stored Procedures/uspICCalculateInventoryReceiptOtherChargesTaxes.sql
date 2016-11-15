@@ -51,7 +51,7 @@ BEGIN
 			SELECT  Charge.intChargeId
 					,Receipt.intLocationId
 					,Receipt.dtmReceiptDate
-					,Receipt.intEntityVendorId
+					,Charge.intEntityVendorId
 					,Charge.intInventoryReceiptChargeId
 					,Receipt.intShipFromId
 					,Receipt.intTaxGroupId
