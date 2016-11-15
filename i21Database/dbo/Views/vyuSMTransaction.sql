@@ -5,5 +5,5 @@ SELECT
 	A.strRecordNo, 
 	C.intTransactionId,
 	A.intEntityId
-FROM vyuSMTransactionRaw A LEFT OUTER JOIN tblSMTransaction C ON A.intId = CAST(C.strRecordNo AS INT) AND C.intScreenId = A.intScreenId
+FROM vyuSMTransactionRaw A LEFT OUTER JOIN tblSMTransaction C ON A.intId = C.intRecordId AND C.intScreenId = A.intScreenId
  

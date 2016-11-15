@@ -18,7 +18,7 @@ BEGIN
 		,@intDocumentMaintenanceId INT = NULL
 		,@intSourceDocumentMaintenanceId INT = NULL
 
-	SELECT @intTransactionId = T.intTransactionId FROM tblSMScreen S JOIN tblSMTransaction T ON T.intScreenId = S.intScreenId WHERE S.strNamespace = @strType AND T.strRecordNo = @strSourceRecordNo
+	SELECT @intTransactionId = T.intTransactionId FROM tblSMScreen S JOIN tblSMTransaction T ON T.intScreenId = S.intScreenId WHERE S.strNamespace = @strType AND T.intRecordId = CONVERT(int, @strSourceRecordNo)
 
 	SELECT @intScreenId = intScreenId FROM tblSMScreen WHERE strNamespace = @strType
 
@@ -33,7 +33,7 @@ BEGIN
 		ELSE
 			BEGIN	
 					
-				INSERT INTO tblSMTransaction (intScreenId, strRecordNo, intConcurrencyId) VALUES(@intScreenId,@strRecordNo, 1)
+				INSERT INTO tblSMTransaction (intScreenId, intRecordId, intConcurrencyId) VALUES(@intScreenId, CONVERT(int,@strRecordNo), 1)
 
 				SELECT @intTransactionId = Scope_Identity()
 
@@ -57,7 +57,7 @@ BEGIN
 						
 						SELECT @intDocumentMaintenanceId = intDocumentMaintenanceId FROM vyuSMDocumentMaintenanceMessage WHERE intDocumentMaintenanceId = @intSourceDocumentMaintenanceId AND strOptionName = @strTransaction
 						
-						INSERT INTO tblSMTransaction (intScreenId, strRecordNo, intConcurrencyId) VALUES(@intScreenId,@strRecordNo, 1)
+						INSERT INTO tblSMTransaction (intScreenId, intRecordId, intConcurrencyId) VALUES(@intScreenId,CONVERT(int,@strRecordNo), 1)
 
 						SELECT @intTransactionId = Scope_Identity()
 

@@ -40,6 +40,6 @@ FROM dbo.tblPOPurchase A
 		INNER JOIN dbo.tblSMApproval J ON I.intTransactionId = J.intTransactionId
 		INNER JOIN dbo.tblEMEntity K ON J.intApproverId = K.intEntityId
 		WHERE H.strScreenName = 'Purchase Order' AND H.strModule = 'Accounts Payable' AND J.ysnCurrent = 1
-		AND A.intPurchaseId = CAST(I.strRecordNo AS INT)
+		AND A.intPurchaseId = I.intRecordId
 	) Approvals
 	
