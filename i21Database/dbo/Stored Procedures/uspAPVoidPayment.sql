@@ -267,7 +267,8 @@ BEGIN
 			C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - B.dblPayment) < 0 THEN 0 ELSE (C.dblPayment - B.dblPayment) END
+			C.dblPayment = CASE WHEN (C.dblPayment - B.dblPayment) < 0 THEN 0 ELSE (C.dblPayment - B.dblPayment) END,
+			C.ysnPosted = CASE WHEN A.ysnPrepay = 1 THEN 0 ELSE 1 END
 	FROM tblAPPayment A
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId

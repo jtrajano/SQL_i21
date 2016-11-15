@@ -5558,4 +5558,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[dblNoOfLots]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="89227d0d-7b9b-41bc-8d33-6d9db4b7b019" ChangeDateTime="11/07/2016 10:51:03">
+    <Property Name="ElementName" Value="[dbo].[tblLGLoadStorageCost].[intLotStorageCostId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGLoadStorageCost]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intLoadStorageCostId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c9db6d9d-9d6f-4649-bf05-f2a3cb23da75" ChangeDateTime="11/07/2016 10:52:10">
+    <Property Name="ElementName" Value="[dbo].[PK_intLotStorageCostId]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGLoadStorageCost]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_intLoadStorageCostId]" />
+  </Operation>
 </Operations>

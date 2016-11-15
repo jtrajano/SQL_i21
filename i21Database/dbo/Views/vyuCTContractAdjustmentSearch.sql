@@ -37,8 +37,10 @@ AS
 
 			EC.strName	AS strCreatedBy,
 			EU.strName	AS strUpdatedBy		
-	FROM	vyuCTContractDetailView2	CD	LEFT
+	FROM	[vyuCTSearchContractDetail]	CD	LEFT
 	JOIN	tblCTContractAdjustment	AD	ON	AD.intContractDetailId	=	CD.intContractDetailId	LEFT 
 	JOIN	tblEMEntity				EC	ON	EC.intEntityId			=	AD.intCreatedById		LEFT
 	JOIN	tblEMEntity				EU	ON	EU.intEntityId			=	AD.intLastModifiedById  LEFT
 	JOIN    tblEMEntity				CE  ON  CE.intEntityId			=   CD.intEntityId
+	WHERE	CD.intPricingTypeId NOT IN (5)
+	AND		CD.intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation WHERE intContractDetailId IS NULL)

@@ -1,30 +1,56 @@
 ﻿CREATE PROCEDURE uspMFGetDestinationStorageLocation (
 	@intProcessId INT
 	,@intLocationId INT
-	,@strName nvarchar(50)='%'
-	,@intStorageLocationId int=0
+	,@strName NVARCHAR(50) = '%'
+	,@intStorageLocationId INT = 0
 	)
 AS
 BEGIN
-	--SELECT SL.intStorageLocationId
-	--	,SL.strName
-	--FROM dbo.tblMFManufacturingProcess P
-	--JOIN dbo.tblMFManufacturingProcessMachineMap PM ON PM.intManufacturingProcessId = P.intManufacturingProcessId
-	--JOIN dbo.tblMFFloorMovement FM ON FM.intSourceId = PM.intMachineId
-	--	AND FM.ysnAllowed = 1
-	--JOIN dbo.tblMFFloorMovementType FMT ON FMT.intFloorMovementTypeId = FM.intDestinationTypeId
-	--JOIN dbo.tblMFStationType ST ON ST.intStationTypeId = FM.intStationTypeId
-	--JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = FM.intDestinationId
-	--WHERE ST.strStationTypeName = 'Storage Location'
-	--	AND FMT.strFloorMovementTypeName = 'Storage Location'
-	--	AND P.intManufacturingProcessId = @intProcessId
-	--	AND PM.intLocationId = @intLocationId
-	SELECT SL.intStorageLocationId
-		,SL.strName
-		,SL.intSubLocationId 
-	FROM dbo.tblICStorageLocation SL
-	WHERE intLocationId = @intLocationId
-		AND strName LIKE @strName +'%'
-		AND SL.intStorageLocationId =(CASE WHEN @intStorageLocationId >0 THEN @intStorageLocationId ELSE SL.intStorageLocationId END)
-		Order by SL.strName
+	DECLARE @strStorageLocationId NVARCHAR(MAX)
+
+	SELECT @strStorageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 81
+
+	IF @strStorageLocationId IS NULL
+		OR @strStorageLocationId = ''
+	BEGIN
+		SELECT SL.intStorageLocationId
+			,SL.strName
+			,SL.intSubLocationId
+		FROM dbo.tblICStorageLocation SL
+		WHERE intLocationId = @intLocationId
+			AND strName LIKE @strName + '%'
+			AND SL.intStorageLocationId = (
+				CASE 
+					WHEN @intStorageLocationId > 0
+						THEN @intStorageLocationId
+					ELSE SL.intStorageLocationId
+					END
+				)
+		ORDER BY SL.strName
+	END
+	ELSE
+	BEGIN
+		SELECT SL.intStorageLocationId
+			,SL.strName
+			,SL.intSubLocationId
+		FROM dbo.tblICStorageLocation SL
+		WHERE intLocationId = @intLocationId
+			AND strName LIKE @strName + '%'
+			AND SL.intStorageLocationId = (
+				CASE 
+					WHEN @intStorageLocationId > 0
+						THEN @intStorageLocationId
+					ELSE SL.intStorageLocationId
+					END
+				)
+			AND SL.intStorageLocationId IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strStorageLocationId, ',')
+				)
+		ORDER BY SL.strName
+	END
 END

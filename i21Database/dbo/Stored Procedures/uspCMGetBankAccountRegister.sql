@@ -27,14 +27,21 @@ DECLARE @openingBalance AS NUMERIC(18,6),
 		@strMemo AS NVARCHAR(250),
 		@strPayee AS NVARCHAR(100),
 		@skip INT = NULL,
-		@take INT = NULL
+		@take INT = NULL,
+		@ysnMaskEmployeeName AS BIT
 
 
--- Get the opAS ening balance from the first bank reconciliation record. 
+-- Get the opening balance from the first bank reconciliation record. 
 SELECT TOP 1 
 		@openingBalance = dblStatementOpeningBalance
 FROM	tblCMBankReconciliation
 WHERE 	intBankAccountId = @intBankAccountId
+
+
+--Get PR Company preference
+SELECT TOP 1
+	@ysnMaskEmployeeName = ysnMaskEmployeeName
+FROM tblPRCompanyPreference
 
 SET @runningBalance = ISNULL(@openingBalance,0)
 
@@ -66,7 +73,11 @@ intTransactionId
 	ELSE
 		strMemo
 	END AS strMemo
-,strPayee
+,CASE WHEN @ysnMaskEmployeeName = 1  AND intBankTransactionTypeId IN (21,23) THEN 
+	'(restricted information)'
+	ELSE
+	strPayee
+	END AS strPayee
 ,dtmDate
 ,dtmDateReconciled
 ,CASE WHEN intBankTransactionTypeId IN (2,3,9,12,13,14,15,16,20,21,22,23)  THEN dblAmount 

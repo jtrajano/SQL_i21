@@ -29,6 +29,7 @@ SELECT
 	,[dblDiscount]							= 0.00
 	,[dblPrice]								= ARCC.[dblCashPrice]
 	,[dblShipmentUnitPrice]					= ARCC.[dblCashPrice]
+	,[strPricing]							= ''
 	,[dblTotalTax]							= 0.00
 	,[dblTotal]								= LGSPS.[dblSAllocatedQty] * ARCC.[dblCashPrice]
 	,[intAccountId]							= ARIA.[intAccountId]

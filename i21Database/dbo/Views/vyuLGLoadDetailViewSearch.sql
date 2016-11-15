@@ -148,7 +148,22 @@ SELECT   Load.intLoadId
 											NULL 
 										END 
 								 END
-
+		,PLH.intPickLotHeaderId
+		,PLH.strPickLotNumber
+		,ALH.intAllocationHeaderId
+		,ALH.strAllocationNumber
+		,Load.intLoadShippingInstructionId
+		,LSI.strLoadNumber AS strShippingInstructionNo
+		,Load.intShipmentType
+		,strShipmentType = CASE Load.intShipmentType
+			WHEN 1
+				THEN 'Shipment'
+			WHEN 2
+				THEN 'Shipping Instructions'
+			WHEN 3
+				THEN 'Vessel Nomination'
+			ELSE ''
+			END COLLATE Latin1_General_CI_AS
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
@@ -175,3 +190,8 @@ LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = Load.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId
+LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LoadDetail.intPickLotDetailId
+LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
+LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LoadDetail.intAllocationDetailId
+LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId	
+LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = Load.intLoadShippingInstructionId

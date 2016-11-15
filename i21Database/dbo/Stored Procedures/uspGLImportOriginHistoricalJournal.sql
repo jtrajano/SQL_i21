@@ -123,8 +123,8 @@ BEGIN
 			0 AS DebitRate,																						-- debit rate		
 			CASE WHEN glhst_dr_cr_ind = 'C' THEN ABS( glhst_amt)ELSE 0 END AS Credit,			
 			0 AS CreditRate,		
-			CASE WHEN glhst_dr_cr_ind = 'D' THEN ABS( AccountUnits.Unit)ELSE 0 END AS DebitUnits,			
-			CASE WHEN glhst_dr_cr_ind = 'C' THEN ABS( AccountUnits.Unit)ELSE 0 END AS CreditUnits,			
+			CASE WHEN glhst_dr_cr_ind = 'D' THEN ABS( glhst_units)ELSE 0 END AS DebitUnits,			
+			CASE WHEN glhst_dr_cr_ind = 'C' THEN ABS( glhst_units)ELSE 0 END AS CreditUnits,			
 			glhst_ref AS strDescription,
 			NULL AS intCurrencyId,
 			0 AS dblUnitsInlbs,
@@ -158,9 +158,6 @@ BEGIN
 			INNER JOIN tblGLJournal ON
 				tblGLJournal.strJournalId COLLATE Latin1_General_CI_AS  = CONVERT(VARCHAR(3),glhst_src_id ) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),(glhst_period)) COLLATE Latin1_General_CI_AS 
 				AND tblGLJournal.strSourceId  COLLATE Latin1_General_CI_AS  = glhst_src_seq COLLATE Latin1_General_CI_AS 
-			OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM tblGLAccountUnit Unit WHERE intAccountUnitId = tblGLAccount.[intAccountUnitId]) U
-			OUTER APPLY dbo.fnGLGetAccountUnit(ABS(glhst_units), U.dblLbsPerUnit) AccountUnits
-			
 		)
 		
 		SELECT intLineNo,intJournalId,dtmDate,glhst_trans_dt ,

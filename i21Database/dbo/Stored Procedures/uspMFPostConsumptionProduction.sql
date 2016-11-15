@@ -52,6 +52,7 @@ BEGIN
 		,@intItemId1 INT
 		,@strItemNo1 AS NVARCHAR(50)
 		,@intRecipeItemUOMId INT
+		,@strLotTracking NVARCHAR(50)
 	DECLARE @tblMFLot TABLE (
 		intRecordId INT Identity(1, 1)
 		,intLotId INT
@@ -209,6 +210,10 @@ BEGIN
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
 
+	SELECT @strLotTracking = strLotTracking
+	FROM tblICItem
+	WHERE intItemId = @intItemId
+
 	SELECT @dblNewCost = [dbo].[fnGetTotalStockValueFromTransactionBatch](@intBatchId, @strBatchId)
 
 	SET @dblNewCost = ABS(@dblNewCost)
@@ -271,107 +276,110 @@ BEGIN
 		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblOtherCharges
 	END
 
-	CREATE TABLE #GeneratedLotItems (
-		intLotId INT
-		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,intDetailId INT
-		,intParentLotId INT
-		,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		)
+	IF @strLotTracking = 'Yes'
+	BEGIN
+		CREATE TABLE #GeneratedLotItems (
+			intLotId INT
+			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+			,intDetailId INT
+			,intParentLotId INT
+			,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			)
 
-	SELECT @strLifeTimeType = strLifeTimeType
-		,@intLifeTime = intLifeTime
-	FROM dbo.tblICItem
-	WHERE intItemId = @intItemId
+		SELECT @strLifeTimeType = strLifeTimeType
+			,@intLifeTime = intLifeTime
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
 
-	IF @strLifeTimeType = 'Years'
-		SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, GetDate())
-	ELSE IF @strLifeTimeType = 'Months'
-		SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, GetDate())
-	ELSE IF @strLifeTimeType = 'Days'
-		SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, GetDate())
-	ELSE IF @strLifeTimeType = 'Hours'
-		SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, GetDate())
-	ELSE IF @strLifeTimeType = 'Minutes'
-		SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, GetDate())
-	ELSE
-		SET @dtmExpiryDate = DateAdd(yy, 1, GetDate())
+		IF @strLifeTimeType = 'Years'
+			SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, GetDate())
+		ELSE IF @strLifeTimeType = 'Months'
+			SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, GetDate())
+		ELSE IF @strLifeTimeType = 'Days'
+			SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, GetDate())
+		ELSE IF @strLifeTimeType = 'Hours'
+			SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, GetDate())
+		ELSE IF @strLifeTimeType = 'Minutes'
+			SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, GetDate())
+		ELSE
+			SET @dtmExpiryDate = DateAdd(yy, 1, GetDate())
 
-	INSERT INTO @ItemsThatNeedLotId (
-		intLotId
-		,strLotNumber
-		,strLotAlias
-		,intItemId
-		,intItemLocationId
-		,intSubLocationId
-		,intStorageLocationId
-		,dblQty
-		,intItemUOMId
-		,dblWeight
-		,intWeightUOMId
-		,dtmExpiryDate
-		,dtmManufacturedDate
-		,intOriginId
-		,intGradeId
-		,strBOLNo
-		,strVessel
-		,strReceiptNumber
-		,strMarkings
-		,strNotes
-		,intEntityVendorId
-		,strVendorLotNo
-		,strGarden
-		,intDetailId
-		,ysnProduced
-		,strTransactionId
-		,strSourceTransactionId
-		,intSourceTransactionTypeId
-		)
-	SELECT intLotId = NULL
-		,strLotNumber = @strLotNumber
-		,strLotAlias = @strLotAlias
-		,intItemId = @intItemId
-		,intItemLocationId = @intItemLocationId
-		,intSubLocationId = @intSubLocationId
-		,intStorageLocationId = @intStorageLocationId
-		,dblQty = @dblQty
-		,intItemUOMId = @intItemUOMId
-		,dblWeight = @dblWeight
-		,intWeightUOMId = @intWeightUOMId
-		,dtmExpiryDate = @dtmExpiryDate
-		,dtmManufacturedDate = @dtmProductionDate
-		,intOriginId = NULL
-		,intGradeId = NULL
-		,strBOLNo = NULL
-		,strVessel = NULL
-		,strReceiptNumber = NULL
-		,strMarkings = NULL
-		,strNotes = NULL
-		,intEntityVendorId = NULL
-		,strVendorLotNo = @strVendorLotNo
-		,strGarden = NULL
-		,intDetailId = @intBatchId
-		,ysnProduced = 1
-		,strTransactionId = @strWorkOrderNo
-		,strSourceTransactionId = @strWorkOrderNo
-		,intSourceTransactionTypeId = @INVENTORY_PRODUCE
+		INSERT INTO @ItemsThatNeedLotId (
+			intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
+			,intItemLocationId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intItemUOMId
+			,dblWeight
+			,intWeightUOMId
+			,dtmExpiryDate
+			,dtmManufacturedDate
+			,intOriginId
+			,intGradeId
+			,strBOLNo
+			,strVessel
+			,strReceiptNumber
+			,strMarkings
+			,strNotes
+			,intEntityVendorId
+			,strVendorLotNo
+			,strGarden
+			,intDetailId
+			,ysnProduced
+			,strTransactionId
+			,strSourceTransactionId
+			,intSourceTransactionTypeId
+			)
+		SELECT intLotId = NULL
+			,strLotNumber = @strLotNumber
+			,strLotAlias = @strLotAlias
+			,intItemId = @intItemId
+			,intItemLocationId = @intItemLocationId
+			,intSubLocationId = @intSubLocationId
+			,intStorageLocationId = @intStorageLocationId
+			,dblQty = @dblQty
+			,intItemUOMId = @intItemUOMId
+			,dblWeight = @dblWeight
+			,intWeightUOMId = @intWeightUOMId
+			,dtmExpiryDate = @dtmExpiryDate
+			,dtmManufacturedDate = @dtmProductionDate
+			,intOriginId = NULL
+			,intGradeId = NULL
+			,strBOLNo = NULL
+			,strVessel = NULL
+			,strReceiptNumber = NULL
+			,strMarkings = NULL
+			,strNotes = NULL
+			,intEntityVendorId = NULL
+			,strVendorLotNo = @strVendorLotNo
+			,strGarden = NULL
+			,intDetailId = @intBatchId
+			,ysnProduced = 1
+			,strTransactionId = @strWorkOrderNo
+			,strSourceTransactionId = @strWorkOrderNo
+			,intSourceTransactionTypeId = @INVENTORY_PRODUCE
 
-	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
-		,@intUserId
+		EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
+			,@intUserId
 
-	SELECT TOP 1 @intLotId = intLotId
-	FROM #GeneratedLotItems
-	WHERE intDetailId = @intBatchId
+		SELECT TOP 1 @intLotId = intLotId
+		FROM #GeneratedLotItems
+		WHERE intDetailId = @intBatchId
 
-	EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
-		,@strParentLotAlias = ''
-		,@intItemId = @intItemId
-		,@dtmExpiryDate = @dtmExpiryDate
-		,@intLotStatusId = 1
-		,@intEntityUserSecurityId = @intUserId
-		,@intLotId = @intLotId
-		,@intSubLocationId = @intSubLocationId
-		,@intLocationId = @intLocationId
+		EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
+			,@strParentLotAlias = ''
+			,@intItemId = @intItemId
+			,@dtmExpiryDate = @dtmExpiryDate
+			,@intLotStatusId = 1
+			,@intEntityUserSecurityId = @intUserId
+			,@intLotId = @intLotId
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+	END
 
 	IF @dblOtherCharges IS NOT NULL
 		AND @dblOtherCharges > 0

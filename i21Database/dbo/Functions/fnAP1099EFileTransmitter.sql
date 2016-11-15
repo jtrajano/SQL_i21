@@ -15,7 +15,7 @@ BEGIN
 		+ CAST(@year AS NVARCHAR(10))  --Position 2-5
 		+ CASE WHEN @year = YEAR(GETDATE()) THEN ' ' ELSE 'P' END -- Position 6
 		+ ISNULL(NULLIF(LEFT(A.strFederalTaxID,9),''),SPACE(9)) --Position 7-15 TIN
-		+ '12345' --Position 16-20 TCC
+		+ '33A19' --Position 16-20 TCC
 		+ SPACE(7) -- 21-27Position 
 		+ CASE WHEN 0 = 1 THEN 'T' ELSE ' ' END --Position 28
 		+ ' ' COLLATE Latin1_General_CI_AS --Position 29 Foreign Indicator

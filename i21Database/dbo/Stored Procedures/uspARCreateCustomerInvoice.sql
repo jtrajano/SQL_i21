@@ -275,6 +275,13 @@ IF (@Type NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Pro
 			RAISERROR(120069, 16, 1, @TransactionType);		
 		RETURN 0;
 	END
+
+IF (@UseOriginIdAsInvoiceNumber = 1 AND EXISTS (SELECT TOP 1 NULL FROM tblARInvoice WHERE strInvoiceNumber = @InvoiceOriginId))
+	BEGIN
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120075, 16, 1, @InvoiceOriginId);		
+		RETURN 0;
+	END
 	
 IF ISNULL(@RaiseError,0) = 0	
 	BEGIN TRANSACTION

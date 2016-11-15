@@ -65,6 +65,7 @@ BEGIN TRY
 	Declare @index int
 	Declare @id int
 	Declare @ysnWOStagePick bit=0
+	Declare @ysnIncludeKitStagingLocation bit=0
 
 	DECLARE @intSequenceNo INT
 		,@intSequenceCount INT = 1
@@ -153,6 +154,20 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Kit Staging Location'
+
+	SELECT @ysnIncludeKitStagingLocation = CASE 
+			WHEN UPPER(pa.strAttributeValue) = 'TRUE'
+				THEN 1
+			ELSE 0
+			END
+	FROM tblMFManufacturingProcessAttribute pa
+	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND at.strAttributeName = 'Include Kit Staging Location In Pick List'
+
+	If ISNULL(@ysnIncludeKitStagingLocation,0)=1 
+		Set @intKitStagingLocationId=0
 
 	SELECT @intBlendStagingLocationId = ISNULL(intBlendProductionStagingUnitId, 0)
 	FROM tblSMCompanyLocation

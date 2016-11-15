@@ -63,22 +63,27 @@ Select @intMachineCapacityItemUOMId=intItemUOMId From tblICItemUOM Where intItem
 Select @strMachineName=strName From tblMFMachine Where intMachineId=@intMachineId
 
 --Convert Qty to Capacity UOM
-If ISNULL(@intMachineCapacityItemUOMId,0) >0
+If @intAttributeTypeId=2 --Blending
 Begin
-	Select @dblQuantity=dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId,@intMachineCapacityItemUOMId,@dblQuantity)
-	Select @strUOM=strUnitMeasure From tblICUnitMeasure Where intUnitMeasureId=@intMachineCapacityUOMId
+	If ISNULL(@intMachineCapacityItemUOMId,0) >0
+	Begin
+		Select @dblQuantity=dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId,@intMachineCapacityItemUOMId,@dblQuantity)
+		Select @strUOM=strUnitMeasure From tblICUnitMeasure Where intUnitMeasureId=@intMachineCapacityUOMId
+	End
+	Else
+		Select @strUOM=strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where iu.intItemUOMId=@intItemUOMId
 End
-Else
 	Select @strUOM=strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where iu.intItemUOMId=@intItemUOMId
 
 --Existing WOs
 If Exists(Select 1 From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId And intItemId=@intItemId And intManufacturingProcessId=@intManufacturingProcessId)
 	Begin
-		Select w.intWorkOrderId,w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate AS dtmDueDate,mc.strCellName,br.strDemandNo,um.strUnitMeasure AS strUOM 
+		Select w.intWorkOrderId,w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate AS dtmDueDate,mc.strCellName,br.strDemandNo,um.strUnitMeasure AS strUOM,w.dtmPlannedDate,w.intPlannedShiftId,s.strShiftName AS strPlannedShiftName
 		From tblMFWorkOrder w Join tblMFManufacturingCell mc on w.intManufacturingCellId=mc.intManufacturingCellId
 		Left Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementId
 		Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
+		Left Join tblMFShift s on w.intPlannedShiftId=s.intShiftId
 		Where intSalesOrderLineItemId=@intSalesOrderDetailId And w.intItemId=@intItemId And w.intManufacturingProcessId=@intManufacturingProcessId
 	End
 Else

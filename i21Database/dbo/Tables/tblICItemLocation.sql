@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intItemLocationId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
-		[intLocationId] INT NULL, 
+		[intLocationId] INT NULL, -- Change this to nullable.  
 		[intVendorId] INT NULL, 
 		[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intCostingMethod] INT NULL, 
@@ -74,6 +74,7 @@ Type the overview for the table here.
 		[ysnLockedInventory] BIT NULL DEFAULT ((0)),
 		[intSort] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intPaymentOn] INT NULL,
 		CONSTRAINT [FK_tblICItemLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),

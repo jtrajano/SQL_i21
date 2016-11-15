@@ -36,12 +36,10 @@ BEGIN TRY
 		, @intTerminal INT
 		, @intSupplyPoint INT
 		, @intCompanyLocation INT
-		, @intItem INT
+		, @intItemId INT
 		, @dblNet DECIMAL(18, 6) = 0
 		, @dblGross DECIMAL(18, 6) = 0
 		, @dblUnitCost DECIMAL(18, 6) = 0
-		, @dblTotalGross DECIMAL(18, 6) = 0
-		, @dblTotalNet DECIMAL(18, 6) = 0
 		, @dblFreight DECIMAL(18, 6) = 0
 		, @dblSurcharge DECIMAL(18, 6) = 0
 		, @GrossorNet NVARCHAR(50)
@@ -56,7 +54,7 @@ BEGIN TRY
 		, @dtmInvoiceDateTime DATETIME
 		, @strresult NVARCHAR(MAX)
 		, @strDescription NVARCHAR(100)
-		, @dblReveivedQuantity DECIMAL(18, 6) = 0
+		, @dblReceivedQuantity DECIMAL(18, 6) = 0
 		, @dblDistributedQuantity DECIMAL(18, 6) = 0
 		, @intFreightItemId INT
 		, @intSurchargeItemId INT
@@ -136,13 +134,20 @@ BEGIN TRY
 			, @intTerminal = RT.intTerminalId
 			, @intSupplyPoint = RT.intSupplyPointId
 			, @intCompanyLocation = RT.intCompanyLocationId
-			, @intItem = RT.intItemId
+			, @intItemId = RT.intItemId
 			, @dblNet = RT.dblNet
 			, @dblGross = RT.dblGross
 			, @dblUnitCost = RT.dblUnitCost
 			, @dblFreight = RT.dblFreight
 			, @dblSurcharge = RT.dblSurcharge
 		FROM #ReceiptList RT
+
+		SELECT TOP 1@intStockUOMId = intStockUOMId
+			, @strItem = strItemNo
+			, @strDescription = strDescription
+		FROM vyuICGetItemStock
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intCompanyLocation
 		
 		IF(@strOrigin = 'Terminal')
 		BEGIN
@@ -162,7 +167,7 @@ BEGIN TRY
 			BEGIN
 				RAISERROR('Invalid Bulk Location', 16, 1)
 			END
-			IF (@intItem IS NULL)
+			IF (@intItemId IS NULL)
 			BEGIN
 				RAISERROR('Invalid Purchase Item', 16, 1)
 			END
@@ -180,11 +185,6 @@ BEGIN TRY
 				RAISERROR(@err, 16, 1)
 			END
 			
-			SELECT @intStockUOMId = intStockUOMId
-				, @strItem = strItemNo
-			FROM vyuICGetItemStock
-			WHERE intItemId = @intItem
-				AND intLocationId = @intCompanyLocation
 			IF (@intStockUOMId IS NULL)
 			BEGIN
 				SET @err = 'Stock UOM is not setup for item ' + @strItem
@@ -198,16 +198,16 @@ BEGIN TRY
 			BEGIN
 				RAISERROR('Gross or Net is not setup for Supply Point', 16, 1)
 			END
-			IF (@GrossorNet = 'Gross')
+			IF (ISNULL(@GrossorNet, 'Gross') = 'Gross')
 			BEGIN
-				IF(@dblGross is null or @dblGross = 0)
+				IF(ISNULL(@dblGross, 0) = 0)
 				BEGIN
 					RAISERROR('Gross Quantity cannot be 0', 16, 1)
 				END
 			END
 			ELSE
 			BEGIN
-				IF (@dblNet IS NULL OR @dblNet = 0)
+				IF (ISNULL(@dblNet, 0) = 0)
 				BEGIN
 					RAISERROR('Net Quantity cannot be 0', 16, 1)
 				END
@@ -219,23 +219,17 @@ BEGIN TRY
 			BEGIN
 				RAISERROR('Invalid Bulk Location', 16, 1)
 			END
-			IF (@intItem IS NULL)
+			IF (@intItemId IS NULL)
 			BEGIN
 				RAISERROR('Invalid Purchase Item', 16, 1)
 			END
-			
-			SELECT @intStockUOMId = intStockUOMId
-				, @strItem = strItemNo
-			FROM vyuICGetItemStock
-			WHERE intItemId = @intItem
-				AND intLocationId = @intCompanyLocation
 			
 			IF (@intStockUOMId IS NULL)
 			BEGIN
 				SET @err = 'Stock UOM is not setup for item ' + @strItem
 				RAISERROR(@err , 16, 1)
 			END
-			IF ((@dblGross IS NULL OR @dblGross = 0) AND (@dblNet IS NULL OR @dblNet = 0))
+			IF ((ISNULL(@dblGross, 0) = 0) AND (ISNULL(@dblNet, 0) = 0))
 			BEGIN
 				RAISERROR('Gross and Net Quantity cannot be 0', 16, 1)
 			END
@@ -249,46 +243,53 @@ BEGIN TRY
 			RAISERROR(@err, 16, 1)
 		END
 
-		SELECT @dblTotalGross = sum(TR.dblGross)
-			, @dblTotalNet = sum(TR.dblNet)
+		SELECT @dblReceivedQuantity = (CASE WHEN (@GrossorNet = 'Net') THEN SUM(TR.dblNet)
+											ELSE SUM(TR.dblGross) END)
 		FROM tblTRLoadReceipt TR
 		WHERE TR.intLoadHeaderId = @intLoadHeaderId
-			AND TR.intItemId = @intItem
+			AND TR.intItemId = @intItemId
 		GROUP BY TR.intItemId
-		
-		SELECT @dblDistributedQuantity = sum(DD.dblUnits)
-		FROM tblTRLoadDistributionHeader DH
-		JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
-		WHERE intLoadHeaderId = @intLoadHeaderId
-			AND DD.intItemId = @intItem
-		GROUP BY DD.intItemId
-		
-		IF(@GrossorNet = 'Gross')
+
+		-- Blend Item Quantity Check
+		SELECT BlendIngredient.intIngredientItemId
+			, dblQuantity = SUM(BlendIngredient.dblQuantity)
+		INTO #tmpBlendDistributionItems
+		FROM vyuTRGetLoadBlendIngredient BlendIngredient
+		LEFT JOIN tblMFRecipe Recipe ON Recipe.intRecipeId = BlendIngredient.intRecipeId
+		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = BlendIngredient.intLoadDistributionHeaderId
+		WHERE HeaderDistItem.intLoadHeaderId = @intLoadHeaderId
+			AND Recipe.ysnActive = 1
+			AND BlendIngredient.intIngredientItemId = @intItemId
+		GROUP BY BlendIngredient.intIngredientItemId
+
+		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
 		BEGIN
-			SET @dblReveivedQuantity = @dblTotalGross
+			SELECT @dblDistributedQuantity = SUM(dblQuantity) FROM #tmpBlendDistributionItems
+
+			IF (@dblReceivedQuantity != @dblDistributedQuantity)
+			BEGIN
+				SET @strresult = 'Raw Materials ' + @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match required quantity ' + LTRIM(@dblDistributedQuantity) + ' for blending'
+				RAISERROR(@strresult, 16, 1)
+			END
 		END
 		ELSE
 		BEGIN
-			IF (@GrossorNet = 'Net')
+			SELECT @dblDistributedQuantity = SUM(DD.dblUnits)
+			FROM tblTRLoadDistributionHeader DH
+			JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+			WHERE intLoadHeaderId = @intLoadHeaderId
+				AND DD.intItemId = @intItemId
+			GROUP BY DD.intItemId
+		
+			IF (@dblReceivedQuantity != @dblDistributedQuantity)
 			BEGIN
-				SET @dblReveivedQuantity = @dblTotalNet
-			END
-			ELSE
-			BEGIN
-				SET @dblReveivedQuantity = @dblTotalGross
+				SET @strresult = @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match distributed quantity ' + LTRIM(@dblDistributedQuantity)
+				RAISERROR(@strresult, 16, 1)
 			END
 		END
-		
-		IF (@dblReveivedQuantity != @dblDistributedQuantity)
-		BEGIN
-			SELECT TOP 1 @strDescription = strDescription
-			FROM vyuICGetItemStock IC
-			WHERE IC.intItemId = @intItem
-			
-			SET @strresult = @strDescription + ' received quantity ' + LTRIM(@dblReveivedQuantity)  + ' does not match distributed quantity ' + LTRIM(@dblDistributedQuantity)
-			RAISERROR(@strresult, 16, 1)
-		END
-		
+
+		DROP TABLE #tmpBlendDistributionItems
+
 		DELETE FROM #ReceiptList WHERE intLoadReceiptId = @intLoadReceiptId
 	END
 
@@ -393,7 +394,7 @@ BEGIN TRY
 			SET @err = 'Default Issue UOM is not setup for item ' + @strItem + ' under location ' + @strItemLocation
 			RAISERROR(@err , 16, 1)
 		END
-		IF (@dblUnits = 0)
+		IF (ISNULL(@dblUnits, 0) = 0)
 		BEGIN
 			RAISERROR('Distribution Units cannot be 0', 16, 1)
 		END
@@ -502,10 +503,17 @@ BEGIN TRY
 		SET intInvoiceId = NULL
 		WHERE intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 
-	   EXEC dbo.uspARDeleteInvoice @intInvoiceId,@intUserId
+	   EXEC uspARDeleteInvoice @intInvoiceId,@intUserId
 
 	   DELETE FROM #InvoiceDeleteTable WHERE intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 	END
+
+	DROP TABLE #ReceiptList
+	DROP TABLE #DistributionHeaderTable
+	DROP TABLE #DistributionDetailTable
+	DROP TABLE #ReceiptDeleteTable
+	DROP TABLE #TransferDeleteTable
+	DROP TABLE #InvoiceDeleteTable
 
 END TRY
 BEGIN CATCH

@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCTContractHeaderView2]
+﻿CREATE VIEW [dbo].[vyuCTSearchContractHeader]
 AS
 SELECT	CH.intContractHeaderId,			
 		CH.strContractNumber,			
@@ -57,15 +57,23 @@ SELECT	CH.intContractHeaderId,
 		CH.ysnExported,
 		CH.dtmExported,
 		YR.strCropYear,
-		dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
+		dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses,
+		CS.intUnitMeasureId AS intStockCommodityUnitMeasureId,
+		U1.strUnitMeasure AS strStockCommodityUnitMeasure
+
 FROM	tblCTContractHeader					CH	
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
-JOIN	tblEMEntity							EY	ON	EY.intEntityId						=		CH.intEntityId
+JOIN	tblEMEntity							EY	ON	EY.intEntityId						=		CH.intEntityId						LEFT
+
+JOIN	tblICCommodityUnitMeasure			CS	ON	CS.intCommodityId					=		CH.intCommodityId				
+												AND	CS.ysnStockUnit						=		1									LEFT
+JOIN	tblICUnitMeasure					U1	ON	U1.intUnitMeasureId					=		CS.intUnitMeasureId					LEFT
 JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
-JOIN	tblICCommodity						CY	ON	CY.intCommodityId					=		CH.intCommodityId					LEFT
-JOIN	tblICCommodityUnitMeasure			CL	ON	CL.intCommodityUnitMeasureId		=		CH.intLoadUOMId						LEFT
 JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					LEFT
+JOIN	tblICCommodityUnitMeasure			CL	ON	CL.intCommodityUnitMeasureId		=		CH.intLoadUOMId						LEFT
 JOIN	tblICUnitMeasure					U3	ON	U3.intUnitMeasureId					=		CL.intUnitMeasureId					LEFT
+
+JOIN	tblICCommodity						CY	ON	CY.intCommodityId					=		CH.intCommodityId					LEFT
 JOIN	tblCTWeightGrade					W1	ON	W1.intWeightGradeId					=		CH.intGradeId						LEFT
 JOIN	tblCTWeightGrade					W2	ON	W2.intWeightGradeId					=		CH.intWeightId						LEFT
 JOIN	tblCTContractText					TX	ON	TX.intContractTextId				=		CH.intContractTextId				LEFT

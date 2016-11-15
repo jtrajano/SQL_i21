@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspQMProductPropertyDetails_Save]
-	@strXml NVARCHAR(Max)
+﻿CREATE PROCEDURE uspQMProductPropertyDetails_Save
+	@strXml NVARCHAR(MAX)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -21,11 +21,11 @@ BEGIN TRY
 		,intProductId INT
 		,intTestId INT
 		,intPropertyId INT
-		,strFormulaParser NVARCHAR(MAX)
+		,strFormulaParser NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		,strComputationMethod NVARCHAR(30)
 		,intSequenceNo INT
 		,intComputationTypeId INT
-		,strFormulaField NVARCHAR(MAX)
+		,strFormulaField NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		,strIsMandatory NVARCHAR(20) COLLATE Latin1_General_CI_AS
 		,intLastModifiedUserId INT
 		,dtmLastModified DATETIME
@@ -55,6 +55,17 @@ BEGIN TRY
 		,intConcurrencyId INT
 		,intOnSuccessPropertyId INT
 		,intOnFailurePropertyId INT
+		,intCreatedUserId INT
+		,dtmCreated DATETIME
+		,intLastModifiedUserId INT
+		,dtmLastModified DATETIME
+		)
+	DECLARE @tblQMProductPropertyFormulaProperty TABLE (
+		intProductPropertyFormulaPropertyId INT
+		,intProductPropertyId INT
+		,intConcurrencyId INT
+		,intTestId INT
+		,intPropertyId INT
 		,intCreatedUserId INT
 		,dtmCreated DATETIME
 		,intLastModifiedUserId INT
@@ -193,6 +204,38 @@ BEGIN TRY
 			,dtmLastModified DATETIME
 			)
 
+	INSERT INTO @tblQMProductPropertyFormulaProperty (
+		intProductPropertyFormulaPropertyId
+		,intProductPropertyId
+		,intConcurrencyId
+		,intTestId
+		,intPropertyId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT intProductPropertyFormulaPropertyId
+		,intProductPropertyId
+		,intConcurrencyId
+		,intTestId
+		,intPropertyId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+	FROM OPENXML(@idoc, 'root/ProductPropertyFormulaProperty', 2) WITH (
+			intProductPropertyFormulaPropertyId INT
+			,intProductPropertyId INT
+			,intConcurrencyId INT
+			,intTestId INT
+			,intPropertyId INT
+			,intCreatedUserId INT
+			,dtmCreated DATETIME
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			)
+
 	SELECT @intProductPropertyId = intProductPropertyId
 	FROM @tblQMProductProperty
 
@@ -206,6 +249,16 @@ BEGIN TRY
 	FROM tblQMProductProperty a
 	JOIN @tblQMProductProperty b ON a.intProductPropertyId = b.intProductPropertyId
 		AND a.strIsMandatory <> b.strIsMandatory
+
+	-- Product Property Formula Updation
+	UPDATE a
+	SET a.intLastModifiedUserId = b.intLastModifiedUserId
+		,a.dtmLastModified = b.dtmLastModified
+		,a.strFormulaParser = b.strFormulaParser
+		,a.strFormulaField = b.strFormulaField
+	FROM tblQMProductProperty a
+	JOIN @tblQMProductProperty b ON a.intProductPropertyId = b.intProductPropertyId
+		AND ISNULL(a.strFormulaField, '') <> ISNULL (b.strFormulaField, '')
 
 	-- Validity Period Deletion & Creation & Updation
 	DELETE
@@ -308,6 +361,45 @@ BEGIN TRY
 		,a.dtmLastModified = b.dtmLastModified
 	FROM tblQMConditionalProductProperty a
 	JOIN @tblQMConditionalProductProperty b ON b.intConditionalProductPropertyId = a.intConditionalProductPropertyId
+
+	-- Product Property Formula Property Deletion & Creation & Updation
+	DELETE
+	FROM tblQMProductPropertyFormulaProperty
+	WHERE intProductPropertyId = @intProductPropertyId
+		AND intProductPropertyFormulaPropertyId NOT IN (
+			SELECT intProductPropertyFormulaPropertyId
+			FROM @tblQMProductPropertyFormulaProperty
+			)
+
+	INSERT INTO tblQMProductPropertyFormulaProperty (
+		intProductPropertyId
+		,intConcurrencyId
+		,intTestId
+		,intPropertyId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT intProductPropertyId
+		,intConcurrencyId
+		,intTestId
+		,intPropertyId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+	FROM @tblQMProductPropertyFormulaProperty
+	WHERE intProductPropertyFormulaPropertyId = 0
+
+	UPDATE a
+	SET a.intConcurrencyId = b.intConcurrencyId
+		,a.intTestId = b.intTestId
+		,a.intPropertyId = b.intPropertyId
+		,a.intLastModifiedUserId = b.intLastModifiedUserId
+		,a.dtmLastModified = b.dtmLastModified
+	FROM tblQMProductPropertyFormulaProperty a
+	JOIN @tblQMProductPropertyFormulaProperty b ON b.intProductPropertyFormulaPropertyId = a.intProductPropertyFormulaPropertyId
 
 	EXEC sp_xml_removedocument @idoc
 

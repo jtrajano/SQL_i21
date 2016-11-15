@@ -22,6 +22,7 @@
 	,@ApplyTermDiscount	BIT				= 1
 	,@Discount			NUMERIC(18,6)	= 0.000000	
 	,@Interest			NUMERIC(18,6)	= 0.000000			
+	,@InvoicePrepayment	BIT				= 0
 AS
 
 BEGIN
@@ -140,6 +141,7 @@ BEGIN TRY
 		,[ysnApplytoBudget]
 		,[ysnApplyOnAccount]
 		,[intEntityId]
+		,[ysnInvoicePrepayment]
 		,[intConcurrencyId])
 	SELECT
 		 [intEntityCustomerId]			= ARC.[intEntityCustomerId]
@@ -158,6 +160,7 @@ BEGIN TRY
 		,[ysnApplytoBudget]				= @ApplytoBudget
 		,[ysnApplyOnAccount]			= @ApplyOnAccount
 		,[intEntityId]					= @EntityId
+		,[ysnInvoicePrepayment]			= @InvoicePrepayment
 		,[intConcurrencyId]				= 0		
 	FROM	
 		tblARCustomer ARC	

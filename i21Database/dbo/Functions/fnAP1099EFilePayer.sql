@@ -12,7 +12,7 @@ BEGIN
 	SELECT 
 	@payer =
 		'A'
-		+ CAST(2015 AS NVARCHAR(10))  --Position 2-5
+		+ CAST(@year AS NVARCHAR(10))  --Position 2-5
 		+ ' ' --CF/SF
 		+ SPACE(5) -- 7-11
 		+ ISNULL(NULLIF(LEFT(A.strFederalTaxID,9),''), SPACE(9)) --Position 12-20 TIN

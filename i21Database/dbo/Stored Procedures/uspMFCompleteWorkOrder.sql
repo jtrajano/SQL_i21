@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFCompleteWorkOrder] (
 	@strXML NVARCHAR(MAX)
-	,@strOutputLotNumber NVARCHAR(50) OUTPUT
-	,@intParentLotId INT = NULL OUTPUT
+	,@strOutputLotNumber NVARCHAR(50) = '' OUTPUT
+	,@intParentLotId INT = 0 OUTPUT
 	)
 AS
 BEGIN TRY
@@ -79,6 +79,7 @@ BEGIN TRY
 		,@intInputItemId INT
 		,@strInputItemLotTracking NVARCHAR(50)
 		,@intInputItemUOMId INT
+		,@strCreateMultipleLots NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -286,6 +287,7 @@ BEGIN TRY
 	BEGIN
 		PRINT 'Move the selected lot''s container to Audit container'
 	END
+
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Is Instant Consumption'
@@ -297,11 +299,11 @@ BEGIN TRY
 		AND intAttributeId = @intAttributeId
 
 	IF @strInstantConsumption = 'False'
-	Begin
+	BEGIN
 		SELECT @intBatchId = intBatchID
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
-	End
+	END
 
 	IF @intBatchId IS NULL
 		OR @intBatchId = 0
@@ -427,7 +429,6 @@ BEGIN TRY
 		--			,1
 		--			)
 		--END
-
 		SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
 		FROM dbo.tblMFWorkOrder
 		WHERE dtmExpectedDate = @dtmPlannedDate
@@ -497,7 +498,15 @@ BEGIN TRY
 
 		IF @strInputQuantityReadOnly = 'True'
 		BEGIN
-			SELECT @dblInputWeight = ri.dblCalculatedQuantity * ((Case When r.intItemUOMId=@intProduceUnitMeasureId Then @dblProduceQty Else @dblPhysicalCount End)/ r.dblQuantity)
+			SELECT @dblInputWeight = ri.dblCalculatedQuantity * (
+					(
+						CASE 
+							WHEN r.intItemUOMId = @intProduceUnitMeasureId
+								THEN @dblProduceQty
+							ELSE @dblPhysicalCount
+							END
+						) / r.dblQuantity
+					)
 			FROM dbo.tblMFRecipeItem ri
 			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			LEFT JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
@@ -645,7 +654,7 @@ BEGIN TRY
 	BEGIN
 		IF EXISTS (
 				SELECT *
-				FROM tblMFWorkOrderRecipe 
+				FROM tblMFWorkOrderRecipe
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intItemUOMId = @intProduceUnitMeasureId
 				)
@@ -696,11 +705,11 @@ BEGIN TRY
 			)
 	BEGIN
 		IF @strInstantConsumption = 'False'
-		Begin
+		BEGIN
 			SELECT @strRetBatchId = strBatchId
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
-		End
+		END
 
 		IF @strRetBatchId IS NULL
 		BEGIN
@@ -732,35 +741,118 @@ BEGIN TRY
 			,@strLotAlias = @strLotAlias
 			,@intProductionTypeId = @intProductionTypeId
 
-		EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
-			,@intItemId = @intItemId
-			,@dblProduceQty = @dblProduceQty
-			,@intProduceUOMKey = @intProduceUnitMeasureId
-			,@strVesselNo = @strVesselNo
-			,@intUserId = @intUserId
-			,@intStorageLocationId = @intStorageLocationId
-			,@strLotNumber = @strOutputLotNumber
-			,@intContainerId = @intContainerId
-			,@dblTareWeight = @dblTareWeight
-			,@dblUnitQty = @dblUnitQty
-			,@dblPhysicalCount = @dblPhysicalCount
-			,@intPhysicalItemUOMId = @intPhysicalItemUOMId
-			,@intBatchId = @intBatchId
-			,@strBatchId = @strRetBatchId
-			,@intShiftId = @intPlannedShiftId
-			,@strReferenceNo = @strReferenceNo
-			,@intStatusId = @intStatusId
-			,@intLotId = @intLotId OUTPUT
-			,@ysnPostProduction = @ysnPostProduction
-			,@strLotAlias = @strLotAlias
-			,@intLocationId = @intLocationId
-			,@intMachineId = @intMachineId
-			,@dtmProductionDate = @dtmPlannedDate
-			,@strVendorLotNo = @strVendorLotNo
-			,@strComment = @strComment
-			,@strParentLotNumber = @strParentLotNumber
-			,@intInputLotId = @intInputLotId
-			,@intInputStorageLocationId = @intInputLotStorageLocationId
+		SELECT @strCreateMultipleLots = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 82
+
+		IF @strCreateMultipleLots = 'True' and @dblPhysicalCount > 0 and @intProduceUnitMeasureId<>@intPhysicalItemUOMId
+		BEGIN
+			WHILE @dblPhysicalCount > 0
+			BEGIN
+				IF Ceiling(@dblPhysicalCount) = 1
+					AND @dblProduceQty % @dblUnitQty > 0
+				BEGIN
+					SELECT @dblUnitQty = @dblProduceQty % @dblUnitQty
+				END
+
+				EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
+					,@intItemId = @intItemId
+					,@dblProduceQty = @dblUnitQty
+					,@intProduceUOMKey = @intProduceUnitMeasureId
+					,@strVesselNo = @strVesselNo
+					,@intUserId = @intUserId
+					,@intStorageLocationId = @intStorageLocationId
+					,@strLotNumber = @strOutputLotNumber
+					,@intContainerId = @intContainerId
+					,@dblTareWeight = @dblTareWeight
+					,@dblUnitQty = @dblUnitQty
+					,@dblPhysicalCount = 1
+					,@intPhysicalItemUOMId = @intPhysicalItemUOMId
+					,@intBatchId = @intBatchId
+					,@strBatchId = @strRetBatchId
+					,@intShiftId = @intPlannedShiftId
+					,@strReferenceNo = @strReferenceNo
+					,@intStatusId = @intStatusId
+					,@intLotId = @intLotId OUTPUT
+					,@ysnPostProduction = @ysnPostProduction
+					,@strLotAlias = @strLotAlias
+					,@intLocationId = @intLocationId
+					,@intMachineId = @intMachineId
+					,@dtmProductionDate = @dtmPlannedDate
+					,@strVendorLotNo = @strVendorLotNo
+					,@strComment = @strComment
+					,@strParentLotNumber = @strParentLotNumber
+					,@intInputLotId = @intInputLotId
+					,@intInputStorageLocationId = @intInputLotStorageLocationId
+
+				IF @intLotStatusId IS NOT NULL
+					AND NOT EXISTS (
+						SELECT *
+						FROM dbo.tblICLot
+						WHERE intLotId = @intLotId
+							AND intLotStatusId = @intLotStatusId
+						)
+					AND @strLotTracking = 'Yes'
+				BEGIN
+					EXEC uspMFSetLotStatus @intLotId
+						,@intLotStatusId
+						,@intUserId
+				END
+
+				SELECT @dblPhysicalCount = @dblPhysicalCount - 1
+
+				IF @strLotTracking <> 'Yes - Serial Number'
+					AND @dblPhysicalCount > 0
+				BEGIN
+					--EXEC dbo.uspSMGetStartingNumber 24
+					--	,@strOutputLotNumber OUTPUT
+					EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+						,@intItemId = @intItemId
+						,@intManufacturingId = @intManufacturingCellId
+						,@intSubLocationId = @intSubLocationId
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 24
+						,@ysnProposed = 0
+						,@strPatternString = @strOutputLotNumber OUTPUT
+				END
+			END
+		END
+		ELSE
+		BEGIN
+			EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@intItemId = @intItemId
+				,@dblProduceQty = @dblProduceQty
+				,@intProduceUOMKey = @intProduceUnitMeasureId
+				,@strVesselNo = @strVesselNo
+				,@intUserId = @intUserId
+				,@intStorageLocationId = @intStorageLocationId
+				,@strLotNumber = @strOutputLotNumber
+				,@intContainerId = @intContainerId
+				,@dblTareWeight = @dblTareWeight
+				,@dblUnitQty = @dblUnitQty
+				,@dblPhysicalCount = @dblPhysicalCount
+				,@intPhysicalItemUOMId = @intPhysicalItemUOMId
+				,@intBatchId = @intBatchId
+				,@strBatchId = @strRetBatchId
+				,@intShiftId = @intPlannedShiftId
+				,@strReferenceNo = @strReferenceNo
+				,@intStatusId = @intStatusId
+				,@intLotId = @intLotId OUTPUT
+				,@ysnPostProduction = @ysnPostProduction
+				,@strLotAlias = @strLotAlias
+				,@intLocationId = @intLocationId
+				,@intMachineId = @intMachineId
+				,@dtmProductionDate = @dtmPlannedDate
+				,@strVendorLotNo = @strVendorLotNo
+				,@strComment = @strComment
+				,@strParentLotNumber = @strParentLotNumber
+				,@intInputLotId = @intInputLotId
+				,@intInputStorageLocationId = @intInputLotStorageLocationId
+		END
 
 		IF @intLotStatusId IS NOT NULL
 			AND NOT EXISTS (
@@ -769,6 +861,7 @@ BEGIN TRY
 				WHERE intLotId = @intLotId
 					AND intLotStatusId = @intLotStatusId
 				)
+			AND @strLotTracking = 'Yes'
 		BEGIN
 			--UPDATE dbo.tblICLot
 			--SET intLotStatusId = @intLotStatusId
@@ -783,8 +876,20 @@ BEGIN TRY
 		FROM dbo.tblICLot
 		WHERE intLotId = @intLotId
 
+		IF @strOutputLotNumber IS NULL
+			SELECT @strOutputLotNumber = ''
+
+		IF @intParentLotId IS NULL
+			SELECT @intParentLotId = 0
+
 		SELECT @strOutputLotNumber AS strOutputLotNumber
 	END
+
+	EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId
+		,@intItemId = @intItemId
+		,@intOutputLotId = @intLotId
+		,@intLocationId = @intLocationId
+		,@intUserId = @intUserId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

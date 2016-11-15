@@ -1682,13 +1682,13 @@ BEGIN
 	SELECT 9
 		,'Count Quantity'
 		,1
-		,0
+		,1
 END
 ELSE
 
 BEGIN
 	UPDATE tblMFYieldTransaction
-	SET ysnInputTransaction = 0
+	SET ysnInputTransaction = 1
 	WHERE intYieldTransactionId = 9
 END
 
@@ -2348,4 +2348,13 @@ BEGIN
     INSERT INTO tblMFScheduleRuleType(intScheduleRuleTypeId,strName)
     VALUES(2,'Finite Constraint')
 END
+GO
+UPDATE ri 
+SET ri.intSequenceNo = t.intSequenceNo
+FROM tblMFRecipeItem ri 
+Join
+(
+SELECT intRecipeItemId, ROW_NUMBER() OVER (PARTITION BY intRecipeId ORDER BY [intRecipeItemId]) AS intSequenceNo
+FROM tblMFRecipeItem Where intSequenceNo is null AND intRecipeItemTypeId=1 Group By intRecipeId,intRecipeItemId
+) t ON ri.intRecipeItemId=t.intRecipeItemId
 GO

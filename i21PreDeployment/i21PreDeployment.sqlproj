@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -101,7 +101,6 @@
     <None Include="Scripts\Pre-Deployment\8_AP\FixPaymentWithoutVendorId.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\DropTriggers.sql" />
     <None Include="Scripts\Pre-Deployment\9_FRD\2_1440_to_1510.sql" />
-    <None Include="Scripts\Pre-Deployment\7_AR\3_FixARTransactionsAccounts.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\AddPOVendorConstraint.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\01_Make_Column_Null.sql" />
     <None Include="i21PreDeployment_1.publish.xml" />
@@ -148,6 +147,8 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Storage_Unit_Type.sql" />
     <None Include="Scripts\Pre-Deployment\21_PR\2_1630_to_1640.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\20_CleanCustomerSpecialPrice.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Charges.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -162,6 +163,7 @@
     <None Include="Scripts\Pre-Deployment\18_IU\1_DataCleanUp.sql" />
     <None Include="Scripts\Pre-Deployment\20_CF\FixeDataWithContraints.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\6_TicketManagement.sql" />
+    <None Include="Scripts\Pre-Deployment\4_SM\7_CRM.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />
@@ -276,4 +278,10 @@
     <None Include="Scripts\Pre-Deployment\22_PAT\2_AddTransferType.sql" />
     <None Include="Scripts\Pre-Deployment\22_PAT\3_MigrateDataChanges.sql" />
   </ItemGroup>
+    <ItemGroup>
+      <None Include="Scripts\Pre-Deployment\7_AR\5_InvoiceCurrencyCleanUp.sql" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="Scripts\Pre-Deployment\11_IC\Rename_IC_Database_Objects.sql" />
+    </ItemGroup>
 </Project>

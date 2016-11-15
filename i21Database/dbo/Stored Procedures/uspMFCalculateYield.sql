@@ -230,11 +230,11 @@ BEGIN TRY
 	WHERE S.intWorkOrderId = @intWorkOrderId
 
 	UPDATE tblMFProductionSummary
-	SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) - (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)
+	SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) - (dblOpeningQuantity + dblOpeningConversionQuantity )
 		,dblYieldPercentage = (
 			CASE 
-				WHEN dblInputQuantity > 0
-					THEN Round((dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) / (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity) * 100, 2)
+				WHEN dblOpeningQuantity > 0
+					THEN Round((dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) / (dblOpeningQuantity + dblOpeningConversionQuantity) * 100, 2)
 				ELSE 100
 				END
 			)

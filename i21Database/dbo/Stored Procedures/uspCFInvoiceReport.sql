@@ -102,7 +102,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber,ysnNonDistibutionList',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -181,6 +181,25 @@ BEGIN
 			 @strPrintTimeStamp = [from]
 		FROM @temp_params WHERE [fieldname] = 'strPrintTimeStamp'
 
+		--NON DISTRIBUTION LIST
+		SELECT TOP 1
+			 @From = [from]
+			,@To = [to]
+			,@Condition = [condition]
+			,@Fieldname = [fieldname]
+		FROM @temp_params WHERE [fieldname] = 'ysnNonDistibutionList'
+
+		IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'TRUE' OR @From = 1))
+		BEGIN
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' NOT (strEmailDistributionOption like ''%CF Invoice%'' AND (strEmail IS NOT NULL AND strEmail != ''))'
+		END
+
+		SET @From = ''
+		SET @To = ''
+		SET @Condition = ''
+		SET @Fieldname = ''
+
 		--INCLUDE PRINTED TRANSACTION
 		SELECT TOP 1
 			 @From = [from]
@@ -189,7 +208,7 @@ BEGIN
 			,@Fieldname = [fieldname]
 		FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
 
-		DECLARE @tblCFTableCardIds TABLE ([intCardId]	INT)
+		DECLARE @tblCFTableCardIds TABLE ([intAccountId]	INT)
 		DECLARE @tblCFTableTransationIds TABLE ([intTransactionId]	INT)
 		DECLARE @tblCFFilterIds TABLE ([intTransactionId]	INT)
 		DECLARE @CFID NVARCHAR(MAX)
@@ -199,14 +218,14 @@ BEGIN
 		DECLARE @intTempCardCounter INT
 		DECLARE @intTempCardId	INT
 		DECLARE @tblCFInvoiceNunber TABLE (
-			[intCardId]	INT,
+			[intAccountId]	INT,
 			[strInvoiceNumber]	NVARCHAR(MAX)
 		)
 
 		---------GET DISTINCT CARD ID---------
-		SET @tblCFTempTableQuery = 'SELECT DISTINCT intCardId FROM vyuCFInvoiceReport ' + @whereClause
+		SET @tblCFTempTableQuery = 'SELECT DISTINCT intAccountId FROM vyuCFInvoiceReport ' + @whereClause
 
-		INSERT INTO  @tblCFTableCardIds (intCardId)
+		INSERT INTO  @tblCFTableCardIds (intAccountId)
 		EXEC (@tblCFTempTableQuery)
 		---------GET DISTINCT CARD ID---------
 
@@ -214,21 +233,21 @@ BEGIN
 		WHILE (EXISTS(SELECT 1 FROM @tblCFTableCardIds))
 		BEGIN
 
-			SELECT @intTempCardCounter = [intCardId] FROM @tblCFTableCardIds
-			SELECT @intTempCardId = [intCardId] FROM @tblCFTableCardIds WHERE [intCardId] = @intTempCardCounter
+			SELECT @intTempCardCounter = [intAccountId] FROM @tblCFTableCardIds
+			SELECT @intTempCardId = [intAccountId] FROM @tblCFTableCardIds WHERE [intAccountId] = @intTempCardCounter
 
 			EXEC uspSMGetStartingNumber 53, @CFID OUT
 
 			INSERT INTO @tblCFInvoiceNunber (
-					[intCardId]
+				[intAccountId]
 				,[strInvoiceNumber]
 			)
 			VALUES(
-					@intTempCardId
+				@intTempCardId
 				,@CFID
 			)
 
-			DELETE FROM @tblCFTableCardIds WHERE [intCardId] = @intTempCardCounter
+			DELETE FROM @tblCFTableCardIds WHERE [intAccountId] = @intTempCardCounter
 
 			-----------UPDATE INVOICE REPORT NUMBER ID---------
 			--EXEC uspSMGetStartingNumber 53, @CFID OUT
@@ -241,7 +260,6 @@ BEGIN
 
 		END
 		---------CREATE ID WITH INVOICE NUMBER--------
-
 
 		DECLARE @intTempTransactionCounter INT
 		DECLARE @intTempTransactionId INT
@@ -267,15 +285,16 @@ BEGIN
 
 				SELECT @intTempTransactionCounter = [intTransactionId] FROM @tblCFTableTransationIds
 				SELECT @intTempTransactionId = [intTransactionId] FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
-				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intCardId = (SELECT TOP 1 intCardId FROM tblCFTransaction WHERE intTransactionId = @intTempTransactionId)
+				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intAccountId = (SELECT TOP 1 cfCardAcct.intAccountId FROM tblCFTransaction as cfTrans
+																											INNER JOIN vyuCFCardAccount as cfCardAcct
+																											ON cfTrans.intCardId = cfCardAcct.intCardId
+																											WHERE cfTrans.intTransactionId = @intTempTransactionId)
 
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 				IF(@CFID IS NOT NULL)
 				BEGIN
-				
 					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
-					
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 
@@ -302,12 +321,15 @@ BEGIN
 
 				SELECT @intTempTransactionCounter = [intTransactionId] FROM @tblCFTableTransationIds
 				SELECT @intTempTransactionId = [intTransactionId] FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
-				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intCardId = (SELECT TOP 1 intCardId FROM tblCFTransaction WHERE intTransactionId = @intTempTransactionId)
+				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intAccountId = (SELECT TOP 1 cfCardAcct.intAccountId FROM tblCFTransaction as cfTrans
+																											INNER JOIN vyuCFCardAccount as cfCardAcct
+																											ON cfTrans.intCardId = cfCardAcct.intCardId
+																											WHERE cfTrans.intTransactionId = @intTempTransactionId)
 
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 				IF(@CFID IS NOT NULL)
 				BEGIN
-				
+
 					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
@@ -330,7 +352,17 @@ BEGIN
 		END
 
 		--EXEC('SELECT * FROM vyuCFInvoiceReport ' + @whereClause)
-		SELECT * FROM vyuCFInvoiceReport where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+		--SELECT * FROM vyuCFInvoiceReport where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+
+		SELECT * FROM vyuCFInvoiceReport AS main 
+		INNER JOIN 
+		(	SELECT intAccountId AS intSubAccountId,SUM(dblCalculatedTotalAmount) AS dblInvoiceTotal 
+			FROM vyuCFInvoiceReport
+			WHERE intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+			GROUP BY intAccountId 
+		) AS sub
+		ON main.intAccountId = sub.intSubAccountId 
+		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 	END
     
 END

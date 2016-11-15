@@ -1,4 +1,5 @@
-﻿--tblCTBuySell
+﻿PRINT('Contract 1_MasterTables Start')
+--tblCTBuySell
 GO
 IF NOT EXISTS(SELECT * FROM tblCTBuySell WHERE intBuySellId = 1)
 BEGIN
@@ -337,6 +338,30 @@ BEGIN
 END
 GO
 
+GO
+IF NOT EXISTS(SELECT * FROM tblCTCleanCostExpenseType WHERE intExpenseTypeId = 7)
+BEGIN
+	INSERT INTO tblCTCleanCostExpenseType(intConcurrencyId,strExpenseName,strExpenseDescription,ysnQuantityEnable)
+	SELECT 1,'UTZ','UTZ',1 
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTCleanCostExpenseType WHERE intExpenseTypeId = 8)
+BEGIN
+	INSERT INTO tblCTCleanCostExpenseType(intConcurrencyId,strExpenseName,strExpenseDescription,ysnQuantityEnable)
+	SELECT 1,'OTA','OTA',1 
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTCleanCostExpenseType WHERE intExpenseTypeId = 9)
+BEGIN
+	INSERT INTO tblCTCleanCostExpenseType(intConcurrencyId,strExpenseName,strExpenseDescription,ysnQuantityEnable)
+	SELECT 1,'Special Costs','Special Costs',1 
+END
+GO
+
 -- Inventory Planning Report -- Vinoth
 GO
 IF NOT EXISTS(SELECT 1 FROM tblCTReportMaster WHERE strReportName = 'Inventory Planning Report')
@@ -483,3 +508,5 @@ UPDATE tblCTCompanyPreference
 SET strDemandItemType = 'Finished Good'
 WHERE strDemandItemType IS NULL
 GO
+
+PRINT('Contract 1_MasterTables End')

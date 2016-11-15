@@ -54,6 +54,14 @@ SELECT CD.intContractDetailId
 	,CD.intContainerTypeId
 	,CD.strVessel
 	,CH.intContractTypeId
+	,S.strSampleStatus
+	,S.strSampleNumber
+	,S.strContainerNumber
+	,S.strSampleTypeName
+	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
+	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
+	,S.intCompanyLocationSubLocationId
+	,S.strSubLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -65,3 +73,24 @@ LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN (SELECT * FROM (
+			SELECT ROW_NUMBER() OVER (
+					PARTITION BY S.intContractDetailId ORDER BY S.intSampleId DESC
+					) intRowNum
+				,S.intContractDetailId
+				,S.strSampleNumber
+				,S.strContainerNumber
+				,ST.strSampleTypeName
+				,SS.strStatus AS strSampleStatus
+				,S.dtmTestingStartDate
+				,S.dtmTestingEndDate
+				,S.intCompanyLocationSubLocationId
+				,CLSL.strSubLocationName
+			FROM tblQMSample S
+			JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+			JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+			WHERE S.intContractDetailId IS NOT NULL
+			) t
+		WHERE intRowNum = 1
+		) S ON S.intContractDetailId = CD.intContractDetailId

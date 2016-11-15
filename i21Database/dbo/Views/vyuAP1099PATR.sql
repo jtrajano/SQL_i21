@@ -65,7 +65,7 @@ AS
 FROM vyuAP1099 A
 CROSS JOIN tblSMCompanySetup B
 CROSS JOIN tblAP1099Threshold C
-WHERE A.int1099Form = 1
+WHERE A.int1099Form = 4
 GROUP BY intYear, intEntityVendorId
 ,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strEin--B.strFederalTaxID
 ,A.int1099Form

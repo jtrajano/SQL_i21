@@ -27,12 +27,12 @@ BEGIN
 		+ dbo.fnTrim(A.strVendorId) + SPACE(20 - LEN(dbo.fnTrim(A.strVendorId))) -- 21-40
 		+ SPACE(4) -- 41-44
 		+ SPACE(10) -- 45-54
-		+ CASE WHEN A.dbl1099INT > @maxAmount
-			THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dbl1099INT AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-			+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(A.dbl1099INT AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+		+ CASE WHEN ISNULL(A.dbl1099INT,0) > @maxAmount
+			THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dbl1099INT,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
+			+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dbl1099INT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
-			dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dbl1099INT AS DECIMAL(18,2)) AS NVARCHAR(100)))
-			+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(A.dbl1099INT AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dbl1099INT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+			+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dbl1099INT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END -- PAGE 64 AND 51
 		+ REPLICATE ('0',12)
 		+ REPLICATE ('0',12)

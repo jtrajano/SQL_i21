@@ -3,6 +3,7 @@
 	[intContractImportId] [int] IDENTITY(1,1) NOT NULL,
 	[strContractType] [nvarchar](50)  COLLATE Latin1_General_CI_AS NULL,
 	[strEntityName] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
+	[strEntityNo] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[strCommodity] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[strContractNumber] [nvarchar](50)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmContractDate] [datetime] NULL,
@@ -33,7 +34,6 @@
 	[strErrorMsg] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
 	[intContractHeaderId] [int] NULL,
 	[xmlInput] [xml] NULL,
-	[strEntityNo] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
-
+	[intSession] [bigint],
 	CONSTRAINT [PK_tblCTContractImport_intContractImportId] PRIMARY KEY CLUSTERED (intContractImportId ASC)
 )

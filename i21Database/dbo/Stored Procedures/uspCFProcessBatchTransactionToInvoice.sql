@@ -329,59 +329,65 @@ END
 	BEGIN
 		IF (@ErrorMessage IS NULL AND @CreatedIvoices IS NOT NULL)
 			BEGIN
-			
-				SELECT * INTO #tmpCreatedInvoice
-				FROM [fnCFSplitString](@CreatedIvoices,',') 
 
-				SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
-				FROM #tmpCreatedInvoice
-
-
-				WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+				IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
 				BEGIN
-					SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice
-					SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
-				
-					UPDATE tblCFTransaction 
-					SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
-					WHERE intTransactionId = (SELECT intTransactionId 
-												FROM tblARInvoice 
-												WHERE intInvoiceId = @intCreatedInvoiceId)
-				
-					DELETE FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
+					SELECT * INTO #tmpCreatedInvoice
+					FROM [fnCFSplitString](@CreatedIvoices,',') 
 
-				END
+					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+					FROM #tmpCreatedInvoice
 
-				DROP TABLE #tmpCreatedInvoice
+
+					WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+					BEGIN
+						SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice
+						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
+				
+						UPDATE tblCFTransaction 
+						SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
+						WHERE intTransactionId = (SELECT intTransactionId 
+													FROM tblARInvoice 
+													WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+						DELETE FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
+
+					END
+
+					DROP TABLE #tmpCreatedInvoice
+				END 
 			
 			END
 
 			IF (@ErrorMessage IS NULL AND @UpdatedIvoices IS NOT NULL)
 			BEGIN
 			
-				SELECT * INTO #tmpUpdatedInvoice
-				FROM [fnCFSplitString](@UpdatedIvoices,',') 
-
-				SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
-				FROM #tmpUpdatedInvoice
-
-
-				WHILE (EXISTS(SELECT 1 FROM #tmpUpdatedInvoice ))
+				IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
 				BEGIN
-					SELECT @intCreatedRecordKey = RecordKey FROM #tmpUpdatedInvoice
-					SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
-				
-					UPDATE tblCFTransaction 
-					SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
-					WHERE intTransactionId = (SELECT intTransactionId 
-												FROM tblARInvoice 
-												WHERE intInvoiceId = @intCreatedInvoiceId)
-				
-					DELETE FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
+					SELECT * INTO #tmpUpdatedInvoice
+					FROM [fnCFSplitString](@UpdatedIvoices,',') 
 
+					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+					FROM #tmpUpdatedInvoice
+
+
+					WHILE (EXISTS(SELECT 1 FROM #tmpUpdatedInvoice ))
+					BEGIN
+						SELECT @intCreatedRecordKey = RecordKey FROM #tmpUpdatedInvoice
+						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
+				
+						UPDATE tblCFTransaction 
+						SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
+						WHERE intTransactionId = (SELECT intTransactionId 
+													FROM tblARInvoice 
+													WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+						DELETE FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
+
+					END
+
+					DROP TABLE #tmpUpdatedInvoice
 				END
-
-				DROP TABLE #tmpUpdatedInvoice
 			
 			END
 

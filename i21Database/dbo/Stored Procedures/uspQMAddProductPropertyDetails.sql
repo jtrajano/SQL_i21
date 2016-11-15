@@ -80,3 +80,22 @@ JOIN tblQMProductProperty PP ON PP.intPropertyId = CP.intPropertyId
 		FROM tblQMConditionalProductProperty CPP
 		WHERE CPP.intProductPropertyId = PP.intProductPropertyId
 		)
+
+-- Updating strIsMandatory value from property table
+UPDATE tblQMProductProperty
+SET strIsMandatory = P.strIsMandatory
+FROM tblQMProductProperty PP
+JOIN tblQMProperty P ON P.intPropertyId = PP.intPropertyId
+WHERE PP.intProductId = @intProductId
+	AND (
+		PP.strIsMandatory IN (
+			'Yes-Conditional'
+			,'No-Conditional'
+			)
+		)
+	AND NOT EXISTS (
+		-- To ignore if Product Conditional Properties are available 
+		SELECT *
+		FROM tblQMConditionalProductProperty CPP
+		WHERE CPP.intProductPropertyId = PP.intProductPropertyId
+		)

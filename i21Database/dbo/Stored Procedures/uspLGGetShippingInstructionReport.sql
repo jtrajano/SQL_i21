@@ -351,6 +351,7 @@ SELECT TOP 1 L.intLoadId
 	,L.strLoadingPerUnit
 	,L.strDischargePerUnit
 	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+	,strShippingInstructionStandardText= (SELECT TOP 1 strShippingInstructionText FROM tblLGCompanyPreference)
 	,@strCompanyName AS strCompanyName
 	,@strCompanyAddress AS strCompanyAddress
 	,@strContactName AS strCompanyContactName 

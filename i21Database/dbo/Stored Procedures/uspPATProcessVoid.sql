@@ -1,38 +1,67 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATProcessVoid]
-	@stockIds NVARCHAR(MAX) = ''
+	@stockIds NVARCHAR(MAX) = '',
+	@intUserId INT,
+	@successfulCount INT = 0 OUTPUT,
+	@invalidCount INT = 0 OUTPUT,
+	@success BIT = 0 OUTPUT
 AS
 BEGIN
-	CREATE TABLE #tmpStocks (intCustomerStockId INT)
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
-	IF (@stockIds <> '' AND @stockIds IS NOT NULL)
-	BEGIN
-		DECLARE @intCustomerStockId INT,
-				@pos INT
+BEGIN TRANSACTION
 
-		WHILE CHARINDEX(',',@stockIds) > 0
-		BEGIN
-			SELECT @pos  = CHARINDEX(',', @stockIds)  				
-			SELECT @intCustomerStockId = CONVERT(INT, SUBSTRING(@stockIds, 1, @pos-1))
+	DECLARE @tmpTransacions TABLE (
+		[intTransactionId] [int] PRIMARY KEY,
+		UNIQUE (intTransactionId)
+	);
+	DECLARE @GLEntries AS RecapTableType;
+	DECLARE @totalRecords INT = 0;
+	DECLARE @error NVARCHAR(MAX);
+	DECLARE @batchId NVARCHAR(40);
 
-			INSERT INTO #tmpStocks VALUES (@intCustomerStockId)
-
-			SELECT @stockIds = SUBSTRING(@stockIds, @pos + 1, LEN(@stockIds) - @pos)
-		END
+	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@stockIds)
 	
-		UPDATE tblPATCustomerStock
-		   SET strActivityStatus = 'Open',
-			   dtmRetireDate = null,
-			   strCheckNumber = null,
-			   dtmCheckDate = null,
-			   dblCheckAmount = null
-		 WHERE intCustomerStockId IN (SELECT intCustomerStockId FROM #tmpStocks)
+	IF(@batchId IS NULL)
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
 
-		 DROP TABLE #tmpStocks
-	END
+	INSERT INTO @GLEntries
+	SELECT * FROM [dbo].[fnPATCreateRetireStockGLEntries](@stockIds, 1, @intUserId, @batchId)
 
+	BEGIN TRY
+		SELECT * FROM @GLEntries
+		EXEC uspGLBookEntries @GLEntries, 1
+	END TRY
+	BEGIN CATCH
+		SET @error = ERROR_MESSAGE()
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback
+	END CATCH
+
+	UPDATE tblPATCustomerStock
+		SET strActivityStatus = 'Open',
+			dtmRetireDate = null,
+			strCheckNumber = null,
+			dtmCheckDate = null,
+			dblCheckAmount = null
+		WHERE intCustomerStockId IN (SELECT [intTransactionId] FROM @tmpTransacions)
+
+	SELECT @totalRecords = [intTransactionId] FROM @tmpTransacions
+
+IF @@ERROR <> 0	GOTO Post_Rollback;
+
+GOTO Post_Commit;
+
+Post_Commit:
+	COMMIT TRANSACTION
+	SET @success = 1
+	SET @successfulCount = @totalRecords
 	
+Post_Rollback:
+	ROLLBACK TRANSACTION	
+	SET @success = 0
 		
 END
-
-GO
-

@@ -30,7 +30,7 @@ BEGIN TRY
 		ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME, SUBSTRING(LTRIM(year(GETDATE())), 1, 2) + LTRIM(intYear) + '-' + SUBSTRING(strFutureMonth, 1, 3) + '-01')) ASC			
 
 		IF @FutureMonthId >0
-		SELECT @strFutureMonth=strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId=@FutureMonthId
+		SELECT @strFutureMonth=LEFT(strFutureMonth,3)+' 20'+RIGHT(strFutureMonth,2) FROM tblRKFuturesMonth WHERE intFutureMonthId=@FutureMonthId
 
 		SELECT @dblFuturesPurchaseBasis=ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,@intCommodityId,@strFutureMonth,1,@FutureMarketId,0,0),0)		
 	END

@@ -89,8 +89,8 @@ AS
 				intSubCurrencyCents			=	ISNULL(SubCurrency.intCent, 1), 
 				dblExchangeRate				=	1,
 				intLotId					=	NULL ,
-				intSubLocationId			=	NULL,
-				intStorageLocationId		=	NULL,
+				intSubLocationId			=	IL.intSubLocationId,
+				intStorageLocationId		=	IL.intStorageLocationId,
 				ysnIsStorage				=	0,
 				intSourceId					=	NULL,
 				intSourceType		 		=	0,
@@ -100,6 +100,7 @@ AS
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN	tblICItemLocation			IL	ON	IL.intItemId	=	CD.intItemId AND IL.intLocationId = CD.intCompanyLocationId
 		CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CH.intEntityId	AND
 													EL.ysnDefaultLocation	=	1				LEFT

@@ -64,7 +64,7 @@ FROM 	tblICItem i LEFT JOIN tblICItemUOM iuStock
 		LEFT JOIN tblICUnitMeasure umTransUOM
 			ON umTransUOM.intUnitMeasureId = iuTransUOM.intUnitMeasureId		
 		LEFT JOIN tblICItemLocation il 
-			ON il.intItemLocationId = t.intItemLocationId
+			ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId) 
 		LEFT JOIN tblICCostingMethod CostingMethod
 			ON CostingMethod.intCostingMethodId = t.intCostingMethod
 		LEFT JOIN tblSMCompanyLocation cl 
@@ -81,7 +81,13 @@ FROM 	tblICItem i LEFT JOIN tblICItemUOM iuStock
 		LEFT JOIN tblICInventoryShipment shipment 
 			ON shipment.intInventoryShipmentId = t.intTransactionId
 			AND shipment.strShipmentNumber = t.strTransactionId
+		LEFT JOIN tblARInvoice invoice
+			ON invoice.intInvoiceId = t.intTransactionId
+			AND invoice.strInvoiceNumber = t.strTransactionId
+		LEFT JOIN tblAPBill bill
+			ON bill.intBillId = t.intTransactionId
+			AND bill.strBillId = t.strTransactionId
 		LEFT JOIN tblEMEntity e 
-			ON e.intEntityId = ISNULL(receipt.intEntityVendorId, shipment.intEntityCustomerId)
+			ON e.intEntityId = ISNULL(receipt.intEntityVendorId, ISNULL(shipment.intEntityCustomerId, ISNULL(invoice.intEntityCustomerId, bill.intEntityVendorId)))
 
 WHERE	i.strType != 'Comment'

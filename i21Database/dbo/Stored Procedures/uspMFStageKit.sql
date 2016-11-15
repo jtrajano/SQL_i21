@@ -122,7 +122,7 @@ Select pld.intPickListId,pld.intPickListDetailId,pld.intLotId,l.strLotNumber,pld
 pld.dblPickQuantity,pld.intPickUOMId,dblWeight,
 CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId,pld.dblQuantity
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
-Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId --Exclude Lots that are already in Kit Staging Location
+Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId AND l.intStorageLocationId <> @intKitStagingLocationId --Exclude Lots that are already in Kit Staging Location
 UNION --Non Lot Tracked
 Select pld.intPickListId,pld.intPickListDetailId,0,'',0,pld.intItemId,0,
 pld.dblQuantity,pld.intItemUOMId,0,1,pld.intItemUOMId,pld.intItemUOMId,pld.dblQuantity

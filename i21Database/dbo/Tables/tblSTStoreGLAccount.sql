@@ -6,7 +6,7 @@
     [intAccountId] INT NULL, 
     [intConcurrencyId] INT NOT NULL,
 	CONSTRAINT [PK_tblSTStoreGLAccount] PRIMARY KEY CLUSTERED ([intStoreGLAccountId] ASC),
-	CONSTRAINT [FK_tblSTStoreGLAccount_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]), 
+	CONSTRAINT [FK_tblSTStoreGLAccount_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]) ON DELETE CASCADE, 
 	CONSTRAINT [AK_tblSTStoreGLAccount_intStoreId_strAccountDescription] UNIQUE NONCLUSTERED ([intStoreId],[strAccountDescription] ASC), 
 	CONSTRAINT [FK_tblSTStoreGLAccount_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
 );

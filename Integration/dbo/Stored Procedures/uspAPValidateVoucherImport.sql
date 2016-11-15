@@ -24,6 +24,11 @@ DECLARE @log TABLE
 )
 
 
+--IF IMPORT STARTS AGAIN MAKE SURE TO DROP EXISTING TABLES FOR IMPORT
+--THIS WILL PREVENT US FROM DELETING EXISTING IMPORT WHEN IMPORT FAILED BEFORE DOING A BACKUP
+IF OBJECT_ID('dbo.tmp_apivcmstImport') IS NOT NULL DROP TABLE tmp_apivcmstImport
+IF OBJECT_ID('dbo.tmp_aptrxmstImport') IS NOT NULL DROP TABLE tmp_aptrxmstImport
+
 IF OBJECT_ID(N'dbo.apchkmst') IS NULL
 BEGIN
 	INSERT INTO @log
@@ -54,6 +59,10 @@ INSERT INTO @log
 SELECT TOP 1 
 	'There are invalid date value on apivc_gl_rev_dt of apivcmst.'
 FROM apivcmst A WHERE ISDATE(A.apivc_gl_rev_dt) = 0
+AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+			THEN
+				CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+			ELSE 1 END)
 UNION ALL
 SELECT TOP 1 
 	'There are invalid date value on aptrx_gl_rev_dt of aptrxmst'
@@ -194,9 +203,11 @@ WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 		ELSE 1 END)
 
 --DO NOT ALLOW TO IMPORT IF THERE ARE CHECK NO 00000000 AND IT IS PREPAYMENT
-INSERT INTO @log
+IF OBJECT_ID('tempdb..#tmpZeroCheckNumber') IS NOT NULL DROP TABLE #tmpZeroCheckNumber
+
 SELECT DISTINCT
-	'Please fix the payment for check # ''00000000'' and for vendor ' + dbo.fnTrim(A.apivc_vnd_no)
+	'Please fix the check # ''00000000'' of invoice # ' + A.apivc_ivc_no + ' and for vendor ' + dbo.fnTrim(A.apivc_vnd_no) AS strDescription
+INTO #tmpZeroCheckNumber
 FROM apivcmst A
 WHERE A.apivc_chk_no = '00000000' AND A.apivc_trans_type = 'A'
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
@@ -205,6 +216,17 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 					ELSE 1 END)
 
 INSERTLOG:
+					
+IF(EXISTS(SELECT 1 FROM #tmpZeroCheckNumber))
+BEGIN
+	INSERT INTO @log
+	SELECT 'Invalid check number 00000000 found in invoice history (apivcmst).  Please find matching check number from origin check history (apchkmst) and update the origin table (apivcmst).'
+END
+
+INSERT INTO @log
+SELECT * FROM #tmpZeroCheckNumber
+
+
 INSERT INTO tblAPImportVoucherLog
 (
 	[strDescription], 

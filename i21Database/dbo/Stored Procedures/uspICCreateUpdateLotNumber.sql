@@ -250,7 +250,15 @@ BEGIN
 		-- 4. if changing the item id of an existing lot. 
 		IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblICLot WHERE strLotNumber = @strLotNumber AND intItemId = @intItemId ) AND @ysnItemChange = 0
 		BEGIN 
-			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
+			--EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT
+			DECLARE @intCategoryId INT = NULL
+			DECLARE @intManufacturingId INT = NULL
+			DECLARE @intOrderTypeId INT = NULL
+			DECLARE @intBlendRequirementId INT = NULL
+			DECLARE @intPatternCode INT = 24
+			DECLARE @ysnProposed INT = 0
+
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId, @intItemId, @intManufacturingId, @intSubLocationId, @intLocationId, @intOrderTypeId, @intBlendRequirementId, @intPatternCode, @ysnProposed, @strLotNumber OUTPUT
 		END 
 	END 
 

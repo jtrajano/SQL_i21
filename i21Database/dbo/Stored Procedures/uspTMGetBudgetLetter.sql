@@ -26,7 +26,7 @@ BEGIN
 		DECLARE @idoc int
 		DECLARE @strCustomerIds NVARCHAR(MAX)
 		DECLARE @strLocationIds NVARCHAR(MAX)
-		DECLARE @strFirstPaymentDue NVARCHAR(15)
+		DECLARE @strFirstPaymentDue DATETIME
 		DECLARE @intBudgetLetterId INT
 		DECLARE @strWhereClause NVARCHAR(MAX)
 		DECLARE @strBudgetLetterId NVARCHAR(10)
@@ -112,7 +112,7 @@ BEGIN
 			,strCustomerZip = D.strZipCode
 			,intEntityCustomerId = B.intEntityCustomerId
 			,dblBudget = B.dblMonthlyBudget
-			,dtmFirstDueDate = ''' + @strFirstPaymentDue + '''
+			,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
 			,blbLetterBody = E.blbMessage 
 			,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
 		FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, tblARCustomer B

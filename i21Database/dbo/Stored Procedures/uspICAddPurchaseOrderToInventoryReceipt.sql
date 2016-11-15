@@ -453,6 +453,7 @@ BEGIN
 			,@InventoryReceiptItemId
 			,@ShipFromId
 			,@TaxGroupId
+			,@FreightTermId
 	END 
 
 	CLOSE loopReceiptItems;

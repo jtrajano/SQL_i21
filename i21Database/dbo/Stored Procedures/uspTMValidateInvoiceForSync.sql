@@ -66,6 +66,12 @@ BEGIN
 			SET @ResultLog = @ResultLog + 'Exception:Burn Rate is Zero.' + CHAR(10)
 			GOTO DONEVALIDATING
 		END
+
+		IF((SELECT ISNULL(dblTotalCapacity,0.0) FROM tblTMSite WHERE intSiteID = @intSiteId) = 0)
+		BEGIN
+			SET @ResultLog = @ResultLog + 'Exception:Site total capacity is Zero.' + CHAR(10)
+			GOTO DONEVALIDATING
+		END
 		
 		IF(NOT EXISTS(SELECT TOP 1 1 FROM tblTMClock WHERE intClockID = @intClockId))
 		BEGIN

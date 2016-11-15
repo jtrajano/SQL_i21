@@ -13,6 +13,7 @@ CREATE TYPE [dbo].[InvoiceItemTableType] AS TABLE
 		,[intCurrencyId]				INT             NOT NULL
 		,[intCompanyLocationId]			INT             NULL
 		,[intDistributionHeaderId]		INT             NULL
+		,[intTransactionId]				INT             NULL
 
 		-- Detail 
 		,[intInvoiceDetailId]			INT             NOT NULL

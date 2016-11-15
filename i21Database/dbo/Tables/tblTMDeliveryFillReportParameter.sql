@@ -6,7 +6,7 @@
 	[strFillMethods]               NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS  NULL,
 	[strDriverIds]               NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS  NULL,
 	[strRouteIds]               NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS  NULL,
-	[strstrPending]               NVARCHAR(10)   COLLATE Latin1_General_CI_AS  NULL,
+	[strPending]               NVARCHAR(10)   COLLATE Latin1_General_CI_AS  NULL,
 	[strOnHold]               NVARCHAR(10)   COLLATE Latin1_General_CI_AS  NULL,
 	[dblEstimatedPercentLeft]               NUMERIC(18,6)    NULL,
 	[dblCalculatedQuantityFrom] NUMERIC(18, 6) NULL, 
@@ -32,6 +32,7 @@
 	[ysnPrintFillGroupInfo] BIT NOT NULL DEFAULT 1, 
 	[ysnPrintTotalOnly] BIT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
+    [strDeliveryFillSort] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     CONSTRAINT [PK_tblTMDeliveryFillReportParameter] PRIMARY KEY CLUSTERED ([intDeliveryFillReportParameterId] ASC),
 )
 
@@ -92,7 +93,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblTMDeliveryFillReportParameter',
     @level2type = N'COLUMN',
-    @level2name = N'strstrPending'
+    @level2name = 'strPending'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'On Hold',

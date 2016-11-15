@@ -361,5 +361,12 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateLeaseCodeView.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
     <None Include="dbo\Stored Procedures\uspETRecreateDeliveryMetricsView.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportAGTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportAGTaxXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceFromAGORDMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql" />
   </ItemGroup>
 </Project>

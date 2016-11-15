@@ -18,9 +18,10 @@ DECLARE @log TABLE
 (
 	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
-DECLARE @intPayablesCategory INT
+DECLARE @intPayablesCategory INT, @prepaymentCategory INT;
 
 SELECT @intPayablesCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account'
+SELECT @prepaymentCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Vendor Prepayments'
 
 --GET THE BALANCE
 IF OBJECT_ID(N'tempdb..#tmpAPGLAccountBalance') IS NOT NULL DROP TABLE #tmpAPGLAccountBalance
@@ -32,9 +33,8 @@ SELECT
 	SUM(ISNULL(A.dblCredit,0)) - SUM(ISNULL(A.dblDebit, 0))
 FROM tblGLDetail A
 INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-INNER JOIN tblGLAccountGroup C ON C.intAccountGroupId = B.intAccountGroupId
-INNER JOIN tblGLAccountCategory D ON C.intAccountCategoryId = D.intAccountCategoryId
-WHERE D.intAccountCategoryId = @intPayablesCategory
+INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
+WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
 AND A.ysnIsUnposted = 0
 GROUP BY B.strAccountId
 

@@ -13,6 +13,7 @@ CREATE TYPE [dbo].[ShipmentItemTableType] AS TABLE
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction. Required. 
 	,[intCurrencyId] INT NULL								-- The currency id used in the transaction. 
 	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
+	,[intEntityCustomerId] INT NOT NULL						-- It is usually the customer entity id. 
 
 	-- Detail 
 	,[intInventoryShipmentItemId] INT NULL					-- Link id to the shipment detail. 	
@@ -34,4 +35,5 @@ CREATE TYPE [dbo].[ShipmentItemTableType] AS TABLE
 	,[intOrderId] INT NULL									-- Link id to PO or Contract. Ex: if Receipt type is "Purchase Order", this field links to the PO table. Optional.
 	,[intSourceId] INT NULL									-- Link id to Scale. Optional.
 	,[intLineNo] INT NOT NULL DEFAULT ((1))					-- Link id to the detail id of the PO detail or Contract detail. Default to zero. Optional. 
+	,[intStorageScheduleTypeId] INT NULL					-- Storage Schedule Id from Grain. 
 )

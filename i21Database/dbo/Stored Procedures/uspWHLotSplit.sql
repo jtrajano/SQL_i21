@@ -165,10 +165,9 @@ BEGIN TRY
 		,@intEntityUserSecurityId = @intUserId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
-	SELECT @strSplitLotNumber = strLotNumber
-		,@intNewLotId = intLotId
-	FROM tblICLot
-	WHERE intSplitFromLotId = @intLotId
+	SELECT TOP 1 @strSplitLotNumber = strLotNumber
+				,@intNewLotId = intLotId
+	FROM tblICLot ORDER BY intLotId DESC
 
 	SELECT @strSplitLotNumber AS strSplitLotNumber
 
@@ -248,6 +247,10 @@ BEGIN TRY
 			,@strReasonCode = 'Residue qty clean up'
 			,@strNotes = 'Residue qty clean up'
 	END
+
+	EXEC uspQMSampleCopy @intOldLotId = @intLotId
+		,@intNewLotId = @intNewLotId
+		,@intLocationId = @intLocationId
 
 	COMMIT TRANSACTION
 END TRY

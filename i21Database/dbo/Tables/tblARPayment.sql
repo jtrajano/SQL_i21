@@ -17,6 +17,8 @@
 	[ysnApplytoBudget]		BIT				NULL,
 	[ysnApplyOnAccount]		BIT				CONSTRAINT [DF_tblARPayment_ysnApplyOnAccount] DEFAULT ((0)) NULL,
     [ysnPosted]				BIT             CONSTRAINT [DF_tblARPayment_ysnPosted] DEFAULT ((0)) NOT NULL,
+	[ysnInvoicePrepayment]	BIT             CONSTRAINT [DF_tblARPayment_ysnInvoicePrepayment] DEFAULT ((0)) NOT NULL,
+	[ysnImportedFromOrigin]	BIT				CONSTRAINT [DF_tblARPayment_ysnImportedFromOrigin] DEFAULT ((0)) NOT NULL,
 	[intEntityId]			INT				NULL DEFAULT ((0)),
 	[intWriteOffAccountId]	INT				NULL,
 	[strPaymentMethod]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,

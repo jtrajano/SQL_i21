@@ -79,7 +79,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
 		AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 		AND ARCC.[strPricingType] NOT IN ('Unit','Index')
-		AND (ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId)
+		AND (ISNULL(@CurrencyId, 0) = 0 OR ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId)
 	ORDER BY
 		 ARCC.[dtmStartDate]
 		,ARCC.[intContractSeq]
@@ -157,7 +157,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		AND (ARCC.[dblBalance] > 0 OR ARCC.[ysnUnlimitedQuantity] = 1)
 		AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 		AND ARCC.[strPricingType] NOT IN ('Unit','Index')
-		AND (ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId)
+		AND (ISNULL(@CurrencyId, 0) = 0 OR ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId)
 	ORDER BY
 		 dtmStartDate
 		,intContractSeq

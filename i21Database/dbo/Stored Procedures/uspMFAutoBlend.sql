@@ -348,7 +348,7 @@ INSERT INTO @tblInputItem (
 	,dblCalculatedQuantity
 	)
 Select @intRecipeId,ri.intRecipeItemId,ri.intItemId,v.dblQuantity,ri.intItemUOMId,0,0,ri.intConsumptionMethodId,ri.intStorageLocationId,0,ri.dblCalculatedQuantity
-From tblTRLoadBlendIngredient v Join tblMFRecipeItem ri on v.intItemId=ri.intItemId 
+From tblTRLoadBlendIngredient v Join tblMFRecipeItem ri on v.intRecipeItemId =ri.intRecipeItemId
 Where intLoadDistributionDetailId=@intLoadDistributionDetailId AND ri.intRecipeId=@intRecipeId AND ri.intRecipeItemTypeId=1
 
 Select @dblRecipeQty=dblQuantity From tblMFRecipe Where intRecipeId=@intRecipeId

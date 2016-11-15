@@ -145,7 +145,7 @@ BEGIN
 	---------------------------------------------------------------------------------------------------------------------------------------
 	SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined
 	UPDATE CVol
-	SET CVol.dtmLastActivityDate = GETDATE(), CVol.ysnRefundProcessed = ISNULL(@ysnPosted,1)
+	SET CVol.ysnRefundProcessed = ISNULL(@ysnPosted,1)
 	FROM tblPATCustomerVolume CVol
 	WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined)
 END
@@ -282,18 +282,17 @@ BEGIN TRY
 		--WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
 		--	THEN DELETE
 		WHEN MATCHED
-			THEN UPDATE SET EQ.dblEquity = CASE WHEN @ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END,
-			EQ.dtmLastActivityDate = GETDATE()
+			THEN UPDATE SET EQ.dblEquity = CASE WHEN @ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END
 		WHEN NOT MATCHED BY TARGET
-			THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dtmLastActivityDate, intConcurrencyId)
-				VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, B.dblEquityRefund, GETDATE(), 1);
+			THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
+				VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, B.dblEquityRefund, 1);
 
 	IF (@ysnPosted = 0)
 	BEGIN
 		----------------------------------REVERSE VOLUME---------------------------------------------------------------------
 
 		UPDATE CVol
-		SET CVol.dtmLastActivityDate = GETDATE(), CVol.ysnRefundProcessed = ISNULL(@ysnPosted, 0)
+		SET CVol.ysnRefundProcessed = ISNULL(@ysnPosted, 0)
 		FROM tblPATCustomerVolume CVol
 		WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
 

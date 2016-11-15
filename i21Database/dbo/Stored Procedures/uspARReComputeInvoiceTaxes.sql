@@ -99,13 +99,13 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 
 		IF (ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemType,'') = 'Other Charge') OR (ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemPrice,0) = 0)
 			BEGIN
-				UPDATE tblARInvoiceDetail SET dblTotalTax = @ZeroDecimal WHERE [intInvoiceDetailId] = @InvoiceDetailId					
+				UPDATE tblARInvoiceDetail SET dblTotalTax = @ZeroDecimal, intTaxGroupId = @TaxGroupId WHERE [intInvoiceDetailId] = @InvoiceDetailId					
 				DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
 				CONTINUE
 			END
 												
 		
-	INSERT INTO [tblARInvoiceDetailTax]
+		INSERT INTO [tblARInvoiceDetailTax]
            ([intInvoiceDetailId]
            ,[intTaxGroupId]
            ,[intTaxCodeId]
@@ -144,9 +144,12 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		FROM
 			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId, NULL, NULL)
 		
-		SELECT @TotalItemTax = SUM([dblAdjustedTax]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
+		SELECT @TotalItemTax = SUM([dblAdjustedTax]), @TaxGroupId = MAX([intTaxGroupId]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
+
+		IF @TaxGroupId = 0
+			SET @TaxGroupId = NULL
 								
-		UPDATE tblARInvoiceDetail SET dblTotalTax = @TotalItemTax WHERE [intInvoiceDetailId] = @InvoiceDetailId
+		UPDATE tblARInvoiceDetail SET dblTotalTax = @TotalItemTax, intTaxGroupId = @TaxGroupId WHERE [intInvoiceDetailId] = @InvoiceDetailId
 					
 		DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
 	END

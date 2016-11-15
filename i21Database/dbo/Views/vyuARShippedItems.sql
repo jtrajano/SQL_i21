@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
-
 SELECT
 	 [strTransactionType]				= 'Sales Order'
 	,[strTransactionNumber]				= SO.[strSalesOrderNumber]
@@ -47,6 +46,7 @@ SELECT
 	,[dblDiscount]						= SOD.[dblDiscount] 
 	,[dblPrice]							= SOD.[dblPrice]
 	,[dblShipmentUnitPrice]				= SOD.[dblPrice]
+	,[strPricing]						= SOD.[strPricing]
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
 	,[intStorageLocationId]				= SOD.[intStorageLocationId]
@@ -189,8 +189,9 @@ SELECT
 	,[dblShipmentQtyShippedTotal]		= SOD.[dblQtyShipped]
 	,[dblQtyRemaining]					= SOD.[dblQtyOrdered] - ISNULL(SOD.[dblQtyShipped], 0.000000)
 	,[dblDiscount]						= SOD.[dblDiscount]
-	,[dblPrice]							= SOD.[dblPrice]
+	,[dblPrice]							= SOD.[dblPrice]	
 	,[dblShipmentUnitPrice]				= SOD.[dblPrice]
+	,[strPricing]						= SOD.[strPricing]
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
 	,[intStorageLocationId]				= SOD.[intStorageLocationId]
@@ -332,9 +333,10 @@ SELECT
 	,[dblDiscount]						= SOD.[dblDiscount] 
 	,[dblPrice]							= SOD.[dblPrice]
 	,[dblShipmentUnitPrice]				= SHP.[dblUnitPrice]
+	,[strPricing]						= SOD.[strPricing]
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
-	,[intStorageLocationId]				= SOD.[intStorageLocationId]
+	,[intStorageLocationId]				= ISNULL(SHP.intStorageLocationId, SOD.[intStorageLocationId])
 	,[strStorageLocationName]			= SL.[strName]
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
@@ -357,7 +359,7 @@ SELECT
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= SOD.[ysnBlended]
 	,[intRecipeId]						= SOD.[intRecipeId]
-	,[intSubLocationId]					= SOD.[intSubLocationId]
+	,[intSubLocationId]					= ISNULL(SHP.intSubLocationId, SOD.[intSubLocationId])
 	,[intCostTypeId]					= SOD.[intCostTypeId]
 	,[intMarginById]					= SOD.[intMarginById]
 	,[intCommentTypeId]					= SOD.[intCommentTypeId]
@@ -401,9 +403,6 @@ LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]		
 LEFT OUTER JOIN
-	tblICStorageLocation SL
-		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
-LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId] 
 LEFT OUTER JOIN
@@ -429,6 +428,8 @@ CROSS APPLY
 		,CL.[strLocationName]
 		,ISH.[intFreightTermId]
 		,ISI.[intWeightUOMId]
+		,ISI.intSubLocationId
+		,ISI.intStorageLocationId
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -467,6 +468,8 @@ CROSS APPLY
 		,CL.[strLocationName]
 		,ISH.[intFreightTermId]
 		,ISI.[intWeightUOMId]
+		,ISI.intSubLocationId
+		,ISI.intStorageLocationId
 	) SHP
 LEFT OUTER JOIN
 	tblSCTicket SCT
@@ -502,6 +505,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCurrency SMC
 		ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN
+	tblICStorageLocation SL
+		ON ISNULL(SHP.[intStorageLocationId], SOD.[intStorageLocationId]) = SL.[intStorageLocationId]
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0			
 	
 UNION ALL
@@ -538,20 +544,21 @@ SELECT
 	,[intItemId]						= ICISI.[intItemId]	
 	,[strItemNo]						= ICI.[strItemNo] 
 	,[strItemDescription]				= ICI.[strDescription] 
-	,[intItemUOMId]						= ICISI.[intItemUOMId]
-	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
-	,[intOrderUOMId]					= ARCC.[intItemUOMId]
-	,[strOrderUnitMeasure]				= ICUM.[strUnitMeasure]
+	,[intItemUOMId]						= ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId])
+	,[strUnitMeasure]					= ISNULL(ARCC.[strUnitMeasure], ICUM.[strUnitMeasure])
+	,[intOrderUOMId]					= ARCC.[intOrderUOMId]
+	,[strOrderUnitMeasure]				= ARCC.[strOrderUnitMeasure]
 	,[intShipmentItemUOMId]				= ICISI.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
-	,[dblQtyShipped]					= ICISI.[dblQuantity] 	
+	,[dblQtyShipped]					= ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity]) 	
 	,[dblQtyOrdered]					= CASE WHEN ARCC.[intContractDetailId] IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END 
-	,[dblShipmentQuantity]				= ICISI.[dblQuantity] --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
-	,[dblShipmentQtyShippedTotal]		= ICISI.[dblQuantity]
-	,[dblQtyRemaining]					= ICISI.[dblQuantity]
+	,[dblShipmentQuantity]				= ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity])  --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
+	,[dblShipmentQtyShippedTotal]		= ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity]) 
+	,[dblQtyRemaining]					= ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity]) 
 	,[dblDiscount]						= 0 
 	,[dblPrice]							= ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
 	,[dblShipmentUnitPrice]				= ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
+	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
 	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
@@ -560,8 +567,8 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
-	,[intTicketId]						= NULL
+	,[strTicketNumber]					= SCT.strTicketNumber
+	,[intTicketId]						= SCT.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](ICISI.[intWeightUOMId],ICISI.[intItemUOMId],1) --ICIU1.[dblWeight]
@@ -674,7 +681,11 @@ LEFT OUTER JOIN
 		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN
 	tblSMCurrency SMC
-		ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]			
+		ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]	
+LEFT OUTER JOIN
+	tblSCTicket SCT
+		ON ICISI.[intSourceId] = SCT.[intTicketId]
+						
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 
 UNION ALL
@@ -725,6 +736,7 @@ SELECT
 	,[dblDiscount]						= 0 
 	,[dblPrice]							= ICISC.[dblAmount]
 	,[dblShipmentUnitPrice]				= ICISC.[dblAmount]
+	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= 1 * ICISC.[dblAmount]
 	,[intStorageLocationId]				= NULL
@@ -733,8 +745,8 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
-	,[intTicketId]						= NULL
+	,[strTicketNumber]					= SCT.strTicketNumber
+	,[intTicketId]						= SCT.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblWeight]						= 0.00
@@ -767,6 +779,9 @@ INNER JOIN
 		ON ICISC.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 		AND ICIS.[ysnPosted] = 1
 		AND ISNULL(ICISC.[ysnPrice],0) = 1
+INNER JOIN	
+		tblICInventoryShipmentItem ICISI 
+			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 LEFT OUTER JOIN 
 	vyuARCustomerContract ARCC	
 		ON ICISC.[intContractId] = ARCC.[intContractHeaderId]
@@ -794,6 +809,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCurrency SMC
 		ON ICISC.[intCurrencyId] = SMC.[intCurrencyID] 
+LEFT OUTER JOIN
+    tblSCTicket SCT
+        ON ICISI.[intSourceId] = SCT.[intTicketId]
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 
 UNION ALL
@@ -844,6 +862,7 @@ SELECT
 	,[dblDiscount]						= 0.00
 	,[dblPrice]							= 0.00
 	,[dblShipmentUnitPrice]				= 0.00
+	,[strPricing]						= ''
 	,[dblTotalTax]						= 0.00
 	,[dblTotal]							= 0.00
 	,[intStorageLocationId]				= NULL
@@ -971,6 +990,7 @@ SELECT
 	,[dblDiscount]						= 0.00
 	,[dblPrice]							= MFG.[dblPrice]
 	,[dblShipmentUnitPrice]				= MFG.[dblPrice]
+	,[strPricing]						= ''
 	,[dblTotalTax]						= 0.00
 	,[dblTotal]							= MFG.[dblLineTotal]
 	,[intStorageLocationId]				= NULL
@@ -1096,6 +1116,7 @@ SELECT DISTINCT
 	,[dblDiscount]						= 0 
 	,[dblPrice]							= MFG.[dblPrice]
 	,[dblShipmentUnitPrice]				= MFG.[dblPrice]
+	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= MFG.[dblLineTotal]
 	,[intStorageLocationId]				= NULL
@@ -1204,26 +1225,23 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[intItemId]						= LD.[intItemId]
 	,[strItemNo]						= ICI.[strItemNo]
 	,[strItemDescription]				= ICI.[strDescription]
-	,[intItemUOMId]						= LD.[intItemUOMId]
-	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
-	,[intOrderUOMId]					= ARCC.[intItemUOMId]
-	,[strOrderUnitMeasure]				= ICUM1.[strUnitMeasure]
-	,[intShipmentItemUOMId]				= LD.[intItemUOMId]
-	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
-	,[dblQtyShipped]					= LD.[dblQuantity]
-	,[dblQtyOrdered]					= CASE 
-											WHEN ARCC.[intContractDetailId] IS NOT NULL
-												THEN ARCC.[dblDetailQuantity] 
-											ELSE 0
-											END
-	,[dblShipmentQuantity]				= LD.[dblQuantity] --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
-	,[dblShipmentQtyShippedTotal]		= LD.[dblQuantity]
-	,[dblQtyRemaining]					= LD.[dblQuantity]
+	,[intItemUOMId]						= ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId])
+	,[strUnitMeasure]					= ISNULL(ARCC.[strUnitMeasure],ICUM.[strUnitMeasure])
+	,[intOrderUOMId]					= ARCC.[intOrderUOMId]
+	,[strOrderUnitMeasure]				= ARCC.[strOrderUnitMeasure]
+	,[intShipmentItemUOMId]				= ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId])
+	,[strShipmentUnitMeasure]			= ISNULL(ARCC.[strUnitMeasure],ICUM.[strUnitMeasure])
+	,[dblQtyShipped]					= ISNULL(ARCC.[dblShipQuantity],LD.[dblQuantity])
+	,[dblQtyOrdered]					= ISNULL([dblOrderQuantity],0)
+	,[dblShipmentQuantity]				= ISNULL(ARCC.[dblShipQuantity],LD.[dblQuantity]) --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
+	,[dblShipmentQtyShippedTotal]		= ISNULL(ARCC.[dblShipQuantity],LD.[dblQuantity])
+	,[dblQtyRemaining]					= ISNULL(ARCC.[dblShipQuantity],LD.[dblQuantity])
 	,[dblDiscount]						= 0
 	,[dblPrice]							= ARCC.[dblCashPrice] 
 	,[dblShipmentUnitPrice]				= ARCC.[dblCashPrice]
+	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
-	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(LD.[intItemUOMId], ISNULL(LD.[intWeightItemUOMId], LD.[intItemUOMId]), ISNULL(LD.[dblQuantity], 0)) * ARCC.[dblCashPrice]
+	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), ISNULL(LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId])), ISNULL(LD.[dblQuantity], 0)) * ARCC.[dblCashPrice]
 	,[intStorageLocationId]				= SL.[intStorageLocationId]
 	,[strStorageLocationName]			= SL.[strName]
 	,[intTermID]						= NULL
@@ -1234,7 +1252,7 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
-	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], LD.[intItemUOMId], 1) --ICIU1.[dblWeight]
+	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), 1) --ICIU1.[dblWeight]
 	,[intWeightUOMId]					= LD.intWeightItemUOMId --ICIU2.[intUnitMeasureId]
 	,[strWeightUnitMeasure]				= ICIU2.[strUnitMeasure]
 	,[dblGrossWt]						= LDL.dblGross
@@ -1326,6 +1344,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblDiscount]						= 0
 	,[dblPrice]							= LWS.[dblPrice]
 	,[dblShipmentUnitPrice]				= [dblShipmentUnitPrice]
+	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= LWS.[dblTotal]
 	,[intStorageLocationId]				= NULL
@@ -1413,6 +1432,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblDiscount]						= 0
 	,[dblPrice]							= LC.[dblPrice]
 	,[dblShipmentUnitPrice]				= [dblShipmentUnitPrice]
+	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= LC.[dblTotal]
 	,[intStorageLocationId]				= NULL

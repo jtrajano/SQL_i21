@@ -305,7 +305,10 @@ BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intLoadId, '') <> '' AND intConcurrencyId <= 1)
 		BEGIN
 			EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Added', @UserId
-		END			
+		END
+
+		---- Add Blend Ingredients if needed
+		--EXEC uspTRUpdateLoadBlendIngredient @LoadHeaderId
 
 	END
 

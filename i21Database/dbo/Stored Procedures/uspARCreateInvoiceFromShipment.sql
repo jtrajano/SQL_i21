@@ -249,7 +249,7 @@ SELECT
 	,[dblItemWeight]						= ARSI.[dblWeight]  
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
 	,[dblPrice]								= ARSI.[dblShipmentUnitPrice] 
-	,[strPricing]							= 'Inventory Shipment Item Price'
+	,[strPricing]							= ARSI.[strPricing]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
 	,[strFrequency]							= NULL
@@ -360,7 +360,7 @@ SELECT
 	,[dblItemWeight]						= @ZeroDecimal
 	,[intItemWeightUOMId]					= @ZeroDecimal
 	,[dblPrice]								= @ZeroDecimal
-	,[strPricing]							= NULL
+	,[strPricing]							= SOD.[strPricing]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
 	,[strFrequency]							= NULL
