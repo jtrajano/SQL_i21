@@ -340,7 +340,7 @@ BEGIN
 			ELSE IF (@strTransactionType = @SourceType_Invoice)
 				SET @strScreenName = 'Transport Sale'
 
-			IF (ISNULL(@intContractDetailId, '') <> '')
+			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer))
 			BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
 					, @dblQuantityToUpdate = @dblQuantity 
