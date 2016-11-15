@@ -146,39 +146,60 @@ BEGIN TRY
 			WHERE QD.ysnQuote = 1
 				AND EL.intEntityId = @CustomerId
 
-			SELECT QD.intQuoteDetailId
-				, QD.intQuoteHeaderId
+			SELECT QD.*
+				, SP.strZipCode
 			INTO #tmpQuoteDetail
 			FROM tblTRQuoteDetail QD
+			LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = QD.intSupplyPointId
 			WHERE intQuoteHeaderId = @QuoteId
 	
-			DECLARE @QuoteDetailId INT
+			DECLARE @LineItems LineItemTaxDetailStagingTable
+				, @QuoteDetailId INT
+				, @QuoteHeaderId INT
 				, @ItemId INT
-				, @LocationId INT
+				, @TerminalId INT
+				, @SupplyPointId INT
+				, @ShipViaId INT
 				, @TaxGroupId INT
-				, @TransactionDate DATETIME
-				, @Amount NUMERIC(18,6)
-				, @Price NUMERIC(18,6)
-				, @IsReversal BIT
-				, @LineItems LineItemTaxDetailStagingTable
-				, @TaxTotal NUMERIC(18,6)
-				, @PriceType NVARCHAR(20)
+				, @ShipToLocationId INT
+				, @SpecialPriceId INT
+				, @RackPrice NUMERIC(18,6) = 0
+				, @DeviationAmount NUMERIC(18,6) = 0
+				, @FreightRate NUMERIC(18,6) = 0
+				, @SurchargeRate NUMERIC(18,6) = 0
+				, @QuotePrice NUMERIC(18,6) = 0
+				, @Margin NUMERIC(18,6) = 0
+				, @QtyOrdered NUMERIC(18,6) = 0
+				, @ExtProfit NUMERIC(18,6) = 0
+				, @Tax NUMERIC(18,6) = 0
+				, @ZipCode NVARCHAR(20)		
 			
 			WHILE EXISTS (SELECT TOP 1 1 FROM #tmpQuoteDetail)
 			BEGIN
-				SELECT TOP 1 @QuoteDetailId = intQuoteDetailId FROM #tmpQuoteDetail
+				SELECT TOP 1 @QuoteDetailId = intQuoteDetailId
+					, @QuoteHeaderId = intQuoteHeaderId
+					, @ItemId = intItemId
+					, @TerminalId = intTerminalId
+					, @SupplyPointId = intSupplyPointId
+					, @ShipViaId = intShipViaId
+					, @TaxGroupId = intTaxGroupId
+					, @ShipToLocationId = intShipToLocationId
+					, @SpecialPriceId = intSpecialPriceId
+					, @RackPrice = dblRackPrice
+					, @DeviationAmount = dblDeviationAmount
+					, @FreightRate = dblFreightRate
+					, @QuotePrice = dblQuotePrice
+					, @Margin = dblMargin
+					, @QtyOrdered = dblQtyOrdered
+					, @ExtProfit = dblExtProfit
+					, @Tax = dblTax
+					, @ZipCode = strZipCode
+				FROM #tmpQuoteDetail
 				
-				UPDATE tblTRQuoteDetail
-				SET dblRackPrice = ISNULL(tblPatch.dblRackPrice, tblTRQuoteDetail.dblRackPrice)
-					, dblDeviationAmount = ISNULL(tblPatch.dblDeviation, 0.000000)
-					, dblFreightRate = 0
-					, dblQuotePrice = ISNULL(tblPatch.dblDeviation, 0.000000) + ISNULL(tblPatch.dblRackPrice, tblTRQuoteDetail.dblRackPrice)
-					, dblMargin = ISNULL(tblPatch.dblDeviation, 0.000000)
-					, dblTempAdjustment = 0.000000
-					, dblQtyOrdered = 0
-					, dblExtProfit = 0
-					, dblTax = 0
-				FROM (
+				SELECT @RackPrice = ISNULL(tblPatch.dblRackPrice, tblTRQuoteDetail.dblRackPrice)
+					, @DeviationAmount = ISNULL(tblPatch.dblDeviation, 0.000000)
+				FROM tblTRQuoteDetail
+				LEFT JOIN (
 					SELECT SP.intSpecialPriceId
 						, SP.dblDeviation
 						, dblRackPrice = (CASE WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, OriginRack.intSupplyPointId, SP.intItemId)
@@ -188,30 +209,21 @@ BEGIN TRY
 						AND OriginRack.intEntityLocationId = SP.intEntityLocationId
 					LEFT JOIN vyuTRSupplyPointView FixedRack ON FixedRack.intEntityVendorId = SP.intRackVendorId
 						AND FixedRack.intEntityLocationId = SP.intRackLocationId
-				) tblPatch 
-				WHERE tblPatch.intSpecialPriceId = tblTRQuoteDetail.intSpecialPriceId
+				) tblPatch ON tblPatch.intSpecialPriceId = tblTRQuoteDetail.intSpecialPriceId
 					AND tblTRQuoteDetail.intQuoteDetailId = @QuoteDetailId
-
-				SELECT TOP 1 @ItemId = intItemId
-				, @LocationId = intShipToLocationId
-				, @TaxGroupId = intTaxGroupId
-				, @Amount = dblQuotePrice
-				, @Price = dblQuotePrice
-				FROM tblTRQuoteDetail
-				WHERE intQuoteDetailId = @QuoteDetailId
 
 				SELECT *
 				INTO #tmpTaxes
 				FROM dbo.fnConstructLineItemTaxDetail (
 					1
-					, @Amount
+					, @QuotePrice
 					, @LineItems
 					, 0
 					, @ItemId
 					, @CustomerId
-					, @LocationId
+					, @ShipToLocationId
 					, @TaxGroupId
-					, @Price
+					, @QuotePrice
 					, @dtmEffectiveDate
 					, NULL
 					, 1
@@ -221,17 +233,50 @@ BEGIN TRY
 					, NULL
 				)
 
-				SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
+				SELECT @Tax = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
 				FROM #tmpTaxes
+				SELECT * FROM vyuTRSupplyPointView
+				EXEC uspTRGetCustomerFreight @intEntityCustomerId = @CustomerId,
+					 @intItemId = @ItemId,
+					 @strZipCode = @ZipCode,
+					 @intShipViaId = @ShipViaId,
+					 @intShipToId = @ShipToLocationId,
+					 @dblReceiptGallons = @QtyOrdered,
+					 @dblInvoiceGallons = @QtyOrdered,
+					 @dtmReceiptDate = @dtmEffectiveDate,
+					 @dtmInvoiceDate = @dtmEffectiveDate,
+					 @ysnToBulkPlant = 0,
+					 @dblInvoiceFreightRate = @FreightRate OUTPUT,
+					 @dblReceiptFreightRate = NULL,
+					 @dblReceiptSurchargeRate = NULL,
+					 @dblInvoiceSurchargeRate = @SurchargeRate OUTPUT,
+					 @ysnFreightInPrice = NULL,
+					 @ysnFreightOnly = NULL
+
+				SET @QuotePrice = @RackPrice + @DeviationAmount + @FreightRate
+				SET @Margin = @QuotePrice - @RackPrice
+				SET @ExtProfit = @QtyOrdered * @Margin
 
 				UPDATE tblTRQuoteDetail
-				SET dblTax = @TaxTotal
+				SET dblRackPrice = @RackPrice 
+					, dblDeviationAmount = @DeviationAmount
+					, dblTempAdjustment = 0.000000
+					, dblFreightRate = ISNULL(@FreightRate, 0.000000)
+					, dblQuotePrice = @QuotePrice
+					, dblMargin = @Margin
+					, dblQtyOrdered = @QtyOrdered
+					, dblExtProfit = @ExtProfit
+					, dblTax = @Tax
 				WHERE intQuoteDetailId = @QuoteDetailId
 
 				DELETE FROM #tmpQuoteDetail WHERE intQuoteDetailId = @QuoteDetailId
 
 				DROP TABLE #tmpTaxes
 			END
+
+			DROP TABLE #tmpQuoteDetail
+
+			DELETE FROM #tmpQuotes WHERE intCustomerId = @CustomerId
 		END
 
 		SELECT @intBegQuoteId = intQuoteHeaderId FROM tblTRQuoteHeader WHERE @MinQuote = strQuoteNumber
