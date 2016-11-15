@@ -4453,6 +4453,7 @@
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuARGetItemPricingLevelDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetItemList.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
