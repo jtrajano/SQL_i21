@@ -27,3 +27,12 @@ The transaction types are:
 		[strTransactionForm] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
 		CONSTRAINT [PK_tblICInventoryTransactionType] PRIMARY KEY CLUSTERED ([intTransactionTypeId])
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionType_intTransactionTypeId]
+		ON [dbo].[tblICInventoryTransactionType]([intTransactionTypeId] ASC);
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionType_strName]
+		ON [dbo].[tblICInventoryTransactionType]([strName] ASC);
+	GO
