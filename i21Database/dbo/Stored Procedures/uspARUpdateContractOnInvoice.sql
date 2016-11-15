@@ -122,6 +122,7 @@ BEGIN TRY
 		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyShipped <> TD.dblQtyShipped)
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		AND (ISNULL(D.intLoadDetailId, 0) = 0 AND ISNULL(H.intLoadId, 0) = 0)
+		AND ISNULL(H.intTransactionId, 0) = 0
 		
 	UNION ALL
 
@@ -156,6 +157,7 @@ BEGIN TRY
 		AND D.intItemId = TD.intItemId
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		AND (ISNULL(D.intLoadDetailId, 0) = 0 AND ISNULL(H.intLoadId, 0) = 0)
+		AND ISNULL(H.intTransactionId, 0) = 0
 		
 	UNION ALL
 
@@ -190,6 +192,7 @@ BEGIN TRY
 		AND D.intItemId = TD.intItemId
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		AND (ISNULL(D.intLoadDetailId, 0) = 0 AND ISNULL(H.intLoadId, 0) = 0)
+		AND ISNULL(H.intTransactionId, 0) = 0
 		
 	UNION ALL
 		
@@ -223,6 +226,7 @@ BEGIN TRY
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		AND (ISNULL(D.intLoadDetailId, 0) = 0 AND ISNULL(H.intLoadId, 0) = 0)
+		AND ISNULL(H.intTransactionId, 0) = 0
 		
 	UNION ALL	
 
@@ -250,6 +254,7 @@ BEGIN TRY
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		AND ISNULL(H.intLoadId, 0) = 0
+		AND ISNULL(H.intTransactionId, 0) = 0
 		
 	UNION ALL
 		
@@ -277,6 +282,7 @@ BEGIN TRY
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
 		AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)
 		AND (ISNULL(Detail.intLoadDetailId, 0) = 0 AND ISNULL(Header.intLoadId, 0) = 0)
+		AND ISNULL(Header.intTransactionId, 0) = 0
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
