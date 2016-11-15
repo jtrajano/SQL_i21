@@ -29,7 +29,7 @@ FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                                                          dbo.tblICItemLocation AS iciItemLocation ON cfiItem.intARItemId = iciItemLocation.intItemId AND 
                                                          iciItemLocation.intLocationId = cfiSite.intARLocationId LEFT OUTER JOIN
                                                          dbo.vyuICGetItemPricing AS iciItemPricing ON cfiItem.intARItemId = iciItemPricing.intItemId AND iciItemLocation.intLocationId = iciItemPricing.intLocationId AND 
-                                                         iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId) AS cfItem ON cfTransaction.intProductId = cfItem.intItemId LEFT OUTER JOIN
+                                                         iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId AND iciItemLocation.intIssueUOMId = iciItemPricing.intUnitMeasureId) AS cfItem ON cfTransaction.intProductId = cfItem.intItemId LEFT OUTER JOIN
                              (SELECT   cfiAccount.intAccountId, cfiCustomer.strName, cfiCustomer.strCustomerNumber, cfiCustomer.intEntityCustomerId, cfiCard.intCardId, cfiCard.strCardNumber, 
                                                          cfiCard.strCardDescription
                                 FROM         dbo.tblCFAccount AS cfiAccount INNER JOIN
