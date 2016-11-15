@@ -75,4 +75,4 @@ SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
        dblAdjustmentQty [dblAdjQty],BalanceForward dblDummy,
     (SELECT SUM(BalanceForward) FROM @tblResult AS T2 WHERE T2.Id <= T1.Id) AS dblBalanceForward,strShipDistributionOption,
 	intInventoryReceiptId,intInventoryShipmentId,intInventoryAdjustmentId
-FROM @tblResult 
+FROM @tblResult T1
