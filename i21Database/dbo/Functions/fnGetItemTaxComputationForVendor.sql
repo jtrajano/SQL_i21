@@ -114,6 +114,7 @@ BEGIN
 		BEGIN
 			DECLARE  @Id				INT
 					,@TaxableAmount		NUMERIC(18,6)
+					,@OtherTaxAmount	NUMERIC(18,6)
 					,@TaxCodeId			INT
 					,@TaxAdjusted		BIT
 					,@AdjustedTax		NUMERIC(18,6)
@@ -201,6 +202,7 @@ BEGIN
 						,@TaxRate					= [dblRate]
 						,@TaxCalculationMethod		= [strCalculationMethod]
 						,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)
+						,@OtherTaxAmount			= 0.000000
 					FROM
 						@TaxableByOtherTaxes
 					WHERE
@@ -212,20 +214,22 @@ BEGIN
 					BEGIN
 						IF(@TaxAdjustedTax = 1)
 						BEGIN
-							SET @TaxableAmount = @TaxableAmount + @TaxAdjustedTax
+							SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax
 						END
 						ELSE
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @TaxableAmount = @TaxableAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@ItemCost * @Quantity) * (@TaxRate/100.00) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.000000 ELSE (@ItemCost * @Quantity) * (@TaxRate/100.000000) END))
 									END
 								ELSE
 									BEGIN
-										SET @TaxableAmount = (@ItemCost * @Quantity) + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@Quantity * @TaxRate) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.000000 ELSE (@Quantity * @TaxRate) END))
 									END
 							END
 					END 
+
+					SET @TaxableAmount = @TaxableAmount + @OtherTaxAmount
 						
 					DELETE FROM @TaxableByOtherTaxes WHERE [Id] = @TaxId
 				END
