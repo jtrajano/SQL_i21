@@ -38,4 +38,4 @@ FROM dbo.tblAPPayment APP
 INNER JOIN dbo.tblAPPaymentDetail APD ON APP.intPaymentId = APD.intPaymentId
 INNER JOIN dbo.tblSMPaymentMethod SMP ON APP.intPaymentMethodId = SMP.intPaymentMethodID
 INNER JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = APP.intEntityId
-WHERE APP.ysnPosted = 0
+WHERE APP.ysnPosted = 0 AND APP.strPaymentInfo NOT LIKE '%Voided%'

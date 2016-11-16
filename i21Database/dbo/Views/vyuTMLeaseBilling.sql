@@ -32,11 +32,17 @@ SELECT
 	,dtmDontBillAfter = C.dtmDontBillAfter
 	,strBillingFrequency = C.strBillingFrequency
 	,ysnTaxable = ISNULL(G.ysnTaxable,0)
-	,strSiteState = (CASE WHEN D.intTaxStateID  IS NULL
-					THEN
-						''
+	,strSiteState = (
+					CASE WHEN C.intLeaseTaxGroupId IS NULL
+					THEN( 
+						CASE WHEN D.intTaxStateID  IS NULL
+						THEN
+							''
+						ELSE
+							I.strTaxGroup
+						END)
 					ELSE
-						I.strTaxGroup
+						P.strTaxGroup
 					END)
 	,strSiteLocale1 = ''
 	,strSiteLocale2 = ''
@@ -44,7 +50,12 @@ SELECT
 	,intConcurrencyId = A.intConcurrencyId
 	,intEntityCustomerId = F.intEntityId
 	,intCompanyLocation = D.intLocationId
-	,intTaxGroupMasterId = D.intTaxStateID 
+	,intTaxGroupMasterId = (CASE WHEN C.intLeaseTaxGroupId IS NULL
+							THEN
+								D.intTaxStateID 
+							ELSE
+								C.intLeaseTaxGroupId
+							END)
 	,intItemId = G.intItemId
 	,D.intSiteID
 	,E.intCustomerID
@@ -76,6 +87,8 @@ LEFT JOIN tblICItem M
 	ON G.intItemId = M.intItemId
 INNER JOIN tblARCustomer O
 	ON O.intEntityCustomerId = F.intEntityId
+LEFT JOIN tblSMTaxGroup P
+	ON C.intLeaseTaxGroupId = P.intTaxGroupId
 WHERE O.ysnActive = 1
 	AND C.strLeaseStatus <> 'Inactive'
 	AND B.strOwnership <> 'Customer Owned'

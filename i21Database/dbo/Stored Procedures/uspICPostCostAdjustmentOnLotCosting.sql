@@ -132,6 +132,7 @@ DECLARE @CostBucketId AS INT
 		,@CostBucketUOMQty AS NUMERIC(38,20)
 		,@CostBucketIntTransactionId AS INT
 		,@CostBucketStrTransactionId AS NVARCHAR(40)
+		,@CostBucketItemUOMId AS INT 
 
 		,@InventoryTransactionIdentityId AS INT
 		,@OriginalCost AS NUMERIC(38,20)
@@ -193,23 +194,54 @@ WHERE	tblICInventoryLot.intItemId = @intItemId
 				END 
 		AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
 
--- Convert the Remaining Qty to the UOM used in the cost bucket
-BEGIN 
+-- Initialize the remaining qty
+SET @dblRemainingQty = @dblQty
 
-	SELECT	TOP 1 
-			@dblRemainingQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, il.intItemUOMId, @dblQty) 
-	FROM	dbo.tblICInventoryLot il 
-	WHERE	il.intItemId = @intItemId
-			AND il.intItemLocationId = @intItemLocationId
-			AND il.intTransactionId = @intSourceTransactionId
-			AND ISNULL(il.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
-			AND il.strTransactionId = @strSourceTransactionId
-			AND ISNULL(il.ysnIsUnposted, 0) = 0 
-			AND 1 = CASE	WHEN @intAdjustLotId IS NOT NULL AND il.intLotId = @intAdjustLotId THEN 1
-							WHEN @intAdjustLotId IS NULL AND il.intLotId >= ISNULL(@intLotId, 0) THEN 1
-							ELSE 0 
-					END 
-END 
+-- Convert the Remaining Qty to the UOM used in the cost bucket
+--BEGIN 
+
+--	SELECT	TOP 1 
+--			@dblRemainingQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, il.intItemUOMId, @dblQty) 
+--	FROM	dbo.tblICInventoryLot il 
+--	WHERE	il.intItemId = @intItemId
+--			AND il.intItemLocationId = @intItemLocationId
+--			AND il.intTransactionId = @intSourceTransactionId
+--			AND ISNULL(il.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+--			AND il.strTransactionId = @strSourceTransactionId
+--			AND ISNULL(il.ysnIsUnposted, 0) = 0 
+--			AND 1 = CASE	WHEN @intAdjustLotId IS NOT NULL AND il.intLotId = @intAdjustLotId THEN 1
+--							WHEN @intAdjustLotId IS NULL AND il.intLotId >= ISNULL(@intLotId, 0) THEN 1
+--							ELSE 0 
+--					END 
+--END 
+
+---- Recalculate the new value depending on the number of cost buckets. 
+--IF ISNULL(@LotWithOldCost, 0) > 0 AND @dblNewValue IS NOT NULL 
+--BEGIN 
+--	SET @dblNewValue = dbo.fnDivide(@dblNewValue, @LotWithOldCost) 
+--	SELECT	@dblNewValue  
+--				= dbo.fnDivide(
+--					@dblNewValue
+--					, SUM(
+--						dbo.fnCalculateQtyBetweenUOM(
+--							cb.intItemUOMId
+--							,dbo.fnGetItemStockUOM(cb.intItemId) 
+--							,cb.dblStockIn
+--						)
+--					)
+--				) 
+--	FROM	tblICInventoryLot cb 
+--	WHERE	cb.intItemId = @intItemId
+--			AND cb.intItemLocationId = @intItemLocationId
+--			AND cb.intTransactionId = @intSourceTransactionId
+--			AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+--			AND cb.strTransactionId = @strSourceTransactionId
+--			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+--			AND 1 = CASE	WHEN @intAdjustLotId IS NOT NULL AND cb.intLotId = @intAdjustLotId THEN 1
+--							WHEN @intAdjustLotId IS NULL AND cb.intLotId >= ISNULL(@intLotId, 0) THEN 1
+--							ELSE 0 
+--					END 
+--END 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start loop for the lot numbers. 
@@ -217,7 +249,7 @@ END
 
 SET @CostBucketId = NULL 
 
-WHILE ISNULL(@LotWithOldCost, 0) > 0 --AND @dblRemainingQty > 0 
+WHILE ISNULL(@LotWithOldCost, 0) > 0 AND @dblRemainingQty > 0 
 BEGIN 	
 
 	-----------------------------------------------------------------------------------------------------------------------------
@@ -233,22 +265,26 @@ BEGIN
 				,@CostBucketIntTransactionId = intTransactionId
 				,@CostBucketStrTransactionId = strTransactionId
 				,@intLotId = intLotId
-				,@dblNewCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryLot.intItemUOMId, @dblVoucherCost)
-		FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
-					ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
-		WHERE	tblICInventoryLot.intItemId = @intItemId
-				AND tblICInventoryLot.intItemLocationId = @intItemLocationId
-				AND tblICInventoryLot.intTransactionId = @intSourceTransactionId
-				AND ISNULL(tblICInventoryLot.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
-				AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
-				AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
-				AND 1 = CASE	WHEN @intAdjustLotId IS NOT NULL AND tblICInventoryLot.intLotId = @intAdjustLotId THEN 1
-								WHEN @intAdjustLotId IS NULL AND tblICInventoryLot.intLotId >= ISNULL(@intLotId, 0) THEN 1
+				,@dblNewCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, cb.intItemUOMId, @dblVoucherCost)
+				,@CostBucketItemUOMId = cb.intItemUOMId
+		FROM	dbo.tblICInventoryLot cb LEFT JOIN dbo.tblICItemUOM 
+					ON cb.intItemUOMId = tblICItemUOM.intItemUOMId
+		WHERE	cb.intItemId = @intItemId
+				AND cb.intItemLocationId = @intItemLocationId
+				AND cb.intTransactionId = @intSourceTransactionId
+				AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+				AND cb.strTransactionId = @strSourceTransactionId
+				AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+				AND 1 = CASE	WHEN @intAdjustLotId IS NOT NULL AND cb.intLotId = @intAdjustLotId THEN 1
+								WHEN @intAdjustLotId IS NULL AND cb.intLotId >= ISNULL(@intLotId, 0) THEN 1
 								ELSE 0 
 						END 
-				AND tblICInventoryLot.intInventoryLotId > ISNULL(@CostBucketId, 0) 
+				AND cb.intInventoryLotId > ISNULL(@CostBucketId, 0) 
 	END 
 
+	-- Convert the remaining Qty 
+	SET @dblRemainingQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, @CostBucketItemUOMId, @dblRemainingQty) 
+	
 	-- Validate the cost bucket
 	BEGIN 
 		IF @CostBucketId IS NULL
@@ -295,21 +331,28 @@ BEGIN
 			SET @OriginalCost = ISNULL(@OriginalCost, @CostBucketCost) 
 		END 
 
-		-- Compute the stock Qty available for cost adjustment. 
-		IF @dblNewValue IS NULL 
+		-- Calculate the Adjusted Qty and Remaining Qty. 
 		BEGIN 
 			SET @AdjustedQty = NULL 
+			IF @dblNewValue IS NULL  
+			BEGIN
 
-			SELECT	@AdjustedQty = SUM(dblQty) 
-			FROM	dbo.tblICInventoryLotCostAdjustmentLog
-			WHERE	intInventoryLotId = @CostBucketId
-					AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-					AND ysnIsUnposted = 0 
+				SELECT	@AdjustedQty = SUM(dblQty) 
+				FROM	dbo.tblICInventoryLotCostAdjustmentLog
+				WHERE	intInventoryLotId = @CostBucketId
+						AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+						AND ysnIsUnposted = 0 
 					
-			-- Determine the stock Qty it can process. 
-			SET @AdjustableQty = @CostBucketStockInQty - ISNULL(@AdjustedQty, 0) 
-			
-			-- Initialize the Qty
+				-- Determine the stock Qty it can process. 
+				SET @AdjustableQty = @CostBucketStockInQty - ISNULL(@AdjustedQty, 0) 			
+
+			END 
+			ELSE 
+			BEGIN 
+				SET @AdjustableQty = ISNULL(@CostBucketStockInQty, 0) 
+			END 
+
+			-- Initialize the Adjust Qty
 			SET @dblAdjustQty = 
 				CASE	WHEN @dblRemainingQty >= @AdjustableQty THEN 
 							@AdjustableQty 
@@ -324,7 +367,11 @@ BEGIN
 						ELSE 
 							0 
 				END 
-
+		END 
+	
+		-- Compute the stock Qty available for cost adjustment. 
+		IF @dblNewValue IS NULL 
+		BEGIN 
 			-- Compute the new transaction value. 
 			SELECT	@NewTransactionValue = dbo.fnMultiply(@dblAdjustQty, @dblNewCost) 
 
@@ -342,13 +389,12 @@ BEGIN
 
 		ELSE IF @dblNewValue IS NOT NULL 
 		BEGIN 
-			SET @CostAdjustmentValue = @dblNewValue
-			SET @dblAdjustQty = 0
+			SET @CostAdjustmentValue = @dblNewValue 
 			SET @dblNewCalculatedCost =  dbo.fnDivide(
 					dbo.fnMultiply(
 						@CostBucketStockInQty
 						, @CostBucketCost
-					) + @dblNewValue
+					) + @dblNewValue 
 					, @CostBucketStockInQty
 				)
 			SET @dblNewCost = @dblNewCalculatedCost
@@ -507,9 +553,10 @@ BEGIN
 									THEN 1
 
 						WHEN	@dblNewValue IS NOT NULL THEN 1
-						ELSE	0
+						ELSE	0 
 					END 
 				AND ISNULL(t.ysnIsUnposted, 0) = 0
+				-- AND escalate.intCostBucketId IS NULL 
 
 		OPEN loopLotOut;
 
@@ -531,7 +578,6 @@ BEGIN
 								ELSE 0 
 						END
 		BEGIN 
-		
 			-- Initialize the variables
 			SELECT	@InvTranId						= NULL 
 					,@InvTranSubLocationId			= NULL
@@ -565,6 +611,8 @@ BEGIN
 					,@InvFobPointId					= InvTran.intFobPointId
 			FROM	dbo.tblICInventoryTransaction InvTran
 			WHERE	InvTran.intInventoryTransactionId = @LotOutInventoryTransactionId
+
+
 
 			-- Calculate the available 'out' stocks that the system can revalue. 
 			SELECT @StockQtyAvailableToRevalue = 
@@ -632,12 +680,6 @@ BEGIN
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-
-					-- Insert the inventory transaction id into the x list. 
-					--INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
-					--SELECT	@InvTranId
-					--WHERE NOT EXISTS (SELECT TOP 1 1 FROM #tmpRevaluedInventoryTransaction WHERE intInventoryTransactionId = @InvTranId)
-
 				END 	
 
 				---------------------------------------------------------------------------
@@ -663,12 +705,7 @@ BEGIN
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Item_Change	THEN @INV_TRANS_TYPE_Revalue_Item_Change
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Merge		THEN @INV_TRANS_TYPE_Revalue_Lot_Merge
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Move		THEN @INV_TRANS_TYPE_Revalue_Lot_Move
-										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Split_Lot		THEN @INV_TRANS_TYPE_Revalue_Split_Lot
-										
-										--WHEN @InvTranTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN 
-										--	CASE	WHEN ISNULL(@InvFobPointId, @FOB_ORIGIN) = @FOB_ORIGIN THEN @INV_TRANS_TYPE_Revalue_Sold
-										--			ELSE @INV_TRANS_TYPE_Revalue_Shipment
-										--	END 
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Split_Lot		THEN @INV_TRANS_TYPE_Revalue_Split_Lot									
 
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN @INV_TRANS_TYPE_Revalue_Shipment
 
@@ -682,10 +719,6 @@ BEGIN
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Merge		THEN @INV_TRANS_TYPE_Revalue_Lot_Merge
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Move		THEN @INV_TRANS_TYPE_Revalue_Lot_Move
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Split_Lot		THEN @INV_TRANS_TYPE_Revalue_Split_Lot
-										--WHEN @InvTranTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN 
-										--	CASE	WHEN ISNULL(@InvFobPointId, @FOB_ORIGIN) = @FOB_ORIGIN THEN @INV_TRANS_TYPE_Revalue_Sold
-										--			ELSE @INV_TRANS_TYPE_Revalue_Shipment
-										--	END 
 
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN @INV_TRANS_TYPE_Revalue_Shipment
 								END

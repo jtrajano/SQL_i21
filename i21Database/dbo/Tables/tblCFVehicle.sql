@@ -33,3 +33,10 @@
 
 
 
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFVehicle_intVehicleId]
+    ON [dbo].[tblCFVehicle]([intVehicleId] ASC);
+

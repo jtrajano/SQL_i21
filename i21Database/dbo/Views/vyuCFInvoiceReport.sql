@@ -46,9 +46,10 @@ SELECT   ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.st
                                                          dbo.tblSMTaxClass AS smTCl ON smTCd.intTaxClassId = smTCl.intTaxClassId
                                 WHERE     (smTCl.strTaxClass NOT LIKE '%(SST)%') AND (smTCl.strTaxClass NOT LIKE '%State Sales Tax%') AND (smTCl.strTaxClass <> 'SST') AND 
                                                          (cfTT.intTransactionId = cfTrans.intTransactionId)
-                                GROUP BY cfTT.intTransactionId) / cfTrans.dblQuantity AS dblTaxExceptSST, cfTrans.strPrintTimeStamp
-FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
-                         dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId LEFT OUTER JOIN
+                                GROUP BY cfTT.intTransactionId) / cfTrans.dblQuantity AS dblTaxExceptSST, cfTrans.strPrintTimeStamp, cfCardAccount.intCustomerId, 
+                         cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail
+FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
+                         dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
                          dbo.vyuCFCardAccount AS cfCardAccount ON arInv.intEntityCustomerId = cfCardAccount.intCustomerId AND cfTrans.intCardId = cfCardAccount.intCardId LEFT OUTER JOIN
                              (SELECT   arCustGroupDetail.intCustomerGroupDetailId, arCustGroupDetail.intCustomerGroupId, arCustGroupDetail.intEntityId, arCustGroupDetail.ysnSpecialPricing, 
@@ -70,5 +71,227 @@ FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                                 WHERE     (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTrans.intTransactionId = cfTransNetPrice.intTransactionId LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId LEFT OUTER JOIN
                          dbo.tblCFDepartment AS cfDep ON cfDep.intDepartmentId = cfCardAccount.intCardId
+WHERE     (cfTrans.ysnPosted = 1)
+
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'MS_DiagramPaneCount', @value = 2, @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'vyuCFInvoiceReport';
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "cfTransNetPrice"
+            Begin Extent = 
+               Top = 1593
+               Left = 57
+               Bottom = 1790
+               Right = 333
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "ctContracts"
+            Begin Extent = 
+               Top = 1791
+               Left = 57
+               Bottom = 1988
+               Right = 439
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "cfDep"
+            Begin Extent = 
+               Top = 1989
+               Left = 57
+               Bottom = 2186
+               Right = 366
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "cfCardAccount"
+            Begin Extent = 
+               Top = 603
+               Left = 57
+               Bottom = 800
+               Right = 443
+            End
+            DisplayFlags = 280
+            TopColumn = 135
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 1440
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'vyuCFInvoiceReport';
+
+
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane1', @value = N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[40] 4[20] 2[20] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = -576
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "arInv"
+            Begin Extent = 
+               Top = 9
+               Left = 57
+               Bottom = 206
+               Right = 323
+            End
+            DisplayFlags = 280
+            TopColumn = 2
+         End
+         Begin Table = "cfTrans"
+            Begin Extent = 
+               Top = 207
+               Left = 57
+               Bottom = 404
+               Right = 356
+            End
+            DisplayFlags = 280
+            TopColumn = 8
+         End
+         Begin Table = "cfVehicle"
+            Begin Extent = 
+               Top = 405
+               Left = 57
+               Bottom = 602
+               Right = 370
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "emGroup"
+            Begin Extent = 
+               Top = 801
+               Left = 57
+               Bottom = 998
+               Right = 369
+            End
+            DisplayFlags = 280
+            TopColumn = 3
+         End
+         Begin Table = "cfSiteItem"
+            Begin Extent = 
+               Top = 999
+               Left = 57
+               Bottom = 1196
+               Right = 430
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "cfTransPrice"
+            Begin Extent = 
+               Top = 1197
+               Left = 57
+               Bottom = 1394
+               Right = 333
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "cfTransGrossPrice"
+            Begin Extent = 
+               Top = 1395
+               Left = 57
+               Bottom = 1592
+               Right = 333
+            End', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'vyuCFInvoiceReport';
+
 
 

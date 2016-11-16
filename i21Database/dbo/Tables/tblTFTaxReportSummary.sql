@@ -31,6 +31,7 @@
 	[strZipCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strTelephoneNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strContactName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strFaxNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblTFTaxReportSummary] PRIMARY KEY CLUSTERED 
 (

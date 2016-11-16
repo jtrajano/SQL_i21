@@ -163,7 +163,8 @@ dtmTransactionDate
 , dblTransactionOutboundSSTExemptGals
 , dblTransactionOutboundSETExemptGals
 , strDiversionNumber
-, strDiversionOriginalDestinationState)
+, strDiversionOriginalDestinationState
+, strCarrierCompanyOwnedIndicator)
   SELECT
     @Guid,
     (CONVERT(NVARCHAR(30), pxrpt_trans_rev_dt) + '_' + REPLACE(pxrpt_ord_no, '   ', '') + '_' + pxrpt_trans_type + '_' + CONVERT(NVARCHAR(20), pxrpt_seq_no)),
@@ -259,7 +260,8 @@ dtmTransactionDate
     pxrpt_sls_sst_exempt_qty,
     pxrpt_sls_set_exempt_qty,
     pxrpt_diver_no2_6,
-    pxrpt_diversion_orig_st
+    pxrpt_diversion_orig_st,
+	pxrpt_car_in_sf401_yn
   FROM pxrptmst px
   WHERE NOT EXISTS (SELECT *
   FROM tblTFIntegrationTransaction tr

@@ -45,7 +45,7 @@ BEGIN
 
 	IF EXISTS(SELECT 1 FROM tblAPPayment A INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 				INNER JOIN tblCMBankTransaction D ON A.strPaymentRecordNum = D.strTransactionId
-					WHERE C.intBillId IN (SELECT [intID] FROM #tmpBillsId) AND A.ysnPosted = 1 AND D.ysnCheckVoid = 0)
+					WHERE C.intBillId IN (SELECT [intID] FROM #tmpBillsId) AND A.ysnPosted = 1 AND D.ysnCheckVoid = 0 AND A.ysnPrepay = 1)
 	BEGIN
 		RAISERROR('Prepay already have payment.', 16, 1);
 		RETURN;

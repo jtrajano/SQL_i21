@@ -89,14 +89,12 @@ BEGIN TRY
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
-	IF OBJECT_ID('tempdb..#SettleStorage') IS NOT NULL
-		DROP TABLE #SettleStorage
-
-	CREATE TABLE #SettleStorage 
+	DECLARE @SettleStorage AS TABLE  
 	(
-		intSettleStorageKey INT IDENTITY(1, 1)
+		 intSettleStorageKey INT IDENTITY(1, 1)
 		,intCustomerStorageId INT
 		,dblStorageUnits DECIMAL(24, 10)
+		,dblRemainingUnits DECIMAL(24, 10)
 		,dblOpenBalance DECIMAL(24, 10)
 		,strStorageTicketNumber NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intCompanyLocationId INT
@@ -104,20 +102,7 @@ BEGIN TRY
 		,intStorageScheduleId INT
 		,intContractHeaderId INT
 	 )
-
-	CREATE TABLE #SettleStorageCopy 
-	(
-		intSettleStorageKey INT
-		,intCustomerStorageId INT
-		,dblStorageUnits DECIMAL(24, 10)
-		,dblOpenBalance DECIMAL(24, 10)
-		,strStorageTicketNumber NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-		,intCompanyLocationId INT
-		,intStorageTypeId INT
-		,intStorageScheduleId INT
-		,intContractHeaderId INT
-	 )
-
+	 
 	DECLARE @SettleContract AS TABLE 
 	(
 		intSettleContractKey INT IDENTITY(1, 1)
@@ -175,10 +160,11 @@ BEGIN TRY
 	FROM tblSMUserSecurity
 	WHERE intEntityUserSecurityId = @UserKey --Another Hiccup
 
-	INSERT INTO #SettleStorage 
+	INSERT INTO @SettleStorage 
 	(
 		 intCustomerStorageId
 		,dblStorageUnits
+		,dblRemainingUnits
 		,dblOpenBalance
 		,strStorageTicketNumber
 		,intCompanyLocationId
@@ -188,6 +174,7 @@ BEGIN TRY
 	)
 	SELECT 
 		 intCustomerStorageId
+		,dblUnits
 		,dblUnits
 		,dblOpenBalance
 		,strStorageTicketNumber
@@ -292,8 +279,8 @@ BEGIN TRY
 	WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId
 
 	SELECT @SettleStorageKey = MIN(intSettleStorageKey)
-	FROM #SettleStorage
-	WHERE dblStorageUnits > 0
+	FROM @SettleStorage
+	WHERE dblRemainingUnits > 0
 
 	SET @intCustomerStorageId = NULL
 	SET @dblStorageUnits = NULL
@@ -310,14 +297,14 @@ BEGIN TRY
 	WHILE @SettleStorageKey > 0
 	BEGIN
 		SELECT @intCustomerStorageId = intCustomerStorageId
-			,@dblStorageUnits = dblStorageUnits
+			,@dblStorageUnits = dblRemainingUnits
 			,@dblOpenBalance = dblOpenBalance
 			,@strStorageTicketNumber = strStorageTicketNumber
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intStorageTypeId = intStorageTypeId
 			,@intStorageScheduleId = intStorageScheduleId
-			,@DPContractHeaderId = intContractHeaderId
-		FROM #SettleStorage
+			,@DPContractHeaderId = CASE WHEN dblStorageUnits = dblRemainingUnits THEN intContractHeaderId ELSE 0 END
+		FROM @SettleStorage
 		WHERE intSettleStorageKey = @SettleStorageKey
 
 		--Storage Due		
@@ -455,7 +442,7 @@ BEGIN TRY
 				,0 AS IsProcessed
 			FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
 		END
-		
+			
 		IF ISNULL(@DPContractHeaderId, 0) > 0
 		BEGIN
 			SELECT @ContractDetailId = intContractDetailId
@@ -513,8 +500,8 @@ BEGIN TRY
 					SET dblContractUnits = dblContractUnits - @dblStorageUnits
 					WHERE intSettleContractKey = @SettleContractKey
 
-					UPDATE #SettleStorage
-					SET dblStorageUnits = 0
+					UPDATE @SettleStorage
+					SET dblRemainingUnits = 0
 					WHERE intSettleStorageKey = @SettleStorageKey
 					
 					UPDATE tblGRCustomerStorage
@@ -586,8 +573,8 @@ BEGIN TRY
 					SET dblContractUnits = dblContractUnits - @dblContractUnits
 					WHERE intSettleContractKey = @SettleContractKey
 
-					UPDATE #SettleStorage
-					SET dblStorageUnits = 0
+					UPDATE @SettleStorage
+					SET dblRemainingUnits = dblRemainingUnits-@dblContractUnits
 					WHERE intSettleStorageKey = @SettleStorageKey
 					
 					UPDATE tblGRCustomerStorage
@@ -646,91 +633,7 @@ BEGIN TRY
 						,@ItemId
 						,@ItemDescription
 						,1
-						,0
-
-					DELETE
-					FROM #SettleStorageCopy
-
-					INSERT INTO #SettleStorageCopy 
-					(
-						 intSettleStorageKey
-						,intCustomerStorageId
-						,dblStorageUnits
-						,dblOpenBalance
-						,strStorageTicketNumber
-						,intCompanyLocationId
-						,intStorageTypeId
-						,intStorageScheduleId
-						,intContractHeaderId
-					)
-					SELECT 
-						 intSettleStorageKey
-						,intCustomerStorageId
-						,dblStorageUnits
-						,dblOpenBalance
-						,strStorageTicketNumber
-						,intCompanyLocationId
-						,intStorageTypeId
-						,intStorageScheduleId
-						,intContractHeaderId
-					FROM #SettleStorage
-					WHERE intSettleStorageKey > @SettleStorageKey
-
-					DELETE
-					FROM #SettleStorage
-					WHERE intSettleStorageKey > @SettleStorageKey
-
-					SET IDENTITY_INSERT [dbo].[#SettleStorage] ON
-
-					INSERT INTO [#SettleStorage] 
-					(
-						 intSettleStorageKey
-						,intCustomerStorageId
-						,dblStorageUnits
-						,dblOpenBalance
-						,strStorageTicketNumber
-						,intCompanyLocationId
-						,intStorageTypeId
-						,intStorageScheduleId
-						,intContractHeaderId
-					)
-					SELECT 
-						 @SettleStorageKey + 1
-						,@intCustomerStorageId
-						,(@dblStorageUnits - @dblContractUnits)
-						,@dblOpenBalance
-						,@strStorageTicketNumber
-						,@intCompanyLocationId
-						,@intStorageTypeId
-						,@intStorageScheduleId
-						,ISNULL(@DPContractHeaderId, 0)
-
-					SET IDENTITY_INSERT [dbo].[#SettleStorage] OFF
-
-					INSERT INTO [#SettleStorage] 
-					(
-						 intCustomerStorageId
-						,dblStorageUnits
-						,dblOpenBalance
-						,strStorageTicketNumber
-						,intCompanyLocationId
-						,intStorageTypeId
-						,intStorageScheduleId
-						,intContractHeaderId
-					)
-					SELECT 
-						 intCustomerStorageId
-						,dblStorageUnits
-						,dblOpenBalance
-						,strStorageTicketNumber
-						,intCompanyLocationId
-						,intStorageTypeId
-						,intStorageScheduleId
-						,intContractHeaderId
-					FROM #SettleStorageCopy
-
-					DELETE
-					FROM #SettleStorageCopy
+						,0				
 
 					BREAK;
 				END
@@ -741,8 +644,8 @@ BEGIN TRY
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
-			FROM [#SettleStorage]
-			WHERE intSettleStorageKey > @SettleStorageKey AND dblStorageUnits > 0
+			FROM @SettleStorage
+			WHERE intSettleStorageKey >= @SettleStorageKey AND dblRemainingUnits > 0
 		END
 		ELSE IF @dblSpotUnits > 0
 		BEGIN
@@ -874,8 +777,8 @@ BEGIN TRY
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
-			FROM [#SettleStorage]
-			WHERE intSettleStorageKey > @SettleStorageKey AND dblStorageUnits > 0
+			FROM @SettleStorage
+			WHERE intSettleStorageKey >= @SettleStorageKey AND dblRemainingUnits > 0
 
 		END
 		ELSE
@@ -1204,7 +1107,7 @@ BEGIN TRY
 					,SH.intBillId = @intBillId
 				FROM tblGRStorageHistory SH
 				JOIN tblICInventoryReceiptItem RL ON RL.intSourceId = SH.intCustomerStorageId
-				JOIN tblICInventoryReceipt RH ON RH.intInventoryReceiptId = RL.intInventoryReceiptId
+				JOIN tblICInventoryReceipt RH ON RH.intInventoryReceiptId = RL.intInventoryReceiptId AND ISNULL(RL.intOrderId,0)=ISNULL(SH.intContractHeaderId,0)
 				WHERE SH.strType = 'Settlement' AND SH.strSettleTicket = @TicketNo AND RH.intInventoryReceiptId = @intReceiptId	
 				
 				IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
@@ -1247,3 +1150,6 @@ BEGIN CATCH
 		EXEC sp_xml_removedocument @idoc
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
+
+
+

@@ -1,8 +1,9 @@
 ﻿CREATE PROC [dbo].[uspRKGetGrainInventory]
 
-       @dtmFromTransactionDate datetime = null,
-          @dtmToTransactionDate datetime = null,
-          @intCommodityId int =  null
+		@dtmFromTransactionDate datetime = null,
+		@dtmToTransactionDate datetime = null,
+		@intCommodityId int =  null,
+		@intItemId int= null
 
 AS
 
@@ -10,18 +11,19 @@ DECLARE @tblResult TABLE
 (Id INT identity(1,1),
 dtmDate datetime,
 tranShipmentNumber nvarchar(50),
-tranShipQty numeric(24,10),
+tranShipQty NUMERIC(24,10),
 tranReceiptNumber nvarchar(50),
-tranRecQty numeric(24,10),
-BalanceForward numeric(24,10),
+tranRecQty NUMERIC(24,10),
+BalanceForward NUMERIC(24,10),
 tranAdjNumber nvarchar(50),
-dblAdjustmentQty numeric(24,10),
+dblAdjustmentQty NUMERIC(24,10),
 strDistributionOption nvarchar(50),
 strShipDistributionOption nvarchar(50),
 strAdjDistributionOption nvarchar(50),
 intInventoryReceiptId int,
 intInventoryShipmentId int,
 intInventoryAdjustmentId int
+
 )
 
 INSERT INTO @tblResult(dtmDate,strDistributionOption,strShipDistributionOption,strAdjDistributionOption,tranShipmentNumber,tranShipQty,tranReceiptNumber,tranRecQty,tranAdjNumber,dblAdjustmentQty
@@ -55,7 +57,9 @@ ROUND((SELECT TOP 1 intInventoryAdjustmentId FROM tblICInventoryAdjustment ia WH
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4,5,10)
 JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and il.strDescription <> 'In-Transit' 
-WHERE intCommodityId=@intCommodityId AND dtmDate BETWEEN @dtmFromTransactionDate and @dtmToTransactionDate  )t
+WHERE intCommodityId=@intCommodityId
+and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
+ AND dtmDate BETWEEN @dtmFromTransactionDate and @dtmToTransactionDate  )t
 
 SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
     dtmDate [dtmDate],case when isnull(tranReceiptNumber,'') <> '' then tranReceiptNumber
