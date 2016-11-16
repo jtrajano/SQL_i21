@@ -265,6 +265,7 @@ BEGIN TRY
 			,@intPatternCode = 24
 			,@ysnProposed = 0
 			,@strPatternString = @strNewLotNumber OUTPUT
+			,@intShiftId=@intBusinessShiftId
 
 		SELECT @ysnAllowMultipleLot = ysnAllowMultipleLot
 		FROM dbo.tblICStorageLocation

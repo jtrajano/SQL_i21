@@ -80,6 +80,7 @@ BEGIN TRY
 		,@strInputItemLotTracking NVARCHAR(50)
 		,@intInputItemUOMId INT
 		,@strCreateMultipleLots NVARCHAR(50)
+		,@intBusinessShiftId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -206,6 +207,12 @@ BEGIN TRY
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
 
+	SELECT @intBusinessShiftId = intShiftId
+		FROM dbo.tblMFShift
+		WHERE intLocationId = @intLocationId
+			AND @dtmCurrentDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+				AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
 	IF @dtmPlannedDate IS NULL
 		SELECT @dtmPlannedDate = @dtmBusinessDate
 
@@ -257,6 +264,7 @@ BEGIN TRY
 	BEGIN
 		--EXEC dbo.uspSMGetStartingNumber 24
 		--	,@strOutputLotNumber OUTPUT
+
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 			,@intItemId = @intItemId
 			,@intManufacturingId = @intManufacturingCellId
@@ -267,6 +275,7 @@ BEGIN TRY
 			,@intPatternCode = 24
 			,@ysnProposed = 0
 			,@strPatternString = @strOutputLotNumber OUTPUT
+			,@intShiftId=@intBusinessShiftId
 	END
 
 	IF EXISTS (
@@ -801,6 +810,12 @@ BEGIN TRY
 						,@intUserId
 				END
 
+				EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId
+						,@intItemId = @intItemId
+						,@intOutputLotId = @intLotId
+						,@intLocationId = @intLocationId
+						,@intUserId = @intUserId
+
 				SELECT @dblPhysicalCount = @dblPhysicalCount - 1
 
 				IF @strLotTracking <> 'Yes - Serial Number'
@@ -818,6 +833,7 @@ BEGIN TRY
 						,@intPatternCode = 24
 						,@ysnProposed = 0
 						,@strPatternString = @strOutputLotNumber OUTPUT
+						,@intShiftId=@intBusinessShiftId
 				END
 			END
 		END
@@ -852,9 +868,8 @@ BEGIN TRY
 				,@strParentLotNumber = @strParentLotNumber
 				,@intInputLotId = @intInputLotId
 				,@intInputStorageLocationId = @intInputLotStorageLocationId
-		END
 
-		IF @intLotStatusId IS NOT NULL
+				IF @intLotStatusId IS NOT NULL
 			AND NOT EXISTS (
 				SELECT *
 				FROM dbo.tblICLot
@@ -871,6 +886,15 @@ BEGIN TRY
 				,@intUserId
 		END
 
+				EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId
+					,@intItemId = @intItemId
+					,@intOutputLotId = @intLotId
+					,@intLocationId = @intLocationId
+					,@intUserId = @intUserId
+		END
+
+		
+
 		SELECT @strOutputLotNumber = strLotNumber
 			,@intParentLotId = intParentLotId
 		FROM dbo.tblICLot
@@ -885,11 +909,7 @@ BEGIN TRY
 		SELECT @strOutputLotNumber AS strOutputLotNumber
 	END
 
-	EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId
-		,@intItemId = @intItemId
-		,@intOutputLotId = @intLotId
-		,@intLocationId = @intLocationId
-		,@intUserId = @intUserId
+	
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

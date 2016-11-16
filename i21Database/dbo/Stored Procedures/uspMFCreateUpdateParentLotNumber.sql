@@ -13,6 +13,11 @@ AS
 
 	DECLARE @ErrMsg NVARCHAR(Max)
 			,@intCategoryId int
+			,@dtmBusinessDate DATETIME
+			,@intBusinessShiftId INT
+			,@dtmCurrentDateTime DATETIME
+
+	SELECT @dtmCurrentDateTime = GETDATE()
 
 	IF @strParentLotNumber IS NULL OR @strParentLotNumber = ''
 	BEGIN
@@ -20,6 +25,14 @@ AS
 		--	78
 		--	,@strParentLotNumber OUTPUT
 		Select @intCategoryId=intCategoryId from tblICItem Where intItemId=@intItemId
+
+		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
+
+		SELECT @intBusinessShiftId = intShiftId
+		FROM dbo.tblMFShift
+		WHERE intLocationId = @intLocationId
+			AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+				AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 			,@intItemId = @intItemId
@@ -31,6 +44,7 @@ AS
 			,@intPatternCode = 78
 			,@ysnProposed = 0
 			,@strPatternString = @strParentLotNumber OUTPUT
+			,@intShiftId=@intBusinessShiftId
 	END
 
 	SELECT @intParentLotId = intParentLotId

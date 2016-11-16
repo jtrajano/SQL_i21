@@ -26,6 +26,8 @@ BEGIN TRY
 		,@intProductionStageLocationId INT
 		,@intAttributeId INT
 		,@strAttributeValue NVARCHAR(50)
+		,@dtmBusinessDate DATETIME
+		,@intBusinessShiftId INT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -373,6 +375,14 @@ BEGIN TRY
 						FROM dbo.tblICStorageLocation
 						WHERE intStorageLocationId = @intStorageLocationId
 
+						SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
+
+						SELECT @intBusinessShiftId = intShiftId
+						FROM dbo.tblMFShift
+						WHERE intLocationId = @intLocationId
+							AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+								AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
 						EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 							,@intItemId = @intItemId
 							,@intManufacturingId = @intManufacturingCellId
@@ -383,6 +393,7 @@ BEGIN TRY
 							,@intPatternCode = 24
 							,@ysnProposed = 0
 							,@strPatternString = @strLotNumber OUTPUT
+							,@intShiftId=@intBusinessShiftId
 					END
 
 					SELECT @intItemUOMId = intItemUOMId

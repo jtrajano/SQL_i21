@@ -171,6 +171,7 @@ BEGIN TRY
 						,@intPatternCode = 24
 						,@ysnProposed = 0
 						,@strPatternString = @strOutputLotNumber OUTPUT
+						,@intShiftId=@intBusinessShiftId
 		END
 
 		EXEC dbo.uspMFLotSplit @intLotId = @intInputLotId
