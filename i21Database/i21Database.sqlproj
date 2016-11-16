@@ -4567,6 +4567,7 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
     <Build Include="dbo\Functions\fnPATValidateForPatronageTransactions.sql" />
     <Build Include="dbo\Views\vyuMFStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGeneratePutAwayTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
