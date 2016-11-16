@@ -77,9 +77,9 @@ BEGIN
 			
 			MERGE tblPATCustomerVolume AS PAT
 			USING #tempItem AS B
-			   ON (PAT.intCustomerPatronId = B.intEntityCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.fiscalYear)
-			 WHEN MATCHED AND B.ysnPosted = 0 AND PAT.dblVolume = B.dblVolume
-				  THEN DELETE
+			   ON (PAT.intCustomerPatronId = B.intEntityCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.fiscalYear AND PAT.ysnRefundProcessed <> 1)
+			 --WHEN MATCHED AND B.ysnPosted = 0 AND PAT.dblVolume = B.dblVolume
+				--  THEN DELETE
 			 WHEN MATCHED
 				  THEN UPDATE SET PAT.dblVolume = CASE WHEN B.ysnPosted = 1 THEN (PAT.dblVolume + B.dblVolume) 
 													   ELSE (PAT.dblVolume - B.dblVolume) END
