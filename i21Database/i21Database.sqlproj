@@ -4565,6 +4565,8 @@
     <Build Include="dbo\Stored Procedures\uspLGValidateUpdatePickedLot.sql" />
     <Build Include="dbo\Views\vyuRKGetItemList.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
+    <Build Include="dbo\Functions\fnPATValidateForPatronageTransactions.sql" />
+    <Build Include="dbo\Views\vyuMFStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

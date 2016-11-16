@@ -243,42 +243,42 @@ SELECT
 	,PATR1099Top.intEntityVendorId
 	,PATR1099Top.dblTotalPayment
 	,PATR1099Top.strCorrected
-	,PATR1099Bottom.strEmployerAddress       AS strEmployerAddress2                     
-	,PATR1099Bottom.strCompanyName           AS strCompanyName2                        
-	,PATR1099Bottom.strEIN                   AS strEIN2                                
-	,PATR1099Bottom.strFederalTaxId          AS strFederalTaxId2                       
-	,PATR1099Bottom.strAddress               AS strAddress2                            
-	,PATR1099Bottom.strVendorCompanyName     AS strVendorCompanyName2                  
-	,PATR1099Bottom.strPayeeName             AS strPayeeName2                          
-	,PATR1099Bottom.strVendorId              AS strVendorId2                           
-	,PATR1099Bottom.strZip                   AS strZip2                                
-	,PATR1099Bottom.strCity                  AS strCity2                               
-	,PATR1099Bottom.strState                 AS strState2                              
-	,PATR1099Bottom.strZipState              AS strZipState2                           
-	,PATR1099Bottom.intYear                  AS intYear2                               
-	,PATR1099Bottom.dblDividends             AS dblDividends2                          
-	,PATR1099Bottom.dblNonpatronage          AS dblNonpatronage2                       
-	,PATR1099Bottom.dblPerUnit               AS dblPerUnit2                            
-	,PATR1099Bottom.dblFederalTax            AS dblFederalTax2                         
-	,PATR1099Bottom.dblRedemption            AS dblRedemption2                         
-	,PATR1099Bottom.dblDomestic              AS dblDomestic2                           
-	,PATR1099Bottom.dblInvestment            AS dblInvestment2                         
-	,PATR1099Bottom.dblOpportunity           AS dblOpportunity2                        
-	,PATR1099Bottom.dblAMT                   AS dblAMT2                                
-	,PATR1099Bottom.dblOther                 AS dblOther2                              
-	,PATR1099Bottom.intEntityVendorId        AS intEntityVendorId2      
-	,PATR1099Bottom.dblTotalPayment			 AS dblTotalPayment2               
-	,PATR1099Bottom.strCorrected             AS strCorrected2                          
+	--,PATR1099Bottom.strEmployerAddress       AS strEmployerAddress2                     
+	--,PATR1099Bottom.strCompanyName           AS strCompanyName2                        
+	--,PATR1099Bottom.strEIN                   AS strEIN2                                
+	--,PATR1099Bottom.strFederalTaxId          AS strFederalTaxId2                       
+	--,PATR1099Bottom.strAddress               AS strAddress2                            
+	--,PATR1099Bottom.strVendorCompanyName     AS strVendorCompanyName2                  
+	--,PATR1099Bottom.strPayeeName             AS strPayeeName2                          
+	--,PATR1099Bottom.strVendorId              AS strVendorId2                           
+	--,PATR1099Bottom.strZip                   AS strZip2                                
+	--,PATR1099Bottom.strCity                  AS strCity2                               
+	--,PATR1099Bottom.strState                 AS strState2                              
+	--,PATR1099Bottom.strZipState              AS strZipState2                           
+	--,PATR1099Bottom.intYear                  AS intYear2                               
+	--,PATR1099Bottom.dblDividends             AS dblDividends2                          
+	--,PATR1099Bottom.dblNonpatronage          AS dblNonpatronage2                       
+	--,PATR1099Bottom.dblPerUnit               AS dblPerUnit2                            
+	--,PATR1099Bottom.dblFederalTax            AS dblFederalTax2                         
+	--,PATR1099Bottom.dblRedemption            AS dblRedemption2                         
+	--,PATR1099Bottom.dblDomestic              AS dblDomestic2                           
+	--,PATR1099Bottom.dblInvestment            AS dblInvestment2                         
+	--,PATR1099Bottom.dblOpportunity           AS dblOpportunity2                        
+	--,PATR1099Bottom.dblAMT                   AS dblAMT2                                
+	--,PATR1099Bottom.dblOther                 AS dblOther2                              
+	--,PATR1099Bottom.intEntityVendorId        AS intEntityVendorId2      
+	--,PATR1099Bottom.dblTotalPayment			 AS dblTotalPayment2               
+	--,PATR1099Bottom.strCorrected             AS strCorrected2                          
 FROM (
 	SELECT
 	*
 	FROM PATR1099 A
-	WHERE A.int1099PATRId % 2 = 1
+	--WHERE A.int1099PATRId % 2 = 1
 ) PATR1099Top
-OUTER APPLY (
-	SELECT
-	*
-	FROM PATR1099 A
-	WHERE A.int1099PATRId % 2 = 0
-	AND A.int1099PATRId = (PATR1099Top.int1099PATRId + 1)
-) PATR1099Bottom
+--OUTER APPLY (
+--	SELECT
+--	*
+--	FROM PATR1099 A
+--	WHERE A.int1099PATRId % 2 = 0
+--	AND A.int1099PATRId = (PATR1099Top.int1099PATRId + 1)
+--) PATR1099Bottom

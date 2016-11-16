@@ -52,6 +52,7 @@ BEGIN TRY
 		AND I.[intInventoryShipmentItemId] IS NULL
 		AND I.[intShipmentPurchaseSalesContractId] IS NULL
 		AND ISNULL(I.[intLoadDetailId],0) = 0
+		AND ISNULL(I.[intTransactionId],0) = 0
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess

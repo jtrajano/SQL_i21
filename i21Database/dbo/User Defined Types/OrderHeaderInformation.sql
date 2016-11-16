@@ -6,8 +6,8 @@
 	,[strOrderNo]						NVARCHAR(50)
 	,[strReferenceNo]					NVARCHAR(50)
 	,[intStagingLocationId]				INT
-	,[intWorkOrderId]					NVARCHAR(MAX)
-	,[strComment]						INT NULL
+	,[intWorkOrderId]					INT NULL
+	,[strComment]						NVARCHAR(MAX)
 	,[dtmOrderDate]						DateTime NULL
 	,[strLastUpdateBy]					NVARCHAR(100)
 	)

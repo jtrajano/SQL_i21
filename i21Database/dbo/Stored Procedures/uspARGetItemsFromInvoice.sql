@@ -17,6 +17,7 @@ SELECT
 	,[intCurrencyId]				= I.[intCurrencyId]
 	,[intCompanyLocationId]			= I.[intCompanyLocationId]
 	,[intDistributionHeaderId]		= I.[intDistributionHeaderId]
+	,[intTransactionId]				= I.[intTransactionId]
 
 	-- Detail 
 	,[intInvoiceDetailId]			= ID.[intInvoiceDetailId]			
