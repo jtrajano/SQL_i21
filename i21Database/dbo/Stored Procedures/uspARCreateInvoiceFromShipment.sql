@@ -258,7 +258,7 @@ SELECT
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
 	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
-	,[ysnRecomputeTax]						= 0
+	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(ARSI.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)	
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
 	,[intSCBudgetId]						= NULL
@@ -369,7 +369,7 @@ SELECT
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= NULL
 	,[intStorageLocationId]					= NULL
-	,[ysnRecomputeTax]						= 0
+	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(SOD.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
 	,[intSCBudgetId]						= NULL
