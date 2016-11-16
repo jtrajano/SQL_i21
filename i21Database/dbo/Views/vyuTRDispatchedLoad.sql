@@ -77,6 +77,7 @@ SELECT LG.intLoadId
 	, LG.strInboundTaxGroup
 	, LG.intOutboundTaxGroupId
 	, LG.strOutboundTaxGroup
+	, LG.dblDeliveredQuantity
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
 LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = Config.intSellerId
@@ -84,4 +85,3 @@ LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLoca
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = LG.intCustomerEntityId
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
 WHERE ISNULL(LG.ysnDispatched, 0) = 1
-	AND ISNULL(LG.dblDeliveredQuantity, 0) <= 0
