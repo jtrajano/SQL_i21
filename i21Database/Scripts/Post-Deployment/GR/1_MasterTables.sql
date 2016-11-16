@@ -59,12 +59,7 @@ BEGIN
 		UPDATE tblSCScaleSetup SET intUnitMeasureId = @intUnitMeasureId,strWeightDescription = @strSymbol  WHERE intUnitMeasureId IS NULL
 END
 GO
-DECLARE @intDTotalRows INT
-DECLARE @intDRowsWithSortOne INT
-SELECT @intDTotalRows=COUNT(1) FROM tblGRDiscountScheduleCode 
-SELECT @intDRowsWithSortOne=COUNT(1) FROM tblGRDiscountScheduleCode WHERE ISNULL(intSort,1)=1
-
-IF  @intDTotalRows=@intDRowsWithSortOne
+IF  EXISTS(SELECT 1 FROM tblGRDiscountScheduleCode WHERE intSort IS NULL)
 BEGIN	
 	UPDATE a
 	SET a.intSort=b.[Rank]
@@ -75,32 +70,17 @@ BEGIN
 		  intDiscountScheduleId,
 		  DENSE_RANK() OVER ( PARTITION BY intDiscountScheduleId ORDER BY intDiscountScheduleCodeId) AS [Rank]
 		  FROM tblGRDiscountScheduleCode
-	) AS b ON a.intDiscountScheduleId = b.intDiscountScheduleId AND a.intDiscountScheduleCodeId = b.intDiscountScheduleCodeId
+	) AS b ON a.intDiscountScheduleId = b.intDiscountScheduleId 
+	      AND a.intDiscountScheduleCodeId = b.intDiscountScheduleCodeId
+		  AND a.intSort IS NULL
 END
 GO
-GO
-DECLARE @intQTotalRows INT
-DECLARE @intQRowsWithSortOne INT
-SELECT @intQTotalRows=COUNT(1) FROM tblQMTicketDiscount 
-SELECT @intQRowsWithSortOne=COUNT(1) FROM tblQMTicketDiscount WHERE ISNULL(intSort,1)=1
-
-IF  @intQTotalRows=@intQRowsWithSortOne
+IF   EXISTS(SELECT 1 FROM tblQMTicketDiscount WHERE intSort IS NULL)
 BEGIN	
 	UPDATE a
-	SET a.intSort=b.[Rank]
+	SET a.intSort=b.intSort
 	FROM tblQMTicketDiscount a
-	JOIN 
-	(
-		  SELECT
-		  intTicketDiscountId,
-		  intTicketFileId,
-		  strSourceType,	   
-		  DENSE_RANK() OVER ( PARTITION BY intTicketFileId, strSourceType ORDER BY intTicketDiscountId) AS [Rank]
-		  FROM tblQMTicketDiscount
-	) as b 
-	  ON a.intTicketDiscountId = b.intTicketDiscountId 
-	  AND a.intTicketFileId = b.intTicketFileId 
-	  AND a.strSourceType = b.strSourceType
+	JOIN tblGRDiscountScheduleCode b ON b.intDiscountScheduleCodeId=a.intDiscountScheduleCodeId
 END
 GO
 IF EXISTS(SELECT * FROM tblGRDiscountScheduleCode WHERE ISNULL(strDiscountChargeType,'')='')
