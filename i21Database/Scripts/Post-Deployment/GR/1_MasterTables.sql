@@ -78,21 +78,9 @@ GO
 IF   EXISTS(SELECT 1 FROM tblQMTicketDiscount WHERE intSort IS NULL)
 BEGIN	
 	UPDATE a
-	SET a.intSort=b.[Rank]
+	SET a.intSort=b.intSort
 	FROM tblQMTicketDiscount a
-	JOIN 
-	(
-		  SELECT
-		  intTicketDiscountId,
-		  intTicketFileId,
-		  strSourceType,	   
-		  DENSE_RANK() OVER ( PARTITION BY intTicketFileId, strSourceType ORDER BY intTicketDiscountId) AS [Rank]
-		  FROM tblQMTicketDiscount
-	) as b 
-	  ON a.intTicketDiscountId = b.intTicketDiscountId 
-	  AND a.intTicketFileId = b.intTicketFileId 
-	  AND a.strSourceType = b.strSourceType
-	  AND a.intSort IS NULL
+	JOIN tblGRDiscountScheduleCode b ON b.intDiscountScheduleCodeId=a.intDiscountScheduleCodeId
 END
 GO
 IF EXISTS(SELECT * FROM tblGRDiscountScheduleCode WHERE ISNULL(strDiscountChargeType,'')='')
