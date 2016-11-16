@@ -6,7 +6,7 @@
     [intItemId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
 	[dblCalculatedQuantity] NUMERIC(18, 6) NOT NULL, 
-    [intItemUOMId] INT NOT NULL,
+    [intItemUOMId] INT NULL,
 	[intRecipeItemTypeId] INT NOT NULL,
 	[strItemGroupName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_strItemGroupName] DEFAULT '', 
 	[dblUpperTolerance] NUMERIC(18, 6) NOT NULL , 

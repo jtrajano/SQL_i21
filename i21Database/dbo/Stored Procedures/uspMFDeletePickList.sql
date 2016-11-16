@@ -60,7 +60,7 @@ Begin Tran
 		PL.dblPickQuantity,PL.intPickUOMId,PL.dblQuantity,PL.intItemUOMId
 		From tblMFPickListDetail PL
 		JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId
-		Where intPickListId=@intPickListId AND PL.intLotId <> PL.intStageLotId
+		Where intPickListId=@intPickListId AND PL.intLotId <> PL.intStageLotId AND PL.intStorageLocationId <> L.intStorageLocationId
 
 		Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail
 
@@ -122,7 +122,7 @@ Begin Tran
 		PL.dblPickQuantity,PL.intPickUOMId,PL.dblQuantity,PL.intItemUOMId
 		From tblMFPickListDetail PL
 		JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId
-		Where intPickListId=@intPickListId
+		Where intPickListId=@intPickListId AND PL.intStorageLocationId <> L.intStorageLocationId
 
 		Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail
 
