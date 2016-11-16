@@ -748,7 +748,7 @@ BEGIN
 	insert into tblSMTransaction
 	(
 		intScreenId
-		,strRecordNo
+		,intRecordId
 		,strTransactionNo
 		,intEntityId
 		,dtmDate
@@ -758,7 +758,7 @@ BEGIN
 	(
 		select
 			intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity')
-			,strRecordNo = convert(nvarchar(50), tblCRMOpportunity.intOpportunityId)
+			,intRecordId = tblCRMOpportunity.intOpportunityId
 			,strTransactionNo = (case when len(tblCRMOpportunity.strName) > 50 THEN SUBSTRING(tblCRMOpportunity.strName, 0, 47) + '...' else tblCRMOpportunity.strName end)
 			,intEntityId = tblCRMOpportunity.intInternalSalesPerson
 			,dtmDate = tblCRMOpportunity.dtmCreated
@@ -767,7 +767,7 @@ BEGIN
 		from
 			tblCRMOpportunity
 		where
-			convert(nvarchar(50), tblCRMOpportunity.intOpportunityId) not in (select strRecordNo from tblSMTransaction where intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity'))
+			tblCRMOpportunity.intOpportunityId not in (select intRecordId from tblSMTransaction where intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity'))
 	)
 
 	update tblSMAttachment set strScreen = 'CRM.Opportunity' where strScreen = 'HelpDesk.Project' and strRecordNo in (select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity);
@@ -1076,7 +1076,7 @@ declare @intGeneratedActivityIdentityAct int
 SET @queryResultAct = CURSOR FOR
 
 	select
-		intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.strRecordNo = convert(nvarchar(50), tblHDProject.intProjectId) and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'CRM.view.Opportunity'))
+		intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblHDProject.intProjectId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'CRM.view.Opportunity'))
 		,strType = 'Task'
 		,strSubject = tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject
 		,intEntityContactId = tblHDTicket.intCustomerContactId
@@ -1214,7 +1214,7 @@ BEGIN
 		insert into tblSMTransaction
 		(
 			intScreenId
-			,strRecordNo
+			,intRecordId
 			,strTransactionNo
 			,intEntityId
 			,dtmDate
@@ -1224,7 +1224,7 @@ BEGIN
 		(
 			select
 				intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'GlobalComponentEngine.view.Activity' and strScreenName = 'Activity')
-				,strRecordNo = convert(nvarchar(50), @intGeneratedActivityIdentityAct)
+				,intRecordId =  @intGeneratedActivityIdentityAct
 				,strTransactionNo = @strActivityNoAct
 				,intEntityId = @intEntityIdAct
 				,dtmDate = @dtmCreatedAct
@@ -1297,7 +1297,7 @@ SET @queryResultComment = CURSOR FOR
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketComment.intCreatedUserEntityId
-		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.strRecordNo = convert(nvarchar(50), tblCRMOpportunityActivityTmp.intActivityId) and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
 		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
 		,intConcurrencyId = 1
 		,tblHDTicketComment.intTicketCommentId
@@ -1441,7 +1441,7 @@ SET @queryResultNote = CURSOR FOR
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketNote.intCreatedUserEntityId
-		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.strRecordNo = convert(nvarchar(50), tblCRMOpportunityActivityTmp.intActivityId) and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
 		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
 		,intConcurrencyId = 1
 		,tblHDTicketNote.intTicketNoteId
@@ -1562,9 +1562,9 @@ insert into tblSMTypeValue
 	(
 		select distinct strStatus from tblSMActivity where intTransactionId in
 		(
-			select intTransactionId from tblSMTransaction where strRecordNo in
+			select intTransactionId from tblSMTransaction where intRecordId in
 			(
-				select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity
+				select intOpportunityId from tblCRMOpportunity
 			)
 			and intScreenId = 
 			(
@@ -1584,9 +1584,9 @@ insert into tblSMTypeValue
 	(
 		select distinct strPriority from tblSMActivity where intTransactionId in
 		(
-			select intTransactionId from tblSMTransaction where strRecordNo in
+			select intTransactionId from tblSMTransaction where intRecordId in
 			(
-				select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity
+				select intOpportunityId from tblCRMOpportunity
 			)
 			and intScreenId = 
 			(
@@ -1606,9 +1606,9 @@ insert into tblSMTypeValue
 	(
 		select distinct strCategory from tblSMActivity where intTransactionId in
 		(
-			select intTransactionId from tblSMTransaction where strRecordNo in
+			select intTransactionId from tblSMTransaction where intRecordId in
 			(
-				select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity
+				select intOpportunityId from tblCRMOpportunity
 			)
 			and intScreenId = 
 			(

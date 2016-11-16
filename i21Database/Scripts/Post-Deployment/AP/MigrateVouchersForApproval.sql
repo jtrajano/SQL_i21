@@ -3,7 +3,7 @@ DECLARE @screenId INT;
 SELECT TOP 1 @screenId = intScreenId FROM tblSMScreen WHERE strScreenName = 'Voucher' AND strModule = 'Accounts Payable';
 
 IF EXISTS(SELECT 1 FROM tblAPBill A WHERE (ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL)
-				AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intBillId = CAST(B.strRecordNo AS INT) AND B.intScreenId = @screenId))
+				AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intBillId = B.intRecordId AND B.intScreenId = @screenId))
 BEGIN
 
 	IF OBJECT_ID(N'tempdb..#tmpVouchersApproval') IS NOT NULL DROP TABLE #tmpVouchersApproval
@@ -29,13 +29,13 @@ BEGIN
 	SELECT intBillId
 	FROM tblAPBill A 
 	WHERE (ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL)
-	AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intBillId = CAST(B.strRecordNo AS INT) AND B.intScreenId = @screenId)
+	AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intBillId = B.intRecordId AND B.intScreenId = @screenId)
 
 	MERGE INTO tblSMTransaction as destination
 	USING (
 		SELECT
 			[intScreenId]		=	@screenId, 
-			[strRecordNo]		=	A.intBillId, 
+			[intRecordId]		=	A.intBillId, 
 			[strApprovalStatus]	=	CASE WHEN B.ysnForApprovalSubmitted = 0 AND B.ysnForApproval = 1
 											THEN 'For Submit'
 										WHEN B.ysnForApprovalSubmitted = 1 AND B.ysnForApproval = 1
@@ -59,12 +59,12 @@ BEGIN
 	WHEN NOT MATCHED THEN
 	INSERT (
 		[intScreenId], 
-		[strRecordNo], 
+		[intRecordId], 
 		[strApprovalStatus]
 	)
 	VALUES (
 		[intScreenId], 
-		[strRecordNo], 
+		[intRecordId], 
 		[strApprovalStatus]
 	)
 	OUTPUT

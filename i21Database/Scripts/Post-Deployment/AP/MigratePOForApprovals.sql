@@ -3,7 +3,7 @@ DECLARE @screenId INT;
 SELECT TOP 1 @screenId = intScreenId FROM tblSMScreen WHERE strScreenName = 'Purchase Order' AND strModule = 'Accounts Payable';
 
 IF EXISTS(SELECT 1 FROM tblPOPurchase A WHERE (ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL)
-				AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intPurchaseId = CAST(B.strRecordNo AS INT) AND B.intScreenId = @screenId))
+				AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intPurchaseId =B.intRecordId AND B.intScreenId = @screenId))
 BEGIN
 
 	IF OBJECT_ID(N'tempdb..#tmpPOApproval') IS NOT NULL DROP TABLE #tmpPOApproval
@@ -29,13 +29,13 @@ BEGIN
 	SELECT intPurchaseId
 	FROM tblPOPurchase A 
 	WHERE (ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL)
-	AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intPurchaseId = CAST(B.strRecordNo AS INT) AND B.intScreenId = @screenId)
+	AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intPurchaseId = B.intRecordId AND B.intScreenId = @screenId)
 
 	MERGE INTO tblSMTransaction as destination
 	USING (
 		SELECT
 			[intScreenId]		=	@screenId, 
-			[strRecordNo]		=	A.intPurchaseId, 
+			[intRecordId]		=	A.intPurchaseId, 
 			[strApprovalStatus]	=	CASE WHEN B.ysnForApprovalSubmitted = 0 AND B.ysnForApproval = 1
 											THEN 'For Submit'
 										WHEN B.ysnForApprovalSubmitted = 1 AND B.ysnForApproval = 1
@@ -59,12 +59,12 @@ BEGIN
 	WHEN NOT MATCHED THEN
 	INSERT (
 		[intScreenId], 
-		[strRecordNo], 
+		[intRecordId], 
 		[strApprovalStatus]
 	)
 	VALUES (
 		[intScreenId], 
-		[strRecordNo], 
+		[intRecordId], 
 		[strApprovalStatus]
 	)
 	OUTPUT
