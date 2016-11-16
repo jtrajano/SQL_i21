@@ -20,12 +20,11 @@ DECLARE @endOfMISC AS TABLE(strEndOfMISC NVARCHAR(1500))
 DECLARE @endOfTransmitter AS TABLE(strEndOfTransmitter NVARCHAR(1500))
 DECLARE @totalPayee NVARCHAR(16)
 
-
 INSERT INTO @transmitter
 SELECT dbo.[fnAP1099EFileTransmitter](@year,@test)
 
 INSERT INTO @payer
-SELECT dbo.[fnAP1099EFilePayer](@year, @test)
+SELECT dbo.[fnAP1099EFilePayer](@year, @test, @vendorFrom, @vendorTo)
 
 INSERT INTO @payee
 SELECT * FROM dbo.fnAP1099EFileMISCPayee(@year, @reprint, @corrected, @vendorFrom, @vendorTo)
