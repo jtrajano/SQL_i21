@@ -8,7 +8,7 @@
 AS
 
 DECLARE @tblResult TABLE
-(Id INT identity(1,1),
+(	Id INT identity(1,1),
 	dtmDate datetime,
 	strItemNo nvarchar(50),
 	dblUnpaidIn NUMERIC(24,10),
@@ -37,11 +37,10 @@ FROM (
 SELECT dtmDate, dblOpenReceive*dblUnitCost AS dblUnitCost
 			,dblUnitCost dblUnitCost1,
 			 ir.intInventoryReceiptItemId ,i.strItemNo,
-			ISNULL((SELECT isnull(b.dblAmountDue,0) FROM tblAPBillDetail bd 
+			ISNULL((SELECT sum(isnull(b.dblAmountDue,0)) FROM tblAPBillDetail bd 
 				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
 				WHERE bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId and ysnPosted=1
-				and bd.intItemId= case when isnull(@intItemId,0)=0 then bd.intItemId else @intItemId end 
-				),0) AS dblQtyReceived
+				and bd.intItemId= case when isnull(@intItemId,0)=0 then bd.intItemId else @intItemId end),0) AS dblQtyReceived
  from 
  vyuAPBillDetail ap
  JOIN tblICInventoryReceiptItem ir on ap.intInventoryReceiptId=ir.intInventoryReceiptId
@@ -74,7 +73,7 @@ isnull(	(SELECT dblOpenReceive from tblICInventoryReceiptItem r
 	WHERE ysnPosted = 1 and r.intInventoryReceiptItemId=ir.intInventoryReceiptItemId),0)*dblUnitCost AS dblRecQty
 			,dblUnitCost dblUnitCost1,
 			 ir.intInventoryReceiptItemId ,i.strItemNo,
-			 ISNULL((SELECT isnull(b.dblAmountDue,0) FROM tblAPBillDetail bd 
+			 ISNULL((SELECT sum(isnull(b.dblAmountDue,0)) FROM tblAPBillDetail bd 
 				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
 				WHERE bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId and b.ysnPosted=1
 				and bd.intItemId= case when isnull(@intItemId,0)=0 then bd.intItemId else @intItemId end 
