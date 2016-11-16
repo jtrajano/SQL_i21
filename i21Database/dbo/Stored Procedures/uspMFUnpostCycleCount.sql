@@ -47,7 +47,7 @@ BEGIN TRY
 
 	IF @strCostAdjustmentBatchId IS NOT NULL
 	BEGIN
-		SELECT @intTransaction = intTransactionId
+		SELECT @intTransactionId = intTransactionId
 			,@strTransactionId = strTransactionId
 		FROM tblICInventoryTransaction
 		WHERE strBatchId = @strCostAdjustmentBatchId
@@ -87,7 +87,7 @@ BEGIN TRY
 			)
 		EXEC dbo.uspICUnpostCosting @intTransactionId
 			,@strTransactionId
-			,@strBatchId
+			,@strCostAdjustmentBatchId
 			,@intUserId
 			,0
 
