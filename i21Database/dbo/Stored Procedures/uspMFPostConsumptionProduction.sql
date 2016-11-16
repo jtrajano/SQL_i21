@@ -276,7 +276,7 @@ BEGIN
 		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblOtherCharges
 	END
 
-	IF @strLotTracking = 'Yes'
+	IF @strLotTracking <> 'No'
 	BEGIN
 		CREATE TABLE #GeneratedLotItems (
 			intLotId INT
