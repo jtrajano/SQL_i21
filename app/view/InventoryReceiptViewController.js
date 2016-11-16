@@ -368,13 +368,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{current.ysnPosted}',
                 disabled: '{current.ysnOrigin}'
             },
-            lblWeightLossMsg: {
-                text: '{getWeightLossText}'
-            },
-            lblWeightLossMsgValue: {
-              //  text: '{getWeightLossValueText}',
-                hidden: '{hidelblWeightLossMsgValue}'
-            },
+            // lblWeightLossMsg: {
+            //     text: '{getWeightLossText}'
+            // },
+            // txtWeightLossMsgValue: '{current.strVessel}',
             grdInventoryReceipt: {
                 readOnly: '{readOnlyReceiptItemGrid}',
                 colOrderNumber: {
@@ -1208,10 +1205,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.showOtherCharges(win);
         }
     },
+    updateWeightLossText: function(window, clear, weightLoss) {
+        if(clear) {
+            window.down("#txtWeightLossMsgValue").setValue("");
+            window.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
+        } else {
+            window.down("#txtWeightLossMsgValue").setValue(Ext.util.Format.number(weightLoss, '0,000.00'));
+
+            if(weightLoss === 0) {
+                document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'black';
+            }
+            else {
+                document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'red';
+            }
+        }
+    },
+
     createRecord: function (config, action) {
         var win = config.window;
-        win.down("#lblWeightLossMsgValue").setText("");
+        win.down("#txtWeightLossMsgValue").setValue("");
         win.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
+
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
@@ -4438,8 +4452,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     return;
                 var w = selModel.views[0].up('window');
                 var plt = w.down("#pnlLotTracking");
-                w.down("#lblWeightLossMsgValue").setText("");
-                w.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
+                this.updateWeightLossText(w, true, 0);
                 plt.setVisible(false);
                 return;
             }
@@ -5371,12 +5384,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                           dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
                       if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
                           dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
-                    var net = 0.00, orderQty = 0.00, wgtQty = 0.00;
-                    if (!iRely.Functions.isEmpty(item.get('dblNet'))) net = item.get('dblNet');
+                    var netQty = 0.00, orderQty = 0.00, wgtQty = 0.00;
+                    if (!iRely.Functions.isEmpty(item.get('dblNet'))) netQty = item.get('dblNet');
                     if (!iRely.Functions.isEmpty(item.get('dblOrderQty'))) orderQty = item.get('dblOrderQty');
                     if (!iRely.Functions.isEmpty(item.get('dblContainerWeightPerQty'))) wgtQty = item.get('dblContainerWeightPerQty');
                     
-                    dblNetReceivedWt = net;
+                    dblNetReceivedWt = netQty;
                     dblNetShippedWt = orderQty * wgtQty;
                     dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
                 }
@@ -5391,17 +5404,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     validateWeightLoss: function (win, ReceiptItems) {
         win.viewModel.data.weightLoss = 0;
-        var lblWeightLossMsgValue = win.down('#lblWeightLossMsgValue');
-
+        var me = this;
         var action = function (weightLoss) {
             win.viewModel.set('weightLoss', weightLoss);
-            lblWeightLossMsgValue.setText(Ext.util.Format.number(weightLoss, '0,000.00'));
-            if(weightLoss == 0) {
-                lblWeightLossMsgValue.setStyle({color: 'black'});
-            }
-            else {
-                lblWeightLossMsgValue.setStyle({color: 'red'});
-            }
+            me.updateWeightLossText(win, false, weightLoss);
         };
 
         var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();

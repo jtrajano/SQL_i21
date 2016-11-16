@@ -774,13 +774,17 @@
                                                 "designer|createAlias": null,
                                                 "emptyText": "Created on Save",
                                                 "fieldLabel": "Receipt No",
+                                                "fieldStyle": "",
                                                 "itemId": "txtReceiptNumber",
                                                 "labelAlign": "top",
+                                                "labelStyle": "",
                                                 "labelWidth": 105,
                                                 "layout|flex": 0.7,
                                                 "margin": null,
                                                 "name": null,
                                                 "readOnly": true,
+                                                "readOnlyCls": null,
+                                                "style": null,
                                                 "width": 100
                                             },
                                             "name": "MyTextField1",
@@ -1491,166 +1495,6 @@
                                                             "designerId": "1ae48ae0-1fcc-4da7-846c-76a32c898e23",
                                                             "cn": [
                                                                 {
-                                                                    "type": "Ext.toolbar.Toolbar",
-                                                                    "reference": {
-                                                                        "name": "dockedItems",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "container|padding": "0 0 0 1",
-                                                                        "dock": "top",
-                                                                        "itemId": "tlbToolbarGrid"
-                                                                    },
-                                                                    "name": "MyToolbar6",
-                                                                    "designerId": "5dc423e8-6af6-4c6e-88bd-93d0fc8447ec",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
-                                                                                "iconCls": "small-insert",
-                                                                                "itemId": "btnInsertInventoryReceipt",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "Insert"
-                                                                            },
-                                                                            "name": "MyButton7",
-                                                                            "designerId": "6f0e12ec-eeb1-4083-847e-e3305baa0d63"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
-                                                                                "iconCls": "small-open",
-                                                                                "itemId": "btnQuality",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "Quality"
-                                                                            },
-                                                                            "name": "MyButton42",
-                                                                            "designerId": "4a07c3e9-046f-47b0-acb7-863b7d4c1c51"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
-                                                                                "iconCls": "small-open",
-                                                                                "itemId": "btnTaxDetails",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "View Tax Details"
-                                                                            },
-                                                                            "name": "MyButton43",
-                                                                            "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
-                                                                                "iconCls": "small-remove",
-                                                                                "itemId": "btnRemoveInventoryReceipt",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "Remove"
-                                                                            },
-                                                                            "name": "MyButton22",
-                                                                            "designerId": "8a532acd-c7b9-4abf-9e5d-00f65003ec37"
-                                                                        },
-                                                                        {
-                                                                            "type": "linkedinstance",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "layout|flex": null
-                                                                            },
-                                                                            "name": "filter1",
-                                                                            "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
-                                                                            "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.container.Container",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "container|align": "stretch",
-                                                                                "container|pack": "end",
-                                                                                "layout": "hbox",
-                                                                                "layout|flex": 1,
-                                                                                "margin": "0 5 0 0"
-                                                                            },
-                                                                            "name": "MyContainer4",
-                                                                            "designerId": "bb433911-8db3-4c5d-8019-15a110959a84",
-                                                                            "cn": [
-                                                                                {
-                                                                                    "type": "Ext.form.Label",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "itemId": "lblWeightLossMsg",
-                                                                                        "style": null,
-                                                                                        "text": "Wgt or Vol Gain/Loss: "
-                                                                                    },
-                                                                                    "name": "MyLabel8",
-                                                                                    "configAlternates": {
-                                                                                        "style": "string"
-                                                                                    },
-                                                                                    "designerId": "ab69e307-c7ba-4fe7-8807-5c496262f7dd"
-                                                                                },
-                                                                                {
-                                                                                    "type": "Ext.form.Label",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "hidden": true,
-                                                                                        "id": null,
-                                                                                        "itemId": "lblWeightLossMsgValue",
-                                                                                        "style": "color: red; padding-left: 5px",
-                                                                                        "text": "0.00"
-                                                                                    },
-                                                                                    "name": "MyLabel9",
-                                                                                    "configAlternates": {
-                                                                                        "style": "string"
-                                                                                    },
-                                                                                    "designerId": "c120a302-36f3-4abf-b4ab-222fcbf7402b"
-                                                                                }
-                                                                            ]
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
                                                                     "type": "Ext.selection.CheckboxModel",
                                                                     "reference": {
                                                                         "name": "selModel",
@@ -1663,6 +1507,176 @@
                                                                     },
                                                                     "name": "MyCheckboxSelectionModel2",
                                                                     "designerId": "ce852480-76ec-459e-abce-97f5745b94ac"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.panel.Panel",
+                                                                    "reference": {
+                                                                        "name": "dockedItems",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "container|align": "stretch",
+                                                                        "dock": "top",
+                                                                        "header": false,
+                                                                        "layout": "vbox",
+                                                                        "shrinkWrap": 0,
+                                                                        "title": "My Panel",
+                                                                        "width": 100
+                                                                    },
+                                                                    "name": "MyPanel6",
+                                                                    "designerId": "2cac0f31-55ad-4415-b203-4cc3662f18ba",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.toolbar.Toolbar",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "border": 0,
+                                                                                "container|padding": "0 0 0 1",
+                                                                                "dock": null,
+                                                                                "itemId": "tlbToolbarGrid",
+                                                                                "layout|flex": null,
+                                                                                "weight": 1
+                                                                            },
+                                                                            "name": "MyToolbar6",
+                                                                            "designerId": "5dc423e8-6af6-4c6e-88bd-93d0fc8447ec",
+                                                                            "cn": [
+                                                                                {
+                                                                                    "type": "Ext.button.Button",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "icon": null,
+                                                                                        "iconCls": "small-insert",
+                                                                                        "itemId": "btnInsertInventoryReceipt",
+                                                                                        "layout|flex": null,
+                                                                                        "tabIndex": -1,
+                                                                                        "text": "Insert"
+                                                                                    },
+                                                                                    "name": "MyButton7",
+                                                                                    "designerId": "6f0e12ec-eeb1-4083-847e-e3305baa0d63"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.button.Button",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "icon": null,
+                                                                                        "iconCls": "small-open",
+                                                                                        "itemId": "btnQuality",
+                                                                                        "layout|flex": null,
+                                                                                        "tabIndex": -1,
+                                                                                        "text": "Quality"
+                                                                                    },
+                                                                                    "name": "MyButton42",
+                                                                                    "designerId": "4a07c3e9-046f-47b0-acb7-863b7d4c1c51"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.button.Button",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "icon": null,
+                                                                                        "iconCls": "small-open",
+                                                                                        "itemId": "btnTaxDetails",
+                                                                                        "layout|flex": null,
+                                                                                        "tabIndex": -1,
+                                                                                        "text": "View Tax Details"
+                                                                                    },
+                                                                                    "name": "MyButton43",
+                                                                                    "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.button.Button",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "icon": null,
+                                                                                        "iconCls": "small-remove",
+                                                                                        "itemId": "btnRemoveInventoryReceipt",
+                                                                                        "layout|flex": null,
+                                                                                        "tabIndex": -1,
+                                                                                        "text": "Remove"
+                                                                                    },
+                                                                                    "name": "MyButton22",
+                                                                                    "designerId": "8a532acd-c7b9-4abf-9e5d-00f65003ec37"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.Label",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "itemId": "lblWeightLossMsg",
+                                                                                        "layout|flex": null,
+                                                                                        "padding": "0 0 0 64",
+                                                                                        "style": null,
+                                                                                        "text": "Wgt or Vol Gain/Loss:"
+                                                                                    },
+                                                                                    "name": "MyLabel8",
+                                                                                    "configAlternates": {
+                                                                                        "style": "string"
+                                                                                    },
+                                                                                    "designerId": "ab69e307-c7ba-4fe7-8807-5c496262f7dd"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "fieldLabel": null,
+                                                                                        "fieldStyle": "color:red",
+                                                                                        "inputWrapCls": "''",
+                                                                                        "itemId": "txtWeightLossMsgValue",
+                                                                                        "layout|flex": null,
+                                                                                        "readOnly": true,
+                                                                                        "readOnlyCls": "color: black",
+                                                                                        "value": [
+                                                                                            "0.00"
+                                                                                        ],
+                                                                                        "width": 172
+                                                                                    },
+                                                                                    "name": "MyTextField3",
+                                                                                    "designerId": "db399a20-19e2-4ee7-a199-addee148f115"
+                                                                                },
+                                                                                {
+                                                                                    "type": "linkedinstance",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "layout|flex": null
+                                                                                    },
+                                                                                    "name": "filter1",
+                                                                                    "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
+                                                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -3086,134 +3100,6 @@
                                                                     "designerId": "8e2c5111-0905-47f1-9aa8-877b2ea634b9"
                                                                 },
                                                                 {
-                                                                    "type": "Ext.container.Container",
-                                                                    "reference": {
-                                                                        "name": "dockedItems",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "container|align": "stretch",
-                                                                        "container|pack": "end",
-                                                                        "dock": "bottom",
-                                                                        "itemId": "grpFooter",
-                                                                        "layout": "hbox",
-                                                                        "width": 100
-                                                                    },
-                                                                    "name": "MyContainer",
-                                                                    "designerId": "8297aaee-7f04-4772-8e09-5cdbc0b57976",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.form.Label",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "itemId": "lblSubTotal",
-                                                                                "text": "SubTotal",
-                                                                                "width": 150
-                                                                            },
-                                                                            "name": "MyLabel3",
-                                                                            "configAlternates": {
-                                                                                "style": "string"
-                                                                            },
-                                                                            "designerId": "c9bafd10-c343-4b9d-a904-f04040ec6b12"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.form.Label",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "itemId": "lblTax",
-                                                                                "text": "Tax",
-                                                                                "width": 120
-                                                                            },
-                                                                            "name": "MyLabel4",
-                                                                            "configAlternates": {
-                                                                                "style": "string"
-                                                                            },
-                                                                            "designerId": "bd5905c1-1122-46fd-8a44-d91600b247d7"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.form.Label",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "itemId": "lblCharges",
-                                                                                "text": "Charges",
-                                                                                "width": 150
-                                                                            },
-                                                                            "name": "MyLabel2",
-                                                                            "configAlternates": {
-                                                                                "style": "string"
-                                                                            },
-                                                                            "designerId": "bc94ae1c-8df6-4e57-ab2f-4353f0159e76"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.form.Label",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "itemId": "lblGrossWgt",
-                                                                                "text": "Gross",
-                                                                                "width": 150
-                                                                            },
-                                                                            "name": "MyLabel5",
-                                                                            "configAlternates": {
-                                                                                "style": "string"
-                                                                            },
-                                                                            "designerId": "fca7feef-7ec3-465d-94e3-b75ecb85f67e"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.form.Label",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "itemId": "lblNetWgt",
-                                                                                "text": "Net",
-                                                                                "width": 150
-                                                                            },
-                                                                            "name": "MyLabel6",
-                                                                            "configAlternates": {
-                                                                                "style": "string"
-                                                                            },
-                                                                            "designerId": "98da0e64-6701-466f-ba6c-51b01bf5997c"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.form.Label",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "itemId": "lblTotal",
-                                                                                "text": "Total",
-                                                                                "width": 180
-                                                                            },
-                                                                            "name": "MyLabel7",
-                                                                            "configAlternates": {
-                                                                                "style": "string"
-                                                                            },
-                                                                            "designerId": "fc56d20e-a083-48bc-98b5-6399ecbb3f8e"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
                                                                     "type": "Ext.grid.column.Column",
                                                                     "reference": {
                                                                         "name": "columns",
@@ -3273,6 +3159,135 @@
                                                                     ]
                                                                 }
                                                             ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.panel.Panel",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "border": false,
+                                                        "container|align": "stretch",
+                                                        "container|pack": "end",
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1,
+                                                        "maxHeight": 20,
+                                                        "title": null
+                                                    },
+                                                    "name": "MyPanel3",
+                                                    "designerId": "b54d233a-fc4b-47bc-b647-a9c6c4f0fe19",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "lblSubTotal",
+                                                                "text": "SubTotal",
+                                                                "width": 150
+                                                            },
+                                                            "name": "MyLabel3",
+                                                            "configAlternates": {
+                                                                "style": "string"
+                                                            },
+                                                            "designerId": "c9bafd10-c343-4b9d-a904-f04040ec6b12"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "lblTax",
+                                                                "text": "Tax",
+                                                                "width": 120
+                                                            },
+                                                            "name": "MyLabel4",
+                                                            "configAlternates": {
+                                                                "style": "string"
+                                                            },
+                                                            "designerId": "bd5905c1-1122-46fd-8a44-d91600b247d7"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "lblCharges",
+                                                                "text": "Charges",
+                                                                "width": 150
+                                                            },
+                                                            "name": "MyLabel2",
+                                                            "configAlternates": {
+                                                                "style": "string"
+                                                            },
+                                                            "designerId": "bc94ae1c-8df6-4e57-ab2f-4353f0159e76"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "lblGrossWgt",
+                                                                "text": "Gross",
+                                                                "width": 150
+                                                            },
+                                                            "name": "MyLabel5",
+                                                            "configAlternates": {
+                                                                "style": "string"
+                                                            },
+                                                            "designerId": "fca7feef-7ec3-465d-94e3-b75ecb85f67e"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "lblNetWgt",
+                                                                "text": "Net",
+                                                                "width": 150
+                                                            },
+                                                            "name": "MyLabel6",
+                                                            "configAlternates": {
+                                                                "style": "string"
+                                                            },
+                                                            "designerId": "98da0e64-6701-466f-ba6c-51b01bf5997c"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "lblTotal",
+                                                                "text": "Total",
+                                                                "width": 180
+                                                            },
+                                                            "name": "MyLabel7",
+                                                            "configAlternates": {
+                                                                "style": "string"
+                                                            },
+                                                            "designerId": "fc56d20e-a083-48bc-98b5-6399ecbb3f8e"
                                                         }
                                                     ]
                                                 },

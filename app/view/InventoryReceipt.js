@@ -26,8 +26,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.form.field.Date',
         'Ext.form.field.Number',
         'Ext.grid.Panel',
-        'Ext.form.Label',
         'Ext.selection.CheckboxModel',
+        'Ext.form.Label',
         'Ext.grid.column.Check',
         'Ext.grid.column.Number',
         'Ext.grid.plugin.CellEditing',
@@ -395,7 +395,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         width: 100,
                                                         fieldLabel: 'Receipt No',
                                                         labelAlign: 'top',
+                                                        labelStyle: '',
                                                         labelWidth: 105,
+                                                        fieldStyle: '',
                                                         readOnly: true,
                                                         blankText: 'Created on Save',
                                                         emptyText: 'Created on Save'
@@ -700,128 +702,86 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'grdInventoryReceipt',
                                                                         margin: '7 0 0 0',
                                                                         columnLines: true,
-                                                                        dockedItems: [
-                                                                            {
-                                                                                xtype: 'toolbar',
-                                                                                dock: 'top',
-                                                                                itemId: 'tlbToolbarGrid',
-                                                                                layout: {
-                                                                                    type: 'hbox',
-                                                                                    padding: '0 0 0 1'
-                                                                                },
-                                                                                items: [
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnInsertInventoryReceipt',
-                                                                                        iconCls: 'small-insert',
-                                                                                        text: 'Insert'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnQuality',
-                                                                                        iconCls: 'small-open',
-                                                                                        text: 'Quality'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnTaxDetails',
-                                                                                        iconCls: 'small-open',
-                                                                                        text: 'View Tax Details'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnRemoveInventoryReceipt',
-                                                                                        iconCls: 'small-remove',
-                                                                                        text: 'Remove'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'filter1'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'container',
-                                                                                        flex: 1,
-                                                                                        margin: '0 5 0 0',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            align: 'stretch',
-                                                                                            pack: 'end'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'label',
-                                                                                                itemId: 'lblWeightLossMsg',
-                                                                                                text: 'Wgt or Vol Gain/Loss: '
-                                                                                            },
-                                                                                            {
-                                                                                                xtype: 'label',
-                                                                                                hidden: true,
-                                                                                                itemId: 'lblWeightLossMsgValue',
-                                                                                                style: 'color: red; padding-left: 5px',
-                                                                                                text: '0.00'
-                                                                                            }
-                                                                                        ]
-                                                                                    }
-                                                                                ]
-                                                                            },
-                                                                            {
-                                                                                xtype: 'container',
-                                                                                dock: 'bottom',
-                                                                                itemId: 'grpFooter',
-                                                                                width: 100,
-                                                                                layout: {
-                                                                                    type: 'hbox',
-                                                                                    align: 'stretch',
-                                                                                    pack: 'end'
-                                                                                },
-                                                                                items: [
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        itemId: 'lblSubTotal',
-                                                                                        width: 150,
-                                                                                        text: 'SubTotal'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        itemId: 'lblTax',
-                                                                                        width: 120,
-                                                                                        text: 'Tax'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        itemId: 'lblCharges',
-                                                                                        width: 150,
-                                                                                        text: 'Charges'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        itemId: 'lblGrossWgt',
-                                                                                        width: 150,
-                                                                                        text: 'Gross'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        itemId: 'lblNetWgt',
-                                                                                        width: 150,
-                                                                                        text: 'Net'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        itemId: 'lblTotal',
-                                                                                        width: 180,
-                                                                                        text: 'Total'
-                                                                                    }
-                                                                                ]
-                                                                            }
-                                                                        ],
                                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                             selType: 'checkboxmodel',
                                                                             allowDeselect: true,
                                                                             mode: 'SINGLE'
                                                                         }),
+                                                                        dockedItems: [
+                                                                            {
+                                                                                xtype: 'panel',
+                                                                                dock: 'top',
+                                                                                shrinkWrap: 0,
+                                                                                width: 100,
+                                                                                header: false,
+                                                                                title: 'My Panel',
+                                                                                layout: {
+                                                                                    type: 'vbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'toolbar',
+                                                                                        weight: 1,
+                                                                                        border: 0,
+                                                                                        itemId: 'tlbToolbarGrid',
+                                                                                        layout: {
+                                                                                            type: 'hbox',
+                                                                                            padding: '0 0 0 1'
+                                                                                        },
+                                                                                        items: [
+                                                                                            {
+                                                                                                xtype: 'button',
+                                                                                                tabIndex: -1,
+                                                                                                itemId: 'btnInsertInventoryReceipt',
+                                                                                                iconCls: 'small-insert',
+                                                                                                text: 'Insert'
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'button',
+                                                                                                tabIndex: -1,
+                                                                                                itemId: 'btnQuality',
+                                                                                                iconCls: 'small-open',
+                                                                                                text: 'Quality'
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'button',
+                                                                                                tabIndex: -1,
+                                                                                                itemId: 'btnTaxDetails',
+                                                                                                iconCls: 'small-open',
+                                                                                                text: 'View Tax Details'
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'button',
+                                                                                                tabIndex: -1,
+                                                                                                itemId: 'btnRemoveInventoryReceipt',
+                                                                                                iconCls: 'small-remove',
+                                                                                                text: 'Remove'
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'label',
+                                                                                                itemId: 'lblWeightLossMsg',
+                                                                                                padding: '0 0 0 64',
+                                                                                                text: 'Wgt or Vol Gain/Loss:'
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'textfield',
+                                                                                                itemId: 'txtWeightLossMsgValue',
+                                                                                                width: 172,
+                                                                                                value: 0.00,
+                                                                                                fieldStyle: 'color:red',
+                                                                                                readOnly: true,
+                                                                                                readOnlyCls: 'color: black',
+                                                                                                inputWrapCls: '\'\''
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'filter1'
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ],
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
@@ -1585,6 +1545,55 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         viewConfig: {
                                                                             itemId: 'grvInventoryReceipt'
                                                                         }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'panel',
+                                                                flex: 1,
+                                                                border: false,
+                                                                maxHeight: 20,
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch',
+                                                                    pack: 'end'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'label',
+                                                                        itemId: 'lblSubTotal',
+                                                                        width: 150,
+                                                                        text: 'SubTotal'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'label',
+                                                                        itemId: 'lblTax',
+                                                                        width: 120,
+                                                                        text: 'Tax'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'label',
+                                                                        itemId: 'lblCharges',
+                                                                        width: 150,
+                                                                        text: 'Charges'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'label',
+                                                                        itemId: 'lblGrossWgt',
+                                                                        width: 150,
+                                                                        text: 'Gross'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'label',
+                                                                        itemId: 'lblNetWgt',
+                                                                        width: 150,
+                                                                        text: 'Net'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'label',
+                                                                        itemId: 'lblTotal',
+                                                                        width: 180,
+                                                                        text: 'Total'
                                                                     }
                                                                 ]
                                                             },
