@@ -4696,6 +4696,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
+    <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -942,9 +942,10 @@ BEGIN TRY
 						,@intLocationId = @intLocationId
 						,@intOrderTypeId = NULL
 						,@intBlendRequirementId = NULL
-						,@intPatternCode = 55
+						,@intPatternCode = 24
 						,@ysnProposed = 0
 						,@strPatternString = @strLotNumber OUTPUT
+						,@intShiftId=@intBusinessShiftId
 				END
 
 				IF @intConsumptionMethodId = 2

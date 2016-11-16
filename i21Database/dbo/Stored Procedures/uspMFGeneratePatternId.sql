@@ -9,6 +9,7 @@
 	,@ysnProposed BIT = 0
 	,@strPatternString NVARCHAR(50) OUTPUT
 	,@intEntityId INT = NULL
+	,@intShiftId INT = NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
@@ -34,6 +35,7 @@ BEGIN
 		,@strSQL NVARCHAR(MAX)
 		,@intRecordId INT
 		,@intPatternId INT
+		,@dtmBusinessDate DATETIME
 
 	SET @dtmCurrentDate = GetDate()
 
@@ -209,6 +211,18 @@ BEGIN
 			DELETE
 			FROM @tblMFRecord
 
+			IF @intShiftId IS NULL
+				AND @strTableName = 'tblMFShift'
+			BEGIN
+				SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
+
+				SELECT @intShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId
+					AND @dtmCurrentDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+						AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+			END
+
 			SELECT @intPrimaryColumnId = CASE 
 					WHEN @strTableName = 'tblSMCompanyLocation'
 						THEN @intLocationId
@@ -226,6 +240,8 @@ BEGIN
 						THEN @intBlendRequirementId
 					WHEN @strTableName = 'tblEMEntity'
 						THEN @intEntityId
+					WHEN @strTableName = 'tblMFShift'
+						THEN @intShiftId
 					END
 
 			IF @intPrimaryColumnId IS NULL
