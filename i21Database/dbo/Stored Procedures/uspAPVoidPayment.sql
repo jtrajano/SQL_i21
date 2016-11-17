@@ -238,7 +238,7 @@ BEGIN
 	UPDATE tblAPPaymentDetail
 	SET tblAPPaymentDetail.dblAmountDue = CASE WHEN A.ysnPrepay = 1 THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
 												ELSE 
-											(CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment - B.dblInterest ELSE (B.dblAmountDue + B.dblPayment) END)
+											(CASE WHEN B.dblAmountDue = 0 THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) ELSE (B.dblAmountDue + B.dblPayment) END)
 											END
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
