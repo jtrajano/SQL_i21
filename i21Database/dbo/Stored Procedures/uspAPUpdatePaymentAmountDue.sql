@@ -18,7 +18,7 @@ IF @post = 0
 BEGIN
 	UPDATE tblAPPaymentDetail
 	SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
-												THEN (B.dblDiscount + B.dblPayment - B.dblInterest) 
+												THEN CAST((B.dblDiscount + B.dblPayment - B.dblInterest) AS DECIMAL(18,2))
 											ELSE (B.dblAmountDue + B.dblPayment) END)
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
