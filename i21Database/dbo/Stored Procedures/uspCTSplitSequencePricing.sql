@@ -39,12 +39,17 @@ BEGIN TRY
 		IF	ISNULL(@intPriceFixationId,0) = 0
 			RETURN
 
-		IF (SELECT COUNT(*) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId) > 1
+		IF NOT EXISTS(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
+			RETURN 
+
+		IF	(SELECT COUNT(*) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId) > 1 AND 
+			EXISTS	(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
 		BEGIN
 			RAISERROR(110005,16,1,@strContractSeq,@strContractSeq)
 		END
 
-		IF EXISTS(SELECT * FROM tblCTPriceFixation WHERE intPriceFixationId = @intPriceFixationId AND dblTotalLots <> dblLotsFixed)
+		IF	EXISTS	(	SELECT	*	FROM	tblCTPriceFixation	WHERE	intPriceFixationId	=	@intPriceFixationId AND dblTotalLots <> dblLotsFixed) AND 
+			EXISTS	(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
 		BEGIN
 			RAISERROR(110006,16,1,@strContractSeq,@strContractSeq)
 		END
@@ -82,7 +87,6 @@ BEGIN TRY
 		SELECT	@intChildContractDetailId = MIN(intContractDetailId) 
 		FROM	tblCTContractDetail 
 		WHERE	intSplitFromId			=	@intContractDetailId
-		AND		intContractDetailId	 NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
 		
 		WHILE	ISNULL(@intChildContractDetailId,0) > 0
 		BEGIN
@@ -130,11 +134,11 @@ BEGIN TRY
 
 				EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixationDetail',@intPriceFixationDetailId, @intNewPFDetailId OUTPUT,@XML
 
+				UPDATE	tblCTContractDetail SET intSplitFromId = NULL WHERE intContractDetailId =@intChildContractDetailId
+
 				SELECT	@intChildContractDetailId = MIN(intContractDetailId) 
 				FROM	tblCTContractDetail 
 				WHERE	intSplitFromId		=	@intContractDetailId
-				AND		intContractDetailId	>	@intChildContractDetailId
-				AND		intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
 		END					
 END TRY
 
