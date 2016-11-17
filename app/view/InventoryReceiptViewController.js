@@ -959,7 +959,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    setupContext: function (options) {
+    setupContext: function(options) {
         "use strict";
         var me = this,
             win = options.window,
@@ -975,26 +975,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
 
         // Update the summary fields whenever the receipt item data changed.
-        me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function (store) {
-            store.on('update', function () {
+        me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function(store) {
+            store.on('update', function() {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
 
-            store.on('datachanged', function () {
+            store.on('datachanged', function() {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
         });
 
         // Update the summary fields whenever the other charges data changed.
-        me.getViewModel().bind('{current.tblICInventoryReceiptCharges}', function (store) {
-            store.on('update', function () {
+        me.getViewModel().bind('{current.tblICInventoryReceiptCharges}', function(store) {
+            store.on('update', function() {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
 
-            store.on('datachanged', function () {
+            store.on('datachanged', function() {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
@@ -1012,6 +1012,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
+            onSaveClick: Ext.bind(function(success, failure) {
+                me.pokeGrid(grdInventoryReceipt);
+                win.context.data.saveRecord({
+                    callbackFn: function(batch, options) {
+                        me.pokeGrid(grdInventoryReceipt);
+                    }
+                });
+            }, me),
             include: 'tblICInventoryReceiptInspections,' +
             'vyuICInventoryReceiptLookUp,' +
             'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
