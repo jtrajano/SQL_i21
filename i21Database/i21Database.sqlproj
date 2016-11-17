@@ -4568,6 +4568,7 @@
     <Build Include="dbo\Functions\fnPATValidateForPatronageTransactions.sql" />
     <Build Include="dbo\Views\vyuMFStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGeneratePutAwayTask.sql" />
+    <Build Include="dbo\Tables\tblCRMJiraIssue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
