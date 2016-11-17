@@ -316,7 +316,7 @@ SET @query = '
 		,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
 		,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
 		,SUM(tmpAPPayables.dblInterest) AS dblInterest
-		,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
+		,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 		FROM ('
 				+ @innerQuery +
 			') tmpAPPayables 
