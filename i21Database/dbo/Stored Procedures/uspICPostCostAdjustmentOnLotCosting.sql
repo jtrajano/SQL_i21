@@ -354,7 +354,9 @@ BEGIN
 
 			-- Initialize the Adjust Qty
 			SET @dblAdjustQty = 
-				CASE	WHEN @dblRemainingQty >= @AdjustableQty THEN 
+				CASE	WHEN @dblNewValue IS NOT NULL THEN 
+							0
+						WHEN @dblRemainingQty >= @AdjustableQty THEN 
 							@AdjustableQty 
 						ELSE 
 							@dblRemainingQty
