@@ -24,8 +24,6 @@ SELECT	NEWID() AS id,
 		ON EN.intEntityId = RCus.intCustomerId
 	INNER JOIN tblARCustomer ARC
 		ON ARC.intEntityCustomerId = RCus.intCustomerId
-	INNER JOIN tblPATRefundCategory RCatPCat
-		ON RCatPCat.intRefundCustomerId = RCus.intRefundCustomerId
 	INNER JOIN tblPATRefundRate RR
 		ON RR.intRefundTypeId = RCus.intRefundTypeId
 	LEFT JOIN tblSMTaxCode TC
