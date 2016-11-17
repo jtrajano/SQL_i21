@@ -4570,6 +4570,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGeneratePutAwayTask.sql" />
     <Build Include="dbo\Tables\tblCRMJiraIssue.sql" />
     <None Include="dbo\Stored Procedures\uspICRestoreBalanceFromClosedPeriod.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdatePropertyName.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
