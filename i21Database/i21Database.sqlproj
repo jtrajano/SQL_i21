@@ -4568,6 +4568,7 @@
     <Build Include="dbo\Functions\fnPATValidateForPatronageTransactions.sql" />
     <Build Include="dbo\Views\vyuMFStorageLocation.sql" />
     <None Include="dbo\Stored Procedures\uspICRestoreBalanceFromClosedPeriod.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdatePropertyName.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
