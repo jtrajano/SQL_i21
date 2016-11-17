@@ -400,8 +400,8 @@ END
 
 			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 			FOR
-			SELECT intInventoryReceiptItemId, intOrderId, intOwnershipType
-			FROM #tmpItemReceiptIds;
+			SELECT TOP 1 intInventoryReceiptItemId, intOrderId, intOwnershipType
+			FROM #tmpItemReceiptIds WHERE intOwnershipType = 1;
 
 			OPEN intListCursor;
 

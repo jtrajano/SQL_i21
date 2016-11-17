@@ -336,6 +336,7 @@ OPEN intListCursor;
 				END
 				ELSE
 					BEGIN
+					SET @dblLoopContractUnits = @dblLoopContractUnits * -1
 					INSERT INTO @ItemsForItemShipment (
 							intItemId
 							,intItemLocationId
@@ -355,7 +356,6 @@ OPEN intListCursor;
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 							,ysnIsStorage
-							,strSourceTransactionId
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
 					END
@@ -403,8 +403,8 @@ BEGIN
 
 			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 			FOR
-			SELECT intInventoryShipmentItemId, intOrderId, intOwnershipType
-			FROM #tmpItemShipmentIds;
+			SELECT TOP 1 intInventoryShipmentItemId, intOrderId, intOwnershipType
+			FROM #tmpItemShipmentIds WHERE intOwnershipType = 1;
 
 			OPEN intListCursor;
 

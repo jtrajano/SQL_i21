@@ -467,8 +467,8 @@ BEGIN TRY
 
 			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 			FOR
-			SELECT intInventoryShipmentItemId, intOrderId, intOwnershipType
-			FROM #tmpItemShipmentIds;
+			SELECT TOP 1 intInventoryShipmentItemId, intOrderId, intOwnershipType
+			FROM #tmpItemShipmentIds WHERE intOwnershipType = 1;
 
 			OPEN intListCursor;
 

@@ -200,6 +200,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[ysnPrice]
 		)
 		SELECT	
+		DISTINCT
 		[intEntityVendorId]					= RE.intEntityVendorId
 		,[strBillOfLadding]					= RE.strBillOfLadding
 		,[strReceiptType]					= RE.strReceiptType
