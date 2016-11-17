@@ -4679,6 +4679,7 @@
     <Build Include="dbo\Tables\tblIPEntityContactStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPVendors.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPVendors.sql" />
+    <Build Include="dbo\Tables\tblCRMJiraIssue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
