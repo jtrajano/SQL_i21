@@ -46,7 +46,15 @@ DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @totalShipment AS INT
 DECLARE @totalContract AS INT
-
+DECLARE @intInventoryShipmentItemId AS INT
+		,@intInvoiceId AS INT
+		,@intOwnershipType AS INT
+		,@intPricingTypeId INT
+		,@successfulCount AS INT
+		,@invalidCount AS INT
+		,@success AS INT
+		,@batchIdUsed AS INT
+		,@recapId AS INT;
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
@@ -446,6 +454,59 @@ BEGIN TRY
 	--IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+			
+			
+			--INVOICE intergration
+			CREATE TABLE #tmpItemShipmentIds (
+				[intInventoryShipmentItemId] [INT] PRIMARY KEY,
+				[intOrderId] [INT],
+				[intOwnershipType] [INT],
+				UNIQUE ([intInventoryShipmentItemId])
+			);
+			INSERT INTO #tmpItemShipmentIds(intInventoryShipmentItemId,intOrderId,intOwnershipType) SELECT intInventoryShipmentItemId,intOrderId,intOwnershipType FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId
+
+			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+			FOR
+			SELECT intInventoryShipmentItemId, intOrderId, intOwnershipType
+			FROM #tmpItemShipmentIds;
+
+			OPEN intListCursor;
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM intListCursor INTO @intInventoryShipmentItemId, @intOrderId , @intOwnershipType;
+
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
+				IF ISNULL(@intInventoryShipmentItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
+				BEGIN
+					EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+					SELECT @intInvoiceId = intInvoiceId FROM tblARInvoice WHERE intShipmentId = @InventoryShipmentId
+					IF ISNULL(@intInvoiceId , 0) != 0
+					BEGIN
+						EXEC dbo.uspARPostInvoice
+						@batchId			= NULL,
+						@post				= 1,
+						@recap				= 0,
+						@param				= @intInvoiceId,
+						@userId				= @intUserId,
+						@beginDate			= NULL,
+						@endDate			= NULL,
+						@beginTransaction	= NULL,
+						@endTransaction		= NULL,
+						@exclude			= NULL,
+						@successfulCount	= @successfulCount OUTPUT,
+						@invalidCount		= @invalidCount OUTPUT,
+						@success			= @success OUTPUT,
+						@batchIdUsed		= @batchIdUsed OUTPUT,
+						@recapId			= @recapId OUTPUT,
+						@transType			= N'all',
+						@accrueLicense		= 0,
+						@raiseError			= 1
+					END
+				END
+				FETCH NEXT FROM intListCursor INTO @intInventoryShipmentItemId, @intOrderId, @intOwnershipType;
+			END
 		END
 	_Exit:
 

@@ -32,7 +32,9 @@ DECLARE @intContractDetailId AS INT,
 		@intHaulerId AS INT,
 		@ysnAccrue AS BIT,
 		@ysnPrice AS BIT,
-		@intFutureMarketId AS INT;
+		@intFutureMarketId AS INT,
+		@batchId AS NVARCHAR(40),
+		@ticketBatchId AS NVARCHAR(40);
 
 BEGIN 
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId
@@ -61,6 +63,13 @@ BEGIN
 		,intInventoryReceiptId INT
 	)
 END 
+
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 105, @batchId OUT
+
+SET @ticketBatchId = @batchId
+
+
 -- Insert Entries to Stagging table that needs to processed to Transport Load
 INSERT into @ReceiptStagingTable(
 		-- Header
@@ -72,6 +81,7 @@ INSERT into @ReceiptStagingTable(
 		,intShipFromId
 		,intShipViaId
 		,intDiscountSchedule
+		,strVendorRefNo
 				
 		-- Detail				
 		,intItemId
@@ -90,8 +100,6 @@ INSERT into @ReceiptStagingTable(
 		,intStorageLocationId
 		,ysnIsStorage
 		,dblFreightRate
-		--,dblGross
-		--,dblNet
 		,intSourceId
 		,intSourceType	
 		,strSourceScreenName
@@ -111,6 +119,7 @@ SELECT
 		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityVendorId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
+		,strVendorRefNo				= @ticketBatchId
 
 		--Detail
 		,intItemId					= SC.intItemId
@@ -142,15 +151,6 @@ SELECT
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
-		--,dblGross					= CASE 
-		--								WHEN SC.strDistributionOption = 'SPL' THEN @dblTicketGross
-		--								ELSE SC.dblGrossWeight - SC.dblTareWeight
-		--							END
-		--,dblNet						= dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
-		--,dblNet						= CASE 
-		--								WHEN SC.strDistributionOption = 'SPL' THEN dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
-		--								ELSE SC.dblGrossWeight - SC.dblTareWeight
-		--							END
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
