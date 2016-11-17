@@ -14,21 +14,20 @@ BEGIN
 
 	IF @form1099 = 1
 	BEGIN
-		SELECT
-			@amountCodes = CASE WHEN A.dblDirectSales > 0 THEN '1' --DIRECT SALES see page 53
-							WHEN A.dblRents > 0 THEN '1'
-							WHEN A.dblRoyalties > 0 THEN '2'
-							WHEN A.dblOtherIncome > 0 THEN '3'
-							WHEN A.dblFederalIncome > 0 THEN '4'
-							WHEN A.dblBoatsProceeds > 0 THEN '5'
-							WHEN A.dblMedicalPayments > 0 THEN '6'
-							WHEN A.dblNonemployeeCompensation > 0 THEN '7'
-							WHEN A.dblSubstitutePayments > 0 THEN '8'
-							WHEN A.dblCropInsurance > 0 THEN 'A'
-							WHEN A.dblParachutePayments > 0 THEN 'B'
-							WHEN A.dblGrossProceedsAtty > 0 THEN 'C'
-						ELSE SPACE(1)
-						END + SPACE(15)
+		SELECT @amountCodes =
+			CASE WHEN A.dblDirectSales > 0 THEN '1' ELSE '' END + --DIRECT SALES see page 53
+			CASE WHEN A.dblRents > 0 THEN '1' ELSE '' END +
+			CASE WHEN A.dblRoyalties > 0 THEN '2' ELSE '' END +
+			CASE WHEN A.dblOtherIncome > 0 THEN '3' ELSE '' END +
+			CASE WHEN A.dblFederalIncome > 0 THEN '4' ELSE '' END +
+			CASE WHEN A.dblBoatsProceeds > 0 THEN '5' ELSE '' END +
+			CASE WHEN A.dblMedicalPayments > 0 THEN '6' ELSE '' END +
+			CASE WHEN A.dblNonemployeeCompensation > 0 THEN '7' ELSE '' END +
+			CASE WHEN A.dblSubstitutePayments > 0 THEN '8' ELSE '' END +
+			CASE WHEN A.dblCropInsurance > 0 THEN 'A' ELSE '' END +
+			CASE WHEN A.dblParachutePayments > 0 THEN 'B' ELSE '' END +
+			CASE WHEN A.dblGrossProceedsAtty > 0 THEN 'C' ELSE '' END +
+			SPACE(15)
 		FROM vyuAP1099MISC A
 		--OUTER APPLY --Temporarily removed, identify when the voucher will exclude from generating 1099 file and report
 		--(
@@ -98,7 +97,7 @@ BEGIN
 		+ SPACE(260)
 		+ '00000002' --500-507
 		+ SPACE(241)
-		+ CHAR(13) + CHAR(10)
+		+ SPACE(2)
 	FROM tblSMCompanySetup A
 	CROSS JOIN tblAP1099Threshold C
 
