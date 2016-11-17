@@ -81,8 +81,9 @@ INNER JOIN
 	tblAPPayment APP
 		ON APPD.[intPaymentId] = APP.[intPaymentId]
 WHERE
-	APP.[ysnPosted] = 1
-	AND ARI.[ysnPosted] = 1
+	--APP.[ysnPosted] = 1
+	--AND 
+	ARI.[ysnPosted] = 1
 	AND APPD.[dblPayment] <> @ZeroDecimal
 
 WHILE EXISTS (SELECT NULL FROM @CustomerIds)
