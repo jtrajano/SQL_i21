@@ -1478,6 +1478,7 @@ BEGIN
 	AND intCardId = @intCardId
 	AND intProductId = @ProductId
 	AND intPumpNumber = @PumpId
+	AND intTransactionId != @intTransactionId
 
 	IF(@intDupTransCount > 0)
 	BEGIN
