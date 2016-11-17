@@ -876,7 +876,7 @@ BEGIN TRY
 				WHERE intLotId = @intLotId
 					AND intLotStatusId = @intLotStatusId
 				)
-			AND @strLotTracking = 'Yes'
+			AND @strLotTracking <> 'No'
 		BEGIN
 			--UPDATE dbo.tblICLot
 			--SET intLotStatusId = @intLotStatusId
