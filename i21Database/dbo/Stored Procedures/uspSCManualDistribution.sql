@@ -41,6 +41,7 @@ DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
 DECLARE @intInventoryReceiptItemId AS INT
 		,@intOrderId INT
+		,@intOwnershipType INT
 		,@intPricingTypeId INT
 		,@intBillId AS INT
 		,@successfulCount AS INT
@@ -392,37 +393,40 @@ END
 			CREATE TABLE #tmpItemReceiptIds (
 				[intInventoryReceiptItemId] [INT] PRIMARY KEY,
 				[intOrderId] [INT],
+				[intOwnershipType] [INT],
 				UNIQUE ([intInventoryReceiptItemId])
 			);
-			INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId) SELECT intInventoryReceiptItemId,intOrderId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
+			INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId,intOwnershipType) SELECT intInventoryReceiptItemId,intOrderId,intOwnershipType FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
 
 			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 			FOR
-			SELECT intInventoryReceiptItemId, intOrderId
+			SELECT intInventoryReceiptItemId, intOrderId, intOwnershipType
 			FROM #tmpItemReceiptIds;
 
 			OPEN intListCursor;
 
 			-- Initial fetch attempt
-			FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId;
+			FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId , @intOwnershipType;
 
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
-			SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
-			IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1
-				EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
-				SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
-				IF ISNULL(@intBillId , 0) != 0
+				SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
+				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
 				BEGIN
-					EXEC [dbo].[uspAPPostBill]
-					@post = 1
-					,@recap = 0
-					,@isBatch = 0
-					,@param = @intBillId
-					,@userId = @intUserId
-					,@success = @success OUTPUT
+					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
+					SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+					IF ISNULL(@intBillId , 0) != 0
+					BEGIN
+						EXEC [dbo].[uspAPPostBill]
+						@post = 1
+						,@recap = 0
+						,@isBatch = 0
+						,@param = @intBillId
+						,@userId = @intUserId
+						,@success = @success OUTPUT
+					END
 				END
-			FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId;
+				FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId, @intOwnershipType;
 			END
 		END
 _Exit:
