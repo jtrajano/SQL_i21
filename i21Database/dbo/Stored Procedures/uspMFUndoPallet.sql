@@ -89,22 +89,22 @@ BEGIN TRY
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intLotId = @intLotId
 
-	IF EXISTS (
-			SELECT *
-			FROM tblMFWorkOrderProducedLot
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND intLotId = @intLotId
-				AND ysnReleased = 1
-			)
-	BEGIN
-		RAISERROR (
-				51137
-				,11
-				,1
-				)
+	--IF EXISTS (
+	--		SELECT *
+	--		FROM tblMFWorkOrderProducedLot
+	--		WHERE intWorkOrderId = @intWorkOrderId
+	--			AND intLotId = @intLotId
+	--			AND ysnReleased = 1
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			51137
+	--			,11
+	--			,1
+	--			)
 
-		RETURN
-	END
+	--	RETURN
+	--END
 
 	IF EXISTS (
 			SELECT *
