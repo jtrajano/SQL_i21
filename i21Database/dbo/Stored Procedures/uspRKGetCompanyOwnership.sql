@@ -19,44 +19,47 @@ DECLARE @tblResult TABLE
 	strReceiptNumber nvarchar(50),
 	intReceiptId int
 )
-INSERT INTO @tblResult (strItemNo,dtmDate,dblUnpaidIn,dblUnpaidOut,dblUnpaidBalance,InventoryBalanceCarryForward)
-SELECT  NULL,NULL, NULL,NULL,SUM(dblUnpaidBalance),sum(InventoryBalanceCarryForward)  from (
-SELECT  NULL a ,NULL b, NULL c,NULL d,(dblUnpaidIn-dblUnpaidOut) dblUnpaidBalance,
-				(SELECT sum(dblQty) BalanceForward
+INSERT INTO @tblResult (dblUnpaidBalance,InventoryBalanceCarryForward)
+select sum(dblUnpaidBalance),sum(InventoryBalanceCarryForward) from(
+SELECT sum(dblUnpaidIn)-sum(dblUnpaidIn-dblUnpaidOut) dblUnpaidBalance,
+(SELECT sum(dblQty) BalanceForward
 				FROM tblICInventoryTransaction it 
 				join tblICItem i on i.intItemId=it.intItemId
 				JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and il.strDescription <> 'In-Transit' 
 				WHERE intCommodityId=@intCommodityId and dtmDate < @dtmFromTransactionDate
 				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 				) InventoryBalanceCarryForward 
- from (
-SELECT 
-dblInQty    dblUnpaidIn,
-dblOutQty  dblUnpaidOut
-FROM (
-  SELECT 	 isnull(bd.dblQtyReceived,0) dblInQty,
-			 ISNULL((SELECT (isnull(b.dblAmountDue,0))/case when isnull(dblUnitCost,0) =0  then 1 else dblUnitCost end FROM tblAPBillDetail a
-			 WHERE a.intBillDetailId=bd.intBillDetailId and b.ysnPosted=1),0) AS dblOutQty  
-  FROM tblAPBill b
-  JOIN tblAPBillDetail bd on b.intBillId=bd.intBillId
-  JOIN tblICInventoryReceiptItem ir on bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId
-  JOIN tblICItem i on i.intItemId=ir.intItemId 
-  LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 
- where dtmDate < @dtmFromTransactionDate and  i.intCommodityId= @intCommodityId
- and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end  
- )t)t2
- UNION 
- SELECT  i.strItemNo,CONVERT(VARCHAR(10),dtmTicketDateTime,110) AS dtmDate,
-	    dblGrossUnits AS dblUnpaidIn,
-		0 as dblUnpaidOut,
-		dblGrossUnits as dblUnpaidBalance, NULL InventoryBalanceCarryForward
+from (
+	SELECT dblInQty  dblUnpaidIn,
+	dblOutQty dblUnpaidOut
+	FROM (
+	 SELECT 	CONVERT(VARCHAR(10),b.dtmDate,110) dtmDate, dblUnitCost dblUnitCost1,
+				 ir.intInventoryReceiptItemId ,i.strItemNo,
+				 isnull(bd.dblQtyReceived,0) dblInQty,
+				 ISNULL((SELECT (isnull(b.dblAmountDue,0))/case when isnull(dblUnitCost,0) =0  then 1 else dblUnitCost end FROM tblAPBillDetail a
+				 WHERE a.intBillDetailId=bd.intBillDetailId and b.ysnPosted=1),0) AS dblOutQty
+				 ,strDistributionOption,b.strBillId as strReceiptNumber,b.intBillId as intReceiptId
+  
+	  FROM tblAPBill b
+	  JOIN tblAPBillDetail bd on b.intBillId=bd.intBillId
+	  JOIN tblICInventoryReceiptItem ir on bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId
+	  JOIN tblICItem i on i.intItemId=ir.intItemId 
+	  LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
+	  WHERE dtmDate < @dtmFromTransactionDate and i.intCommodityId= @intCommodityId
+	   and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
+	  )t   
+  
+  )t2
+   union
+ SELECT sum(dblGrossUnits) as dblUnpaidBalance, NULL InventoryBalanceCarryForward
  FROM 
  tblICInventoryReceiptItem ir 
  JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
  JOIN tblICItem i on i.intItemId=ir.intItemId
  JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId AND strDistributionOption IN ('DP')
- WHERE CONVERT(VARCHAR(10),dtmTicketDateTime,110) <= CONVERT(VARCHAR(10),@dtmFromTransactionDate,110)  and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end )t 
+ WHERE CONVERT(VARCHAR(10),dtmTicketDateTime,110) < CONVERT(VARCHAR(10),@dtmFromTransactionDate,110)  and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 
+ )t3
 
 INSERT INTO @tblResult (strItemNo,dtmDate,dblUnpaidIn,dblUnpaidOut,dblUnpaidBalance,strDistributionOption,strReceiptNumber,intReceiptId)
 SELECT strItemNo,dtmDate,dblUnpaidIn,dblUnpaidIn-dblUnpaidOut dblUnpaidOut, dblUnpaidOut dblUnpaidBalance,strDistributionOption,strReceiptNumber,intReceiptId 
