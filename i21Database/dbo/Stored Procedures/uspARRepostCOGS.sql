@@ -1,4 +1,17 @@
-﻿CREATE PROCEDURE uspARRepostCOGS
+﻿/*
+	uspARRepostCOGS
+	Use this stored procedure to correct the COGS and In-Transit values. 
+
+	How to use: 
+	1. Determine the open period. 
+	2. For example:
+		2.1. Closed accounting periods are Jan 201x to September 201x. 
+		2.2. This means October 201x is the next open period. 
+		2.3. Specify 10/01/201x as the argument in @dtmOpenPeriod parameter. 
+*/
+
+CREATE PROCEDURE uspARRepostCOGS
+	@dtmOpenPeriod AS DATETIME 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -7,89 +20,356 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal NUMERIC(18,6)
-		,@LastInvoiceId INT
+-- Create the backup table. 
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'tblICRepostCOGSGLEntriesBackup')
+BEGIN 
+	DROP TABLE tblICRepostCOGSGLEntriesBackup
+END 
 
-SET @ZeroDecimal = 0.000000
-
-DECLARE @Invoice AS TABLE
-([intInvoiceId]					INT
-,[strInvoiceNumber]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS
-,[ysnProcessed]					BIT
-)
-INSERT INTO @Invoice
-([intInvoiceId]
-,[strInvoiceNumber]
-,[ysnProcessed]
-)
-SELECT DISTINCT --TOP 20 
-	 ARI.[intInvoiceId]
-	,ARI.[strInvoiceNumber]
-	,0
-FROM
-	tblARInvoice ARI
-INNER JOIN
-	tblARInvoiceDetail ARID
-		ON ARI.[intInvoiceId] = ARID.[intInvoiceId] 
-WHERE
-	ISNULL(ARID.[intInventoryShipmentItemId],0) <> @ZeroDecimal
-	--AND ARI.[intInvoiceId] > @LastInvoiceId
-	--AND strInvoiceNumber = 'SI-10325'
-ORDER BY
-	ARI.[intInvoiceId]
-	
-	
-SELECT TOP 1 [intInvoiceId] FROM @Invoice ORDER BY [intInvoiceId] DESC
-	
-WHILE EXISTS (SELECT NULL FROM @Invoice)
-BEGIN
-	DECLARE @InvoiceId INT
-			,@InvoiceNumber NVARCHAR(25)
-			
-	SELECT TOP 1
-		 @InvoiceId		= [intInvoiceId]
-		,@InvoiceNumber	= [strInvoiceNumber]
-	FROM
-		@Invoice
-	ORDER BY
-		[intInvoiceId]
-		
-		
-	--Update GL Entries	- Debit(COGS)	
-	DECLARE @GLDebit AS TABLE
-	([intGLDetailId]	INT NULL
-	,[dblDebit]			NUMERIC(18, 6) NULL
-	,[ysnProcessed]		BIT NULL
-	,[strBatchId]		NVARCHAR(20) NULL
-	,[dtmDate]			DATETIME NULL
-	,[intAccountId]		INT NULL
-	,[strDescription]	NVARCHAR(255) NULL
-	,[strReference]		NVARCHAR(255) NULL
-	,[intCurrencyId]	INT NULL
-	,[dblExchangeRate]	NUMERIC(38, 20) NULL
-	,[dtmDateEntered]	DATETIME NULL
-	,[dtmTransactionDate]	DATETIME NULL
-	,[strJournalLineDescription] NVARCHAR(250) NULL
-	,[intJournalLineNo] INT NULL
-	,[intUserId]		INT NULL
-	,[intEntityId]		INT NULL
-	,[strTransactionId] NVARCHAR(40)
-	,[intTransactionId]	INT NULL
-	,[strTransactionType] NVARCHAR(255)
-	,[strTransactionForm] NVARCHAR(255)
-	,[strModuleName]	NVARCHAR(255)
+BEGIN 
+	CREATE TABLE tblICRepostCOGSGLEntriesBackup (
+		[intGLDetailId]		INT 
+		,[dblDebit]			NUMERIC(18, 6) NULL
+		,[strBatchId]		NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+		,[dtmDate]			DATETIME NULL
+		,[intAccountId]		INT NULL
+		,[strDescription]	NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+		,[strReference]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+		,[intCurrencyId]	INT NULL
+		,[dblExchangeRate]	NUMERIC(38, 20) NULL
+		,[dtmDateEntered]	DATETIME NULL
+		,[dtmTransactionDate]	DATETIME NULL
+		,[strJournalLineDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+		,[intJournalLineNo] INT NULL
+		,[intUserId]		INT NULL
+		,[intEntityId]		INT NULL
+		,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,[intTransactionId]	INT NULL
+		,[strTransactionType] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+		,[strTransactionForm] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+		,[strModuleName]	NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+		,CONSTRAINT [PK_tblICRepostCOGSGLEntriesBackup] PRIMARY KEY ([intGLDetailId])
 	)
-	
-	DELETE FROM @GLDebit
-	
-	INSERT INTO @GLDebit
-		([intGLDetailId]
-		,[dblDebit]
-		,[ysnProcessed]
+
+	CREATE NONCLUSTERED INDEX [IX_tblICRepostCOGSGLEntriesBackup_intGLDetailId]
+		ON [dbo].[tblICRepostCOGSGLEntriesBackup]([intGLDetailId] ASC);
+
+	CREATE NONCLUSTERED INDEX [IX_tblICRepostCOGSGLEntriesBackup_strTransactionId]
+		ON [dbo].[tblICRepostCOGSGLEntriesBackup]([strTransactionId] ASC);
+
+	CREATE NONCLUSTERED INDEX [IX_tblICRepostCOGSGLEntriesBackup_intJournalLineNo]
+		ON [dbo].[tblICRepostCOGSGLEntriesBackup]([intJournalLineNo] ASC);
+
+END
+
+-- Backup the GL entries 
+BEGIN 	
+	INSERT INTO tblICRepostCOGSGLEntriesBackup (
+		intGLDetailId
+		,dblDebit
+		,strBatchId
+		,dtmDate
+		,intAccountId
+		,strDescription
+		,strReference
+		,intCurrencyId
+		,dblExchangeRate
+		,dtmDateEntered
+		,dtmTransactionDate
+		,strJournalLineDescription
+		,intJournalLineNo
+		,intUserId
+		,intEntityId
+		,strTransactionId
+		,intTransactionId
+		,strTransactionType
+		,strTransactionForm
+		,strModuleName
+	)
+	-- Backup the GL entries related to COGS. 
+	SELECT 
+		gd.intGLDetailId
+		,gd.dblDebit
+		,gd.strBatchId
+		,gd.dtmDate
+		,gd.intAccountId
+		,gd.strDescription
+		,gd.strReference
+		,gd.intCurrencyId
+		,gd.dblExchangeRate
+		,gd.dtmDateEntered
+		,gd.dtmTransactionDate
+		,gd.strJournalLineDescription
+		,gd.intJournalLineNo
+		,gd.intUserId
+		,gd.intEntityId
+		,gd.strTransactionId
+		,gd.intTransactionId
+		,gd.strTransactionType
+		,gd.strTransactionForm
+		,gd.strModuleName
+	FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
+				ON i.[intInvoiceId] = id.[intInvoiceId] 
+
+			INNER JOIN (
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					AND s.ysnPosted = 1 
+			)
+				ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId 
+		
+			INNER JOIN tblGLDetail gd
+				ON gd.strTransactionId = i.strInvoiceNumber
+					AND gd.intJournalLineNo = id.intInvoiceDetailId
+					AND gd.ysnIsUnposted = 0 	
+					AND gd.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Cost of Goods') 
+	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
+			AND i.ysnPosted = 1
+	-- Backup the GL entries related to Inventory In-Transit. 
+	UNION ALL 
+	SELECT 
+		gd.intGLDetailId
+		,gd.dblDebit
+		,gd.strBatchId
+		,gd.dtmDate
+		,gd.intAccountId
+		,gd.strDescription
+		,gd.strReference
+		,gd.intCurrencyId
+		,gd.dblExchangeRate
+		,gd.dtmDateEntered
+		,gd.dtmTransactionDate
+		,gd.strJournalLineDescription
+		,gd.intJournalLineNo
+		,gd.intUserId
+		,gd.intEntityId
+		,gd.strTransactionId
+		,gd.intTransactionId
+		,gd.strTransactionType
+		,gd.strTransactionForm
+		,gd.strModuleName
+	FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
+				ON i.[intInvoiceId] = id.[intInvoiceId] 
+
+			INNER JOIN (
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					AND s.ysnPosted = 1 
+			)
+				ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId 
+		
+			INNER JOIN tblGLDetail gd
+				ON gd.strTransactionId = i.strInvoiceNumber
+					AND gd.intJournalLineNo = id.intInvoiceDetailId
+					AND gd.ysnIsUnposted = 0 	
+					AND gd.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Inventory In-Transit') 
+	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
+		AND i.ysnPosted = 1
+END 
+
+-- Zero out the debits and credits
+BEGIN 
+
+	-- Zero out the debit and credit of all GL entries related to COGS. 
+	UPDATE	gd
+	SET		dblDebit = 0
+			,dblCredit = 0
+			,dblDebitUnit = 0
+			,dblCreditUnit = 0 
+	FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
+				ON i.[intInvoiceId] = id.[intInvoiceId] 
+
+			INNER JOIN (
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					AND s.ysnPosted = 1 
+			)
+				ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId 
+		
+			INNER JOIN tblGLDetail gd
+				ON gd.strTransactionId = i.strInvoiceNumber
+					AND gd.intJournalLineNo = id.intInvoiceDetailId
+					AND gd.ysnIsUnposted = 0 	
+					AND gd.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Cost of Goods') 
+	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
+			AND i.ysnPosted = 1
+
+	-- Zero out the debit and credit of all GL entries related to Inventory In-Transit. 
+	UPDATE	gd
+	SET		dblDebit = 0
+			,dblCredit = 0
+			,dblDebitUnit = 0
+			,dblCreditUnit = 0 
+	FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
+				ON i.[intInvoiceId] = id.[intInvoiceId] 
+
+			INNER JOIN (
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					AND s.ysnPosted = 1 
+			)
+				ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId 
+		
+			INNER JOIN tblGLDetail gd
+				ON gd.strTransactionId = i.strInvoiceNumber
+					AND gd.intJournalLineNo = id.intInvoiceDetailId
+					AND gd.ysnIsUnposted = 0 	
+					AND gd.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Inventory In-Transit') 
+	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
+			AND i.ysnPosted = 1
+END 
+
+-- Update the GL entries from the closed period. 
+BEGIN 
+	UPDATE	gd
+	SET		dblDebit = Debit.Value 
+			,dblCredit = Credit.Value 
+			,dblDebitUnit = DebitUnit.Value
+			,dblCreditUnit = CreditUnit.Value
+	FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
+				ON i.[intInvoiceId] = id.[intInvoiceId] 
+			INNER JOIN (
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					AND s.ysnPosted = 1 
+			)
+				ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId 
+		
+			CROSS APPLY (
+				SELECT	value = SUM(-ROUND(t.dblQty * t.dblCost + t.dblValue, 2))
+						,unit = SUM(-ROUND(t.dblQty * t.dblUOMQty, 2))
+				FROM	tblICInventoryTransaction t
+				WHERE	t.strTransactionId = s.strShipmentNumber
+						AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+						AND t.ysnIsUnposted = 0 
+						AND 1 = 
+							CASE	
+									-- 1: When shipment date is on the open period and invoice date is greater than the open period. 
+									WHEN	dbo.fnDateEquals(t.dtmDate, @dtmOpenPeriod) = 1
+											AND dbo.fnDateGreaterThanEquals(i.dtmShipDate, @dtmOpenPeriod) = 1 THEN 1
+									
+									-- 2: When invoice date is equal or greater than shipment date. 
+									WHEN	dbo.fnDateGreaterThanEquals(i.dtmShipDate, t.dtmDate) = 1 THEN 1
+
+									-- 3: When shipment date is on the open period and shipment date is less than the open period. 
+									-- There seems to be instances where the invoice is dated earlier than the shipment date. 
+									WHEN	dbo.fnDateLessThan(t.dtmDate, @dtmOpenPeriod) = 1 
+											AND dbo.fnDateLessThan(i.dtmShipDate, @dtmOpenPeriod) = 1 THEN 1
+
+									-- Otherwise: do not include the ic transaction in the query. 
+									ELSE	0
+							END 
+
+			) t
+			CROSS APPLY (
+				SELECT TOP 1 *
+				FROM	tblGLDetail gd
+				WHERE	gd.strTransactionId = i.strInvoiceNumber
+						AND gd.intJournalLineNo = id.intInvoiceDetailId
+						AND gd.ysnIsUnposted = 0 	
+						AND gd.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Cost of Goods') 
+			) tgd
+			INNER JOIN tblGLDetail gd
+				ON gd.intGLDetailId = tgd.intGLDetailId 
+			CROSS APPLY dbo.fnGetDebit(t.value) Debit
+			CROSS APPLY dbo.fnGetCredit(t.value) Credit
+			CROSS APPLY dbo.fnGetDebit(t.unit) DebitUnit
+			CROSS APPLY dbo.fnGetCredit(t.unit) CreditUnit
+	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
+			AND i.ysnPosted = 1
+
+	-- Update the GL amounts for the Inventory Transit 
+	UPDATE	gd
+	SET		dblDebit = Credit.Value 
+			,dblCredit = Debit.Value 
+			,dblDebitUnit = CreditUnit.Value
+			,dblCreditUnit = DebitUnit.Value
+	FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
+				ON i.[intInvoiceId] = id.[intInvoiceId] 
+			INNER JOIN (
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					AND s.ysnPosted = 1 
+			)
+				ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId 
+		
+			CROSS APPLY (
+				SELECT	value = SUM(-ROUND(t.dblQty * t.dblCost + t.dblValue, 2))
+						,unit = SUM(-ROUND(t.dblQty * t.dblUOMQty, 2))
+				FROM	tblICInventoryTransaction t
+				WHERE	t.strTransactionId = s.strShipmentNumber
+						AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+						AND t.ysnIsUnposted = 0 
+						AND 1 = 
+							CASE	
+									-- 1: When shipment date is on the open period and invoice date is greater than the open period. 
+									WHEN	dbo.fnDateEquals(t.dtmDate, @dtmOpenPeriod) = 1
+											AND dbo.fnDateGreaterThanEquals(i.dtmShipDate, @dtmOpenPeriod) = 1 THEN 1
+									
+									-- 2: When invoice date is equal or greater than shipment date. 
+									WHEN	dbo.fnDateGreaterThanEquals(i.dtmShipDate, t.dtmDate) = 1 THEN 1
+
+									-- 3: When shipment date is on the open period and shipment date is less than the open period. 
+									-- There seems to be instances where the invoice is dated earlier than the shipment date. 
+									WHEN	dbo.fnDateLessThan(t.dtmDate, @dtmOpenPeriod) = 1 
+											AND dbo.fnDateLessThan(i.dtmShipDate, @dtmOpenPeriod) = 1 THEN 1
+
+									-- Otherwise: do not include the ic transaction in the query. 
+									ELSE	0
+							END 
+			) t
+			CROSS APPLY (
+				SELECT TOP 1 *
+				FROM	tblGLDetail gd
+				WHERE	gd.strTransactionId = i.strInvoiceNumber
+						AND gd.intJournalLineNo = id.intInvoiceDetailId
+						AND gd.ysnIsUnposted = 0 	
+						AND gd.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Inventory In-Transit')
+			) tgd
+			INNER JOIN tblGLDetail gd
+				ON gd.intGLDetailId = tgd.intGLDetailId 
+			CROSS APPLY dbo.fnGetDebit(t.value) Debit
+			CROSS APPLY dbo.fnGetCredit(t.value) Credit
+			CROSS APPLY dbo.fnGetDebit(t.unit) DebitUnit
+			CROSS APPLY dbo.fnGetCredit(t.unit) CreditUnit
+	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
+			AND i.ysnPosted = 1
+END 
+
+-- Insert new GL entries. Transfer g/l adjustments from the closed period to the open period
+BEGIN 
+	INSERT INTO [tblGLDetail](
+		[dtmDate]
 		,[strBatchId]
-		,[dtmDate]
 		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
 		,[strDescription]
+		,[strCode]
 		,[strReference]
 		,[intCurrencyId]
 		,[dblExchangeRate]
@@ -97,6 +377,7 @@ BEGIN
 		,[dtmTransactionDate]
 		,[strJournalLineDescription]
 		,[intJournalLineNo]
+		,[ysnIsUnposted]
 		,[intUserId]
 		,[intEntityId]
 		,[strTransactionId]
@@ -104,482 +385,210 @@ BEGIN
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		)
-	SELECT --TOP 1
-		 GLD.[intGLDetailId]
-		,GLD.[dblDebit]
-		,0
-		,GLD.[strBatchId]
-		,GLD.[dtmDate]
-		,GLD.[intAccountId]
-		,GLD.[strDescription]
-		,GLD.[strReference]
-		,GLD.[intCurrencyId]
-		,GLD.[dblExchangeRate]
-		,GLD.[dtmDateEntered]
-		,GLD.[dtmTransactionDate]
-		,GLD.[strJournalLineDescription]
-		,GLD.[intJournalLineNo]
-		,GLD.[intUserId]
-		,GLD.[intEntityId]
-		,GLD.[strTransactionId]
-		,GLD.[intTransactionId]
-		,GLD.[strTransactionType]
-		,GLD.[strTransactionForm]
-		,GLD.[strModuleName]
-	FROM
-		tblGLDetail GLD
-	INNER JOIN
-		vyuGLAccountDetail GLAD
-			ON GLD.[intAccountId] = GLAD.[intAccountId]
-			AND GLAD.[strAccountCategory] = 'Cost of Goods'
-	WHERE
-		GLD.[ysnIsUnposted] = 0	
-		AND GLD.[strTransactionId] = @InvoiceNumber
-		AND GLD.[intTransactionId] = @InvoiceId	
-	ORDER BY
-		GLD.[intGLDetailId]			
-		
-	IF @@ERROR <> 0 GOTO GOTO_ERROR
-			
-	IF EXISTS (SELECT TOP 1 1 FROM @GLDebit)
-	BEGIN 
-
-		DECLARE @GLDebitEntries AS TABLE
-		([intInvoiceDetailId]	INT
-		,[intInvoiceId]			INT
-		,[strInvoiceNumber]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS
-		,[intAccountId]			INT
-		,[dblDebit]				NUMERIC(18, 6)
-		,[dblDebitUnit]			NUMERIC(18, 6)
-		,[strDescription]		NVARCHAR(500) COLLATE Latin1_General_CI_AS
-		,[strItemDescription]	NVARCHAR(500) COLLATE Latin1_General_CI_AS
-		,[ysnProcessed]			BIT
-		,[intInventoryShipmentItemId]			INT
-		)
-	
-		DELETE FROM @GLDebitEntries
-	
-		INSERT INTO @GLDebitEntries
-		([intInvoiceDetailId]
-		,[intInvoiceId]
-		,[strInvoiceNumber]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblDebitUnit]
-		,[strDescription]
-		,[strItemDescription]
-		,[ysnProcessed]
-		,[intInventoryShipmentItemId]
-		)
-		SELECT     
-			 ARID.[intInvoiceDetailId]
-			,ARI.[intInvoiceId]
-			,ARI.[strInvoiceNumber]
-			,[dbo].[fnGetItemGLAccount](ARID.[intItemId], ICGIS.[intItemLocationId], 'Cost of Goods') -- IST.[intCOGSAccountId]  
-			,CASE WHEN ARI.[strTransactionType] = 'Invoice' THEN (ABS(ICT.[dblQty]) * ICT.[dblCost]) ELSE 0 END  
-			,CASE WHEN ARI.[strTransactionType] = 'Invoice' THEN (ABS(ICT.[dblQty]) * ICT.[dblUOMQty]) ELSE 0 END  
-			,ARI.[strComments]
-			,ARID.[strItemDescription]
-			,0
-			,ISD.[intInventoryShipmentItemId]
-		FROM
-			tblICInventoryTransaction ICT  
-		INNER JOIN  
-			tblICInventoryShipmentItem ISD  
-				ON ISD.[intInventoryShipmentItemId] = ICT.[intTransactionDetailId]  	
-		INNER JOIN  
-			tblICInventoryShipment ISH  
-				ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]  
-				AND ISH.[intInventoryShipmentId] = ICT.[intTransactionId] 
-				AND ISH.[strShipmentNumber] = ICT.[strTransactionId]  
-		INNER JOIN
-			tblARInvoiceDetail ARID  
-			ON ARID.[intInventoryShipmentItemId] = ISD.[intInventoryShipmentItemId] 
-		INNER JOIN     
-			tblARInvoice ARI   
-				ON ARID.[intInvoiceId] = ARI.[intInvoiceId]  
-				AND ISNULL(ARI.[intPeriodsToAccrue],0) <= 1  
-		INNER JOIN  
-			tblICItemUOM ItemUOM   
-				ON ItemUOM.[intItemUOMId] = ARID.[intItemUOMId]
-		LEFT OUTER JOIN
-			vyuICGetItemStock ICGIS
-					ON ARID.[intItemId] = ICGIS.[intItemId]
-					AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId]
-		WHERE  
-			ARID.[dblTotal] <> @ZeroDecimal  
-			AND ARID.[intInventoryShipmentItemId] IS NOT NULL AND ARID.[intInventoryShipmentItemId] <> 0  
-			AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0  
-			AND ARI.[strType] <> 'Debit Memo' 
-			AND ARI.[intInvoiceId] = @InvoiceId
-			AND ISNULL(ICT.[ysnIsUnposted],0) = 0		
-		
-		DELETE FROM tblGLDetail
-		WHERE
-			[ysnIsUnposted] = 0
-			AND [intGLDetailId] IN (SELECT [intGLDetailId] FROM @GLDebit)
-			AND [strTransactionId] = @InvoiceNumber
-			AND [intTransactionId] = @InvoiceId
-		
-		
-		IF @@ERROR <> 0 GOTO GOTO_ERROR				
-			
-		INSERT INTO [tblGLDetail]
-			   ([dtmDate]
-			   ,[strBatchId]
-			   ,[intAccountId]
-			   ,[dblDebit]
-			   ,[dblCredit]
-			   ,[dblDebitUnit]
-			   ,[dblCreditUnit]
-			   ,[strDescription]
-			   ,[strCode]
-			   ,[strReference]
-			   ,[intCurrencyId]
-			   ,[dblExchangeRate]
-			   ,[dtmDateEntered]
-			   ,[dtmTransactionDate]
-			   ,[strJournalLineDescription]
-			   ,[intJournalLineNo]
-			   ,[ysnIsUnposted]
-			   ,[intUserId]
-			   ,[intEntityId]
-			   ,[strTransactionId]
-			   ,[intTransactionId]
-			   ,[strTransactionType]
-			   ,[strTransactionForm]
-			   ,[strModuleName]
-			   ,[intConcurrencyId]
-			   ,[dblDebitForeign]
-			   ,[dblDebitReport]
-			   ,[dblCreditForeign]
-			   ,[dblCreditReport]
-			   ,[dblReportingRate]
-			   ,[dblForeignRate])
-		 SELECT
-				(SELECT TOP 1 GLD.[dtmDate] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[strBatchId] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,GLDE.[intAccountId] --(SELECT TOP 1 GLD.[intAccountId] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId]) 
-			   ,ROUND(GLDE.[dblDebit],2)
-			   ,@ZeroDecimal
-			   ,ROUND(GLDE.[dblDebitUnit],2)
-			   ,@ZeroDecimal
-			   ,GLDE.[strDescription]
-			   ,'AR'
-			   ,(SELECT TOP 1 GLD.[strReference] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId]) 
-			   ,(SELECT TOP 1 GLD.[intCurrencyId] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[dblExchangeRate] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[dtmDateEntered] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[dtmTransactionDate] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 [strItemDescription] FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.[intInvoiceDetailId] = GLDE.[intInvoiceDetailId])
-			   ,(SELECT TOP 1 [intInvoiceDetailId] FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.[intInvoiceDetailId] = GLDE.[intInvoiceDetailId])
-			   ,0
-			   ,(SELECT TOP 1 GLD.[intUserId] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[intEntityId] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[strTransactionId] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[intTransactionId] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[strTransactionType] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[strTransactionForm] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLD.[strModuleName] FROM @GLDebit GLD WHERE GLD.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,1
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-		FROM
-			@GLDebitEntries GLDE			
-		WHERE
-			GLDE.[strInvoiceNumber] = @InvoiceNumber
-			AND GLDE.[intInvoiceId] = @InvoiceId									
-
-		IF @@ERROR <> 0 GOTO GOTO_ERROR	
-	
-	
-	
-		------------------------------------------------------------------------------------------------------	
-		
-		--Update GL Entries	- Credit	
-		DECLARE @GLCredit AS TABLE
-		([intGLDetailId]	INT
-		,[dblCredit]		NUMERIC(18, 6)
-		,[ysnProcessed]		BIT
-		,[strBatchId]		NVARCHAR(20) NULL
-		,[dtmDate]			DATETIME NULL
-		,[intAccountId]		INT NULL
-		,[strDescription]	NVARCHAR(255) NULL
-		,[strReference]		NVARCHAR(255) NULL
-		,[intCurrencyId]	INT NULL
-		,[dblExchangeRate]	NUMERIC(38, 20) NULL
-		,[dtmDateEntered]	DATETIME NULL
-		,[dtmTransactionDate]	DATETIME NULL
-		,[strJournalLineDescription] NVARCHAR(250) NULL
-		,[intJournalLineNo] INT NULL
-		,[intUserId]		INT NULL
-		,[intEntityId]		INT NULL
-		,[strTransactionId] NVARCHAR(40)
-		,[intTransactionId]	INT NULL
-		,[strTransactionType] NVARCHAR(255)
-		,[strTransactionForm] NVARCHAR(255)
-		,[strModuleName]	NVARCHAR(255)
-		)
-	
-		DELETE FROM @GLCredit
-	
-		INSERT INTO @GLCredit
-			([intGLDetailId]
-			,[dblCredit]
-			,[ysnProcessed]
-			,[strBatchId]
-			,[dtmDate]
-			,[intAccountId]
-			,[strDescription]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]
+	)
+	-- GL entries for COGS
+	SELECT	
+			[dtmDate] = @dtmOpenPeriod
+			,[strBatchId]	= gd_backup.strBatchId
+			,[intAccountId]	= gd_backup.intAccountId
+			,[dblDebit]		= Debit.Value
+			,[dblCredit]	= Credit.Value
+			,[dblDebitUnit]	= DebitUnit.Value
+			,[dblCreditUnit]	= CreditUnit.Value
+			,[strDescription]	= gd_backup.strDescription
+			,[strCode]			= 'AR'
+			,[strReference]		= gd_backup.strReference
+			,[intCurrencyId]	= gd_backup.intCurrencyId
+			,[dblExchangeRate]	= gd_backup.dblExchangeRate
+			,[dtmDateEntered]	= GETDATE()
+			,[dtmTransactionDate]	= gd_backup.dtmTransactionDate
+			,[strJournalLineDescription]	= gd_backup.strJournalLineDescription
+			,[intJournalLineNo]	= gd_backup.intJournalLineNo
+			,[ysnIsUnposted]	= 0 
+			,[intUserId]		= gd_backup.intUserId
+			,[intEntityId]		= gd_backup.intEntityId
+			,[strTransactionId]	= gd_backup.strTransactionId
+			,[intTransactionId]	= gd_backup.intTransactionId
+			,[strTransactionType] = gd_backup.strTransactionType
+			,[strTransactionForm]	= gd_backup.strTransactionForm
+			,[strModuleName]		= gd_backup.strModuleName
+			,[intConcurrencyId]		= 1
+			,[dblDebitForeign]		= 0.00
+			,[dblDebitReport]		= 0.00
+			,[dblCreditForeign]		= 0.00
+			,[dblCreditReport]		= 0.00
+			,[dblReportingRate]		= 0.00
+			,[dblForeignRate]		= 0.00
+	FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
+				ON i.[intInvoiceId] = id.[intInvoiceId] 
+			INNER JOIN (
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					AND s.ysnPosted = 1 
 			)
-		SELECT --TOP 1
-			 GLD.[intGLDetailId]
-			,GLD.[dblCredit]
-			,0
-			,GLD.[strBatchId]
-			,GLD.[dtmDate]
-			,GLD.[intAccountId]
-			,GLD.[strDescription]
-			,GLD.[strReference]
-			,GLD.[intCurrencyId]
-			,GLD.[dblExchangeRate]
-			,GLD.[dtmDateEntered]
-			,GLD.[dtmTransactionDate]
-			,GLD.[strJournalLineDescription]
-			,GLD.[intJournalLineNo]
-			,GLD.[intUserId]
-			,GLD.[intEntityId]
-			,GLD.[strTransactionId]
-			,GLD.[intTransactionId]
-			,GLD.[strTransactionType]
-			,GLD.[strTransactionForm]
-			,GLD.[strModuleName]
-		FROM
-			tblGLDetail GLD
-		INNER JOIN
-			vyuGLAccountDetail GLAD
-				ON GLD.[intAccountId] = GLAD.[intAccountId]
-				AND GLAD.[strAccountCategory] = 'Inventory In-Transit'
-		WHERE
-			GLD.[ysnIsUnposted] = 0
-			AND GLD.[strTransactionId] = @InvoiceNumber
-			AND GLD.[intTransactionId] = @InvoiceId	
-		ORDER BY
-			GLD.[intGLDetailId]
+				ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId 
 		
-		IF @@ERROR <> 0 GOTO GOTO_ERROR				
-		
-		DECLARE @GLCreditEntries AS TABLE
-		([intInvoiceDetailId]	INT
-		,[intInvoiceId]			INT
-		,[strInvoiceNumber]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS
-		,[intAccountId]			INT
-		,[dblCredit]			NUMERIC(18, 6)
-		,[dblCreditUnit]		NUMERIC(18, 6)
-		,[strDescription]		NVARCHAR(500) COLLATE Latin1_General_CI_AS
-		,[strItemDescription]	NVARCHAR(500) COLLATE Latin1_General_CI_AS
-		,[ysnProcessed]			BIT
-		)
-	
-		DELETE FROM  @GLCreditEntries
-	
-		INSERT INTO @GLCreditEntries
-		([intInvoiceDetailId]
-		,[intInvoiceId]
-		,[strInvoiceNumber]
-		,[intAccountId]
-		,[dblCredit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[strItemDescription]
-		,[ysnProcessed]
-		)
-		SELECT     
-			 ARID.[intInvoiceDetailId]
-			,ARI.[intInvoiceId]  
-			,ARI.[strInvoiceNumber]  
-			,[dbo].[fnGetItemGLAccount](ARID.[intItemId], ICGIS.[intItemLocationId], 'Inventory In-Transit') -- IST.[intInventoryInTransitAccountId]  
-			,CASE WHEN ARI.[strTransactionType] = 'Invoice' THEN (ABS(ICT.[dblQty]) * ICT.[dblCost]) ELSE 0 END  
-			,CASE WHEN ARI.[strTransactionType] = 'Invoice' THEN (ABS(ICT.[dblQty]) * ICT.[dblUOMQty]) ELSE 0 END  
-			,ARI.[strComments]
-			,ARID.[strItemDescription]
-			,0
-		FROM 
-			tblICInventoryTransaction ICT  
-		INNER JOIN  
-			tblICInventoryShipmentItem ISD  
-				ON ISD.[intInventoryShipmentItemId] = ICT.[intTransactionDetailId]  	
-		INNER JOIN  
-			tblICInventoryShipment ISH  
-				ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId] 
-				AND ISH.[intInventoryShipmentId] = ICT.[intTransactionId] 
-				AND ISH.[strShipmentNumber] = ICT.[strTransactionId]  
-		INNER JOIN						
-			tblARInvoiceDetail ARID  
-				ON ARID.[intInventoryShipmentItemId] = ISD.[intInventoryShipmentItemId]
-		INNER JOIN     
-			tblARInvoice ARI   
-				ON ARID.[intInvoiceId] = ARI.[intInvoiceId]  
-				AND ISNULL(ARI.[intPeriodsToAccrue],0) <= 1  
-		INNER JOIN  
-			tblICItemUOM ItemUOM   
-				ON ItemUOM.[intItemUOMId] = ARID.[intItemUOMId]
-		LEFT OUTER JOIN
-			vyuICGetItemStock ICGIS
-					ON ARID.[intItemId] = ICGIS.[intItemId]
-					AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId]			              
-		WHERE  
-			ARID.[dblTotal] <> @ZeroDecimal  
-			AND ARID.[intInventoryShipmentItemId] IS NOT NULL AND ARID.[intInventoryShipmentItemId] <> 0  
-			AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0  
-			AND ARI.[strType] <> 'Debit Memo' 
-			AND ARI.[intInvoiceId] = @InvoiceId 
-			AND ISNULL(ICT.[ysnIsUnposted],0) = 0
-		
-		IF @@ERROR <> 0 GOTO GOTO_ERROR	
-		
-		
-		DELETE FROM tblGLDetail
-		WHERE
-			[ysnIsUnposted] = 0
-			AND [intGLDetailId] IN (SELECT [intGLDetailId] FROM @GLCredit)
-			AND [strTransactionId] = @InvoiceNumber
-			AND [intTransactionId] = @InvoiceId
-		
-		
-		IF @@ERROR <> 0 GOTO GOTO_ERROR				
-			
-		INSERT INTO [tblGLDetail]
-			   ([dtmDate]
-			   ,[strBatchId]
-			   ,[intAccountId]
-			   ,[dblDebit]
-			   ,[dblCredit]
-			   ,[dblDebitUnit]
-			   ,[dblCreditUnit]
-			   ,[strDescription]
-			   ,[strCode]
-			   ,[strReference]
-			   ,[intCurrencyId]
-			   ,[dblExchangeRate]
-			   ,[dtmDateEntered]
-			   ,[dtmTransactionDate]
-			   ,[strJournalLineDescription]
-			   ,[intJournalLineNo]
-			   ,[ysnIsUnposted]
-			   ,[intUserId]
-			   ,[intEntityId]
-			   ,[strTransactionId]
-			   ,[intTransactionId]
-			   ,[strTransactionType]
-			   ,[strTransactionForm]
-			   ,[strModuleName]
-			   ,[intConcurrencyId]
-			   ,[dblDebitForeign]
-			   ,[dblDebitReport]
-			   ,[dblCreditForeign]
-			   ,[dblCreditReport]
-			   ,[dblReportingRate]
-			   ,[dblForeignRate])
-		 SELECT
-				(SELECT TOP 1 GLC.[dtmDate] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[strBatchId] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,GLDE.[intAccountId] --(SELECT TOP 1 GLC.[intAccountId]  FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,@ZeroDecimal
-			   ,ROUND(GLDE.[dblCredit],2)
-			   ,@ZeroDecimal
-			   ,ROUND(GLDE.[dblCreditUnit],2)
-			   ,GLDE.[strDescription]
-			   ,'AR'
-			   ,(SELECT TOP 1 GLC.[strReference] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[intCurrencyId] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[dblExchangeRate] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[dtmDateEntered] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[dtmTransactionDate] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 [strItemDescription] FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.[intInvoiceDetailId] = GLDE.[intInvoiceDetailId])
-			   ,(SELECT TOP 1 [intInvoiceDetailId] FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.[intInvoiceDetailId] = GLDE.[intInvoiceDetailId])
-			   ,0
-			   ,(SELECT TOP 1 GLC.[intUserId] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[intEntityId] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[strTransactionId] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[intTransactionId] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[strTransactionType] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[strTransactionForm] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,(SELECT TOP 1 GLC.[strModuleName] FROM @GLCredit GLC WHERE GLC.[intTransactionId] = GLDE.[intInvoiceId])
-			   ,1
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-			   ,@ZeroDecimal
-		FROM
-			@GLCreditEntries GLDE
-		WHERE
-			GLDE.[strInvoiceNumber] = @InvoiceNumber
-			AND GLDE.[intInvoiceId] = @InvoiceId
-						 	
-							
+			CROSS APPLY (
+				-- Get the valuation from the open period. 
+				SELECT	value = SUM(-ROUND(t.dblQty * t.dblCost + t.dblValue, 2))
+						,unit = SUM(-ROUND(t.dblQty * t.dblUOMQty, 2))
+				FROM	tblICInventoryTransaction t
+				WHERE	t.strTransactionId = s.strShipmentNumber
+						AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+						AND t.ysnIsUnposted = 0 
+						AND dbo.fnDateEquals(t.dtmDate, @dtmOpenPeriod) = 1
+			) t
+			CROSS APPLY (
+				-- Get the backup and use as template to generate a new gl detail record.
+				SELECT	TOP 1 *
+				FROM	tblICRepostCOGSGLEntriesBackup gd_backup
+				WHERE	gd_backup.strTransactionId = i.strInvoiceNumber
+						AND gd_backup.intJournalLineNo = id.intInvoiceDetailId
+						AND gd_backup.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Cost of Goods') 
+			) gd_backup
 
-		IF @@ERROR <> 0 GOTO GOTO_ERROR			
+			CROSS APPLY dbo.fnGetDebit(t.value) Debit
+			CROSS APPLY dbo.fnGetCredit(t.value) Credit
+			CROSS APPLY dbo.fnGetDebit(t.unit) DebitUnit
+			CROSS APPLY dbo.fnGetCredit(t.unit) CreditUnit
+			OUTER APPLY (
+				SELECT	TOP 1 *
+				FROM	tblGLDetail tgd
+				WHERE	tgd.strTransactionId = i.strInvoiceNumber
+						AND tgd.intJournalLineNo = id.intInvoiceDetailId
+						AND tgd.ysnIsUnposted = 0 	
+						AND tgd.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Cost of Goods') 
+						AND dbo.fnDateEquals(tgd.dtmDate, @dtmOpenPeriod) = 1 
+			) tgd
 
-	END 
+	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
+			AND i.ysnPosted = 1
+			AND tgd.intGLDetailId IS NULL -- Insert it if there is no g/l entry for it. 
+			AND t.value IS NOT NULL 
+
+	-- GL entries for Inventory In-Transit
+	UNION ALL 
+	SELECT	
+			[dtmDate]		= @dtmOpenPeriod
+			,[strBatchId]	= gd_backup.strBatchId
+			,[intAccountId]	= gd_backup.intAccountId
+			,[dblDebit]		= Credit.Value
+			,[dblCredit]	= Debit.Value
+			,[dblDebitUnit]	= CreditUnit.Value
+			,[dblCreditUnit]	= DebitUnit.Value
+			,[strDescription]	= gd_backup.strDescription
+			,[strCode]			= 'AR'
+			,[strReference]		= gd_backup.strReference
+			,[intCurrencyId]	= gd_backup.intCurrencyId
+			,[dblExchangeRate]	= gd_backup.dblExchangeRate
+			,[dtmDateEntered]	= GETDATE()
+			,[dtmTransactionDate]	= gd_backup.dtmTransactionDate
+			,[strJournalLineDescription]	= gd_backup.strJournalLineDescription
+			,[intJournalLineNo]	= gd_backup.intJournalLineNo
+			,[ysnIsUnposted]	= 0 
+			,[intUserId]		= gd_backup.intUserId
+			,[intEntityId]		= gd_backup.intEntityId
+			,[strTransactionId]	= gd_backup.strTransactionId
+			,[intTransactionId]	= gd_backup.intTransactionId
+			,[strTransactionType] = gd_backup.strTransactionType
+			,[strTransactionForm]	= gd_backup.strTransactionForm
+			,[strModuleName]		= gd_backup.strModuleName
+			,[intConcurrencyId]		= 1
+			,[dblDebitForeign]		= 0.00
+			,[dblDebitReport]		= 0.00
+			,[dblCreditForeign]		= 0.00
+			,[dblCreditReport]		= 0.00
+			,[dblReportingRate]		= 0.00
+			,[dblForeignRate]		= 0.00
+	FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
+				ON i.[intInvoiceId] = id.[intInvoiceId] 
+			INNER JOIN (
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					AND s.ysnPosted = 1 
+			)
+				ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId 
 		
-	--UPDATE @Invoice SET [ysnProcessed] = 1 WHERE [intInvoiceId] = @InvoiceId AND [strInvoiceNumber] = @InvoiceNumber
-	DELETE FROM @Invoice WHERE [intInvoiceId] = @InvoiceId AND [strInvoiceNumber] = @InvoiceNumber
-END
- 
+			CROSS APPLY (
+				-- Get the valuation from the open period. 
+				SELECT	value = SUM(-ROUND(t.dblQty * t.dblCost + t.dblValue, 2))
+						,unit = SUM(-ROUND(t.dblQty * t.dblUOMQty, 2))
+				FROM	tblICInventoryTransaction t
+				WHERE	t.strTransactionId = s.strShipmentNumber
+						AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+						AND t.ysnIsUnposted = 0 
+						AND dbo.fnDateEquals(t.dtmDate, @dtmOpenPeriod) = 1
 
+			) t
+			CROSS APPLY (
+				-- Get the backup and use as template to generate a new gl detail record.
+				SELECT	TOP 1 *
+				FROM	tblICRepostCOGSGLEntriesBackup gd_backup
+				WHERE	gd_backup.strTransactionId = i.strInvoiceNumber
+						AND gd_backup.intJournalLineNo = id.intInvoiceDetailId
+						AND gd_backup.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Inventory In-Transit') 
+			) gd_backup
+
+			CROSS APPLY dbo.fnGetDebit(t.value) Debit
+			CROSS APPLY dbo.fnGetCredit(t.value) Credit
+			CROSS APPLY dbo.fnGetDebit(t.unit) DebitUnit
+			CROSS APPLY dbo.fnGetCredit(t.unit) CreditUnit
+			OUTER APPLY (
+				SELECT	TOP 1 *
+				FROM	tblGLDetail tgd
+				WHERE	tgd.strTransactionId = i.strInvoiceNumber
+						AND tgd.intJournalLineNo = id.intInvoiceDetailId
+						AND tgd.ysnIsUnposted = 0 	
+						AND tgd.intAccountId = dbo.fnGetItemGLAccount(si.intItemId, il.intItemLocationId, 'Inventory In-Transit') 
+						AND dbo.fnDateEquals(tgd.dtmDate, @dtmOpenPeriod) = 1 
+			) tgd
+
+	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
+			AND i.ysnPosted = 1
+			AND tgd.intGLDetailId IS NULL -- Insert it if there is no g/l entry for it. 
+			AND t.value IS NOT NULL 
+
+END 
+
+-- Delete the old GL Entries 
+-- Those backup records that is still zero in debit and credit can be deleted. 
 BEGIN 
- DELETE [dbo].[tblGLSummary]
+	DELETE	gd 
+	FROM	tblGLDetail gd INNER JOIN tblICRepostCOGSGLEntriesBackup gdBackup
+				ON gd.intGLDetailId = gdBackup.intGLDetailId
+	WHERE	gd.dblDebit = 0 
+			AND gd.dblCredit = 0 
+END 
 
- INSERT INTO tblGLSummary(
-  intAccountId
- ,dtmDate 
- ,dblDebit 
- ,dblCredit
- ,dblDebitUnit 
- ,dblCreditUnit 
- ,strCode 
- ,intConcurrencyId 
- )
- SELECT
-   intAccountId
-   ,dtmDate
-   ,SUM(ISNULL(dblDebit,0)) as dblDebit
-   ,SUM(ISNULL(dblCredit,0)) as dblCredit
-   ,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
-   ,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
-   ,strCode
-   ,0 as intConcurrencyId
- FROM
-  tblGLDetail
- WHERE ysnIsUnposted = 0 
- GROUP BY intAccountId, dtmDate, strCode
+-- Rebuild the G/L Summary 
+BEGIN 
+	DELETE [dbo].[tblGLSummary]
+
+	INSERT INTO tblGLSummary
+	SELECT
+			intAccountId
+			,dtmDate
+			,SUM(ISNULL(dblDebit,0)) as dblDebit
+			,SUM(ISNULL(dblCredit,0)) as dblCredit
+			,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
+			,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
+			,strCode
+			,0 as intConcurrencyId
+	FROM
+		tblGLDetail
+	WHERE ysnIsUnposted = 0	
+	GROUP BY intAccountId, dtmDate, strCode
 END
-
-GOTO GOTO_EXIT
-
-GOTO_ERROR:
-SELECT [@InvoiceNumber] = @InvoiceNumber, [@InvoiceId] = @InvoiceId
-
-GOTO_EXIT:
