@@ -30,7 +30,7 @@ FROM (
 		, intCommodityId			= intPCommodityId
 		, intContainerId			= intLoadContainerId
 		, strContainer				= strContainerNumber
-		, intSubLocationId			= LogisticsView.intSubLocationId
+		, intSubLocationId			= intSubLocationId
 		, strSubLocationName		= strSubLocationName
 		, intStorageLocationId		= CAST(NULL AS INT) 
 		, strStorageLocationName	= CAST(NULL AS NVARCHAR(50)) 
@@ -62,7 +62,6 @@ FROM (
 		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
-		, intPaymentOn				= ItemLocation.intPaymentOn
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 
@@ -77,8 +76,6 @@ FROM (
 				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intPCostUOMId)
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure 
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-			LEFT JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intItemId = LogisticsView.intItemId AND ItemLocation.intLocationId = LogisticsView.intCompanyLocationId
 	WHERE LogisticsView.dblBalanceToReceive > 0 
 		  AND LogisticsView.intSourceType = 2 
 		  AND LogisticsView.intTransUsedBy = 1 
