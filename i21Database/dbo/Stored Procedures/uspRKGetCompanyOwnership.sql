@@ -43,7 +43,7 @@ from (
 	  FROM tblAPBill b
 	  JOIN tblAPBillDetail bd on b.intBillId=bd.intBillId
 	  JOIN tblICInventoryReceiptItem ir on bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId
-	  JOIN tblICItem i on i.intItemId=ir.intItemId 
+	  JOIN tblICItem i on i.intItemId=bd.intItemId 
 	  LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
 	  WHERE dtmDate < @dtmFromTransactionDate and i.intCommodityId= @intCommodityId
 	   and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
@@ -78,7 +78,7 @@ FROM (
   FROM tblAPBill b
   JOIN tblAPBillDetail bd on b.intBillId=bd.intBillId
   JOIN tblICInventoryReceiptItem ir on bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId
-  JOIN tblICItem i on i.intItemId=ir.intItemId 
+  JOIN tblICItem i on i.intItemId=bd.intItemId 
   LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
   WHERE dtmDate BETWEEN @dtmFromTransactionDate and @dtmToTransactionDate and i.intCommodityId= @intCommodityId
    and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
