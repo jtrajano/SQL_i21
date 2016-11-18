@@ -1,17 +1,18 @@
 ﻿CREATE FUNCTION [dbo].[fnGetCustomerTaxCodeExemption]
 ( 
-	 @CustomerId			INT
-	,@TransactionDate		DATETIME
-	,@TaxGroupId			INT
-	,@TaxCodeId				INT
-	,@TaxClassId			INT
-	,@TaxState				NVARCHAR(100)
-	,@ItemId				INT
-	,@ItemCategoryId		INT
-	,@ShipToLocationId		INT
-	,@IsCustomerSiteTaxable	BIT
-	,@CardId				INT
-	,@VehicleId				INT
+	 @CustomerId				INT
+	,@TransactionDate			DATETIME
+	,@TaxGroupId				INT
+	,@TaxCodeId					INT
+	,@TaxClassId				INT
+	,@TaxState					NVARCHAR(100)
+	,@ItemId					INT
+	,@ItemCategoryId			INT
+	,@ShipToLocationId			INT
+	,@IsCustomerSiteTaxable		BIT
+	,@CardId					INT
+	,@VehicleId					INT
+	,@DisregardExemptionSetup	BIT
 )
 --RETURNS NVARCHAR(500)
 RETURNS @returntable TABLE
@@ -32,11 +33,12 @@ BEGIN
 	SET @ExemptionPercent = 0.00000
 	SET @TaxExempt = 0
 	SET @InvalidSetup = 0
+	SET @DisregardExemptionSetup = ISNULL(@DisregardExemptionSetup, 0)
 
 	IF @IsCustomerSiteTaxable IS NULL
 		BEGIN
 			--Customer
-			IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
+			IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1) AND @DisregardExemptionSetup <> 1
 				SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
 			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
@@ -55,7 +57,7 @@ BEGIN
 	IF @IsCustomerSiteTaxable IS NOT NULL
 		BEGIN
 			--Customer
-			IF ISNULL(@IsCustomerSiteTaxable,0) = 0
+			IF ISNULL(@IsCustomerSiteTaxable,0) = 0 AND @DisregardExemptionSetup <> 1
 				SET @TaxCodeExemption = 'Customer Site is non taxable; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
 			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
@@ -88,6 +90,7 @@ BEGIN
 		SMTGCE.intCategoryId = @ItemCategoryId
 		AND SMTGC.[intTaxCodeId] = @TaxCodeId
 		AND SMTGC.[intTaxGroupId] = @TaxGroupId
+		AND @DisregardExemptionSetup <> 1
 
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
@@ -176,6 +179,7 @@ BEGIN
 			ON TE.[intVehicleId] = CFV.[intVehicleId] 
 	WHERE
 		TE.[intEntityCustomerId] = @CustomerId
+		AND @DisregardExemptionSetup <> 1
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(TE.[dtmStartDate], @TransactionDate) AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 		AND (ISNULL(TE.[intEntityCustomerLocationId], 0) = 0 OR TE.[intEntityCustomerLocationId] = @ShipToLocationId)
 		AND (ISNULL(TE.[intItemId], 0) = 0 OR TE.[intItemId] = @ItemId)

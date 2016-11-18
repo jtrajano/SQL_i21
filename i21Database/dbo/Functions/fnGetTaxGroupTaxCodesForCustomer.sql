@@ -1,14 +1,15 @@
 ﻿CREATE FUNCTION [dbo].[fnGetTaxGroupTaxCodesForCustomer]
 (
-	 @TaxGroupId			INT
-	,@CustomerId			INT
-	,@TransactionDate		DATETIME
-	,@ItemId				INT
-	,@ShipToLocationId		INT
-	,@IncludeExemptedCodes	BIT
-	,@IsCustomerSiteTaxable	BIT
-	,@CardId				INT
-	,@VehicleId				INT
+	 @TaxGroupId				INT
+	,@CustomerId				INT
+	,@TransactionDate			DATETIME
+	,@ItemId					INT
+	,@ShipToLocationId			INT
+	,@IncludeExemptedCodes		BIT
+	,@IsCustomerSiteTaxable		BIT
+	,@CardId					INT
+	,@VehicleId					INT
+	,@DisregardExemptionSetup	BIT
 )
 RETURNS @returntable TABLE
 (
@@ -91,7 +92,7 @@ BEGIN
 		tblSMTaxGroup TG
 			ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 	CROSS APPLY
-		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@CustomerId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable, @CardId, @VehicleId) E
+		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@CustomerId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup) E
 	CROSS APPLY
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R			
 	WHERE
