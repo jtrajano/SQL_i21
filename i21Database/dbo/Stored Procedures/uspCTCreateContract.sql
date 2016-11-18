@@ -145,7 +145,7 @@ BEGIN TRY
 			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
 			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId
 		)
-		SELECT	DISTINCT			intContractTypeId	=	CASE WHEN CI.strContractType = 'B' THEN 1 ELSE 2 END,
+		SELECT	DISTINCT			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 				intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmStartDate,
 				intCommodityId		=	CM.intCommodityId,		intCommodityUOMId			=	CU.intCommodityUnitMeasureId,
 				dblHeaderQuantity	=	CI.dblQuantity,			intSalespersonId			=	SY.intEntityId,	
@@ -192,18 +192,13 @@ BEGIN TRY
 		JOIN	tblCTPosition				PN	ON	PN.strPosition		=	CI.strPosition			LEFT
 		JOIN	tblRKFutureMarket			MA	ON	MA.strFutMarketName	=	CI.strFutMarketName		LEFT
 		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMarketId=	MA.intFutureMarketId
-												AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
-												AND	YEAR(MO.dtmFutureMonthsDate) = CI.intYear		LEFT
-		JOIN	(
-					SELECT	E.intEntityId,E.strName,E.strEntityNo
-					FROM	tblEMEntity			E
-					JOIN	tblEMEntityLocation	L	ON	E.intEntityId	=	L.intEntityId			
-				)EY	ON	EY.strName			=	CI.strEntityName	AND ISNULL(EY.strEntityNo,'') = ISNULL(CI.strEntityNo,'')	LEFT
-		JOIN	(
-					SELECT	E.intEntityId,E.strName
-					FROM	tblEMEntity			E
-					JOIN	tblEMEntityLocation	L	ON	E.intEntityId	=	L.intEntityId			
-				)SY	ON	SY.strName			=	CI.strSalesperson
+												AND	MONTH(MO.dtmFutureMonthsDate)	=	CI.intMonth
+												AND	YEAR(MO.dtmFutureMonthsDate)	=	CI.intYear		LEFT
+		JOIN	vyuCTEntity					EY	ON	EY.strEntityName				=	CI.strEntityName	
+												AND ISNULL(EY.strEntityNumber,'')	= ISNULL(CI.strEntityNo,'')	
+												AND	EY.strEntityType	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 'Vendor' ELSE 'Customer' END LEFT
+		JOIN	vyuCTEntity					SY	ON	SY.strEntityName	=	CI.strSalesperson
+												AND	SY.strEntityType	=	'Salesperson'
 		
 		WHERE	intContractImportId	= @intExternalId
 	END
