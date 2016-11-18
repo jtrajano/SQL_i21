@@ -110,9 +110,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         {dataIndex: 'strCountGroup', text: 'Count Group', width: 100, dataType: 'string', hidden: true },
                         {dataIndex: 'ysnCountedDaily', text: 'Counted Daily', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
                         {dataIndex: 'ysnLockedInventory', text: 'Locked Inventory', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'intPaymentOn', text: 'Payment On Id', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strPaymentOn', text: 'Payment On', width: 120, dataType: 'string', hidden: true }
+                        {dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
                     ]
                 },
                 {
