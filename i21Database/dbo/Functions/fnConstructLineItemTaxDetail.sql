@@ -1,21 +1,22 @@
 ﻿CREATE FUNCTION [dbo].[fnConstructLineItemTaxDetail]
 (
-	 @Quantity				NUMERIC(18,6)					= 0
-	,@GrossAmount			NUMERIC(18,6)					= 0
-	,@LineItemTaxEntries	LineItemTaxDetailStagingTable	READONLY
-	,@IsReversal			BIT								= 0	
-	,@ItemId				INT								= NULL	
-	,@EntityCustomerId		INT								= NULL
-	,@CompanyLocationId		INT								= NULL
-	,@TaxGroupId			INT								= NULL
-	,@Price					NUMERIC(18,6)					= 0	
-	,@TransactionDate		DATE							= NULL	
-	,@ShipToLocationId		INT								= NULL
-	,@IncludeExemptedCodes	BIT								= 0
-	,@SiteId				INT								= NULL
-	,@FreightTermId			INT								= NULL
-	,@CardId				INT								= NULL
-	,@VehicleId				INT								= NULL
+	 @Quantity					NUMERIC(18,6)					= 0
+	,@GrossAmount				NUMERIC(18,6)					= 0
+	,@LineItemTaxEntries		LineItemTaxDetailStagingTable	READONLY
+	,@IsReversal				BIT								= 0	
+	,@ItemId					INT								= NULL	
+	,@EntityCustomerId			INT								= NULL
+	,@CompanyLocationId			INT								= NULL
+	,@TaxGroupId				INT								= NULL
+	,@Price						NUMERIC(18,6)					= 0	
+	,@TransactionDate			DATE							= NULL	
+	,@ShipToLocationId			INT								= NULL
+	,@IncludeExemptedCodes		BIT								= 0
+	,@SiteId					INT								= NULL
+	,@FreightTermId				INT								= NULL
+	,@CardId					INT								= NULL
+	,@VehicleId					INT								= NULL
+	,@DisregardExemptionSetup	BIT								= 0
 )
 RETURNS @returntable TABLE
 (
@@ -113,6 +114,7 @@ BEGIN
 						,@FreightTermId
 						,@CardId
 						,@VehicleId
+						,@DisregardExemptionSetup
 					) 	
 		END
 
