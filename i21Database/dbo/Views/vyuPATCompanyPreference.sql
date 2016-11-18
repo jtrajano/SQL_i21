@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuPATCompanyPreference]
 	AS
 SELECT   CP.intCompanyPreferenceId,
+		 ComLoc.intCompanyLocationId,
+		 ComLoc.dblWithholdPercent,
          CP.intGrainDiscountId, 
          CP.intGrainStorageId, 
          CP.intServiceChargeId, 
@@ -33,3 +35,4 @@ LEFT JOIN tblGLAccount DA
 	ON DA.intAccountId = CP.intDividendsGLAccount
 LEFT JOIN tblGLAccount TA
 	ON TA.intAccountId = CP.intTreasuryGLAccount
+CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) ComLoc
