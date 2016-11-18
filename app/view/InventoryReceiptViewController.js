@@ -4732,8 +4732,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true },
 
                 { xtype: 'numbercolumn', dataIndex: 'dblGross', text: 'Gross', width: 100, dataType: 'float' },
-                { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' },
-                { dataIndex: 'intPaymentOn', text: 'Payment On Id', width: 100, dataType: 'string', hidden: true }
+                { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' }
+
             ];
             search.title = "Add Orders";
             search.showNew = false;
@@ -4797,8 +4797,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             ysnSubCurrency: order.get('ysnSubCurrency'),
                             strSubCurrency: order.get('strSubCurrency'),
                             dblGross: order.get('dblGross'),
-                            dblNet: order.get('dblNet'),
-                            intPaymentOn: order.get('intPaymentOn')
+                            dblNet: order.get('dblNet')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
 
