@@ -113,11 +113,7 @@ SELECT
 	Item.intLifeTime,
 	Item.strLifeTimeType,
 	Item.ysnListBundleSeparately,
-	dblExtendedCost = ISNULL(ItemStock.dblUnitOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0),
-	ItemLocation.intPaymentOn,
-	strPaymentOn = (CASE WHEN ItemLocation.intPaymentOn = 1 THEN 'Quantity'
-						   WHEN ItemLocation.intPaymentOn = 2 THEN 'Net' 
-						   ELSE '' END)
+	dblExtendedCost = ISNULL(ItemStock.dblUnitOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0)
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
