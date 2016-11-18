@@ -4556,6 +4556,7 @@
     <Build Include="dbo\Views\vyuMFStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGeneratePutAwayTask.sql" />
     <Build Include="dbo\Views\vyuARPrepaymentContractDefault.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertRecurringSalesOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

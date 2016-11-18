@@ -10,6 +10,8 @@
 AS
 
 BEGIN
+	DECLARE @ysnRecurringDuplicate BIT = 0
+
 	SET @SalesOrderDate = CASE WHEN @SalesOrderDate IS NULL THEN GETDATE() ELSE @SalesOrderDate END
 		
 	INSERT INTO tblSOSalesOrder
@@ -276,5 +278,20 @@ BEGIN
 		END	
 
 	EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, 0, @UserId
+	
+	SELECT 
+		@ysnRecurringDuplicate = ysnRecurring 
+	FROM 
+		tblSOSalesOrder 
+	WHERE
+		intSalesOrderId = @NewSalesOrderId
+
+	IF (@ysnRecurringDuplicate = 1)
+	BEGIN
+		IF NOT EXISTS(SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @NewSalesOrderId)
+		BEGIN
+			EXEC dbo.[uspARInsertRecurringSalesOrder] @NewSalesOrderId, @UserId
+		END		
+	END 
 	
 END
