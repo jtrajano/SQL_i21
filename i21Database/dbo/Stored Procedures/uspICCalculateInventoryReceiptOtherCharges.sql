@@ -73,21 +73,7 @@ BEGIN
 												* dbo.fnCalculateQtyBetweenUOM(
 													ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 													, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
-													--, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END
-													, CASE 
-														WHEN ReceiptItem.intPaymentOn IS NOT NULL
-															THEN
-																CASE
-																	WHEN ReceiptItem.intPaymentOn = 2 THEN ISNULL(ReceiptItem.dblNet, 0) -- Calculate based on Net, intPayment 2 = Net 
-																	ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) -- Calculate based on Quantity, intPayment 1 = Quantity to Receive
-																END
-														ELSE
-														 --If there is no payment on option, calculate based on the old way (If Gross/Net UOM is available, calculate based on Net, otherwise, based on Quantity to Receive)
-														 CASE 
-															WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) 
-															ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) 
-														 END
-													   END
+													, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 												)
 												, 2
 											 )
