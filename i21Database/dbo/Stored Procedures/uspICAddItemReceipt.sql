@@ -953,6 +953,35 @@ BEGIN
 				) Detail
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
+	
+		---------------------------------
+		-- Update Gross/Net quantities --
+		---------------------------------
+
+		-- Copy the value of Quantity to Receive to Gross and Net if Gross and Net are both NULL
+		UPDATE ReceiptItem
+		SET dblGross = ReceiptItem.dblOpenReceive
+			,dblNet = ReceiptItem.dblOpenReceive
+		FROM dbo.tblICInventoryReceiptItem ReceiptItem
+		WHERE ReceiptItem.intInventoryReceiptId = @inventoryReceiptId
+			  AND (ReceiptItem.dblGross = 0 OR ReceiptItem.dblGross IS NULL)
+			  AND (ReceiptItem.dblNet = 0 OR ReceiptItem.dblNet IS NULL)
+
+		-- Change value of Gross to 0 if it is Null and Net has value
+		UPDATE ReceiptItem
+		SET dblGross = 0
+		FROM dbo.tblICInventoryReceiptItem ReceiptItem
+		WHERE ReceiptItem.intInventoryReceiptId = @inventoryReceiptId
+			  AND ReceiptItem.dblGross IS NULL
+			  AND ReceiptItem.dblNet > 0 
+
+		-- Change value of Net to 0 if it is Null and Gross has value
+		UPDATE ReceiptItem
+		SET dblNet = 0
+		FROM dbo.tblICInventoryReceiptItem ReceiptItem
+		WHERE ReceiptItem.intInventoryReceiptId = @inventoryReceiptId
+			  AND ReceiptItem.dblNet IS NULL
+			  AND ReceiptItem.dblGross > 0 
 
 		-- Log successful inserts. 
 		INSERT INTO #tmpAddItemReceiptResult (
