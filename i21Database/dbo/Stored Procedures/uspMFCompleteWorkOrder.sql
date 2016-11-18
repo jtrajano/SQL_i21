@@ -260,7 +260,7 @@ BEGIN TRY
 			@strOutputLotNumber = ''
 			OR @strOutputLotNumber IS NULL
 			)
-		AND @strLotTracking <> 'Yes - Serial Number'
+		AND @strLotTracking = 'Yes - Manual'
 	BEGIN
 		--EXEC dbo.uspSMGetStartingNumber 24
 		--	,@strOutputLotNumber OUTPUT
@@ -818,7 +818,7 @@ BEGIN TRY
 
 				SELECT @dblPhysicalCount = @dblPhysicalCount - 1
 
-				IF @strLotTracking <> 'Yes - Serial Number'
+				IF @strLotTracking = 'Yes - Manual'
 					AND @dblPhysicalCount > 0
 				BEGIN
 					--EXEC dbo.uspSMGetStartingNumber 24
