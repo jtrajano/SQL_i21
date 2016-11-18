@@ -43,7 +43,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intCostUOMId] INT NULL							-- Cost UOM
 	,[intDiscountSchedule] INT NULL						-- Discount Schedule field. (Quality module).
 	,[ysnSubCurrency] BIT NULL 
-	,[intPaymentOn] INT NULL							-- Use 1 to compute receipt item's line total and taxes based on Quantity to Received and 2 to compute based on Net
+	,[intPaymentOn] INT NULL							-- Reserved for PaymentOn option
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
