@@ -481,6 +481,7 @@ BEGIN
 	DECLARE @intLoopTaxGroupID 	  INT
 	DECLARE @intLoopTaxCodeID 	  INT
 	DECLARE @intLoopTaxClassID	  INT
+	DECLARE @DisregardExemptionSetup	BIT
 
 	IF((@ysnPostedCSV IS NULL OR @ysnPostedCSV = 0 ) AND (@ysnPostedOrigin = 0 OR @ysnPostedCSV IS NULL))
 	BEGIN
@@ -710,6 +711,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,@DisregardExemptionSetup
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -762,6 +764,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,@DisregardExemptionSetup
 				)
 
 				END
@@ -819,6 +822,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,@DisregardExemptionSetup
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -871,6 +875,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,@DisregardExemptionSetup
 				)
 
 				END
@@ -995,6 +1000,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,@DisregardExemptionSetup
 				)
 					INSERT INTO @tblCFCalculatedTax	
 				(
@@ -1046,6 +1052,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,@DisregardExemptionSetup
 				)
 
 				
@@ -1106,6 +1113,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,@DisregardExemptionSetup
 				)
 					INSERT INTO @tblCFCalculatedTax	
 				(
@@ -1157,6 +1165,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,@DisregardExemptionSetup
 				)
 
 				

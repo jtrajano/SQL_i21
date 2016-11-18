@@ -34,6 +34,7 @@ SELECT
 														,Loc.intFreightTermId
 														,NULL
 														,NULL
+														,0
                                                     )
 	,intSiteId = A.intSiteID
 	,M.strDeliveryTicketFormat

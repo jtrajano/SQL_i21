@@ -97,6 +97,7 @@ BEGIN
 
 	SET @ZeroDecimal = 0.000000
 	SELECT @intItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @intItemId 
+	DECLARE @DisregardExemptionSetup BIT
 
 	INSERT INTO @tblNetworkTaxMapping
 	SELECT
@@ -131,7 +132,7 @@ BEGIN
 	INNER JOIN tblSMTaxCodeRate smTaxCodeRate
 		ON smTaxCode.intTaxCodeId = smTaxCodeRate.intTaxCodeId
 	CROSS APPLY
-		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@intCustomerId, @dtmTransactionDate, NULL, smTaxCode.intTaxCodeId, smTaxClass.intTaxClassId, smTaxCode.strState, @intItemId, @intItemCategoryId, @intCustomerLocationId,NULL,NULL,NULL) E
+		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@intCustomerId, @dtmTransactionDate, NULL, smTaxCode.intTaxCodeId, smTaxClass.intTaxClassId, smTaxCode.strState, @intItemId, @intItemCategoryId, @intCustomerLocationId,NULL,NULL,NULL, @DisregardExemptionSetup) E
 	WHERE cfNetwork.intNetworkId = @intNetworkId
 
 	
