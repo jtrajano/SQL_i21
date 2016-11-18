@@ -1915,8 +1915,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblInvoiceTotal ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblInvoiceTotal END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
 																								(
 																								SELECT
@@ -1996,6 +1996,76 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId
 			INNER JOIN 
 				@PostInvoiceData	P
+					ON A.intInvoiceId = P.intInvoiceId	
+			LEFT OUTER JOIN
+				(
+				--Credit Memo Prepaids
+				SELECT
+					 [dblAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
+					,[intInvoiceId]			= A.[intInvoiceId] 
+				FROM
+					tblARPrepaidAndCredit ARPAC
+				INNER JOIN
+					tblARInvoice A
+						ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
+						AND ISNULL(ARPAC.[ysnApplied],0) = 1
+						AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+				INNER JOIN
+					tblARInvoice ARI1
+						ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
+						AND ARI1.strTransactionType = 'Credit Memo'
+				GROUP BY
+					A.[intInvoiceId]
+				) CM
+					ON A.[intInvoiceId] = CM.[intInvoiceId] 		
+			WHERE
+				ISNULL(A.intPeriodsToAccrue,0) <= 1
+
+
+			UNION ALL
+			--DEBIT Prepaids
+			SELECT
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				,strBatchID					= @batchId
+				,intAccountId				= ARI1.intAccountId
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,dblDebitUnit				= @ZeroDecimal 
+				,dblCreditUnit				= @ZeroDecimal
+				,strDescription				= A.strComments
+				,strCode					= @CODE
+				,strReference				= C.strCustomerNumber
+				,intCurrencyId				= A.intCurrencyId 
+				,dblExchangeRate			= 1
+				,dtmDateEntered				= @PostDate
+				,dtmTransactionDate			= A.dtmDate
+				,strJournalLineDescription	= 'Applied Prepaid - ' + ARI1.[strInvoiceNumber] 
+				,intJournalLineNo			= ARPAC.[intPrepaidAndCreditId]
+				,ysnIsUnposted				= 0
+				,intUserId					= @userId
+				,intEntityId				= @UserEntityID				
+				,strTransactionId			= A.strInvoiceNumber
+				,intTransactionId			= A.intInvoiceId
+				,strTransactionType			= A.strTransactionType
+				,strTransactionForm			= @SCREEN_NAME
+				,strModuleName				= @MODULE_NAME
+				,intConcurrencyId			= 1				 
+			FROM
+				tblARPrepaidAndCredit ARPAC
+			INNER JOIN
+				tblARInvoice A
+					ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
+					AND ISNULL(ARPAC.[ysnApplied],0) = 1
+					AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+			INNER JOIN
+				tblARInvoice ARI1
+					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
+					AND ARI1.strTransactionType = 'Credit Memo' 
+			LEFT JOIN 
+				tblARCustomer C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+			INNER JOIN 
+				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
@@ -2008,8 +2078,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= SMCL.intUndepositedFundsId 
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
 				,dblDebitUnit				= @ZeroDecimal
 				,dblCreditUnit				= @ZeroDecimal		
 				,strDescription				= A.strComments
@@ -2041,6 +2111,27 @@ IF @post = 1
 			INNER JOIN
 				tblSMCompanyLocation SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
+			LEFT OUTER JOIN
+				(
+				--Credit Memo Prepaids
+				SELECT
+					 [dblAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
+					,[intInvoiceId]			= A.[intInvoiceId] 
+				FROM
+					tblARPrepaidAndCredit ARPAC
+				INNER JOIN
+					tblARInvoice A
+						ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
+						AND ISNULL(ARPAC.[ysnApplied],0) = 1
+						AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+				INNER JOIN
+					tblARInvoice ARI1
+						ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
+						AND ARI1.strTransactionType = 'Credit Memo'
+				GROUP BY
+					A.[intInvoiceId]
+				) CM
+					ON A.[intInvoiceId] = CM.[intInvoiceId] 
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND A.dblPayment <> @ZeroDecimal
@@ -2082,7 +2173,8 @@ IF @post = 1
 					AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
 			INNER JOIN
 				tblARInvoice ARI1
-					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] 
+					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
+					AND ARI1.strTransactionType <> 'Credit Memo' 
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId
