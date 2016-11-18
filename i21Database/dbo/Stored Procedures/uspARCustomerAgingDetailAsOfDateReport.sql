@@ -265,8 +265,22 @@ SELECT DISTINCT
 	 , I.intInvoiceId
 	 , intPaymentId			= ISNULL(P.intPaymentId, PC.intPrepaymentId)
 	 , I.strBOLNumber	 
-	 , dblAmountPaid		= (CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) END) + ISNULL(PC.dblAppliedInvoiceAmount, 0)
-     , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) = (I.dblInvoiceTotal * -1) THEN I.dblInvoiceTotal * -1 ELSE 0 END   
+	 , dblAmountPaid		= (CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') 
+								THEN 
+									CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 
+										THEN ISNULL(PD.dblPayment, 0) + ISNULL(APPD.dblPayment, 0) 
+										ELSE 0 
+									END 
+								ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) 
+							  END) + ISNULL(PC.dblAppliedInvoiceAmount, 0)
+     , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) = (I.dblInvoiceTotal * -1) 
+								THEN I.dblInvoiceTotal * -1 
+								ELSE 
+									CASE WHEN I.strTransactionType = 'Overpayment' AND ISNULL(P.dblAmountPaid, 0) < 0
+										THEN ISNULL(PD.dblInvoiceTotal, 0)
+										ELSE 0
+									END
+							  END
 	 , I.dblAmountDue     
 	 , dblDiscount			= ISNULL(I.dblDiscount, 0)
 	 , dblInterest			= ISNULL(I.dblInterest, 0)
@@ -500,8 +514,22 @@ SELECT DISTINCT
   , I.intInvoiceId
   , intPaymentId		= ISNULL(P.intPaymentId, PC.intPrepaymentId)
   , I.strBOLNumber
-  , dblAmountPaid		= (CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) END) + ISNULL(PC.dblAppliedInvoiceAmount, 0)
-  , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) = (I.dblInvoiceTotal * -1) THEN I.dblInvoiceTotal * -1 ELSE 0 END
+  , dblAmountPaid		= (CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') 
+							THEN 
+								CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 
+									THEN ISNULL(PD.dblPayment, 0) + ISNULL(APPD.dblPayment, 0) 
+									ELSE 0 
+								END 
+							ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) 
+						  END) + ISNULL(PC.dblAppliedInvoiceAmount, 0)
+  , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) = (I.dblInvoiceTotal * -1) 
+							THEN I.dblInvoiceTotal * -1 
+							ELSE 
+								CASE WHEN I.strTransactionType = 'Overpayment' AND ISNULL(P.dblAmountPaid, 0) < 0
+									THEN ISNULL(PD.dblInvoiceTotal, 0)
+									ELSE 0
+								END
+						  END
   , dblAmountDue		= 0
   , dblDiscount			= ISNULL(PD.dblDiscount, 0) + ISNULL(APPD.dblDiscount, 0)
   , dblInterest			= ISNULL(PD.dblInterest, 0) + ISNULL(APPD.dblInterest, 0)
