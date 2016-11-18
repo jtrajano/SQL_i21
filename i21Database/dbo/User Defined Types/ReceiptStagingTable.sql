@@ -43,6 +43,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intCostUOMId] INT NULL							-- Cost UOM
 	,[intDiscountSchedule] INT NULL						-- Discount Schedule field. (Quality module).
 	,[ysnSubCurrency] BIT NULL 
+	,[intPaymentOn] INT NULL							-- Reserved for PaymentOn option
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
