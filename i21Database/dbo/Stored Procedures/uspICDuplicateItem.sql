@@ -422,8 +422,7 @@ BEGIN
 		strCounted,
 		intCountGroupId,
 		ysnCountedDaily,
-		intSort,
-		intPaymentOn)
+		intSort)
 	SELECT @NewItemId,
 		intLocationId,
 		intVendorId,
@@ -482,8 +481,7 @@ BEGIN
 		strCounted,
 		intCountGroupId,
 		ysnCountedDaily,
-		intSort,
-		intPaymentOn
+		intSort
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------
