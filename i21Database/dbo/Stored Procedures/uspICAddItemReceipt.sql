@@ -370,7 +370,6 @@ BEGIN
 				,intCostUOMId
 				,intDiscountSchedule
 				,ysnSubCurrency
-				,intPaymentOn
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -438,7 +437,6 @@ BEGIN
 				,intCostUOMId			= RawData.intCostUOMId
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0) 
-				,intPaymentOn			= ISNULL(RawData.intPaymentOn, ItemLocation.intPaymentOn)
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -457,8 +455,7 @@ BEGIN
                 LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure    
                     ON GrossNetUOM.intUnitMeasureId = GrossNetUnitMeasure.intUnitMeasureId
                     AND GrossNetUnitMeasure.strUnitType IN ('Weight', 'Volume')
-				LEFT JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemLocation.intItemId = RawData.intItemId AND ItemLocation.intLocationId = RawData.intLocationId
+
 				-- Integrations with the other modules: 
 				-- 1. Purchase Order
 				LEFT JOIN vyuPODetails POView
@@ -655,8 +652,7 @@ BEGIN
 				-- Fields used in the calculation of the taxes
 
 				SELECT TOP 1
-				 -- Use 1 to compute Line Total and Taxes based on Quantity, 2 to compute based on Net, and null to compute based on default setup (If Gross/Net UOM is available, compute based on Net, else based on Quantity)
-					 @Amount = CASE	WHEN (ReceiptItem.intPaymentOn = 2 OR (ReceiptItem.intPaymentOn IS NULL AND ReceiptItem.intWeightUOMId IS NOT NULL)) THEN 
+					 @Amount = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
 										 dbo.fnMultiply(
 											 dbo.fnDivide(
 												 ISNULL(dblUnitCost, 0) 
@@ -679,7 +675,7 @@ BEGIN
 											 )
 										)																	
 								END 
-					,@Qty	 = CASE	WHEN (ReceiptItem.intPaymentOn = 2 OR (ReceiptItem.intPaymentOn IS NULL AND ReceiptItem.intWeightUOMId IS NOT NULL)) THEN 
+					,@Qty	 = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
 										ReceiptItem.dblNet 
 									ELSE 
 										ReceiptItem.dblOpenReceive 
@@ -901,11 +897,10 @@ BEGIN
 
 		-- Re-update the line total 
 		UPDATE	ReceiptItem 
-		 -- Use 1 to compute Line Total and Taxes based on Quantity, 2 to compute based on Net, and null to compute based on default setup (If Gross/Net UOM is available, compute based on Net, else based on Quantity)
 		SET		dblLineTotal = 
 					ROUND(
 						--ISNULL(dblTax, 0) + 
-						CASE	WHEN (ReceiptItem.intPaymentOn = 2 OR (ReceiptItem.intPaymentOn IS NULL AND ReceiptItem.intWeightUOMId IS NOT NULL)) THEN 
+						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
 									dbo.fnMultiply(
 										ISNULL(ReceiptItem.dblNet, 0)
 										,dbo.fnMultiply(
@@ -943,7 +938,7 @@ BEGIN
 				LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
 					ON GrossNetUOM.intItemUOMId = ReceiptItem.intWeightUOMId
 				LEFT JOIN dbo.tblICItemUOM CostUOM
-					ON CostUOM.intItemUOMId = ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId) 								
+					ON CostUOM.intItemUOMId = ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId) 					
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
 		-- Re-update the total cost 
