@@ -604,15 +604,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLineTotal: 'dblLineTotal',
-                colGrossMargin: 'dblGrossMargin',
-                colPaymentOn: {
-                    dataIndex: 'strPaymentOn',
-                     editor: {
-                        origValueField: 'intPaymentOn',
-                        origUpdateField: 'intPaymentOn',
-                        store: '{paymenOnOptions}'
-                    }
-                }
+                colGrossMargin: 'dblGrossMargin'
             },
 
             /*pnlLotTracking: {
@@ -4815,20 +4807,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                             }
                         }
-
                         // Add the item record.
                         var newReceiptItems = currentVM.tblICInventoryReceiptItems().add(newRecord);
-                        var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
-
-                        // Set string value for Payment On
-                        if (order.get('intPaymentOn') == 1) {
-                            newReceiptItem.set('strPaymentOn', 'Quantity');
-                        }
-                        else if (order.get('intPaymentOn') == 2) {
-                            newReceiptItem.set('strPaymentOn', 'Net');
-                        }
 
                         // Calculate the line total
+                        var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
                         newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
 
                         // Calculate the taxes

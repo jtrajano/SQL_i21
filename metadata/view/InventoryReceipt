@@ -3085,61 +3085,130 @@
                                                                     "designerId": "8e2c5111-0905-47f1-9aa8-877b2ea634b9"
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.column.Column",
+                                                                    "type": "Ext.container.Container",
                                                                     "reference": {
-                                                                        "name": "columns",
+                                                                        "name": "dockedItems",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "dataIndex": "strPaymentOn",
-                                                                        "itemId": "colPaymentOn",
-                                                                        "text": "Payment On",
+                                                                        "container|align": "stretch",
+                                                                        "container|pack": "end",
+                                                                        "dock": "bottom",
+                                                                        "itemId": "grpFooter",
+                                                                        "layout": "hbox",
                                                                         "width": 100
                                                                     },
-                                                                    "name": "MyColumn49",
-                                                                    "designerId": "55f1964d-078a-41cd-b39d-261bc4639bb7",
+                                                                    "name": "MyContainer",
+                                                                    "designerId": "8297aaee-7f04-4772-8e09-5cdbc0b57976",
                                                                     "cn": [
                                                                         {
-                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "type": "Ext.form.Label",
                                                                             "reference": {
-                                                                                "name": "editor",
-                                                                                "type": "object"
+                                                                                "name": "items",
+                                                                                "type": "array"
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
-                                                                                "columns": [
-                                                                                    "[",
-                                                                                    "{",
-                                                                                    "dataIndex: 'intPaymentOn',",
-                                                                                    "dataType: 'numeric',",
-                                                                                    "hidden: true",
-                                                                                    "},",
-                                                                                    "{",
-                                                                                    "dataIndex: 'strPaymentOn',",
-                                                                                    "dataType: 'string',",
-                                                                                    "text: 'Payment On',",
-                                                                                    "flex: 1",
-                                                                                    "}",
-                                                                                    "]"
-                                                                                ],
-                                                                                "designer|createAlias": "gridcombobox",
-                                                                                "displayField": "strPaymentOn",
-                                                                                "itemId": "cboPaymentOn",
-                                                                                "valueField": "strPaymentOn"
+                                                                                "itemId": "lblSubTotal",
+                                                                                "text": "SubTotal",
+                                                                                "width": 150
                                                                             },
-                                                                            "name": "MyComboBox16",
+                                                                            "name": "MyLabel3",
                                                                             "configAlternates": {
-                                                                                "columns": "array"
+                                                                                "style": "string"
                                                                             },
-                                                                            "designerId": "54afdcaf-2be4-4ebe-b6fe-b6f6d7b756df",
-                                                                            "customConfigs": [
-                                                                                {
-                                                                                    "group": "(Custom Properties)",
-                                                                                    "name": "columns",
-                                                                                    "type": "string"
-                                                                                }
-                                                                            ]
+                                                                            "designerId": "c9bafd10-c343-4b9d-a904-f04040ec6b12"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblTax",
+                                                                                "text": "Tax",
+                                                                                "width": 120
+                                                                            },
+                                                                            "name": "MyLabel4",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "bd5905c1-1122-46fd-8a44-d91600b247d7"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblCharges",
+                                                                                "text": "Charges",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel2",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "bc94ae1c-8df6-4e57-ab2f-4353f0159e76"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblGrossWgt",
+                                                                                "text": "Gross",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel5",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "fca7feef-7ec3-465d-94e3-b75ecb85f67e"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblNetWgt",
+                                                                                "text": "Net",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel6",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "98da0e64-6701-466f-ba6c-51b01bf5997c"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblTotal",
+                                                                                "text": "Total",
+                                                                                "width": 180
+                                                                            },
+                                                                            "name": "MyLabel7",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "fc56d20e-a083-48bc-98b5-6399ecbb3f8e"
                                                                         }
                                                                     ]
                                                                 }
