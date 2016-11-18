@@ -274,34 +274,13 @@ Ext.define('Inventory.view.ItemLocation', {
                                                     },
                                                     items: [
                                                         {
-                                                            xtype: 'container',
+                                                            xtype: 'combobox',
                                                             flex: 1,
-                                                            margin: '0 0 5 0',
-                                                            layout: {
-                                                                type: 'hbox',
-                                                                align: 'stretch'
-                                                            },
-                                                            items: [
-                                                                {
-                                                                    xtype: 'combobox',
-                                                                    flex: 1,
-                                                                    itemId: 'cboCostingMethod',
-                                                                    fieldLabel: 'Costing Method',
-                                                                    labelWidth: 95,
-                                                                    displayField: 'strDescription',
-                                                                    valueField: 'intCostingMethodId'
-                                                                },
-                                                                {
-                                                                    xtype: 'combobox',
-                                                                    flex: 1,
-                                                                    itemId: 'cboPaymentOn',
-                                                                    margin: '0 0 0 5',
-                                                                    fieldLabel: 'Payment On',
-                                                                    labelWidth: 98,
-                                                                    displayField: 'strPaymentOn',
-                                                                    valueField: 'intPaymentOn'
-                                                                }
-                                                            ]
+                                                            itemId: 'cboCostingMethod',
+                                                            fieldLabel: 'Costing Method',
+                                                            labelWidth: 95,
+                                                            displayField: 'strDescription',
+                                                            valueField: 'intCostingMethodId'
                                                         },
                                                         {
                                                             xtype: 'container',

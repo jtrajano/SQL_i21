@@ -158,28 +158,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         },
         countGroup: {
             type: 'icbufferedcountgroup'
-        },
-        paymentOn: {
-            data: [
-                {
-                    intPaymentOn: '1',
-                    strPaymentOn: 'Quantity'
-                },
-                {
-                    intPaymentOn: '2',
-                    strPaymentOn: 'Net'
-                }
-            ],
-            fields: [
-                {
-                    type: 'int',
-                    name: 'intPaymentOn'
-                },
-                {
-                    name: 'strPaymentOn'
-                }
-            ]
-        },
+        }
     }
 
 });

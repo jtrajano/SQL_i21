@@ -2172,7 +2172,6 @@ Ext.define('Inventory.view.ItemViewController', {
                                 strLocationName: location.data.strLocationName,
                                 intAllowNegativeInventory: 3,
                                 intCostingMethod: 1,
-                                intPaymentOn: 1
                             };
                             currentVM.tblICItemLocations().add(newRecord);
 

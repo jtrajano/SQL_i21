@@ -11,7 +11,7 @@ namespace iRely.Inventory.Model
             this.HasKey(t => t.intItemLocationId);
 
             // Table & Column Mappings
-            this.ToTable("tblICItemLocation");
+            this.ToTable("vyuICItemLocation");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
@@ -71,7 +71,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCounted).HasColumnName("strCounted");
             this.Property(t => t.intCountGroupId).HasColumnName("intCountGroupId");
             this.Property(t => t.ysnCountedDaily).HasColumnName("ysnCountedDaily");
-            this.Property(t => t.intPaymentOn).HasColumnName("intPaymentOn");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetItemLocation)

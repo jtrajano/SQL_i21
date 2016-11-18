@@ -526,62 +526,23 @@
                                                     "designerId": "d108382d-c8d1-4c50-ab98-2f513d363bf2",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.container.Container",
+                                                            "type": "Ext.form.field.ComboBox",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "container|align": "stretch",
-                                                                "designer|displayName": "container",
-                                                                "layout": "hbox",
+                                                                "displayField": "strDescription",
+                                                                "fieldLabel": "Costing Method",
+                                                                "itemId": "cboCostingMethod",
+                                                                "labelAlign": null,
+                                                                "labelWidth": 95,
                                                                 "layout|flex": 1,
-                                                                "margin": "0 0 5 0"
+                                                                "valueField": "intCostingMethodId"
                                                             },
-                                                            "name": "MyContainer",
-                                                            "designerId": "74920698-2197-4fee-8162-bd8f6965c789",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "displayField": "strDescription",
-                                                                        "fieldLabel": "Costing Method",
-                                                                        "itemId": "cboCostingMethod",
-                                                                        "labelAlign": null,
-                                                                        "labelWidth": 95,
-                                                                        "layout|flex": 1,
-                                                                        "valueField": "intCostingMethodId"
-                                                                    },
-                                                                    "name": "MyComboBox20",
-                                                                    "designerId": "9e6c9559-01c7-4ada-a282-00b519aa1336"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "",
-                                                                        "displayField": "strPaymentOn",
-                                                                        "fieldLabel": "Payment On",
-                                                                        "itemId": "cboPaymentOn",
-                                                                        "labelWidth": 98,
-                                                                        "layout|flex": 1,
-                                                                        "margin": "0 0 0 5",
-                                                                        "valueField": "intPaymentOn"
-                                                                    },
-                                                                    "name": "MyComboBox5",
-                                                                    "designerId": "2b562968-5555-4957-9c6c-4c8ebf444284"
-                                                                }
-                                                            ]
+                                                            "name": "MyComboBox20",
+                                                            "designerId": "9e6c9559-01c7-4ada-a282-00b519aa1336"
                                                         },
                                                         {
                                                             "type": "Ext.container.Container",
