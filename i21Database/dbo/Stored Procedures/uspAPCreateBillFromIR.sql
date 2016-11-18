@@ -21,7 +21,10 @@ DECLARE @receiptLocation INT;
 DECLARE @userLocation INT;
 DECLARE @location INT;
 DECLARE @cashPrice DECIMAL;
-DECLARE @receiptAmount DECIMAL(18,6)
+DECLARE @receiptAmount DECIMAL(18,6);
+DECLARE @totalReceiptAmount DECIMAL(18,6);
+DECLARE @totalLineItem DECIMAL(18,6);
+DECLARE @totalCharges DECIMAL(18,6);
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -95,8 +98,18 @@ BEGIN
 		RAISERROR('Please setup default AP Account.', 16, 1);
 		--GOTO DONE
 	END
-		
+	
+	----GET THE TOTAL IR AMOUNT
 	SELECT @receiptAmount = SUM(A.dblLineTotal) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
+	
+	SELECT @totalCharges = (SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00))
+	FROM vyuAPChargesForBilling WHERE intInventoryReceiptId = @receiptId
+	
+	SELECT @totalLineItem =  SUM(A.dblLineTotal)
+	FROM tblICInventoryReceiptItem A 
+	WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
+	
+	SET @totalReceiptAmount = @totalLineItem + @totalCharges;
 
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -156,8 +169,8 @@ BEGIN
 		[intAccountId] 			=	@APAccount,
 		[strBillId]				=	@generatedBillRecordId,
 		[strReference] 			=	A.strBillOfLading,
-		[dblTotal] 				=	A.dblInvoiceAmount,
-		[dblAmountDue]			=	A.dblInvoiceAmount,
+		[dblTotal] 				=	@totalReceiptAmount,
+		[dblAmountDue]			=	@totalReceiptAmount,
 		[intEntityId]			=	@userId,
 		[ysnPosted]				=	0,
 		[ysnPaid]				=	0,
