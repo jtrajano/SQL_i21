@@ -36,23 +36,21 @@ BEGIN
 			,strTransactionId		= SO.strSalesOrderNumber
 			,intTransactionTypeId	= @SALES_ORDER
 			,intLotId				= NULL 
-			,intSubLocationId		= NULL -- There is no sub location in Sales Order
-			,intStorageLocationId	= SODetail.intStorageLocationId
-	FROM	dbo.tblSOSalesOrder SO INNER JOIN dbo.tblSOSalesOrderDetail SODetail
-				ON SO.intSalesOrderId = SODetail.intSalesOrderId
-			INNER JOIN dbo.tblICItemUOM ItemUOM
-				ON SODetail.intItemId = ItemUOM.intItemId
-				AND SODetail.intItemUOMId = ItemUOM.intItemUOMId
-			INNER JOIN dbo.tblICItemLocation ItemLocation
-				ON SODetail.intItemId = ItemLocation.intItemId
-				AND SO.intCompanyLocationId = ItemLocation.intLocationId
-			LEFT JOIN dbo.tblICItemPricing ItemPricing
-				ON ItemPricing.intItemId = SODetail.intItemId
-				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-			LEFT OUTER JOIN 
-				(SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY ID.intSalesOrderDetailId) AS InvoiceDetail
-				ON InvoiceDetail.intSalesOrderDetailId = SODetail.intSalesOrderDetailId
-	WHERE	SODetail.intSalesOrderId = @intSourceTransactionId
-			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
-			AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0			
+			,intSubLocationId		= ISNULL(SODetail.intSubLocationId, ItemLocation.intSubLocationId)
+			,intStorageLocationId	= ISNULL(SODetail.intStorageLocationId, ItemLocation.intStorageLocationId)
+	FROM	dbo.tblSOSalesOrder SO
+		INNER JOIN dbo.tblSOSalesOrderDetail SODetail ON SO.intSalesOrderId = SODetail.intSalesOrderId
+		INNER JOIN dbo.tblICItemUOM ItemUOM ON SODetail.intItemId = ItemUOM.intItemId
+			AND SODetail.intItemUOMId = ItemUOM.intItemUOMId
+		INNER JOIN dbo.tblICItemLocation ItemLocation ON SODetail.intItemId = ItemLocation.intItemId
+			AND SO.intCompanyLocationId = ItemLocation.intLocationId
+		LEFT JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemId = SODetail.intItemId
+			AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+		LEFT OUTER JOIN (
+			SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped
+			FROM tblARInvoiceDetail ID
+			GROUP BY ID.intSalesOrderDetailId) AS InvoiceDetail ON InvoiceDetail.intSalesOrderDetailId = SODetail.intSalesOrderDetailId
+	WHERE SODetail.intSalesOrderId = @intSourceTransactionId
+		AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
+		AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0			
 END
