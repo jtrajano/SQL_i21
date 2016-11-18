@@ -2358,3 +2358,57 @@ SELECT intRecipeItemId, ROW_NUMBER() OVER (PARTITION BY intRecipeId ORDER BY [in
 FROM tblMFRecipeItem Where intSequenceNo is null AND intRecipeItemTypeId=1 Group By intRecipeId,intRecipeItemId
 ) t ON ri.intRecipeItemId=t.intRecipeItemId
 GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'View Lot')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('View Lot')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'Move/Put Away')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Move/Put Away')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'Merge/Split')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Merge/Split')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'FG Release')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('FG Release')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'Pick For Shipment')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Pick For Shipment')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'Pick For Kitting')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Pick For Kitting')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'Transfer Kit')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Transfer Kit')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'WO Staging')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('WO Staging')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFHandheldMenuItem WHERE strHandheldMenuItemName = 'Print Label')
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Print Label')
+END
+GO
