@@ -174,7 +174,7 @@ BEGIN TRY
 		,UnPvt.dblQuantity
 		,NULL intItemUOMId
 		,UnPvt.intWorkOrderId
-		,UnPvt.intItemId
+		,W.intItemId
 	FROM dbo.tblMFProductionSummary
 	UNPIVOT(dblQuantity FOR strTransactionType IN (
 				dblOpeningQuantity
@@ -338,10 +338,10 @@ BEGIN TRY
 						END
 
 				UPDATE ##tblMFYield
-				SET dblActualYield = @dblYieldP * 100
+				SET dblActualYield = ((@dblYieldP * 100)/@dblCalculatedQuantity)*100
 					,dblTotalInput = @dblTInput
 					,dblTotalOutput = @dblTOutput
-					,dblStandardYield = @dblCalculatedQuantity
+					,dblStandardYield = 100
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intItemId = @intItemId
 
@@ -373,7 +373,7 @@ BEGIN TRY
 				,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-				,ROUND(SUM(dblActualYield), 2) dblActualYield
+				,ROUND(AVG(dblActualYield), 2) dblActualYield
 				--,CONVERT(INT, 1) AS intConcurrencyId
 				,intWorkOrderId
 			FROM ##tblMFYield
@@ -621,10 +621,10 @@ BEGIN TRY
 				END
 
 				UPDATE ##tblMFInputItemYield
-				SET dblActualYield = @dblYieldP * 100
+				SET dblActualYield = ((@dblYieldP * 100)/@dblCalculatedQuantity)*100
 					,dblTotalInput = @dblTInput
 					,dblTotalOutput = @dblTOutput
-					,dblStandardYield = @dblCalculatedQuantity
+					,dblStandardYield = 100
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intInputItemId = @intInputItemId
 
@@ -658,7 +658,7 @@ BEGIN TRY
 				,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-				,ROUND(SUM(dblActualYield), 2) dblActualYield
+				,ROUND(AVG(dblActualYield), 2) dblActualYield
 				--,CONVERT(INT, 1) AS intConcurrencyId
 				,intWorkOrderId
 			FROM ##tblMFInputItemYield
@@ -900,10 +900,10 @@ BEGIN TRY
 						END
 
 				UPDATE ##tblMFYieldByDate
-				SET dblActualYield = @dblYieldP * 100
+				SET dblActualYield = ((@dblYieldP * 100)/@dblCalculatedQuantity)*100
 					,dblTotalInput = @dblTInput
 					,dblTotalOutput = @dblTOutput
-					,dblStandardYield = @dblCalculatedQuantity
+					,dblStandardYield = 100
 				WHERE intYieldId = @intYieldId
 					AND intItemId = @intItemId
 
@@ -945,7 +945,7 @@ BEGIN TRY
 				,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-				,ROUND(SUM(dblActualYield), 2) dblActualYield
+				,ROUND(AVG(dblActualYield), 2) dblActualYield
 				--,CONVERT(INT, 1) AS intConcurrencyId
 				,dtmDate
 				,intShiftId
@@ -1018,6 +1018,7 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
 			,RI.intItemUOMId
 			,W.intItemId AS intPrimaryItemId
+			,strTransactionType
 		INTO ##tblMFInputItemYieldByDate
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
@@ -1240,10 +1241,10 @@ BEGIN TRY
 				END
 
 				UPDATE ##tblMFInputItemYieldByDate
-				SET dblActualYield = @dblYieldP * 100
+				SET dblActualYield = ((@dblYieldP * 100)/@dblCalculatedQuantity)*100
 					,dblTotalInput = @dblTInput
 					,dblTotalOutput = @dblTOutput
-					,dblStandardYield = @dblCalculatedQuantity
+					,dblStandardYield = 100
 				WHERE intYieldId = @intYieldId
 					AND intInputItemId = @intInputItemId
 
@@ -1269,6 +1270,9 @@ BEGIN TRY
 		--	,CONVERT(INT, 1) AS intConcurrencyId
 		--FROM ##tblMFInputItemYieldByDate
 		--WHERE intInputItemId = intItemId
+
+		Delete from ##tblMFInputItemYieldByDate Where strTransactionType ='dblOpeningQuantity'
+
 		SELECT dtmFromDate
 			,dtmToDate
 			,intManufacturingProcessId
@@ -1286,7 +1290,7 @@ BEGIN TRY
 				,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-				,ROUND(SUM(dblActualYield), 2) dblActualYield
+				,ROUND(AVG(dblActualYield), 2) dblActualYield
 				--,CONVERT(INT, 1) AS intConcurrencyId
 				,dtmDate
 				,intShiftId
