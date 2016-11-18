@@ -55,13 +55,13 @@ SELECT
 	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
-									WHEN 1 THEN
+									WHEN 1 THEN 
 											CurrentBill.allocatedAmount * A.dblAmountDue 
 									--UNIT ALLOCATION COMPUTATION W/O ITEM		                                 
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))END
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
@@ -153,7 +153,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
+											ELSE CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount)  AS DECIMAL(18,2)) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
@@ -245,7 +245,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))  END
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
@@ -337,7 +337,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
@@ -463,7 +463,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
 									--PERCENTAGE ALLOCATION COMPUTATION              
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
@@ -554,7 +554,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))  END
 									--PERCENTAGE ALLOCATION COMPUTATION              
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
@@ -646,7 +646,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
 									--PERCENTAGE ALLOCATION COMPUTATION                                  
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
