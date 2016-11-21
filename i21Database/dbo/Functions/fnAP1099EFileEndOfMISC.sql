@@ -151,7 +151,7 @@ BEGIN
 		+ SPACE(196)
 		+ SPACE(8) --500-507
 		+ SPACE(241)
-		+ SPACE(2)
+		+ CHAR(13) + CHAR(10)
 
 	RETURN @endOfMISC;
 
