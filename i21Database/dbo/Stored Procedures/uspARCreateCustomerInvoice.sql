@@ -70,6 +70,7 @@
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
+	,@ItemInventoryShipmentChargeId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
@@ -538,6 +539,7 @@ BEGIN TRY
 		,@ItemSCInvoiceId				= @ItemSCInvoiceId
 		,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 		,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
+		,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 		,@ItemShipmentNumber			= @ItemShipmentNumber
 		,@ItemRecipeItemId				= @ItemRecipeItemId
 		,@ItemRecipeId					= @ItemRecipeId

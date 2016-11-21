@@ -205,6 +205,7 @@ DECLARE  @Id									INT
 		,@ItemSCInvoiceId						INT
 		,@ItemSCInvoiceNumber					NVARCHAR(25)
 		,@ItemInventoryShipmentItemId			INT
+		,@ItemInventoryShipmentChargeId			INT
 		,@ItemShipmentNumber					NVARCHAR(50)
 		,@ItemRecipeItemId						INT
 		,@ItemRecipeId							INT
@@ -351,6 +352,7 @@ BEGIN
 		,@ItemSCInvoiceId				= (CASE WHEN @GroupingOption = 0 THEN [intSCInvoiceId] ELSE NULL END)
 		,@ItemSCInvoiceNumber			= (CASE WHEN @GroupingOption = 0 THEN [strSCInvoiceNumber] ELSE NULL END)
 		,@ItemInventoryShipmentItemId	= (CASE WHEN @GroupingOption = 0 THEN [intInventoryShipmentItemId] ELSE NULL END)
+		,@ItemInventoryShipmentChargeId	= (CASE WHEN @GroupingOption = 0 THEN [intInventoryShipmentChargeId] ELSE NULL END)
 		,@ItemShipmentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strShipmentNumber] ELSE NULL END)
 		,@ItemRecipeItemId				= (CASE WHEN @GroupingOption = 0 THEN [intRecipeItemId] ELSE NULL END)
 		,@ItemRecipeId					= (CASE WHEN @GroupingOption = 0 THEN [intRecipeId] ELSE NULL END)
@@ -555,6 +557,7 @@ BEGIN
 			,@ItemSCInvoiceId				= @ItemSCInvoiceId
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
+			,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 			,@ItemShipmentNumber			= @ItemShipmentNumber
 			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemRecipeId					= @ItemRecipeId
@@ -688,6 +691,7 @@ BEGIN
 					,@ItemSCInvoiceId				= [intSCInvoiceId]
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
 					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
+					,@ItemInventoryShipmentChargeId	= [intInventoryShipmentChargeId]
 					,@ItemShipmentNumber			= [strShipmentNumber]
 					,@ItemRecipeItemId				= [intRecipeItemId]
 					,@ItemRecipeId					= [intRecipeId]
@@ -766,6 +770,7 @@ BEGIN
 						,@ItemSCInvoiceId				= @ItemSCInvoiceId
 						,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 						,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
+						,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 						,@ItemShipmentNumber			= @ItemShipmentNumber
 						,@ItemRecipeItemId				= @ItemRecipeItemId
 						,@ItemRecipeId					= @ItemRecipeId
@@ -1292,6 +1297,7 @@ BEGIN TRY
 						,@ItemSCInvoiceId				= [intSCInvoiceId]
 						,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
 						,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
+						,@ItemInventoryShipmentChargeId	= [intInventoryShipmentChargeId]
 						,@ItemShipmentNumber			= [strShipmentNumber]						
 						,@ItemRecipeItemId				= [intRecipeItemId]
 						,@ItemRecipeId					= [intRecipeId]
@@ -1366,6 +1372,7 @@ BEGIN TRY
 							,@ItemSCInvoiceId				= @ItemSCInvoiceId
 							,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 							,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
+							,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 							,@ItemShipmentNumber			= @ItemShipmentNumber
 							,@ItemRecipeItemId				= @ItemRecipeItemId
 							,@ItemRecipeId					= @ItemRecipeId
@@ -1539,6 +1546,7 @@ BEGIN TRY
 					,@ItemSCInvoiceId				= [intSCInvoiceId]
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
 					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
+					,@ItemInventoryShipmentChargeId	= [intInventoryShipmentChargeId]
 					,@ItemShipmentNumber			= [strShipmentNumber]
 					,@ItemRecipeItemId				= [intRecipeItemId]	
 					,@ItemRecipeId					= [intRecipeId]
@@ -1649,6 +1657,7 @@ BEGIN TRY
 						,[intSCInvoiceId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSCInvoiceId ELSE [intSCInvoiceId] END					
 						,[strSCInvoiceNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSCInvoiceNumber ELSE [strSCInvoiceNumber] END				
 						,[intInventoryShipmentItemId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemInventoryShipmentItemId ELSE [intInventoryShipmentItemId] END			
+						,[intInventoryShipmentChargeId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemInventoryShipmentChargeId ELSE [intInventoryShipmentChargeId] END			
 						,[strShipmentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentNumber ELSE [strShipmentNumber] END	
 						,[intRecipeItemId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeItemId ELSE [intRecipeItemId] END
 						,[intRecipeId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeId ELSE [intRecipeId] END
