@@ -208,10 +208,10 @@ BEGIN TRY
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
 
 	SELECT @intBusinessShiftId = intShiftId
-		FROM dbo.tblMFShift
-		WHERE intLocationId = @intLocationId
-			AND @dtmCurrentDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
-				AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCurrentDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
 	IF @dtmPlannedDate IS NULL
 		SELECT @dtmPlannedDate = @dtmBusinessDate
@@ -264,7 +264,6 @@ BEGIN TRY
 	BEGIN
 		--EXEC dbo.uspSMGetStartingNumber 24
 		--	,@strOutputLotNumber OUTPUT
-
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 			,@intItemId = @intItemId
 			,@intManufacturingId = @intManufacturingCellId
@@ -275,7 +274,8 @@ BEGIN TRY
 			,@intPatternCode = 24
 			,@ysnProposed = 0
 			,@strPatternString = @strOutputLotNumber OUTPUT
-			,@intShiftId=@intBusinessShiftId
+			,@intShiftId = @intPlannedShiftId
+			,@dtmDate = @dtmPlannedDate
 	END
 
 	IF EXISTS (
@@ -756,7 +756,9 @@ BEGIN TRY
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 82
 
-		IF @strCreateMultipleLots = 'True' and @dblPhysicalCount > 0 and @intProduceUnitMeasureId<>@intPhysicalItemUOMId
+		IF @strCreateMultipleLots = 'True'
+			AND @dblPhysicalCount > 0
+			AND @intProduceUnitMeasureId <> @intPhysicalItemUOMId
 		BEGIN
 			WHILE @dblPhysicalCount > 0
 			BEGIN
@@ -811,10 +813,10 @@ BEGIN TRY
 				END
 
 				EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId
-						,@intItemId = @intItemId
-						,@intOutputLotId = @intLotId
-						,@intLocationId = @intLocationId
-						,@intUserId = @intUserId
+					,@intItemId = @intItemId
+					,@intOutputLotId = @intLotId
+					,@intLocationId = @intLocationId
+					,@intUserId = @intUserId
 
 				SELECT @dblPhysicalCount = @dblPhysicalCount - 1
 
@@ -833,7 +835,8 @@ BEGIN TRY
 						,@intPatternCode = 24
 						,@ysnProposed = 0
 						,@strPatternString = @strOutputLotNumber OUTPUT
-						,@intShiftId=@intBusinessShiftId
+						,@intShiftId = @intPlannedShiftId
+						,@dtmDate = @dtmPlannedDate
 				END
 			END
 		END
@@ -869,31 +872,29 @@ BEGIN TRY
 				,@intInputLotId = @intInputLotId
 				,@intInputStorageLocationId = @intInputLotStorageLocationId
 
-				IF @intLotStatusId IS NOT NULL
-			AND NOT EXISTS (
-				SELECT *
-				FROM dbo.tblICLot
-				WHERE intLotId = @intLotId
-					AND intLotStatusId = @intLotStatusId
-				)
-			AND @strLotTracking <> 'No'
-		BEGIN
-			--UPDATE dbo.tblICLot
-			--SET intLotStatusId = @intLotStatusId
-			--WHERE intLotId = @intLotId
-			EXEC uspMFSetLotStatus @intLotId
-				,@intLotStatusId
-				,@intUserId
-		END
+			IF @intLotStatusId IS NOT NULL
+				AND NOT EXISTS (
+					SELECT *
+					FROM dbo.tblICLot
+					WHERE intLotId = @intLotId
+						AND intLotStatusId = @intLotStatusId
+					)
+				AND @strLotTracking <> 'No'
+			BEGIN
+				--UPDATE dbo.tblICLot
+				--SET intLotStatusId = @intLotStatusId
+				--WHERE intLotId = @intLotId
+				EXEC uspMFSetLotStatus @intLotId
+					,@intLotStatusId
+					,@intUserId
+			END
 
-				EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId
-					,@intItemId = @intItemId
-					,@intOutputLotId = @intLotId
-					,@intLocationId = @intLocationId
-					,@intUserId = @intUserId
+			EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId
+				,@intItemId = @intItemId
+				,@intOutputLotId = @intLotId
+				,@intLocationId = @intLocationId
+				,@intUserId = @intUserId
 		END
-
-		
 
 		SELECT @strOutputLotNumber = strLotNumber
 			,@intParentLotId = intParentLotId
@@ -908,8 +909,6 @@ BEGIN TRY
 
 		SELECT @strOutputLotNumber AS strOutputLotNumber
 	END
-
-	
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
