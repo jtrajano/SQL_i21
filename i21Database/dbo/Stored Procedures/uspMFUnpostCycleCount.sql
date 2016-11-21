@@ -19,6 +19,9 @@ BEGIN TRY
 		,@strWorkOrderNo NVARCHAR(50)
 		,@strBatchId NVARCHAR(50)
 		,@intBatchId INT
+		,@intYieldCostId INT
+		,@strYieldCostValue NVARCHAR(50)
+		,@intLocationId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -32,6 +35,7 @@ BEGIN TRY
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@strCostAdjustmentBatchId = strCostAdjustmentBatchId
+		,@intLocationId = intLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -85,7 +89,7 @@ BEGIN TRY
 			,[dblReportingRate]
 			,[dblForeignRate]
 			)
-		EXEC dbo.uspICUnpostCosting @intTransactionId
+		EXEC dbo.uspICUnpostCostAdjustment @intTransactionId
 			,@strTransactionId
 			,@strCostAdjustmentBatchId
 			,@intUserId
@@ -99,11 +103,22 @@ BEGIN TRY
 	SET intCountStatusId = 10
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	SELECT @intYieldCostId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Add yield cost to output item'
+
+	SELECT @strYieldCostValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intYieldCostId
+
 	SELECT @intWorkOrderProducedLotTransactionId = MIN(intWorkOrderProducedLotTransactionId)
 	FROM tblMFWorkOrderProducedLotTransaction PL
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	WHILE @intWorkOrderProducedLotTransactionId IS NOT NULL
+		AND @strYieldCostValue = 'False'
 	BEGIN
 		SELECT @strAdjustmentNo = NULL
 			,@intTransactionId = NULL
@@ -234,6 +249,11 @@ BEGIN TRY
 
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,0
+
+		DELETE
+		FROM tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intBatchId = @intBatchId
 	END
 
 	IF @intTransactionCount = 0
