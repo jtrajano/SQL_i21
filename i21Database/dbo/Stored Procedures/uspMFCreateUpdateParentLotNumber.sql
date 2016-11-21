@@ -1,119 +1,110 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCreateUpdateParentLotNumber] 
-	@strParentLotNumber NVARCHAR(50) = NULL
+﻿CREATE PROCEDURE [dbo].[uspMFCreateUpdateParentLotNumber] @strParentLotNumber NVARCHAR(50) = NULL
 	,@strParentLotAlias NVARCHAR(50)
 	,@intItemId INT
 	,@dtmExpiryDate DATETIME
 	,@intLotStatusId INT
 	,@intEntityUserSecurityId INT
 	,@intLotId INT
-	,@intParentLotId INT = NULL OUTPUT 
+	,@intParentLotId INT = NULL OUTPUT
 	,@intSubLocationId INT = NULL
-	,@intLocationId INT = NULL 
+	,@intLocationId INT = NULL
+	,@dtmDate DATETIME = NULL
+	,@intShiftId INT = NULL
 AS
+DECLARE @ErrMsg NVARCHAR(Max)
+	,@intCategoryId INT
+	,@dtmBusinessDate DATETIME
+	,@intBusinessShiftId INT
+	,@dtmCurrentDateTime DATETIME
 
-	DECLARE @ErrMsg NVARCHAR(Max)
-			,@intCategoryId int
-			,@dtmBusinessDate DATETIME
-			,@intBusinessShiftId INT
-			,@dtmCurrentDateTime DATETIME
+SELECT @dtmCurrentDateTime = GETDATE()
 
-	SELECT @dtmCurrentDateTime = GETDATE()
+IF @dtmDate IS NULL
+BEGIN
+	SELECT @dtmDate = @dtmCurrentDateTime
+END
 
-	IF @strParentLotNumber IS NULL OR @strParentLotNumber = ''
+IF @strParentLotNumber IS NULL
+	OR @strParentLotNumber = ''
+BEGIN
+	SELECT @intCategoryId = intCategoryId
+	FROM tblICItem
+	WHERE intItemId = @intItemId
+
+	IF @intShiftId IS NULL
 	BEGIN
-		--EXEC dbo.uspSMGetStartingNumber 
-		--	78
-		--	,@strParentLotNumber OUTPUT
-		Select @intCategoryId=intCategoryId from tblICItem Where intItemId=@intItemId
-
 		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
-		SELECT @intBusinessShiftId = intShiftId
+		SELECT @intShiftId = intShiftId
 		FROM dbo.tblMFShift
 		WHERE intLocationId = @intLocationId
 			AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 				AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
-
-		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-			,@intItemId = @intItemId
-			,@intManufacturingId = NULL
-			,@intSubLocationId = @intSubLocationId
-			,@intLocationId = @intLocationId
-			,@intOrderTypeId = NULL
-			,@intBlendRequirementId = NULL
-			,@intPatternCode = 78
-			,@ysnProposed = 0
-			,@strPatternString = @strParentLotNumber OUTPUT
-			,@intShiftId=@intBusinessShiftId
 	END
 
-	SELECT @intParentLotId = intParentLotId
-	FROM tblICParentLot
-	WHERE strParentLotNumber = @strParentLotNumber
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		,@intItemId = @intItemId
+		,@intManufacturingId = NULL
+		,@intSubLocationId = @intSubLocationId
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 78
+		,@ysnProposed = 0
+		,@strPatternString = @strParentLotNumber OUTPUT
+		,@intShiftId = @intShiftId
+		,@dtmDate = @dtmDate
+END
 
-	--IF @dtmDate IS NULL
-	--	SET @dtmDate = GETDATE()
+SELECT @intParentLotId = intParentLotId
+FROM tblICParentLot
+WHERE strParentLotNumber = @strParentLotNumber
 
-	IF NOT EXISTS (
-			SELECT 1
-			FROM tblICLot
-			WHERE intLotId = @intLotId
-	)
-	BEGIN 
-		RAISERROR (
-		'Lot does not exist for parent lot creation.'
-		,16
-		,1
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblICLot
+		WHERE intLotId = @intLotId
+		)
+BEGIN
+	RAISERROR (
+			'Lot does not exist for parent lot creation.'
+			,16
+			,1
+			)
+
+	RETURN - 1;
+END
+
+IF ISNULL(@intParentLotId, 0) = 0
+BEGIN
+	INSERT INTO tblICParentLot (
+		strParentLotNumber
+		,strParentLotAlias
+		,intItemId
+		,dtmExpiryDate
+		,intLotStatusId
+		,intCreatedEntityId
+		,dtmDateCreated
+		)
+	VALUES (
+		@strParentLotNumber
+		,@strParentLotAlias
+		,@intItemId
+		,@dtmExpiryDate
+		,@intLotStatusId
+		,@intEntityUserSecurityId
+		,GETDATE()
 		)
 
-		RETURN -1;
-	END 
+	SELECT @intParentLotId = SCOPE_IDENTITY()
 
-	IF ISNULL(@intParentLotId, 0) = 0
-	BEGIN
-		INSERT INTO tblICParentLot (
-			strParentLotNumber
-			,strParentLotAlias
-			,intItemId
-			,dtmExpiryDate
-			,intLotStatusId
-			,intCreatedEntityId
-			,dtmDateCreated
-			)
-		VALUES (
-			@strParentLotNumber
-			,@strParentLotAlias
-			,@intItemId
-			,@dtmExpiryDate
-			,@intLotStatusId
-			,@intEntityUserSecurityId
-			,GETDATE()
-			)
-
-		SELECT @intParentLotId = SCOPE_IDENTITY()
-
-		UPDATE tblICLot
-		SET intParentLotId = @intParentLotId
-		WHERE intLotId = @intLotId
-	END
-	ELSE
-	BEGIN
-		--IF (
-		--		SELECT intItemId
-		--		FROM tblICParentLot
-		--		WHERE intParentLotId = @intParentLotId
-		--) <> @intItemId
-		--BEGIN 
-		--	RAISERROR (
-		--		'Lot and Parent Lot cannot have different item.'
-		--		,16
-		--		,1
-		--	)
-		--	RETURN -1;
-		--END 
-			
-
-		UPDATE tblICLot
-		SET intParentLotId = @intParentLotId
-		WHERE intLotId = @intLotId
-	END
+	UPDATE tblICLot
+	SET intParentLotId = @intParentLotId
+	WHERE intLotId = @intLotId
+END
+ELSE
+BEGIN
+	UPDATE tblICLot
+	SET intParentLotId = @intParentLotId
+	WHERE intLotId = @intLotId
+END

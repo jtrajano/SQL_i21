@@ -10,6 +10,7 @@
 	,@strPatternString NVARCHAR(50) OUTPUT
 	,@intEntityId INT = NULL
 	,@intShiftId INT = NULL
+	,@dtmDate datetime=NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
