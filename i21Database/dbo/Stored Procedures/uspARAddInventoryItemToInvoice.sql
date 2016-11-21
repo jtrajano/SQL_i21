@@ -30,6 +30,7 @@
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
+	,@ItemInventoryShipmentChargeId	INT				= NULL
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
@@ -234,6 +235,7 @@ BEGIN TRY
 				,[intSCInvoiceId]
 				,[strSCInvoiceNumber]
 				,[intInventoryShipmentItemId]
+				,[intInventoryShipmentChargeId]
 				,[strShipmentNumber]
 				,[intRecipeItemId] 
 				,[intRecipeId]
@@ -309,6 +311,7 @@ BEGIN TRY
 				,[intSCInvoiceId]					= @ItemSCInvoiceId
 				,[strSCInvoiceNumber]				= @ItemSCInvoiceNumber 
 				,[intInventoryShipmentItemId]		= @ItemInventoryShipmentItemId 
+				,[intInventoryShipmentChargeId]		= @ItemInventoryShipmentChargeId 
 				,[strShipmentNumber]				= @ItemShipmentNumber 
 				,[intRecipeItemId]					= @ItemRecipeItemId 
 				,[intRecipeId]						= @ItemRecipeId
