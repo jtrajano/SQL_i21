@@ -1572,7 +1572,8 @@ BEGIN
 							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 						LEFT JOIN dbo.tblICLot lot
 							ON lot.intLotId = RebuilInvTrans.intLotId 
-				WHERE	strBatchId = @strBatchId
+				WHERE	RebuilInvTrans.strBatchId = @strBatchId
+						AND RebuilInvTrans.intTransactionId = @intTransactionId
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -1681,8 +1682,9 @@ BEGIN
 			END CATCH 
 		END 
 
-		DELETE FROM #tmpICInventoryTransaction
-		WHERE strBatchId = @strBatchId
+		DELETE	FROM #tmpICInventoryTransaction
+		WHERE	strBatchId = @strBatchId
+				AND intTransactionId = @intTransactionId
 	END 
 END 
 
