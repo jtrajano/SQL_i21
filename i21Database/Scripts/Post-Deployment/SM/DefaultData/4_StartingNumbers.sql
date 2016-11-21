@@ -986,7 +986,7 @@ GO
     WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Ticket Management')
 	
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 105
+	SELECT	[intStartingNumberId]	= 106
 			,[strTransactionType]	= N'Load Shipping Instruction'
 			,[strPrefix]			= N'LSI-'
 			,[intNumber]			= 1
