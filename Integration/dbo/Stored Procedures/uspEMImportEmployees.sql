@@ -308,7 +308,7 @@ BEGIN
 				@dtmNextReview		= case when premp_next_review_dt = 0 then null else premp_next_review_dt end ,
 				@ysnRetirementPlan	= premp_pension_flag_9,
 				@dblRegularHours	= premp_std_hrs,
-				@dtmLastModified	= premp_user_rev_dt
+				@dtmLastModified	= CASE WHEN ISNULL(premp_user_rev_dt,0) = 0 THEN NULL ELSE premp_user_rev_dt END
 					
             FROM prempmst
             WHERE premp_emp = @originEmployee
