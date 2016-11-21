@@ -513,6 +513,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     },
 
     setupContext: function (options) {
+        "use strict";
         var me = this,
             win = options.window,
             store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 });
@@ -600,33 +601,63 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     validateRecord: function (config, action) {
         var win = config.window;
         this.validateRecord(config, function (result) {
-            var lineItems = config.viewModel.data.current.tblICInventoryAdjustmentDetails();
-            var zeroCost = false;
-            zeroCost = Ext.Array.each(lineItems.data.items, function (detail) {
-                if (!detail.dummy) {
-                    var hasModification = !_.isUndefined(detail.modified);
-                    var defined =  hasModification && !_.isUndefined(detail.modified.dblNewCost);
-                    var notNull = hasModification && !_.isNull(detail.modified.dblNewCost);
-                    var checkCost = defined && notNull;
+           if (result) {
+                var controller = config.window.controller;
+                var vm = config.window.viewModel;
+                var current = vm.data.current;
+                var win = config.window;
+                var colNewUnitCost = win.down('#colNewUnitCost');
 
-                    if (detail.get('dblNewCost') <= 0 && (checkCost &&  (detail.modified.dblNewCost !== detail.get('dblNewCost')))) {
-                        return true;
+                if(current) {
+                    var lineItems = config.viewModel.data.current.tblICInventoryAdjustmentDetails();
+
+                    var lotIds = [];
+                    _.each(lineItems.data.items, function (value, key, list) {
+                        if(!value.dummy)
+                            lotIds.push(value.data.intLotId);
+                    });
+                    if(_.size(lotIds) !== _.size(_.uniq(lotIds))) {
+                        iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
+                        return;
                     }
+
+                    var zeroCost = false;
+                        zeroCost = Ext.Array.each(lineItems.data.items, function (detail) {
+                            if (!detail.dummy) {
+                                if(!iRely.Functions.isEmpty(detail.get('dblNewCost')) || detail.modified.dblNewCost !== null) {
+                                   /* var hasModification = !_.isUndefined(detail.modified);
+                                    var defined =  hasModification && !_.isUndefined(detail.modified.dblNewCost);
+                                    var notNull = hasModification && !_.isNull(detail.modified.dblNewCost);
+                                    var checkCost = defined && notNull;
+
+                                    if (detail.get('dblNewCost') <= 0 && (checkCost &&  (detail.modified.dblNewCost !== detail.get('dblNewCost')))) {
+                                        return true;
+                                    }*/
+
+                                    if(detail.get('dblNewCost') == 0) {
+                                        return true;
+                                    }
+                                }
+                            }
+                            return false;
+                        });
+
+                        if (zeroCost && colNewUnitCost.hidden == false) {
+                            var msgAction = function (button) {
+                                if (button === 'yes') {
+                                    action(true);
+                                }
+                                else action(false);
+                            };
+                            iRely.Functions.showCustomDialog('question', 'yesnocancel', 'One of your line items has a zero (0) New Unit Cost.<br>Are you sure you want to set your new unit cost to zero(0)?', msgAction);
+                        }
+                        else {
+                            action(true);
+                        }
                 }
-                return false;
-            });
-
-            if (zeroCost) {
-                var msgAction = function (button) {
-                    if (button === 'yes') {
-                        action(true);
-                    }
-                    else action(false);
-                };
-                iRely.Functions.showCustomDialog('question', 'yesnocancel', 'One of your line items has a zero (0) New Unit Cost.<br>Are you sure you want to set your new unit cost to zero(0)?', msgAction);
-            }
-            else {
-                action(true);
+                else {
+                     action(true);
+                }
             }
         });
     },

@@ -67,5 +67,17 @@ Ext.define('Inventory.model.AdjustmentDetail', {
 
     validators: [
         { type: 'presence', field: 'strItemNo' }
-    ]
+    ],
+     validate: function(options) {
+         var errors = this.callParent(arguments);
+
+         if(this.get('dblAdjustByQuantity') == null || this.get('dblAdjustByQuantity') == '' || this.get('dblAdjustByQuantity') == 0) {
+             errors.add({
+                field: 'dblAdjustByQuantity',
+                message: 'Adjust By Quantity must have a value.'
+            })
+         }
+
+         return errors;
+    }
 });
