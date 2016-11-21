@@ -129,7 +129,7 @@ END
 					 [strSourceTransaction]					= 'Card Fueling Transaction'
 					,[intSourceId]							= cfTrans.intTransactionId
 					,[strSourceId]							= cfTrans.strTransactionId
-					,[intInvoiceId]							= NULL --NULL Value will create new invoice
+					,[intInvoiceId]							= cfTrans.intInvoiceId --NULL Value will create new invoice
 					,[intEntityCustomerId]					= cfCardAccount.intCustomerId
 					,[intCompanyLocationId]					= cfSiteItem.intARLocationId
 					,[intCurrencyId]						= 1
@@ -162,7 +162,9 @@ END
 					,[ysnResetDetails]						= 0
 					,[ysnPost]								= @Post
 					,[ysnRecap]								= @Recap
-					,[intInvoiceDetailId]					= NULL
+					,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
+												FROM tblARInvoiceDetail 
+												WHERE intInvoiceId = cfTrans.intInvoiceId)
 					,[intItemId]							= cfSiteItem.intARItemId
 					,[ysnInventory]							= 1
 					,[strItemDescription]					= cfSiteItem.strDescription 
@@ -356,6 +358,32 @@ END
 
 					DROP TABLE #tmpCreatedInvoice
 				END 
+				ELSE IF (@Recap = 1)
+				BEGIN
+					SELECT * INTO #tmpCreatedInvoice2
+					FROM [fnCFSplitString](@CreatedIvoices,',') 
+
+					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+					FROM #tmpCreatedInvoice2
+
+
+					WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice2 ))
+					BEGIN
+						SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice2
+						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+				
+						UPDATE tblCFTransaction 
+						SET intInvoiceId = @intCreatedInvoiceId
+						WHERE intTransactionId = (SELECT intTransactionId 
+													FROM tblARInvoice 
+													WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+						DELETE FROM #tmpCreatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+
+					END
+
+					DROP TABLE #tmpCreatedInvoice2
+				END
 			
 			END
 
@@ -387,6 +415,32 @@ END
 					END
 
 					DROP TABLE #tmpUpdatedInvoice
+				END
+				IF (@Recap = 1)
+				BEGIN
+					SELECT * INTO #tmpUpdatedInvoice2
+					FROM [fnCFSplitString](@UpdatedIvoices,',') 
+
+					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+					FROM #tmpUpdatedInvoice2
+
+
+					WHILE (EXISTS(SELECT 1 FROM #tmpUpdatedInvoice2 ))
+					BEGIN
+						SELECT @intCreatedRecordKey = RecordKey FROM #tmpUpdatedInvoice2
+						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpUpdatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+				
+						UPDATE tblCFTransaction 
+						SET intInvoiceId = @intCreatedInvoiceId
+						WHERE intTransactionId = (SELECT intTransactionId 
+													FROM tblARInvoice 
+													WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+						DELETE FROM #tmpUpdatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+
+					END
+
+					DROP TABLE #tmpUpdatedInvoice2
 				END
 			
 			END
