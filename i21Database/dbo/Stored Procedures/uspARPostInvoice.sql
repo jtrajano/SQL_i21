@@ -2356,7 +2356,7 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= IST.intGeneralAccountId
+				,intAccountId				= @DeferredRevenueAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
 																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
