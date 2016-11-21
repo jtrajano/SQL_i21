@@ -210,41 +210,15 @@ BEGIN
 	,[intChargeId]						= IC.intItemId
 	,[strCostMethod]					= IC.strCostMethod
 	,[dblRate]							= CASE
-											WHEN IC.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount
+											WHEN IC.strCostMethod = 'Per Unit' THEN (QM.dblDiscountAmount * -1)
 											WHEN IC.strCostMethod = 'Amount' THEN 0
 										END
-	--Comment this line for temporary fixes in Inventory Shipment Cost
-	--,[dblRate]							= CASE
-	--										WHEN IC.strCostMethod = 'Per Unit' THEN 
-	--										CASE 
-	--											WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-	--											WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
-	--										END
-	--										WHEN IC.strCostMethod = 'Amount' THEN 0
-	--									END
 	,[intCostUOMId]						= @intTicketItemUOMId
 	,[intOtherChargeEntityVendorId]		= NULL
 	,[dblAmount]						= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 0
-											WHEN IC.strCostMethod = 'Amount' THEN dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId)
-											--CASE 
-											--	WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId) * -1)
-											--	WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId)
-											--END
+											WHEN IC.strCostMethod = 'Amount' THEN (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId) * -1)
 										END
-	--Comment this line for temporary fixes in Inventory Shipment Cost
-	--,[dblAmount]						= CASE
-	--										WHEN IC.strCostMethod = 'Per Unit' THEN 0
-	--										WHEN IC.strCostMethod = 'Amount' THEN 
-	--										CASE 
-	--											WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-	--											WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
-	--										END
-	--									END
-	--,[ysnAccrue]						= CASE
-	--										WHEN QM.dblDiscountAmount < 0 THEN 1
-	--										WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
-	--									END
 	,[ysnAccrue]						= 0
 	,[ysnPrice]							= 1
 	FROM @ShipmentStagingTable SE
