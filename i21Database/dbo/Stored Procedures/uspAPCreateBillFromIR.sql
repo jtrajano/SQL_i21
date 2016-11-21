@@ -102,7 +102,7 @@ BEGIN
 	----GET THE TOTAL IR AMOUNT
 	SELECT @receiptAmount = SUM(A.dblLineTotal) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
 	
-	SELECT @totalCharges = (SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00))
+	SELECT @totalCharges = ISNULL((SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00)),0.00)
 	FROM vyuAPChargesForBilling WHERE intInventoryReceiptId = @receiptId
 	
 	SELECT @totalLineItem =  SUM(A.dblLineTotal)
@@ -256,12 +256,12 @@ BEGIN
 											 ELSE B.dblUnitCost
 										END,
 		[dblOldCost]				=	NULL,
-		[dblClaimAmount]			=	CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
+		[dblClaimAmount]			=	ISNULL(CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
 										(
 										 (ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
 										 (CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) 
 											   WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * ( CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) ELSE B.dblUnitCost END) / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END
-										) ELSE 0.00 END,
+										) ELSE 0.00 END,0),
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0),
 		[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
