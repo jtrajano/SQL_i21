@@ -2358,3 +2358,9 @@ SELECT intRecipeItemId, ROW_NUMBER() OVER (PARTITION BY intRecipeId ORDER BY [in
 FROM tblMFRecipeItem Where intSequenceNo is null AND intRecipeItemTypeId=1 Group By intRecipeId,intRecipeItemId
 ) t ON ri.intRecipeItemId=t.intRecipeItemId
 GO
+
+GO
+UPDATE tblMFCompanyPreference
+SET intWastageWorkOrderDuration = 2
+WHERE intWastageWorkOrderDuration IS NULL
+GO
