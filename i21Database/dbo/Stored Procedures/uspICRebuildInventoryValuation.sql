@@ -816,6 +816,11 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+
+				-- Special delete on #tmpICInventoryTransaction
+				-- Produce and Consume transactions typically shares a batch but hold different transaction ids. 
+				DELETE	FROM #tmpICInventoryTransaction
+				WHERE	strBatchId = @strBatchId
 			END
 
 			--ELSE IF @strTransactionForm = 'Inventory Transfer'
