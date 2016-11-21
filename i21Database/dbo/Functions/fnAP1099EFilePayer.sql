@@ -97,7 +97,7 @@ BEGIN
 		+ SPACE(260)
 		+ '00000002' --500-507
 		+ SPACE(241)
-		+ SPACE(2)
+		+ CHAR(13) + CHAR(10)
 	FROM tblSMCompanySetup A
 	CROSS JOIN tblAP1099Threshold C
 

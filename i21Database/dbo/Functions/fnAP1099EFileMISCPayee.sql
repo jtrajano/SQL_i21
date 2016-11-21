@@ -139,7 +139,7 @@ BEGIN
 		+ SPACE(12)
 		+ SPACE(12)
 		+ SPACE(2)
-		+ SPACE(2)
+		+ CHAR(13) + CHAR(10)
 	FROM vyuAP1099MISC A
 	--OUTER APPLY 
 	--(
