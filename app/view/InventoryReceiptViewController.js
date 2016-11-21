@@ -5739,8 +5739,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current = win.viewModel.data.current;
 
             if (current) {
-                //Change Source Type to "None" for "Direct" Receipt Type
-                if(current.get('strReceiptType') == 'Direct') {
+                //Change Source Type to "None" for "Direct" or "Purchase Order" Receipt Type
+                if(current.get('strReceiptType') == 'Direct' || current.get('strReceiptType') == 'Purchase Order') {
                     current.set('intSourceType', 0);
                     current.set('strSourceType', 'None');
                 }

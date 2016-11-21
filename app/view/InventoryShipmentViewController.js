@@ -2470,8 +2470,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intShipToLocationId', null);
             current.set('strShipToAddress', null);
 
-            //Change Source Type to "None" for "Direct" Order Type
-            if(current.get('intOrderType') == 4) {
+            //Change Source Type to "None" for "Direct" or "Sales Order" Order Type
+            if(current.get('intOrderType') == 4 || current.get('intOrderType') == 2) {
                 current.set('intSourceType', 0);
                 current.set('strSourceType', 'None');
             }
