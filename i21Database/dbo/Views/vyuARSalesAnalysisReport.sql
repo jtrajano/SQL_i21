@@ -177,8 +177,8 @@ FROM
 					AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 					AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 		WHERE ARI.ysnPosted = 1 
-		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
-		  AND ICI.strType <> 'Software'
+		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
+		  AND ISNULL(ICI.strType, '') <> 'Software'
 
 UNION ALL
 
