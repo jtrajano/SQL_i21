@@ -11,9 +11,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @Active AS INT = 1
-		,@OnHold AS INT = 2
-		,@Quarantine AS INT = 3
+DECLARE @LotStatus_Active AS INT = 1
+		,@LotStatus_OnHold AS INT = 2
+		,@LotStatus_Quarantine AS INT = 3
 
 DECLARE @intInsertedLotId AS INT 
 DECLARE @intLotTypeId AS INT
@@ -292,8 +292,16 @@ BEGIN
 	END 
 
 	-- Setup the Lot Status
-	  --SET @intLotStatusId_ItemLotTable = ISNULL(ISNULL(@intLotStatusId, @intLotStatusId_ItemLotTable), @Active) 
-	  SET @intLotStatusId_ItemLotTable = ISNULL((SELECT intLotStatusId FROM tblICItem WHERE intItemId=@intItemId), @Active) 
+	-- 1: Get lot status from @intLotStatusId
+	-- 2: If NULL, get lot status from source lot (@intLotStatusId_ItemLotTable)
+	-- 3: If NULL, get lot status from item setup
+	-- 4: If NULL, default to Active. 
+	DECLARE @lotStatusFromItemSetup AS INT
+	SELECT	TOP 1
+			@lotStatusFromItemSetup = i.intLotStatusId
+	FROM	tblICItem i
+	WHERE	intItemId = @intItemId
+	SET @intLotStatusId_ItemLotTable = COALESCE(@intLotStatusId, @intLotStatusId_ItemLotTable, @lotStatusFromItemSetup, @LotStatus_Active)
 
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  
