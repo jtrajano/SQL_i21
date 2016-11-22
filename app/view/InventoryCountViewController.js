@@ -1,5 +1,5 @@
 Ext.define('Inventory.view.InventoryCountViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventorycount',
     requires: [
         'CashManagement.common.Text',
@@ -351,7 +351,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     setupContext: function (options) {
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.InventoryCount', { pageSize: 1 });
+            store = Ext.create('Inventory.store.InventoryCount', { pageSize: 1 }),
+            grdPhysicalCount = win.down('#grdPhysicalCount');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
@@ -364,13 +365,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             }),
             createTransaction: Ext.bind(me.createTransaction, me),
             include: 'tblICInventoryCountDetails.vyuICGetInventoryCountDetail',
+            onSaveClick: me.saveAndPokeGrid(win, grdPhysicalCount),
             createRecord: me.createRecord,
             binding: me.config.binding,
             details: [
                 {
                     key: 'tblICInventoryCountDetails',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdPhysicalCount'),
+                        grid: grdPhysicalCount,
                         deleteButton: win.down('#btnRemove'),
                         createRecord: me.createLineItemRecord
                     })

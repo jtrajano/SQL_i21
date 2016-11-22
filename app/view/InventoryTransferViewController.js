@@ -1,5 +1,5 @@
 Ext.define('Inventory.view.InventoryTransferViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventorytransfer',
     requires: [
         'CashManagement.common.Text',
@@ -389,6 +389,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             include: 'tblICInventoryTransferDetails.vyuICGetInventoryTransferDetail',
+            onSaveClick: me.saveAndPokeGrid(win, grdInventoryTransfer),
             createRecord : me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {
