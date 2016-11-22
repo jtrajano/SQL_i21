@@ -41,7 +41,7 @@ BEGIN
 			dblCost = arSalesAnalysisReport.dblUnitCost 
 			FROM tblCFTransaction AS cfTransaction
 			INNER JOIN tblARInvoice AS arInvoice
-			ON cfTransaction.intTransactionId = arInvoice.intTransactionId
+			ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId
 			INNER JOIN vyuARSalesAnalysisReport AS arSalesAnalysisReport
 			ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId 
 			LEFT OUTER JOIN

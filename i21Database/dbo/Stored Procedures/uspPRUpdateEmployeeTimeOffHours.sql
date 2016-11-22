@@ -79,16 +79,6 @@ BEGIN
 													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
 													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= GETDATE() 
 													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
-								WHEN (strPeriod = 'Day') THEN 
-									DATEDIFF(DD, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								WHEN (strPeriod = 'Week') THEN 
-									DATEDIFF(WK, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								WHEN (strPeriod = 'Month') THEN
-									DATEDIFF(MM, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								WHEN (strPeriod = 'Quarter') THEN
-									DATEDIFF(QQ, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								WHEN (strPeriod = 'Year') THEN
-									DATEDIFF(YY, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
 								ELSE 0
 							END * dblRate * dblRateFactor
 		--Calculate Total Earned Hours
@@ -133,12 +123,29 @@ BEGIN
 		
 		--Update Accrued Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursAccrued = CASE WHEN (T.dblAccruedHours > dblMaxEarned) THEN dblMaxEarned ELSE T.dblAccruedHours END
+			SET dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN T.dblAccruedHours ELSE 0 END
 		FROM
 		#tmpEmployees T
 		WHERE T.intEntityEmployeeId = @intEmployeeId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 				AND intTypeTimeOffId = @intTypeTimeOffId
+
+		--Reset Hours Used
+		UPDATE tblPREmployeeTimeOff
+			SET dblHoursUsed = CASE WHEN (T.strAwardPeriod = 'Anniversary Date') 
+									THEN
+										CASE WHEN (GETDATE() >= T.dtmNextAward) 
+										THEN 0
+										ELSE dblHoursUsed END
+									ELSE	
+										CASE WHEN (YEAR(T.dtmLastAward) < YEAR(GETDATE())) 
+										THEN 0 
+										ELSE dblHoursUsed END
+									END
+		FROM #tmpEmployees T
+		WHERE T.intEntityEmployeeId = @intEmployeeId
+			AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
+			AND intTypeTimeOffId = @intTypeTimeOffId
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
@@ -147,7 +154,7 @@ BEGIN
 								 ELSE
 									(dblHoursEarned + T.dblEarnedHours)
 								END
-				,dblHoursAccrued = dblHoursAccrued - T.dblEarnedHours
+				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
 				,dtmLastAward = T.dtmNextAward
 		FROM
 		#tmpEmployees T

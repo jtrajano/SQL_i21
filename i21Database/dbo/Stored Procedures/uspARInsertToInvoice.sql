@@ -52,6 +52,46 @@ DECLARE @EntityCustomerId		INT,
 		@EntityContactId		INT,
 		@StorageScheduleTypeId	INT
 
+DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT, 
+							ysnIsInventory				BIT,
+							ysnBlended					BIT,
+							strItemDescription			NVARCHAR(100),
+							intItemUOMId				INT,
+							intContractHeaderId			INT,
+							intContractDetailId			INT,
+							dblQtyOrdered				NUMERIC(18,6),
+							dblQtyRemaining				NUMERIC(18,6),
+							dblLicenseAmount			NUMERIC(18,6),
+							dblMaintenanceAmount		NUMERIC(18,6),
+							dblDiscount					NUMERIC(18,6),
+							dblItemTermDiscount			NUMERIC(18,6),
+							strItemTermDiscountBy		NVARCHAR(50),
+							dblPrice					NUMERIC(18,6),
+							strPricing					NVARCHAR(250),
+							intTaxGroupId				INT,
+							intSalesOrderDetailId		INT,
+							intInventoryShipmentItemId	INT,
+							intRecipeItemId				INT,
+							intRecipeId					INT,
+							intSubLocationId			INT,
+							intCostTypeId				INT,
+							intMarginById				INT,
+							intCommentTypeId			INT,
+							dblMargin					NUMERIC(18,6),
+							dblRecipeQuantity			NUMERIC(18,6),
+							strMaintenanceType			NVARCHAR(100),
+							strFrequency				NVARCHAR(100),
+							dtmMaintenanceDate			DATETIME,
+							strItemType					NVARCHAR(100),
+							strSalesOrderNumber			NVARCHAR(100),
+							strShipmentNumber			NVARCHAR(100),
+							dblContractBalance			INT,
+							dblContractAvailable		INT,
+							intEntityContactId			INT,
+							intStorageScheduleTypeId	INT,
+							[intSubCurrencyId]			INT,
+							[dblSubCurrencyRate]		NUMERIC(18,6))
+
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
 							ysnIsInventory				BIT,
@@ -104,7 +144,7 @@ DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 SELECT @DateOnly = CAST(GETDATE() AS DATE), @dblZeroAmount = 0.000000
 
 --GET ITEMS FROM SALES ORDER
-INSERT INTO @tblItemsToInvoice
+INSERT INTO @tblItemsToInvoiceUnsorted
 SELECT intItemId					= SI.intItemId
 	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(SI.intItemId)
 	 , ysnBlended					= SOD.ysnBlended
@@ -124,7 +164,7 @@ SELECT intItemId					= SI.intItemId
 	 , intTaxGroupId				= SI.intTaxGroupId
 	 , intSalesOrderDetailId		= SI.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
-	 , intRecipeItemId				= NULL
+	 , intRecipeItemId				= SOD.intRecipeItemId
 	 , intRecipeId					= SOD.intRecipeId
 	 , intSubLocationId				= SOD.intSubLocationId
 	 , intCostTypeId				= SOD.intCostTypeId
@@ -156,7 +196,7 @@ WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND (ISNULL(SI.intRecipeItemId, 0) = 0)	
 
 --GET COMMENT ITEMS FROM SALES ORDER
-INSERT INTO @tblItemsToInvoice
+INSERT INTO @tblItemsToInvoiceUnsorted
 SELECT intItemId					= SOD.intItemId
 	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(SOD.intItemId)
 	 , ysnBlended					= SOD.ysnBlended
@@ -176,7 +216,7 @@ SELECT intItemId					= SOD.intItemId
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
-	 , intRecipeItemId				= NULL
+	 , intRecipeItemId				= SOD.intRecipeItemId
 	 , intRecipeId					= SOD.intRecipeId
 	 , intSubLocationId				= SOD.intSubLocationId
 	 , intCostTypeId				= SOD.intCostTypeId
@@ -202,7 +242,7 @@ WHERE SO.intSalesOrderId = @SalesOrderId
 AND ISNULL(intCommentTypeId, 0) <> 0
 
 --GET ITEMS FROM POSTED SHIPMENT
-INSERT INTO @tblItemsToInvoice
+INSERT INTO @tblItemsToInvoiceUnsorted
 SELECT intItemId					= ICSI.intItemId
 	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(ICSI.intItemId)
 	 , ysnBlended					= SOD.ysnBlended
@@ -222,7 +262,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , intTaxGroupId				= SOD.intTaxGroupId
 	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= ICSI.intInventoryShipmentItemId
-	 , intRecipeItemId				= NULL
+	 , intRecipeItemId				= SOD.intRecipeItemId
 	 , intRecipeId					= SOD.intRecipeId
 	 , intSubLocationId				= SOD.intSubLocationId
 	 , intCostTypeId				= SOD.intCostTypeId
@@ -251,7 +291,7 @@ WHERE ICSI.intOrderId = @SalesOrderId
 AND ICS.ysnPosted = 1
 
 --GET ITEMS FROM Manufacturing - Other Charges
-INSERT INTO @tblItemsToInvoice
+INSERT INTO @tblItemsToInvoiceUnsorted
 SELECT intItemId					= ARSI.intItemId
 	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(ARSI.intItemId)
 	 , ysnBlended					= ARSI.ysnBlended
@@ -269,10 +309,10 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblPrice						= ARSI.dblPrice 
 	 , strPricing					= ARSI.strPricing
 	 , intTaxGroupId				= NULL
-	 , intSalesOrderDetailId		= NULL
+	 , intSalesOrderDetailId		= ARSI.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
-	 , intRecipeItemId				= NULL
-	 , intRecipeId					= NULL
+	 , intRecipeItemId				= ARSI.intRecipeItemId
+	 , intRecipeId					= ARSI.intRecipeId
 	 , intSubLocationId				= NULL
 	 , intCostTypeId				= NULL
 	 , intMarginById				= NULL
@@ -296,6 +336,59 @@ LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
 	ARSI.intSalesOrderId = @SalesOrderId
 	AND ISNULL(ARSI.intRecipeItemId,0) <> 0
+
+IF EXISTS (SELECT NULL FROM @tblItemsToInvoiceUnsorted WHERE ISNULL(intRecipeId, 0) > 0)
+	BEGIN
+		DECLARE @tblItemsWithRecipe TABLE(intSalesOrderDetailId INT, intRecipeId INT)
+		DECLARE @intCurrentSalesOrderDetailId INT
+		      , @intCurrentRecipeId INT
+			  , @intMinSalesOrderDetailId INT
+
+		INSERT INTO @tblItemsWithRecipe
+		SELECT DISTINCT MIN(intSalesOrderDetailId), intRecipeId FROM @tblItemsToInvoiceUnsorted WHERE intRecipeId > 0 GROUP BY intRecipeId
+
+		WHILE EXISTS (SELECT NULL FROM @tblItemsWithRecipe)
+			BEGIN
+				SELECT TOP 1 @intMinSalesOrderDetailId = MIN(intSalesOrderDetailId) FROM @tblItemsWithRecipe
+				SELECT TOP 1 @intCurrentRecipeId = intRecipeId FROM @tblItemsWithRecipe WHERE intSalesOrderDetailId = @intMinSalesOrderDetailId
+
+				WHILE EXISTS (SELECT NULL FROM @tblItemsToInvoiceUnsorted)
+					BEGIN
+						SELECT TOP 1 @intCurrentSalesOrderDetailId = MIN(intSalesOrderDetailId) FROM @tblItemsToInvoiceUnsorted WHERE intRecipeId IS NULL
+
+						IF @intMinSalesOrderDetailId > @intCurrentSalesOrderDetailId
+							BEGIN
+								INSERT INTO @tblItemsToInvoice
+								SELECT * FROM @tblItemsToInvoiceUnsorted WHERE intSalesOrderDetailId = @intCurrentSalesOrderDetailId
+
+								DELETE FROM @tblItemsToInvoiceUnsorted WHERE intSalesOrderDetailId = @intCurrentSalesOrderDetailId
+								CONTINUE
+							END
+						ELSE
+							BEGIN
+								INSERT INTO @tblItemsToInvoice
+								SELECT * FROM @tblItemsToInvoiceUnsorted WHERE intRecipeId = @intCurrentRecipeId ORDER BY intRecipeItemId
+
+								DELETE FROM @tblItemsToInvoiceUnsorted WHERE intRecipeId = @intCurrentRecipeId
+
+								SET @intMinSalesOrderDetailId = 0
+								BREAK
+							END
+
+						SET @intCurrentSalesOrderDetailId = 0						
+					END
+
+				DELETE FROM @tblItemsWithRecipe WHERE intRecipeId = @intCurrentRecipeId
+			END
+
+		INSERT INTO @tblItemsToInvoice
+		SELECT * FROM @tblItemsToInvoiceUnsorted ORDER BY intSalesOrderDetailId
+	END
+ELSE
+	BEGIN
+		INSERT INTO @tblItemsToInvoice
+		SELECT * FROM @tblItemsToInvoiceUnsorted ORDER BY intSalesOrderDetailId
+	END
 
 --GET SOFTWARE ITEMS
 IF @FromShipping = 0
@@ -369,7 +462,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				  , dtmDate				= @DateOnly
 				  , ysnRecurring		= 1
 				  , strType				= 'Software'
-				  , ysnPosted			= 1
+				  , ysnPosted			= 0
 				WHERE intInvoiceId = @SoftwareInvoiceId
 			END
 		ELSE
@@ -460,7 +553,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strBillToZipCode]
 					,[strBillToCountry]
 					,1
-					,1
+					,0
 					,[intEntityContactId]
 				FROM
 				tblSOSalesOrder
@@ -689,7 +782,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@StorageScheduleTypeId	= intStorageScheduleTypeId,
 						@ItemSubCurrencyId		= intSubCurrencyId,
 						@ItemSubCurrencyRate	= dblSubCurrencyRate 
-				FROM @tblItemsToInvoice ORDER BY intSalesOrderDetailId ASC
+				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
 							 @InvoiceId						= @NewInvoiceId	

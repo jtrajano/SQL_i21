@@ -114,17 +114,42 @@ BEGIN
 	strEntityName = ENTITY.strName,
 	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipToAddress, Bill.strShipToCity, Bill.strShipToState,Bill.strShipToZipCode),
 	TICKET.intTicketId,
-	INVRCPT.strReceiptNumber,
 	TICKET.strTicketNumber,
-	LOCATION.strLocationName,
+	INVRCPT.strReceiptNumber,
+	INVRCPTITEM.intInventoryReceiptItemId,
+	--LOCATION.strLocationName,
+	Bill.strBillId as RecordId,
+	SPLIT.strSplitNumber,
 	Bill.dtmDate,
+	TICKET.dblGrossWeight,
+	(TICKET.dblShrink / TICKET.dblConvertedUOMQty) as dblShrinkWeight,
+	(TICKET.dblGrossWeight - TICKET.dblTareWeight) as dblNetWeight,
 	BillDtl.dblCost,
-	BillDtl.dblQtyOrdered,
+	BillDtl.dblQtyOrdered as Net,
+	UOM.strUnitMeasure,
+	BillDtl.dblTotal,
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
-	BillDtl.dblTotal
-	,(SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL) AS dblTotalDiscount
-	, BillDtl.intBillId
+	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
+	PYMTDTL.dblTotal as NetDue,
+	Bill.strBillId as strId,
+	PYMT.intPaymentId,
+
+	--Settlement Total
+	BillDtl.dblQtyOrdered as InboundNetWeight,
+	0 as OutboundNetWeight,
+	BillDtl.dblTotal as InboundGrossDollars,
+	0 as OutboundGrossDollars,
+	BillDtl.dblTax as InboundTax,
+	0 as OutboundTax,
+	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
+	0 as OutboundDiscount,
+	PYMTDTL.dblTotal as InboundNetDue,
+	0 as OutboundNetDue,
+	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId IS NULL),0) AS VoucherAdjustment,
+	0 as SalesAdjustment,
+	PYMT.dblAmountPaid as CheckAmount
+	 
 	FROM tblCMBankTransaction BNKTRN
 	INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
 	            AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -140,9 +165,92 @@ BEGIN
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1 
-	LEFT JOIN tblEMEntityLocation LOCATION ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+	--LEFT JOIN tblEMEntityLocation LOCATION ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
-	WHERE BNKTRN.intBankAccountId = @intBankAccountId
+	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
+
+	UNION ALL SELECT
+	BNKTRN.intBankAccountId,
+	BNKTRN.intTransactionId,
+	BNKTRN.strTransactionId,
+	--Company info related fields
+	strCompanyName = COMPANY.strCompanyName,
+	strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState,COMPANY.strZip),
+
+	--Report Title related fields
+	Item.strItemNo,
+	--(SELECT strItemNo FROM tblICItem WHERE intItemId = (SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId =BillDtl.intBillId AND intInventoryReceiptChargeId IS NULL)) as strItemNo,
+
+	--Vendor Account Number
+	strDate = CONVERT(VARCHAR(10),GETDATE(),110),
+	strTime = CONVERT(VARCHAR(8),GETDATE(),108),
+	strAccountNumber = EFT.strAccountNumber,
+	BNKTRN.strReferenceNo,
+
+	--Vendor Address
+	strEntityName = ENTITY.strName,
+	strVendorAddress = '',--dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
+	TICKET.intTicketId,
+	TICKET.strTicketNumber,
+	INVSHIP.strShipmentNumber,
+	0,
+	--LOCATION.strLocationName,
+	INV.strInvoiceNumber as RecordId,
+	SPLIT.strSplitNumber,
+	INV.dtmDate,
+	TICKET.dblGrossWeight,
+	(TICKET.dblShrink / TICKET.dblConvertedUOMQty) as dblShrinkWeight,
+	(TICKET.dblGrossWeight - TICKET.dblTareWeight) as dblNetWeight,
+	INVDTL.dblPrice as dblCost,
+	INVDTL.dblQtyShipped as Net,
+	UOM.strUnitMeasure,
+	INVDTL.dblTotal,
+	INVDTL.dblTotalTax,
+	CNTRCT.strContractNumber,
+	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)  AS TotalDiscount,
+	PYMTDTL.dblTotal as NetDue,
+	INV.strInvoiceNumber as strId,
+	PYMT.intPaymentId,
+
+	--Settlement Total
+	0 as InboundNetWeight,
+	INVDTL.dblQtyShipped as OutboundNetWeight,
+	0 as InboundGrossDollars,
+	INVDTL.dblTotal as OutboundGrossDollars,
+	0 as InboundTax,
+	INVDTL.dblTotalTax as OutboundTax,
+	0 as InboundDiscount,
+	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)  as OutboundDiscount,
+	0 as InboundGNetDue,
+	PYMTDTL.dblTotal as OutboundNetDue,
+	0 as VoucherAdjustment,
+	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentItemId IS NULL),0) AS SalesAdjustment,
+	PYMT.dblAmountPaid as CheckAmount
+
+	FROM tblCMBankTransaction BNKTRN
+	INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
+	            AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
+	INNER JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId =  PYMT.strPaymentRecordNum
+	INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+	INNER JOIN tblARInvoice INV ON PYMTDTL.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblARInvoiceDetail INVDTL ON INV.intInvoiceId = INVDTL.intInvoiceId AND INVDTL.intInventoryShipmentChargeId is null
+	INNER JOIN tblICItem Item ON INVDTL.intItemId = Item.intItemId
+	INNER JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
+	INNER JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
+	INNER JOIN tblSCTicket TICKET ON INVSHIPITEM.intSourceId = TICKET.intTicketId
+	LEFT JOIN tblCTContractHeader CNTRCT ON INVDTL.intContractHeaderId = CNTRCT.intContractHeaderId
+	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
+	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
+	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1 
+	--LEFT JOIN tblEMEntityLocation LOCATION ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+	LEFT JOIN tblICItemUOM ItemUOM ON INVDTL.intItemUOMId = ItemUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
 END
 ELSE
 BEGIN
@@ -168,17 +276,42 @@ BEGIN
 	strEntityName = ENTITY.strName,
 	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipToAddress, Bill.strShipToCity, Bill.strShipToState,Bill.strShipToZipCode),
 	TICKET.intTicketId,
-	INVRCPT.strReceiptNumber,
 	TICKET.strTicketNumber,
-	LOCATION.strLocationName,
+	INVRCPT.strReceiptNumber,
+	INVRCPTITEM.intInventoryReceiptItemId,
+	--LOCATION.strLocationName,
+	Bill.strBillId as RecordId,
+	SPLIT.strSplitNumber,
 	Bill.dtmDate,
+	TICKET.dblGrossWeight,
+	(TICKET.dblShrink / TICKET.dblConvertedUOMQty) as dblShrinkWeight,
+	(TICKET.dblGrossWeight - TICKET.dblTareWeight) as dblNetWeight,
 	BillDtl.dblCost,
-	BillDtl.dblQtyOrdered,
+	BillDtl.dblQtyOrdered as Net,
+	UOM.strUnitMeasure,
+	BillDtl.dblTotal,
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
-	BillDtl.dblTotal
-	,(SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL) AS dblTotalDiscount
-	, BillDtl.intBillId
+	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
+	PYMTDTL.dblTotal as NetDue,
+	Bill.strBillId as strId,
+	PYMT.intPaymentId,
+
+	--Settlement Total
+	BillDtl.dblQtyOrdered as InboundNetWeight,
+	0 as OutboundNetWeight,
+	BillDtl.dblTotal as InboundGrossDollars,
+	0 as OutboundGrossDollars,
+	BillDtl.dblTax as InboundTax,
+	0 as OutboundTax,
+	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
+	0 as OutboundDiscount,
+	PYMTDTL.dblTotal as InboundNetDue,
+	0 as OutboundNetDue,
+	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId IS NULL),0) AS VoucherAdjustment,
+	0 as SalesAdjustment,
+	PYMT.dblAmountPaid as CheckAmount
+	 
 	FROM tblCMBankTransaction BNKTRN
 	--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
 	--            AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -194,7 +327,90 @@ BEGIN
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1 
-	LEFT JOIN tblEMEntityLocation LOCATION ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+	--LEFT JOIN tblEMEntityLocation LOCATION ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
+
+	UNION ALL SELECT
+	BNKTRN.intBankAccountId,
+	BNKTRN.intTransactionId,
+	BNKTRN.strTransactionId,
+	--Company info related fields
+	strCompanyName = COMPANY.strCompanyName,
+	strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState,COMPANY.strZip),
+
+	--Report Title related fields
+	Item.strItemNo,
+	--(SELECT strItemNo FROM tblICItem WHERE intItemId = (SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId =BillDtl.intBillId AND intInventoryReceiptChargeId IS NULL)) as strItemNo,
+
+	--Vendor Account Number
+	strDate = CONVERT(VARCHAR(10),GETDATE(),110),
+	strTime = CONVERT(VARCHAR(8),GETDATE(),108),
+	strAccountNumber = EFT.strAccountNumber,
+	BNKTRN.strReferenceNo,
+
+	--Vendor Address
+	strEntityName = ENTITY.strName,
+	strVendorAddress = '',--dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
+	TICKET.intTicketId,
+	TICKET.strTicketNumber,
+	INVSHIP.strShipmentNumber,
+	0,
+	--LOCATION.strLocationName,
+	INV.strInvoiceNumber as RecordId,
+	SPLIT.strSplitNumber,
+	INV.dtmDate,
+	TICKET.dblGrossWeight,
+	(TICKET.dblShrink / TICKET.dblConvertedUOMQty) as dblShrinkWeight,
+	(TICKET.dblGrossWeight - TICKET.dblTareWeight) as dblNetWeight,
+	INVDTL.dblPrice as dblCost,
+	INVDTL.dblQtyShipped as Net,
+	UOM.strUnitMeasure,
+	INVDTL.dblTotal,
+	INVDTL.dblTotalTax,
+	CNTRCT.strContractNumber,
+	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)  AS TotalDiscount,
+	PYMTDTL.dblTotal as NetDue,
+	INV.strInvoiceNumber as strId,
+	PYMT.intPaymentId,
+
+	--Settlement Total
+	0 as InboundNetWeight,
+	INVDTL.dblQtyShipped as OutboundNetWeight,
+	0 as InboundGrossDollars,
+	INVDTL.dblTotal as OutboundGrossDollars,
+	0 as InboundTax,
+	INVDTL.dblTotalTax as OutboundTax,
+	0 as InboundDiscount,
+	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)  as OutboundDiscount,
+	0 as InboundGNetDue,
+	PYMTDTL.dblTotal as OutboundNetDue,
+	0 as VoucherAdjustment,
+	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentItemId IS NULL),0) AS SalesAdjustment,
+	PYMT.dblAmountPaid as CheckAmount
+
+	FROM tblCMBankTransaction BNKTRN
+	--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
+	--            AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
+	INNER JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId =  PYMT.strPaymentRecordNum
+	INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+	INNER JOIN tblARInvoice INV ON PYMTDTL.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblARInvoiceDetail INVDTL ON INV.intInvoiceId = INVDTL.intInvoiceId  AND INVDTL.intInventoryShipmentChargeId is null
+	INNER JOIN tblICItem Item ON INVDTL.intItemId = Item.intItemId
+	INNER JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
+	INNER JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
+	INNER JOIN tblSCTicket TICKET ON INVSHIPITEM.intSourceId = TICKET.intTicketId
+	LEFT JOIN tblCTContractHeader CNTRCT ON INVDTL.intContractHeaderId = CNTRCT.intContractHeaderId
+	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
+	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
+	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1 
+	--LEFT JOIN tblEMEntityLocation LOCATION ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+	LEFT JOIN tblICItemUOM ItemUOM ON INVDTL.intItemUOMId = ItemUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
 END
