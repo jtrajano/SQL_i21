@@ -4455,6 +4455,7 @@
     <Build Include="dbo\Views\vyuRKGetItemList.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
     <None Include="dbo\Stored Procedures\uspICRestoreBalanceFromClosedPeriod.sql" />
+    <Build Include="dbo\Tables\tblTFDeploymentNote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4581,6 +4582,7 @@
     <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCriteria.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
