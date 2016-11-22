@@ -1235,7 +1235,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = config.window;
         win.down("#txtWeightLossMsgValue").setValue("");
         win.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
-
+        
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
@@ -1667,7 +1667,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        var pnlLotTracking = win.down('#pnlLotTracking');
 
         if (combo.itemId === 'cboItem') {
             current.set('intItemId', records[0].get('intItemId'));
@@ -1727,23 +1726,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (records[0].get('strLotTracking') === 'No') {
                 current.set('intWeightUOMId', null);
                 current.set('strWeightUOM', null);
-
-                //Hide Lot Grid
-                pnlLotTracking.setVisible(false);
-            }
-            else {
-                // Clear Lot Grid for a new record               
-                var receiptLotItems = current.tblICInventoryReceiptItemLots(),
-                    receiptLotRecords = receiptLotItems ? receiptLotItems.getRange() : [];
-
-                var i = receiptLotRecords.length - 1;
-
-                for (; i >= 0; i--) {
-                if (!receiptLotRecords[i].dummy) receiptLotItems.removeAt(i);
-                }
-
-                //Show Lot Grid
-                pnlLotTracking.setVisible(true);
             }
 
             var receiptDate = win.viewModel.data.current.get('dtmReceiptDate');
@@ -1886,6 +1868,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var currentReceipt = win.viewModel.data.current;
         if(currentReceiptItem) {
             currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
+        }
+
+        // Show or hide the Lot Panel (or Grid)
+        var pnlLotTracking = win.down("#pnlLotTracking");
+
+        if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
+            pnlLotTracking.setVisible(true);
+        } else {
+            pnlLotTracking.setVisible(false);
         }
     },
 
@@ -4460,7 +4451,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
             var pnlLotTracking = win.down("#pnlLotTracking");
-            var grdLotTracking = win.down('#grdLotTracking');
 
             if (selected.length > 0) {
                 var current = selected[0];
@@ -4471,15 +4461,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
                 else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
                     vm.data.currentReceiptItem = current;
-                    var task = new Ext.util.DelayedTask(function () {
-                        grdLotTracking.store.load();
-                        pnlLotTracking.setVisible(true);         
-                    });
-                    task.delay(100);
+                    pnlLotTracking.setVisible(true);
                 }
                 else {
                     pnlLotTracking.setVisible(false);
                     vm.data.currentReceiptItem = null;
+                }
+                
+                if(!current.phantom && !current.dirty) {
+                    win.down("#grdLotTracking").setLoading("Loading lots...");
+                    current.tblICInventoryReceiptItemLots().load({
+                        callback: function(records, operation, success) {
+                            win.down("#grdLotTracking").setLoading(false);
+                        }
+                    });
                 }
             }
             else {
