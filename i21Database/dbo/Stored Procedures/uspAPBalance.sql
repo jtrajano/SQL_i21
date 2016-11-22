@@ -28,10 +28,10 @@ SELECT TOP 1 @accountId = strAccountId FROM vyuGLAccountDetail WHERE intAccountC
 
 --GET THE BALANCE
 IF OBJECT_ID(N'tempdb..#tmpAPAccountBalance') IS NOT NULL DROP TABLE #tmpAPAccountBalance
-CREATE TABLE #tmpAPAccountBalance(strAccountId NVARCHAR(40) DEFAULT(@accountId), dblBalance DECIMAL(18,6))
+CREATE TABLE #tmpAPAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMAL(18,6))
 
-INSERT INTO #tmpAPAccountBalance(dblBalance)
-SELECT SUM(dblAmountDue) FROM(
+INSERT INTO #tmpAPAccountBalance
+SELECT @accountId, SUM(dblAmountDue) FROM(
 	SELECT 
 	CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 	FROM (
