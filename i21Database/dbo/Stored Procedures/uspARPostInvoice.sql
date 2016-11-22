@@ -2156,7 +2156,7 @@ IF @post = 1
 					ON A.[intInvoiceId] = CM.[intInvoiceId] 
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
-				AND A.dblPayment <> @ZeroDecimal
+				AND (A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal)) <> @ZeroDecimal
 			
 			UNION ALL
 			--Credit Prepaids
