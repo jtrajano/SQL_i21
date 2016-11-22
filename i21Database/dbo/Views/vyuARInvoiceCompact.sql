@@ -32,7 +32,7 @@ SELECT
 	,intCompanyLocationId			= ARI.intCompanyLocationId	
 	,strLocationName				= SML.strLocationName
 	,intPaymentMethodId				= ARI.intPaymentMethodId	
-	,strPaymentMethod				= CASE WHEN ARI.strTransactionType = 'Overpayment' THEN '' ELSE SMP.strPaymentMethod END
+	,strPaymentMethod				= NULL
 	,strCustomerEmail				= E.strEmail
 	,intCurrencyId					= ARI.intCurrencyId
 	,strCurrency					= SMC.strCurrency
