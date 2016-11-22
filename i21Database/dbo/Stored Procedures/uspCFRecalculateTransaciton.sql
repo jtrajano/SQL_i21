@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE  PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
 ,@CardId				INT				
@@ -711,7 +711,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,@DisregardExemptionSetup
+					, 1 --@DisregardExemptionSetup
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -764,7 +764,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,@DisregardExemptionSetup
+					,0 -- @DisregardExemptionSetup
 				)
 
 				END
@@ -822,7 +822,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,@DisregardExemptionSetup
+					,1 --@DisregardExemptionSetup
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -875,7 +875,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,@DisregardExemptionSetup
+					,0 --@DisregardExemptionSetup
 				)
 
 				END
@@ -1000,8 +1000,9 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,@DisregardExemptionSetup
+					,1 --@DisregardExemptionSetup
 				)
+
 					INSERT INTO @tblCFCalculatedTax	
 				(
 					 [intTaxGroupId]				
@@ -1052,7 +1053,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,@DisregardExemptionSetup
+					,0 -- @DisregardExemptionSetup
 				)
 
 				
@@ -1113,8 +1114,9 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,@DisregardExemptionSetup
+					,1 --@DisregardExemptionSetup
 				)
+
 					INSERT INTO @tblCFCalculatedTax	
 				(
 					 [intTaxGroupId]				
@@ -1165,7 +1167,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,@DisregardExemptionSetup
+					,0 --@DisregardExemptionSetup
 				)
 
 				
