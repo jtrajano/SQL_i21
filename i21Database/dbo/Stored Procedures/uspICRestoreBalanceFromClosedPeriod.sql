@@ -1,13 +1,17 @@
 ﻿/*
 	uspICRestoreBalanceFromClosedPeriod
-	Use this stored procedure to restore the 
+	Use this stored procedure to restore the inventory and gl balances from a closed period. 
 
+	Pre-requisites
+	1. A separate db as the source of the closed year figures. 
+	
 	How to use: 
 	1. Determine the open period. 
 	2. For example:
 		2.1. Closed accounting periods are Jan 201x to September 201x. 
 		2.2. This means October 201x is the next open period. 
 		2.3. Specify 10/01/201x as the argument in @dtmOpenPeriod parameter. 
+	3. Alter this sp and rename all instance of 'irely02_25Oct' to the name of the source db. 
 */
 
 CREATE PROCEDURE uspICRestoreBalanceFromClosedPeriod
@@ -21,7 +25,7 @@ DECLARE @intFirstOpenMonth AS INT = MONTH(@dtmOpenPeriod)
 DECLARE @id AS INT
 		,@strOldBatchId AS NVARCHAR(50) 
 		,@strNewBatchId AS NVARCHAR(50) 
-		,@intOldInventoryTransactionId AS INT 
+		,@intTemplateInventoryTransactionId AS INT 
 		,@intNewInventoryTransactionId AS INT 
 		,@strTransactionType AS NVARCHAR(50) 
 		,@year AS INT 
@@ -29,6 +33,8 @@ DECLARE @id AS INT
 		,@valueDifference NUMERIC(38, 20) 
 		,@strOldTransactionId AS NVARCHAR(50) 
 		,@strNewTransactionId AS NVARCHAR(50) 
+		,@strAdjustTransactionId AS NVARCHAR(50) 
+
 
 DECLARE @intItemId AS INT
 		,@intItemLocationId AS INT
@@ -67,7 +73,7 @@ CREATE TABLE tblICFixClosedPeriodValues (
 	,intStorageLocationId INT 
 	,intLotId INT 
 	,strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-	--,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,[year] INT
 	,[month] INT
 	,dblOldValue NUMERIC(38, 20) 	
@@ -75,17 +81,6 @@ CREATE TABLE tblICFixClosedPeriodValues (
 	,dblDifference NUMERIC(38, 20) 
 	,CONSTRAINT [PK_tblICFixClosedPeriodValues] PRIMARY KEY CLUSTERED ([id]) 
 ) 
-
-CREATE TABLE tblICUnableToFindOpenYear (
-	[intItemId] INT 
-	,[intItemLocationId] INT 
-	,[intSubLocationId] INT 
-	,[intStorageLocationId] INT
-	,[intLotId] INT
-	,[value]  NUMERIC(38, 20) 
-	,[type] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-	,[intOldInventoryTransactionId] INT 
-)
 
 BEGIN 
 	INSERT INTO tblICFixClosedPeriodValues (
@@ -95,7 +90,7 @@ BEGIN
 		,intStorageLocationId
 		,intLotId
 		,strTransactionType
-		--,strTransactionId
+		,strTransactionId
 		,[year]
 		,[month]
 		,dblOldValue
@@ -109,6 +104,7 @@ BEGIN
 			, intStorageLocationId = ISNULL(new.intStorageLocationId, old.intStorageLocationId)
 			, intLotId = ISNULL(new.intLotId, old.intLotId) 
 			, strTransactionType = ISNULL(new.[strTransactionType], old.[strTransactionType])
+			, strTransactionId = ISNULL(new.strTransactionId, old.strTransactionId)
 			, [year] = ISNULL(new.[year], old.[year])
 			, [month] = ISNULL(new.[month], old.[month])
 			, [old value] = old.[value]
@@ -123,6 +119,7 @@ BEGIN
 					, t.intStorageLocationId
 					, t.intLotId					
 					, [strTransactionType] = ty.strName
+					, t.strTransactionId
 					, [year] = YEAR(t.dtmDate)
 					, [month] = MONTH(t.dtmDate) 
 					, [value] = SUM(ROUND(t.dblQty * t.dblCost + t.dblValue, 2))
@@ -130,6 +127,7 @@ BEGIN
 						ON t.intTransactionTypeId = ty.intTransactionTypeId
 					INNER JOIN dbo.tblICItem i
 						ON i.intItemId = t.intItemId
+			WHERE	t.ysnIsUnposted = 0 
 			GROUP BY 
 				t.intItemId
 				, t.intItemLocationId
@@ -137,6 +135,7 @@ BEGIN
 				, t.intStorageLocationId
 				, t.intLotId
 				, ty.strName
+				, t.strTransactionId
 				, YEAR(t.dtmDate)
 				, MONTH(t.dtmDate) 
 			HAVING SUM(ROUND(t.dblQty * t.dblCost + t.dblValue, 2)) <> 0 
@@ -150,6 +149,7 @@ BEGIN
 					, t.intStorageLocationId
 					, t.intLotId					
 					, [strTransactionType] = ty.strName
+					, t.strTransactionId
 					, [year] = YEAR(t.dtmDate)
 					, [month] = MONTH(t.dtmDate) 
 					, [value] = SUM(ROUND(t.dblQty * t.dblCost + t.dblValue, 2))					
@@ -157,13 +157,15 @@ BEGIN
 						ON t.intTransactionTypeId = ty.intTransactionTypeId
 					INNER JOIN irely02_25Oct.dbo.tblICItem i
 						ON i.intItemId = t.intItemId
+			WHERE	t.ysnIsUnposted = 0 
 			GROUP BY 
 				t.intItemId
 				, t.intItemLocationId
 				, t.intSubLocationId
 				, t.intStorageLocationId
 				, t.intLotId
-				, ty.strName	
+				, ty.strName
+				, t.strTransactionId
 				, YEAR(t.dtmDate)
 				, MONTH(t.dtmDate) 
 			HAVING SUM(ROUND(t.dblQty * t.dblCost + t.dblValue, 2)) <> 0 
@@ -174,6 +176,7 @@ BEGIN
 				AND ISNULL(old.intStorageLocationId, 0) = ISNULL(new.intStorageLocationId, 0)
 				AND ISNULL(old.intLotId, 0) = ISNULL(new.intLotId, 0)
 				AND old.[strTransactionType] = new.[strTransactionType]
+				AND old.strTransactionId = new.strTransactionId
 				AND old.[year] = new.[year]
 				AND old.[month] = new.[month]
 	WHERE	ROUND( ISNULL(old.[value], 0) - ISNULL(new.[value], 0), 2) <> 0 
@@ -205,18 +208,20 @@ BEGIN
 				,@year = [year]
 				,@month = [month]
 				,@valueDifference = dblDifference
+				,@strAdjustTransactionId = strTransactionId 
 		FROM	tblICFixClosedPeriodValues
-	
-		-- Update the closed period	
+		
+		-- Get a template 
 		BEGIN 
-			PRINT 'Get the closed period.'
+			PRINT 'Get a template.'
+			PRINT @strAdjustTransactionId
 
-			SET @intOldInventoryTransactionId = NULL 
+			SET @intTemplateInventoryTransactionId = NULL 
 			SET @strOldBatchId = NULL 
 
-			-- Get the last transaction record for the Item, Lot Id, Location Set, Transaction Type, Year, and Month from the closed year period.
+			-- Get a template id from the closed period. 
 			SELECT	TOP 1 
-					@intOldInventoryTransactionId = t.intInventoryTransactionId
+					@intTemplateInventoryTransactionId = t.intInventoryTransactionId
 					,@strOldBatchId = t.strBatchId
 			FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 						ON t.intTransactionTypeId = ty.intTransactionTypeId
@@ -226,30 +231,17 @@ BEGIN
 					AND ISNULL(t.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0) 
 					AND ISNULL(t.intLotId, 0) = ISNULL(@intLotId, 0) 
 					AND ty.strName = @strTransactionType
+					AND t.strTransactionId = @strAdjustTransactionId
 					AND YEAR(t.dtmDate) = @year
 					AND MONTH(t.dtmDate) = @month
 			ORDER BY t.intInventoryTransactionId DESC 
-
-			--SELECT	'DEBUG old transaction id'
-			--		,t.dblQty
-			--		,t.dblCost
-			--		,t.dblValue
-			--		,t.intItemId
-			--		,t.intItemLocationId
-			--		,t.intStorageLocationId
-			--		,t.intLotId 
-			--FROM	tblICInventoryTransaction t
-			--WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-			-- If there is no old transaction, try to create a new record. 
-			IF @intOldInventoryTransactionId IS NULL 
-			BEGIN 
-				PRINT 'Create a new closed period.'
-
-				-- Try to get the first transaction from the open period. 
+							
+			-- If there is no template id from current db, try to get from the closed year database. 
+			IF @intTemplateInventoryTransactionId IS NULL 
+			BEGIN
 				SELECT	TOP 1 
-						@intOldInventoryTransactionId = t.intInventoryTransactionId
-				FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+						@intTemplateInventoryTransactionId = t.intInventoryTransactionId
+				FROM	irely02_25Oct.dbo.tblICInventoryTransaction t INNER JOIN irely02_25Oct.dbo.tblICInventoryTransactionType ty
 							ON t.intTransactionTypeId = ty.intTransactionTypeId
 				WHERE	t.intItemId = @intItemId
 						AND t.intItemLocationId = @intItemLocationId
@@ -257,562 +249,90 @@ BEGIN
 						AND ISNULL(t.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0) 
 						AND ISNULL(t.intLotId, 0) = ISNULL(@intLotId, 0) 
 						AND ty.strName = @strTransactionType
-						AND dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmOpenPeriod) = 1 
+						AND t.strTransactionId = @strAdjustTransactionId
 				ORDER BY t.intInventoryTransactionId ASC 
-
-				-- Try again 
-				IF @intOldInventoryTransactionId IS NULL 
-				BEGIN 
-					-- By the item, location, and type. 
-					SELECT	TOP 1 
-							@intOldInventoryTransactionId = t.intInventoryTransactionId
-					FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-								ON t.intTransactionTypeId = ty.intTransactionTypeId
-					WHERE	t.intItemId = @intItemId
-							AND t.intItemLocationId = @intItemLocationId
-							AND ty.strName = @strTransactionType
-							AND dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmOpenPeriod) = 1 
-					ORDER BY t.intInventoryTransactionId ASC 
-				END 
-
-				-- Try again 
-				IF @intOldInventoryTransactionId IS NULL 
-				BEGIN 
-					-- By Item Location and Type
-					SELECT	TOP 1 
-							@intOldInventoryTransactionId = t.intInventoryTransactionId
-					FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-								ON t.intTransactionTypeId = ty.intTransactionTypeId
-					WHERE	t.intItemLocationId = @intItemLocationId
-							AND ty.strName = @strTransactionType
-							AND dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmOpenPeriod) = 1 
-					ORDER BY t.intInventoryTransactionId ASC 
-				END 
-
-				-- Try again 
-				IF @intOldInventoryTransactionId IS NULL 
-				BEGIN 
-					-- By the transaction type
-					SELECT	TOP 1 
-							@intOldInventoryTransactionId = t.intInventoryTransactionId
-					FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-								ON t.intTransactionTypeId = ty.intTransactionTypeId
-					WHERE	ty.strName = @strTransactionType
-							AND dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmOpenPeriod) = 1 
-					ORDER BY t.intInventoryTransactionId ASC 
-				END 
-
-				-- Last Attempt failed. Raise the error. 
-				IF @intOldInventoryTransactionId IS NULL 
-				BEGIN 
-					SELECT 'Unable to find a closed period.', * FROM tblICFixClosedPeriodValues WHERE id = @id
+			END 
+								
+			-- Raise error if template id can't be found. 
+			IF @intTemplateInventoryTransactionId IS NULL 
+			BEGIN 
+				SELECT 'Unable to find a template.', * FROM tblICFixClosedPeriodValues WHERE id = @id
 					
-					RAISERROR('Unable to find a closed period record.', 16, 1);
-					GOTO _ExitWithError; 
-				END 
-				ELSE 
-				-- Create a closed year record. 
-				BEGIN 
-					-- Get a template transaction from the open period. 
-					SET @intInventoryTransactionId = NULL 
-					SELECT	TOP  1 
-							@intItemId = @intItemId
-							,@intItemLocationId = @intItemLocationId
-							,@intItemUOMId = dbo.fnGetItemStockUOM(@intItemId) 
-							,@intSubLocationId = @intSubLocationId
-							,@intStorageLocationId = @intStorageLocationId
-							,@dtmDate = DATEFROMPARTS(@year, @month, 1)
-							,@intLotId = @intLotId
-							,@dblQty = 0
-							,@dblUOMQty = 0 
-							,@dblCost = 0
-							,@dblSalesPrice = 0 
-							,@intCurrencyId = @DefaultCurrencyId 
-							,@dblExchangeRate = 1
-							,@intTransactionId = t.intTransactionId
-							,@intTransactionDetailId = t.intTransactionDetailId
-							,@strTransactionId = t.strTransactionId
-							,@strBatchId = t.strBatchId --ISNULL(@strBatchId, t.strBatchId)
-							,@intTransactionTypeId = t.intTransactionTypeId
-							,@strTransactionForm = t.strTransactionForm
-							,@intEntityUserSecurityId = t.intCreatedEntityId
-							,@intCostingMethod = t.intCostingMethod
-							,@intInventoryTransactionId = t.intInventoryTransactionId
-					FROM	tblICInventoryTransaction t
-					WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-		
-					IF @intInventoryTransactionId IS NULL 
-					BEGIN 
-						RAISERROR('Unable to find a template.', 16, 1);
-						GOTO _ExitWithError; 	
-					END 
-					ELSE 
-					BEGIN 
-						SET @InventoryTransactionIdentityId = NULL 
-						-- Create the Inventory Transaction 
-						EXEC [dbo].[uspICPostInventoryTransaction]
-								@intItemId = @intItemId
-								,@intItemLocationId = @intItemLocationId
-								,@intItemUOMId = @intItemUOMId
-								,@intSubLocationId = @intSubLocationId
-								,@intStorageLocationId = @intStorageLocationId					 
-								,@dtmDate = @dtmDate
-								,@dblQty = 0
-								,@dblUOMQty = 1 
-								,@dblCost = 0 
-								,@dblValue = @valueDifference
-								,@dblSalesPrice = @dblSalesPrice
-								,@intCurrencyId = @intCurrencyId
-								,@dblExchangeRate = @dblExchangeRate
-								,@intTransactionId = @intTransactionId
-								,@intTransactionDetailId = @intTransactionDetailId
-								,@strTransactionId = @strTransactionId
-								,@strBatchId = @strBatchId
-								,@intTransactionTypeId = @intTransactionTypeId
-								,@intLotId = @intLotId 
-								,@intRelatedInventoryTransactionId = NULL 
-								,@intRelatedTransactionId = NULL 
-								,@strRelatedTransactionId = NULL 
-								,@strTransactionForm = @strTransactionForm
-								,@intEntityUserSecurityId = @intEntityUserSecurityId
-								,@intCostingMethod = @intCostingMethod
-								,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
-			
-						IF @InventoryTransactionIdentityId IS NULL 
-						BEGIN 
-							SELECT	'Unable to create the G/L entries'
-									,t.* 
-							FROM	tblICInventoryTransaction t
-							WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-							SELECT	TOP  1 
-									'Unable to create the G/L entries'
-									,[@intItemId] = @intItemId
-									,[@intItemLocationId] = @intItemLocationId
-									,[@intItemUOMId] = @intItemUOMId
-									,[@intSubLocationId] = @intSubLocationId
-									,[@intStorageLocationId] = @intStorageLocationId
-									,[@dtmDate] = DATEFROMPARTS(@year, @month, 1)
-									,[@intLotId] = @intLotId
-									,[@dblQty] = 0
-									,[@dblUOMQty] = 0 
-									,[@dblCost] = 0
-									,[@dblSalesPrice] = 0 
-									,[@intCurrencyId] = @DefaultCurrencyId 
-									,[@dblExchangeRate] = 1
-									,[@intTransactionId] = t.intTransactionId
-									,[@intTransactionDetailId] = t.intTransactionDetailId
-									,[@strTransactionId] = t.strTransactionId
-									,[@strBatchId] = ISNULL(@strBatchId, t.strBatchId)
-									,[@intTransactionTypeId] = t.intTransactionTypeId
-									,[@strTransactionForm] = t.strTransactionForm
-									,[@intEntityUserSecurityId] = t.intCreatedEntityId
-									,[@intCostingMethod] = t.intCostingMethod
-									,[@intInventoryTransactionId] = t.intInventoryTransactionId
-							FROM	tblICInventoryTransaction t
-							WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-							RAISERROR('Unable to create the G/L entries', 16, 1);
-							GOTO _ExitWithError; 				
-						END 
-			
-						-- Create the G/L entries 
-						ELSE 
-						BEGIN 
-							PRINT 'create the g/l entries for the closed period.'
-							PRINT @strBatchId
-							PRINT @InventoryTransactionIdentityId
-							PRINT @intOldInventoryTransactionId 
-
-							INSERT INTO tblGLDetail (
-								dtmDate
-								,strBatchId
-								,intAccountId
-								,dblDebit
-								,dblCredit
-								,dblDebitUnit
-								,dblCreditUnit
-								,strDescription
-								,strCode
-								,strReference
-								,intCurrencyId
-								,dblExchangeRate
-								,dtmDateEntered
-								,dtmTransactionDate
-								,strJournalLineDescription
-								,intJournalLineNo
-								,ysnIsUnposted
-								,intUserId
-								,intEntityId
-								,strTransactionId
-								,intTransactionId
-								,strTransactionType
-								,strTransactionForm
-								,strModuleName
-								,intConcurrencyId
-								,dblDebitForeign
-								,dblDebitReport
-								,dblCreditForeign
-								,dblCreditReport
-								,dblReportingRate
-								,dblForeignRate
-							)	
-							SELECT	TOP 1
-									dtmDate = DATEFROMPARTS(@year, @month, 1)
-									,@strBatchId
-									,ia.intAccountId
-									,dblDebit = Debit.Value --CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
-									,dblCredit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
-									,dblDebitUnit = 0 
-									,dblCreditUnit = 0 
-									,gd.strDescription
-									,gd.strCode
-									,gd.strReference
-									,gd.intCurrencyId
-									,gd.dblExchangeRate
-									,GETDATE()--gd.dtmDateEntered
-									,gd.dtmTransactionDate
-									,gd.strJournalLineDescription
-									,intJournalLineNo = @InventoryTransactionIdentityId
-									,gd.ysnIsUnposted
-									,gd.intUserId
-									,gd.intEntityId
-									,gd.strTransactionId
-									,gd.intTransactionId
-									,gd.strTransactionType
-									,gd.strTransactionForm
-									,gd.strModuleName
-									,gd.intConcurrencyId
-									,dblDebitForeign = 0 
-									,gd.dblDebitReport
-									,dblCreditForeign = 0 
-									,gd.dblCreditReport
-									,dblReportingRate = 1
-									,gd.dblForeignRate
-							FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-										ON gd.intJournalLineNo = t.intInventoryTransactionId
-										AND gd.strTransactionId = t.strTransactionId
-										AND gd.strBatchId = t.strBatchId
-									INNER JOIN tblGLAccount ga
-										ON ga.intAccountId = gd.intAccountId
-									INNER JOIN tblGLAccountSegmentMapping asm
-										ON asm.intAccountId = ga.intAccountId
-									INNER JOIN tblGLAccountSegment gs
-										ON gs.intAccountSegmentId = asm.intAccountSegmentId
-										AND gs.intAccountStructureId = 1
-									INNER JOIN tblGLAccountCategory gc
-										ON gc.intAccountCategoryId = gs.intAccountCategoryId
-									CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
-									CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit											
-									CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory ) ia
-							WHERE	--ia.intAccountId = gd.intAccountId
-									t.intInventoryTransactionId = @intOldInventoryTransactionId
-							UNION ALL 
-							SELECT	TOP 1
-									dtmDate = DATEFROMPARTS(@year, @month, 1)
-									,@strBatchId
-									,ia.intAccountId
-									,dblDebit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
-									,dblCredit = Debit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
-									,dblDebitUnit = 0 
-									,dblCreditUnit = 0 
-									,gd.strDescription
-									,gd.strCode
-									,gd.strReference
-									,gd.intCurrencyId
-									,gd.dblExchangeRate
-									,GETDATE() -- gd.dtmDateEntered
-									,gd.dtmTransactionDate
-									,gd.strJournalLineDescription
-									,intJournalLineNo = @InventoryTransactionIdentityId
-									,gd.ysnIsUnposted
-									,gd.intUserId
-									,gd.intEntityId
-									,gd.strTransactionId
-									,gd.intTransactionId
-									,gd.strTransactionType
-									,gd.strTransactionForm
-									,gd.strModuleName
-									,gd.intConcurrencyId
-									,dblDebitForeign = 0 
-									,gd.dblDebitReport
-									,dblCreditForeign = 0 
-									,gd.dblCreditReport
-									,dblReportingRate = 1
-									,gd.dblForeignRate
-							FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-										ON gd.intJournalLineNo = t.intInventoryTransactionId
-										AND gd.strTransactionId = t.strTransactionId
-										AND gd.strBatchId = t.strBatchId
-									INNER JOIN tblGLAccount ga
-										ON ga.intAccountId = gd.intAccountId
-									INNER JOIN tblGLAccountSegmentMapping asm
-										ON asm.intAccountId = ga.intAccountId
-									INNER JOIN tblGLAccountSegment gs
-										ON gs.intAccountSegmentId = asm.intAccountSegmentId
-										AND gs.intAccountStructureId = 1
-									INNER JOIN tblGLAccountCategory gc
-										ON gc.intAccountCategoryId = gs.intAccountCategoryId
-									CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
-									CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit									
-									CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory) ia
-							WHERE	--ia.intAccountId <> gd.intAccountId
-									t.intInventoryTransactionId = @intOldInventoryTransactionId	
-									AND gc.strAccountCategory <> 'Inventory' -- Make sure the contra account id is not 'Inventory'
-									--AND @strTransactionType NOT IN ('Revalue WIP')			
-						END 
-					END 
-				END 
-			END  
-			ELSE 
-			BEGIN 
-				PRINT 'Update a closed period.'				
-
-				--select 'before update t', [@valueDifference] = @valueDifference, t.dblValue, t.intInventoryTransactionId, t.dtmDate, t.strBatchId, t.strTransactionId, t.dblQty * t.dblCost + t.dblValue, @valueDifference
-				--FROM	tblICInventoryTransaction t inner join tblICInventoryTransactionType ty
-				--			on t.intTransactionTypeId = ty.intTransactionTypeId
-				--WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-				-- Add the value to the closed period transaction. 
-				UPDATE	t
-				SET		t.dblValue = ISNULL(t.dblValue, 0) + @valueDifference
-				FROM	tblICInventoryTransaction t
-				WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-				--select 'after update t', [@valueDifference] = @valueDifference, t.dblValue, t.intInventoryTransactionId, t.dtmDate, t.strBatchId, t.strTransactionId, t.dblQty * t.dblCost + t.dblValue, @valueDifference
-				--FROM	tblICInventoryTransaction t inner join tblICInventoryTransactionType ty
-				--			on t.intTransactionTypeId = ty.intTransactionTypeId
-				--WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-				--select 'before gl update', gd.strTransactionId, gd.strBatchId, gd.intAccountId, gd.dblDebit, gd.dblCredit, gd.dtmDate, gd.ysnIsUnposted
-				--FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-				--			ON gd.intJournalLineNo = t.intInventoryTransactionId
-				--			AND gd.strTransactionId = t.strTransactionId
-				--			AND gd.strBatchId = t.strBatchId						
-				--WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-				-- Update the g/l entries for the closed period. 							
-				-- Update the Inventory account
-				UPDATE	gd 
-				SET		dblDebit = Debit.Value 
-						,dblCredit = Credit.Value 
-				FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-							ON gd.intJournalLineNo = t.intInventoryTransactionId
-							AND gd.strTransactionId = t.strTransactionId
-							AND gd.strBatchId = t.strBatchId					
-						CROSS APPLY dbo.fnGetDebit(
-							--dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0)		
-							ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)
-						) Debit
-						CROSS APPLY dbo.fnGetCredit(
-							--dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0)
-							ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)
-						) Credit					
-						CROSS APPLY dbo.fnGetItemGLAccountAsTable(t.intItemId, t.intItemLocationId, 'Inventory') ia 			
-				WHERE	ia.intAccountId = gd.intAccountId
-						AND t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-				-- Update the Contra Account 
-				UPDATE	gd 
-				SET		dblDebit = Credit.Value
-						,dblCredit =  Debit.Value 
-				FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-							ON gd.intJournalLineNo = t.intInventoryTransactionId
-							AND gd.strTransactionId = t.strTransactionId
-							AND gd.strBatchId = t.strBatchId					
-						CROSS APPLY dbo.fnGetDebit(
-							--dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0)		
-							ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)	
-						) Debit
-						CROSS APPLY dbo.fnGetCredit(
-							--dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0) 
-							ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)			
-						) Credit					
-						CROSS APPLY dbo.fnGetItemGLAccountAsTable(t.intItemId, t.intItemLocationId, 'Inventory') ia 			
-				WHERE	ia.intAccountId <> gd.intAccountId
-						AND t.intInventoryTransactionId = @intOldInventoryTransactionId
-
-				--select 'after gl update', gd.strTransactionId, gd.strBatchId, gd.intAccountId, gd.dblDebit, gd.dblCredit, gd.dtmDate, gd.ysnIsUnposted
-				--FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-				--			ON gd.intJournalLineNo = t.intInventoryTransactionId
-				--			AND gd.strTransactionId = t.strTransactionId
-				--			AND gd.strBatchId = t.strBatchId						
-				--WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-
+				RAISERROR('Unable to find a template.', 16, 1);
+				GOTO _ExitWithError; 
 			END 
-			PRINT 'Updated closed period: ' + @strOldBatchId
+
+			-- Get the template transaction
+			SET @intInventoryTransactionId = NULL 
+			SET @dtmDate = NULL 
+			SELECT	TOP  1 
+					@intItemId = @intItemId
+					,@intItemLocationId = @intItemLocationId
+					,@intItemUOMId = dbo.fnGetItemStockUOM(@intItemId) 
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId
+					,@dtmDate = t.dtmDate 
+					,@intLotId = @intLotId
+					,@dblQty = 0
+					,@dblUOMQty = 0 
+					,@dblCost = 0
+					,@dblSalesPrice = 0 
+					,@intCurrencyId = @DefaultCurrencyId 
+					,@dblExchangeRate = 1
+					,@intTransactionId = t.intTransactionId
+					,@intTransactionDetailId = t.intTransactionDetailId
+					,@strTransactionId = t.strTransactionId
+					,@strBatchId = t.strBatchId --ISNULL(@strBatchId, t.strBatchId)
+					,@intTransactionTypeId = t.intTransactionTypeId
+					,@strTransactionForm = t.strTransactionForm
+					,@intEntityUserSecurityId = t.intCreatedEntityId
+					,@intCostingMethod = t.intCostingMethod
+					,@intInventoryTransactionId = t.intInventoryTransactionId
+			FROM	tblICInventoryTransaction t
+			WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+		
+			-- Get a template from the closed year database. 
+			IF @intInventoryTransactionId IS NULL 
+			BEGIN 
+				SELECT	TOP  1 
+						@intItemId = @intItemId
+						,@intItemLocationId = @intItemLocationId
+						,@intItemUOMId = dbo.fnGetItemStockUOM(@intItemId) 
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@dtmDate = NULL 
+						,@intLotId = @intLotId
+						,@dblQty = 0
+						,@dblUOMQty = 0 
+						,@dblCost = 0
+						,@dblSalesPrice = 0 
+						,@intCurrencyId = @DefaultCurrencyId 
+						,@dblExchangeRate = 1
+						,@intTransactionId = t.intTransactionId
+						,@intTransactionDetailId = t.intTransactionDetailId
+						,@strTransactionId = t.strTransactionId
+						,@strBatchId = t.strBatchId --ISNULL(@strBatchId, t.strBatchId)
+						,@intTransactionTypeId = t.intTransactionTypeId
+						,@strTransactionForm = t.strTransactionForm
+						,@intEntityUserSecurityId = t.intCreatedEntityId
+						,@intCostingMethod = t.intCostingMethod
+						,@intInventoryTransactionId = t.intInventoryTransactionId
+				FROM	irely02_25Oct.dbo.tblICInventoryTransaction t
+				WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId				
+			END 
+			
+			IF @intInventoryTransactionId IS NULL 
+			BEGIN 
+				RAISERROR('Unable to find a template.', 16, 1);
+				GOTO _ExitWithError; 	
+			END 
 		END
-
-		-- Upate the Open period. 
-		BEGIN 
-			PRINT 'Update the open period.'
-
-			SET @intNewInventoryTransactionId = NULL 
-			SET @strNewBatchId = NULL 
-
-			-- Get the last transaction record for the Item, Location Set, Transaction Type, Year, and Month on the open year period.
-			SELECT	TOP 1 
-					@intNewInventoryTransactionId = t.intInventoryTransactionId
-					,@strNewBatchId = t.strBatchId
-			FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-						ON t.intTransactionTypeId = ty.intTransactionTypeId
-			WHERE	t.intItemId = @intItemId
-					AND t.intItemLocationId = @intItemLocationId
-					AND ISNULL(t.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
-					AND ISNULL(t.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0) 
-					AND ISNULL(t.intLotId, 0) = ISNULL(@intLotId, 0) 
-					AND ty.strName = @strTransactionType
-					AND dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmOpenPeriod) = 1
-			ORDER BY t.intInventoryTransactionId ASC
-
-			-- If we can't find a suitable open period record with lot id in it, then pick a record by the item id and location only.  
-			IF @intNewInventoryTransactionId IS NULL 
-			BEGIN 
-				SELECT	TOP 1 
-						@intNewInventoryTransactionId = t.intInventoryTransactionId
-						,@strNewBatchId = t.strBatchId
-				FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-							ON t.intTransactionTypeId = ty.intTransactionTypeId
-				WHERE	t.intItemId = @intItemId
-						AND t.intItemLocationId = @intItemLocationId
-						AND ty.strName = @strTransactionType
-						AND dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmOpenPeriod) = 1
-				ORDER BY t.intInventoryTransactionId ASC
-			END
-
-			IF @intNewInventoryTransactionId IS NOT NULL
-			BEGIN 
-				-- Add the difference in the open year period. 
-				UPDATE	t
-				SET		dblValue -= @valueDifference
-				FROM	tblICInventoryTransaction t
-				WHERE	t.intInventoryTransactionId = @intNewInventoryTransactionId
-
-				-- Update the g/l entries for the OPEN period. 
-				-- Update the INVENTORY g/l account
-				UPDATE	gd
-				SET		dblDebit = Debit.Value
-						,dblCredit = Credit.Value
-				FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-							ON gd.intJournalLineNo = t.intInventoryTransactionId
-							AND gd.strTransactionId = t.strTransactionId
-							AND gd.strBatchId = t.strBatchId
-						CROSS APPLY dbo.fnGetDebit(
-							dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0)			
-						) Debit
-						CROSS APPLY dbo.fnGetCredit(
-							dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0) 			
-						) Credit
-						CROSS APPLY dbo.fnGetItemGLAccountAsTable(t.intItemId, t.intItemLocationId, 'Inventory') ia
-				WHERE	ia.intAccountId = gd.intAccountId
-						AND t.intInventoryTransactionId = @intNewInventoryTransactionId
-
-				-- Update the contra-account
-				UPDATE	gd
-				SET		dblDebit = Credit.Value
-						,dblCredit = Debit.Value
-				FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-							ON gd.intJournalLineNo = t.intInventoryTransactionId
-							AND gd.strTransactionId = t.strTransactionId
-							AND gd.strBatchId = t.strBatchId
-						CROSS APPLY dbo.fnGetDebit(
-							dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0)			
-						) Debit
-						CROSS APPLY dbo.fnGetCredit(
-							dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0) 			
-						) Credit
-						CROSS APPLY dbo.fnGetItemGLAccountAsTable(t.intItemId, t.intItemLocationId, 'Inventory') ia
-				WHERE	ia.intAccountId <> gd.intAccountId
-						AND t.intInventoryTransactionId = @intNewInventoryTransactionId
-
-				PRINT 'Updated open period: ' + @strNewBatchId
-			END 
-			ELSE 
-			BEGIN 
-				-- Keep track of those adjustments that does not have records in the FY open period. 
-				INSERT INTO tblICUnableToFindOpenYear (
-					[intItemId] 
-					,[intItemLocationId] 
-					,[intSubLocationId] 
-					,[intStorageLocationId] 
-					,[intLotId] 
-					,[value] 
-					,[type] 
-					,[intOldInventoryTransactionId]
-				)
-				SELECT 
-					[intItemId] = @intItemId
-					,[intItemLocationId] = @intItemLocationId
-					,[intSubLocationId] = @intSubLocationId
-					,[intStorageLocationId] = @intStorageLocationId
-					,[intLotId] = @intLotId 
-					,[value] = @valueDifference
-					,[type] = @strTransactionType
-					,[intOldInventoryTransactionId] = @intOldInventoryTransactionId
-			END 
-		END 
-
-		DELETE FROM tblICFixClosedPeriodValues WHERE @id = id
-	END 
-END
-
--- Create new Inventory Transaction records 
--- If it does not exsits in the open year. 
-IF EXISTS (SELECT TOP 1 1 FROM tblICUnableToFindOpenYear) 
-BEGIN 
-	SELECT	[Reason] = 'For the FY Open Period.'
-			,* 
-	FROM	tblICUnableToFindOpenYear
 	
-	DECLARE loopMissingOpenPeriod CURSOR LOCAL FAST_FORWARD
-	FOR 
-	SELECT  intOldInventoryTransactionId
-			,-[value]
-	FROM	tblICUnableToFindOpenYear
-		
-	OPEN loopMissingOpenPeriod;
-
-	-- Initial fetch attempt
-	FETCH NEXT FROM loopMissingOpenPeriod INTO 
-		@intOldInventoryTransactionId
-		,@valueDifference;
-	
-	-----------------------------------------------------------------------------------------------------------------------------
-	-- Start of the loop
-	-----------------------------------------------------------------------------------------------------------------------------
-	WHILE @@FETCH_STATUS = 0
-	BEGIN 
-		SET @intInventoryTransactionId = NULL 
-		SELECT	TOP  1 
-				@intItemId = t.intItemId
-				,@intItemLocationId = t.intItemLocationId
-				,@intItemUOMId = t.intItemUOMId
-				,@intSubLocationId = t.intSubLocationId
-				,@intStorageLocationId = t.intStorageLocationId
-				,@dtmDate = @dtmOpenPeriod
-				,@intLotId = t.intLotId
-				,@dblQty = 0
-				,@dblUOMQty = 0 
-				,@dblCost = 0
-				,@dblSalesPrice = 0 
-				,@intCurrencyId = @DefaultCurrencyId 
-				,@dblExchangeRate = 1
-				,@intTransactionId = t.intTransactionId
-				,@intTransactionDetailId = t.intTransactionDetailId
-				,@strTransactionId = t.strTransactionId
-				,@strBatchId = t.strBatchId
-				,@intTransactionTypeId = t.intTransactionTypeId
-				,@strTransactionForm = t.strTransactionForm
-				,@intEntityUserSecurityId = t.intCreatedEntityId
-				,@intCostingMethod = t.intCostingMethod
-				,@intInventoryTransactionId = t.intInventoryTransactionId
-		FROM	tblICInventoryTransaction t
-		WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
-		
-		IF @intInventoryTransactionId IS NOT NULL
+		-- Update the closed period			
 		BEGIN 
-			SET @InventoryTransactionIdentityId = NULL 
-			-- Create the Inventory Transaction 
+			-- Create the Inventory Transaction for the closed period
+			SET @InventoryTransactionIdentityId = NULL 				
+			SET @dtmDate = ISNULL(@dtmDate, DATEFROMPARTS(@year, @month, 1)) 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
@@ -821,7 +341,7 @@ BEGIN
 					,@intStorageLocationId = @intStorageLocationId					 
 					,@dtmDate = @dtmDate
 					,@dblQty = 0
-					,@dblUOMQty = @dblUOMQty 
+					,@dblUOMQty = 1 
 					,@dblCost = 0 
 					,@dblValue = @valueDifference
 					,@dblSalesPrice = @dblSalesPrice
@@ -846,143 +366,710 @@ BEGIN
 				SELECT	'Unable to create the G/L entries'
 						,t.* 
 				FROM	tblICInventoryTransaction t
-				WHERE	t.intInventoryTransactionId = @intOldInventoryTransactionId
+				WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+
+				SELECT	TOP  1 
+						'Unable to create the G/L entries'
+						,[@intItemId] = @intItemId
+						,[@intItemLocationId] = @intItemLocationId
+						,[@intItemUOMId] = @intItemUOMId
+						,[@intSubLocationId] = @intSubLocationId
+						,[@intStorageLocationId] = @intStorageLocationId
+						,[@dtmDate] = @dtmDate
+						,[@intLotId] = @intLotId
+						,[@dblQty] = 0
+						,[@dblUOMQty] = 0 
+						,[@dblCost] = 0
+						,[@dblSalesPrice] = 0 
+						,[@intCurrencyId] = @DefaultCurrencyId 
+						,[@dblExchangeRate] = 1
+						,[@intTransactionId] = t.intTransactionId
+						,[@intTransactionDetailId] = t.intTransactionDetailId
+						,[@strTransactionId] = t.strTransactionId
+						,[@strBatchId] = ISNULL(@strBatchId, t.strBatchId)
+						,[@intTransactionTypeId] = t.intTransactionTypeId
+						,[@strTransactionForm] = t.strTransactionForm
+						,[@intEntityUserSecurityId] = t.intCreatedEntityId
+						,[@intCostingMethod] = t.intCostingMethod
+						,[@intInventoryTransactionId] = t.intInventoryTransactionId
+				FROM	tblICInventoryTransaction t
+				WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
 
 				RAISERROR('Unable to create the G/L entries', 16, 1);
 				GOTO _ExitWithError; 				
 			END 
 			
-			-- Create the G/L entries 
+			-- Create the G/L entries for the closed period. 
 			ELSE 
 			BEGIN 
-				INSERT INTO tblGLDetail (
-					dtmDate
-					,strBatchId
-					,intAccountId
-					,dblDebit
-					,dblCredit
-					,dblDebitUnit
-					,dblCreditUnit
-					,strDescription
-					,strCode
-					,strReference
-					,intCurrencyId
-					,dblExchangeRate
-					,dtmDateEntered
-					,dtmTransactionDate
-					,strJournalLineDescription
-					,intJournalLineNo
-					,ysnIsUnposted
-					,intUserId
-					,intEntityId
-					,strTransactionId
-					,intTransactionId
-					,strTransactionType
-					,strTransactionForm
-					,strModuleName
-					,intConcurrencyId
-					,dblDebitForeign
-					,dblDebitReport
-					,dblCreditForeign
-					,dblCreditReport
-					,dblReportingRate
-					,dblForeignRate
-				)	
-				SELECT	dtmDate = @dtmOpenPeriod
-						,gd.strBatchId
-						,gd.intAccountId
-						,dblDebit = Debit.Value
-						,dblCredit = Credit.Value
-						,gd.dblDebitUnit
-						,gd.dblCreditUnit
-						,gd.strDescription
-						,gd.strCode
-						,gd.strReference
-						,gd.intCurrencyId
-						,gd.dblExchangeRate
-						,gd.dtmDateEntered
-						,gd.dtmTransactionDate
-						,gd.strJournalLineDescription
-						,intJournalLineNo = @InventoryTransactionIdentityId
-						,gd.ysnIsUnposted
-						,gd.intUserId
-						,gd.intEntityId
-						,gd.strTransactionId
-						,gd.intTransactionId
-						,gd.strTransactionType
-						,gd.strTransactionForm
-						,gd.strModuleName
-						,gd.intConcurrencyId
-						,dblDebitForeign = 0 
-						,gd.dblDebitReport
-						,dblCreditForeign = 0 
-						,gd.dblCreditReport
-						,dblReportingRate = 1
-						,gd.dblForeignRate
-				FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
+				PRINT 'Create the g/l entries for the closed period.'
+				PRINT @strBatchId
+				PRINT @InventoryTransactionIdentityId
+				PRINT @intTemplateInventoryTransactionId 
+
+				IF EXISTS (
+					SELECT	TOP 1 gd.intGLDetailId 
+					FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
 							ON gd.intJournalLineNo = t.intInventoryTransactionId
 							AND gd.strTransactionId = t.strTransactionId
 							AND gd.strBatchId = t.strBatchId
-						CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
-						CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit											
-						CROSS APPLY dbo.fnGetItemGLAccountAsTable(t.intItemId, t.intItemLocationId, 'Inventory') ia
-				WHERE	ia.intAccountId = gd.intAccountId
-						AND t.intInventoryTransactionId = @intOldInventoryTransactionId
-				UNION ALL 
-				SELECT	dtmDate = @dtmOpenPeriod
-						,gd.strBatchId
-						,gd.intAccountId
-						,dblDebit = Credit.Value
-						,dblCredit = Debit.Value
-						,gd.dblDebitUnit
-						,gd.dblCreditUnit
-						,gd.strDescription
-						,gd.strCode
-						,gd.strReference
-						,gd.intCurrencyId
-						,gd.dblExchangeRate
-						,gd.dtmDateEntered
-						,gd.dtmTransactionDate
-						,gd.strJournalLineDescription
-						,intJournalLineNo = @InventoryTransactionIdentityId
-						,gd.ysnIsUnposted
-						,gd.intUserId
-						,gd.intEntityId
-						,gd.strTransactionId
-						,gd.intTransactionId
-						,gd.strTransactionType
-						,gd.strTransactionForm
-						,gd.strModuleName
-						,gd.intConcurrencyId
-						,dblDebitForeign = 0 
-						,gd.dblDebitReport
-						,dblCreditForeign = 0 
-						,gd.dblCreditReport
-						,dblReportingRate = 1
-						,gd.dblForeignRate
-				FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
-							ON gd.intJournalLineNo = t.intInventoryTransactionId
-							AND gd.strTransactionId = t.strTransactionId
-							AND gd.strBatchId = t.strBatchId
-						CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
-						CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit											
-						CROSS APPLY dbo.fnGetItemGLAccountAsTable(t.intItemId, t.intItemLocationId, 'Inventory') ia
-				WHERE	ia.intAccountId <> gd.intAccountId
-						AND t.intInventoryTransactionId = @intOldInventoryTransactionId				
+					WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+				) 
+				BEGIN 
+					INSERT INTO tblGLDetail (
+						dtmDate
+						,strBatchId
+						,intAccountId
+						,dblDebit
+						,dblCredit
+						,dblDebitUnit
+						,dblCreditUnit
+						,strDescription
+						,strCode
+						,strReference
+						,intCurrencyId
+						,dblExchangeRate
+						,dtmDateEntered
+						,dtmTransactionDate
+						,strJournalLineDescription
+						,intJournalLineNo
+						,ysnIsUnposted
+						,intUserId
+						,intEntityId
+						,strTransactionId
+						,intTransactionId
+						,strTransactionType
+						,strTransactionForm
+						,strModuleName
+						,intConcurrencyId
+						,dblDebitForeign
+						,dblDebitReport
+						,dblCreditForeign
+						,dblCreditReport
+						,dblReportingRate
+						,dblForeignRate
+					)	
+					SELECT	TOP 1
+							dtmDate = @dtmDate
+							,@strBatchId
+							,ia.intAccountId
+							,dblDebit = Debit.Value --CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
+							,dblCredit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
+							,dblDebitUnit = 0 
+							,dblCreditUnit = 0 
+							,gd.strDescription
+							,gd.strCode
+							,gd.strReference
+							,gd.intCurrencyId
+							,gd.dblExchangeRate
+							,GETDATE()--gd.dtmDateEntered
+							,gd.dtmTransactionDate
+							,gd.strJournalLineDescription
+							,intJournalLineNo = @InventoryTransactionIdentityId
+							,gd.ysnIsUnposted
+							,gd.intUserId
+							,gd.intEntityId
+							,gd.strTransactionId
+							,gd.intTransactionId
+							,gd.strTransactionType
+							,gd.strTransactionForm
+							,gd.strModuleName
+							,gd.intConcurrencyId
+							,dblDebitForeign = 0 
+							,gd.dblDebitReport
+							,dblCreditForeign = 0 
+							,gd.dblCreditReport
+							,dblReportingRate = 1
+							,gd.dblForeignRate
+					FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
+								ON gd.intJournalLineNo = t.intInventoryTransactionId
+								AND gd.strTransactionId = t.strTransactionId
+								AND gd.strBatchId = t.strBatchId
+							INNER JOIN tblGLAccount ga
+								ON ga.intAccountId = gd.intAccountId
+							INNER JOIN tblGLAccountSegmentMapping asm
+								ON asm.intAccountId = ga.intAccountId
+							INNER JOIN tblGLAccountSegment gs
+								ON gs.intAccountSegmentId = asm.intAccountSegmentId
+								AND gs.intAccountStructureId = 1
+							INNER JOIN tblGLAccountCategory gc
+								ON gc.intAccountCategoryId = gs.intAccountCategoryId
+							CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
+							CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit											
+							CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory ) ia
+					WHERE	--ia.intAccountId = gd.intAccountId
+							t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+					UNION ALL 
+					SELECT	TOP 1
+							dtmDate = @dtmDate
+							,@strBatchId
+							,ia.intAccountId
+							,dblDebit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
+							,dblCredit = Debit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
+							,dblDebitUnit = 0 
+							,dblCreditUnit = 0 
+							,gd.strDescription
+							,gd.strCode
+							,gd.strReference
+							,gd.intCurrencyId
+							,gd.dblExchangeRate
+							,GETDATE() -- gd.dtmDateEntered
+							,gd.dtmTransactionDate
+							,gd.strJournalLineDescription
+							,intJournalLineNo = @InventoryTransactionIdentityId
+							,gd.ysnIsUnposted
+							,gd.intUserId
+							,gd.intEntityId
+							,gd.strTransactionId
+							,gd.intTransactionId
+							,gd.strTransactionType
+							,gd.strTransactionForm
+							,gd.strModuleName
+							,gd.intConcurrencyId
+							,dblDebitForeign = 0 
+							,gd.dblDebitReport
+							,dblCreditForeign = 0 
+							,gd.dblCreditReport
+							,dblReportingRate = 1
+							,gd.dblForeignRate
+					FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
+								ON gd.intJournalLineNo = t.intInventoryTransactionId
+								AND gd.strTransactionId = t.strTransactionId
+								AND gd.strBatchId = t.strBatchId
+							INNER JOIN tblGLAccount ga
+								ON ga.intAccountId = gd.intAccountId
+							INNER JOIN tblGLAccountSegmentMapping asm
+								ON asm.intAccountId = ga.intAccountId
+							INNER JOIN tblGLAccountSegment gs
+								ON gs.intAccountSegmentId = asm.intAccountSegmentId
+								AND gs.intAccountStructureId = 1
+							INNER JOIN tblGLAccountCategory gc
+								ON gc.intAccountCategoryId = gs.intAccountCategoryId
+							CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
+							CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit									
+							CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory) ia
+					WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId	
+							AND gc.strAccountCategory <> 'Inventory' -- Make sure the contra account id is not 'Inventory'
+				END 
+				ELSE 
+				-- Insert GL entries for the closed period from the closed period db. 
+				BEGIN 
+					INSERT INTO tblGLDetail (
+						dtmDate
+						,strBatchId
+						,intAccountId
+						,dblDebit
+						,dblCredit
+						,dblDebitUnit
+						,dblCreditUnit
+						,strDescription
+						,strCode
+						,strReference
+						,intCurrencyId
+						,dblExchangeRate
+						,dtmDateEntered
+						,dtmTransactionDate
+						,strJournalLineDescription
+						,intJournalLineNo
+						,ysnIsUnposted
+						,intUserId
+						,intEntityId
+						,strTransactionId
+						,intTransactionId
+						,strTransactionType
+						,strTransactionForm
+						,strModuleName
+						,intConcurrencyId
+						,dblDebitForeign
+						,dblDebitReport
+						,dblCreditForeign
+						,dblCreditReport
+						,dblReportingRate
+						,dblForeignRate
+					)	
+					SELECT	TOP 1
+							dtmDate = @dtmDate
+							,@strBatchId
+							,ia.intAccountId
+							,dblDebit = Debit.Value --CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
+							,dblCredit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
+							,dblDebitUnit = 0 
+							,dblCreditUnit = 0 
+							,gd.strDescription
+							,gd.strCode
+							,gd.strReference
+							,gd.intCurrencyId
+							,gd.dblExchangeRate
+							,GETDATE()--gd.dtmDateEntered
+							,gd.dtmTransactionDate
+							,gd.strJournalLineDescription
+							,intJournalLineNo = @InventoryTransactionIdentityId
+							,gd.ysnIsUnposted
+							,gd.intUserId
+							,gd.intEntityId
+							,gd.strTransactionId
+							,gd.intTransactionId
+							,gd.strTransactionType
+							,gd.strTransactionForm
+							,gd.strModuleName
+							,gd.intConcurrencyId
+							,dblDebitForeign = 0 
+							,gd.dblDebitReport
+							,dblCreditForeign = 0 
+							,gd.dblCreditReport
+							,dblReportingRate = 1
+							,gd.dblForeignRate
+					FROM	irely02_25Oct.dbo.tblGLDetail gd INNER JOIN irely02_25Oct.dbo.tblICInventoryTransaction t
+								ON gd.intJournalLineNo = t.intInventoryTransactionId
+								AND gd.strTransactionId = t.strTransactionId
+								AND gd.strBatchId = t.strBatchId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccount ga
+								ON ga.intAccountId = gd.intAccountId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountSegmentMapping asm
+								ON asm.intAccountId = ga.intAccountId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountSegment gs
+								ON gs.intAccountSegmentId = asm.intAccountSegmentId
+								AND gs.intAccountStructureId = 1
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountCategory gc
+								ON gc.intAccountCategoryId = gs.intAccountCategoryId
+							CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
+							CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit											
+							CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory ) ia
+					WHERE	--ia.intAccountId = gd.intAccountId
+							t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+					UNION ALL 
+					SELECT	TOP 1
+							dtmDate = @dtmDate
+							,@strBatchId
+							,ia.intAccountId
+							,dblDebit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
+							,dblCredit = Debit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
+							,dblDebitUnit = 0 
+							,dblCreditUnit = 0 
+							,gd.strDescription
+							,gd.strCode
+							,gd.strReference
+							,gd.intCurrencyId
+							,gd.dblExchangeRate
+							,GETDATE() -- gd.dtmDateEntered
+							,gd.dtmTransactionDate
+							,gd.strJournalLineDescription
+							,intJournalLineNo = @InventoryTransactionIdentityId
+							,gd.ysnIsUnposted
+							,gd.intUserId
+							,gd.intEntityId
+							,gd.strTransactionId
+							,gd.intTransactionId
+							,gd.strTransactionType
+							,gd.strTransactionForm
+							,gd.strModuleName
+							,gd.intConcurrencyId
+							,dblDebitForeign = 0 
+							,gd.dblDebitReport
+							,dblCreditForeign = 0 
+							,gd.dblCreditReport
+							,dblReportingRate = 1
+							,gd.dblForeignRate
+					FROM	irely02_25Oct.dbo.tblGLDetail gd INNER JOIN irely02_25Oct.dbo.tblICInventoryTransaction t
+								ON gd.intJournalLineNo = t.intInventoryTransactionId
+								AND gd.strTransactionId = t.strTransactionId
+								AND gd.strBatchId = t.strBatchId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccount ga
+								ON ga.intAccountId = gd.intAccountId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountSegmentMapping asm
+								ON asm.intAccountId = ga.intAccountId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountSegment gs
+								ON gs.intAccountSegmentId = asm.intAccountSegmentId
+								AND gs.intAccountStructureId = 1
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountCategory gc
+								ON gc.intAccountCategoryId = gs.intAccountCategoryId
+							CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
+							CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit									
+							CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory) ia
+					WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId	
+							AND gc.strAccountCategory <> 'Inventory' -- Make sure the contra account id is not 'Inventory'
+				END 
 			END 
-		END 
 
-		FETCH NEXT FROM loopMissingOpenPeriod INTO 
-			@intOldInventoryTransactionId
-			,@valueDifference;
+			PRINT 'Updated closed period: ' + @strOldBatchId
+		END 						
+
+		-- Update the open period			
+		BEGIN 
+			-- Reverse the value difference 
+			SET @valueDifference = -@valueDifference 
+
+			-- Create the Inventory Transaction for the open period
+			SET @InventoryTransactionIdentityId = NULL 				
+			EXEC [dbo].[uspICPostInventoryTransaction]
+					@intItemId = @intItemId
+					,@intItemLocationId = @intItemLocationId
+					,@intItemUOMId = @intItemUOMId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId					 
+					,@dtmDate = @dtmOpenPeriod
+					,@dblQty = 0
+					,@dblUOMQty = 1 
+					,@dblCost = 0 
+					,@dblValue = @valueDifference
+					,@dblSalesPrice = @dblSalesPrice
+					,@intCurrencyId = @intCurrencyId
+					,@dblExchangeRate = @dblExchangeRate
+					,@intTransactionId = @intTransactionId
+					,@intTransactionDetailId = @intTransactionDetailId
+					,@strTransactionId = @strTransactionId
+					,@strBatchId = @strBatchId
+					,@intTransactionTypeId = @intTransactionTypeId
+					,@intLotId = @intLotId 
+					,@intRelatedInventoryTransactionId = NULL 
+					,@intRelatedTransactionId = NULL 
+					,@strRelatedTransactionId = NULL 
+					,@strTransactionForm = @strTransactionForm
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
+					,@intCostingMethod = @intCostingMethod
+					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+			
+			IF @InventoryTransactionIdentityId IS NULL 
+			BEGIN 
+				SELECT	'Unable to create the G/L entries'
+						,t.* 
+				FROM	tblICInventoryTransaction t
+				WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+
+				SELECT	TOP  1 
+						'Unable to create the G/L entries'
+						,[@intItemId] = @intItemId
+						,[@intItemLocationId] = @intItemLocationId
+						,[@intItemUOMId] = @intItemUOMId
+						,[@intSubLocationId] = @intSubLocationId
+						,[@intStorageLocationId] = @intStorageLocationId
+						,[@dtmDate] = @dtmOpenPeriod
+						,[@intLotId] = @intLotId
+						,[@dblQty] = 0
+						,[@dblUOMQty] = 0 
+						,[@dblCost] = 0
+						,[@dblSalesPrice] = 0 
+						,[@intCurrencyId] = @DefaultCurrencyId 
+						,[@dblExchangeRate] = 1
+						,[@intTransactionId] = t.intTransactionId
+						,[@intTransactionDetailId] = t.intTransactionDetailId
+						,[@strTransactionId] = t.strTransactionId
+						,[@strBatchId] = ISNULL(@strBatchId, t.strBatchId)
+						,[@intTransactionTypeId] = t.intTransactionTypeId
+						,[@strTransactionForm] = t.strTransactionForm
+						,[@intEntityUserSecurityId] = t.intCreatedEntityId
+						,[@intCostingMethod] = t.intCostingMethod
+						,[@intInventoryTransactionId] = t.intInventoryTransactionId
+				FROM	tblICInventoryTransaction t
+				WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+
+				RAISERROR('Unable to create the G/L entries', 16, 1);
+				GOTO _ExitWithError; 				
+			END 
+			
+			-- Create the G/L entries for the open period. 
+			ELSE 
+			BEGIN 
+				PRINT 'create the g/l entries for the open period.'
+				PRINT @strBatchId
+				PRINT @InventoryTransactionIdentityId
+				PRINT @intTemplateInventoryTransactionId 
+
+				IF EXISTS (
+					SELECT	TOP 1 gd.intGLDetailId 
+					FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
+							ON gd.intJournalLineNo = t.intInventoryTransactionId
+							AND gd.strTransactionId = t.strTransactionId
+							AND gd.strBatchId = t.strBatchId
+					WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+				) 
+				BEGIN 
+
+					INSERT INTO tblGLDetail (
+						dtmDate
+						,strBatchId
+						,intAccountId
+						,dblDebit
+						,dblCredit
+						,dblDebitUnit
+						,dblCreditUnit
+						,strDescription
+						,strCode
+						,strReference
+						,intCurrencyId
+						,dblExchangeRate
+						,dtmDateEntered
+						,dtmTransactionDate
+						,strJournalLineDescription
+						,intJournalLineNo
+						,ysnIsUnposted
+						,intUserId
+						,intEntityId
+						,strTransactionId
+						,intTransactionId
+						,strTransactionType
+						,strTransactionForm
+						,strModuleName
+						,intConcurrencyId
+						,dblDebitForeign
+						,dblDebitReport
+						,dblCreditForeign
+						,dblCreditReport
+						,dblReportingRate
+						,dblForeignRate
+					)	
+					SELECT	TOP 1
+							dtmDate = @dtmOpenPeriod
+							,@strBatchId
+							,ia.intAccountId
+							,dblDebit = Debit.Value --CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
+							,dblCredit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
+							,dblDebitUnit = 0 
+							,dblCreditUnit = 0 
+							,gd.strDescription
+							,gd.strCode
+							,gd.strReference
+							,gd.intCurrencyId
+							,gd.dblExchangeRate
+							,GETDATE()--gd.dtmDateEntered
+							,gd.dtmTransactionDate
+							,gd.strJournalLineDescription
+							,intJournalLineNo = @InventoryTransactionIdentityId
+							,gd.ysnIsUnposted
+							,gd.intUserId
+							,gd.intEntityId
+							,gd.strTransactionId
+							,gd.intTransactionId
+							,gd.strTransactionType
+							,gd.strTransactionForm
+							,gd.strModuleName
+							,gd.intConcurrencyId
+							,dblDebitForeign = 0 
+							,gd.dblDebitReport
+							,dblCreditForeign = 0 
+							,gd.dblCreditReport
+							,dblReportingRate = 1
+							,gd.dblForeignRate
+					FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
+								ON gd.intJournalLineNo = t.intInventoryTransactionId
+								AND gd.strTransactionId = t.strTransactionId
+								AND gd.strBatchId = t.strBatchId
+							INNER JOIN tblGLAccount ga
+								ON ga.intAccountId = gd.intAccountId
+							INNER JOIN tblGLAccountSegmentMapping asm
+								ON asm.intAccountId = ga.intAccountId
+							INNER JOIN tblGLAccountSegment gs
+								ON gs.intAccountSegmentId = asm.intAccountSegmentId
+								AND gs.intAccountStructureId = 1
+							INNER JOIN tblGLAccountCategory gc
+								ON gc.intAccountCategoryId = gs.intAccountCategoryId
+							CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
+							CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit											
+							CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory ) ia
+					WHERE	--ia.intAccountId = gd.intAccountId
+							t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+					UNION ALL 
+					SELECT	TOP 1
+							dtmDate = @dtmOpenPeriod
+							,@strBatchId
+							,ia.intAccountId
+							,dblDebit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
+							,dblCredit = Debit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
+							,dblDebitUnit = 0 
+							,dblCreditUnit = 0 
+							,gd.strDescription
+							,gd.strCode
+							,gd.strReference
+							,gd.intCurrencyId
+							,gd.dblExchangeRate
+							,GETDATE() -- gd.dtmDateEntered
+							,gd.dtmTransactionDate
+							,gd.strJournalLineDescription
+							,intJournalLineNo = @InventoryTransactionIdentityId
+							,gd.ysnIsUnposted
+							,gd.intUserId
+							,gd.intEntityId
+							,gd.strTransactionId
+							,gd.intTransactionId
+							,gd.strTransactionType
+							,gd.strTransactionForm
+							,gd.strModuleName
+							,gd.intConcurrencyId
+							,dblDebitForeign = 0 
+							,gd.dblDebitReport
+							,dblCreditForeign = 0 
+							,gd.dblCreditReport
+							,dblReportingRate = 1
+							,gd.dblForeignRate
+					FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
+								ON gd.intJournalLineNo = t.intInventoryTransactionId
+								AND gd.strTransactionId = t.strTransactionId
+								AND gd.strBatchId = t.strBatchId
+							INNER JOIN tblGLAccount ga
+								ON ga.intAccountId = gd.intAccountId
+							INNER JOIN tblGLAccountSegmentMapping asm
+								ON asm.intAccountId = ga.intAccountId
+							INNER JOIN tblGLAccountSegment gs
+								ON gs.intAccountSegmentId = asm.intAccountSegmentId
+								AND gs.intAccountStructureId = 1
+							INNER JOIN tblGLAccountCategory gc
+								ON gc.intAccountCategoryId = gs.intAccountCategoryId
+							CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
+							CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit									
+							CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory) ia
+					WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId	
+							AND gc.strAccountCategory <> 'Inventory' -- Make sure the contra account id is not 'Inventory'
+				END
+				-- Insert GL entries for the open period from the closed period db. 
+				ELSE 
+				BEGIN 
+					INSERT INTO tblGLDetail (
+						dtmDate
+						,strBatchId
+						,intAccountId
+						,dblDebit
+						,dblCredit
+						,dblDebitUnit
+						,dblCreditUnit
+						,strDescription
+						,strCode
+						,strReference
+						,intCurrencyId
+						,dblExchangeRate
+						,dtmDateEntered
+						,dtmTransactionDate
+						,strJournalLineDescription
+						,intJournalLineNo
+						,ysnIsUnposted
+						,intUserId
+						,intEntityId
+						,strTransactionId
+						,intTransactionId
+						,strTransactionType
+						,strTransactionForm
+						,strModuleName
+						,intConcurrencyId
+						,dblDebitForeign
+						,dblDebitReport
+						,dblCreditForeign
+						,dblCreditReport
+						,dblReportingRate
+						,dblForeignRate
+					)	
+					SELECT	TOP 1
+							dtmDate = @dtmOpenPeriod
+							,@strBatchId
+							,ia.intAccountId
+							,dblDebit = Debit.Value --CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
+							,dblCredit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
+							,dblDebitUnit = 0 
+							,dblCreditUnit = 0 
+							,gd.strDescription
+							,gd.strCode
+							,gd.strReference
+							,gd.intCurrencyId
+							,gd.dblExchangeRate
+							,GETDATE()--gd.dtmDateEntered
+							,gd.dtmTransactionDate
+							,gd.strJournalLineDescription
+							,intJournalLineNo = @InventoryTransactionIdentityId
+							,gd.ysnIsUnposted
+							,gd.intUserId
+							,gd.intEntityId
+							,gd.strTransactionId
+							,gd.intTransactionId
+							,gd.strTransactionType
+							,gd.strTransactionForm
+							,gd.strModuleName
+							,gd.intConcurrencyId
+							,dblDebitForeign = 0 
+							,gd.dblDebitReport
+							,dblCreditForeign = 0 
+							,gd.dblCreditReport
+							,dblReportingRate = 1
+							,gd.dblForeignRate
+					FROM	irely02_25Oct.dbo.tblGLDetail gd INNER JOIN irely02_25Oct.dbo.tblICInventoryTransaction t
+								ON gd.intJournalLineNo = t.intInventoryTransactionId
+								AND gd.strTransactionId = t.strTransactionId
+								AND gd.strBatchId = t.strBatchId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccount ga
+								ON ga.intAccountId = gd.intAccountId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountSegmentMapping asm
+								ON asm.intAccountId = ga.intAccountId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountSegment gs
+								ON gs.intAccountSegmentId = asm.intAccountSegmentId
+								AND gs.intAccountStructureId = 1
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountCategory gc
+								ON gc.intAccountCategoryId = gs.intAccountCategoryId
+							CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
+							CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit											
+							CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory ) ia
+					WHERE	--ia.intAccountId = gd.intAccountId
+							t.intInventoryTransactionId = @intTemplateInventoryTransactionId
+					UNION ALL 
+					SELECT	TOP 1
+							dtmDate = @dtmOpenPeriod
+							,@strBatchId
+							,ia.intAccountId
+							,dblDebit = Credit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Credit.Value else Debit.Value END 
+							,dblCredit = Debit.Value -- CASE WHEN gc.strAccountCategory = 'Inventory' THEN Debit.Value else Credit.Value END 
+							,dblDebitUnit = 0 
+							,dblCreditUnit = 0 
+							,gd.strDescription
+							,gd.strCode
+							,gd.strReference
+							,gd.intCurrencyId
+							,gd.dblExchangeRate
+							,GETDATE() -- gd.dtmDateEntered
+							,gd.dtmTransactionDate
+							,gd.strJournalLineDescription
+							,intJournalLineNo = @InventoryTransactionIdentityId
+							,gd.ysnIsUnposted
+							,gd.intUserId
+							,gd.intEntityId
+							,gd.strTransactionId
+							,gd.intTransactionId
+							,gd.strTransactionType
+							,gd.strTransactionForm
+							,gd.strModuleName
+							,gd.intConcurrencyId
+							,dblDebitForeign = 0 
+							,gd.dblDebitReport
+							,dblCreditForeign = 0 
+							,gd.dblCreditReport
+							,dblReportingRate = 1
+							,gd.dblForeignRate
+					FROM	irely02_25Oct.dbo.tblGLDetail gd INNER JOIN irely02_25Oct.dbo.tblICInventoryTransaction t
+								ON gd.intJournalLineNo = t.intInventoryTransactionId
+								AND gd.strTransactionId = t.strTransactionId
+								AND gd.strBatchId = t.strBatchId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccount ga
+								ON ga.intAccountId = gd.intAccountId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountSegmentMapping asm
+								ON asm.intAccountId = ga.intAccountId
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountSegment gs
+								ON gs.intAccountSegmentId = asm.intAccountSegmentId
+								AND gs.intAccountStructureId = 1
+							INNER JOIN irely02_25Oct.dbo.tblGLAccountCategory gc
+								ON gc.intAccountCategoryId = gs.intAccountCategoryId
+							CROSS APPLY dbo.fnGetDebit(@valueDifference) Debit
+							CROSS APPLY dbo.fnGetCredit(@valueDifference) Credit									
+							CROSS APPLY dbo.fnGetItemGLAccountAsTable(@intItemId, @intItemLocationId, gc.strAccountCategory) ia
+					WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId	
+							AND gc.strAccountCategory <> 'Inventory' -- Make sure the contra account id is not 'Inventory'
+				END 
+			END 
+
+			PRINT 'Updated open period: ' + @strBatchId
+		END 	
+
+		DELETE FROM tblICFixClosedPeriodValues WHERE @id = id
 	END 
+END
 
-	CLOSE loopMissingOpenPeriod;
-	DEALLOCATE loopMissingOpenPeriod;
-END 
 
 DROP TABLE tblICFixClosedPeriodValues
-DROP TABLE tblICUnableToFindOpenYear
+--DROP TABLE tblICUnableToFindOpenYear
 
 -- Rebuild the G/L Summary 
 BEGIN 
