@@ -319,17 +319,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intItemId',
                                 value: '{grdInventoryAdjustment.selection.intItemId}',
                                 conjunction: 'and'
-                            },
-                          /*  {
-                                column: 'intSubLocationId',
-                                value: '{grdInventoryAdjustment.selection.intSubLocationId}',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intStorageLocationId',
-                                value: '{grdInventoryAdjustment.selection.intStorageLocationId}',
-                                conjunction: 'and'
-                            }*/
+                            }
                         ],
                         readOnly: '{formulaShowItemUOMEditor}'
                     }
@@ -746,8 +736,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 if (cboUOM) cboUOM.setReadOnly(true);
             }
 
-            //Update Available Quantity based on UOM
-            current.set('dblQuantity', record.get('dblOnHand'));
         }
         else if (combo.itemId === 'cboSubLocation') {
             current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
@@ -950,8 +938,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var locationId = current.get('intLocationId'),
             itemId = record.get('intItemId'),
             subLocationId = record.get('intSubLocationId'),
-            storageLocationId = record.get('intStorageLocationId'),
-            itemUOMId = current.get('intItemUOMId');
+            storageLocationId = record.get('intStorageLocationId');
         var qty = 0;
 
         Ext.Ajax.request({
