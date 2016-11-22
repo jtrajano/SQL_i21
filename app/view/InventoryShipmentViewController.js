@@ -627,6 +627,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    pokeGrid: function (grdInventoryShipment) {
+        // Temporary fix for the issue on grid alignment: After saving the screen, the grid header is misaligned with the grid cells.
+        if (grdInventoryShipment.getView().body.dom && grdInventoryShipment.getView().body.dom.offsetParent) {
+            if (grdInventoryShipment.getView().body.dom.offsetParent.scrollLeft % 2 === 0)
+                grdInventoryShipment.getView().scrollBy(1, 0);
+            else
+                grdInventoryShipment.getView().scrollBy(-1, 0);
+        }
+    },
+
     setupContext : function(options) {
         "use strict";
         var me = this,
@@ -643,6 +653,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
+            onSaveClick: Ext.bind(function(success, failure) {
+                me.pokeGrid(grdInventoryShipment);
+                win.context.data.saveRecord({
+                    callbackFn: function(batch, options) {
+                        me.pokeGrid(grdInventoryShipment);
+                    }
+                });
+            }, me),
             include: 'vyuICGetInventoryShipment, ' +
             'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
             'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem, ' +
