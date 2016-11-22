@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
-
 SELECT
 	 [strTransactionType]				= 'Sales Order'
 	,[strTransactionNumber]				= SO.[strSalesOrderNumber]
@@ -21,7 +20,7 @@ SELECT
 	,[intLoadId]						= NULL
 	,[intLoadDetailId]					= NULL
 	,[strLoadNumber]					= NULL
-	,[intRecipeItemId]					= NULL
+	,[intRecipeItemId]					= SOD.[intRecipeItemId]
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
 	,[strContractNumber]				= ARCR.[strContractNumber]
 	,[intContractDetailId]				= SOD.[intContractDetailId]
@@ -337,7 +336,7 @@ SELECT
 	,[strPricing]						= SOD.[strPricing]
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
-	,[intStorageLocationId]				= SOD.[intStorageLocationId]
+	,[intStorageLocationId]				= ISNULL(SHP.intStorageLocationId, SOD.[intStorageLocationId])
 	,[strStorageLocationName]			= SL.[strName]
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
@@ -360,7 +359,7 @@ SELECT
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= SOD.[ysnBlended]
 	,[intRecipeId]						= SOD.[intRecipeId]
-	,[intSubLocationId]					= SOD.[intSubLocationId]
+	,[intSubLocationId]					= ISNULL(SHP.intSubLocationId, SOD.[intSubLocationId])
 	,[intCostTypeId]					= SOD.[intCostTypeId]
 	,[intMarginById]					= SOD.[intMarginById]
 	,[intCommentTypeId]					= SOD.[intCommentTypeId]
@@ -404,9 +403,6 @@ LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]		
 LEFT OUTER JOIN
-	tblICStorageLocation SL
-		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
-LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId] 
 LEFT OUTER JOIN
@@ -432,6 +428,8 @@ CROSS APPLY
 		,CL.[strLocationName]
 		,ISH.[intFreightTermId]
 		,ISI.[intWeightUOMId]
+		,ISI.intSubLocationId
+		,ISI.intStorageLocationId
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -470,6 +468,8 @@ CROSS APPLY
 		,CL.[strLocationName]
 		,ISH.[intFreightTermId]
 		,ISI.[intWeightUOMId]
+		,ISI.intSubLocationId
+		,ISI.intStorageLocationId
 	) SHP
 LEFT OUTER JOIN
 	tblSCTicket SCT
@@ -505,6 +505,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCurrency SMC
 		ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN
+	tblICStorageLocation SL
+		ON ISNULL(SHP.[intStorageLocationId], SOD.[intStorageLocationId]) = SL.[intStorageLocationId]
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0			
 	
 UNION ALL
@@ -564,8 +567,8 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
-	,[intTicketId]						= NULL
+	,[strTicketNumber]					= SCT.strTicketNumber
+	,[intTicketId]						= SCT.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](ICISI.[intWeightUOMId],ICISI.[intItemUOMId],1) --ICIU1.[dblWeight]
@@ -678,7 +681,11 @@ LEFT OUTER JOIN
 		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN
 	tblSMCurrency SMC
-		ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]			
+		ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]	
+LEFT OUTER JOIN
+	tblSCTicket SCT
+		ON ICISI.[intSourceId] = SCT.[intTicketId]
+						
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 
 UNION ALL
@@ -738,8 +745,8 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
-	,[intTicketId]						= NULL
+	,[strTicketNumber]					= SCT.strTicketNumber
+	,[intTicketId]						= SCT.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblWeight]						= 0.00
@@ -772,6 +779,9 @@ INNER JOIN
 		ON ICISC.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 		AND ICIS.[ysnPosted] = 1
 		AND ISNULL(ICISC.[ysnPrice],0) = 1
+LEFT OUTER JOIN	
+		tblICInventoryShipmentItem ICISI 
+			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 LEFT OUTER JOIN 
 	vyuARCustomerContract ARCC	
 		ON ICISC.[intContractId] = ARCC.[intContractHeaderId]
@@ -799,7 +809,10 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCurrency SMC
 		ON ICISC.[intCurrencyId] = SMC.[intCurrencyID] 
-WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+LEFT OUTER JOIN
+    tblSCTicket SCT
+        ON ICISI.[intSourceId] = SCT.[intTicketId]
+WHERE ISNULL(ARID.[intInventoryShipmentChargeId],0) = 0
 
 UNION ALL
 
@@ -1002,7 +1015,7 @@ SELECT
 	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= NULL
-	,[intRecipeId]						= NULL
+	,[intRecipeId]						= MFR.intRecipeId
 	,[intSubLocationId]					= NULL
 	,[intCostTypeId]					= NULL
 	,[intMarginById]					= NULL
@@ -1047,6 +1060,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblARInvoiceDetail	ARID
 		ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+LEFT OUTER JOIN
+	tblMFRecipeItem MFR
+		ON MFG.intRecipeItemId = MFR.intRecipeItemId
 LEFT OUTER JOIN
 	(SELECT D.[intOrderId] FROM tblICInventoryShipmentItem D INNER JOIN tblICInventoryShipment H ON H.[intInventoryShipmentId] = D.[intInventoryShipmentId] WHERE H.[intOrderType] = 2) ISD
 		ON SO.[intSalesOrderId] = ISD.[intOrderId] 
