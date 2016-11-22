@@ -12,6 +12,9 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @key NVARCHAR(100) = NEWID()
 DECLARE @logDate DATETIME = GETDATE()
+DECLARE @intPayablesCategory INT
+DECLARE @accountId NVARCHAR(40);
+
 SET @logKey = @key;
 
 DECLARE @log TABLE
@@ -19,17 +22,31 @@ DECLARE @log TABLE
 	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 
+SELECT @intPayablesCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account'
+
+SELECT TOP 1 @accountId = strAccountId FROM vyuGLAccountDetail WHERE intAccountCategoryId = @intPayablesCategory
+
 --GET THE BALANCE
 IF OBJECT_ID(N'tempdb..#tmpAPAccountBalance') IS NOT NULL DROP TABLE #tmpAPAccountBalance
-CREATE TABLE #tmpAPAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMAL(18,6))
+CREATE TABLE #tmpAPAccountBalance(strAccountId NVARCHAR(40) DEFAULT(@accountId), dblBalance DECIMAL(18,6))
 
-INSERT INTO #tmpAPAccountBalance
-SELECT
-	B.strAccountId,
-	CAST(SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount)AS DECIMAL(18,2)) AS dblBalance
-FROM vyuAPPayables A
-INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-GROUP BY B.strAccountId
+INSERT INTO #tmpAPAccountBalance(dblBalance)
+SELECT SUM(dblAmountDue) FROM(
+	SELECT 
+	CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+	FROM (
+		SELECT 
+				intBillId
+				,dblTotal
+				,dblAmountDue
+				,dblAmountPaid
+				,dblDiscount
+				,dblInterest
+				,dtmDate
+				FROM dbo.vyuAPPayables A
+			) tmpAPPayables 
+	GROUP BY intBillId
+) AS tmpAgingSummaryTotal
 
 SELECT @balance = SUM(ISNULL(dblBalance, 0)) FROM #tmpAPAccountBalance
 
