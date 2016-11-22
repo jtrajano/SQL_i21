@@ -39,6 +39,7 @@ DECLARE @totalInvalid INT = 0
 DECLARE @PostInvoiceData TABLE  (
 	intInvoiceId int PRIMARY KEY,
 	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intEntityId int,
 	UNIQUE (intInvoiceId)
 );
 
@@ -67,10 +68,12 @@ DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @UserEntityID				INT
 		,@DiscountAccountId			INT
 		,@DeferredRevenueAccountId	INT
+		,@AllowOtherUserToPost		BIT
 
 SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
 SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intDiscountAccountId],0) <> 0)
 SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intDeferredRevenueAccountId],0) <> 0)
+SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserEntityID)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 
@@ -103,18 +106,18 @@ IF (@param IS NOT NULL)
 	BEGIN
 		IF(@param = 'all')
 		BEGIN
-			INSERT INTO @PostInvoiceData SELECT [intInvoiceId], [strInvoiceNumber] FROM dbo.tblARInvoice WHERE [ysnPosted] = 0 AND ([strTransactionType] = @transType OR @transType = 'all')
+			INSERT INTO @PostInvoiceData SELECT [intInvoiceId], [strInvoiceNumber], [intEntityId] FROM dbo.tblARInvoice WHERE [ysnPosted] = 0 AND ([strTransactionType] = @transType OR @transType = 'all')
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @PostInvoiceData SELECT ARI.[intInvoiceId], ARI.[strInvoiceNumber] FROM dbo.tblARInvoice ARI WHERE EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@param) DV WHERE DV.[intID] = ARI.[intInvoiceId])
+			INSERT INTO @PostInvoiceData SELECT ARI.[intInvoiceId], ARI.[strInvoiceNumber], [intEntityId] FROM dbo.tblARInvoice ARI WHERE EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@param) DV WHERE DV.[intID] = ARI.[intInvoiceId])
 		END
 	END
 
 IF(@beginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
-		SELECT intInvoiceId, strInvoiceNumber FROM dbo.tblARInvoice
+		SELECT intInvoiceId, strInvoiceNumber, intEntityId FROM dbo.tblARInvoice
 		WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @beginDate AND @endDate
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
@@ -122,7 +125,7 @@ IF(@beginDate IS NOT NULL)
 IF(@beginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
-		SELECT intInvoiceId, strInvoiceNumber FROM dbo.tblARInvoice
+		SELECT intInvoiceId, strInvoiceNumber, intEntityId FROM dbo.tblARInvoice
 		WHERE intInvoiceId BETWEEN @beginTransaction AND @endTransaction
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
@@ -137,13 +140,11 @@ IF(@exclude IS NOT NULL)
 		INSERT INTO @InvoicesExclude
 		SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@exclude)
 
-
 		DELETE FROM A
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
 	END
 	
-
 IF(@batchId IS NULL)
 	EXEC dbo.uspSMGetStartingNumber 3, @batchId OUT
 
@@ -179,7 +180,7 @@ BEGIN TRY
 				IF (ISNULL(@invoicesToAdd, '') <> '')
 					BEGIN
 						INSERT INTO @PostInvoiceData 
-						SELECT ARI.[intInvoiceId], ARI.[strInvoiceNumber] 
+						SELECT ARI.[intInvoiceId], ARI.[strInvoiceNumber], ARI.[intEntityId]
 						FROM dbo.tblARInvoice ARI
 						WHERE ARI.[ysnPosted] = 0 
 							AND intInvoiceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd))
@@ -575,6 +576,7 @@ END CATCH
 		IF @post = 1
 			BEGIN
 
+
 				--ALREADY POSTED
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
@@ -589,8 +591,7 @@ END CATCH
 					tblARInvoice ARI
 						ON PID.intInvoiceId = ARI.intInvoiceId
 				WHERE  
-					ARI.ysnPosted = 1
-					
+					ARI.ysnPosted = 1				
 								
 				-- Tank consumption site
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType,strTransactionId, strBatchNumber, intTransactionId)
@@ -1548,6 +1549,25 @@ END CATCH
 				WHERE  
 					ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.dtmPostDate, ARI.dtmDate)), 0) = 0
 
+
+				--If ysnAllowUserSelfPost is True in User Role
+				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
+				BEGIN
+					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT 
+						'You cannot Post/Unpost transactions you did not create.',
+						ARI.strTransactionType,
+						ARI.strInvoiceNumber,
+						@batchId,
+						ARI.intInvoiceId
+					FROM 
+						@PostInvoiceData PID
+					INNER JOIN 
+						tblARInvoice ARI
+							ON PID.intInvoiceId = ARI.intInvoiceId
+					WHERE  
+						PID.intEntityId <> @UserEntityID
+				END	
 
 				--Invalid Consumption Site
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
