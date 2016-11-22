@@ -309,17 +309,27 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
                             },
-                            {
+                           /* {
                                 column: 'intLocationId',
                                 value: '',
                                 conjunction: 'or',
                                 condition: 'blk'
-                            },
+                            },*/
                             {
                                 column: 'intItemId',
                                 value: '{grdInventoryAdjustment.selection.intItemId}',
                                 conjunction: 'and'
-                            }
+                            },
+                          /*  {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryAdjustment.selection.intSubLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intStorageLocationId',
+                                value: '{grdInventoryAdjustment.selection.intStorageLocationId}',
+                                conjunction: 'and'
+                            }*/
                         ],
                         readOnly: '{formulaShowItemUOMEditor}'
                     }
@@ -736,6 +746,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 if (cboUOM) cboUOM.setReadOnly(true);
             }
 
+            //Update Available Quantity based on UOM
+            current.set('dblQuantity', record.get('dblOnHand'));
         }
         else if (combo.itemId === 'cboSubLocation') {
             current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
@@ -883,6 +895,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
 
             current.set('dblNewQuantity', newQty);
+
+            //Set Sub and Storage Locations
+            current.set('intStorageLocationId', record.get('intStorageLocationId'));
+            current.set('strStorageLocation', record.get('strStorageLocationName'));
+            current.set('intSubLocationId', record.get('intStorageLocationId'));
+            current.set('strSubLocation', record.get('strSubLocationName'));
+
+            //Set Available Quantity Per UOm
+            current.set('dblQuantity', record.get('dblOnHand'));
         }
 
         else if (combo.itemId === 'cboNewWeightUOM') {
@@ -929,7 +950,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var locationId = current.get('intLocationId'),
             itemId = record.get('intItemId'),
             subLocationId = record.get('intSubLocationId'),
-            storageLocationId = record.get('intStorageLocationId');
+            storageLocationId = record.get('intStorageLocationId'),
+            itemUOMId = current.get('intItemUOMId');
         var qty = 0;
 
         Ext.Ajax.request({
@@ -1404,6 +1426,32 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         i21.ModuleMgr.Inventory.showScreen(value, 'LotStatus');
     },
 
+    onSubLocationChange: function (obj, newValue, oldValue, eOpts) {
+        var me = this;
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        var win = obj.up('window');
+
+        if(newValue == null) {
+            current.set('intSubLocationId', null);
+            me.getStockQuantity(current, win);
+        }
+    },
+
+    onStorageLocationChange: function (obj, newValue, oldValue, eOpts) {
+        var me = this;
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        var win = obj.up('window');
+
+        if(newValue == null) {
+            current.set('intStorageLocationId', null);
+            me.getStockQuantity(current, win);
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboItemNo": {
@@ -1413,13 +1461,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboStorageLocation": {
-                select: this.onAdjustmentDetailSelect
+                select: this.onAdjustmentDetailSelect,
+                change: this.onStorageLocationChange
             },
             "#cboLotNumber": {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboSubLocation": {
-                select: this.onAdjustmentDetailSelect
+                select: this.onAdjustmentDetailSelect,
+                change: this.onSubLocationChange
             },
             "#cboUOM": {
                 select: this.onAdjustmentDetailSelect,
