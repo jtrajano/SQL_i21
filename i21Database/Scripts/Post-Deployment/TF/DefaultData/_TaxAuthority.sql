@@ -7,12 +7,12 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'AL')
 		IF @strTaxAuthority IS NULL
 			BEGIN
-				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
+				INSERT INTO [tblTFTaxAuthority2]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
 				VALUES('AL','Alabama', 'FALSE',	'FALSE', 'FALSE')
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AL', strDescription = 'Alabama', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'AL'
+			UPDATE tblTFTaxAuthority2 SET strTaxAuthorityCode = 'AL', strDescription = 'Alabama', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE', ysnFilingForThisTA = 'FALSE' WHERE strTaxAuthorityCode = 'AL'
 		END
 
 
@@ -24,7 +24,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AK', strDescription = 'Alaska', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE  strTaxAuthorityCode = 'AK'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AK', strDescription = 'Alaska', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE', ysnFilingForThisTA = 'FALSE' WHERE  strTaxAuthorityCode = 'AK'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'AZ')
@@ -35,7 +35,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AZ', strDescription = 'Arizona', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE  strTaxAuthorityCode = 'AZ'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AZ', strDescription = 'Arizona', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE', ysnFilingForThisTA = 'FALSE' WHERE  strTaxAuthorityCode = 'AZ'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'AR')
@@ -141,55 +141,55 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('IL','Illinois', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('IL','Illinois', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IL', strDescription = 'Illinois', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'IL'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IL', strDescription = 'Illinois', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE', ysnFilingForThisTA = 'FALSE' WHERE strTaxAuthorityCode = 'IL'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN')
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('IN','Indiana', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('IN','Indiana', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IN', strDescription = 'Indiana', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'IN'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IN', strDescription = 'Indiana', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE', ysnFilingForThisTA = 'FALSE' WHERE strTaxAuthorityCode = 'IN'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IA')
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('IA','Iowa', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('IA','Iowa', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IA', strDescription = 'Iowa', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'IA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IA', strDescription = 'Iowa', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE', ysnFilingForThisTA = 'FALSE' WHERE strTaxAuthorityCode = 'IA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'KS')
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('KS','Kansas', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('KS','Kansas', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'KS', strDescription = 'Kansas', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'KS'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'KS', strDescription = 'Kansas', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE', ysnFilingForThisTA = 'FALSE' WHERE strTaxAuthorityCode = 'KS'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'KY')
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('KY','Kentucky', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('KY','Kentucky', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'KY', strDescription = 'Kentucky', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'KY'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'KY', strDescription = 'Kentucky', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE', ysnFilingForThisTA = 'FALSE' WHERE strTaxAuthorityCode = 'KY'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'LA')

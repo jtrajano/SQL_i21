@@ -2255,6 +2255,7 @@
     <Build Include="dbo\Tables\tblTFTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityConfiguration.sql" />
     <Build Include="dbo\Tables\tblTFTerminalControlNumber.sql" />
+    <Build Include="dbo\Tables\tblTFDeploymentNote.sql" />
     <Build Include="dbo\Tables\tblCTSpreadArbitrage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStartBlendSheet.sql" />
@@ -3033,6 +3034,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ConfigurationType.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ProductCode.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCriteria.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
