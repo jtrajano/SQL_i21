@@ -111,7 +111,7 @@ BEGIN
 				,vwcus_avg_days_no_ivcs = CAST(ISNULL(A.agcus_avg_days_no_ivcs,0) AS INT)
 				,vwcus_last_stmt_rev_dt = ISNULL(A.agcus_last_stmt_rev_dt,0)  
 				,vwcus_country   = ISNULL(A.agcus_country,'''')  
-				,vwcus_termdescription  = ISNULL((select top 1 agtrm_desc from agtrmmst where agtrm_key_n = A.agcus_terms_cd),'''')  
+				,vwcus_termdescription  = ISNULL(C.agtrm_desc,'''')
 				,vwcus_tax_ynp   = ISNULL(A.agcus_tax_ynp,'''')  
 				,vwcus_tax_state  = ISNULL(A.agcus_tax_state,'''')  
 				,A4GLIdentity= CAST(A.A4GLIdentity as INT)  
@@ -139,9 +139,30 @@ BEGIN
 										 END)COLLATE Latin1_General_CI_AS
 				,intCustomerPricingLevel = CAST(NULL AS INT)
 				,strCustomerContactEmail = ''''
+				,dtmLastInvoiceRevisedDate = CASE WHEN ISDATE(A.agcus_last_ivc_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_ivc_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
+				,dtmLastPaymentRevisedDate = CASE WHEN ISDATE(A.agcus_last_pay_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_pay_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END 
+				,dtmLastStatementRevDate = CASE WHEN ISDATE(A.agcus_last_stmt_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_stmt_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END 
+				,strCompleteAddress = dbo.[fnConvertToFullAddress]((ISNULL(A.agcus_addr,'''') + CHAR(13) + CHAR(10) + ISNULL(A.agcus_addr2,''''))
+																	,ISNULL(A.agcus_city,'''')
+																	,ISNULL(A.agcus_state,'''')
+																	,ISNULL(A.agcus_zip,'''')) COLLATE Latin1_General_CI_AS
+				,strFormattedAddress = (CASE WHEN RTRIM(ISNULL(A.agcus_addr2,'''')) = '''' THEN (ISNULL(A.agcus_addr,'''') + CHAR(13) + CHAR(10) + A.agcus_addr2) ELSE ISNULL(A.agcus_addr,'''') END) COLLATE Latin1_General_CI_AS
+				,strFullName = (CASE WHEN A.agcus_co_per_ind_cp = ''C'' 
+									THEN RTRIM(A.agcus_last_name) + RTRIM(A.agcus_first_name) 
+								WHEN A.agcus_first_name IS NULL OR RTRIM(A.agcus_first_name) = ''''  
+									THEN RTRIM(A.agcus_last_name)
+								ELSE RTRIM(A.agcus_last_name) + '', '' + RTRIM(A.agcus_first_name) 
+								END)  COLLATE Latin1_General_CI_AS
+				,strFullTermName = (CAST(ISNULL(A.agcus_terms_cd,'''') AS NVARCHAR(10)) + '' - '' + ISNULL(C.agtrm_desc,'''')) COLLATE Latin1_General_CI_AS
+				,strCreditNote =''''
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
+				OUTER APPLY (
+					SELECT TOP 1 agtrm_desc 
+					FROM agtrmmst 
+					WHERE agtrm_key_n = A.agcus_terms_cd  
+				) C 
 				')
 		END
 		-- PT VIEW
@@ -264,11 +285,31 @@ BEGIN
 										 END)COLLATE Latin1_General_CI_AS
 				,intCustomerPricingLevel = CAST(NULL AS INT)
 				,strCustomerContactEmail = ''''
+				,dtmLastInvoiceRevisedDate = CASE WHEN ISDATE(A.ptcus_last_ivc_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_ivc_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
+				,dtmLastPaymentRevisedDate = CASE WHEN ISDATE(A.ptcus_last_pay_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_pay_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
+				,dtmLastStatementRevDate =  CASE WHEN ISDATE(A.ptcus_last_stmnt_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_stmnt_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
+				,strCompleteAddress = dbo.[fnConvertToFullAddress]((ISNULL(A.ptcus_addr,'''') + CHAR(13) + CHAR(10) + ISNULL(A.ptcus_addr2,''''))
+																	,ISNULL(A.ptcus_city,'''')
+																	,ISNULL(A.ptcus_state,'''')
+																	,ISNULL(A.ptcus_zip,'''')) COLLATE Latin1_General_CI_AS
+				,strFormattedAddress = (CASE WHEN RTRIM(ISNULL(A.ptcus_addr2,'''')) = '''' THEN (ISNULL(A.ptcus_addr,'''') + CHAR(13) + CHAR(10) + A.ptcus_addr2) ELSE ISNULL(A.ptcus_addr,'''') END) COLLATE Latin1_General_CI_AS
+				,strFullName = (CASE WHEN A.ptcus_co_per_ind_cp = ''C'' 
+									THEN RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_first_name) + RTRIM(A.ptcus_mid_init) + RTRIM(A.ptcus_name_suffx)   
+								WHEN A.ptcus_first_name IS NULL OR RTRIM(A.ptcus_first_name) = ''''  
+									THEN     RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_name_suffx)    
+								ELSE     RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_name_suffx) + '', '' + RTRIM(A.ptcus_first_name) + RTRIM(A.ptcus_mid_init)
+								END)  COLLATE Latin1_General_CI_AS
+				,strFullTermName = (CAST(ISNULL(A.ptcus_terms_code,'''') AS NVARCHAR(10)) + '' - '' + ISNULL(C.pttrm_desc,'''')) COLLATE Latin1_General_CI_AS
+				,strCreditNote =''''
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
-				'
-				)
+				OUTER APPLY (
+					SELECT TOP 1 pttrm_desc 
+					FROM pttrmmst
+					WHERE pttrm_code = A.ptcus_terms_code  
+				) C 
+				')
 		END
 	END
 	ELSE
@@ -350,6 +391,17 @@ BEGIN
 				,strFullCustomerName = Ent.strName
 				,intCustomerPricingLevel = Cus.intCompanyLocationPricingLevelId
 				,strCustomerContactEmail = Con.strEmail
+				,dtmLastInvoiceRevisedDate = (SELECT TOP 1 dtmDate FROM tblARInvoice WHERE intEntityId = Ent.intEntityId AND strTransactionType = ''Invoice'' ORDER BY dtmDate DESC)
+				,dtmLastPaymentRevisedDate = CI.dtmLastPaymentDate
+				,dtmLastStatementRevDate = CI.dtmLastStatementDate
+				,strCompleteAddress = dbo.[fnConvertToFullAddress](ISNULL(Loc.strAddress,'''')
+																	,ISNULL(Loc.strCity,'''')
+																	,ISNULL(Loc.strState,'''')
+																	,ISNULL(Loc.strZipCode,'''')) COLLATE Latin1_General_CI_AS
+				,strFormattedAddress =  ISNULL(Loc.strAddress,'''') COLLATE Latin1_General_CI_AS
+				,strFullName = Ent.strName
+				,strFullTermName = (CAST(ISNULL(T.intTermID,'''') AS NVARCHAR(10)) + '' - '' + ISNULL(T.strTerm,'''')) COLLATE Latin1_General_CI_AS
+				,strCreditNote =''''
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId
@@ -367,6 +419,8 @@ BEGIN
 				ON Con.intEntityId = E.intEntityId
 			LEFT JOIN tblEMEntityMobileNumber F
 				ON Con.intEntityId = F.intEntityId  
+			LEFT JOIN tblSMTerm T
+				ON Loc.intTermsId = T.intTermID
 		
 		')
 	END
