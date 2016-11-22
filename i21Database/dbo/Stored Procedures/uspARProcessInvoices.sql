@@ -2023,7 +2023,7 @@ BEGIN TRY
 	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
 		BEGIN			
 		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= @BatchIdForExistingPost,
+			@batchId			= @BatchIdForExistingRecap,
 			@post				= 1,
 			@recap				= 1,
 			@param				= @IdsForPostingUpdated,
@@ -2041,7 +2041,7 @@ BEGIN TRY
 			@transType			= N'all',
 			@raiseError			= @RaiseError
 
-			SET @BatchIdForExistingPost = @batchIdUsed
+			SET @BatchIdForExistingRecap = @batchIdUsed
 			SET @RecapPostExistingCount  = @successfulCount
 		END
 		
