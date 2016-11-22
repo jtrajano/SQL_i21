@@ -319,6 +319,7 @@ END
 	,@UpdatedIvoices			= @UpdatedIvoices OUTPUT
 	,@BatchIdForNewPost			= @BatchId OUTPUT
 	,@BatchIdForNewPostRecap	= @BatchId OUTPUT
+	,@BatchIdForExistingRecap	= @BatchId OUTPUT
 
 
 	DECLARE @intCreatedRecordKey INT
