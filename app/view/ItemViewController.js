@@ -1,5 +1,5 @@
 Ext.define('Inventory.view.ItemViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icitem',
 
     config: {
@@ -1269,6 +1269,7 @@ Ext.define('Inventory.view.ItemViewController', {
             enableAudit: true,
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
+            onSaveClick: me.saveAndPokeGrid(win, grdUOM),
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
