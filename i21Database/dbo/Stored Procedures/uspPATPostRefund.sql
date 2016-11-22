@@ -33,100 +33,30 @@ DECLARE @error NVARCHAR(200)
 --=====================================================================================================================================
 --  GET REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
-SELECT	R.intRefundId, 
+
+SELECT R.intRefundId, 
 		R.intFiscalYearId, 
 		R.dtmRefundDate, 
 		R.strRefund,
 		R.dblMinimumRefund, 
 		R.dblServiceFee,		   
 		R.dblCashCutoffAmount, 
-		R.dblFedWithholdingPercentage, 
-		dblPurchaseVolume = (CASE WHEN RCatPCat.strPurchaseSale = 'Purchase' THEN RCatPCat.dblVolume ELSE 0 END), 
-		dblSaleVolume = (CASE WHEN RCatPCat.strPurchaseSale = 'Sale' THEN RCatPCat.dblVolume ELSE 0 END), 
-		dblLessFWT = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
-		dblLessService = R.dblServiceFee,
-		dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) < 0) THEN 0 ELSE RCus.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) END,
-		R.ysnPosted,
-		RCus.intRefundCustomerId,
-		RCus.intCustomerId,
-		RCus.strStockStatus,
-		RCus.ysnEligibleRefund,
-		RCus.intRefundTypeId,
-		RR.dblCashPayout,
-		RCus.ysnQualified, 
-		RCus.dblRefundAmount,
-		RCus.dblCashRefund,
-		RCus.dblEquityRefund,
-		RCatPCat.intRefundCategoryId,
-		RCatPCat.dblRefundRate, 
-		RCatPCat.dblVolume
-INTO #tmpRefundData
-FROM tblPATRefundCustomer RCus
-INNER JOIN tblPATRefund R
-	ON R.intRefundId = RCus.intRefundId
-INNER JOIN tblARCustomer ARC
-	ON RCus.intCustomerId = ARC.intEntityCustomerId
-INNER JOIN tblAPVendor APV
-	ON APV.intEntityVendorId = RCus.intCustomerId
-INNER JOIN tblPATRefundRate RR
-	ON RR.intRefundTypeId = RCus.intRefundTypeId
-INNER JOIN
-	(
-		SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
-				intPatronageCategoryId = RCat.intPatronageCategoryId,
-				RCat.intRefundCategoryId,
-				dblRefundRate = RCat.dblRefundRate,
-				strPurchaseSale = PCat.strPurchaseSale,
-				dblVolume = RCat.dblVolume
-		FROM tblPATRefundCategory RCat
-		INNER JOIN tblPATPatronageCategory PCat
-			ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
-	) RCatPCat
-		ON RCatPCat.intRefundCustomerId = RCus.intRefundCustomerId
-WHERE R.intRefundId = @intRefundId AND RCus.ysnEligibleRefund = 1
+		R.dblFedWithholdingPercentage,
+		RC.intRefundCustomerId,
+		RC.intCustomerId,
+		RC.strStockStatus,
+		RC.ysnEligibleRefund,
+		RC.intRefundTypeId,
+		RC.ysnQualified, 
+		RC.dblRefundAmount,
+		RC.dblCashRefund,
+		RC.dblEquityRefund
+	INTO #tmpRefundData 
+	FROM tblPATRefundCustomer RC 
+	INNER JOIN tblPATRefund R 
+		ON R.intRefundId = RC.intRefundId 
 
-SELECT	intRefundId, 
-		intFiscalYearId, 
-		intRefundTypeId,
-		dtmRefundDate, 
-		strRefund,
-		dblMinimumRefund, 
-		dblServiceFee,		   
-		dblCashCutoffAmount, 
-		dblFedWithholdingPercentage, 
-		dblPurchaseVolume = SUM(dblPurchaseVolume), 
-		dblSaleVolume = SUM(dblSaleVolume), 
-		dblLessFWT = SUM(dblLessFWT), 
-		dblLessService = SUM(dblLessService),
-		dblCheckAmount = SUM(dblCheckAmount),
-		ysnPosted,
-		intCustomerId,
-		strStockStatus,
-		ysnEligibleRefund,
-		ysnQualified, 
-		dblRefundAmount = SUM(dblRefundAmount),
-		dblCashRefund = SUM(dblCashRefund),
-		dblEquityRefund = SUM(dblEquityRefund),
-		dblRefundRate = SUM(dblRefundRate), 
-		dblVolume = SUM(dblVolume)
-INTO #tmpRefundDataCombined
-FROM #tmpRefundData
-GROUP BY	intCustomerId,
-			intRefundTypeId,
-			intRefundId,
-			intFiscalYearId,
-			dtmRefundDate,
-			strRefund,
-			dblMinimumRefund, 
-			dblServiceFee,		   
-			dblCashCutoffAmount, 
-			dblFedWithholdingPercentage,
-			ysnPosted,
-			strStockStatus,
-			ysnEligibleRefund,
-			ysnQualified
-
-SELECT @totalRecords = COUNT(*) FROM #tmpRefundDataCombined	
+SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	where ysnEligibleRefund = 1
 
 COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
@@ -138,32 +68,12 @@ BEGIN
 END
 
 
-IF (@ysnPosted = 1)
-BEGIN
-	--=====================================================================================================================================
-	-- 	UPDATE CUSTOMER VOLUME TABLE
-	---------------------------------------------------------------------------------------------------------------------------------------
-	SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined
-	UPDATE CVol
-	SET CVol.ysnRefundProcessed = ISNULL(@ysnPosted,1)
-	FROM tblPATCustomerVolume CVol
-	WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundDataCombined)
-END
-
 ---------------------------------------------------------------------------------------------------------------------------------------
+
 BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CREATE GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
-
---=====================================================================================================================================
--- 	UPDATE REFUND TABLE
----------------------------------------------------------------------------------------------------------------------------------------
-
-	UPDATE tblPATRefund 
-	   SET ysnPosted = ISNULL(@ysnPosted,1)
-	  FROM tblPATRefund R
-	 WHERE R.intRefundId = @intRefundId
 
 
 DECLARE @validRefundIds NVARCHAR(MAX)
@@ -171,7 +81,6 @@ DECLARE @validRefundIds NVARCHAR(MAX)
 -- CREATE TEMP GL ENTRIES
 SELECT DISTINCT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT(VARCHAR(12),intRefundId)
 FROM #tmpRefundData
-ORDER BY 1
 
 DECLARE @dblDiff NUMERIC(18,6)
 DECLARE @intAdjustmentId INT
@@ -269,47 +178,59 @@ BEGIN CATCH
 	RAISERROR(@error, 16, 1);
 	GOTO Post_Rollback
 END CATCH
-	
----------------------------------------------------------------------------------------------------------------------------------------
+
+IF ISNULL(@ysnPosted,0) = 0
+BEGIN
+	UPDATE tblGLDetail SET ysnIsUnposted = 1
+		WHERE intTransactionId = @intRefundId 
+			AND strModuleName = @MODULE_NAME 
+			AND strTransactionForm = @TRAN_TYPE
+END
+
 
 --=====================================================================================================================================
 -- 	UPDATE CUSTOMER EQUITY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 BEGIN TRY
 	MERGE tblPATCustomerEquity AS EQ
-	USING (SELECT * FROM #tmpRefundDataCombined WHERE intRefundId = @intRefundId) AS B
+	USING (SELECT * FROM #tmpRefundData WHERE ysnEligibleRefund = 1) AS B
 		ON (EQ.intCustomerId = B.intCustomerId AND EQ.intFiscalYearId = B.intFiscalYearId AND EQ.intRefundTypeId = B.intRefundTypeId)
-		--WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
-		--	THEN DELETE
 		WHEN MATCHED
 			THEN UPDATE SET EQ.dblEquity = CASE WHEN @ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END
 		WHEN NOT MATCHED BY TARGET
 			THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
 				VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, B.dblEquityRefund, 1);
-
-	IF (@ysnPosted = 0)
-	BEGIN
-		----------------------------------REVERSE VOLUME---------------------------------------------------------------------
-
-		UPDATE CVol
-		SET CVol.ysnRefundProcessed = ISNULL(@ysnPosted, 0)
-		FROM tblPATCustomerVolume CVol
-		WHERE CVol.intFiscalYear = @intFiscalYearId AND CVol.intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
-
-	END
-
 END TRY
 BEGIN CATCH
 	SET @error = ERROR_MESSAGE()
 	RAISERROR(@error, 16, 1);
 	GOTO Post_Rollback
 END CATCH
-
 ---------------------------------------------------------------------------------------------------------------------------------------
+
+--=====================================================================================================================================
+-- 	UPDATE CUSTOMER VOLUME TABLE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+	UPDATE tblPATCustomerVolume
+	SET ysnRefundProcessed = @ysnPosted
+	WHERE intFiscalYear = @intFiscalYearId AND intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
+---------------------------------------------------------------------------------------------------------------------------------------
+
+
+--=====================================================================================================================================
+-- 	UPDATE REFUND TABLE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+	UPDATE tblPATRefund 
+	SET ysnPosted = @ysnPosted
+	WHERE intRefundId = @intRefundId
+	
+---------------------------------------------------------------------------------------------------------------------------------------
+
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 GOTO Post_Commit;
----------------------------------------------------------------------------------------------------------------------------------------
 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
@@ -318,7 +239,6 @@ Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
 	SET @successfulCount = @totalRecords
-	GOTO Post_Cleanup
 	GOTO Post_Exit
 
 Post_Rollback:
@@ -326,13 +246,8 @@ Post_Rollback:
 	SET @success = 0
 	GOTO Post_Exit
 
-Post_Cleanup:
-	--DELETE FROM tblGLTest
-	--FROM tblGLPostRecap A
-	--INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundDataCombined')) DROP TABLE #tmpRefundDataCombined
 END
 ---------------------------------------------------------------------------------------------------------------------------------------
 GO
