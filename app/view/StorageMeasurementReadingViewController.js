@@ -16,7 +16,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                 {dataIndex: 'strLocationName',text: 'Location', flex: 1, dataType: 'string'},
                 {dataIndex: 'dtmDate', text: 'Date', flex: 1,  dataType: 'datetime', xtype: 'datecolumn'},
                 {dataIndex: 'strReadingNo', text: 'Reading No', flex: 1,  dataType: 'string'},
-                {dataIndex: 'intStorageMeasurementReadingId', text: 'Reading Id', flex: 1, defaultSort:true, sortOrder: 'DESC', dataType: 'numeric', hidden: true}
+                {dataIndex: 'intStorageMeasurementReadingId', key: true, text: 'Reading Id', flex: 1, defaultSort:true, sortOrder: 'DESC', dataType: 'numeric', hidden: true}
             ],
             buttons: [
                 {
