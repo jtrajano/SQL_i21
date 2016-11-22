@@ -1837,9 +1837,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
-        else if (combo.itemId === 'cboSubLocation' || combo.itemId === 'cboStorageLocation') {
-            current.set('intSubLocationId', records[0].get('intSubLocationId'));
-            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+        else if (combo.itemId === 'cboSubLocation') {
+            current.set('intStorageLocationId', null);
+            current.set('strStorageLocationName', null);
+            var lots = current.tblICInventoryReceiptItemLots();
+
+            if (lots) {
+                Ext.Array.each(lots.data.items, function (lot) {
+                    if (!lot.dummy) {
+                        lot.set('intStorageLocationId', null);
+                        lot.set('strStorageLocation', null);
+                    }
+                });
+            }
         }
 
         // Calculate the taxes
