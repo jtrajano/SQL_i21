@@ -793,7 +793,7 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
-		,[dblTax]									=	ISNULL(A.dblTax,0)
+		,[dblTax]									=	ISNULL(Taxes.dblTax,0)
 		,[dblRate]									=	ISNULL(G1.dblRate,0)
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
@@ -852,6 +852,12 @@ FROM
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	INNER JOIN dbo.tblICItem I ON I.intItemId = A.intItemId
+	LEFT JOIN tblICCategoryTax B ON I.intCategoryId = B.intCategoryId
+	LEFT JOIN tblSMTaxClass C ON B.intTaxClassId = C.intTaxClassId 
+	LEFT JOIN tblSMTaxCode D ON D.intTaxClassId = C.intTaxClassId 
+	LEFT JOIN dbo.tblSMTaxGroupCode E ON D.intTaxCodeId = E.intTaxCodeId
+	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, E.intTaxGroupId, NULL, NULL , 0, NULL) Taxes
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD
