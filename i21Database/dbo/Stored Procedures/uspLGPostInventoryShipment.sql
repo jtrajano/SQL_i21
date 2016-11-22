@@ -546,93 +546,88 @@ BEGIN
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strLoadNumber = @strTransactionId  
 
-	EXEC dbo.uspICPostInventoryShipmentIntegrations
-			@ysnPost
-			,@intTransactionId 
-			,@intEntityUserSecurityId
+	DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType
 
-			DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType
-
-			INSERT INTO @ItemsFromInventoryShipment (
-				-- Header
-				[intShipmentId]
-				,[strShipmentId]
-				,[intOrderType]
-				,[intSourceType]
-				,[dtmDate]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[intEntityCustomerId]
-				-- Detail 
-				,[intInventoryShipmentItemId]
-				,[intItemId]
-				,[intLotId]
-				,[strLotNumber]
-				,[intLocationId]
-				,[intItemLocationId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[intItemUOMId]
-				,[intWeightUOMId]
-				,[dblQty]
-				,[dblUOMQty]
-				,[dblNetWeight]
-				,[dblSalesPrice]
-				,[intDockDoorId]
-				,[intOwnershipType]
-				,[intOrderId]
-				,[intSourceId]
-				,[intLineNo]
-			)
-			SELECT L.intLoadId
-				,L.strLoadNumber
-				,1 AS intOrderType
-				,1 AS intSourceType
-				,L.dtmScheduledDate
-				,intCurrencyId = NULL
-				,[dblExchangeRate] = 1
-				,L.intEntityId
-				,LD.intLoadDetailId
-				,LD.intItemId
-				,LDL.intLotId
-				,Lot.strLotNumber
-				,[intLocationId] = LD.intSCompanyLocationId
-				,[intItemLocationId] = IL.intItemLocationId
-				,[intSubLocationId] = LD.intSSubLocationId
-				,[intStorageLocationId] = NULL
-				,[intItemUOMId] = LD.intItemUOMId
-				,[intWeightUOMId] = LD.intWeightItemUOMId
-				,[dblQty] = CASE 
-							WHEN @ysnPost = 1
-								THEN - 1 *
-									CASE 
-										WHEN LDL.intLoadDetailLotId > 0
-											THEN LDL.dblLotQuantity
-										ELSE LD.dblQuantity
-										END
-							ELSE CASE 
-									WHEN LDL.intLoadDetailLotId > 0
-										THEN LDL.dblLotQuantity
-									ELSE LD.dblQuantity
-									END
+	INSERT INTO @ItemsFromInventoryShipment (
+		-- Header
+		[intShipmentId]
+		,[strShipmentId]
+		,[intOrderType]
+		,[intSourceType]
+		,[dtmDate]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intEntityCustomerId]
+		-- Detail 
+		,[intInventoryShipmentItemId]
+		,[intItemId]
+		,[intLotId]
+		,[strLotNumber]
+		,[intLocationId]
+		,[intItemLocationId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[intItemUOMId]
+		,[intWeightUOMId]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblNetWeight]
+		,[dblSalesPrice]
+		,[intDockDoorId]
+		,[intOwnershipType]
+		,[intOrderId]
+		,[intSourceId]
+		,[intLineNo]
+	)
+	SELECT L.intLoadId
+		,L.strLoadNumber
+		,1 AS intOrderType
+		,1 AS intSourceType
+		,L.dtmScheduledDate
+		,intCurrencyId = NULL
+		,[dblExchangeRate] = 1
+		,LD.intCustomerEntityId
+		,LD.intLoadDetailId
+		,LD.intItemId
+		,LDL.intLotId
+		,Lot.strLotNumber
+		,[intLocationId] = LD.intSCompanyLocationId
+		,[intItemLocationId] = IL.intItemLocationId
+		,[intSubLocationId] = LD.intSSubLocationId
+		,[intStorageLocationId] = NULL
+		,[intItemUOMId] = LD.intItemUOMId
+		,[intWeightUOMId] = LD.intWeightItemUOMId
+		,[dblQty] = CASE 
+					WHEN @ysnPost = 1
+						THEN - 1 *
+							CASE 
+								WHEN LDL.intLoadDetailLotId > 0
+									THEN LDL.dblLotQuantity
+								ELSE LD.dblQuantity
+								END
+					ELSE CASE 
+							WHEN LDL.intLoadDetailLotId > 0
+								THEN LDL.dblLotQuantity
+							ELSE LD.dblQuantity
 							END
-				,[dblUOMQty] = IU.dblUnitQty
-				,[dblNetWeight] = LDL.dblGross - LDL.dblTare
-				,[dblSalesPrice] = CD.dblCashPrice
-				,[intDockDoorId] = NULL
-				,[intOwnershipType] = Lot.intOwnershipType
-				,[intOrderId] = NULL
-				,[intSourceId] = NULL
-				,[intLineNo] = ISNULL(LD.intSContractDetailId, 0)
-			FROM tblLGLoad L
-			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
-			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
-			JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
-			LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
-			LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-			JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-			WHERE L.intLoadId = @intTransactionId
+					END
+		,[dblUOMQty] = IU.dblUnitQty
+		,[dblNetWeight] = LDL.dblGross - LDL.dblTare
+		,[dblSalesPrice] = CD.dblCashPrice
+		,[intDockDoorId] = NULL
+		,[intOwnershipType] = Lot.intOwnershipType
+		,[intOrderId] = NULL
+		,[intSourceId] = NULL
+		,[intLineNo] = ISNULL(LD.intSContractDetailId, 0)
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+	LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
+	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+	JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
+	WHERE L.intLoadId = @intTransactionId
 
 	EXEC dbo.uspCTShipped @ItemsFromInventoryShipment ,@intEntityUserSecurityId  
 
@@ -674,4 +669,3 @@ BEGIN
 END
 
 Post_Exit:
-GO
