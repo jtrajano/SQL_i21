@@ -1,5 +1,5 @@
 Ext.define('Inventory.view.InventoryAdjustmentViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventoryadjustment',
     requires: [
         'CashManagement.common.Text',
@@ -516,7 +516,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         "use strict";
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 });
+            store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 }),
+            grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
@@ -525,6 +526,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             include: 'tblICInventoryAdjustmentDetails.vyuICGetInventoryAdjustmentDetail',
+            onSaveClick: me.saveAndPokeGrid(win, grdInventoryAdjustment),
             createRecord: me.createRecord,
             validateRecord: me.validateRecord,
             binding: me.config.binding,
@@ -536,7 +538,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 {
                     key: 'tblICInventoryAdjustmentDetails',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdInventoryAdjustment'),
+                        grid: grdInventoryAdjustment,
                         deleteButton: win.down('#btnRemoveItem')
                     })
                 }

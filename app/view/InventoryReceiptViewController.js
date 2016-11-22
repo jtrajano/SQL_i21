@@ -1,5 +1,5 @@
 Ext.define('Inventory.view.InventoryReceiptViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventoryreceipt',
     requires: [
         'CashManagement.common.Text',
@@ -951,16 +951,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    pokeGrid: function (grdInventoryReceipt) {
-        // Temporary fix for the issue on grid alignment: After saving the screen, the grid header is misaligned with the grid cells.
-        if (grdInventoryReceipt.getView().body.dom && grdInventoryReceipt.getView().body.dom.offsetParent) {
-            if (grdInventoryReceipt.getView().body.dom.offsetParent.scrollLeft % 2 === 0)
-                grdInventoryReceipt.getView().scrollBy(1, 0);
-            else
-                grdInventoryReceipt.getView().scrollBy(-1, 0);
-        }
-    },
-
     setupContext: function(options) {
         "use strict";
         var me = this,
@@ -1014,14 +1004,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
-            onSaveClick: Ext.bind(function(success, failure) {
-                me.pokeGrid(grdInventoryReceipt);
-                win.context.data.saveRecord({
-                    callbackFn: function(batch, options) {
-                        me.pokeGrid(grdInventoryReceipt);
-                    }
-                });
-            }, me),
+            onSaveClick: me.saveAndPokeGrid(win, grdInventoryReceipt),
             include: 'tblICInventoryReceiptInspections,' +
             'vyuICInventoryReceiptLookUp,' +
             'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
