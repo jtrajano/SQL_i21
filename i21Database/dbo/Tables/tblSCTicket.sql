@@ -106,7 +106,9 @@
 	[intTicketTypeId] INT NULL,
 	[intStorageScheduleTypeId] INT NULL,
 	[strFreightSettlement]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[strCostMethod]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	[strCostMethod]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intGradeId] INT NULL,
+	[intWeightId] INT NULL,
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
