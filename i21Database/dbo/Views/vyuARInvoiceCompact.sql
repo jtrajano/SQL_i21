@@ -49,10 +49,11 @@ SELECT
 	,dblTotalTermDiscount			= ARI.dblTotalTermDiscount
 	,ysnExcludeForPayment			= CASE WHEN ARI.strTransactionType = 'Customer Prepayment' 
 										AND (EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intInvoiceId = ARI.intInvoiceId AND (ISNULL(ysnRestricted, 0) = 1 OR ISNULL(intContractDetailId, 0) <> 0)) 
-										OR NOT EXISTS(SELECT NULL FROM tblARInvoice ARI1 INNER JOIN tblARPayment ARP ON ARI1.intPaymentId  = ARP.intPaymentId AND ARP.ysnPosted = 1 AND ARI1.strTransactionType = 'Customer Prepayment'
-INNER JOIN
-	tblARPaymentDetail ARPD
-		ON ARI1.intInvoiceId = ARPD.intInvoiceId)) THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+										--OR NOT EXISTS(SELECT NULL FROM tblARInvoice ARI1 INNER JOIN tblARPayment ARP ON ARI1.intPaymentId  = ARP.intPaymentId AND ARI1.intInvoiceId = ARI.intInvoiceId  AND ARP.ysnPosted = 1 AND ARI1.strTransactionType = 'Customer Prepayment'
+										--INNER JOIN
+										--	tblARPaymentDetail ARPD
+										--		ON ARI1.intInvoiceId = ARPD.intInvoiceId)
+										) THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM         
 	dbo.tblARInvoice AS ARI 
 INNER JOIN
