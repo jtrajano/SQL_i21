@@ -779,7 +779,7 @@ INNER JOIN
 		ON ICISC.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 		AND ICIS.[ysnPosted] = 1
 		AND ISNULL(ICISC.[ysnPrice],0) = 1
-INNER JOIN	
+LEFT OUTER JOIN	
 		tblICInventoryShipmentItem ICISI 
 			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 LEFT OUTER JOIN 
@@ -812,7 +812,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
     tblSCTicket SCT
         ON ICISI.[intSourceId] = SCT.[intTicketId]
-WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+WHERE ISNULL(ARID.[intInventoryShipmentChargeId],0) = 0
 
 UNION ALL
 
