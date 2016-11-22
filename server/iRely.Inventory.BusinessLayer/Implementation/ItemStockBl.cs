@@ -48,6 +48,20 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public async Task<SearchResult> GetLocationStockOnHand(int intLocationId, int intItemId)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockUOM>()
+                .Where(w => w.intLocationId == intLocationId && w.intItemId == intItemId)
+                .GroupBy(o => o.intLocationId)
+                .Select(g => new { dblOnHand = g.Sum(i => i.dblOnHand) });
+            var data = await query.ToListAsync();
+
+            return new SearchResult() 
+            {
+                data = query.AsQueryable()
+            };
+        }
+
         public async Task<SearchResult> GetItemStockUOMForAdjustmentView(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOMForAdjustment>()

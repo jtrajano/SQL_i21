@@ -435,6 +435,28 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         action(record);
     },
 
+    getTotalLocationStockOnHand: function (intLocationId, intItemId, callback) {
+        Ext.Ajax.request({
+            timeout: 120000,
+            url: '../Inventory/api/ItemStock/GetLocationStockOnHand?intLocationId=' + intLocationId + '&intItemId=' + intItemId,
+            method: 'get',
+            success: function (response) {
+                var jsonData = Ext.decode(response.responseText);
+                if (jsonData.success) {
+                    if(jsonData.data.length > 0)
+                        callback(jsonData.data[0].dblOnHand);
+                    else
+                        callback(0);
+                } else
+                    callback(0);
+            },
+            failure: function (response) {
+                var jsonData = Ext.decode(response.responseText);
+                callback(jsonData.ExceptionMessage, true);
+            }
+        });
+    },
+
     createLineItemRecord: function (config, action) {
         var record = Ext.create('Inventory.model.InventoryCountDetail');
         var strCountLine = '';
@@ -442,8 +464,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         record.set('strCountLine', strCountLine);
         record.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
         record.set('strUserName', iRely.config.Security.UserName);
-
-        action(record);
+        config.createRecord.$owner.prototype.getTotalLocationStockOnHand(config.dummy.intInventoryCount.data.intLocationId, config.dummy.data.intItemId, function (val, err) {
+            if (err) {
+                iRely.Functions.showErrorDialog(val);
+            } else {
+                record.set('dblSystemCount', val);
+            }
+            action(record);
+        });
     },
 
     onCountGroupSelect: function (combo, records, eOpts) {
@@ -993,7 +1021,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var grid = combo.up('grid');
         var plugin = grid ? grid.getPlugin('cepPhysicalCount') : null;
         var current = plugin ? plugin.getActiveRecord() : null;
-
+        var me = this;
         if (current) {
             switch (combo.itemId) {
                 case 'cboItem':
@@ -1005,40 +1033,43 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('strSubLocationName', null);
                     current.set('intSubLocationId', null);
                     current.set('dblSystemCount', null);
-                    
-                    if(current.get('strCountLine') === '' || current.get('strCountLine') === null)
-                        {
-                            var win = combo.up('window');
-                            var currentItems = win.viewModel.data.current;
-                            var countDetail = currentItems.tblICInventoryCountDetails().data.items;
-                            var count = countDetail.length;
-                            var strCountLine = currentItems.get('strCountNo') + '-' + count;
-                            var countLength = 0;
-                            
-                            if (count === 1)
-                                {
-                                    current.set('strCountLine', strCountLine);
-                                }
-                            
-                            if(count > 1)
-                                {
-                                   Ext.Array.each(currentItems.tblICInventoryCountDetails().data.items, function (item) {
-                                            if (!item.dummy) {
-                                                 countLength++;
-                                                    if(countLength == count -1)
-                                                        {
-                                                            var itemCountLine =  item.get('strCountLine') + '';
-                                                            var strCountLineSplit = itemCountLine.split('-');
-                                                            count = parseInt(strCountLineSplit[2]) + 1;
-                                                            strCountLine = currentItems.get('strCountNo') + '-' + count;
-                                                            current.set('strCountLine', strCountLine);
-                                                        }
-                                                }
-                                            
-                                    });   
-                                }
-                            
+                    me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
+                        if (err) {
+                            iRely.Functions.showErrorDialog(val);
+                        } else {
+                            current.set('dblSystemCount', val);
                         }
+                    });
+
+                    if (current.get('strCountLine') === '' || current.get('strCountLine') === null) {
+                        var win = combo.up('window');
+                        var currentItems = win.viewModel.data.current;
+                        var countDetail = currentItems.tblICInventoryCountDetails().data.items;
+                        var count = countDetail.length;
+                        var strCountLine = currentItems.get('strCountNo') + '-' + count;
+                        var countLength = 0;
+
+                        if (count === 1) {
+                            current.set('strCountLine', strCountLine);
+                        }
+
+                        if (count > 1) {
+                            Ext.Array.each(currentItems.tblICInventoryCountDetails().data.items, function (item) {
+                                if (!item.dummy) {
+                                    countLength++;
+                                    if (countLength == count - 1) {
+                                        var itemCountLine = item.get('strCountLine') + '';
+                                        var strCountLineSplit = itemCountLine.split('-');
+                                        count = parseInt(strCountLineSplit[2]) + 1;
+                                        strCountLine = currentItems.get('strCountNo') + '-' + count;
+                                        current.set('strCountLine', strCountLine);
+                                    }
+                                }
+
+                            });
+                        }
+
+                    }
                     break;
                 case 'cboSubLocation':
                     current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
