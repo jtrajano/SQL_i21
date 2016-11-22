@@ -27,6 +27,7 @@ FROM	tblICItem Item INNER JOIN tblICItemUOM ItemUOM
 			ON ItemUOM.intItemUOMId = StockUOM.intItemUOMId
 		LEFT JOIN tblICItemLocation ItemLoc
 			ON ItemLoc.intItemLocationId = StockUOM.intItemLocationId
+				AND ItemLoc.intItemId = Item.intItemId
 		LEFT JOIN tblSMCompanyLocation Location 
 			ON Location.intCompanyLocationId = ItemLoc.intLocationId
 		LEFT JOIN tblICUnitMeasure UOM 
