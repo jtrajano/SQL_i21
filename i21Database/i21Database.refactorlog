@@ -5572,4 +5572,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[PK_intLoadStorageCostId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2bb3112e-4f77-4bfb-8652-540a03257d1d" ChangeDateTime="11/21/2016 05:14:30">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketContractUsed].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketContractUsed]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketContractUsed" />
+  </Operation>
 </Operations>

@@ -215,13 +215,8 @@ BEGIN TRY
 				   -- uses a PRINT statement as that action (not a very good
 				   -- example).
 				   IF ISNULL(@intLoopContractId,0) != 0
-					UPDATE tblSCTicket SET intContractId = @intLoopContractId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
-					UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-					, intContractSequence = CT.intContractSeq
-					, strContractLocation = CT.strLocationName
-					FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-				   
+				   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
@@ -417,11 +412,6 @@ BEGIN TRY
 						-- uses a PRINT statement as that action (not a very good
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
-							UPDATE tblSCTicket SET intContractId = @intDPContractId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
-							UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-							, intContractSequence = CT.intContractSeq
-							, strContractLocation = CT.strLocationName
-							FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 							INSERT INTO @ItemsForItemReceipt (
 							intItemId
 							,intItemLocationId
@@ -444,6 +434,7 @@ BEGIN TRY
 							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits;
 						--EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
 
 						-- Attempt to fetch next row from cursor
