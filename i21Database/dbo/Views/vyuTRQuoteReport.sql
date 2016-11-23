@@ -21,6 +21,7 @@ SELECT TOP 100 PERCENT QD.intQuoteDetailId
 							WHEN CustomerTransports.ysnShowTaxDetail = 1 AND CustomerTransports.ysnShowFeightDetail = 1 THEN ISNULL(QD.dblQuotePrice, 0) - ISNULL(QD.dblFreightRate, 0)
 							WHEN CustomerTransports.ysnShowTaxDetail = 1 AND CustomerTransports.ysnShowFeightDetail = 0 THEN ISNULL(QD.dblQuotePrice, 0)
 							WHEN CustomerTransports.ysnShowTaxDetail = 0 AND CustomerTransports.ysnShowFeightDetail = 1 THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0) - ISNULL(QD.dblFreightRate, 0) END)
+	, dblTotalPrice = ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)
 	, ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) 
 									FROM vyuARCustomerContacts CC 
 									WHERE CC.intCustomerEntityId = QH.intEntityCustomerId 
@@ -30,7 +31,9 @@ SELECT TOP 100 PERCENT QD.intQuoteDetailId
 	, QH.intQuoteHeaderId
 	, QH.strQuoteComments
 	, CustomerTransports.ysnShowTaxDetail
+	, dblTax = ISNULL(QD.dblTax, 0)
 	, CustomerTransports.ysnShowFeightDetail
+	, dblFreight = ISNULL(QD.dblFreightRate, 0)
 FROM tblTRQuoteHeader QH
 CROSS APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
 LEFT JOIN tblTRQuoteDetail QD ON QD.intQuoteHeaderId = QH.intQuoteHeaderId
