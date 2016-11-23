@@ -10,5 +10,5 @@
 	[strPriority]			[nvarchar](50)		COLLATE Latin1_General_CI_AS	NULL,
 	[strStatus]				[nvarchar](50)		COLLATE Latin1_General_CI_AS	NULL,
 	[strDetails]			[nvarchar](MAX)		COLLATE Latin1_General_CI_AS	NULL,
-	[intConcurrencyId]		[int]												NOT NULL DEFAULT ((1)),
+	[intConcurrencyId]		[int]												NOT NULL DEFAULT ((1))
 )
