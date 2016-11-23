@@ -2171,16 +2171,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
-                        var otherChargeTax = charge.get('dblTax');
-                        
-
-                        if (charge.get('ysnPrice') === true) {
-                            totalChargeTaxes -= otherChargeTax;
-                        }
-                        else {
-                            totalChargeTaxes += otherChargeTax;
-                        }
-
+                        var otherChargeTax = charge.get('dblTax');  
+                        totalChargeTaxes += otherChargeTax;
                     }
                 });
             }
@@ -5427,7 +5419,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                  taxAmount = taxableAmount * itemDetailTax.dblRate;
                               }
                               if (itemDetailTax.ysnCheckoffTax) {
-                                 taxAmount = taxAmount * -1;
+                                 taxAmount = -(taxAmount);
+                              }
+
+                              if (charge.get('ysnPrice')) {
+                                  taxAmount = -(taxAmount);
                               }
 
                               taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
