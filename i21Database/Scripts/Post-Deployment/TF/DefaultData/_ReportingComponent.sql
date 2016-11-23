@@ -2808,6 +2808,7 @@ GO
 PRINT 'END TF tblTFValidDestinationState'
 GO
 
+
 GO
 PRINT 'START TF tblTFValidProductCode'
 GO
@@ -2982,15 +2983,15 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('61', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 61 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(61, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('61', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 61 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(61, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('61', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 61 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(61, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('61', '61')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 61 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(61, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('61', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 61 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(61, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('61', '061')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '248')
@@ -3000,27 +3001,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '223')
@@ -3030,12 +3031,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '150')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '293', '150') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '150')
@@ -3054,24 +3055,24 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '148')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '305', '148') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '148')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '74')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '73')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '074')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '073')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '100')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '310', '100') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '100')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '92')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '312', '92') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '92')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '092')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '312', '092') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '092')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 62 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(62, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('62', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 64 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(64, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('64', 'E00')
@@ -3087,12 +3088,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('64', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 64 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(64, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('64', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 64 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(64, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('64', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 64 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(64, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('64', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 64 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(64, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('64', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 64 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(64, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('64', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 67 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(67, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('67', 'E00')
@@ -3108,15 +3109,15 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('67', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 67 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(67, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('67', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 67 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(67, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('67', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 67 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(67, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('67', '61')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 67 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(67, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('67', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 67 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(67, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('67', '061')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '248')
@@ -3126,27 +3127,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '223')
@@ -3156,12 +3157,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '150')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '293', '150') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '150')
@@ -3180,27 +3181,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '148')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '305', '148') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '148')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '74')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '73')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '074')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '073')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '100')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '310', '100') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '100')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '92')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '312', '92') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '92')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '93')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '092')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '312', '092') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '092')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 65 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(65, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('65', '093')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '248')
@@ -3210,27 +3211,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '223')
@@ -3240,12 +3241,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '150')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '293', '150') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '150')
@@ -3264,24 +3265,24 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '148')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '305', '148') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '148')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '74')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '73')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '074')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '073')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '100')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '310', '100') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '100')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '92')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '312', '92') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '92')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '092')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '312', '092') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '092')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 68 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(68, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('68', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 1 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(1, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('1', 'E00')
@@ -3297,12 +3298,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('1', 'M1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 1 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(1, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('1', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 1 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(1, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('1', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 1 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(1, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('1', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 1 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(1, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('1', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 1 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(1, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('1', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 4 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(4, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('4', 'E00')
@@ -3318,12 +3319,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('4', 'M1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 4 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(4, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('4', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 4 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(4, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('4', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 4 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(4, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('4', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 4 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(4, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('4', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 4 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(4, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('4', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 7 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(7, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('7', 'E00')
@@ -3339,12 +3340,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('7', 'M1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 7 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(7, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('7', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 7 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(7, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('7', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 7 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(7, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('7', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 7 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(7, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('7', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 7 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(7, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('7', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 10 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(10, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('10', 'E00')
@@ -3360,12 +3361,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('10', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 10 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(10, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('10', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 10 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(10, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('10', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 10 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(10, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('10', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 10 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(10, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('10', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 10 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(10, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('10', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 13 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(13, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('13', 'E00')
@@ -3381,12 +3382,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('13', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 13 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(13, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('13', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 13 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(13, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('13', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 13 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(13, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('13', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 13 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(13, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('13', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 13 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(13, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('13', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 16 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(16, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('16', 'E00')
@@ -3402,12 +3403,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('16', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 16 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(16, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('16', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 16 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(16, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('16', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 16 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(16, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('16', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 16 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(16, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('16', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 16 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(16, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('16', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 19 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(19, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('19', 'E00')
@@ -3423,12 +3424,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('19', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 19 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(19, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('19', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 19 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(19, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('19', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 19 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(19, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('19', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 19 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(19, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('19', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 19 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(19, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('19', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 22 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(22, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('22', 'E00')
@@ -3444,12 +3445,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('22', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 22 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(22, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('22', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 22 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(22, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('22', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 22 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(22, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('22', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 22 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(22, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('22', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 22 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(22, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('22', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 25 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(25, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('25', 'E00')
@@ -3465,12 +3466,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('25', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 25 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(25, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('25', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 25 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(25, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('25', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 25 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(25, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('25', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 25 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(25, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('25', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 25 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(25, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('25', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 28 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(28, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('28', 'E00')
@@ -3486,12 +3487,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('28', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 28 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(28, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('28', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 28 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(28, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('28', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 28 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(28, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('28', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 28 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(28, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('28', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 28 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(28, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('28', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 31 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(31, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('31', 'E00')
@@ -3507,12 +3508,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('31', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 31 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(31, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('31', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 31 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(31, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('31', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 31 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(31, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('31', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 31 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(31, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('31', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 31 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(31, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('31', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 34 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(34, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('34', 'E00')
@@ -3528,12 +3529,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('34', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 34 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(34, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('34', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 34 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(34, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('34', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 34 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(34, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('34', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 34 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(34, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('34', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 34 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(34, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('34', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 37 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(37, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('37', 'E00')
@@ -3549,147 +3550,147 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('37', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 37 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(37, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('37', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 37 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(37, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('37', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 37 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(37, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('37', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 37 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(37, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('37', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 37 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(37, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('37', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 2 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(2, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('2', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 2 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(2, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('2', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 2 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(2, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('2', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 2 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(2, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('2', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 2 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(2, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('2', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 2 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(2, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('2', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 5 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(5, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('5', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 5 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(5, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('5', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 5 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(5, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('5', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 5 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(5, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('5', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 5 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(5, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('5', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 5 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(5, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('5', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 8 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(8, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('8', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 8 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(8, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('8', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 8 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(8, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('8', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 8 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(8, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('8', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 8 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(8, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('8', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 8 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(8, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('8', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 11 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(11, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('11', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 11 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(11, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('11', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 11 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(11, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('11', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 11 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(11, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('11', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 11 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(11, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('11', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 11 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(11, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('11', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 14 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(14, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('14', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 14 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(14, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('14', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 14 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(14, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('14', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 14 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(14, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('14', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 14 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(14, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('14', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 14 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(14, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('14', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 17 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(17, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('17', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 17 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(17, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('17', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 17 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(17, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('17', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 17 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(17, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('17', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 17 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(17, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('17', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 17 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(17, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('17', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 20 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(20, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('20', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 20 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(20, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('20', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 20 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(20, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('20', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 20 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(20, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('20', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 20 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(20, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('20', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 20 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(20, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('20', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 23 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(23, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('23', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 23 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(23, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('23', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 23 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(23, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('23', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 23 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(23, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('23', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 23 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(23, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('23', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 23 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(23, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('23', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 26 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(26, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('26', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 26 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(26, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('26', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 26 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(26, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('26', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 26 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(26, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('26', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 26 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(26, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('26', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 26 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(26, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('26', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 29 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(29, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('29', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 29 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(29, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('29', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 29 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(29, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('29', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 29 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(29, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('29', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 29 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(29, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('29', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 29 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(29, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('29', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 32 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(32, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('32', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 32 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(32, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('32', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 32 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(32, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('32', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 32 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(32, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('32', '74')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 32 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(32, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('32', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 32 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(32, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('32', '074')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '248')
@@ -3699,27 +3700,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '19
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '223')
@@ -3729,12 +3730,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '12
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '231')
@@ -3750,9 +3751,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '15
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 3 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(3, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('3', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '248')
@@ -3762,27 +3763,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '19
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '223')
@@ -3792,12 +3793,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '12
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '231')
@@ -3813,9 +3814,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '15
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 6 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(6, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('6', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '248')
@@ -3825,27 +3826,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '19
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '223')
@@ -3855,12 +3856,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '12
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '231')
@@ -3876,9 +3877,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '15
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 9 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(9, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('9', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '248')
@@ -3888,27 +3889,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '223')
@@ -3918,12 +3919,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '231')
@@ -3939,9 +3940,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 12 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(12, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('12', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '248')
@@ -3951,27 +3952,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '223')
@@ -3981,12 +3982,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '231')
@@ -4002,9 +4003,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 15 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(15, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('15', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '248')
@@ -4014,27 +4015,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '223')
@@ -4044,12 +4045,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '231')
@@ -4065,9 +4066,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 18 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(18, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('18', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '248')
@@ -4077,27 +4078,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '223')
@@ -4107,12 +4108,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '231')
@@ -4128,9 +4129,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 21 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(21, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('21', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '248')
@@ -4140,27 +4141,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '223')
@@ -4170,12 +4171,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '231')
@@ -4191,9 +4192,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 24 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(24, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('24', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '248')
@@ -4203,27 +4204,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '223')
@@ -4233,12 +4234,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '231')
@@ -4254,9 +4255,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 27 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(27, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('27', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '248')
@@ -4266,27 +4267,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '223')
@@ -4296,12 +4297,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '231')
@@ -4317,9 +4318,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 30 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(30, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('30', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '248')
@@ -4329,27 +4330,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '223')
@@ -4359,12 +4360,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 33 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(33, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('33', '231')
@@ -4395,12 +4396,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('71', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 71 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(71, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('71', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 71 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(71, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('71', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 71 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(71, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('71', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 71 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(71, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('71', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 71 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(71, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('71', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 74 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(74, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('74', 'E00')
@@ -4416,12 +4417,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('74', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 74 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(74, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('74', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 74 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(74, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('74', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 74 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(74, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('74', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 74 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(74, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('74', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 74 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(74, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('74', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 77 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(77, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('77', 'E00')
@@ -4437,51 +4438,51 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('77', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 77 AND strProductCode = '125')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(77, '265', '125') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('77', '125')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 77 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(77, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('77', '65')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 77 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(77, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('77', '61')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 77 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(77, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('77', '065')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 77 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(77, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('77', '061')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 72 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(72, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('72', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 72 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(72, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('72', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 72 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(72, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('72', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 72 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(72, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('72', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 72 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(72, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('72', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 72 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(72, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('72', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 75 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(75, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('75', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 75 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(75, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('75', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 75 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(75, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('75', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 75 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(75, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('75', '74')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 75 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(75, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('75', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 75 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(75, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('75', '074')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 78 AND strProductCode = '145')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(78, '302', '145') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('78', '145')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 78 AND strProductCode = '147')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(78, '304', '147') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('78', '147')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 78 AND strProductCode = '73')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(78, '306', '73') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('78', '73')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 78 AND strProductCode = '74')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(78, '307', '74') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('78', '74')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 78 AND strProductCode = '073')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(78, '306', '073') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('78', '073')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 78 AND strProductCode = '074')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(78, '307', '074') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('78', '074')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '248')
@@ -4491,27 +4492,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '223')
@@ -4521,12 +4522,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '231')
@@ -4542,9 +4543,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 73 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(73, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('73', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '248')
@@ -4554,27 +4555,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '223')
@@ -4584,12 +4585,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '231')
@@ -4605,9 +4606,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 76 AND strProductCode = '130')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(76, '300', '130') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('76', '130')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '90')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '266', '90') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '90')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '090')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '266', '090') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '090')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '248')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '267', '248') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '248')
@@ -4617,27 +4618,27 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '249')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '269', '249') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '249')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '52')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '270', '52') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '52')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '052')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '270', '052') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '052')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '196')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '271', '196') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '196')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '58')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '272', '58') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '58')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '058')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '272', '058') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '058')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '265')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '273', '265') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '265')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '126')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '274', '126') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '126')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '59')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '275', '59') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '59')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '75')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '276', '75') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '75')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '059')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '275', '059') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '059')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '075')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '276', '075') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '075')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '223')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '277', '223') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '223')
@@ -4647,12 +4648,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '199')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '279', '199') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '199')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '91')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '280', '91') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '91')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '76')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '281', '76') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '76')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '091')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '280', '091') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '091')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '076')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '281', '076') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '076')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 79 AND strProductCode = '231')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(79, '288', '231') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('79', '231')
@@ -4722,9 +4723,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('46', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 46 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(46, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('46', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 46 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(46, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('46', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 46 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(46, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('46', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 47 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(47, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('47', 'B00')
@@ -4779,9 +4780,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('47', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 47 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(47, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('47', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 47 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(47, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('47', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 47 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(47, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('47', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 48 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(48, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('48', 'B00')
@@ -4836,9 +4837,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('48', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 48 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(48, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('48', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 48 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(48, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('48', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 48 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(48, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('48', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 49 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(49, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('49', 'B00')
@@ -4893,9 +4894,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('49', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 49 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(49, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('49', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 49 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(49, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('49', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 49 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(49, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('49', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 50 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(50, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('50', 'B00')
@@ -4950,9 +4951,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('50', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 50 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(50, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('50', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 50 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(50, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('50', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 50 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(50, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('50', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 51 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(51, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('51', 'B00')
@@ -5007,9 +5008,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('51', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 51 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(51, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('51', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 51 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(51, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('51', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 51 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(51, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('51', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 52 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(52, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('52', 'B00')
@@ -5064,9 +5065,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('52', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 52 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(52, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('52', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 52 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(52, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('52', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 52 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(52, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('52', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 53 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(53, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('53', 'B00')
@@ -5121,9 +5122,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('53', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 53 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(53, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('53', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 53 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(53, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('53', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 53 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(53, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('53', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 54 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(54, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('54', 'B00')
@@ -5178,9 +5179,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('54', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 54 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(54, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('54', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 54 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(54, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('54', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 54 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(54, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('54', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 55 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(55, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('55', 'B00')
@@ -5235,9 +5236,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('55', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 55 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(55, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('55', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 55 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(55, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('55', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 55 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(55, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('55', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 56 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(56, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('56', 'B00')
@@ -5268,9 +5269,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('56', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 56 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(56, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('56', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 56 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(56, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('56', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 56 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(56, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('56', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 57 AND strProductCode = 'D00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(57, '284', 'D00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('57', 'D00')
@@ -5289,9 +5290,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('57', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 57 AND strProductCode = '153')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(57, '290', '153') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('57', '153')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 57 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(57, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('57', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 57 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(57, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('57', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 58 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(58, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('58', 'B00')
@@ -5346,9 +5347,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('58', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 58 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(58, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('58', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 58 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(58, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('58', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 58 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(58, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('58', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 80 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(80, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('80', 'B00')
@@ -5403,9 +5404,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('80', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 80 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(80, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('80', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 80 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(80, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('80', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 80 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(80, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('80', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 81 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(81, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('81', 'B00')
@@ -5460,9 +5461,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('81', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 81 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(81, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('81', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 81 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(81, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('81', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 81 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(81, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('81', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 82 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(82, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('82', 'B00')
@@ -5517,9 +5518,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('82', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 82 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(82, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('82', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 82 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(82, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('82', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 82 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(82, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('82', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 83 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(83, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('83', 'B00')
@@ -5574,9 +5575,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('83', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 83 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(83, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('83', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 83 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(83, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('83', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 83 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(83, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('83', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 84 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(84, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('84', 'B00')
@@ -5631,9 +5632,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('84', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 84 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(84, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('84', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 84 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(84, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('84', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 84 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(84, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('84', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 85 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(85, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('85', 'B00')
@@ -5688,9 +5689,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('85', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 85 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(85, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('85', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 85 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(85, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('85', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 85 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(85, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('85', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 86 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(86, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('86', 'B00')
@@ -5745,9 +5746,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('86', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 86 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(86, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('86', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 86 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(86, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('86', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 86 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(86, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('86', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 87 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(87, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('87', 'B00')
@@ -5802,9 +5803,9 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('87', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 87 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(87, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('87', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 87 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(87, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('87', '93')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 87 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(87, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('87', '093')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 88 AND strProductCode = 'B00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(88, '282', 'B00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('88', 'B00')
@@ -5859,15 +5860,15 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('88', '2
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 88 AND strProductCode = '101')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(88, '311', '101') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('88', '101')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 88 AND strProductCode = '93')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(88, '313', '93') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('88', '93')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 41 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(41, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('41', '61')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 41 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(41, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('41', '65')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 88 AND strProductCode = '093')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(88, '313', '093') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('88', '093')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 41 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(41, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('41', '061')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 41 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(41, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('41', '065')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 42 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(42, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('42', 'E00')
@@ -5880,12 +5881,12 @@ INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('42', 'M
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 42 AND strProductCode = 'M11')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(42, '264', 'M11') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('42', 'M11')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 43 AND strProductCode = '61')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(43, '308', '61') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('43', '61')
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 43 AND strProductCode = '65')
-BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(43, '301', '65') END 
-INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('43', '65')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 43 AND strProductCode = '061')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(43, '308', '061') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('43', '061')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 43 AND strProductCode = '065')
+BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(43, '301', '065') END 
+INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('43', '065')
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFValidProductCode WHERE intReportingComponentId = 44 AND strProductCode = 'E00')
 BEGIN INSERT INTO tblTFValidProductCode([intReportingComponentId],[intProductCode],[strProductCode]) VALUES(44, '314', 'E00') END 
 INSERT @tblTempSource (intReportingComponentId, strProductCode) VALUES ('44', 'E00')
