@@ -5417,7 +5417,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                  taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                               } else {
                                   //If calculation method is 'Unit', unit will be considered as 1 since other charges do not have quantity
-                                 taxAmount = 1 * itemDetailTax.dblRate;
+                                 taxAmount = itemDetailTax.dblRate;
                               }
                               if (itemDetailTax.ysnCheckoffTax) {
                                  taxAmount = -(taxAmount);
