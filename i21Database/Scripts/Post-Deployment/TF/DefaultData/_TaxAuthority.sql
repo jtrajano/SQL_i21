@@ -7,12 +7,12 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'AL')
 		IF @strTaxAuthority IS NULL
 			BEGIN
-				INSERT INTO [tblTFTaxAuthority2]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
+				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
 				VALUES('AL','Alabama', 'FALSE',	'FALSE', 'FALSE')
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority2 SET strTaxAuthorityCode = 'AL', strDescription = 'Alabama', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE', ysnFilingForThisTA = 'FALSE' WHERE strTaxAuthorityCode = 'AL'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AL', strDescription = 'Alabama', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE', ysnFilingForThisTA = 'FALSE' WHERE strTaxAuthorityCode = 'AL'
 		END
 
 
