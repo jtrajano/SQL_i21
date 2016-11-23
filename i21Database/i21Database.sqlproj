@@ -4456,6 +4456,7 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
     <None Include="dbo\Stored Procedures\uspICRestoreBalanceFromClosedPeriod.sql" />
     <Build Include="dbo\Tables\tblTFDeploymentNote.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorPrepayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
