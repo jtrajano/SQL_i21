@@ -711,7 +711,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					, 1 --@DisregardExemptionSetup
+					--, 1 --@DisregardExemptionSetup
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -764,7 +764,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,0 -- @DisregardExemptionSetup
+					--,0 -- @DisregardExemptionSetup
 				)
 
 				END
@@ -822,7 +822,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,1 --@DisregardExemptionSetup
+					--,1 --@DisregardExemptionSetup
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -875,7 +875,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,0 --@DisregardExemptionSetup
+					--,0 --@DisregardExemptionSetup
 				)
 
 				END
@@ -1000,7 +1000,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,1 --@DisregardExemptionSetup
+					--,1 --@DisregardExemptionSetup
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1053,7 +1053,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,0 -- @DisregardExemptionSetup
+					--,0 -- @DisregardExemptionSetup
 				)
 
 				
@@ -1114,7 +1114,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,1 --@DisregardExemptionSetup
+					--,1 --@DisregardExemptionSetup
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1167,7 +1167,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
-					,0 --@DisregardExemptionSetup
+					--,0 --@DisregardExemptionSetup
 				)
 
 				
