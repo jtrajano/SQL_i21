@@ -857,7 +857,7 @@ FROM
 	LEFT JOIN tblSMTaxClass C ON B.intTaxClassId = C.intTaxClassId 
 	LEFT JOIN tblSMTaxCode D ON D.intTaxClassId = C.intTaxClassId 
 	LEFT JOIN dbo.tblSMTaxGroupCode E ON D.intTaxCodeId = E.intTaxCodeId
-	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, E.intTaxGroupId, NULL, NULL , 0, NULL) Taxes
+	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, E.intTaxGroupId, (SELECT TOP 1 intCompanyLocationId  FROM tblSMUserRoleCompanyLocationPermission), D1.intShipFromId , 0, NULL) Taxes
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD
