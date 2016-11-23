@@ -83,6 +83,7 @@ BEGIN TRY
 	DECLARE @intItemLocationId INT
 	DECLARE @strOrderType NVARCHAR(50)
 	DECLARE @dblUnits DECIMAL(24, 10)
+	DECLARE @intShipFromId INT
 
 	SET @dtmDate = GETDATE()
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference
@@ -247,7 +248,10 @@ BEGIN TRY
 			,dblSpotBasis DECIMAL(24, 10)
 			,dblSpotCashPrice DECIMAL(24, 10)
 	)
-
+	SELECT TOP 1 @intShipFromId=intShipFromId 
+	FROM tblAPVendor 
+	WHERE intEntityVendorId =@EntityId
+	 
 	SELECT @ItemDescription = strItemNo
 	FROM tblICItem
 	WHERE intItemId = @ItemId
@@ -1081,7 +1085,7 @@ BEGIN TRY
 			SELECT 
 				 strReceiptType				= @strOrderType 
 				,intEntityVendorId			= @EntityId
-				,intShipFromId				= SV.intCompanyLocationId
+				,intShipFromId				= @intShipFromId
 				,intLocationId				= SV.intCompanyLocationId
 				,intItemId					= SV.[intItemId]
 				,intItemLocationId			= @intItemLocationId
@@ -1146,7 +1150,7 @@ BEGIN TRY
 			,[strReceiptType]					= @strOrderType
 			,[intLocationId]					= SV.intCompanyLocationId
 			,[intShipViaId]						= NULL
-			,[intShipFromId]					= SV.intCompanyLocationId
+			,[intShipFromId]					= @intShipFromId
 			,[intCurrencyId]  					= @intCurrencyId
 			,[intChargeId]						= SV.[intItemId]
 			,[ysnInventoryCost]					= 0
@@ -1248,3 +1252,4 @@ BEGIN CATCH
 		EXEC sp_xml_removedocument @idoc
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
+
