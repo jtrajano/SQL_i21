@@ -199,4 +199,12 @@ BEGIN
 				) Taxes
 					ON Charge.intInventoryReceiptChargeId = Taxes.intInventoryReceiptChargeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+
+		-- Update Other Charge Tax Table
+		UPDATE ChargeTax
+		SET dblTax = Charge.dblTax
+		FROM dbo.tblICInventoryReceiptChargeTax ChargeTax
+			 INNER JOIN dbo.tblICInventoryReceiptCharge Charge
+			 ON Charge.intInventoryReceiptChargeId = ChargeTax.intInventoryReceiptChargeId
+		WHERE Charge.intInventoryReceiptId = @intInventoryReceiptId
 END
