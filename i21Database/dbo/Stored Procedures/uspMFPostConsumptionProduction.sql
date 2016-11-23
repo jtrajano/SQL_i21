@@ -120,7 +120,7 @@ BEGIN
 		,dtmDate = GetDate()
 		,dblQty = (- cl.dblIssuedQuantity)
 		,dblUOMQty = ItemUOM.dblUnitQty
-		,dblCost = 0 --l.dblLastCost
+		,dblCost = IP.dblLastCost
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -138,6 +138,7 @@ BEGIN
 	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
 	INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId
 		AND il.intLocationId = @intLocationId
+	INNER JOIN dbo.tblICItemPricing IP on IP.intItemId=i.intItemId AND IP.intItemLocationId =il.intItemLocationId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND cl.intBatchId = @intBatchId
 		AND ISNULL(cl.intLotId, 0) = 0
