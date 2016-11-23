@@ -154,7 +154,8 @@ BEGIN
               ysnOffset,
               intCurrencyId,
               intConcurrencyId ,
-			  intSelectedInstrumentTypeId
+			  intSelectedInstrumentTypeId,
+			  dtmCreateDateTime
                )    
             VALUES(CONVERT(DATETIME,CONVERT(CHAR(10),@dtmTransactionDate,110)) ,
               @intFutOptTransactionHeaderId,
@@ -179,7 +180,8 @@ BEGIN
               @ysnOffset  ,
               @intCurrencyId,
               1,
-			  @intSelectedInstrumentTypeId
+			  @intSelectedInstrumentTypeId,
+			  GETDATE()
       )          
 
       SET @intFutOptTransactionId = SCOPE_IDENTITY()
