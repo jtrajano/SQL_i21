@@ -233,6 +233,40 @@ BEGIN TRY
 					, NULL
 				)
 
+				INSERT INTO tblTRQuoteDetailTax(
+					intQuoteDetailId
+					, intTaxGroupId
+					, intTaxCodeId
+					, intTaxClassId
+					, strTaxableByOtherTaxes
+					, strCalculationMethod
+					, dblRate
+					, dblTax
+					, dblAdjustedTax
+					, intTaxAccountId
+					, ysnTaxAdjusted
+					, ysnSeparateOnInvoice
+					, ysnCheckoffTax
+					, strTaxCode
+				)
+				SELECT 
+					@QuoteDetailId
+					, intTaxGroupId
+					, intTaxCodeId
+					, intTaxClassId
+					, strTaxableByOtherTaxes
+					, strCalculationMethod
+					, dblRate
+					, dblTax
+					, dblAdjustedTax
+					, intTaxAccountId
+					, 0
+					, 0
+					, ysnCheckoffTax
+					, strTaxCode
+				FROM #tmpTaxes
+				WHERE ISNULL(dblAdjustedTax, 0) <> 0
+
 				SELECT @Tax = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
 				FROM #tmpTaxes
 				SELECT * FROM vyuTRSupplyPointView

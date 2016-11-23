@@ -1,0 +1,27 @@
+﻿CREATE TABLE [dbo].[tblTRQuoteDetailTax]
+(
+	[intQuoteDetailTaxId] INT NOT NULL IDENTITY,
+	[intQuoteDetailId] INT NOT NULL, 
+	[intTaxGroupId] INT NULL,
+	[intTaxCodeId] INT NULL,
+	[intTaxClassId] INT NULL,	
+	[strTaxableByOtherTaxes] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strCalculationMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblAdjustedTax] NUMERIC(18, 6) NULL DEFAULT ((0)),		
+	[intTaxAccountId] INT NULL,
+	[ysnTaxAdjusted] BIT NULL DEFAULT ((0)),
+	[ysnSeparateOnInvoice] BIT NULL DEFAULT ((0)),
+	[ysnCheckoffTax] BIT NULL DEFAULT ((0)),
+	[strTaxCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intSort] INT NULL, 
+	[intConcurrencyId] INT NULL DEFAULT ((0)), 
+    CONSTRAINT [PK_tblTRQuoteDetailTax] PRIMARY KEY ([intQuoteDetailTaxId]), 
+    CONSTRAINT [FK_tblTRQuoteDetailTax_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]), 
+    CONSTRAINT [FK_tblTRQuoteDetailTax_tblSMTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES [tblSMTaxClass]([intTaxClassId]), 
+    CONSTRAINT [FK_tblTRQuoteDetailTax_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId]), 
+    CONSTRAINT [FK_tblTRQuoteDetailTax_tblGLAccount] FOREIGN KEY ([intTaxAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
+    CONSTRAINT [FK_tblTRQuoteDetailTax_tblTRQuoteDetail] FOREIGN KEY ([intQuoteDetailId]) REFERENCES [tblTRQuoteDetail]([intQuoteDetailId]) ON DELETE CASCADE,
+
+)
