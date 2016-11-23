@@ -745,6 +745,11 @@ BEGIN
 	)
 	SET IDENTITY_INSERT tblCRMOpportunity OFF
 
+	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMStatus'))
+	begin
+		exec('update tblCRMOpportunity set tblCRMOpportunity.intStatusId = (select top 1 tblCRMStatus.intStatusId from tblCRMStatus where tblCRMStatus.strStatus = tblCRMOpportunity.strOpportunityStatus) where tblCRMOpportunity.intStatusId is null and tblCRMOpportunity.strOpportunityStatus is not null');
+	end
+
 	insert into tblSMTransaction
 	(
 		intScreenId
