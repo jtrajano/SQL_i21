@@ -8,5 +8,9 @@ SELECT ST.intControlPointId
 	,CAST(ROW_NUMBER() OVER (
 			ORDER BY PC.intProductId
 			) AS INT) AS intRowNo
+	,P.intProductTypeId
+	,P.intProductValueId
+	,P.ysnActive
 FROM tblQMProductControlPoint PC
 JOIN tblQMSampleType ST ON ST.intControlPointId = PC.intControlPointId
+JOIN tblQMProduct P ON P.intProductId = PC.intProductId
