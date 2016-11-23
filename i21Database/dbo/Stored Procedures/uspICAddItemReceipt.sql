@@ -953,7 +953,7 @@ BEGIN
 				) Detail
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
-	
+	/* Removing this as requested in IC-2924
 		---------------------------------
 		-- Update Gross/Net quantities --
 		---------------------------------
@@ -982,7 +982,7 @@ BEGIN
 		WHERE ReceiptItem.intInventoryReceiptId = @inventoryReceiptId
 			  AND ReceiptItem.dblNet IS NULL
 			  AND ReceiptItem.dblGross > 0 
-
+*/
 		-- Log successful inserts. 
 		INSERT INTO #tmpAddItemReceiptResult (
 			intSourceId
