@@ -3,6 +3,7 @@
 WITH FiscalSum AS(
 	SELECT	R.intFiscalYearId,
 			RC.intCustomerId,
+			RC.intRefundTypeId,
 			dblVolume = SUM(RC.dblVolume),
 			dblRefundAmount = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN RC.dblRefundAmount ELSE 0 END),
 			dblNonRefundAmount = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN 0 ELSE RC.dblRefundAmount END),
@@ -22,10 +23,11 @@ WITH FiscalSum AS(
 	FROM (SELECT intRefundId,
 				RC.intRefundCustomerId,
 				RC.ysnEligibleRefund,
+				RC.intRefundTypeId,
 				intCustomerId,
 				RCat.dblVolume,
-				dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate,
-				dblCashRefund = (RCat.dblVolume * RCat.dblRefundRate) * (RC.dblCashPayout/100)
+				dblRefundAmount = RC.dblRefundAmount,
+				dblCashRefund = RC.dblCashRefund
 		FROM tblPATRefundCustomer RC
 		INNER JOIN tblPATRefundCategory RCat
 			ON RCat.intRefundCustomerId = RC.intRefundCustomerId) RC
@@ -39,6 +41,7 @@ WITH FiscalSum AS(
 			RC.intCustomerId,
 			RC.ysnEligibleRefund,
 			R.dblServiceFee,
+			RC.intRefundTypeId,
 			R.intRefundId
 
 )
@@ -49,7 +52,7 @@ SELECT	intFiscalYearId,
 		dblCashRefund = SUM(dblCashRefund),
 		dblLessFWT = SUM(dblLessFWT),
 		dblLessServiceFee = SUM(dblLessServiceFee),
-		dblCheckAmount = SUM(dblCheckAmount),
+		dblCheckAmount = SUM(CASE WHEN dblCheckAmount > 0 THEN dblCheckAmount ELSE 0 END),
 		dblEquityRefund = SUM(dblEquityRefund),
 		intVoting,
 		intNonVoting,
