@@ -170,12 +170,8 @@ OPEN intListCursor;
 							IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 							BEGIN
 								IF	ISNULL(@intLoopContractId,0) != 0
-								UPDATE tblSCTicket SET intContractId = @intLoopContractId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
-								UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-								, intContractSequence = CT.intContractSeq
-								, strContractLocation = CT.strLocationName
-								FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
 							END
 						INSERT INTO @ItemsForItemReceipt (
 								intItemId
@@ -304,11 +300,6 @@ OPEN intListCursor;
 						-- uses a PRINT statement as that action (not a very good
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
-							UPDATE tblSCTicket SET intContractId = @intDPContractId WHERE intTicketId = @intTicketId
-							UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-							, intContractSequence = CT.intContractSeq
-							, strContractLocation = CT.strLocationName
-							FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 							INSERT INTO @ItemsForItemReceipt (
 							intItemId
 							,intItemLocationId
@@ -331,6 +322,7 @@ OPEN intListCursor;
 							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
 					END;
