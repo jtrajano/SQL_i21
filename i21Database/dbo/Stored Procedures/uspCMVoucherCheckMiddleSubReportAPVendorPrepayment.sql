@@ -1,8 +1,9 @@
 ﻿/*  
- This stored procedure is used as data source for "Check Voucher Middle Sub Report AP Payment"
+ This stored procedure is used as data source for "Check Voucher Middle Sub Report AP Vendor Prepayment"
 */  
-CREATE PROCEDURE uspCMVoucherCheckMiddleSubReportAPPayment  
-	@intTransactionIdFrom INT = 0   
+CREATE PROCEDURE uspCMVoucherCheckMiddleSubReportAPVendorPrepayment
+	@intTransactionIdFrom INT = 0,
+	@intPaymentDetailId INT = 0   
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -100,7 +101,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 --SET @intTransactionIdFrom = CASE WHEN ISNULL(@intTransactionIdFrom, 0) = 0 THEN NULL ELSE @intTransactionIdFrom END  
   
 -- Report Query:  
-SELECT  TOP 10 * FROM(
+SELECT * FROM(
 	SELECT  
 			intTransactionId = F.intTransactionId
 			,strBillId = BILL.strBillId
@@ -116,18 +117,18 @@ SELECT  TOP 10 * FROM(
 						THEN PYMTDetail.dblPayment * -1
 						ELSE PYMTDetail.dblPayment
 						END
-			--,CONTRACTHEADER.strContractNumber
-			--,strPPDType = CASE WHEN BILLDETAIL.intPrepayTypeId = 3
-			--			THEN 'Percentage'
-			--			WHEN BILLDETAIL.intPrepayTypeId = 2
-			--			THEN 'Unit'
-			--			ELSE 'Standard'
-			--			END
-			--,BILLDETAIL.dblTotal
-			--,BILLDETAIL.dblQtyOrdered
+			,CONTRACTHEADER.strContractNumber
+			,strPPDType = CASE WHEN BILLDETAIL.intPrepayTypeId = 3
+						THEN 'Percentage'
+						WHEN BILLDETAIL.intPrepayTypeId = 2
+						THEN 'Unit'
+						ELSE 'Standard'
+						END
+			,BILLDETAIL.dblTotal
+			,BILLDETAIL.dblQtyOrdered
 			,BILL.intTransactionType
-			--,ITEM.strItemNo
-			--,ITEM.strDescription
+			,ITEM.strItemNo
+			,ITEM.strDescription
 			,PYMTDetail.intPaymentDetailId
 	FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON F.strTransactionId = PYMT.strPaymentRecordNum
@@ -135,14 +136,15 @@ SELECT  TOP 10 * FROM(
 				ON PYMT.intPaymentId = PYMTDetail.intPaymentId
 			INNER JOIN [dbo].[tblAPBill] BILL
 				ON PYMTDetail.intBillId = BILL.intBillId
-			--INNER JOIN [dbo].[tblAPBillDetail] BILLDETAIL
-			--	ON BILL.intBillId = BILLDETAIL.intBillId
-			--LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
-			--	ON BILLDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
-			--LEFT JOIN [dbo].tblICItem ITEM
-			--	ON BILLDETAIL.intItemId = ITEM.intItemId
+			INNER JOIN [dbo].[tblAPBillDetail] BILLDETAIL
+				ON BILL.intBillId = BILLDETAIL.intBillId
+			LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
+				ON BILLDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
+			LEFT JOIN [dbo].tblICItem ITEM
+				ON BILLDETAIL.intItemId = ITEM.intItemId
 	WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
+			AND PYMTDetail.intPaymentDetailId = @intPaymentDetailId
 
 	--Include Invoice
 	UNION ALL SELECT
@@ -154,13 +156,13 @@ SELECT  TOP 10 * FROM(
 			,dblAmount = INV.dblInvoiceTotal
 			,dblDiscount = PYMTDetail.dblDiscount
 			,dblNet = PYMTDetail.dblPayment
-			--,CONTRACTHEADER.strContractNumber
-			--,strPPDType = ''
-			--,INVDETAIL.dblTotal
-			--,INVDETAIL.dblQtyOrdered
+			,CONTRACTHEADER.strContractNumber
+			,strPPDType = ''
+			,INVDETAIL.dblTotal
+			,INVDETAIL.dblQtyOrdered
 			,'' AS intTransactionType
-			--,ITEM.strItemNo
-			--,ITEM.strDescription
+			,ITEM.strItemNo
+			,ITEM.strDescription
 			,PYMTDetail.intPaymentDetailId
 	FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON F.strTransactionId = PYMT.strPaymentRecordNum
@@ -168,12 +170,13 @@ SELECT  TOP 10 * FROM(
 				ON PYMT.intPaymentId = PYMTDetail.intPaymentId
 			INNER JOIN [dbo].[tblARInvoice] INV
 				ON PYMTDetail.intInvoiceId = INV.intInvoiceId
-			--INNER JOIN [dbo].[tblARInvoiceDetail] INVDETAIL
-			--	ON INV.intInvoiceId = INVDETAIL.intInvoiceId
-			--LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
-			--	ON INVDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
-			--LEFT JOIN [dbo].tblICItem ITEM
-			--	ON INVDETAIL.intItemId = ITEM.intItemId
+			INNER JOIN [dbo].[tblARInvoiceDetail] INVDETAIL
+				ON INV.intInvoiceId = INVDETAIL.intInvoiceId
+			LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
+				ON INVDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
+			LEFT JOIN [dbo].tblICItem ITEM
+				ON INVDETAIL.intItemId = ITEM.intItemId
 	WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
+			AND PYMTDetail.intPaymentDetailId = @intPaymentDetailId
 ) as tbl order by intPaymentDetailId
