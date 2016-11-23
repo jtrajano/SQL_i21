@@ -4580,6 +4580,7 @@
     <Build Include="dbo\Stored Procedures\uspSCUpdateTicketContractUsed.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePickOrderForInventoryShipment.sql" />
     <Build Include="dbo\Views\vyuMFInventoryShipmentView.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorPrepayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
