@@ -1,9 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblGLCrossReferenceMapping](
 	[intCrossReferenceMappingId] [int] IDENTITY(1,1) NOT NULL,
-	[intOldAccountId] INT,
 	[strOldAccountId] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	[inti21AccountId] INT NULL,
-	[stri21AccountId] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[intAccountId] INT NULL,
 	[intAccountSystemId] INT NULL,
 	[ysnOutbound] BIT NULL,
 	[ysnInbound] BIT NULL,
