@@ -4557,8 +4557,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGeneratePutAwayTask.sql" />
     <Build Include="dbo\Views\vyuARPrepaymentContractDefault.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertRecurringSalesOrder.sql" />
-    <Build Include="dbo\Tables\tblSCTicketContractUsed.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketContractUsed.sql" />
     <Build Include="dbo\Tables\tblTRQuoteDetailTax.sql" />
     <Build Include="dbo\Views\vyuTRGetQuoteDetailTax.sql" />
     <Build Include="dbo\Views\vyuTRGetQuoteDetailFreight.sql" />
