@@ -1,16 +1,4 @@
-﻿/*
-	uspARRepostCOGS
-	Use this stored procedure to correct the COGS and In-Transit values. 
-
-	How to use: 
-	1. Determine the open period. 
-	2. For example:
-		2.1. Closed accounting periods are Jan 201x to September 201x. 
-		2.2. This means October 201x is the next open period. 
-		2.3. Specify 10/01/201x as the argument in @dtmOpenPeriod parameter. 
-*/
-
-CREATE PROCEDURE uspARRepostCOGS
+﻿CREATE PROCEDURE uspARRepostCOGS
 	@dtmOpenPeriod AS DATETIME 
 AS
 
@@ -30,6 +18,7 @@ BEGIN
 	CREATE TABLE tblICRepostCOGSGLEntriesBackup (
 		[intGLDetailId]		INT 
 		,[dblDebit]			NUMERIC(18, 6) NULL
+		,[dblCredit]		NUMERIC(18, 6) NULL
 		,[strBatchId]		NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 		,[dtmDate]			DATETIME NULL
 		,[intAccountId]		INT NULL
@@ -67,6 +56,7 @@ BEGIN
 	INSERT INTO tblICRepostCOGSGLEntriesBackup (
 		intGLDetailId
 		,dblDebit
+		,dblCredit 
 		,strBatchId
 		,dtmDate
 		,intAccountId
@@ -90,6 +80,7 @@ BEGIN
 	SELECT 
 		gd.intGLDetailId
 		,gd.dblDebit
+		,gd.dblCredit 
 		,gd.strBatchId
 		,gd.dtmDate
 		,gd.intAccountId
@@ -134,6 +125,7 @@ BEGIN
 	SELECT 
 		gd.intGLDetailId
 		,gd.dblDebit
+		,gd.dblCredit 
 		,gd.strBatchId
 		,gd.dtmDate
 		,gd.intAccountId
@@ -447,6 +439,7 @@ BEGIN
 						AND t.intTransactionDetailId = si.intInventoryShipmentItemId
 						AND t.ysnIsUnposted = 0 
 						AND dbo.fnDateEquals(t.dtmDate, @dtmOpenPeriod) = 1
+						AND dbo.fnDateNotEquals(t.dtmDate, s.dtmShipDate) = 1 -- T date is in the open period but was originally posted in the closed period. 
 			) t
 			CROSS APPLY (
 				-- Get the backup and use as template to generate a new gl detail record.
@@ -473,7 +466,6 @@ BEGIN
 
 	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
 			AND i.ysnPosted = 1
-			AND tgd.intGLDetailId IS NULL -- Insert it if there is no g/l entry for it. 
 			AND t.value IS NOT NULL 
 
 	-- GL entries for Inventory In-Transit
@@ -531,6 +523,7 @@ BEGIN
 						AND t.intTransactionDetailId = si.intInventoryShipmentItemId
 						AND t.ysnIsUnposted = 0 
 						AND dbo.fnDateEquals(t.dtmDate, @dtmOpenPeriod) = 1
+						AND dbo.fnDateNotEquals(t.dtmDate, s.dtmShipDate) = 1 -- T date is in the open period but was originally posted in the closed period. 
 
 			) t
 			CROSS APPLY (
@@ -558,19 +551,19 @@ BEGIN
 
 	WHERE	ISNULL(id.intInventoryShipmentItemId, 0) <> 0 
 			AND i.ysnPosted = 1
-			AND tgd.intGLDetailId IS NULL -- Insert it if there is no g/l entry for it. 
 			AND t.value IS NOT NULL 
-
 END 
 
 -- Delete the old GL Entries 
--- Those backup records that is still zero in debit and credit can be deleted. 
+-- Those backup records that are still zero in debit and credit can be deleted. 
 BEGIN 
 	DELETE	gd 
-	FROM	tblGLDetail gd INNER JOIN tblICRepostCOGSGLEntriesBackup gdBackup
-				ON gd.intGLDetailId = gdBackup.intGLDetailId
+	FROM	tblGLDetail gd 
+			--INNER JOIN tblICRepostCOGSGLEntriesBackup gdBackup
+			--	ON gd.intGLDetailId = gdBackup.intGLDetailId
 	WHERE	gd.dblDebit = 0 
 			AND gd.dblCredit = 0 
+			AND gd.strCode IN ('IC', 'AR') 
 END 
 
 -- Rebuild the G/L Summary 
