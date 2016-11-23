@@ -46,9 +46,10 @@ SELECT   ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.st
                                                          dbo.tblSMTaxClass AS smTCl ON smTCd.intTaxClassId = smTCl.intTaxClassId
                                 WHERE     (smTCl.strTaxClass NOT LIKE '%(SST)%') AND (smTCl.strTaxClass NOT LIKE '%State Sales Tax%') AND (smTCl.strTaxClass <> 'SST') AND 
                                                          (cfTT.intTransactionId = cfTrans.intTransactionId)
-                                GROUP BY cfTT.intTransactionId) / cfTrans.dblQuantity AS dblTaxExceptSST, cfTrans.strPrintTimeStamp
-FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
-                         dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId LEFT OUTER JOIN
+                                GROUP BY cfTT.intTransactionId) / cfTrans.dblQuantity AS dblTaxExceptSST, cfTrans.strPrintTimeStamp, cfCardAccount.intCustomerId, 
+                         cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail
+FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
+                         dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
                          dbo.vyuCFCardAccount AS cfCardAccount ON arInv.intEntityCustomerId = cfCardAccount.intCustomerId AND cfTrans.intCardId = cfCardAccount.intCardId LEFT OUTER JOIN
                              (SELECT   arCustGroupDetail.intCustomerGroupDetailId, arCustGroupDetail.intCustomerGroupId, arCustGroupDetail.intEntityId, arCustGroupDetail.ysnSpecialPricing, 
@@ -69,6 +70,7 @@ FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                                 FROM         dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
                                 WHERE     (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTrans.intTransactionId = cfTransNetPrice.intTransactionId LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId LEFT OUTER JOIN
-                         dbo.tblCFDepartment AS cfDep ON cfDep.intDepartmentId = cfCardAccount.intCardId
+                         dbo.tblCFDepartment AS cfDep ON cfDep.intDepartmentId = cfCardAccount.intDepartmentId
+WHERE     (cfTrans.ysnPosted = 1)
 
 

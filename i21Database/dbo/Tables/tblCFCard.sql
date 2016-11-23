@@ -39,7 +39,7 @@
     [dtmLastModified]            DATETIME       NULL,
     [ysnCardForOwnUse]           BIT            NULL,
     [ysnIgnoreCardTransaction]   BIT            NULL,
-    [strComment]				 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL, 
+    [strComment]                 NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblCFCard] PRIMARY KEY CLUSTERED ([intCardId] ASC),
     CONSTRAINT [FK_tblCFCard_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCFCard_tblCFCardType] FOREIGN KEY ([intCardTypeId]) REFERENCES [dbo].[tblCFCardType] ([intCardTypeId]),
@@ -64,10 +64,6 @@ ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
 
 
 GO
-
-
-
-GO
 ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
 
 
@@ -88,6 +84,16 @@ GO
 
 
 GO
+ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
+
+
+
+
+GO
+
+
+
+GO
 
 
 
@@ -97,4 +103,9 @@ ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
 
 
 
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFCard_intCardId]
+    ON [dbo].[tblCFCard]([intCardId] ASC);
 
