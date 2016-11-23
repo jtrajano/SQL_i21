@@ -26,11 +26,11 @@ BEGIN
 	SELECT 
 		'B'
 		+ CAST(@year AS NVARCHAR(10))  --Position 2-5
-		+ CASE WHEN @corrected = 1 THEN '1' ELSE ' ' END
+		+ CASE WHEN @corrected = 1 THEN 'G' ELSE ' ' END
 		+ SPACE(4)
 		+ '1'
 		+ ISNULL(NULLIF(A.strFederalTaxId,''),SPACE(9)) -- 12-20
-		+ dbo.fnTrim(A.strVendorId) + SPACE(20 - LEN(dbo.fnTrim(A.strVendorId))) -- 21-40
+		+ CAST(A.intEntityVendorId AS NVARCHAR) + SPACE(20 - LEN(CAST(A.intEntityVendorId AS NVARCHAR))) -- 21-40
 		+ SPACE(4) -- 41-44
 		+ SPACE(10) -- 45-54
 		+ CASE WHEN A.strDirectSales IS NOT NULL THEN REPLICATE('0',192) -- ALL ZEROS WHEN DIRECT SALES SEE PAGE 53
@@ -118,7 +118,7 @@ BEGIN
 		+ REPLICATE('0',12)
 		+ REPLICATE('0',12) 
 		END-- 235-246
-		+ ' '
+		+ ' ' --Foreign Indicator
 		+ A.strPayeeName + SPACE(40 - LEN(A.strPayeeName))
 		+ SPACE(40) -- 288-327
 		+ SPACE(40) -- 328-367
