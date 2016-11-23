@@ -3,15 +3,20 @@
 WITH Refunds AS(
 SELECT	R.intRefundId,
 		R.intFiscalYearId,
+		RC.intCustomerId,
 		F.strFiscalYear,
-		dblTotalPurchases = (CASE WHEN RCatPCat.strPurchaseSale = 'Purchase' THEN RCatPCat.dblVolume ELSE 0 END),
-		dblTotalSales = (CASE WHEN RCatPCat.strPurchaseSale = 'Sale' THEN RCatPCat.dblVolume ELSE 0 END),
-		dbLessFWT = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
-		dblTotalCashRefund = RC.dblCashRefund,
-		dblLessServiceFee = R.dblServiceFee,
-		dblCheckAmount = CASE WHEN (RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) < 0) THEN 0 ELSE RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) END,
-		dblTotalVolume = RCatPCat.dblVolume,
-		dblTotalRefund = RC.dblRefundAmount,
+		dblTotalPurchases = SUM(CASE WHEN RC.strPurchaseSale = 'Purchase' THEN RC.dblVolume ELSE 0 END),
+		dblTotalSales = SUM(CASE WHEN RC.strPurchaseSale = 'Sale' THEN RC.dblVolume ELSE 0 END),
+		dblLessFWT = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN (CASE WHEN APV.ysnWithholding = 1 THEN RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) ELSE 0 END) ELSE 0 END),
+		dblTotalCashRefund = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN RC.dblCashRefund ELSE 0 END),
+		dblLessServiceFee = CASE WHEN RC.ysnEligibleRefund = 1 THEN R.dblServiceFee ELSE 0 END,
+		dblCheckAmount = SUM (CASE WHEN RC.ysnEligibleRefund = 1 THEN (CASE WHEN APV.ysnWithholding = 1 THEN
+					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblFedWithholdingPercentage/100))
+					ELSE
+					(RC.dblCashRefund)
+					END) ELSE 0 END) - CASE WHEN RC.ysnEligibleRefund = 1 THEN R.dblServiceFee ELSE 0 END,
+		dblTotalVolume = SUM(RC.dblVolume),
+		dblTotalRefund = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN RC.dblRefundAmount ELSE 0 END),
 		R.dtmRefundDate,
         R.dblMinimumRefund,
         R.dblServiceFee,
@@ -22,7 +27,19 @@ SELECT	R.intRefundId,
         R.ysnPrinted,
         R.intConcurrencyId
 FROM tblPATRefund R
-LEFT OUTER JOIN tblPATRefundCustomer RC
+LEFT OUTER JOIN (SELECT intRefundId,
+				RC.intRefundCustomerId,
+				RC.ysnEligibleRefund,
+				intCustomerId,
+				RCat.dblVolume,
+				PC.strPurchaseSale,
+				dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate,
+				dblCashRefund = (RCat.dblVolume * RCat.dblRefundRate) * (RC.dblCashPayout/100)
+		FROM tblPATRefundCustomer RC
+		INNER JOIN tblPATRefundCategory RCat
+			ON RCat.intRefundCustomerId = RC.intRefundCustomerId
+		INNER JOIN tblPATPatronageCategory PC
+			ON RCat.intPatronageCategoryId = PC.intPatronageCategoryId) RC
 	ON RC.intRefundId = R.intRefundId
 LEFT OUTER JOIN tblGLFiscalYear F
 	ON F.intFiscalYearId = R.intFiscalYearId
@@ -30,35 +47,30 @@ LEFT OUTER JOIN tblARCustomer C
 	ON C.intEntityCustomerId = RC.intCustomerId
 LEFT OUTER JOIN tblAPVendor APV
 	ON APV.intEntityVendorId = RC.intCustomerId
-LEFT OUTER JOIN (SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
-				intPatronageCategoryId = RCat.intPatronageCategoryId,
-				dblRefundRate = RCat.dblRefundRate,
-				strPurchaseSale = PCat.strPurchaseSale,
-				intRefundTypeId = RRD.intRefundTypeId,
-				strRefundType = RR.strRefundType,
-				strRefundDescription = RR.strRefundDescription,
-				dblCashPayout = RR.dblCashPayout,
-				ysnQualified = RR.ysnQualified,
-				dblVolume = RCat.dblVolume
-		FROM tblPATRefundCategory RCat
-		INNER JOIN tblPATPatronageCategory PCat
-			ON RCat.intPatronageCategoryId	 = PCat.intPatronageCategoryId
-		INNER JOIN tblPATRefundRateDetail RRD
-			ON RRD.intPatronageCategoryId = RCat.intPatronageCategoryId
-		INNER JOIN tblPATRefundRate RR
-			ON RR.intRefundTypeId = RRD.intRefundTypeId
-	) RCatPCat
-	ON RCatPCat.intRefundCustomerId = RC.intRefundCustomerId
+GROUP BY R.intRefundId,
+		R.intFiscalYearId,
+		RC.intCustomerId,
+		RC.ysnEligibleRefund,
+		F.strFiscalYear,
+		R.dtmRefundDate,
+        R.dblMinimumRefund,
+        R.dblServiceFee,
+        R.dblCashCutoffAmount,
+        R.dblFedWithholdingPercentage,
+        R.strDescription,
+        R.ysnPosted,
+        R.ysnPrinted,
+        R.intConcurrencyId
 )
 SELECT	intRefundId,
 		intFiscalYearId,
 		strFiscalYear,
 		dblTotalPurchases = SUM(dblTotalPurchases),
 		dblTotalSales = SUM(dblTotalSales),
-		dblTotalLessFWT = SUM(dbLessFWT),
+		dblTotalLessFWT = SUM(dblLessFWT),
 		dblTotalLessServiceFee = SUM(dblLessServiceFee),
 		dblTotalCashRefund = SUM(dblTotalCashRefund),
-		dblTotalCheckAmount = SUM(dblCheckAmount),
+		dblTotalCheckAmount = SUM(CASE WHEN dblCheckAmount > 0 THEN dblCheckAmount ELSE 0 END),
 		dblTotalVolume = SUM(dblTotalVolume),
 		dblTotalRefund = SUM(dblTotalRefund),
 		dtmRefundDate,
