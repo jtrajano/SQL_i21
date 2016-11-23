@@ -231,6 +231,7 @@ BEGIN TRY
 					, NULL
 					, NULL
 					, NULL
+					, 0
 				)
 
 				INSERT INTO tblTRQuoteDetailTax(
