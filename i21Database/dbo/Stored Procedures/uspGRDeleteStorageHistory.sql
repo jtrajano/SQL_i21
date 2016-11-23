@@ -8,6 +8,10 @@ BEGIN TRY
 	    IF  @strSourceType = 'InventoryShipment'
 		BEGIN
 			DELETE FROM tblGRStorageHistory Where intInventoryShipmentId=@IntSourceKey 
+		END
+		ELSE IF  @strSourceType = 'Voucher'
+		BEGIN
+			DELETE FROM tblGRStorageHistory Where intBillId=@IntSourceKey 
 		END 
 
 END TRY
