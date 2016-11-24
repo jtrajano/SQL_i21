@@ -213,6 +213,7 @@ BEGIN
 		(ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
 		strCustomerName
+	RETURN 1
 END
 
 IF @strLetterName = '30 Day Overdue Collection Letter'
@@ -234,6 +235,7 @@ BEGIN
 		(ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
 		strCustomerName
+	RETURN 1
 END
 
 IF @strLetterName = '60 Day Overdue Collection Letter'
@@ -254,6 +256,7 @@ BEGIN
 		(ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
 		strCustomerName
+	RETURN 1
 END
 
 IF @strLetterName = '90 Day Overdue Collection Letter'
@@ -274,6 +277,7 @@ BEGIN
 		(ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
 		strCustomerName
+	RETURN 1
 END
 
 IF @strLetterName = 'Final Overdue Collection Letter'
@@ -294,6 +298,7 @@ BEGIN
 		(ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
 		strCustomerName
+	RETURN 1
 END
 
 IF @strLetterName = 'Credit Suspension'
@@ -308,6 +313,7 @@ BEGIN
 		dblCreditLimit = 0 AND ysnActive = 1	
 	ORDER BY 
 		strName
+	RETURN 1
 END
 
 IF @strLetterName = 'Expired Credit Card'
@@ -321,6 +327,7 @@ BEGIN
 		ysnActive = 1
 	ORDER BY 
 		strName
+	RETURN 1
 END
 
 IF @strLetterName = 'Credit Review'
@@ -335,5 +342,19 @@ BEGIN
 		dblCreditLimit > 0 AND ysnActive = 1
 	ORDER BY 
 		strName
+	RETURN 1
 END
+
+
+SELECT 
+	intEntityCustomerId	= intEntityCustomerId 
+	,strCustomerNumber	= strCustomerNumber
+	,strCustomerName	= strName
+	,strLetterName		= @strLetterName
+FROM 
+	vyuARCustomer 
+WHERE 
+	ysnActive = 1
+ORDER BY 
+	strCustomerName
  
