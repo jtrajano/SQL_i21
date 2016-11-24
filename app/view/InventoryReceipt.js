@@ -252,6 +252,24 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 dataType: 'string',
                                                                 text: 'Vendor Name',
                                                                 flex: 1
+                                                            },
+                                                            {
+                                                                dataIndex: 'intCurrencyId',
+                                                                dataType: 'numeric',
+                                                                text: 'Currency Id',
+                                                                hidden: true
+                                                            },
+                                                            {
+                                                                dataIndex: 'intSubCurrencyCent',
+                                                                dataType: 'numeric',
+                                                                text: 'SubCurrency Cent',
+                                                                hidden: true
+                                                            },
+                                                            {
+                                                                dataIndex: 'intDefaultLocationId',
+                                                                dataType: 'numeric',
+                                                                text: 'Default Location Id',
+                                                                hidden: true
                                                             }
                                                         ],
                                                         enableDrillDown: true,
@@ -375,6 +393,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 dataIndex: 'intMainCurrencyId',
                                                                 dataType: 'numeric',
+                                                                hidden: true
+                                                            },
+                                                            {
+                                                                dataIndex: 'intSubCurrencyCent',
+                                                                dataType: 'numeric',
+                                                                text: 'SubCurrency Cent',
                                                                 hidden: true
                                                             }
                                                         ],
