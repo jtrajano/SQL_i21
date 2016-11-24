@@ -177,6 +177,7 @@
     <Folder Include="Scripts\Post-Deployment\IP" />
     <Folder Include="Scripts\Post-Deployment\TR\" />
     <Folder Include="Scripts\Post-Deployment\CRM" />
+    <Folder Include="Scripts\Post-Deployment\LG" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -4697,6 +4698,7 @@
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
+    <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
