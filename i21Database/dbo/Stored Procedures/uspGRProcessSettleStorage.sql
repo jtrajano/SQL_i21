@@ -753,6 +753,11 @@ BEGIN TRY
 		BEGIN
 			IF @dblStorageUnits <= @dblSpotUnits
 			BEGIN
+
+				UPDATE @SettleStorage
+				SET dblRemainingUnits = dblRemainingUnits -@dblStorageUnits
+				WHERE intSettleStorageKey = @SettleStorageKey
+
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @dblStorageUnits
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -816,6 +821,11 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				
+				UPDATE @SettleStorage
+				SET dblRemainingUnits = dblRemainingUnits - @dblSpotUnits
+				WHERE intSettleStorageKey = @SettleStorageKey
+
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @dblSpotUnits
 				WHERE intCustomerStorageId = @intCustomerStorageId
