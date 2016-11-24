@@ -1345,41 +1345,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colGrade',
-                                                                        width: 100,
-                                                                        dataIndex: 'strSubLocation',
-                                                                        text: 'Grade',
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intCommodityAttributeId',
-                                                                                    dataType: 'numeric',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intCommodityId',
-                                                                                    dataType: 'numeric',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strDescription',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Grade',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboGrade',
-                                                                            displayField: 'strDescription',
-                                                                            valueField: 'strDescription'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colDestWeights',
                                                                         width: 120,
                                                                         dataIndex: 'strDestinationWeights',
-                                                                        text: 'Destination Weights',
+                                                                        text: 'Weights',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -1404,8 +1373,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colDestGrades',
                                                                         width: 120,
-                                                                        dataIndex: 'strDestinationGrades',
-                                                                        text: 'Destination Grades',
+                                                                        dataIndex: 'intDestinationGradeId',
+                                                                        text: 'Grades',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [

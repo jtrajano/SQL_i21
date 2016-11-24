@@ -386,22 +386,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         ]
                     }
                 },
-                colGrade: {
-                    dataIndex: 'strGrade',
-                    editor: {
-                        readOnly: '{hasItemCommodity}',
-                        store: '{grade}',
-                        origValueField: 'intCommodityAttributeId',
-                        origUpdateField: 'intGradeId',
-                        defaultFilters: [
-                            {
-                                column: 'intCommodityId',
-                                value: '{grdInventoryShipment.selection.intCommodityId}',
-                                conjunction: 'and'
-                            }
-                        ]
-                    }
-                },
+                // Grade from Commodity Attributes is now obsolete and will be removed
+                // colGrade: {
+                //     dataIndex: 'strGrade',
+                //     editor: {
+                //         readOnly: '{hasItemCommodity}',
+                //         store: '{grade}',
+                //         origValueField: 'intCommodityAttributeId',
+                //         origUpdateField: 'intGradeId',
+                //         defaultFilters: [
+                //             {
+                //                 column: 'intCommodityId',
+                //                 value: '{grdInventoryShipment.selection.intCommodityId}',
+                //                 conjunction: 'and'
+                //             }
+                //         ]
+                //     }
+                // },
                 colDestGrades: {
                     dataIndex: 'strDestinationGrades',
                     editor: {
@@ -551,11 +552,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             column: 'intOwnershipType',
                             value: '{grdInventoryShipment.selection.intOwnershipType}',
                             conjunction: 'and'
-                        },{
-                            column: 'intGradeId',
-                            value: '{grdInventoryShipment.selection.intGradeId}',
-                            conjunction: 'and'
-                        },{
+                        },
+                        // Grade in Commodity Attributes is now obsolete and will be removed.
+                        // {
+                        //     column: 'intGradeId',
+                        //     value: '{grdInventoryShipment.selection.intGradeId}',
+                        //     conjunction: 'and'
+                        // },
+                        {
                             column: 'dblQty',
                             value: 0,
                             conjunction: 'and',
