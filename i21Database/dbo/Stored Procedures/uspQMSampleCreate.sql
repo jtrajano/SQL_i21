@@ -240,6 +240,7 @@ BEGIN TRY
 		,strMarks
 		,intCompanyLocationSubLocationId
 		,strCountry
+		,strComment
 		,intItemBundleId
 		,dtmBusinessDate
 		,intShiftId
@@ -293,6 +294,7 @@ BEGIN TRY
 		,strMarks
 		,intCompanyLocationSubLocationId
 		,strCountry
+		,strComment
 		,intItemBundleId
 		,@dtmBusinessDate
 		,@intShiftId
@@ -343,6 +345,7 @@ BEGIN TRY
 			,strMarks NVARCHAR(100)
 			,intCompanyLocationSubLocationId INT
 			,strCountry NVARCHAR(100)
+			,strComment NVARCHAR(MAX)
 			,intItemBundleId INT
 			,intLocationId INT
 			,intCreatedUserId INT

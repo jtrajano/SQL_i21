@@ -52,6 +52,7 @@ SELECT S.intSampleId
 	,CL.strLocationName
 	,IR.strReceiptNumber
 	,WO.strWorkOrderNo
+	,S.strComment
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1

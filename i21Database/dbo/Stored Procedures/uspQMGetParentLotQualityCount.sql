@@ -57,6 +57,7 @@ BEGIN TRY
   ,strUnitMeasure
   ,dtmDateCreated
   ,intSampleId
+  ,strComment
   ,' + @str + 
 		'FROM (  
   SELECT DENSE_RANK() OVER (ORDER BY S.intSampleId DESC) intRankNo  
@@ -76,6 +77,7 @@ BEGIN TRY
    ,S.intSampleId  
    ,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName  
    ,TR.strPropertyValue  
+   ,S.strComment
   FROM dbo.tblQMTestResult AS TR
   JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = TR.intProductValueId AND TR.intProductTypeId = 11 
   JOIN dbo.tblICLot AS L ON L.intParentLotId = PL.intParentLotId 

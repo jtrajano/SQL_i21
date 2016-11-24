@@ -76,6 +76,7 @@ BEGIN TRY
 			,L.strLoadNumber
 			,S.dtmSampleReceivedDate
 			,S.dtmSamplingEndDate
+			,S.strComment
 			,COUNT(*) OVER () AS intTotalCount
 		FROM dbo.tblCTContractHeader AS CH
 		JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId
@@ -103,6 +104,7 @@ BEGIN TRY
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strMarks]', 'S.strMarks')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strShipperCode]', 'E1.strEntityNo')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strShipperName]', 'E1.strName')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strComment]', 'S.strComment')
 		SET @SQL = @SQL + ' WHERE ' + @strFilterCriteria
 	END
 
@@ -129,6 +131,7 @@ BEGIN TRY
   ,intSampleId  
   ,dtmSampleReceivedDate
   ,dtmSamplingEndDate
+  ,strComment
   ,' + @str + 
 		'FROM (  
 	SELECT intTotalCount
@@ -150,6 +153,7 @@ BEGIN TRY
 		,CQ.intSampleId
 		,dtmSampleReceivedDate
 		,dtmSamplingEndDate
+		,CQ.strComment
 		,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName
 		,TR.strPropertyValue
 	FROM #ContractQuality CQ

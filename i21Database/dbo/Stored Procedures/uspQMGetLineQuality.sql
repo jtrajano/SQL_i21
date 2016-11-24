@@ -60,6 +60,7 @@ BEGIN TRY
   ,strSampleTypeName
   ,intSampleId
   ,dtmSampleReceivedDate
+  ,strComment
   ,' + @str + 
 		'FROM (  
   SELECT DENSE_RANK() OVER (ORDER BY S.intSampleId DESC) intRankNo  
@@ -77,6 +78,7 @@ BEGIN TRY
    ,S.dtmSampleReceivedDate
    ,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName  
    ,TR.strPropertyValue
+   ,S.strComment
     FROM tblQMTestResult AS TR
     JOIN tblMFWorkOrder W ON W.intWorkOrderId = TR.intProductValueId AND TR.intProductTypeId = 12
     JOIN tblICItem AS I ON I.intItemId = W.intItemId  

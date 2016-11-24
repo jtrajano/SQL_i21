@@ -49,6 +49,8 @@
 	[intLocationId] INT, 
 	[intInventoryReceiptId] INT, 
 	[intWorkOrderId] INT, 
+	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, 
+
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,

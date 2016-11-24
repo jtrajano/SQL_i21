@@ -45,7 +45,7 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb.dbo.##PropertyName') IS NOT NULL
 		DROP TABLE ##PropertyName
 
-	SELECT @SQL = 'CREATE TABLE ##PropertyName (strContractNumber INT,strName INT,strContractItemName INT,strBundleItemNo INT,strItemNo INT,strDescription INT,strLoadNumber INT,strContainerNumber INT,strMarks INT,strShipperCode INT,strShipperName INT,strSubLocationName INT,strSampleNumber INT,strSampleTypeName INT,strStatus INT,intSampleId INT,dtmSampleReceivedDate INT,dtmSamplingEndDate INT,' + @str + ')'
+	SELECT @SQL = 'CREATE TABLE ##PropertyName (strContractNumber INT,strName INT,strContractItemName INT,strBundleItemNo INT,strItemNo INT,strDescription INT,strLoadNumber INT,strContainerNumber INT,strMarks INT,strShipperCode INT,strShipperName INT,strSubLocationName INT,strSampleNumber INT,strSampleTypeName INT,strStatus INT,intSampleId INT,dtmSampleReceivedDate INT,dtmSamplingEndDate INT,strComment INT,' + @str + ')'
 
 	EXEC sp_executesql @SQL
 

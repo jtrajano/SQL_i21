@@ -111,6 +111,7 @@ BEGIN TRY
 		,strMarks = x.strMarks
 		,intCompanyLocationSubLocationId = x.intCompanyLocationSubLocationId
 		,strCountry = x.strCountry
+		,strComment = x.strComment
 		,intItemBundleId = x.intItemBundleId
 		,intWorkOrderId = x.intWorkOrderId
 		,intLastModifiedUserId = x.intLastModifiedUserId
@@ -155,6 +156,7 @@ BEGIN TRY
 			,strMarks NVARCHAR(100)
 			,intCompanyLocationSubLocationId INT
 			,strCountry NVARCHAR(100)
+			,strComment NVARCHAR(MAX)
 			,intItemBundleId INT
 			,intWorkOrderId INT
 			,intLastModifiedUserId INT

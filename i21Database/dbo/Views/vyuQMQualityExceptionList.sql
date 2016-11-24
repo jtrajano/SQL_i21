@@ -32,6 +32,7 @@ SELECT TR.intTestResultId
 		SELECT strShipperName
 		FROM dbo.fnQMGetShipperName(S.strMarks)
 		) AS strShipperName
+	,S.strComment
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
