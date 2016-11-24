@@ -5361,7 +5361,7 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intVendorId',",
+                                                                    "\t\tdataIndex: 'intEntityVendorId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\ttext: 'Vendor Id',",
                                                                     "\t\thidden: true",
