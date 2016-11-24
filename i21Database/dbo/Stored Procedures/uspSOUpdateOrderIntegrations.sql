@@ -22,6 +22,6 @@ IF @ForDelete = 1 OR @ForUnship = 1
 		EXEC dbo.[uspMFUnReservePickListBySalesOrder] @SalesOrderId
 	END
 
-DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @SalesOrderId AND [strTransactionType] = 'Order'
+DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @SalesOrderId AND [strTransactionType] IN ('Order', 'Quote')
 
 GO

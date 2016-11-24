@@ -21,10 +21,11 @@ BEGIN
 			INNER JOIN
 				tblSOSalesOrder SO
 					ON SOSOD.intSalesOrderId = SO.intSalesOrderId
+					AND SO.strTransactionType = 'Order'
 			INNER JOIN
 				tblARTransactionDetail ARTD
 					ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId 
-					AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
+					AND SOSOD.intSalesOrderId = ARTD.intTransactionId
 			INNER JOIN
 				tblICItem ICI
 					ON ARTD.[intItemId] = ICI.[intItemId]
@@ -40,6 +41,10 @@ BEGIN
 			LEFT OUTER JOIN
 				tblSOSalesOrderDetail SOSOD
 					ON SOSODC.[intSalesOrderDetailId] = SOSOD.[intSalesOrderDetailId]
+			LEFT OUTER JOIN
+				tblSOSalesOrder SO
+					ON SO.[intSalesOrderId] = SOSOD.[intSalesOrderId] 
+					AND SO.strTransactionType = 'Order'
 			WHERE 
 				ISNULL(SOSOD.[intSalesOrderDetailId],0) = 0
 
@@ -67,7 +72,7 @@ BEGIN
 		tblSOSalesOrderDetail SOSOD
 	INNER JOIN
 		tblSOSalesOrder SO
-			ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]
+			ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]			
 	INNER JOIN
 		vyuARGetItemComponents ARGIC
 			ON SOSOD.[intItemId] = ARGIC.[intItemId] 
@@ -77,6 +82,7 @@ BEGIN
 			ON SOSOD.[intItemId] = ICI.[intItemId]
 	WHERE 
 		SO.[intSalesOrderId] = @SalesOrderId
+		AND SO.[strTransactionType] = 'Order'
 		AND SOSOD.[intSalesOrderDetailId] NOT IN (SELECT [intTransactionDetailId] FROM tblARTransactionDetail WHERE [intTransactionId] = @SalesOrderId)
 		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0
 		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')
@@ -117,6 +123,7 @@ BEGIN
 			ON SOSOD.[intItemId] = ICI.[intItemId]
 	WHERE 
 		SO.[intSalesOrderId] = @SalesOrderId
+		AND SO.[strTransactionType] = 'Order'
 		AND SOSOD.[intItemId] <> ARTD.[intItemId]
 		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0	
 		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')					

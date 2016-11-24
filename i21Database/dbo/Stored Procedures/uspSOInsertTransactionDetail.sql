@@ -3,7 +3,7 @@
 AS
 BEGIN
 
-	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @SalesOrderId AND [strTransactionType] = 'Order'
+	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @SalesOrderId AND [strTransactionType] IN ('Order', 'Quote')
 
 	INSERT INTO [tblARTransactionDetail](
 		 [intTransactionDetailId]
@@ -24,7 +24,7 @@ BEGIN
 	SELECT
 		 [intTransactionDetailId]			= SOD.[intSalesOrderDetailId]
 		,[intTransactionId]					= SOD.[intSalesOrderId]
-		,[strTransactionType]				= 'Order'
+		,[strTransactionType]				= SO.[strTransactionType]
 		,[strTransactionStatus]				= SO.[strOrderStatus]
 		,[intItemId]						= SOD.[intItemId] 
 		,[intItemUOMId]						= SOD.[intItemUOMId] 
@@ -44,5 +44,6 @@ BEGIN
 			ON SOD.[intSalesOrderId] = SO.[intSalesOrderId] 
 	WHERE
 		SOD.[intSalesOrderId] = @SalesOrderId
+		AND SO.[strTransactionType] IN ('Order', 'Quote')
 	
 END
