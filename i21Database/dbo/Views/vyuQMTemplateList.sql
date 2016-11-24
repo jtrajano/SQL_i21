@@ -9,6 +9,7 @@ SELECT DISTINCT P.intProductId
 	,P.ysnActive
 	,LS.strSecondaryStatus AS strApprovalLotStatus
 	,LS1.strSecondaryStatus AS strRejectionLotStatus
+	,'' AS strUnitMeasure
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -43,6 +44,7 @@ SELECT DISTINCT P.intProductId
 	,P.ysnActive
 	,LS.strSecondaryStatus AS strApprovalLotStatus
 	,LS1.strSecondaryStatus AS strRejectionLotStatus
+	,UOM.strUnitMeasure
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -65,6 +67,7 @@ JOIN tblICItem II ON II.intItemId = P.intProductValueId
 	AND II.strStatus = 'Active'
 LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = P.intApprovalLotStatusId
 LEFT JOIN tblICLotStatus LS1 ON LS1.intLotStatusId = P.intRejectionLotStatusId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = P.intUnitMeasureId
 WHERE P.intProductTypeId = 2
 
 UNION ALL
@@ -78,6 +81,7 @@ SELECT DISTINCT P.intProductId
 	,P.ysnActive
 	,'' AS strApprovalLotStatus
 	,'' AS strRejectionLotStatus
+	,'' AS strUnitMeasure
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -110,6 +114,7 @@ SELECT DISTINCT P.intProductId
 	,P.ysnActive
 	,'' AS strApprovalLotStatus
 	,'' AS strRejectionLotStatus
+	,'' AS strUnitMeasure
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -142,6 +147,7 @@ SELECT DISTINCT P.intProductId
 	,P.ysnActive
 	,'' AS strApprovalLotStatus
 	,'' AS strRejectionLotStatus
+	,'' AS strUnitMeasure
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName

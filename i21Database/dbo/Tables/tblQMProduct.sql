@@ -9,6 +9,7 @@
 	[ysnActive] BIT NOT NULL CONSTRAINT [DF_tblQMProduct_ysnActive] DEFAULT 1,
 	[intApprovalLotStatusId] INT, 
 	[intRejectionLotStatusId] INT, 
+	[intUnitMeasureId] INT, 
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProduct_dtmCreated] DEFAULT GetDate(),
@@ -18,5 +19,6 @@
 	CONSTRAINT [PK_tblQMProduct] PRIMARY KEY ([intProductId]), 
 	CONSTRAINT [FK_tblQMProduct_tblQMProductType] FOREIGN KEY ([intProductTypeId]) REFERENCES [tblQMProductType]([intProductTypeId]),
 	CONSTRAINT [FK_tblQMProduct_tblICLotStatus_intApprovalLotStatusId] FOREIGN KEY ([intApprovalLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]),
-	CONSTRAINT [FK_tblQMProduct_tblICLotStatus_intRejectionLotStatusId] FOREIGN KEY ([intRejectionLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId])
+	CONSTRAINT [FK_tblQMProduct_tblICLotStatus_intRejectionLotStatusId] FOREIGN KEY ([intRejectionLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]),
+	CONSTRAINT [FK_tblQMProduct_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
