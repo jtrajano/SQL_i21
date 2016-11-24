@@ -61,6 +61,7 @@
     <Folder Include="Properties" />
     <Folder Include="Fake Data" />
     <Folder Include="Integrations" />
+    <Folder Include="Increase SPs" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -100,6 +101,11 @@
     <Build Include="Integrations\test shipment with other charges.sql" />
     <Build Include="Fake Data\Fake Vendor.sql" />
     <Build Include="Fake Data\Fake Shipment.sql" />
+    <Build Include="Fake Data\Fake Item Stock.sql" />
+    <Build Include="Fake Data\Fake Item Pricing.sql" />
+    <Build Include="Increase SPs\test uspICIncreaseInTransitOutBoundQty and Stock UOM for decrease qty.sql" />
+    <Build Include="Fake Data\Fake Item Stock UOM.sql" />
+    <Build Include="Fake Data\Fake Item UOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
