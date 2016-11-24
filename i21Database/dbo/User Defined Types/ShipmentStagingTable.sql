@@ -55,6 +55,8 @@
 	strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	intGradeId INT NULL,
 	intDiscountSchedule INT NULL,
+	intDestinationGradeId INT NULL,
+	intDestinationWeightId INT NULL,
 	
 	-- Fields for Internal Use Only
 	intHeaderId INT NULL,

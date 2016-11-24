@@ -43,6 +43,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, S
 	, dblLineTotal = ISNULL(dblQtyShipped, 0) * ISNULL(dblPrice, 0)
 	, intGradeId = NULL
 	, strGrade = NULL
+	, strDestinationGrades = NULL
+	, intDestinationGradeId = NULL
+	, strDestinationWeights = NULL
+	, intDestinationWeightId = NULL
 FROM vyuSOSalesOrderDetail SODetail INNER JOIN vyuSOSalesOrderSearch SO
 		ON SODetail.intSalesOrderId = SO.intSalesOrderId
 	LEFT JOIN dbo.tblICItemLocation DefaultFromItemLocation
