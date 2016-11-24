@@ -1,18 +1,14 @@
-﻿CREATE PROCEDURE testi21Database.[test shipment results table]
+if exists (select * from sys.procedures where object_id = object_id('testIC.test shipment shipment number'))
+	drop procedure [testIC].[test shipment shipment number];
+GO
+CREATE PROCEDURE testIC.[test shipment shipment number]
 AS
 BEGIN
-	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
-	BEGIN 
-		CREATE TABLE #tmpAddItemShipmentResult (
-			intInventoryShipmentId INT
-		)
-	END
-
 	-- Fake data
 	BEGIN 
-		EXEC [testi21Database].[Fake IC Starting Numbers]; 
+		EXEC [testIC].[Fake IC Starting Numbers]; 
 	END 
-
+	
 	DECLARE 
 		@ExpectedShipmentNumber VARCHAR(50) = 'T-INVSHP-1001',
 		@ActualShipmentNumber VARCHAR(50),
@@ -50,7 +46,7 @@ BEGIN
 		intEntityCustomerId = 8, -- Apple Spice Sales
 		dtmShipDate = GETDATE(), -- Today
 		intShipFromLocationId = 2, -- Fort Wayne
-		intShipToLocationId = 4, -- Apple Spice
+		intShipToLocationId = 638, -- Apple Spice
 		intFreightTermId = 3, -- Pickup
 		strBOLNumber = 'BOL-1',
 		strSourceScreenName = 'Inventory Shipment',
@@ -66,11 +62,6 @@ BEGIN
 		intLineNo = NULL
 
 	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @intUserId
-
-	IF NOT EXISTS(SELECT * FROM #tmpAddItemShipmentResult)
-	BEGIN
-		EXEC tSQLt.Fail 'No results returned by the temp table #tblAddItemShipment'
-	END
 
 	SELECT TOP 1 @ActualShipmentNumber = strShipmentNumber
 	FROM tblICInventoryShipment

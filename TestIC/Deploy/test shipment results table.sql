@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE testi21Database.[test shipment results table]
+if exists (select * from sys.procedures where object_id = object_id('testIC.test shipment results table'))
+	drop procedure [testIC].[test shipment results table];
+GO
+CREATE PROCEDURE testIC.[test shipment results table]
 AS
 BEGIN
 	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
@@ -10,7 +13,7 @@ BEGIN
 
 	-- Fake data
 	BEGIN 
-		EXEC [testi21Database].[Fake IC Starting Numbers]; 
+		EXEC [testIC].[Fake IC Starting Numbers]; 
 	END 
 
 	DECLARE 

@@ -1,20 +1,11 @@
-﻿CREATE PROCEDURE testi21Database.[test shipment results table]
+if exists (select * from sys.procedures where object_id = object_id('testIC.test shipment if item values are correct'))
+	drop procedure [testIC].[test shipment if item values are correct];
+GO
+CREATE PROCEDURE testIC.[test shipment if item values are correct]
 AS
 BEGIN
-	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
-	BEGIN 
-		CREATE TABLE #tmpAddItemShipmentResult (
-			intInventoryShipmentId INT
-		)
-	END
-
-	-- Fake data
-	BEGIN 
-		EXEC [testi21Database].[Fake IC Starting Numbers]; 
-	END 
-
 	DECLARE 
-		@ExpectedShipmentNumber VARCHAR(50) = 'T-INVSHP-1001',
+		@ExpectedShipmentNumber VARCHAR(50) = 'IS-75',
 		@ActualShipmentNumber VARCHAR(50),
 		@intUserId INT = 1,
 		@ShipmentEntries ShipmentStagingTable,
@@ -50,14 +41,14 @@ BEGIN
 		intEntityCustomerId = 8, -- Apple Spice Sales
 		dtmShipDate = GETDATE(), -- Today
 		intShipFromLocationId = 2, -- Fort Wayne
-		intShipToLocationId = 4, -- Apple Spice
+		intShipToLocationId = 638, -- Apple Spice
 		intFreightTermId = 3, -- Pickup
 		strBOLNumber = 'BOL-1',
 		strSourceScreenName = 'Inventory Shipment',
 		
 		intItemId = 2, 
 		intOwnershipType = @OWNERSHIP_TYPE_Storage,
-		dblQuantity = 8.5,
+		dblQuantity = 10, -- Quantity should be greater than zero.
 		intItemUOMId = 3,
 		intItemLotGroup = 1,
 
@@ -66,15 +57,4 @@ BEGIN
 		intLineNo = NULL
 
 	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @intUserId
-
-	IF NOT EXISTS(SELECT * FROM #tmpAddItemShipmentResult)
-	BEGIN
-		EXEC tSQLt.Fail 'No results returned by the temp table #tblAddItemShipment'
-	END
-
-	SELECT TOP 1 @ActualShipmentNumber = strShipmentNumber
-	FROM tblICInventoryShipment
-	ORDER BY intInventoryShipmentId DESC
-
-	EXEC tSQLt.AssertEqualsString @ExpectedShipmentNumber, @ActualShipmentNumber, N'Error creating shipment.'
 END

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test shipment from purchase orders]
+﻿CREATE PROCEDURE testIC.[test shipment from purchase orders]
 AS
 BEGIN
 	CREATE TABLE expected_tblICInventoryShipmentItem (

@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE testi21Database.[test shipment from purchase orders]
+if exists (select * from sys.procedures where object_id = object_id('testIC.test shipment from purchase orders'))
+	drop procedure [testIC].[test shipment from purchase orders];
+GO
+CREATE PROCEDURE testIC.[test shipment from purchase orders]
 AS
 BEGIN
 	CREATE TABLE expected_tblICInventoryShipmentItem (
