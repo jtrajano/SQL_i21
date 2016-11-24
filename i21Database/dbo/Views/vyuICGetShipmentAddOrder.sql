@@ -45,6 +45,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, dblLineTotal = ISNULL(dblQtyShipped, 0) * ISNULL(dblPrice, 0)
 		, intGradeId = NULL
 		, strGrade = NULL
+		, strDestinationGrades = NULL
+		, intDestinationGradeId = NULL
+		, strDestinationWeights = NULL
+		, intDestinationWeightId = NULL
 	FROM vyuSOSalesOrderDetail SODetail INNER JOIN vyuSOSalesOrderSearch SO
 			ON SODetail.intSalesOrderId = SO.intSalesOrderId
 		LEFT JOIN dbo.tblICItemLocation DefaultFromItemLocation
@@ -102,6 +106,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblSeqPrice, 0)
 		, intGradeId = NULL
 		, strGrade = NULL
+		, strDestinationGrades = ContractView.strGrade
+		, intDestinationGradeId = ContractView.intGradeId
+		, strDestinationWeights = ContractView.strWeight
+		, intDestinationWeightId = ContractView.intWeightId
 	FROM vyuCTContractDetailView ContractView
 	WHERE ysnAllowedToShow = 1
 		AND strContractType = 'Sale'
@@ -151,6 +159,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblCashPrice, 0)
 		, intGradeId = NULL
 		, strGrade = NULL
+		, strDestinationGrades = NULL
+		, intDestinationGradeId = NULL
+		, strDestinationWeights = NULL
+		, intDestinationWeightId = NULL
 	FROM vyuLGDeliveryOpenPickLots PickLot
 	LEFT JOIN vyuLGDeliveryOpenPickLotDetails PickLotDetail ON PickLotDetail.intPickLotHeaderId = PickLot.intPickLotHeaderId
 	WHERE PickLot.ysnShipped = 0)

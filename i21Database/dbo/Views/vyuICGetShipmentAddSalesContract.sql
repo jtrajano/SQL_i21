@@ -43,6 +43,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityI
 	, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblSeqPrice, 0)
 	, intGradeId = NULL
 	, strGrade = NULL
+	, strDestinationGrades = ContractView.strGrade
+	, intDestinationGradeId = ContractView.intGradeId
+	, strDestinationWeights = ContractView.strWeight
+	, intDestinationWeightId = ContractView.intWeightId
 FROM vyuCTContractDetailView ContractView
 WHERE ysnAllowedToShow = 1
 	AND strContractType = 'Sale'

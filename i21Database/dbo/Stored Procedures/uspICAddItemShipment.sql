@@ -78,6 +78,8 @@ INSERT INTO @ShipmentEntries(
 		, intGradeId
 		, intDiscountSchedule
 		, intStorageScheduleTypeId
+		, intDestinationGradeId
+		, intDestinationWeightId
 )
 SELECT 
 		intOrderType
@@ -123,6 +125,8 @@ SELECT
 		, intGradeId
 		, intDiscountSchedule
 		, intStorageScheduleTypeId
+		, intDestinationGradeId
+		, intDestinationWeightId
 FROM @Entries
 
 -- 2. Charges
@@ -355,6 +359,8 @@ INSERT INTO tblICInventoryShipmentItem(
 	, intDiscountSchedule
 	, intConcurrencyId
 	, intStorageScheduleTypeId
+	, intDestinationGradeId
+	, intDestinationWeightId
 )
 SELECT 
 	se.intShipmentId
@@ -375,7 +381,9 @@ SELECT
 	, se.intGradeId
 	, se.intDiscountSchedule
 	, 1
-	, intStorageScheduleTypeId
+	, se.intStorageScheduleTypeId
+	, se.intDestinationGradeId
+	, se.intDestinationWeightId
 FROM @ShipmentEntries se
 
 -- Insert shipment charges

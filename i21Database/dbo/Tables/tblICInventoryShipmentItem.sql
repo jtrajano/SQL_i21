@@ -29,6 +29,8 @@ Type the overview for the table here.
 		[intDockDoorId] INT NULL, 
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intGradeId] INT NULL,
+		[intDestinationGradeId] INT NULL,
+		[intDestinationWeightId] INT NULL,
 		[intDiscountSchedule] INT NULL,
 		[intStorageScheduleTypeId] INT NULL,
 		[intSort] INT NULL, 
@@ -42,7 +44,9 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblGRDiscountId] FOREIGN KEY ([intDiscountSchedule]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblCTWeightGrade_Grades] FOREIGN KEY ([intDestinationGradeId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblCTWeightGrade_Weights] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId])
 	)
 
 	GO

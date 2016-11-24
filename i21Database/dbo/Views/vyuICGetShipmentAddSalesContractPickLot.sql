@@ -43,6 +43,10 @@ SELECT DISTINCT intKey = CAST(ROW_NUMBER() OVER(ORDER BY PickLot.intCompanyLocat
 	, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblCashPrice, 0)
 	, intGradeId = NULL
 	, strGrade = NULL
+	, strDestinationGrades = NULL
+	, intDestinationGradeId = NULL
+	, strDestinationWeights = NULL
+	, intDestinationWeightId = NULL
 FROM vyuLGDeliveryOpenPickLots PickLot
 	LEFT JOIN vyuLGDeliveryOpenPickLotDetails PickLotDetail ON PickLotDetail.intPickLotHeaderId = PickLot.intPickLotHeaderId
 WHERE PickLot.ysnShipped = 0
