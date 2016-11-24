@@ -16,7 +16,7 @@ FROM            dbo.tblGLAccount INNER JOIN
                          dbo.tblGLAccountUnit ON dbo.tblGLAccount.intAccountUnitId = dbo.tblGLAccountUnit.intAccountUnitId LEFT OUTER JOIN
 						 dbo.tblGLCOACrossReference ON dbo.tblGLAccount.intAccountId = dbo.tblGLCOACrossReference.inti21Id LEFT OUTER JOIN
                          dbo.tblGLAccountGroup ON dbo.tblGLAccount.intAccountGroupId = dbo.tblGLAccountGroup.intAccountGroupId LEFT OUTER JOIN
-						 dbo.tblGLCrossReferenceMapping ON tblGLAccount.intAccountId = dbo.tblGLCrossReferenceMapping.inti21AccountId  
+						 dbo.tblGLCrossReferenceMapping ON tblGLAccount.intAccountId = dbo.tblGLCrossReferenceMapping.intAccountId  
 						 and dbo.tblGLCrossReferenceMapping.intAccountSystemId in (select [intDefaultVisibleOldAccountSystemId] from tblGLCompanyPreferenceOption)
 WHERE        (dbo.tblGLAccountStructure.strType = 'Primary')
 GO
