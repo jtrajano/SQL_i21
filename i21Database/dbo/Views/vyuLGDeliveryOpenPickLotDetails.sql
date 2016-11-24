@@ -1,6 +1,6 @@
 CREATE VIEW vyuLGDeliveryOpenPickLotDetails
 AS
-SELECT PL.intPickLotDetailId,
+SELECT DISTINCT PL.intPickLotDetailId,
   PL.intPickLotHeaderId,
   PLH.strCustomer,
   PLH.intCustomerEntityId,
@@ -56,7 +56,9 @@ SELECT PL.intPickLotDetailId,
   dblItemUOMConv = (SELECT IU.dblUnitQty from tblICItemUOM IU WHERE IU.intItemUOMId = Lot.intItemUOMId),
   dblWeightItemUOMConv = (SELECT IU.dblUnitQty from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId),
   PLH.strCustomerNo, 
-  Receipt.strWarehouseRefNo
+  Receipt.strWarehouseRefNo,
+  L.strLoadNumber,
+  ysnDelivered = CONVERT(BIT,(CASE WHEN ISNULL(L.strLoadNumber,'') = '' THEN 0 ELSE 1 END))
 
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
@@ -73,4 +75,5 @@ JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocati
 LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-WHERE PL.intPickLotDetailId NOT IN (SELECT IsNull(LD.intPickLotDetailId, 0) FROM tblLGLoadDetail LD)
+LEFT JOIN tblLGLoadDetail LD ON LD.intPickLotDetailId = PL.intPickLotDetailId
+LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
