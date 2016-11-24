@@ -1107,6 +1107,34 @@ SET @queryResultAct = CURSOR FOR
 		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
 		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
 
+	union all
+
+		select
+		intTransactionId = null
+		,strType = 'Task'
+		,strSubject = tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject
+		,intEntityContactId = tblHDTicket.intCustomerContactId
+		,intEntityId = tblHDTicket.intCustomerId
+		,dtmStartDate = tblHDTicket.dtmDueDate
+		,dtmEndDate = tblHDTicket.dtmDueDate
+		,dtmStartTime = tblHDTicket.dtmDueDate
+		,dtmEndTime = tblHDTicket.dtmDueDate
+		,strStatus = (select top 1 tblHDTicketStatus.strStatus from tblHDTicketStatus where tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId)
+		,strPriority = (select top 1 (case when tblHDTicketPriority.strPriority = 'Sev 1 - Blocker' then 'High' when tblHDTicketPriority.strPriority = 'Sev 2 - Major' then 'High' else 'Normal' end) from tblHDTicketPriority where tblHDTicketPriority.intTicketPriorityId = tblHDTicket.intTicketPriorityId)
+		,strCategory = (select top 1 tblHDTicketType.strType from tblHDTicketType where tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId)
+		,intAssignedTo = tblHDTicket.intAssignedToEntity
+		,strActivityNo = (select top 1 tblSMStartingNumber.strPrefix from tblSMStartingNumber where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity')
+		,strDetails = '<p>'+tblHDTicket.strSubject+'</p>'
+		,ysnPublic = 1
+		,dtmCreated = tblHDTicket.dtmCreated
+		,dtmModified = tblHDTicket.dtmLastModified
+		,intCreatedBy = tblHDTicket.intCreatedUserEntityId
+		,intConcurrencyId = 1
+		,intTicketId = tblHDTicket.intTicketId
+	from tblHDTicket
+	where tblHDTicket.strType = 'CRM'
+		and tblHDTicket.intTicketId not in (select distinct tblHDProjectTask.intTicketId from tblHDProjectTask)
+
 OPEN @queryResultAct
 FETCH NEXT
 FROM
@@ -1313,6 +1341,27 @@ SET @queryResultComment = CURSOR FOR
 		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
 		and tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
 
+	union all
+
+	select
+		strComment = '<p>Comment : '+(case when tblHDTicketComment.ysnSent = 1 then 'Sent' else '<font color="red">Draft</font>' end)+'</p>'+(case when tblHDTicketComment.ysnEncoded = 1 then dbo.fnHDDecodeComment(substring(tblHDTicketComment.strComment,4,len(tblHDTicketComment.strComment)-3)) else tblHDTicketComment.strComment end)+'</br>'
+		,strScreen = ''
+		,strRecordNo = ''
+		,dtmAdded = tblHDTicketComment.dtmCreated
+		,dtmModified = tblHDTicketComment.dtmLastModified
+		,ysnPublic = convert(bit,1)
+		,ysnEdited = null
+		,intEntityId = tblHDTicketComment.intCreatedUserEntityId
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
+		,intConcurrencyId = 1
+		,tblHDTicketComment.intTicketCommentId
+	from tblHDTicket, tblCRMOpportunityActivityTmp, tblHDTicketComment
+	where tblHDTicket.strType = 'CRM'
+		and tblHDTicket.intTicketId not in (select distinct tblHDProjectTask.intTicketId from tblHDProjectTask)
+		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
+		and tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
+
 OPEN @queryResultComment
 FETCH NEXT
 FROM
@@ -1454,6 +1503,27 @@ SET @queryResultNote = CURSOR FOR
 	where tblHDProject.strType = 'CRM'
 		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
 		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
+		and tblHDTicketNote.intTicketId = tblHDTicket.intTicketId
+
+	union all
+
+	select
+		strComment = '<p>Internal Note:</p><p>'+tblHDTicketNote.strNote+'</p></br>'
+		,strScreen = ''
+		,strRecordNo = ''
+		,dtmAdded = tblHDTicketNote.dtmCreated
+		,dtmModified = tblHDTicketNote.dtmCreated
+		,ysnPublic = convert(bit,1)
+		,ysnEdited = null
+		,intEntityId = tblHDTicketNote.intCreatedUserEntityId
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
+		,intConcurrencyId = 1
+		,tblHDTicketNote.intTicketNoteId
+	from tblHDTicket, tblCRMOpportunityActivityTmp, tblHDTicketNote
+	where tblHDTicket.strType = 'CRM'
+		and tblHDTicket.intTicketId not in (select distinct tblHDProjectTask.intTicketId from tblHDProjectTask)
 		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
 		and tblHDTicketNote.intTicketId = tblHDTicket.intTicketId
 
