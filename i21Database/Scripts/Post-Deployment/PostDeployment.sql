@@ -372,5 +372,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Common
 :r .\Common\ErrorMessages.sql 
 
+--Logistics
+:R .\LG\1_MasterTables.sql
 
 print 'END POST DEPLOYMENT'

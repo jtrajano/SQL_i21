@@ -177,6 +177,7 @@
     <Folder Include="Scripts\Post-Deployment\IP" />
     <Folder Include="Scripts\Post-Deployment\TR\" />
     <Folder Include="Scripts\Post-Deployment\CRM" />
+    <Folder Include="Scripts\Post-Deployment\LG" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -4690,6 +4691,7 @@
     <None Include="Scripts\Post-Deployment\CRM\SplitCRMData.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
+    <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
