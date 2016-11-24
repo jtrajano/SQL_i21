@@ -96,7 +96,7 @@ BEGIN TRY
 			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
 			AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0	
 
-		EXEC dbo.uspICGetItemsForInventoryShipment @intSourceTransactionId, @strSourceType
+		--EXEC dbo.uspICGetItemsForInventoryShipment @intSourceTransactionId, @strSourceType
 
 	-- Validate the items to shipment 
 	EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
