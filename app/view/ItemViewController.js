@@ -509,7 +509,7 @@ Ext.define('Inventory.view.ItemViewController', {
             txtUserGroupFee: '{current.dblUserGroupFee}',
             txtWgtTolerance: '{current.dblWeightTolerance}',
             txtOverReceiveTolerance: '{current.dblOverReceiveTolerance}',
-            txtMaintenanceCalculationMethod: {
+            cboMaintenanceCalculationMethod: {
                 value: '{current.strMaintenanceCalculationMethod}',
                 store: '{maintenancaCalculationMethods}'
             },

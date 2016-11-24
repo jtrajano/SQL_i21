@@ -1458,7 +1458,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'txtMaintenanceCalculationMethod',
+                                                                        itemId: 'cboMaintenanceCalculationMethod',
                                                                         fieldLabel: 'Maintenance Calculation Method',
                                                                         labelWidth: 125,
                                                                         displayField: 'strDescription',
