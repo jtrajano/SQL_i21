@@ -132,6 +132,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.intStorageScheduleTypeId).HasColumnName("intStorageScheduleTypeId");
+            this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
+            this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
 
             this.HasMany(p => p.tblICInventoryShipmentItemLots)
                 .WithRequired(p => p.tblICInventoryShipmentItem)
@@ -282,6 +284,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(37, 12);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.strDestinationWeights).HasColumnName("strDestinationWeights");
+            this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
             this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.strStorageTypeDescription).HasColumnName("strStorageTypeDescription");
         }
@@ -399,6 +403,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.strDestinationWeights).HasColumnName("strDestinationWeights");
+            this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
+            this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
+            this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
         }
     }
 
@@ -453,6 +461,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.strDestinationWeights).HasColumnName("strDestinationWeights");
+            this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
+            this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
+            this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
         }
     }
 
@@ -507,6 +519,14 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.strDestinationWeights).HasColumnName("strDestinationWeights");
+            this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
+            this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
+            this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
+            this.Property(t => t.strDestinationWeights).HasColumnName("strDestinationWeights");
+            this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
+            this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
+            this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
         }
     }
 
@@ -561,6 +581,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.strDestinationWeights).HasColumnName("strDestinationWeights");
+            this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
+            this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
+            this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
         }
     }
 }

@@ -198,6 +198,8 @@ namespace iRely.Inventory.Model
         public int? intDiscountSchedule { get; set; }
         public int? intSort { get; set; }
         public int? intStorageScheduleTypeId  { get; set; }
+        public int? intDestinationGradeId { get; set; }
+        public int? intDestinationWeightId { get; set; }
 
         private string _orderNumber;
         [NotMapped]
@@ -561,6 +563,45 @@ namespace iRely.Inventory.Model
                 _grade = value;
             }
         }
+        private string _destinationWeights;
+        [NotMapped]
+        public string strDestinationWeights
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_destinationWeights))
+                    if (vyuICGetInventoryShipmentItem != null)
+                        return vyuICGetInventoryShipmentItem.strDestinationWeights;
+                    else
+                        return null;
+                else
+                    return _destinationWeights;
+            }
+            set
+            {
+                _destinationWeights = value;
+            }
+        }
+        private string _destinationGrades;
+        [NotMapped]
+        public string strDestinationGrades
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_destinationGrades))
+                    if (vyuICGetInventoryShipmentItem != null)
+                        return vyuICGetInventoryShipmentItem.strDestinationGrades;
+                    else
+                        return null;
+                else
+                    return _destinationGrades;
+            }
+            set
+            {
+                _destinationGrades = value;
+            }
+        }
+
         private int? _commodityId;
         [NotMapped]
         public int? intCommodityId
@@ -688,6 +729,8 @@ namespace iRely.Inventory.Model
         public decimal? dblLineTotal { get; set; }
         public int? intGradeId { get; set; }
         public string strGrade { get; set; }
+        public string strDestinationGrades { get; set; }
+        public string strDestinationWeights { get; set; }
         public int? intDiscountSchedule { get; set; }
         public string strDiscountSchedule { get; set; }
         public string strStorageTypeDescription { get; set; }
@@ -1184,6 +1227,10 @@ namespace iRely.Inventory.Model
         public decimal? dblLineTotal { get; set; }
         public int? intGradeId { get; set; }
         public int? strGrade { get; set; }
+        public int? intDestinationGradeId { get; set; }
+        public int? intDestinationWeightId { get; set; }
+        public string strDestinationWeights { get; set; }
+        public string strDestinationGrades { get; set; }
     }
 
     public class vyuICGetShipmentAddSalesContractPickLot
@@ -1230,6 +1277,10 @@ namespace iRely.Inventory.Model
         public decimal? dblLineTotal { get; set; }
         public int? intGradeId { get; set; }
         public int? strGrade { get; set; }
+        public int? intDestinationGradeId { get; set; }
+        public int? intDestinationWeightId { get; set; }
+        public string strDestinationWeights { get; set; }
+        public string strDestinationGrades { get; set; }
     }
 
     public class vyuICGetShipmentAddSalesContract
@@ -1276,6 +1327,10 @@ namespace iRely.Inventory.Model
         public decimal? dblLineTotal { get; set; }
         public int? intGradeId { get; set; }
         public int? strGrade { get; set; }
+        public int? intDestinationGradeId { get; set; }
+        public int? intDestinationWeightId { get; set; }
+        public string strDestinationWeights { get; set; }
+        public string strDestinationGrades { get; set; }
     }
 
     public class vyuICGetShipmentAddSalesOrder
@@ -1322,5 +1377,9 @@ namespace iRely.Inventory.Model
         public decimal? dblLineTotal { get; set; }
         public int? intGradeId { get; set; }
         public int? strGrade { get; set; }
+        public int? intDestinationGradeId { get; set; }
+        public int? intDestinationWeightId { get; set; }
+        public string strDestinationWeights { get; set; }
+        public string strDestinationGrades { get; set; }
     }
 }

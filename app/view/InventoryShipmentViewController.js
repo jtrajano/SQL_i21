@@ -402,6 +402,58 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         ]
                     }
                 },
+                colDestGrades: {
+                    dataIndex: 'strDestinationGrades',
+                    editor: {
+                        readOnly: '{readOnlyWeightsGrades}',
+                        store: '{weightsGrades}',
+                        origValueField: 'intWeightGradeId',
+                        origUpdateField: 'intDestinationGradeId',
+                        defaultFilters: [
+                            {
+                                column: 'ysnActive',
+                                value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'ysnGrade',
+                                value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intOriginDest',
+                                value: 2,
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
+                colDestWeights: {
+                    dataIndex: 'strDestinationWeights',
+                    editor: {
+                        readOnly: '{readOnlyWeightsGrades}',
+                        store: '{weightsGrades}',
+                        origValueField: 'intWeightGradeId',
+                        origUpdateField: 'intDestinationWeightId',
+                        defaultFilters: [
+                            {
+                                column: 'ysnActive',
+                                value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'ysnWeight',
+                                value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intOriginDest',
+                                value: 2,
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
                 colDiscountSchedule: 'strDiscountSchedule',
                 colOwnershipType: {
                     hidden: '{checkHideOwnershipType}',
@@ -2221,6 +2273,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', width: 100, dataType: 'float' },
                 { dataIndex: 'intGradeId', text: 'Grade Id', width: 100, dataType: 'numeric', hidden: true },
                 { dataIndex: 'strGrade', text: 'Grade', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intDestinationGradeId', text: 'Destination Grade Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strDestinationGrades', text: 'Destination Grades', width: 100, dataType: 'string' },
+                { dataIndex: 'intDestinationWeightId', text: 'Destination Weight Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strDestinationWeights', text: 'Destination Weights', width: 100, dataType: 'string' },
 
                 {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
@@ -2367,6 +2423,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strLotTracking: order.get('strLotTracking'),
                                 dblItemUOMConv: order.get('dblItemUOMConv'),
                                 dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
+                                intDestinationGradeId: order.get('intDestinationGradeId'),
+                                strDestinationGrades: order.get('strDestinationGrades'),
+                                intDestinationWeightId: order.get('intDestinationWeightId'),
+                                strDestinationWeights: order.get('strDestinationWeights'),
+
                                 strOwnershipType: 'Own',
                                 intOwnershipType: 1,
                                 intCommodityId: order.get('intCommodityId')

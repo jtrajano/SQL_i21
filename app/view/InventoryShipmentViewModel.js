@@ -24,7 +24,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'ContractManagement.store.ContractHeaderViewBuffered',
         'i21.store.CurrencyBuffered',
         'Logistics.store.PickedLots',
-        'Grain.store.BufferedStorageTakeOut'
+        'Grain.store.BufferedStorageTakeOut',
+        'ContractManagement.store.WeightGradeBuffered'
     ],
 
     data: {
@@ -32,6 +33,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
     },
 
     stores: {
+        weightsGrades: {
+            type: 'ctweightgradebuffered'
+        },
         orderTypes: {
             autoLoad: true,
             data: [
@@ -411,6 +415,14 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         hideShipToCompanyLocation: function(get) {
             if (get('current.intOrderType') === 3) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
+        readOnlyWeightsGrades: function(get) {
+            if (get('current.intOrderType') === 4) {
                 return false;
             }
             else {
