@@ -11,6 +11,7 @@
 	[dblAppliedInvoiceDetailAmount]	NUMERIC(18, 6)					NULL		DEFAULT 0,
 	[ysnApplied]					BIT								NULL		DEFAULT 0,
 	[ysnPosted]						BIT								NULL		DEFAULT 0,
+	[intRowNumber]					INT								NULL,
 	[intConcurrencyId]				INT								NOT NULL	CONSTRAINT [DF_tblARPrepaidAndCredit_intConcurrencyId] DEFAULT ((0)),
 	CONSTRAINT [PK_tblARPrepaidAndCredit_intPrepaidAndCreditId] PRIMARY KEY CLUSTERED ([intPrepaidAndCreditId] ASC),
 	CONSTRAINT [FK_tblARPrepaidAndCredit_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice]([intInvoiceId]) ON DELETE CASCADE,
