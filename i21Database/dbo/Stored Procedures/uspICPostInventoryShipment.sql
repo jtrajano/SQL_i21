@@ -769,6 +769,7 @@ BEGIN
 			, intTransactionId
 			, strTransactionId
 			, intTransactionTypeId
+			, intFOBPointId
 	)
 	SELECT	
 			intItemId				= si.intItemId
@@ -791,6 +792,7 @@ BEGIN
 			,intTransactionId		= s.intInventoryShipmentId
 			,strTransactionId		= s.strShipmentNumber
 			,intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
+			,intFobPointId			= @intFobPointId
 	FROM    tblICInventoryShipment s INNER JOIN  tblICInventoryShipmentItem si
 				ON s.intInventoryShipmentId = si.intInventoryShipmentId    
 			INNER JOIN tblICItemLocation il
