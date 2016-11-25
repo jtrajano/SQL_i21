@@ -5518,7 +5518,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var task = new Ext.util.DelayedTask(function () {
                             me.doOtherChargeTaxCalculate(win);
                         });
-                        task.delay(1500);
+                        task.delay(1700);
                     }
                 },
                 failure: function (response) {
