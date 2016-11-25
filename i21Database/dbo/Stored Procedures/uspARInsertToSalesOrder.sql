@@ -266,5 +266,5 @@ BEGIN
 
 	SET @NewSalesOrderId = @NewTransactionId
 
-	EXEC dbo.[uspSOUpdateCommitted] @NewSalesOrderId, 0
+	EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, 0, @UserId
 END
