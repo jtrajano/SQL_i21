@@ -138,6 +138,12 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
     },
 
     formulas: {
+        destinationWeightsDisabled: function(get) {
+            if(!(get('current.ysnShipmentRequired') && get('current.strTransferType') === 'Location to Location') || get('current.ysnPosted') || get('current.intSourceType') === 1) {
+                return true;
+            }
+            return false;
+        },
         checkTransportPosting: function(get) {
             if (get('current.intSourceType') === 3) {
                 return true;

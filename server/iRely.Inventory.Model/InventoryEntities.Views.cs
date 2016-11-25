@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsabf628c9385da39b14de26fbc05f962b11e8567b778776cfbeeba40a7172737e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets46f7c1c672da06e2aa1d2781fa3e1efbd8c57ebfda549e3c7c876412b45b9e1d))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsabf628c9385da39b14de26fbc05f962b11e8567b778776cfbeeba40a7172737e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets46f7c1c672da06e2aa1d2781fa3e1efbd8c57ebfda549e3c7c876412b45b9e1d : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "abf628c9385da39b14de26fbc05f962b11e8567b778776cfbeeba40a7172737e"; }
+            get { return "46f7c1c672da06e2aa1d2781fa3e1efbd8c57ebfda549e3c7c876412b45b9e1d"; }
         }
 
         /// <summary>
@@ -3152,7 +3152,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransferDetail
-        [CodeFirstDatabaseSchema.tblICInventoryTransferDetail](T1.tblICInventoryTransferDetail_intInventoryTransferDetailId, T1.tblICInventoryTransferDetail_intInventoryTransferId, T1.tblICInventoryTransferDetail_intSourceId, T1.tblICInventoryTransferDetail_intItemId, T1.tblICInventoryTransferDetail_intLotId, T1.tblICInventoryTransferDetail_intFromSubLocationId, T1.tblICInventoryTransferDetail_intToSubLocationId, T1.tblICInventoryTransferDetail_intFromStorageLocationId, T1.tblICInventoryTransferDetail_intToStorageLocationId, T1.tblICInventoryTransferDetail_dblQuantity, T1.tblICInventoryTransferDetail_intItemUOMId, T1.tblICInventoryTransferDetail_intItemWeightUOMId, T1.tblICInventoryTransferDetail_dblGrossWeight, T1.tblICInventoryTransferDetail_dblTareWeight, T1.tblICInventoryTransferDetail_intNewLotId, T1.tblICInventoryTransferDetail_strNewLotId, T1.tblICInventoryTransferDetail_dblCost, T1.tblICInventoryTransferDetail_intTaxCodeId, T1.tblICInventoryTransferDetail_dblFreightRate, T1.tblICInventoryTransferDetail_dblFreightAmount, T1.tblICInventoryTransferDetail_intOwnershipType, T1.tblICInventoryTransferDetail_intSort, T1.tblICInventoryTransferDetail_dblOriginalAvailableQty, T1.tblICInventoryTransferDetail_dblOriginalStorageQty, T1.tblICInventoryTransferDetail_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryTransferDetail](T1.tblICInventoryTransferDetail_intInventoryTransferDetailId, T1.tblICInventoryTransferDetail_intInventoryTransferId, T1.tblICInventoryTransferDetail_intSourceId, T1.tblICInventoryTransferDetail_intItemId, T1.tblICInventoryTransferDetail_intLotId, T1.tblICInventoryTransferDetail_intFromSubLocationId, T1.tblICInventoryTransferDetail_intToSubLocationId, T1.tblICInventoryTransferDetail_intFromStorageLocationId, T1.tblICInventoryTransferDetail_intToStorageLocationId, T1.tblICInventoryTransferDetail_dblQuantity, T1.tblICInventoryTransferDetail_intItemUOMId, T1.tblICInventoryTransferDetail_intItemWeightUOMId, T1.tblICInventoryTransferDetail_dblGrossWeight, T1.tblICInventoryTransferDetail_dblTareWeight, T1.tblICInventoryTransferDetail_intNewLotId, T1.tblICInventoryTransferDetail_strNewLotId, T1.tblICInventoryTransferDetail_dblCost, T1.tblICInventoryTransferDetail_intTaxCodeId, T1.tblICInventoryTransferDetail_dblFreightRate, T1.tblICInventoryTransferDetail_dblFreightAmount, T1.tblICInventoryTransferDetail_intOwnershipType, T1.tblICInventoryTransferDetail_intSort, T1.tblICInventoryTransferDetail_dblOriginalAvailableQty, T1.tblICInventoryTransferDetail_dblOriginalStorageQty, T1.tblICInventoryTransferDetail_ysnWeights, T1.tblICInventoryTransferDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferDetailId AS tblICInventoryTransferDetail_intInventoryTransferDetailId, 
@@ -3179,6 +3179,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSort AS tblICInventoryTransferDetail_intSort, 
             T.dblOriginalAvailableQty AS tblICInventoryTransferDetail_dblOriginalAvailableQty, 
             T.dblOriginalStorageQty AS tblICInventoryTransferDetail_dblOriginalStorageQty, 
+            T.ysnWeights AS tblICInventoryTransferDetail_ysnWeights, 
             T.intConcurrencyId AS tblICInventoryTransferDetail_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICInventoryTransferDetails AS T
@@ -3193,7 +3194,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryTransferDetail
-        [CodeFirstDatabaseSchema.vyuICGetInventoryTransferDetail](T1.vyuICGetInventoryTransferDetail_intInventoryTransferDetailId, T1.vyuICGetInventoryTransferDetail_intInventoryTransferId, T1.vyuICGetInventoryTransferDetail_intFromLocationId, T1.vyuICGetInventoryTransferDetail_intToLocationId, T1.vyuICGetInventoryTransferDetail_strTransferNo, T1.vyuICGetInventoryTransferDetail_intSourceId, T1.vyuICGetInventoryTransferDetail_strSourceNumber, T1.vyuICGetInventoryTransferDetail_intItemId, T1.vyuICGetInventoryTransferDetail_strItemNo, T1.vyuICGetInventoryTransferDetail_strItemDescription, T1.vyuICGetInventoryTransferDetail_strLotTracking, T1.vyuICGetInventoryTransferDetail_intCommodityId, T1.vyuICGetInventoryTransferDetail_strLotNumber, T1.vyuICGetInventoryTransferDetail_intLifeTime, T1.vyuICGetInventoryTransferDetail_strLifeTimeType, T1.vyuICGetInventoryTransferDetail_intFromSubLocationId, T1.vyuICGetInventoryTransferDetail_strFromSubLocationName, T1.vyuICGetInventoryTransferDetail_intToSubLocationId, T1.vyuICGetInventoryTransferDetail_strToSubLocationName, T1.vyuICGetInventoryTransferDetail_intFromStorageLocationId, T1.vyuICGetInventoryTransferDetail_strFromStorageLocationName, T1.vyuICGetInventoryTransferDetail_intToStorageLocationId, T1.vyuICGetInventoryTransferDetail_strToStorageLocationName, T1.vyuICGetInventoryTransferDetail_intItemUOMId, T1.vyuICGetInventoryTransferDetail_strUnitMeasure, T1.vyuICGetInventoryTransferDetail_dblItemUOMCF, T1.vyuICGetInventoryTransferDetail_intWeightUOMId, T1.vyuICGetInventoryTransferDetail_strWeightUOM, T1.vyuICGetInventoryTransferDetail_dblWeightUOMCF, T1.vyuICGetInventoryTransferDetail_strTaxCode, T1.vyuICGetInventoryTransferDetail_strAvailableUOM, T1.vyuICGetInventoryTransferDetail_dblLastCost, T1.vyuICGetInventoryTransferDetail_dblOnHand, T1.vyuICGetInventoryTransferDetail_dblOnOrder, T1.vyuICGetInventoryTransferDetail_dblReservedQty, T1.vyuICGetInventoryTransferDetail_dblAvailableQty, T1.vyuICGetInventoryTransferDetail_dblQuantity, T1.vyuICGetInventoryTransferDetail_intOwnershipType, T1.vyuICGetInventoryTransferDetail_strOwnershipType, T1.vyuICGetInventoryTransferDetail_ysnPosted)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryTransferDetail](T1.vyuICGetInventoryTransferDetail_intInventoryTransferDetailId, T1.vyuICGetInventoryTransferDetail_intInventoryTransferId, T1.vyuICGetInventoryTransferDetail_intFromLocationId, T1.vyuICGetInventoryTransferDetail_intToLocationId, T1.vyuICGetInventoryTransferDetail_strTransferNo, T1.vyuICGetInventoryTransferDetail_intSourceId, T1.vyuICGetInventoryTransferDetail_strSourceNumber, T1.vyuICGetInventoryTransferDetail_intItemId, T1.vyuICGetInventoryTransferDetail_strItemNo, T1.vyuICGetInventoryTransferDetail_strItemDescription, T1.vyuICGetInventoryTransferDetail_strLotTracking, T1.vyuICGetInventoryTransferDetail_intCommodityId, T1.vyuICGetInventoryTransferDetail_strLotNumber, T1.vyuICGetInventoryTransferDetail_intLifeTime, T1.vyuICGetInventoryTransferDetail_strLifeTimeType, T1.vyuICGetInventoryTransferDetail_intFromSubLocationId, T1.vyuICGetInventoryTransferDetail_strFromSubLocationName, T1.vyuICGetInventoryTransferDetail_intToSubLocationId, T1.vyuICGetInventoryTransferDetail_strToSubLocationName, T1.vyuICGetInventoryTransferDetail_intFromStorageLocationId, T1.vyuICGetInventoryTransferDetail_strFromStorageLocationName, T1.vyuICGetInventoryTransferDetail_intToStorageLocationId, T1.vyuICGetInventoryTransferDetail_strToStorageLocationName, T1.vyuICGetInventoryTransferDetail_intItemUOMId, T1.vyuICGetInventoryTransferDetail_strUnitMeasure, T1.vyuICGetInventoryTransferDetail_dblItemUOMCF, T1.vyuICGetInventoryTransferDetail_intWeightUOMId, T1.vyuICGetInventoryTransferDetail_strWeightUOM, T1.vyuICGetInventoryTransferDetail_dblWeightUOMCF, T1.vyuICGetInventoryTransferDetail_strTaxCode, T1.vyuICGetInventoryTransferDetail_strAvailableUOM, T1.vyuICGetInventoryTransferDetail_dblLastCost, T1.vyuICGetInventoryTransferDetail_dblOnHand, T1.vyuICGetInventoryTransferDetail_dblOnOrder, T1.vyuICGetInventoryTransferDetail_dblReservedQty, T1.vyuICGetInventoryTransferDetail_dblAvailableQty, T1.vyuICGetInventoryTransferDetail_dblQuantity, T1.vyuICGetInventoryTransferDetail_intOwnershipType, T1.vyuICGetInventoryTransferDetail_strOwnershipType, T1.vyuICGetInventoryTransferDetail_ysnPosted, T1.vyuICGetInventoryTransferDetail_ysnWeights)
     FROM (
         SELECT 
             T.intInventoryTransferDetailId AS vyuICGetInventoryTransferDetail_intInventoryTransferDetailId, 
@@ -3236,6 +3237,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intOwnershipType AS vyuICGetInventoryTransferDetail_intOwnershipType, 
             T.strOwnershipType AS vyuICGetInventoryTransferDetail_strOwnershipType, 
             T.ysnPosted AS vyuICGetInventoryTransferDetail_ysnPosted, 
+            T.ysnWeights AS vyuICGetInventoryTransferDetail_ysnWeights, 
             True AS _from0
         FROM InventoryEntities.vyuICGetInventoryTransferDetails AS T
     ) AS T1");
@@ -6324,7 +6326,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransferDetails
-        [iRely.Inventory.Model.tblICInventoryTransferDetail](T1.tblICInventoryTransferDetail_intInventoryTransferDetailId, T1.tblICInventoryTransferDetail_intInventoryTransferId, T1.tblICInventoryTransferDetail_intSourceId, T1.tblICInventoryTransferDetail_intItemId, T1.tblICInventoryTransferDetail_intLotId, T1.tblICInventoryTransferDetail_intFromSubLocationId, T1.tblICInventoryTransferDetail_intToSubLocationId, T1.tblICInventoryTransferDetail_intFromStorageLocationId, T1.tblICInventoryTransferDetail_intToStorageLocationId, T1.tblICInventoryTransferDetail_dblQuantity, T1.tblICInventoryTransferDetail_intItemUOMId, T1.tblICInventoryTransferDetail_intItemWeightUOMId, T1.tblICInventoryTransferDetail_dblGrossWeight, T1.tblICInventoryTransferDetail_dblTareWeight, T1.tblICInventoryTransferDetail_intNewLotId, T1.tblICInventoryTransferDetail_strNewLotId, T1.tblICInventoryTransferDetail_dblCost, T1.tblICInventoryTransferDetail_intTaxCodeId, T1.tblICInventoryTransferDetail_dblFreightRate, T1.tblICInventoryTransferDetail_dblFreightAmount, T1.tblICInventoryTransferDetail_intOwnershipType, T1.tblICInventoryTransferDetail_intSort, T1.tblICInventoryTransferDetail_dblOriginalAvailableQty, T1.tblICInventoryTransferDetail_dblOriginalStorageQty, T1.tblICInventoryTransferDetail_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryTransferDetail](T1.tblICInventoryTransferDetail_intInventoryTransferDetailId, T1.tblICInventoryTransferDetail_intInventoryTransferId, T1.tblICInventoryTransferDetail_intSourceId, T1.tblICInventoryTransferDetail_intItemId, T1.tblICInventoryTransferDetail_intLotId, T1.tblICInventoryTransferDetail_intFromSubLocationId, T1.tblICInventoryTransferDetail_intToSubLocationId, T1.tblICInventoryTransferDetail_intFromStorageLocationId, T1.tblICInventoryTransferDetail_intToStorageLocationId, T1.tblICInventoryTransferDetail_dblQuantity, T1.tblICInventoryTransferDetail_intItemUOMId, T1.tblICInventoryTransferDetail_intItemWeightUOMId, T1.tblICInventoryTransferDetail_dblGrossWeight, T1.tblICInventoryTransferDetail_dblTareWeight, T1.tblICInventoryTransferDetail_intNewLotId, T1.tblICInventoryTransferDetail_strNewLotId, T1.tblICInventoryTransferDetail_dblCost, T1.tblICInventoryTransferDetail_intTaxCodeId, T1.tblICInventoryTransferDetail_dblFreightRate, T1.tblICInventoryTransferDetail_dblFreightAmount, T1.tblICInventoryTransferDetail_intOwnershipType, T1.tblICInventoryTransferDetail_intSort, T1.tblICInventoryTransferDetail_dblOriginalAvailableQty, T1.tblICInventoryTransferDetail_dblOriginalStorageQty, T1.tblICInventoryTransferDetail_ysnWeights, T1.tblICInventoryTransferDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferDetailId AS tblICInventoryTransferDetail_intInventoryTransferDetailId, 
@@ -6351,6 +6353,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSort AS tblICInventoryTransferDetail_intSort, 
             T.dblOriginalAvailableQty AS tblICInventoryTransferDetail_dblOriginalAvailableQty, 
             T.dblOriginalStorageQty AS tblICInventoryTransferDetail_dblOriginalStorageQty, 
+            T.ysnWeights AS tblICInventoryTransferDetail_ysnWeights, 
             T.intConcurrencyId AS tblICInventoryTransferDetail_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICInventoryTransferDetail AS T
@@ -6365,7 +6368,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryTransferDetails
-        [iRely.Inventory.Model.vyuICGetInventoryTransferDetail](T1.vyuICGetInventoryTransferDetail_intInventoryTransferDetailId, T1.vyuICGetInventoryTransferDetail_intInventoryTransferId, T1.vyuICGetInventoryTransferDetail_intFromLocationId, T1.vyuICGetInventoryTransferDetail_intToLocationId, T1.vyuICGetInventoryTransferDetail_strTransferNo, T1.vyuICGetInventoryTransferDetail_intSourceId, T1.vyuICGetInventoryTransferDetail_strSourceNumber, T1.vyuICGetInventoryTransferDetail_intItemId, T1.vyuICGetInventoryTransferDetail_strItemNo, T1.vyuICGetInventoryTransferDetail_strItemDescription, T1.vyuICGetInventoryTransferDetail_strLotTracking, T1.vyuICGetInventoryTransferDetail_intCommodityId, T1.vyuICGetInventoryTransferDetail_strLotNumber, T1.vyuICGetInventoryTransferDetail_intLifeTime, T1.vyuICGetInventoryTransferDetail_strLifeTimeType, T1.vyuICGetInventoryTransferDetail_intFromSubLocationId, T1.vyuICGetInventoryTransferDetail_strFromSubLocationName, T1.vyuICGetInventoryTransferDetail_intToSubLocationId, T1.vyuICGetInventoryTransferDetail_strToSubLocationName, T1.vyuICGetInventoryTransferDetail_intFromStorageLocationId, T1.vyuICGetInventoryTransferDetail_strFromStorageLocationName, T1.vyuICGetInventoryTransferDetail_intToStorageLocationId, T1.vyuICGetInventoryTransferDetail_strToStorageLocationName, T1.vyuICGetInventoryTransferDetail_intItemUOMId, T1.vyuICGetInventoryTransferDetail_strUnitMeasure, T1.vyuICGetInventoryTransferDetail_dblItemUOMCF, T1.vyuICGetInventoryTransferDetail_intWeightUOMId, T1.vyuICGetInventoryTransferDetail_strWeightUOM, T1.vyuICGetInventoryTransferDetail_dblWeightUOMCF, T1.vyuICGetInventoryTransferDetail_strTaxCode, T1.vyuICGetInventoryTransferDetail_strAvailableUOM, T1.vyuICGetInventoryTransferDetail_dblLastCost, T1.vyuICGetInventoryTransferDetail_dblOnHand, T1.vyuICGetInventoryTransferDetail_dblOnOrder, T1.vyuICGetInventoryTransferDetail_dblReservedQty, T1.vyuICGetInventoryTransferDetail_dblAvailableQty, T1.vyuICGetInventoryTransferDetail_dblQuantity, T1.vyuICGetInventoryTransferDetail_intOwnershipType, T1.vyuICGetInventoryTransferDetail_strOwnershipType, T1.vyuICGetInventoryTransferDetail_ysnPosted)
+        [iRely.Inventory.Model.vyuICGetInventoryTransferDetail](T1.vyuICGetInventoryTransferDetail_intInventoryTransferDetailId, T1.vyuICGetInventoryTransferDetail_intInventoryTransferId, T1.vyuICGetInventoryTransferDetail_intFromLocationId, T1.vyuICGetInventoryTransferDetail_intToLocationId, T1.vyuICGetInventoryTransferDetail_strTransferNo, T1.vyuICGetInventoryTransferDetail_intSourceId, T1.vyuICGetInventoryTransferDetail_strSourceNumber, T1.vyuICGetInventoryTransferDetail_intItemId, T1.vyuICGetInventoryTransferDetail_strItemNo, T1.vyuICGetInventoryTransferDetail_strItemDescription, T1.vyuICGetInventoryTransferDetail_strLotTracking, T1.vyuICGetInventoryTransferDetail_intCommodityId, T1.vyuICGetInventoryTransferDetail_strLotNumber, T1.vyuICGetInventoryTransferDetail_intLifeTime, T1.vyuICGetInventoryTransferDetail_strLifeTimeType, T1.vyuICGetInventoryTransferDetail_intFromSubLocationId, T1.vyuICGetInventoryTransferDetail_strFromSubLocationName, T1.vyuICGetInventoryTransferDetail_intToSubLocationId, T1.vyuICGetInventoryTransferDetail_strToSubLocationName, T1.vyuICGetInventoryTransferDetail_intFromStorageLocationId, T1.vyuICGetInventoryTransferDetail_strFromStorageLocationName, T1.vyuICGetInventoryTransferDetail_intToStorageLocationId, T1.vyuICGetInventoryTransferDetail_strToStorageLocationName, T1.vyuICGetInventoryTransferDetail_intItemUOMId, T1.vyuICGetInventoryTransferDetail_strUnitMeasure, T1.vyuICGetInventoryTransferDetail_dblItemUOMCF, T1.vyuICGetInventoryTransferDetail_intWeightUOMId, T1.vyuICGetInventoryTransferDetail_strWeightUOM, T1.vyuICGetInventoryTransferDetail_dblWeightUOMCF, T1.vyuICGetInventoryTransferDetail_strTaxCode, T1.vyuICGetInventoryTransferDetail_strAvailableUOM, T1.vyuICGetInventoryTransferDetail_dblLastCost, T1.vyuICGetInventoryTransferDetail_dblOnHand, T1.vyuICGetInventoryTransferDetail_dblOnOrder, T1.vyuICGetInventoryTransferDetail_dblReservedQty, T1.vyuICGetInventoryTransferDetail_dblAvailableQty, T1.vyuICGetInventoryTransferDetail_dblQuantity, T1.vyuICGetInventoryTransferDetail_intOwnershipType, T1.vyuICGetInventoryTransferDetail_strOwnershipType, T1.vyuICGetInventoryTransferDetail_ysnPosted, T1.vyuICGetInventoryTransferDetail_ysnWeights)
     FROM (
         SELECT 
             T.intInventoryTransferDetailId AS vyuICGetInventoryTransferDetail_intInventoryTransferDetailId, 
@@ -6408,6 +6411,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intOwnershipType AS vyuICGetInventoryTransferDetail_intOwnershipType, 
             T.strOwnershipType AS vyuICGetInventoryTransferDetail_strOwnershipType, 
             T.ysnPosted AS vyuICGetInventoryTransferDetail_ysnPosted, 
+            T.ysnWeights AS vyuICGetInventoryTransferDetail_ysnWeights, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryTransferDetail AS T
     ) AS T1");

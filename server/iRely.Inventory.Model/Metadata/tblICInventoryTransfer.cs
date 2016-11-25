@@ -90,7 +90,7 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
         public decimal? dblOriginalAvailableQty { get; set; }
         public decimal? dblOriginalStorageQty { get; set; }
-
+        public bool? ysnWeights { get; set; }
         private string _sourceNo;
         [NotMapped]
         public string strSourceNumber
@@ -402,6 +402,7 @@ namespace iRely.Inventory.Model
         public int? intOwnershipType { get; set; }
         public string strOwnershipType { get; set; }
         public bool? ysnPosted { get; set; }
+        public bool? ysnWeights { get; set; }
 
         public tblICInventoryTransferDetail tblICInventoryTransferDetail { get; set; }
     }
