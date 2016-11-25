@@ -34,7 +34,8 @@ BEGIN
 		 @Posted			= ISNULL(ARI.[ysnPosted],0)
 		,@InvoiceId			= ARI.[intInvoiceId]
 		,@InvoiceNumber		= ARI.[strInvoiceNumber]  
-		,@TransactionType	= ARI.[strTransactionType] 
+		,@TransactionType	= ARI.[strTransactionType]
+		,@AccountId         = CASE WHEN ARI.[strTransactionType] =  'Debit Memo' THEN ARID.intAccountId ELSE NULL END
 	FROM
 		tblARInvoice ARI
 	INNER JOIN
@@ -46,46 +47,51 @@ BEGIN
 			
 	IF @Posted = 1
 		BEGIN
-			
-			INSERT INTO @returntable([intAccountId])
-			SELECT TOP 1
-				GLD.[intAccountId]
-			FROM
-				tblGLDetail GLD
-			WHERE
-				GLD.[intJournalLineNo] = @InvoiceDetailId
-				AND ISNULL(GLD.[ysnIsUnposted],0) <> @Posted
-				AND GLD.[intTransactionId] = @InvoiceId
-				AND GLD.[strTransactionId] = @InvoiceNumber
-				AND GLD.[strCode] = 'AR'
-				AND (
-						(GLD.dblCredit > @ZeroDecimal AND @TransactionType IN ('Invoice', 'Cash'))
-					OR
-						(GLD.dblDebit > @ZeroDecimal AND @TransactionType NOT IN ('Invoice', 'Cash'))
-					)
-				AND (
-						RTRIM(LTRIM(ISNULL(@SoftWareItemType, ''))) = ''
-					OR
-						(
-							(
-								RTRIM(LTRIM(ISNULL(@SoftWareItemType, ''))) = 'Maintenance' 
-							AND
-								EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'Maintenance Sales')
+			IF @TransactionType <> 'Debit Memo'
+				BEGIN
+					INSERT INTO @returntable([intAccountId])
+					SELECT TOP 1
+						GLD.[intAccountId]
+					FROM
+						tblGLDetail GLD
+					WHERE
+						GLD.[intJournalLineNo] = @InvoiceDetailId
+						AND ISNULL(GLD.[ysnIsUnposted],0) <> @Posted
+						AND GLD.[intTransactionId] = @InvoiceId
+						AND GLD.[strTransactionId] = @InvoiceNumber
+						AND GLD.[strCode] = 'AR'
+						AND (
+								(GLD.dblCredit > @ZeroDecimal AND @TransactionType IN ('Invoice', 'Cash'))
+							OR
+								(GLD.dblDebit > @ZeroDecimal AND @TransactionType NOT IN ('Invoice', 'Cash'))
 							)
-						OR
-							(
-								RTRIM(LTRIM(ISNULL(@SoftWareItemType, ''))) = 'License' 
-							AND
+						AND (
+								RTRIM(LTRIM(ISNULL(@SoftWareItemType, ''))) = ''
+							OR
 								(
-									EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'General')
+									(
+										RTRIM(LTRIM(ISNULL(@SoftWareItemType, ''))) = 'Maintenance' 
+									AND
+										EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'Maintenance Sales')
+									)
 								OR
-									EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'Sales Account')
-								)
+									(
+										RTRIM(LTRIM(ISNULL(@SoftWareItemType, ''))) = 'License' 
+									AND
+										(
+											EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'General')
+										OR
+											EXISTS(SELECT NULL FROM vyuGLAccountDetail GLAD WHERE GLAD.[intAccountId] = GLD.[intAccountId] AND GLAD.[strAccountCategory] = 'Sales Account')
+										)
 								
-							)
+									)
 
-						)
-					)
+								)
+							)
+					END
+				ELSE
+					INSERT INTO @returntable([intAccountId])
+					SELECT @AccountId
 		END
 		
 	RETURN;
