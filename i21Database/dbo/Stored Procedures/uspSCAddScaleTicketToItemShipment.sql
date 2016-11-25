@@ -101,6 +101,8 @@ BEGIN
 		,intStorageScheduleTypeId
 		,intItemUOMId
 		,intItemLotGroup
+		,intDestinationGradeId
+		,intDestinationWeightId
 		
 		,intOrderId
 		,dtmShipDate
@@ -141,6 +143,8 @@ BEGIN
 									  END
 		,intItemUOMId				= LI.intItemUOMId
 		,intItemLotGroup			= LI.intItemId
+		,intDestinationGradeId		= SC.intGradeId
+		,intDestinationWeightId		= SC.intWeightId
 		
 		,intOrderId					= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
