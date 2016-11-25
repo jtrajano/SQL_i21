@@ -1,11 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceAgingReport]
 AS
-SELECT A.strInvoiceNumber
+SELECT AGING.*
+     , dblCreditLimit       = C.dblCreditLimit
+     , strShipToLocation    = dbo.fnARFormatCustomerAddress(NULL, NULL, SHIPTOLOCATION.strLocationName, SHIPTOLOCATION.strAddress, SHIPTOLOCATION.strCity, SHIPTOLOCATION.strState, SHIPTOLOCATION.strZipCode, SHIPTOLOCATION.strCountry, NULL, 0)
+	 , strDefaultLocation   = dbo.fnARFormatCustomerAddress(NULL, NULL, DEFAULTLOCATION.strLocationName, DEFAULTLOCATION.strAddress, DEFAULTLOCATION.strCity, DEFAULTLOCATION.strState, DEFAULTLOCATION.strZipCode, DEFAULTLOCATION.strCountry, NULL, 0)
+	 , strDefaultShipTo     = dbo.fnARFormatCustomerAddress(NULL, NULL, DEFAULTSHIPTO.strLocationName, DEFAULTSHIPTO.strAddress, DEFAULTSHIPTO.strCity, DEFAULTSHIPTO.strState, DEFAULTSHIPTO.strZipCode, DEFAULTSHIPTO.strCountry, NULL, 0)
+FROM 
+(SELECT A.strInvoiceNumber
      , A.intInvoiceId
 	 , A.strCustomerName
 	 , A.strBOLNumber
 	 , A.intEntityCustomerId     
-	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , dblTotalAR			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
 	 , dblFuture			= 0.000000
 	 , dbl0Days				= SUM(B.dbl0Days)
@@ -20,9 +25,9 @@ SELECT A.strInvoiceNumber
 	 , dblCredits			= SUM(B.dblAvailableCredit) * -1
 	 , dblPrepayments		= SUM(B.dblPrepayments) * -1
 	 , dblPrepaids			= 0.000000
-	 , dtmDate
-	 , dtmDueDate
-	 , intCompanyLocationId	  
+	 , A.dtmDate
+	 , A.dtmDueDate
+	 , A.intCompanyLocationId	 
 FROM
 (SELECT dtmDate				= I.dtmPostDate
 	 , I.strInvoiceNumber
@@ -387,4 +392,9 @@ AND A.dblAmountPaid		 = B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
 AND A.dblPrepayments	 = B.dblPrepayments
 
-GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.strCustomerName, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId
+GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.strCustomerName, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId) AS AGING
+LEFT JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
+LEFT JOIN tblARInvoice SHIPTO ON AGING.intInvoiceId = SHIPTO.intInvoiceId
+LEFT JOIN tblEMEntityLocation SHIPTOLOCATION ON SHIPTO.intShipToLocationId = SHIPTOLOCATION.intEntityLocationId AND SHIPTO.intEntityCustomerId = SHIPTOLOCATION.intEntityId
+LEFT JOIN tblEMEntityLocation DEFAULTLOCATION ON AGING.intEntityCustomerId = DEFAULTLOCATION.intEntityId AND DEFAULTLOCATION.ysnDefaultLocation = 1
+LEFT JOIN tblEMEntityLocation DEFAULTSHIPTO ON C.intShipToId = DEFAULTSHIPTO.intEntityLocationId AND C.intEntityCustomerId = DEFAULTSHIPTO.intEntityId
