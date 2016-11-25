@@ -13,3 +13,5 @@ TestAP/TestAP.sqlproj.user
 i21.v12.suo
 *.jfm
 .vs/i21/v14/.suo
+**/Deploy
+**/SQLTddExtender.config
