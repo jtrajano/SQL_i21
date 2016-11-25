@@ -746,9 +746,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 items: [
                                                                                     {
                                                                                         xtype: 'toolbar',
-                                                                                        weight: 1,
                                                                                         border: 0,
                                                                                         itemId: 'tlbToolbarGrid',
+                                                                                        weight: 1,
                                                                                         layout: {
                                                                                             type: 'hbox',
                                                                                             padding: '0 0 0 1'
@@ -1045,11 +1045,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'strLifeTimeType',
-                                                                                            dataType: 'string',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strStatus',
                                                                                             dataType: 'string',
                                                                                             hidden: true
                                                                                         }
