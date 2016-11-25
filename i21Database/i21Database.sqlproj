@@ -4585,6 +4585,7 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorPrepayment.sql" />
     <Build Include="dbo\Views\vyuRKFutOptTranForNotMapping.sql" />
     <Build Include="dbo\Views\vyuRKCollateralNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKBasisDetailNotMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
