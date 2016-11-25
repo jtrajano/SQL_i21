@@ -6,9 +6,9 @@
 	intExternalId INT NOT NULL,
 	
 	strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
-	dblOldValue NUMERIC(12, 4)NOT NULL,
-	dblTransactionQuantity NUMERIC(12, 4) NOT NULL,
-	dblNewValue NUMERIC(12, 4)NOT NULL,
+	dblOldValue NUMERIC(18, 6)NOT NULL,
+	dblTransactionQuantity NUMERIC(18, 6) NOT NULL,
+	dblNewValue NUMERIC(18, 6)NOT NULL,
 	
 	intUserId INT NOT NULL,
 	dtmTransactionDate DATETIME NOT NULL,

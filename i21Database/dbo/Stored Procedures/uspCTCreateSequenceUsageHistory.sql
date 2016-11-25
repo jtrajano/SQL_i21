@@ -3,9 +3,9 @@
 	@strScreenName			NVARCHAR(50),
 	@intExternalId			INT,
 	@strFieldName			NVARCHAR(50),
-	@dblOldValue			NUMERIC(12,4),
-	@dblTransactionQuantity NUMERIC(12,4),
-	@dblNewValue			NUMERIC(12,4),	
+	@dblOldValue			NUMERIC(18, 6),
+	@dblTransactionQuantity NUMERIC(18, 6),
+	@dblNewValue			NUMERIC(18, 6),	
 	@intUserId				INT
 AS
 BEGIN TRY

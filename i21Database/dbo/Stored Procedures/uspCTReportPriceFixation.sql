@@ -84,7 +84,7 @@ BEGIN TRY
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'')
 			AS	strOtherPartyAddress,
 			LTRIM(PF.dblPriceWORollArb) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strTotal,
-			LTRIM(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18,4))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strDifferential,
+			LTRIM(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strDifferential,
 			LTRIM(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strAdditionalCost,
 			LTRIM(PF.dblFinalPrice) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strFinalPrice,
 			CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 

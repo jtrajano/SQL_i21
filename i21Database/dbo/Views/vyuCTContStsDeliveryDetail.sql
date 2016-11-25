@@ -8,7 +8,7 @@ AS
 						SH.strShipmentNumber,
 						SH.dtmShipDate,
 						EY.strName	AS strCustomer,
-						LTRIM(CAST(SUM(SI.dblQuantity) AS NUMERIC(18,2))) + ' ' + UM.strUnitMeasure AS strQuantity,
+						LTRIM(CAST(SUM(SI.dblQuantity) AS NUMERIC(18, 6))) + ' ' + UM.strUnitMeasure AS strQuantity,
 						dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(IL.dblGrossWeight - IL.dblTareWeight)) dblNetWeight,
 						SI.intWeightUOMId
 				FROM	tblLGPickLotDetail				PL
@@ -38,7 +38,7 @@ AS
 						SH.strShipmentNumber,
 						SH.dtmShipDate,
 						EY.strName	AS strCustomer,
-						LTRIM(CAST(SUM(SI.dblQuantity) AS NUMERIC(18,2))) + ' ' + UM.strUnitMeasure AS strQuantity,
+						LTRIM(CAST(SUM(SI.dblQuantity) AS NUMERIC(18, 6))) + ' ' + UM.strUnitMeasure AS strQuantity,
 						dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(IL.dblGrossWeight - IL.dblTareWeight)) dblNetWeight,
 						SI.intWeightUOMId
 				FROM	tblLGPickLotDetail				PL

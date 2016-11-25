@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblCTFreightRate](
 	[strOrigin] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDest] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intRateType] [int] NOT NULL,
-	[dblRate] [numeric](12, 4) NOT NULL,
+	[dblRate] [numeric](18, 6) NOT NULL,
 	[intUnitMeasureId] [int] NULL,
 	[intCurrencyId] [int] NOT NULL,
 	[dtmExpire] [datetime] NOT NULL,

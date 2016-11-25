@@ -30,7 +30,7 @@ AS
 						FT.dtmTransactionDate,
 						MA.strFutMarketName,
 						MO.strFutureMonth,
-						CAST(ISNULL(SY.intHedgedLots,0) AS NUMERIC(18,2))+ISNULL(SY.dblAssignedLots,0) 						AS	dblLots,
+						CAST(ISNULL(SY.intHedgedLots,0) AS NUMERIC(18, 6))+ISNULL(SY.dblAssignedLots,0) 						AS	dblLots,
 						FT.dblPrice,
 						dbo.fnCTGetLastSettlementPrice(FT.intFutureMarketId,FT.intFutureMonthId)							AS	dblLatestPrice,
 						dbo.fnCTGetBrokerageCommission(FT.intBrokerageAccountId,FT.intFutureMarketId,FT.dtmTransactionDate) AS	dblCommission,

@@ -9,13 +9,13 @@ AS
 	FROM	(
 				SELECT	CD.intContractDetailId,
 						CAST(GS.dblNetWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS						[Shipped],
-						CAST(CAST(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity) AS NUMERIC(18,2)) - GS.dblNetWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS		[To be Shipped],
+						CAST(CAST(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity) AS NUMERIC(18, 6)) - GS.dblNetWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS		[To be Shipped],
 						CAST(CR.dblShippedWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS					[Recd Wt in Wh],
-						CAST(CAST(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity) AS NUMERIC(18,2)) - CR.dblShippedWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS	[To be Received]
+						CAST(CAST(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity) AS NUMERIC(18, 6)) - CR.dblShippedWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS	[To be Received]
 				FROM	tblCTContractDetail			CD								LEFT
 				JOIN	(
 							SELECT	intContractDetailId,
-									CAST(SUM(dblNetWeight) AS NUMERIC(18,2)) dblNetWeight,
+									CAST(SUM(dblNetWeight) AS NUMERIC(18, 6)) dblNetWeight,
 									MIN(intItemUOMId) intItemUOMId
 							FROM	vyuCTContStsGoodsShipped
 							GROUP
@@ -23,7 +23,7 @@ AS
 						)GS	ON	GS.intContractDetailId	=	CD.intContractDetailId	LEFT
 				JOIN	(
 							SELECT	intContractDetailId,
-									CAST(SUM(dblShippedWeight) AS NUMERIC(18,2)) dblShippedWeight,
+									CAST(SUM(dblShippedWeight) AS NUMERIC(18, 6)) dblShippedWeight,
 									MIN(intItemUOMId) intItemUOMId 
 							FROM	vyuCTContStsContainer	
 							GROUP
