@@ -29,6 +29,7 @@ BEGIN TRY
 	DECLARE @intLotId INT
 	DECLARE @intContractDetailId INT
 	DECLARE @intLoadDetailContainerLinkId INT
+	DECLARE @ysnRejectLGContainer BIT
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -51,13 +52,19 @@ BEGIN TRY
 		,@intLoadDetailContainerLinkId = intLoadDetailContainerLinkId
 	FROM tblQMSample
 
-	IF @intContractDetailId IS NOT NULL
-		AND @intLoadDetailContainerLinkId IS NOT NULL
+	SELECT TOP 1 @ysnRejectLGContainer = ISNULL(ysnRejectLGContainer, 0)
+	FROM tblQMCompanyPreference
+
+	IF @ysnRejectLGContainer = 1
 	BEGIN
-		EXEC uspLGRejectContainerFromQuality @intLoadDetailContainerLinkId
-			,@intContractDetailId
-			,1
-			,@intLastModifiedUserId
+		IF @intContractDetailId IS NOT NULL
+			AND @intLoadDetailContainerLinkId IS NOT NULL
+		BEGIN
+			EXEC uspLGRejectContainerFromQuality @intLoadDetailContainerLinkId
+				,@intContractDetailId
+				,1
+				,@intLastModifiedUserId
+		END
 	END
 
 	UPDATE dbo.tblQMSample

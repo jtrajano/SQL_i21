@@ -625,6 +625,12 @@ WHERE ysnChangeLotStatusOnApproveforPreSanitizeLot IS NULL
 GO
 
 GO
+UPDATE tblQMCompanyPreference
+SET ysnRejectLGContainer = 1
+WHERE ysnRejectLGContainer IS NULL
+GO
+
+GO
 UPDATE tblQMReportProperty SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
 

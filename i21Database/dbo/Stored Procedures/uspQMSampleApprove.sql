@@ -31,6 +31,7 @@ BEGIN TRY
 	DECLARE @intContractDetailId INT
 	DECLARE @intLoadDetailContainerLinkId INT
 	DECLARE @intSampleStatusId INT
+	DECLARE @ysnRejectLGContainer BIT
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -57,14 +58,20 @@ BEGIN TRY
 		,@intSampleStatusId = intSampleStatusId
 	FROM tblQMSample
 
-	IF @intContractDetailId IS NOT NULL
-		AND @intLoadDetailContainerLinkId IS NOT NULL
-		AND @intSampleStatusId = 4 -- Only for Rejected to Approved
+	SELECT TOP 1 @ysnRejectLGContainer = ISNULL(ysnRejectLGContainer, 0)
+	FROM tblQMCompanyPreference
+
+	IF @ysnRejectLGContainer = 1
 	BEGIN
-		EXEC uspLGRejectContainerFromQuality @intLoadDetailContainerLinkId
-			,@intContractDetailId
-			,0
-			,@intLastModifiedUserId
+		IF @intContractDetailId IS NOT NULL
+			AND @intLoadDetailContainerLinkId IS NOT NULL
+			AND @intSampleStatusId = 4 -- Only for Rejected to Approved
+		BEGIN
+			EXEC uspLGRejectContainerFromQuality @intLoadDetailContainerLinkId
+				,@intContractDetailId
+				,0
+				,@intLastModifiedUserId
+		END
 	END
 
 	UPDATE dbo.tblQMSample
