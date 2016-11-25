@@ -24,7 +24,9 @@ BEGIN
 				, [dblQty]
 				, [intTransactionId]
 				, [strTransactionId]
-				, [intTransactionTypeId])
+				, [intTransactionTypeId]
+				, [intFOBPointId]
+			) 
 			SELECT ID.intItemId
 				 , IL.intItemLocationId
 				 , ID.intItemUOMId
@@ -35,9 +37,14 @@ BEGIN
 				 , I.intInvoiceId
 				 , I.strInvoiceNumber
 				 , 7
+				 , fp.intFobPointId
 			FROM tblARInvoiceDetail ID
 				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 				INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
+				LEFT JOIN tblSMFreightTerms ft
+					ON I.intFreightTermId = ft.intFreightTermId
+				LEFT JOIN tblICFobPoint fp
+					ON fp.strFobPoint = ft.strFobPoint
 			WHERE ID.intInvoiceId = @TransactionId 
 			  AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
 	  END
@@ -53,7 +60,9 @@ BEGIN
 				, [dblQty]
 				, [intTransactionId]
 				, [strTransactionId]
-				, [intTransactionTypeId])
+				, [intTransactionTypeId]
+				, [intFOBPointId]
+			)
 			SELECT ISHI.intItemId
 				, IL.intItemLocationId
 				, ISHI.intItemUOMId
@@ -64,19 +73,24 @@ BEGIN
 				, ISH.intInventoryShipmentId
 				, ISH.strShipmentNumber
 				, 5
+				, fp.intFobPointId
 			FROM tblICInventoryShipmentItem ISHI
 				INNER JOIN tblICInventoryShipment ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 				INNER JOIN tblSOSalesOrderDetail SOD ON ISHI.intLineNo = SOD.intSalesOrderDetailId
 				INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
 				INNER JOIN tblICItemLocation IL ON ISHI.intItemId = IL.intItemId AND SO.intCompanyLocationId = IL.intLocationId
+				LEFT JOIN tblSMFreightTerms ft
+					ON ISH.intFreightTermId = ft.intFreightTermId
+				LEFT JOIN tblICFobPoint fp
+					ON fp.strFobPoint = ft.strFobPoint
 			WHERE ISHI.intInventoryShipmentId = @TransactionId
 		END
 
 	UPDATE @tblItemsToUpdate
-	SET dblQty = dblQty * (CASE WHEN @IsShipped = 0
-								THEN (CASE WHEN @Negate = 0 THEN 1 ELSE -1 END)
-								ELSE (CASE WHEN @Negate = 0 THEN -1 ELSE 1 END)
-							END)  
+	SET dblQty = 
+			CASE	WHEN @IsShipped = 0 THEN (CASE WHEN @Negate = 0 THEN dblQty ELSE -dblQty END)
+					ELSE (CASE WHEN @Negate = 0 THEN -dblQty ELSE dblQty END)
+			END  
 
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @tblItemsToUpdate
 END
