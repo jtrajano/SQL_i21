@@ -1423,7 +1423,7 @@ IF(@Checking = 1)
 		[tblARInvoice] I
 			ON I.[ysnPosted] = 1
 			AND P1. [ptpay_orig_crd_pay_type] = ''CRM''
-			AND P1.[ptpay_invc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
+			AND P1.[ptpay_ref_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
 			ON P.[intEntityCustomerId] = C.[intEntityCustomerId]
