@@ -4588,6 +4588,9 @@
     <Build Include="dbo\Views\vyuRKFutOptTranForNotMapping.sql" />
     <Build Include="dbo\Views\vyuRKCollateralNotMapping.sql" />
     <Build Include="dbo\Views\vyuRKBasisDetailNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKM2MInquiryTranNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKM2MInquiryBasisNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKM2MInquiryNotMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
