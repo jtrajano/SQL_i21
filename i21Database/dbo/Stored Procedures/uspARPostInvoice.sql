@@ -1788,7 +1788,7 @@ END CATCH
 				END
 
 				IF @IsPT = 1
-				BEGIN					
+				BEGIN				
 					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					SELECT 
 						ARI.strInvoiceNumber + ' was imported from origin. Unpost is not allowed!',
@@ -1807,6 +1807,25 @@ END CATCH
 					WHERE  
 						ARI.ysnPosted = 1
 				END
+
+				--If ysnAllowUserSelfPost is True in User Role
+				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
+				BEGIN
+					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT 
+						'You cannot Post/Unpost transactions you did not create.',
+						ARI.strTransactionType,
+						ARI.strInvoiceNumber,
+						@batchId,
+						ARI.intInvoiceId
+					FROM 
+						@PostInvoiceData PID
+					INNER JOIN 
+						tblARInvoice ARI
+							ON PID.intInvoiceId = ARI.intInvoiceId
+					WHERE  
+						PID.intEntityId <> @UserEntityID
+				END	
 
 			END			
 		
