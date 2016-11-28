@@ -30,7 +30,6 @@ BEGIN TRY
      JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
      JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
      JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId  
-     LEFT JOIN dbo.tblLGLoadContainer AS C ON C.intLoadContainerId = S.intLoadContainerId  
      ) t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
@@ -42,18 +41,18 @@ BEGIN TRY
 		,@params
 		,@PropList = @str OUTPUT
 
-	IF OBJECT_ID('tempdb.dbo.##PropertyName') IS NOT NULL
-		DROP TABLE ##PropertyName
+	IF OBJECT_ID('tempdb.dbo.##ContractProperty') IS NOT NULL
+		DROP TABLE ##ContractProperty
 
-	SELECT @SQL = 'CREATE TABLE ##PropertyName (strContractNumber INT,strName INT,strContractItemName INT,strBundleItemNo INT,strItemNo INT,strDescription INT,strLoadNumber INT,strContainerNumber INT,strMarks INT,strShipperCode INT,strShipperName INT,strSubLocationName INT,strSampleNumber INT,strSampleTypeName INT,strStatus INT,intSampleId INT,dtmSampleReceivedDate INT,dtmSamplingEndDate INT,strComment INT,' + @str + ')'
+	SELECT @SQL = 'CREATE TABLE ##ContractProperty (intSampleId INT,strContractNumber INT,strName INT,strContractItemName INT,strBundleItemNo INT,strItemNo INT,strDescription INT,strLoadNumber INT,strContainerNumber INT,strMarks INT,strShipperCode INT,strShipperName INT,strSubLocationName INT,strSampleNumber INT,strSampleTypeName INT,strStatus INT,dtmSampleReceivedDate INT,dtmSamplingEndDate INT,strComment INT,' + @str + ')'
 
 	EXEC sp_executesql @SQL
 
-	INSERT INTO ##PropertyName (strContractNumber)
+	INSERT INTO ##ContractProperty (intSampleId)
 	SELECT NULL
 
 	SELECT *
-	FROM ##PropertyName
+	FROM ##ContractProperty
 END TRY
 
 BEGIN CATCH
