@@ -43,6 +43,19 @@ SELECT
 	,ARC.intBillToId
 	,ARC.intShipToId
 	,ARC.intEntityContactId
+	,ARC.strShipToLocationName
+    ,ARC.strShipToAddress
+    ,ARC.strShipToCity
+    ,ARC.strShipToState
+    ,ARC.strShipToZipCode
+    ,ARC.strShipToCountry
+    ,ARC.strBillToLocationName
+    ,ARC.strBillToAddress
+    ,ARC.strBillToCity
+    ,ARC.strBillToState
+    ,ARC.strBillToZipCode
+    ,ARC.strBillToCountry
+
 FROM [vyuARCustomerContract] CustCon
 INNER JOIN [vyuARCustomerSearch] ARC ON CustCon.intEntityCustomerId = ARC.intEntityCustomerId
 WHERE CustCon.intCurrencyId = (SELECT TOP 1 intCurrencyId 
@@ -51,3 +64,4 @@ WHERE CustCon.intCurrencyId = (SELECT TOP 1 intCurrencyId
 								ON CTD.intCurrencyId IN (SMC.intCurrencyID, SMC.intMainCurrencyId )
 								WHERE CustCon.intContractHeaderId = CTD.intContractHeaderId 				
 								ORDER BY intContractSeq ASC) 
+AND strContractStatus NOT IN ('Complete','Cancelled')
