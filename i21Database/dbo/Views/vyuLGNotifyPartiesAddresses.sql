@@ -10,7 +10,8 @@ AS
 			ENLOC.strZipCode, 
 			ENLOC.strPhone, 
 			ENLOC.strFax,
-			ENTYPE.strType
+			ENTYPE.strType,
+			CONVERT(BIT,ENLOC.ysnActive)									AS ysnActive
 	FROM	[tblEMEntityLocation] ENLOC
 	JOIN	[tblEMEntityType] ENTYPE ON ENTYPE.intEntityId = ENLOC.intEntityId  
 
@@ -26,20 +27,22 @@ AS
 			L.strZipPostalCode												AS strZipCode, 
 			L.strPhone, 
 			L.strFax,
-			'Company'														AS strType
+			'Company'														AS strType,
+			CONVERT(BIT,L.ysnActive) 										AS ysnActive
 	FROM	tblSMCompanyLocation L
 
 	UNION ALL
 
-	SELECT	intBankId	AS			intEntityId, 
-			-1					AS	intEntityLocationId, 
-			strBankName			AS	strLocationName,
+	SELECT	intBankId														AS intEntityId, 
+			-1																AS intEntityLocationId, 
+			strBankName														AS strLocationName,
 			strAddress, 
 			strCity, 
 			strCountry, 
 			strState, 
-			''				AS			strZipCode, 
+			''																AS strZipCode, 
 			strPhone, 
 			strFax,
-			'Bank'			AS			strType
+			'Bank'															AS strType,
+			CONVERT(BIT,1)													AS ysnActive
 	FROM	tblCMBank
