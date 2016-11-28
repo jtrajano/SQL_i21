@@ -953,7 +953,32 @@ SET @batchIdUsed = @batchId
 						ON PC.intInvoiceId = I2.intInvoiceId 
 						AND I2.ysnPosted = 1
 
-				
+				--If ysnAllowUserSelfPost is True in User Role
+				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
+				BEGIN
+					INSERT INTO 
+						@ARReceivableInvalidData
+					SELECT 
+						'You cannot Post/Unpost transactions you did not create.'
+						,'Receivable'
+						,A.strRecordNumber
+						,@batchId
+						,A.intPaymentId
+					FROM
+						tblARPayment A
+					INNER JOIN
+						tblARPaymentDetail D
+							ON A.intPaymentId = D.intPaymentId
+					INNER JOIN
+						tblSMCompanyLocation CL
+							ON A.intLocationId = CL.intCompanyLocationId 
+					INNER JOIN
+						@ARReceivablePostData P
+							ON A.intPaymentId = P.intPaymentId						 
+					WHERE
+						P.intEntityId <> @UserEntityID
+				END
+								
 				---overpayment
 				INSERT INTO
 					@AROverpayment
