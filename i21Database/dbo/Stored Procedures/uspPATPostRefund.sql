@@ -55,6 +55,7 @@ SELECT R.intRefundId,
 	FROM tblPATRefundCustomer RC 
 	INNER JOIN tblPATRefund R 
 		ON R.intRefundId = RC.intRefundId 
+	WHERE R.intRefundId = @intRefundId
 
 SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	where ysnEligibleRefund = 1
 
