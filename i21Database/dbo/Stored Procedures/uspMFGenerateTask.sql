@@ -31,8 +31,10 @@ BEGIN TRY
 	DECLARE @dblRemainingLotWeight NUMERIC(18,6)
 	DECLARE @intLotId INT
 	DECLARE @intTaskCount INT
+	DECLARE @ysnPickByLotCode BIT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
+	SELECT @ysnPickByLotCode  = ysnPickByLotCode FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -204,6 +206,8 @@ BEGIN TRY
 					,L.dblWeight
 					,L.intWeightUOMId
 					,L.dtmDateCreated
+					,L.dtmManufacturedDate
+					,L.strLotNumber
 				HAVING L.dblWeight  - (
 						SUM(ISNULL(CASE 
 									WHEN T.intTaskTypeId = 13
@@ -220,7 +224,7 @@ BEGIN TRY
 											END, 0))
 								)
 							) - @dblRequiredWeight)
-					,L.dtmDateCreated ASC
+					,CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE CONVERT(INT,LEFT(L.strLotNumber,5)) END ASC
 
 
 				--- INSERT ALL THE LOTS OUTSIDE ALLOWABLE PICK DAY RANGE
@@ -270,6 +274,8 @@ BEGIN TRY
 							,L.dblWeight
 							,L.intWeightUOMId
 							,L.dtmDateCreated
+							,L.dtmManufacturedDate
+							,L.strLotNumber
 					HAVING L.dblWeight - (
 							SUM(ISNULL(CASE 
 										WHEN T.intTaskTypeId = 13
@@ -286,7 +292,7 @@ BEGIN TRY
 												END, 0))
 									)
 								) - @dblRequiredWeight)
-						,L.dtmDateCreated ASC
+						,CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE CONVERT(INT,LEFT(L.strLotNumber,5)) END ASC
 										
 		SELECT @intLotRecordId  = MIN(intLotRecordId)
 		FROM @tblLot
