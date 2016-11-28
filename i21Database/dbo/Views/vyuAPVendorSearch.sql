@@ -33,6 +33,8 @@ SELECT
 	FROM tblAPVendor a
 	join tblEMEntity b
 		on b.intEntityId = a.intEntityVendorId
+	join tblEMEntityType etype
+		on etype.intEntityId = b.intEntityId and strType = 'Vendor'
 	join [tblEMEntityToContact] c
 		on c.intEntityId = b.intEntityId
 			and c.ysnDefaultContact = 1
