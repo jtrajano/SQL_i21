@@ -56,29 +56,39 @@ SET ANSI_WARNINGS OFF
 			RAISERROR(@ErrMsg,16,1)
 		END
 		
-		IF NOT EXISTS(SELECT * FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId)
-		BEGIN		
-			SET @ErrMsg = 'Container for this shipment does not exist'
-			RAISERROR(@ErrMsg,16,1)
+		IF ISNULL(@intContainerId,0) <> -1
+		BEGIN
+			IF NOT EXISTS(SELECT * FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId)
+			BEGIN		
+				SET @ErrMsg = 'Container for this shipment does not exist'
+				RAISERROR(@ErrMsg,16,1)
+			END
+					
+			IF (@dblContainerQty + @dblQty) < 0
+			BEGIN		
+				SET @ErrMsg = 'Negative container quantity is not allowed'
+				RAISERROR(@ErrMsg,16,1)
+			END
+
+			SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) 
+			FROM tblLGLoadDetailContainerLink 
+			WHERE intLoadContainerId = @intContainerId
+			
+			UPDATE tblLGLoadDetailContainerLink 
+			SET dblReceivedQty = (@dblContainerQty + @dblQty)  
+			WHERE intLoadDetailId = @intSourceId 
+				AND intLoadContainerId = @intContainerId
 		END
-		
+				
 		SELECT @dblContractQty = ISNULL(dblDeliveredQuantity,0) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
-		SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) FROM tblLGLoadDetailContainerLink WHERE intLoadContainerId = @intContainerId
 
 		IF (@dblContractQty + @dblQty) < 0
 		BEGIN		
 			SET @ErrMsg = 'Negative contract quantity is not allowed'
 			RAISERROR(@ErrMsg,16,1)
 		END
-		
-		IF (@dblContainerQty + @dblQty) < 0
-		BEGIN		
-			SET @ErrMsg = 'Negative container quantity is not allowed'
-			RAISERROR(@ErrMsg,16,1)
-		END
 
 		UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight WHERE intLoadDetailId = @intSourceId
-		UPDATE tblLGLoadDetailContainerLink SET dblReceivedQty = (@dblContainerQty + @dblQty)  WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId
 	
 		SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
 
