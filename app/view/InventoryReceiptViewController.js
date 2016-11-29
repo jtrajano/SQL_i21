@@ -1803,6 +1803,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')) {
                 current.set('strWeightUOM', records[0].get('strUnitMeasure'));
                 current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+                current.set('dblWeightUOMConvFactor', current.get('dblItemUOMConvFactor'));
             }
         }
         else if (combo.itemId === 'cboWeightUOM') {
@@ -2335,7 +2336,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
             if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
 
-            // If there is not Gross/Net UOM, do not calculate the lot gross and net.
+            // If there is no Gross/Net UOM, do not calculate the lot gross and net.
             if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === '') {
                 totalGross = 0;
             }
