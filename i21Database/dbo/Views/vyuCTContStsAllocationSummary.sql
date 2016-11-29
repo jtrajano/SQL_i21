@@ -12,7 +12,7 @@ AS
 						CAST(ISNULL(RV.dblReservedQuantity,0) AS NVARCHAR(100)) collate Latin1_General_CI_AS [Reserved],				
 						--ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0) AS dblUnReservedQuantity,
 						CAST(ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) AS NVARCHAR(100)) collate Latin1_General_CI_AS  AS [Allocated],
-						CAST(CAST(ISNULL(CD.dblQuantity,0) AS NUMERIC(18, 6)) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0) AS NVARCHAR(100)) collate Latin1_General_CI_AS AS [Unallocated],
+						CAST(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,LP.intWeightUOMId,ISNULL(CD.dblQuantity,0)) AS NUMERIC(18, 6)) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0) AS NVARCHAR(100)) collate Latin1_General_CI_AS AS [Unallocated],
 						CAST(ISNULL(PL.dblPickedQty,0) AS NVARCHAR(100)) collate Latin1_General_CI_AS [Picked Qty],
 						CAST(ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) - PL.dblPickedQty AS NVARCHAR(100)) collate Latin1_General_CI_AS AS [To be Picked]
 
@@ -45,7 +45,8 @@ AS
 							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblPickedQty),0) AS NUMERIC(18, 6))  AS dblPickedQty
 							FROM		vyuCTContStsPickedLot 
 							Group By	intContractDetailId
-						)	PL	  ON	PL.intContractDetailId		=	CD.intContractDetailId
+						)	PL	  ON	PL.intContractDetailId		=	CD.intContractDetailId	CROSS	
+				APPLY	tblLGCompanyPreference	LP
 			) s
 				UNPIVOT	(strValue FOR strName IN 
 							(
