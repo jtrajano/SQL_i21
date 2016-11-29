@@ -3837,7 +3837,7 @@ IF @post = 0
 					EXEC	dbo.uspGLInsertReverseGLEntry
 								@strTransactionId	= @strTransactionId
 								,@intEntityId		= @UserEntityID
-								,@dtmDateReverse	= @PostDate
+								,@dtmDateReverse	= NULL
 										
 					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												
