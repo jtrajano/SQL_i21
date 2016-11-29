@@ -14,7 +14,7 @@
 
 GO
 
-ALTER TABLE [dbo].[tblGLCrossReferenceMapping]  WITH CHECK ADD  CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccount] FOREIGN KEY([inti21AccountId])
+ALTER TABLE [dbo].[tblGLCrossReferenceMapping]  WITH CHECK ADD  CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccount] FOREIGN KEY([intAccountId])
 REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 GO
 

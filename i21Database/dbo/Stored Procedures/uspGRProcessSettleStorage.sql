@@ -754,7 +754,7 @@ BEGIN TRY
 			IF @dblStorageUnits <= @dblSpotUnits
 			BEGIN
 
-				UPDATE @SettleStorage
+				UPDATE #SettleStorage
 				SET dblRemainingUnits = dblRemainingUnits -@dblStorageUnits
 				WHERE intSettleStorageKey = @SettleStorageKey
 
@@ -822,7 +822,7 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				
-				UPDATE @SettleStorage
+				UPDATE #SettleStorage
 				SET dblRemainingUnits = dblRemainingUnits - @dblSpotUnits
 				WHERE intSettleStorageKey = @SettleStorageKey
 
