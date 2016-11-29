@@ -2011,6 +2011,22 @@ IF @post = 1
 			ARID.dblTotal <> @ZeroDecimal  
 			AND PID.strTransactionType = 'Debit Memo'
 			AND ISNULL(PID.intPeriodsToAccrue,0) <= 1
+			
+			
+		UPDATE ARID
+		SET
+			ARID.[intAccountId]					= LIA.[intAccountId]
+			,ARID.[intCOGSAccountId]			= LIA.[intCOGSAccountId]
+			,ARID.[intSalesAccountId]			= LIA.[intSalesAccountId]
+			,ARID.[intInventoryAccountId]		= LIA.[intInventoryAccountId]
+			,ARID.[intServiceChargeAccountId]	= LIA.[intServiceChargeAccountId]
+			,ARID.[intLicenseAccountId]			= LIA.[intLicenseAccountId]
+			,ARID.[intMaintenanceAccountId]		= LIA.[intMaintenanceAccountId]
+		FROM 
+			tblARInvoiceDetail ARID
+		INNER JOIN
+			@LineItemAccounts LIA
+				ON ARID.[intInvoiceDetailId] = LIA.[intInvoiceDetailId] 
 
 
 		
