@@ -4,7 +4,7 @@ AS
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractDetailId ASC) AS INT) intUniqueId,*
 	FROM
 	(	
-			SELECT	CQ.intSContractDetailId intContractDetailId,
+			SELECT	CQ.intPContractDetailId intContractDetailId,
 					SH.strBLNumber,
 					BC.strContainerNumber,
 					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,BC.intWeightUnitMeasureId,LP.intWeightUOMId,BC.dblNetWt) dblShippedWeight,
