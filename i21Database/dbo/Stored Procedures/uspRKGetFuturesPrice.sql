@@ -25,7 +25,7 @@ BEGIN TRY
 		FROM tblRKFutSettlementPriceMarketMap a
 		JOIN tblRKFuturesSettlementPrice b ON b.intFutureSettlementPriceId=a.intFutureSettlementPriceId
 		WHERE b.intFutureMarketId=@FutureMarketId AND a.intFutureMonthId=@FutureMonthId
-		ORDER BY a.intFutSettlementPriceMonthId DESC
+		ORDER BY b.dtmPriceDate DESC
 	END 
 
 END TRY
