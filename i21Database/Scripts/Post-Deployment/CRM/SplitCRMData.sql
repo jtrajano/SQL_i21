@@ -1066,6 +1066,7 @@ declare @strTypeAct nvarchar(50)
 declare @strSubjectAct nvarchar(100)
 declare @intEntityContactIdAct int
 declare @intEntityIdAct int
+declare @intCompanyLocationIdAct int
 declare @dtmStartDateAct datetime
 declare @dtmEndDateAct datetime
 declare @dtmStartTimeAct datetime
@@ -1094,6 +1095,7 @@ SET @queryResultAct = CURSOR FOR
 		,strSubject = tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject
 		,intEntityContactId = tblHDTicket.intCustomerContactId
 		,intEntityId = tblHDTicket.intCustomerId
+		,intCompanyLocationId = tblHDTicket.intCompanyLocationId
 		,dtmStartDate = tblHDTicket.dtmDueDate
 		,dtmEndDate = tblHDTicket.dtmDueDate
 		,dtmStartTime = tblHDTicket.dtmDueDate
@@ -1123,6 +1125,7 @@ SET @queryResultAct = CURSOR FOR
 		,strSubject = tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject
 		,intEntityContactId = tblHDTicket.intCustomerContactId
 		,intEntityId = tblHDTicket.intCustomerId
+		,intCompanyLocationId = tblHDTicket.intCompanyLocationId
 		,dtmStartDate = tblHDTicket.dtmDueDate
 		,dtmEndDate = tblHDTicket.dtmDueDate
 		,dtmStartTime = tblHDTicket.dtmDueDate
@@ -1153,6 +1156,7 @@ INTO
 	,@strSubjectAct
 	,@intEntityContactIdAct
 	,@intEntityIdAct
+	,@intCompanyLocationIdAct
 	,@dtmStartDateAct
 	,@dtmEndDateAct
 	,@dtmStartTimeAct
@@ -1199,6 +1203,7 @@ BEGIN
 			,strSubject
 			,intEntityContactId
 			,intEntityId
+			,intCompanyLocationId
 			,dtmStartDate
 			,dtmEndDate
 			,dtmStartTime
@@ -1222,6 +1227,7 @@ BEGIN
 				,strSubject = (case when len(@strSubjectAct) > 100 then SUBSTRING(@strSubjectAct, 1,97) + '...' else @strSubjectAct end)
 				,intEntityContactId = @intEntityContactIdAct
 				,intEntityId = @intEntityIdAct
+				,intCompanyLocationId = @intCompanyLocationIdAct
 				,dtmStartDate = @dtmEndDateAct
 				,dtmEndDate = @dtmEndDateAct
 				,dtmStartTime = @dtmEndDateAct
@@ -1284,6 +1290,7 @@ BEGIN
 		,@strSubjectAct
 		,@intEntityContactIdAct
 		,@intEntityIdAct
+		,@intCompanyLocationIdAct
 		,@dtmStartDateAct
 		,@dtmEndDateAct
 		,@dtmStartTimeAct
