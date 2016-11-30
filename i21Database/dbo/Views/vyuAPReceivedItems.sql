@@ -413,6 +413,7 @@ FROM
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND ((Billed.dblQty < B.dblOpenReceive) OR Billed.dblQty IS NULL)
 	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
+	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	UNION ALL
 
