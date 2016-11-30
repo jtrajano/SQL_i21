@@ -18,6 +18,8 @@
 			,d.intEntityId
 			,d.intEntityContactId
 			,d.intAssignedTo
+			,d.ysnPrivate
+			,d.intCreatedBy
 		from
 			tblCRMOpportunity a
 			,tblSMTransaction b
