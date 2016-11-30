@@ -4457,6 +4457,7 @@
     <None Include="dbo\Stored Procedures\uspICRestoreBalanceFromClosedPeriod.sql" />
     <Build Include="dbo\Tables\tblTFDeploymentNote.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorPrepayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
