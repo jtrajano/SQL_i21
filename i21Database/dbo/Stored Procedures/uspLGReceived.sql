@@ -120,21 +120,22 @@ SET ANSI_WARNINGS OFF
 			JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = SC.intContractDetailId
 			WHERE SC.intShipmentContractQtyId = @intSourceId;
 		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
+
+		SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
+
+		IF @ysnReverse = 0
+		BEGIN
+			UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+		END
+		ELSE 
+		BEGIN
+			UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+		END
+
 		SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId
 	END
 	
-	SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
-
-	IF @ysnReverse = 0
-	BEGIN
-		UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
-	END
-	ELSE 
-	BEGIN
-		UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
-		UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
-	END
-
 END TRY
 
 BEGIN CATCH
