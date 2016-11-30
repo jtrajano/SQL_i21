@@ -748,6 +748,11 @@ BEGIN
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMStatus'))
 	begin
 		exec('update tblCRMOpportunity set tblCRMOpportunity.intStatusId = (select top 1 tblCRMStatus.intStatusId from tblCRMStatus where tblCRMStatus.strStatus = tblCRMOpportunity.strOpportunityStatus) where tblCRMOpportunity.intStatusId is null and tblCRMOpportunity.strOpportunityStatus is not null');
+		
+		IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMSalesPipeStatus'))
+		begin
+			exec('update tblCRMSalesPipeStatus set tblCRMSalesPipeStatus.intStatusId = (select top 1 tblCRMStatus.intStatusId from tblCRMStatus where tblCRMStatus.strStatus = tblCRMSalesPipeStatus.strProjectStatus) where tblCRMSalesPipeStatus.intStatusId is null');
+		end
 	end
 
 	insert into tblSMTransaction
