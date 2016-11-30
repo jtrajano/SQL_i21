@@ -6,24 +6,25 @@ WITH cte AS(
 )
 ,cte2 as (
 SELECT TOP 1
-case when Options.PostRemind_BeforeAfter = 'Before' then 
+case when Options.PostRemind_BeforeAfter = 'Before' THEN 
 	DATEADD(day, Options.PostRemind_Days *-1, dtmEndDate) 
-else
-	dtmStartDate end	
-as DateLimit1,
-case when Options.PostRemind_BeforeAfter = 'Before' then 
-	 dtmEndDate
-else
-	DATEADD(day,Options.PostRemind_Days, dtmStartDate)  end	
-as DateLimit2
+ELSE
+	dtmStartDate END	
+AS DateLimit1,
+CASE WHEN Options.PostRemind_BeforeAfter = 'Before' THEN 
+	 DATEADD(DAY,1,dtmEndDate)
+ELSE
+	DATEADD(day,Options.PostRemind_Days+1, dtmStartDate)  END	
+AS DateLimit2
 FROM tblGLFiscalYearPeriod 
-CROSS APPLY(SELECT TOP 1  PostRemind_Days,PostRemind_BeforeAfter FROM cte )Options
-where getdate() between dateadd(day,-1, dtmStartDate) and DATEADD(day,1, dtmEndDate)
+CROSS APPLY(
+	SELECT TOP 1  PostRemind_Days,PostRemind_BeforeAfter FROM cte )Options
+	WHERE CONVERT(DATE, GETDATE(),101) BETWEEN dtmStartDate AND  dtmEndDate
 )
 SELECT  intJournalId, intEntityId, DateLimit1,DateLimit2 FROM tblGLJournal J JOIN 
 	cte ON J.intEntityId = cte.intEntity 
-	join cte2 on J.dtmDate BETWEEN DateLimit1 and  DateLimit2
+	JOIN cte2 on CONVERT(DATE, J.dtmDate,101) BETWEEN DateLimit1 AND DateLimit2
 	WHERE ysnPosted = 0
-	AND ISNULL(ysnRecurringTemplate,0) =0
-	and getdate() between dateadd(day,-1, DateLimit1) and DATEADD(day,1, DateLimit2)
+	AND ISNULL(ysnRecurringTemplate,0) = 0
+	AND CONVERT(DATE, GETDATE(),101) BETWEEN DateLimit1 AND  DateLimit2
 GO
