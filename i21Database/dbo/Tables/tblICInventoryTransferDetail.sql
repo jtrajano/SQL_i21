@@ -25,6 +25,7 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	[dblOriginalAvailableQty] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	[dblOriginalStorageQty] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+	[ysnWeights] BIT NULL DEFAULT((0)),
     CONSTRAINT [PK_tblICInventoryTransferDetail] PRIMARY KEY ([intInventoryTransferDetailId]), 
     CONSTRAINT [FK_tblICInventoryTransferDetail_tblICInventoryTransfer] FOREIGN KEY ([intInventoryTransferId]) REFERENCES [tblICInventoryTransfer]([intInventoryTransferId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICInventoryTransferDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 

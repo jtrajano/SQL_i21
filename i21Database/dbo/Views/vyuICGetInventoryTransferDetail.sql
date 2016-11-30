@@ -73,6 +73,7 @@ SELECT TransferDetail.intInventoryTransferId
 								WHEN TransferDetail.intOwnershipType = 3 THEN 'Consigned Purchase'
 								ELSE NULL END)
 	, ysnPosted
+	, ysnWeights
 FROM tblICInventoryTransferDetail TransferDetail
 	LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 	LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
