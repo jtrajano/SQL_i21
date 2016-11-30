@@ -7,7 +7,7 @@
     [strDestrict] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strAddress] NVARCHAR(60) COLLATE Latin1_General_CI_AS NULL, 
     [strCity] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
-    [strState] NVARCHAR(2) COLLATE Latin1_General_CI_AS NULL, 
+    [strState] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strCountry] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL, 
     [strZipCode] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strPhone] NVARCHAR(13) COLLATE Latin1_General_CI_AS NULL, 
