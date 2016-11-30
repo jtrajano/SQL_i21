@@ -13,10 +13,10 @@ AS
 				FROM	tblLGPickLotDetail			PL
 				JOIN	tblLGPickLotHeader			LH	ON	LH.intPickLotHeaderId		=	PL.intPickLotHeaderId
 				JOIN	tblLGAllocationDetail		AD	ON	AD.intAllocationDetailId	=	PL.intAllocationDetailId
-				JOIN	tblICInventoryShipmentItem	SI	ON	SI.intLineNo				=	PL.intPickLotDetailId
+				JOIN	tblICInventoryShipmentItem	SI	ON	SI.intSourceId				=	PL.intPickLotDetailId
 				JOIN	tblICInventoryShipment		SH	ON	SH.intInventoryShipmentId	=	SI.intInventoryShipmentId AND SH.intOrderType = 1 AND intSourceType = 3
 				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId		
-				JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId				=	SI.intWeightUOMId	CROSS	
+				JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId				=	SI.intItemUOMId	CROSS	
 				APPLY	tblLGCompanyPreference		LP 	
 				GROUP BY AD.intPContractDetailId,
 						CD.dblQuantity,
@@ -32,10 +32,10 @@ AS
 				FROM	tblLGPickLotDetail			PL
 				JOIN	tblLGPickLotHeader			LH	ON	LH.intPickLotHeaderId		=	PL.intPickLotHeaderId
 				JOIN	tblLGAllocationDetail		AD	ON	AD.intAllocationDetailId	=	PL.intAllocationDetailId
-				JOIN	tblICInventoryShipmentItem	SI	ON	SI.intLineNo				=	PL.intPickLotDetailId
+				JOIN	tblICInventoryShipmentItem	SI	ON	SI.intSourceId				=	PL.intPickLotDetailId
 				JOIN	tblICInventoryShipment		SH	ON	SH.intInventoryShipmentId	=	SI.intInventoryShipmentId AND SH.intOrderType = 1 AND intSourceType = 3
 				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId		
-				JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId				=	SI.intWeightUOMId	CROSS	
+				JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId				=	SI.intItemUOMId	CROSS	
 				APPLY	tblLGCompanyPreference		LP 	
 				GROUP BY AD.intSContractDetailId,
 						CD.dblQuantity,
