@@ -557,28 +557,31 @@ END
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDMilestone'))
 BEGIN
 	
-	PRINT N'Begin splitting Milestone...'
-
-	SET IDENTITY_INSERT tblCRMMilestone ON
-	insert into tblCRMMilestone (
-		intMilestoneId
-		,strMileStone
-		,strDescription
-		,intPriority
-		,intSort
-		,intConcurrencyId
-	)(
-		select
+	IF NOT EXISTS (SELECT * FROM tblCRMMilestone)
+	BEGIN
+		PRINT N'Begin splitting Milestone...'
+		SET IDENTITY_INSERT tblCRMMilestone ON
+		insert into tblCRMMilestone (
 			intMilestoneId
 			,strMileStone
 			,strDescription
 			,intPriority
 			,intSort
 			,intConcurrencyId
-		from tblHDMilestone
-		where intMilestoneId not in (select intMilestoneId from tblCRMMilestone)
-	)
-	SET IDENTITY_INSERT tblCRMMilestone OFF
+		)(
+			select
+				intMilestoneId
+				,strMileStone
+				,strDescription
+				,intPriority
+				,intSort
+				,intConcurrencyId
+			from tblHDMilestone
+			where intMilestoneId not in (select intMilestoneId from tblCRMMilestone)
+		)
+		SET IDENTITY_INSERT tblCRMMilestone OFF
+	END
+
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityWinLossReason'))
