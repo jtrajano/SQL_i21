@@ -1213,86 +1213,346 @@ WHERE strSubHeading ='Futures - Long' OR strSubHeading ='Futures - Short' and st
 
 DELETE @List
 
-INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId) 
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId FROM  @FinalList Where strContractEndMonth='Inventory'
+UPDATE @FinalList set dblBalance = null where dblBalance = 0 
 
-INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId) 
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId FROM  @FinalList Where strContractEndMonth='Previous'
+DECLARE @Result AS TABLE (  
+     intRowNumber INT IDENTITY(1,1) PRIMARY KEY , 
+	 strCommodity  NVARCHAR(200),
+	 strHeaderValue NVARCHAR(200),  
+     strSubHeading  NVARCHAR(200),  
+	 strSecondSubHeading NVARCHAR(200),
+     strContractEndMonth  NVARCHAR(100),  
+     strContractBasis  NVARCHAR(200),  
+     dblBalance  DECIMAL(24,10),  
+     strMarketZoneCode  NVARCHAR(200),  
+     dblFuturesPrice  DECIMAL(24,10),
+     dblBasisPrice DECIMAL(24,10),  
+     dblCashPrice DECIMAL(24,10),       
+     dblWtAvgPriced DECIMAL(24,10),  
+     dblQuantity DECIMAL(24,10),
+	 strLocationName NVARCHAR(200),
+	 strContractNumber NVARCHAR(200),
+	 strItemNo NVARCHAR(200),
+	 intOrderByOne INT,
+	 intOrderByTwo INT,
+	 intOrderByThree INT,
+	 dblRate  DECIMAL(24,10),
+	 ExRate DECIMAL(24,10),
+	 strCurrencyExchangeRateType NVARCHAR(200),
+	 intContractHeaderId int ,
+	 intFutOptTransactionHeaderId int	  
+	 )  
 
-INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId) 
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId FROM @FinalList Where strContractEndMonth NOT IN('Previous','Future','Inventory','Total') ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading='Inventory' 
 
-INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId)
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId FROM @FinalList Where strContractEndMonth='Future'
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' 
+	and (strSubHeading like '%Purchase-Priced%' or strSubHeading like '%Purchase-Basis%' or  strSubHeading like '%Purchase-HTA%' or  strSubHeading like '%Purchase-DP%') 
+	and strContractEndMonth<>'Inventory'
 
-INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId)
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate,intContractHeaderId,intFutOptTransactionHeaderId FROM @FinalList Where strContractEndMonth='Total'
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE (strSubHeading like '%Purchase-Priced%' or strSubHeading like '%Purchase-Basis%' or strSubHeading like '%Purchase-HTA%' or strSubHeading like '%Purchase-DP%') and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+and (strSubHeading like '%Purchase-Priced%' or strSubHeading like '%Purchase-Basis%' or strSubHeading like '%Purchase-HTA%' or strSubHeading like '%Purchase-DP%') order by  strContractEndMonth asc
 
 
-UPDATE @List set dblBalance = null where dblBalance = 0 
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Purchase Total' and strContractEndMonth<>'Inventory'
 
-update @List set intOrderByTwo=1  Where strSubHeading='Inventory' 
-update @List set intOrderByTwo=2  Where strContractEndMonth='Previous' 
-update @List set intOrderByTwo=3  Where strSubHeading like '%Purchase-Priced%' 
-update @List set intOrderByTwo=4  Where strSubHeading like '%Purchase-Basis%' 
-update @List set intOrderByTwo=5  Where strSubHeading like '%Purchase-HTA%' 
-update @List set intOrderByTwo=6  Where strSubHeading like '%Purchase-DP%' 
-update @List set intOrderByTwo=7  Where strSubHeading = 'Purchase Total' 
-update @List set intOrderByTwo=8  Where strSubHeading like '%Sale-Priced%' 
-update @List set intOrderByTwo=9  Where strSubHeading like '%Sale-Basis%' 
-update @List set intOrderByTwo=10  Where strSubHeading like '%Sale-HTA%' 
-update @List set intOrderByTwo=11 Where strSubHeading like '%Sale-DP%' 
-update @List set intOrderByTwo=12 Where strSubHeading = 'Sale Total' 
-update @List set intOrderByTwo=13 Where strSubHeading = 'Net Physical Position' 
-update @List set intOrderByTwo=14 Where strSubHeading = 'Cumulative physical position' 
-update @List set intOrderByTwo=15 Where strSubHeading = 'Futures - Long' 
-update @List set intOrderByTwo=16 Where strSubHeading = 'Futures - Short' 
-update @List set intOrderByTwo=17 Where strSubHeading = 'Net Futures' 
-update @List set intOrderByTwo=18 Where strSubHeading = 'Cash Exposure' 
-update @List set intOrderByTwo=19 Where strSubHeading = 'Basis Exposure' 
-update @List set intOrderByTwo=20 Where strContractEndMonth='Future' 
-update @List set intOrderByTwo=21 Where strContractEndMonth='Total' 
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Purchase Total' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
 
-update @List set intOrderByThree=1 Where strSecondSubHeading like'%Quantity%'
-update @List set intOrderByThree=2 Where strSecondSubHeading ='Wt./Avg Futures'
-update @List set intOrderByThree=3 Where strSecondSubHeading ='Wt./Avg Basis'
-update @List set intOrderByThree=4 Where strSecondSubHeading ='Wt./Avg Cash'
-update @List set intOrderByThree=5 Where strSecondSubHeading ='Wt./Avg Freight'
-update @List set intOrderByThree=6 Where strSecondSubHeading like '%' + @strCurrencyName + '%'
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND (strSubHeading='Purchase Total') order by  strContractEndMonth asc
 
-update @List set intOrderByOne=1  Where strSubHeading='Inventory' 
-update @List set intOrderByOne=2  Where strContractEndMonth='Previous' and strContractEndMonth<>'Inventory'
-update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3  Where strSubHeading = 'Purchase Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3  Where strSubHeading like '%Sale-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3  Where strSubHeading like '%Sale-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3  Where strSubHeading like '%Sale-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading like '%Sale-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading = 'Sale Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading = 'Net Physical Position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading = 'Cumulative physical position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading = 'Futures - Long' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading = 'Futures - Short' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading = 'Net Futures' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading = 'Cash Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=3 Where strSubHeading = 'Basis Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=4 Where strContractEndMonth='Future' 
-update @List set intOrderByOne=5 Where strContractEndMonth='Total' 
 
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' 
+	and (strSubHeading like '%Sale-Priced%' or strSubHeading like '%Sale-Basis%' or  strSubHeading like '%Sale-HTA%' or  strSubHeading like '%Sale-DP%') 
+	and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE (strSubHeading like '%Sale-Priced%' or strSubHeading like '%Sale-Basis%' or strSubHeading like '%Sale-HTA%' or strSubHeading like '%Sale-DP%') and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+and (strSubHeading like '%Sale-Priced%' or strSubHeading like '%Sale-Basis%' or strSubHeading like '%Sale-HTA%' or strSubHeading like '%Sale-DP%') order by  strContractEndMonth asc
+
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Sale Total' and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Sale Total' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND (strSubHeading='Sale Total') order by  strContractEndMonth asc
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Net Physical Position' and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Net Physical Position' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND  strSubHeading='Net Physical Position' order by  strContractEndMonth asc
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Cumulative physical position' and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Cumulative physical position' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND  strSubHeading='Cumulative physical position' order by  strContractEndMonth asc
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Futures - Long' and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Futures - Long' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND  strSubHeading='Futures - Long' order by  strContractEndMonth asc
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Futures - Short' and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Futures - Short' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND  strSubHeading='Futures - Short' order by  strContractEndMonth asc
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Net Futures' and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Net Futures' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND  strSubHeading='Net Futures' order by  strContractEndMonth asc
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Cash Exposure' and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Cash Exposure' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND  strSubHeading='Cash Exposure' order by  strContractEndMonth asc
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth='Previous' and strSubHeading = 'Basis Exposure' and strContractEndMonth<>'Inventory'
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strSubHeading = 'Basis Exposure' and strContractEndMonth NOT IN('Previous','Future','Inventory','Total')
+			ORDER BY CONVERT(DATETIME,'01 '+strContractEndMonth)
+
+INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
+				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
+					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId 
+FROM @FinalList WHERE strContractEndMonth in('Future','Total') 
+AND  strSubHeading='Basis Exposure' order by  strContractEndMonth asc
 
 IF ISNULL(@ysnSummary,0) = 0
 BEGIN 
-	SELECT * FROM @List WHERE dblBalance IS NOT NULL 
-	ORDER BY intOrderByTwo,intOrderByThree,intOrderByOne
+	SELECT * FROM @Result WHERE dblBalance IS NOT NULL ORDER BY intRowNumber
 END
 ELSE
 BEGIN
-
-	SELECT * from @List WHERE strSecondSubHeading  not like '%Wt./Avg%'
+	SELECT * FROM @Result WHERE strSecondSubHeading  not like '%Wt./Avg%'
 	and strSecondSubHeading not like '%' + @strCurrencyName + '%' and	dblBalance IS NOT NULL 	
-	ORDER BY intOrderByTwo,intOrderByThree,intOrderByOne
-
+	ORDER BY intRowNumber
 END
