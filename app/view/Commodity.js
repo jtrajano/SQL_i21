@@ -579,6 +579,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 itemId: 'colUOMUnitQty',
                                                                 align: 'right',
                                                                 dataIndex: 'strFieldName',
+                                                                format: '0,000.000000##',
                                                                 text: 'Unit Qty',
                                                                 flex: 3,
                                                                 editor: {
