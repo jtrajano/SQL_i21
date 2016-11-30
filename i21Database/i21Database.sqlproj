@@ -4597,6 +4597,7 @@
     <Build Include="dbo\Functions\fnAPGetBillDetailReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGatherVolumeForPatronage.sql" />
+    <Build Include="dbo\Functions\fnRoundBanker.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

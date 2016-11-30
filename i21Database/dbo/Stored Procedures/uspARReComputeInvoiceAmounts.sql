@@ -32,8 +32,8 @@ UPDATE
 SET
 	 [dblRate]			= ISNULL([dblRate], @ZeroDecimal)
 	,[dblTax]			= ISNULL([dblTax], @ZeroDecimal)
-	,[dblAdjustedTax]	= ROUND(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-	,[ysnTaxAdjusted]	= ROUND(ISNULL([ysnTaxAdjusted], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	,[dblAdjustedTax]	= [dbo].fnRoundBanker(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	,[ysnTaxAdjusted]	= [dbo].fnRoundBanker(ISNULL([ysnTaxAdjusted], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 WHERE 
 	intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceIdLocal)
 	
@@ -132,9 +132,9 @@ UPDATE
 SET
 	[dblTotal]		= (	CASE WHEN ((ISNULL([intShipmentId],0) <> 0 OR ISNULL([intShipmentPurchaseSalesContractId],0) <> 0 OR ISNULL(intLoadDetailId,0) <> 0) AND ISNULL([intItemWeightUOMId],0) <> 0)
 							THEN
-								ROUND(ROUND((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+								[dbo].fnRoundBanker([dbo].fnRoundBanker((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker(((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 							ELSE
-								ROUND(ROUND((([dblPrice] / [dblSubCurrencyRate]) * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / [dblSubCurrencyRate]) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+								[dbo].fnRoundBanker([dbo].fnRoundBanker((([dblPrice] / [dblSubCurrencyRate]) * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker(((([dblPrice] / [dblSubCurrencyRate]) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 						END							
 					  )
 WHERE
