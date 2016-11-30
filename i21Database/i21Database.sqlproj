@@ -4591,6 +4591,7 @@
     <Build Include="dbo\Views\vyuRKM2MInquiryTranNotMapping.sql" />
     <Build Include="dbo\Views\vyuRKM2MInquiryBasisNotMapping.sql" />
     <Build Include="dbo\Views\vyuRKM2MInquiryNotMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
