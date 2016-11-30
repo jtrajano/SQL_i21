@@ -88,7 +88,7 @@ LEFT OUTER JOIN
 		ON I.[intEntityId] = EB.intEntityId
 LEFT OUTER JOIN
 	(
-	SELECT --TOP 1
+	SELECT TOP 1
 		 G.intTransactionId
 		,G.strTransactionId
 		,G.intAccountId
