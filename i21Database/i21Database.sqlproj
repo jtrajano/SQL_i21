@@ -4454,6 +4454,7 @@
     <Build Include="dbo\Views\vyuARGetItemPricingLevelDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetItemList.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
