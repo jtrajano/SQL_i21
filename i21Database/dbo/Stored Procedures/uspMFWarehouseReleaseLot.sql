@@ -49,11 +49,14 @@ BEGIN TRY
 		,@strAttributeValueByBatch NVARCHAR(50)
 		,@intCategoryId int
 		,@intReleaseStatusId int
+	DECLARE @intManufacturingCellId INT
+		,@intLotCreatedShiftId INT
+		,@dtmBusinessDate DATETIME
+		,@intShiftActivityId INT
+		,@intShiftActivityStatusId INT
 
 	SELECT @dtmCurrentDate = GETDATE()
-
-
-
+	
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
@@ -360,6 +363,47 @@ BEGIN TRY
 			,@ysnSanitized = 0
 			,@strBatchNo = @intBatchId
 			,@intSKUId = @intSKUId OUTPUT
+	END
+
+	SELECT TOP 1 @intManufacturingCellId = WO.intManufacturingCellId
+	FROM tblMFWorkOrderProducedLot WPL
+	JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = WPL.intWorkOrderId
+	WHERE WPL.intLotId = @intLotId
+	ORDER BY WPL.intWorkOrderProducedLotId DESC
+
+	IF ISNULL(@intManufacturingCellId, '') <> ''
+	BEGIN
+		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmDateCreated, @intLocationId)
+
+		SELECT @intLotCreatedShiftId = intShiftId
+		FROM tblMFShift
+		WHERE intLocationId = @intLocationId
+			AND @dtmDateCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+				AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+		SELECT @intShiftActivityId = intShiftActivityId
+			,@intShiftActivityStatusId = intShiftActivityStatusId
+		FROM tblMFShiftActivity
+		WHERE intManufacturingCellId = @intManufacturingCellId
+			AND intShiftId = @intLotCreatedShiftId
+			AND dtmShiftDate = @dtmBusinessDate
+
+		IF ISNULL(@intShiftActivityId, '') <> ''
+		BEGIN
+			-- Completed status
+			UPDATE tblMFShiftActivity
+			SET strComments = 'ShiftActivity is in completed status when the lot was released. Please re-calculate the efficiency.'
+			WHERE intShiftActivityId = @intShiftActivityId
+				AND intShiftActivityStatusId = 3
+
+			UPDATE tblMFWorkOrderProducedLot
+			SET intShiftActivityId = CASE 
+					WHEN ISNULL(intShiftActivityId, '') <> ''
+						THEN intShiftActivityId
+					ELSE @intShiftActivityId
+					END
+			WHERE intLotId = @intLotId
+		END
 	END
 
 	COMMIT TRANSACTION
