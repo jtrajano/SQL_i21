@@ -13,7 +13,7 @@ FROM (
 		, intLineNo					= intPContractDetailId
 		, intOrderId				= intPContractHeaderId
 		, strOrderNumber			= strPContractNumber
-		, dblOrdered				= dblQuantity
+		, dblOrdered				= LogisticsView.dblQuantity
 		, dblReceived				= dblDeliveredQuantity
 		, intSourceType				= 2
 		, intSourceId				= intLoadDetailId
@@ -21,15 +21,15 @@ FROM (
 		, intItemId					= LogisticsView.intItemId
 		, strItemNo					= strItemNo
 		, strItemDescription		= strItemDescription
-		, dblQtyToReceive			= dblQuantity - dblDeliveredQuantity
+		, dblQtyToReceive			= LogisticsView.dblQuantity - dblDeliveredQuantity
 		, intLoadToReceive			= CAST(0 AS INT) 
 		, dblUnitCost				= dblCost
 		, dblTax					= CAST(0 AS NUMERIC(18, 6)) 
 		, dblLineTotal				= CAST(0 AS NUMERIC(18, 6)) 
 		, strLotTracking			= strLotTracking
 		, intCommodityId			= intPCommodityId
-		, intContainerId			= intLoadContainerId
-		, strContainer				= strContainerNumber
+		, intContainerId			= LogisticsView.intLoadContainerId
+		, strContainer				= LogisticsView.strContainerNumber
 		, intSubLocationId			= intSubLocationId
 		, strSubLocationName		= strSubLocationName
 		, intStorageLocationId		= CAST(NULL AS INT) 
@@ -62,6 +62,7 @@ FROM (
 		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
+		, LC.ysnRejected
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 
@@ -76,9 +77,11 @@ FROM (
 				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intPCostUOMId)
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure 
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
+			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
 	WHERE LogisticsView.dblBalanceToReceive > 0 
 		  AND LogisticsView.intSourceType = 2 
 		  AND LogisticsView.intTransUsedBy = 1 
 		  AND LogisticsView.intPurchaseSale = 1
 		  AND LogisticsView.ysnPosted = 1
+		  AND ISNULL(LC.ysnRejected,0) <> 1
 ) tblAddOrders
