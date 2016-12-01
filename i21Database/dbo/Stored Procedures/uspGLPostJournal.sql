@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspGLPostJournal]
 	@strBatchId			AS NVARCHAR(100)	= '',	
 	@strJournalType		AS NVARCHAR(30)		= '',
 	@intEntityId		AS INT				= 1,
+	@applyCurrentRate	AS BIT				= 1,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
 AS
@@ -497,10 +498,10 @@ BEGIN
 				,@intJournalId_NEW
 				,@dtmDate_NEW
 				,[intAccountId]			
-				,[dblCredit]  =CASE WHEN @intDefaultCurrencyId <> C.intCurrencyId THEN (dblCreditForeign * B.dblRate) else dblCredit end
-				,[dblCreditRate] = B.dblRate
-				,[dblDebit] =   CASE WHEN @intDefaultCurrencyId <> C.intCurrencyId THEN (dblDebitForeign * B.dblRate) else dblDebit end
-				,[dblDebitRate]	 = B.dblRate
+				,[dblCredit]  =CASE WHEN @intDefaultCurrencyId <> C.intCurrencyId AND @applyCurrentRate = 1 THEN (dblCreditForeign * B.dblRate) else dblCredit end
+				,[dblCreditRate] = CASE WHEN @applyCurrentRate = 1 THEN  B.dblRate ELSE dblCreditRate END
+				,[dblDebit] =   CASE WHEN @intDefaultCurrencyId <> C.intCurrencyId AND @applyCurrentRate = 1 THEN (dblDebitForeign * B.dblRate) else dblDebit end
+				,[dblDebitRate]	 = CASE WHEN @applyCurrentRate = 1 THEN  B.dblRate ELSE dblDebitRate END
 				,[dblCreditUnit]
 				,[dblDebitUnit]
 				,[dblCreditForeign]
