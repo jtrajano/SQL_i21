@@ -4568,6 +4568,7 @@
     <Build Include="dbo\Tables\tblSMActivityFollowUp.sql" />
     <Build Include="dbo\Tables\tblSMActivityFollowUpTemplate.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
