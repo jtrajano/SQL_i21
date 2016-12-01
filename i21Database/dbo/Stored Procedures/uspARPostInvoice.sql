@@ -1852,182 +1852,26 @@ if @recap = 1 AND @raiseError = 0
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------
-DECLARE @LineItemAccounts AS TABLE(
-	 [intInvoiceDetailId]			INT
-	,[intAccountId]					INT
-	,[intCOGSAccountId]				INT
-	,[intSalesAccountId]			INT
-	,[intInventoryAccountId]		INT
-	,[intServiceChargeAccountId]	INT
-	,[intLicenseAccountId]			INT
-	,[intMaintenanceAccountId]		INT
-)
 
 IF @post = 1  
 	BEGIN 
 
-		INSERT INTO @LineItemAccounts(
-			 [intInvoiceDetailId]
-			,[intAccountId]
-			,[intCOGSAccountId]
-			,[intSalesAccountId]
-			,[intInventoryAccountId]
-			,[intServiceChargeAccountId]
-			,[intLicenseAccountId]
-			,[intMaintenanceAccountId]
-		)
-		SELECT
-			 [intInvoiceDetailId]
-			,[intAccountId]
-			,[intCOGSAccountId]
-			,[intSalesAccountId]
-			,[intInventoryAccountId]
-			,[intServiceChargeAccountId]
-			,[intLicenseAccountId]
-			,[intMaintenanceAccountId]
-		FROM
-			tblARInvoiceDetail ARID
-		INNER JOIN
-			@PostInvoiceData PID
-				ON ARID.[intInvoiceId] = PID.[intInvoiceId]
+		
+		BEGIN TRY 
+			DECLARE @Ids AS Id
+			INSERT INTO @Ids(intId)
+			SELECT IP.intInvoiceId 
+			FROM 
+				@PostInvoiceData IP 
 
-		UPDATE LIA
-		SET
-			LIA.[intAccountId] = (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = ARID.intItemId AND strType IN ('Non-Inventory','Service'))) 
-										THEN
-											IST.intGeneralAccountId													
-										WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = ARID.intItemId AND strType = 'Other Charge')) 
-										THEN
-											IST.intOtherChargeIncomeAccountId
-										ELSE
-											ISNULL(ARID.intConversionAccountId,(CASE WHEN ARID.intServiceChargeAccountId IS NOT NULL AND ARID.intServiceChargeAccountId <> 0 THEN ARID.intServiceChargeAccountId ELSE ARID.intSalesAccountId END))
-									END)
-		FROM
-			@LineItemAccounts LIA
-		INNER JOIN
-			tblARInvoiceDetail ARID
-				ON LIA.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 	
-		INNER JOIN 
-			@PostInvoiceData PID
-				ON ARID.intInvoiceId = PID.intInvoiceId
-		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
-				ON ARID.intItemId = IST.intItemId 
-				AND PID.intCompanyLocationId = IST.intLocationId					
-		WHERE
-			ARID.dblTotal <> @ZeroDecimal 
-			AND ((ARID.intItemId IS NULL OR ARID.intItemId = 0)
-				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = ARID.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
-			AND PID.strTransactionType <> 'Debit Memo'
-			AND ISNULL(PID.intPeriodsToAccrue,0) <= 1
-
-		UPDATE LIA
-		SET
-			LIA.[intLicenseAccountId] = IST.intGeneralAccountId
-		FROM
-			@LineItemAccounts LIA
-		INNER JOIN
-			tblARInvoiceDetail ARID
-				ON LIA.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
-		INNER JOIN
-			tblICItem I
-				ON ARID.intItemId = ARID.intItemId 				
-		INNER JOIN 
-			@PostInvoiceData PID
-				ON ARID.intInvoiceId = PID.intInvoiceId
-		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
-				ON ARID.intItemId = IST.intItemId 						
-		WHERE
-			ARID.dblLicenseAmount <> @ZeroDecimal
-			AND ARID.strMaintenanceType IN ('License/Maintenance', 'License Only')
-			AND I.strType = 'Software'
-			AND PID.strTransactionType <> 'Debit Memo'
-			AND (ISNULL(PID.intPeriodsToAccrue,0) <= 1 OR ( ISNULL(PID.intPeriodsToAccrue,0) > 1 AND ISNULL(@accrueLicense,0) = 0))
-
-		UPDATE LIA
-		SET
-			LIA.[intMaintenanceAccountId] = IST.intMaintenanceSalesAccountId
-		FROM
-			@LineItemAccounts LIA
-		INNER JOIN
-			tblARInvoiceDetail ARID
-				ON LIA.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
-		INNER JOIN
-			tblICItem I
-				ON ARID.intItemId = ARID.intItemId 				
-		INNER JOIN 
-			@PostInvoiceData PID
-				ON ARID.intInvoiceId = PID.intInvoiceId
-		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
-				ON ARID.intItemId = IST.intItemId 							
-		WHERE
-			ARID.dblMaintenanceAmount <> @ZeroDecimal
-			AND ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-			AND I.strType = 'Software'
-			AND PID.strTransactionType <> 'Debit Memo'
-			AND ISNULL(PID.intPeriodsToAccrue,0) <= 1
-
-
-		UPDATE LIA
-		SET
-			 LIA.[intAccountId]		= IST.intSalesAccountId
-			,LIA.intSalesAccountId	= IST.intSalesAccountId
-		FROM
-			@LineItemAccounts LIA
-		INNER JOIN
-			tblARInvoiceDetail ARID
-				ON LIA.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
-		INNER JOIN
-			tblICItem I
-				ON ARID.intItemId = ARID.intItemId 				
-		INNER JOIN 
-			@PostInvoiceData PID
-				ON ARID.intInvoiceId = PID.intInvoiceId
-		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
-				ON ARID.intItemId = IST.intItemId 							
-		WHERE
-			(ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-			AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
-			AND PID.strTransactionType <> 'Debit Memo'
-			AND ISNULL(PID.intPeriodsToAccrue,0) <= 1
-
-
-		UPDATE LIA
-		SET
-			 LIA.[intAccountId]		= ARID.intSalesAccountId
-			,LIA.intSalesAccountId	= ARID.intSalesAccountId
-		FROM
-			@LineItemAccounts LIA
-		INNER JOIN
-			tblARInvoiceDetail ARID
-				ON LIA.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 			
-		INNER JOIN 
-			@PostInvoiceData PID
-				ON ARID.intInvoiceId = PID.intInvoiceId							
-		WHERE
-			ARID.dblTotal <> @ZeroDecimal  
-			AND PID.strTransactionType = 'Debit Memo'
-			AND ISNULL(PID.intPeriodsToAccrue,0) <= 1
-			
-			
-		UPDATE ARID
-		SET
-			ARID.[intAccountId]					= LIA.[intAccountId]
-			,ARID.[intCOGSAccountId]			= LIA.[intCOGSAccountId]
-			,ARID.[intSalesAccountId]			= LIA.[intSalesAccountId]
-			,ARID.[intInventoryAccountId]		= LIA.[intInventoryAccountId]
-			,ARID.[intServiceChargeAccountId]	= LIA.[intServiceChargeAccountId]
-			,ARID.[intLicenseAccountId]			= LIA.[intLicenseAccountId]
-			,ARID.[intMaintenanceAccountId]		= LIA.[intMaintenanceAccountId]
-		FROM 
-			tblARInvoiceDetail ARID
-		INNER JOIN
-			@LineItemAccounts LIA
-				ON ARID.[intInvoiceDetailId] = LIA.[intInvoiceDetailId] 
-
+			EXEC	dbo.[uspARUpdateTransactionAccounts]  
+						 @Ids				= @Ids
+						,@TransactionType	= 1
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH
 
 		
 		-- Accruals
@@ -2365,7 +2209,7 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= LIA.intAccountId
+				,intAccountId				= B.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
@@ -2398,10 +2242,7 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
 				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId
-			LEFT OUTER JOIN
-				@LineItemAccounts LIA
-					ON B.intInvoiceDetailId = LIA.intInvoiceDetailId 	
+					ON A.intInvoiceId = P.intInvoiceId 	
 			LEFT OUTER JOIN 
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
@@ -2419,7 +2260,7 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= LIA.intLicenseAccountId 
+				,intAccountId				= B.intLicenseAccountId 
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
@@ -2479,10 +2320,7 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
 				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId
-			LEFT OUTER JOIN
-				@LineItemAccounts LIA
-					ON B.intInvoiceDetailId = LIA.intInvoiceDetailId 
+					ON A.intInvoiceId = P.intInvoiceId 
 			LEFT OUTER JOIN 
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
@@ -2581,7 +2419,7 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= LIA.intMaintenanceAccountId 
+				,intAccountId				= B.intMaintenanceAccountId 
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
 																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
 																												ELSE
@@ -2639,9 +2477,6 @@ IF @post = 1
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
-				@LineItemAccounts LIA
-					ON B.intInvoiceDetailId = LIA.intInvoiceDetailId
-			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
 					AND A.intCompanyLocationId = ICIS.intLocationId 						
@@ -2657,7 +2492,7 @@ IF @post = 1
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= LIA.intSalesAccountId
+				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
@@ -2694,9 +2529,6 @@ IF @post = 1
 			INNER JOIN
 				tblICItem I
 					ON B.intItemId = I.intItemId
-			LEFT OUTER JOIN
-				@LineItemAccounts LIA
-					ON B.intInvoiceDetailId = LIA.intInvoiceDetailId
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 

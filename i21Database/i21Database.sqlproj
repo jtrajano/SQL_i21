@@ -4459,6 +4459,7 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
     <Build Include="dbo\Functions\fnRoundBanker.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
