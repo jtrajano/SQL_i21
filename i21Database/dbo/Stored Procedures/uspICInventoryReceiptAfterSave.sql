@@ -56,6 +56,9 @@ BEGIN
 	-- Call the grain sp when deleting the receipt. 
 	EXEC uspGRReverseOnReceiptDelete @ReceiptId
 
+	-- IC-3058 Increase the Storage ticket Open Balance and DP contract quantity if the Storage Ticket is a DP ticket when an IR created by Settle Storage is deleted.
+	EXEC uspGRReverseSettleStorage @ReceiptId, @UserId
+
 	-- Call the quality sp when deleting the receipt.
 	EXEC uspQMInspectionDeleteResult @ReceiptId
 END 
