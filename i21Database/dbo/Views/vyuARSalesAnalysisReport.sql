@@ -194,7 +194,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= INV.intAccountId 
+	 , intItemAccountId				= ISNULL(INV.intAccountId, SOD.intAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -442,7 +442,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= INV.intLicenseAccountId 
+	 , intItemAccountId				= ISNULL(INV.intLicenseAccountId, SOD.intLicenseAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -691,7 +691,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= INV.intMaintenanceAccountId 
+	 , intItemAccountId				= ISNULL(INV.intMaintenanceAccountId, SOD.intMaintenanceAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
