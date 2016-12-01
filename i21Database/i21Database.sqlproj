@@ -4577,6 +4577,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
     <Build Include="dbo\Tables\tblCTPriceContract.sql" />
     <None Include="Scripts\Post-Deployment\EM\036_MoveTheTermsPerType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostAdjustmentAverageCostingLoopCBOut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
