@@ -1139,8 +1139,8 @@ SET @queryResultAct = CURSOR FOR
 		,strActivityNo = (select top 1 tblSMStartingNumber.strPrefix from tblSMStartingNumber where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity')
 		,strDetails = '<p>'+tblHDTicket.strSubject+'</p>'
 		,ysnPublic = 1
-		,dtmCreated = tblHDTicket.dtmCreated
-		,dtmModified = tblHDTicket.dtmLastModified
+		,dtmCreated = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmCreated) else DATEADD(hour, -@intOffset, tblHDTicket.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmLastModified) else DATEADD(hour, -@intOffset, tblHDTicket.dtmLastModified) end)
 		,intCreatedBy = tblHDTicket.intCreatedUserEntityId
 		,intConcurrencyId = 1
 		,intTicketId = tblHDTicket.intTicketId
