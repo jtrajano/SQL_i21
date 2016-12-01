@@ -1578,9 +1578,34 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             }
         }
+
         this.validateRecord(config, function (result) {
             if (result) {
-                action(true);
+                var uomStore = config.viewModel.data.current.tblICItemUOMs();
+                
+                if(uomStore) {
+                    var uoms = uomStore.data.items;
+                    var cnt = false;
+                    for(var i = 0; i < uoms.length; i++) {
+                        var u = uoms[i];
+                        if (!u.dummy) {
+                            if (cnt > 1)
+                                break;
+                            if (u.data.dblUnitQty === 1) {
+                                cnt++;
+                            }
+                        }
+                    }
+                    if(cnt > 1) {
+                        var tabItem = win.down('#tabItem');
+                        tabItem.setActiveTab('pgeDetails');
+                        var grid = win.down('#grdUnitOfMeasure');
+                        iRely.Msg.showError('UOMs must not have the same Unit Qty.', Ext.MessageBox.OK, win);
+                        action(false);
+                    } else
+                        action(true);
+                } else
+                    action(true);
             }
             else {
                 var tabItem = win.down('#tabItem');
