@@ -207,6 +207,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql
 :r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
+:r .\AR\DefaultData\25_UpdateTransactionAccountIds.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
