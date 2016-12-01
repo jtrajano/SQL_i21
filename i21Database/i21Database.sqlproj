@@ -4460,6 +4460,7 @@
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
     <Build Include="dbo\Functions\fnRoundBanker.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccounts.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\25_UpdateTransactionAccountIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
