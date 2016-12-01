@@ -1058,6 +1058,8 @@ END
 
 DECLARE @queryResultAct CURSOR
 
+declare @intOffset int = (SELECT datediff(hour,GETUTCDATE(), getdate()));
+
 declare @intTransactionIdAct int
 declare @strTypeAct nvarchar(50)
 declare @strSubjectAct nvarchar(100)
@@ -1104,8 +1106,8 @@ SET @queryResultAct = CURSOR FOR
 		,strActivityNo = (select top 1 tblSMStartingNumber.strPrefix from tblSMStartingNumber where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity')
 		,strDetails = '<p>'+tblHDTicket.strSubject+'</p>'
 		,ysnPublic = 1
-		,dtmCreated = tblHDTicket.dtmCreated
-		,dtmModified = tblHDTicket.dtmLastModified
+		,dtmCreated = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmCreated) else DATEADD(hour, -@intOffset, tblHDTicket.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmLastModified) else DATEADD(hour, -@intOffset, tblHDTicket.dtmLastModified) end)
 		,intCreatedBy = tblHDTicket.intCreatedUserEntityId
 		,intConcurrencyId = 1
 		,intTicketId = tblHDTicket.intTicketId
@@ -1286,6 +1288,8 @@ PRINT N'Creating Activity Note from Activity Details...'
 
 DECLARE @queryResultComment CURSOR
 
+declare @intDetailsOffset int = (SELECT datediff(hour,GETUTCDATE(), getdate()));
+
 declare @strCommentComment nvarchar(max);
 declare @strScreenComment nvarchar(50);
 declare @strRecordNoComment nvarchar(50);
@@ -1308,8 +1312,8 @@ SET @queryResultComment = CURSOR FOR
 		strComment = '<p>Comment : '+(case when tblHDTicketComment.ysnSent = 1 then 'Sent' else '<font color="red">Draft</font>' end)+'</p>'+(case when tblHDTicketComment.ysnEncoded = 1 then dbo.fnHDDecodeComment(substring(tblHDTicketComment.strComment,4,len(tblHDTicketComment.strComment)-3)) else tblHDTicketComment.strComment end)+'</br>'
 		,strScreen = ''
 		,strRecordNo = ''
-		,dtmAdded = tblHDTicketComment.dtmCreated
-		,dtmModified = tblHDTicketComment.dtmLastModified
+		,dtmAdded = (case when @intOffset < 0 then DATEADD(hour, ABS(@intDetailsOffset), tblHDTicketComment.dtmCreated) else DATEADD(hour, -@intDetailsOffset, tblHDTicketComment.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intDetailsOffset), tblHDTicketComment.dtmLastModified) else DATEADD(hour, -@intDetailsOffset, tblHDTicketComment.dtmLastModified) end)
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketComment.intCreatedUserEntityId
@@ -1430,6 +1434,8 @@ PRINT N'Creating Activity Note from Activity Internal Note...'
 
 DECLARE @queryResultNote CURSOR
 
+declare @intNotesOffset int = (SELECT datediff(hour,GETUTCDATE(), getdate()));
+
 declare @strCommentNote nvarchar(max);
 declare @strScreenNote nvarchar(50);
 declare @strRecordNoNote nvarchar(50);
@@ -1452,8 +1458,8 @@ SET @queryResultNote = CURSOR FOR
 		strComment = '<p>Internal Note:</p><p>'+tblHDTicketNote.strNote+'</p></br>'
 		,strScreen = ''
 		,strRecordNo = ''
-		,dtmAdded = tblHDTicketNote.dtmCreated
-		,dtmModified = tblHDTicketNote.dtmCreated
+		,dtmAdded = (case when @intOffset < 0 then DATEADD(hour, ABS(@intNotesOffset), tblHDTicketNote.dtmCreated) else DATEADD(hour, -@intNotesOffset, tblHDTicketNote.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intNotesOffset), tblHDTicketNote.dtmCreated) else DATEADD(hour, -@intNotesOffset, tblHDTicketNote.dtmCreated) end)
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketNote.intCreatedUserEntityId
