@@ -1676,8 +1676,13 @@ FROM	ForGLEntries_CTE
 			ON GLAccounts.intItemId = ForGLEntries_CTE.intItemId
 			AND GLAccounts.intItemLocationId = ForGLEntries_CTE.intItemLocationId
 			AND GLAccounts.intTransactionTypeId = ForGLEntries_CTE.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		INNER JOIN dbo.tblGLAccount			
+			ON tblGLAccount.intAccountId = 
+				CASE	WHEN ForGLEntries_CTE.intFOBPointId = @FOB_DESTINATION THEN 
+							GLAccounts.intRevalueInTransit 
+						ELSE 
+							GLAccounts.intInventoryId 
+				END 
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(ForGLEntries_CTE.dblQty, 0), ISNULL(ForGLEntries_CTE.dblCost, 0)) + ISNULL(ForGLEntries_CTE.dblValue, 0)			
 		) Debit
