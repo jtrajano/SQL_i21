@@ -4592,6 +4592,7 @@
     <Build Include="dbo\Views\vyuRKM2MInquiryBasisNotMapping.sql" />
     <Build Include="dbo\Views\vyuRKM2MInquiryNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
