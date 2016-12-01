@@ -4574,6 +4574,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetLotQualityColumns.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetParentLotQualityColumns.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
