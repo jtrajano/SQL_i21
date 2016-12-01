@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspQMGetParentLotQuality]
+﻿CREATE PROCEDURE uspQMGetParentLotQuality
 	@strStart NVARCHAR(10) = '0'
 	,@strLimit NVARCHAR(10) = '1'
 	,@strFilterCriteria NVARCHAR(MAX) = ''
@@ -22,18 +22,20 @@ BEGIN TRY
 	SET @SQL = 'SELECT @PropList = Stuff((  
     SELECT ''],['' + strPropertyName  
     FROM (  
-     SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName  
-	FROM dbo.tblQMTestResult AS TR
-  JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = TR.intProductValueId AND TR.intProductTypeId = 11 
-  JOIN dbo.tblICLot AS L ON L.intParentLotId = PL.intParentLotId 
-  JOIN dbo.tblICItem AS I ON I.intItemId = L.intItemId  
-  JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
-  JOIN dbo.tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
-  JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
-  JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
-	AND S.intLocationId =' + @strLocationId + '
-  JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
-  JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
+		SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName  
+		FROM tblICParentLot AS PL
+		JOIN tblICLot AS L ON L.intParentLotId = PL.intParentLotId 
+		JOIN tblICItem AS I ON I.intItemId = L.intItemId  
+		JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
+		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
+		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
+			AND S.intProductTypeId = 11
+			AND S.intLocationId =' + @strLocationId + 
+		'
+		JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId
+		JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
+		JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
      ) t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
@@ -46,77 +48,120 @@ BEGIN TRY
 		,@PropList = @str OUTPUT
 
 	--SELECT @str -- Property Names List  
-	SET @SQL = 'SELECT TOP ' + @strLimit + '   
-  strCategoryCode  
-  ,intItemId  
-  ,strItemNo  
-  ,strDescription  
-  ,intLotId  
-  ,strLotNumber
-  ,strLotStatus
-  ,strLotAlias
-  ,strSampleNumber
-  ,strSampleStatus
-  ,dblLotQty  
-  ,strUnitMeasure
-  ,dtmDateCreated
-  ,intSampleId
-  ,strComment
-  ,' + @str + 
-		'FROM (  
-  SELECT DENSE_RANK() OVER (ORDER BY S.intSampleId DESC) intRankNo  
-   ,C.strCategoryCode
-   ,I.intItemId
-   ,I.strItemNo  
-   ,I.strDescription  
-   ,PL.intParentLotId AS intLotId
-   ,PL.strParentLotNumber AS strLotNumber
-   ,LS.strSecondaryStatus AS strLotStatus
-   ,L.strLotAlias
-   ,S.strSampleNumber
-   ,SS.strSecondaryStatus AS strSampleStatus
-   ,ISNULL(SUM(L.dblWeight),SUM(L.dblQty)) AS dblLotQty
-   ,U.strUnitMeasure
-   ,MIN(L.dtmDateCreated) AS dtmDateCreated
-   ,S.intSampleId  
-   ,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName  
-   ,TR.strPropertyValue  
-   ,S.strComment
-  FROM dbo.tblQMTestResult AS TR
-  JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = TR.intProductValueId AND TR.intProductTypeId = 11 
-  JOIN dbo.tblICLot AS L ON L.intParentLotId = PL.intParentLotId 
-  JOIN dbo.tblICLotStatus AS LS ON LS.intLotStatusId = PL.intLotStatusId  
-  JOIN dbo.tblICItem AS I ON I.intItemId = L.intItemId  
-  JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
-  JOIN dbo.tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
-  JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
-  JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
-	AND S.intLocationId =' + @strLocationId + '
-  JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
-  JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
-  JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
-  GROUP BY
-   C.strCategoryCode
-   ,I.intItemId
-   ,I.strItemNo
-   ,I.strDescription
-   ,PL.intParentLotId
-   ,PL.strParentLotNumber
-   ,LS.strSecondaryStatus
-   ,L.strLotAlias
-   ,S.strSampleNumber
-   ,SS.strSecondaryStatus
-   ,U.strUnitMeasure
-   ,S.intSampleId
-   ,P.strPropertyName + '' - '' + T.strTestName
-   ,TR.strPropertyValue
-  ) t  
- PIVOT(max(strPropertyValue) FOR strPropertyName IN (' 
-		+ @str + ')) pvt WHERE intRankNo > ' + @strStart
+	-- Quality Sample Data
+	IF OBJECT_ID('tempdb.dbo.#ParentLotQuality') IS NOT NULL
+		DROP TABLE #ParentLotQuality
+
+	SET @SQL = 
+		'SELECT *
+	INTO #ParentLotQuality
+	FROM (
+		SELECT DENSE_RANK() OVER (
+				ORDER BY S.intSampleId DESC
+				) intRankNo  
+			,C.strCategoryCode
+			,I.intItemId
+			,I.strItemNo  
+			,I.strDescription  
+			,PL.intParentLotId AS intLotId
+			,PL.strParentLotNumber AS strLotNumber
+			,LS.strSecondaryStatus AS strLotStatus
+			,L.strLotAlias
+			,S.strSampleNumber
+			,SS.strSecondaryStatus AS strSampleStatus
+			,ISNULL(SUM(L.dblWeight),SUM(L.dblQty)) AS dblLotQty
+			,U.strUnitMeasure
+			,MIN(L.dtmDateCreated) AS dtmDateCreated
+			,S.intSampleId
+			,S.strComment
+			,COUNT(*) OVER () AS intTotalCount 
+		FROM tblICParentLot AS PL 
+		JOIN tblICLot AS L ON L.intParentLotId = PL.intParentLotId 
+		JOIN tblICLotStatus AS LS ON LS.intLotStatusId = PL.intLotStatusId  
+		JOIN tblICItem AS I ON I.intItemId = L.intItemId  
+		JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
+		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
+		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
+			AND S.intProductTypeId = 11
+			AND S.intLocationId =' 
+		+ @strLocationId + '
+		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId'
 
 	IF (LEN(@strFilterCriteria) > 0)
-		SET @SQL = @SQL + ' and ' + @strFilterCriteria
+	BEGIN
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotNumber]', 'PL.strParentLotNumber')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotStatus]', 'LS.strSecondaryStatus')
+		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dblLotQty]', 'ISNULL(L.dblWeight,L.dblQty)')
+		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dtmDateCreated]', 'L.dtmDateCreated')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strSampleStatus]', 'SS.strSecondaryStatus')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strComment]', 'S.strComment')
+		SET @SQL = @SQL + ' WHERE ' + @strFilterCriteria
+	END
 
+	SET @SQL = @SQL + ' GROUP BY
+			C.strCategoryCode
+			,I.intItemId
+			,I.strItemNo
+			,I.strDescription
+			,PL.intParentLotId
+			,PL.strParentLotNumber
+			,LS.strSecondaryStatus
+			,L.strLotAlias
+			,S.strSampleNumber
+			,SS.strSecondaryStatus
+			,U.strUnitMeasure
+			,S.intSampleId
+			,S.strComment'
+
+	SET @SQL = @SQL + ') t '
+	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
+			AND intRankNo <= ' + @strStart + '+' + @strLimit
+	SET @SQL = @SQL + ' SELECT   
+	intTotalCount
+	,strCategoryCode  
+	,intItemId  
+	,strItemNo  
+	,strDescription  
+	,intLotId  
+	,strLotNumber
+	,strLotStatus
+	,strLotAlias
+	,strSampleNumber
+	,strSampleStatus
+	,dblLotQty  
+	,strUnitMeasure
+	,dtmDateCreated
+	,intSampleId
+	,strComment
+	,' + @str + 'FROM (  
+		SELECT intTotalCount
+			,strCategoryCode
+			,CQ.intItemId
+			,strItemNo  
+			,CQ.strDescription  
+			,intLotId
+			,strLotNumber
+			,strLotStatus
+			,strLotAlias
+			,strSampleNumber
+			,strSampleStatus
+			,dblLotQty
+			,strUnitMeasure
+			,CQ.dtmDateCreated
+			,CQ.intSampleId
+			,CQ.strComment
+			,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName  
+			,TR.strPropertyValue
+		FROM #ParentLotQuality CQ
+		JOIN tblQMTestResult AS TR ON TR.intSampleId = CQ.intSampleId
+		JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
+		JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
+	) t  
+	PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @str + 
+		')) pvt'
 	SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
 
 	EXEC sp_executesql @SQL

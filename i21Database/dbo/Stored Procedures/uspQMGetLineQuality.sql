@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspQMGetLineQuality
-     @strStart NVARCHAR(10) = '0'
+	@strStart NVARCHAR(10) = '0'
 	,@strLimit NVARCHAR(10) = '1'
 	,@strFilterCriteria NVARCHAR(MAX) = ''
 	,@strSortField NVARCHAR(MAX) = 'intSampleId'
@@ -23,18 +23,20 @@ BEGIN TRY
     SELECT ''],['' + strPropertyName  
     FROM (  
      SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName
-	   FROM tblQMTestResult AS TR
-	   JOIN tblMFWorkOrder W ON W.intWorkOrderId = TR.intProductValueId AND TR.intProductTypeId = 12
+	   FROM tblMFWorkOrder W
+	   JOIN tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	   JOIN tblICItem AS I ON I.intItemId = W.intItemId  
 	   JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
-	   JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId
-		  AND S.intLocationId =' + @strLocationId + 
+	   JOIN tblQMSample AS S ON S.intWorkOrderId = W.intWorkOrderId
+			AND S.intProductTypeId = 12
+			AND S.intProductValueId = W.intWorkOrderId
+			AND S.intLocationId =' + @strLocationId + 
 		'
 	   JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
 	   JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-	   JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
-	   JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
-	   JOIN tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
+	   JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
+	   JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
+	   JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
      ) t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
@@ -47,55 +49,93 @@ BEGIN TRY
 		,@PropList = @str OUTPUT
 
 	--SELECT @str -- Property Names List  
-	SET @SQL = 'SELECT TOP ' + @strLimit + '   
-  strCategoryCode  
-  ,intItemId  
-  ,strItemNo  
-  ,strDescription  
-  ,intWorkOrderId  
-  ,strWorkOrderNo
-  ,strWorkOrderStatus
-  ,strSampleNumber
-  ,strSampleStatus
-  ,strSampleTypeName
-  ,intSampleId
-  ,dtmSampleReceivedDate
-  ,strComment
-  ,' + @str + 
-		'FROM (  
-  SELECT DENSE_RANK() OVER (ORDER BY S.intSampleId DESC) intRankNo  
-   ,C.strCategoryCode
-   ,I.intItemId
-   ,I.strItemNo  
-   ,I.strDescription  
-   ,W.intWorkOrderId
-   ,W.strWorkOrderNo
-   ,WS.strName AS strWorkOrderStatus
-   ,S.strSampleNumber
-   ,SS.strSecondaryStatus AS strSampleStatus
-   ,ST.strSampleTypeName  
-   ,S.intSampleId  
-   ,S.dtmSampleReceivedDate
-   ,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName  
-   ,TR.strPropertyValue
-   ,S.strComment
-    FROM tblQMTestResult AS TR
-    JOIN tblMFWorkOrder W ON W.intWorkOrderId = TR.intProductValueId AND TR.intProductTypeId = 12
-    JOIN tblICItem AS I ON I.intItemId = W.intItemId  
-    JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
-    JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId
-	   AND S.intLocationId =' + @strLocationId + 
+	-- Quality Sample Data
+	IF OBJECT_ID('tempdb.dbo.#LineQuality') IS NOT NULL
+		DROP TABLE #LineQuality
+
+	SET @SQL = 'SELECT *
+	INTO #LineQuality
+	FROM (				
+		SELECT DENSE_RANK() OVER (
+				ORDER BY S.intSampleId DESC
+				) intRankNo  
+		   ,C.strCategoryCode
+		   ,I.intItemId
+		   ,I.strItemNo  
+		   ,I.strDescription  
+		   ,W.intWorkOrderId
+		   ,W.strWorkOrderNo
+		   ,WS.strName AS strWorkOrderStatus
+		   ,S.strSampleNumber
+		   ,SS.strSecondaryStatus AS strSampleStatus
+		   ,ST.strSampleTypeName  
+		   ,S.intSampleId  
+		   ,S.dtmSampleReceivedDate
+		   ,S.strComment
+		   ,COUNT(*) OVER () AS intTotalCount
+		FROM tblMFWorkOrder W
+		JOIN tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
+		JOIN tblICItem AS I ON I.intItemId = W.intItemId  
+		JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
+		JOIN tblQMSample AS S ON S.intWorkOrderId = W.intWorkOrderId
+			AND S.intProductTypeId = 12
+			AND S.intProductValueId = W.intWorkOrderId
+			AND S.intLocationId =' + @strLocationId + 
 		'
-    JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
-    JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-    JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
-    JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
-    JOIN tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
-  ) t  
- PIVOT(max(strPropertyValue) FOR strPropertyName IN (' + @str + ')) pvt WHERE intRankNo > ' + @strStart
+		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
+		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId'
 
 	IF (LEN(@strFilterCriteria) > 0)
-		SET @SQL = @SQL + ' and ' + @strFilterCriteria
+	BEGIN
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strWorkOrderStatus]', 'WS.strName')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strSampleStatus]', 'SS.strSecondaryStatus')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strComment]', 'S.strComment')
+		SET @SQL = @SQL + ' WHERE ' + @strFilterCriteria
+	END
+
+	SET @SQL = @SQL + ') t '
+	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
+			AND intRankNo <= ' + @strStart + '+' + @strLimit
+	SET @SQL = @SQL + ' SELECT   
+	intTotalCount
+	,strCategoryCode  
+	,intItemId  
+	,strItemNo  
+	,strDescription  
+	,intWorkOrderId  
+	,strWorkOrderNo
+	,strWorkOrderStatus
+	,strSampleNumber
+	,strSampleStatus
+	,strSampleTypeName
+	,intSampleId
+	,dtmSampleReceivedDate
+	,strComment
+	,' + @str + 'FROM (  
+		SELECT intTotalCount
+			,strCategoryCode
+			,CQ.intItemId
+			,strItemNo  
+			,CQ.strDescription  
+			,CQ.intWorkOrderId
+			,strWorkOrderNo
+			,strWorkOrderStatus
+			,strSampleNumber
+			,strSampleStatus
+			,strSampleTypeName  
+			,CQ.intSampleId  
+			,dtmSampleReceivedDate
+			,CQ.strComment
+			,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName
+			,TR.strPropertyValue
+		FROM #LineQuality CQ
+		JOIN tblQMTestResult AS TR ON TR.intSampleId = CQ.intSampleId
+		JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
+		JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
+	) t  
+	PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @str + ')) pvt'
 	SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
 
 	EXEC sp_executesql @SQL

@@ -23,18 +23,17 @@ BEGIN TRY
     SELECT ''],['' + strPropertyName  
     FROM (  
      SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName  
-     FROM dbo.tblCTContractHeader AS CH  
-     JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId  
-     JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
-     JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId  
-     JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
-		AND S.intLocationId =' + @strLocationId + 
-		'
-     JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
-     JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
-     JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
-     JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
-     JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId
+     FROM tblCTContractHeader AS CH  
+     JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId  
+     JOIN tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
+     JOIN tblICItem AS I ON I.intItemId = CD.intItemId  
+     JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
+		AND S.intLocationId =' + @strLocationId + '
+     JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
+     JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
+     JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
+     JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
+     JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
      ) t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
@@ -78,20 +77,20 @@ BEGIN TRY
 			,S.dtmSamplingEndDate
 			,S.strComment
 			,COUNT(*) OVER () AS intTotalCount
-		FROM dbo.tblCTContractHeader AS CH
-		JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId
-		JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId
-		JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId
-		JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
+		FROM tblCTContractHeader AS CH
+		JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId
+		JOIN tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN tblICItem AS I ON I.intItemId = CD.intItemId
+		JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
 			AND S.intLocationId = ' 
 		+ @strLocationId + '
-		JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-		JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-		LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
-		LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
-		LEFT JOIN dbo.tblLGLoad L ON L.intLoadId = S.intLoadId
-		LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
-		LEFT JOIN dbo.tblEMEntity AS E1 ON E1.intEntityId = S.intShipperEntityId'
+		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
+		LEFT JOIN tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+		LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
+		LEFT JOIN tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
+		LEFT JOIN tblEMEntity AS E1 ON E1.intEntityId = S.intShipperEntityId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -157,9 +156,9 @@ BEGIN TRY
 		,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName
 		,TR.strPropertyValue
 	FROM #ContractQuality CQ
-	JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = CQ.intSampleId
-	JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
-	JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId
+	JOIN tblQMTestResult AS TR ON TR.intSampleId = CQ.intSampleId
+	JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
+	JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
   ) t  
  PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @str + ')) pvt'
 	SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
