@@ -2760,6 +2760,31 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onSpecialPricingBeforeQuery: function (obj) {
+        if (obj.combo) {
+            var store = obj.combo.store;
+            var win = obj.combo.up('window');
+            var grid = win.down('#grdSpecialPricing');
+            if (store) {
+                store.remoteFilter = true;
+                store.remoteSort = true;
+            }
+
+            if (obj.combo.itemId === 'cboSpecialPricingDiscountBy') {
+                var promotionType = grid.selection.data.strPromotionType;
+                store.clearFilter();
+                store.filterBy(function (rec, id) {
+                    if (promotionType !== 'Terms Discount' && promotionType !== '') {
+                        if (rec.get('strDescription') !== 'Terms Rate')
+                            return true;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        }
+    },
+    
     onSpecialPricingSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -3699,7 +3724,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 select: this.onSpecialPricingSelect
             },
             "#cboSpecialPricingDiscountBy": {
-                select: this.onSpecialPricingSelect
+                select: this.onSpecialPricingSelect,
+                beforequery: this.onSpecialPricingBeforeQuery
             },
             "#cboBundleUOM": {
                 select: this.onBundleSelect
