@@ -87,7 +87,7 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 		,@COST_ADJ_TYPE_New_Cost AS INT = 2
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
+DECLARE @INV_TRANS_TYPE_Auto_Variance AS INT = 1
 		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
 		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 
@@ -117,6 +117,7 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_ADJ_Lot_Move AS INT = 20
 
 DECLARE	@RunningQty AS NUMERIC(38, 20)
+		,@RunningValue AS NUMERIC(38, 20)
 
 		,@CB_intInventoryFIFOId AS INT 
 		,@CB_intItemId AS INT 
@@ -132,9 +133,13 @@ DECLARE	@RunningQty AS NUMERIC(38, 20)
 		,@AdjustQty AS NUMERIC(38, 20)
 		,@AdjustmentValue AS NUMERIC(38, 20) 
 		,@NewCost AS NUMERIC(38, 20)
+		,@AdjustAverageCost AS NUMERIC(38, 20)
 		,@CostAdjustmentTransactionType AS INT 
 		,@InventoryTransactionIdentityId AS INT 
 		,@StockItemUOMId AS INT 
+		,@BreakOnNextLoop AS BIT = 0
+
+		,@CBOut_Id AS INT 
 						
 -- Exit immediately if item is a lot type. 
 IF dbo.fnGetItemLotType(@intItemId) <> 0 
@@ -257,15 +262,18 @@ BEGIN
 						ELSE 
 							@dblNewValue
 				END 
-				- dbo.fnMultiply(
-					@CB_dblCost
-					,@CB_dblStockIn
-				)
 
-			SET @NewCost = dbo.fnDivide(
-				dbo.fnMultiply(@CB_dblCost, @CB_dblStockIn) + @AdjustmentValue
-				, @CB_dblStockIn
-			) 
+			SET @AdjustAverageCost = 						
+				dbo.fnDivide(
+					@AdjustmentValue
+					,CASE WHEN @RunningQty > 0 THEN @RunningQty ELSE @CB_dblStockIn END 
+				) 
+
+			SET @NewCost = 
+				dbo.fnDivide(
+					dbo.fnMultiply(@CB_dblCost, @CB_dblStockIn) + @AdjustmentValue
+					,@CB_dblStockIn
+				) 
 
 			-- Determine the transaction type to use. 
 			SELECT @CostAdjustmentTransactionType =		
@@ -368,22 +376,93 @@ BEGIN
 			SET		cb.dblCost = @NewCost
 			FROM	tblICInventoryFIFO cb
 			WHERE	cb.intInventoryFIFOId = @CB_intInventoryFIFOId
+
+			-- Process the lot-out. 
+			BEGIN 
+				EXEC uspICPostAdjustmentAverageCostingLoopCBOut @CB_intInventoryFIFOId, @AdjustAverageCost
+			END
 		END 
 
-		-- 2. Process the lot out. 
+		-- Process the next cost bucket. 
+		ELSE IF @CB_dblStockIn > 0  
+		BEGIN 		
+			-- Calculate a new average cost. 
+			SET @AdjustAverageCost = CASE WHEN @RunningQty > 0 THEN dbo.fnDivide(@AdjustmentValue, @RunningQty) ELSE @NewCost END 
+
+			-- TODO: If Running Qty is > 0, then process the lot-out. 
+			IF @RunningQty > 0 
+			BEGIN 
+				EXEC uspICPostAdjustmentAverageCostingLoopCBOut @CB_intInventoryFIFOId, @AdjustAverageCost
+			END 
+			
+			-- TODO: Otherwise, add an adjustment to re-align the average cost. 
+			ELSE IF @RunningQty <= 0 
+			BEGIN 
+				-- Get the running value 
+				SELECT	@RunningValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))
+				FROM	tblICInventoryTransaction t
+						OUTER APPLY (
+							SELECT	TOP 1 
+									t2.intInventoryTransactionId
+							FROM	tblICInventoryTransaction t2
+							WHERE	t2.intItemId = @CB_intItemId
+									AND t2.intItemLocationId = @CB_intItemLocationId
+									AND t2.strTransactionId = @CB_strTransactionId
+									AND t2.intTransactionId = @CB_intTransactionId
+									AND t2.intTransactionDetailId = @CB_intTransactionDetailId
+						) t2
+				WHERE	t.intItemId = @intItemId
+						AND t.intItemLocationId = @intItemLocationId 
+						AND t.intInventoryTransactionId <= t2.intInventoryTransactionId
+
+				SET @AdjustmentValue = 
+					@CB_dblCost 
+					* (
+						@CB_dblStockIn 
+						- dbo.fnCalculateQtyBetweenUOM(@StockItemUOMId, @CB_intItemUOMId, @RunningQty)
+					)
+					- @RunningValue
+
+				-- Create the 'Auto Variance'
+				EXEC [uspICPostInventoryTransaction]
+					@intItemId								= @intItemId
+					,@intItemLocationId						= @intItemLocationId
+					,@intItemUOMId							= @intItemUOMId
+					,@intSubLocationId						= @intSubLocationId
+					,@intStorageLocationId					= @intStorageLocationId
+					,@dtmDate								= @dtmDate
+					,@dblQty								= 0
+					,@dblUOMQty								= 0
+					,@dblCost								= 0
+					,@dblValue								= @AdjustmentValue
+					,@dblSalesPrice							= 0
+					,@intCurrencyId							= @intCurrencyId 
+					,@dblExchangeRate						= @dblExchangeRate
+					,@intTransactionId						= @intTransactionId
+					,@intTransactionDetailId				= @intTransactionDetailId
+					,@strTransactionId						= @strTransactionId
+					,@strBatchId							= @strBatchId
+					,@intTransactionTypeId					= @INV_TRANS_TYPE_Auto_Variance 
+					,@intLotId								= NULL  
+					,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
+					,@intRelatedTransactionId				= @CB_intTransactionId 
+					,@strRelatedTransactionId				= @CB_strTransactionId
+					,@strTransactionForm					= @strTransactionForm
+					,@intEntityUserSecurityId				= @intEntityUserSecurityId
+					,@intCostingMethod						= @AVERAGECOST
+					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+					,@intFobPointId							= @intFobPointId 
+					,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+			END 
+		END 
+
+		-- Execute the stopper (if true). 
+		IF @BreakOnNextLoop = 1 
 		BEGIN 
-			SET @NewCost = @NewCost;
+			BREAK; 
+		END 
 
-
-			SELECT	* 
-			FROM	tblICInventoryFIFOOut cbOut
-			WHERE	cbOut.intInventoryFIFOId = @CB_intInventoryFIFOId
-		END
-
-		-- Stop the loop if running qty becomes zero or negative. 
-		IF @RunningQty <= 0 
-		BREAK; 
-
+		-- Get the next cb record. 
 		FETCH NEXT FROM loopCostBuckets INTO 
 			@CB_intInventoryFIFOId 
 			,@CB_intItemId 
@@ -396,11 +475,16 @@ BEGIN
 			,@CB_intTransactionId
 			,@CB_intTransactionDetailId
 		;
+	
+		-- Add a stopper if Running Qty is Less-Than zero and next cost bucket is Greater-Than zero. 
+		IF @RunningQty <= 0 AND @CB_dblStockIn > 0 
+		BEGIN 
+			SET @BreakOnNextLoop = 1 
+		END 
 	END 
 
 	CLOSE loopCostBuckets;
 	DEALLOCATE loopCostBuckets;
-
 END 
 
 
