@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMBOnDeleteMeterReading]
-	@MeterReadingId INT
+	@MeterReadingId INT,
+	@UserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,11 +16,17 @@ DECLARE @ErrorState INT;
 
 BEGIN TRY
 
+	DECLARE @InvoiceId INT
+	SELECT TOP 1 @InvoiceId =  intInvoiceId FROM tblARInvoice
+	WHERE intMeterReadingId = @MeterReadingId
+
 	UPDATE tblARInvoice
 	SET intMeterReadingId = NULL
 		, intConcurrencyId	= intConcurrencyId + 1
-	WHERE intMeterReadingId = @MeterReadingId
+	WHERE intInvoiceId = @InvoiceId
 		AND ISNULL(ysnPosted, 0) <> 1
+
+	EXEC uspARDeleteInvoice @InvoiceId, @UserId
 
 END TRY
 BEGIN CATCH
