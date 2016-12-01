@@ -136,20 +136,20 @@ BEGIN
 				WHERE ysnCustomerStorage <> 1 AND
 				intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 								
-				UNION
+				--UNION
 
-				(select distinct 1 AS intSeqId,'In-House',@strDescription,StorageType AS [strType],				
-				 CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then dblTotal  else 0 end dblTotal 
-				 ,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId,'' strTruckName,'' strDriverName,[Storage Due]
-				 FROM (
-				SELECT 
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal,strLocationName,strItemNo
-				,Ticket,
-				[Storage Type] StorageType,[Storage Due]
-				FROM vyuGRGetStorageDetail ch
-				WHERE ch.intCommodityId  = @intCommodityId	AND ysnDPOwnedType = 1
-					AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
-				)t)
+				--(select distinct 1 AS intSeqId,'In-House',@strDescription,StorageType AS [strType],				
+				-- CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then dblTotal  else 0 end dblTotal 
+				-- ,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId,'' strTruckName,'' strDriverName,[Storage Due]
+				-- FROM (
+				--SELECT 
+				--dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal,strLocationName,strItemNo
+				--,Ticket,
+				--[Storage Type] StorageType,[Storage Due]
+				--FROM vyuGRGetStorageDetail ch
+				--WHERE ch.intCommodityId  = @intCommodityId	AND ysnDPOwnedType = 1
+				--	AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
+				--)t)
 			UNION
 				SELECT DISTINCT 1,'In-House',@strDescription,'On-Hold' strType,
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal,
