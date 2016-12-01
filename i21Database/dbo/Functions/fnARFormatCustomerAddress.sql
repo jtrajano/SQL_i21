@@ -14,7 +14,9 @@
 RETURNS NVARCHAR(MAX) AS
 BEGIN
 	DECLARE @fullAddress NVARCHAR(MAX)
-	
+	DECLARE @tempAddress NVARCHAR(1000)
+
+
 	SET @strBillToName = CASE WHEN @strBillToName = '' THEN NULL ELSE @strBillToName END
 	SET @strPhone = CASE WHEN @strPhone = '' THEN NULL ELSE @strPhone END
 	SET @strEmail = CASE WHEN @strEmail = '' THEN NULL ELSE @strEmail END	
@@ -29,29 +31,57 @@ BEGIN
 	if @ysnIncludeEntityName = 0
 		SET @strBillToName = NULL
 
-	IF @strBillToName IS NULL
-		BEGIN
-			SET @fullAddress = ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
-					 + ISNULL(RTRIM(@strEmail) + CHAR(13) + char(10), '')
-					 + ISNULL(RTRIM(@strLocationName) + CHAR(13) + char(10), '')
-					 + ISNULL(RTRIM(@strAddress) + CHAR(13) + char(10), '')
-					 + ISNULL(RTRIM(@strCity), '')
-					 + ISNULL(', ' + RTRIM(@strState), '')
-					 + ISNULL(', ' + RTRIM(@strZipCode), '')
-					 + ISNULL(', ' + RTRIM(@strCountry), '')
-		END
-	ELSE
-		BEGIN
-			SET @fullAddress = ISNULL(RTRIM(@strBillToName) + CHAR(13) + char(10), '')
+    
+
+	IF @strBillToName IS NOT NULL
+			SET @tempAddress =  ISNULL(RTRIM(@strBillToName) + CHAR(13) + char(10), '')
+    ELSE
+	        SET @tempAddress = '';
+
+
+	SET @tempAddress = @tempAddress
 				 + ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strEmail) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strLocationName) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strAddress) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strCity), '')
-				 + ISNULL(', ' + RTRIM(@strState), '')
-				 + ISNULL(', ' + RTRIM(@strZipCode), '')
-				 + ISNULL(', ' + RTRIM(@strCountry), '')
-		END	
+			
+    --- Validate City if not null then it will concatenate the comma---
+	IF @strCity is Not Null
+	    SET @tempAddress = @tempAddress + ISNULL(', ' + RTRIM(@strState), '')
+	ELSE 
+	    SET @tempAddress = @tempAddress + ISNULL('' + RTRIM(@strState), '')
+
+
+    --- Validate State if not null then it will concatenate the comma---
+    IF @strState is Not Null
+	    SET @tempAddress = @tempAddress + ISNULL(', ' + RTRIM(@strZipCode), '')
+	ELSE 
+	   BEGIN
+			IF(@strCity is Not Null)
+				SET @tempAddress = @tempAddress + ISNULL(', ' + RTRIM(@strZipCode), '')
+			ELSE
+				SET @tempAddress = @tempAddress + ISNULL('' + RTRIM(@strZipCode), '')
+	   END
+
+    --- Validate ZipCode if not null then it will concatenate the comma---
+    IF @strZipCode is Not Null
+	    SET @tempAddress = @tempAddress + ISNULL(', ' + RTRIM(@strCountry), '')
+	ELSE
+	   BEGIN 
+			 IF @strState is Not Null
+				SET @tempAddress = @tempAddress + ISNULL(', ' + RTRIM(@strCountry), '')
+			 ELSE 
+			   BEGIN
+					IF(@strCity is Not Null)
+						SET @tempAddress = @tempAddress + ISNULL(', ' + RTRIM(@strCountry), '')
+					ELSE
+						SET @tempAddress = @tempAddress + ISNULL('' + RTRIM(@strCountry), '')
+			   END
+       END
+
+	SET @fullAddress = @tempAddress
+
 
 	RETURN @fullAddress	
 END
