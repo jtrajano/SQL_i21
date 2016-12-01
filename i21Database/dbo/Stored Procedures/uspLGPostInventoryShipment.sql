@@ -622,11 +622,11 @@ BEGIN
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
-	JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 	LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
 	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
+	LEFT JOIN tblICItemLocation IL ON IL.intItemLocationId = Lot.intItemLocationId
 	WHERE L.intLoadId = @intTransactionId
 
 	EXEC dbo.uspCTShipped @ItemsFromInventoryShipment ,@intEntityUserSecurityId  
