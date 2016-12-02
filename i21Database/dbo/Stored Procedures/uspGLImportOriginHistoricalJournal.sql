@@ -8,13 +8,13 @@ DECLARE @invalidDatesUpdated VARCHAR(1)
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption A join tblGLAccount B on A.OriginConversion_OffsetAccountId = B.intAccountId)
 BEGIN
-	SELECT 'Origin Offset Account is required in GL Company Configuration'
+	SELECT 'Origin Offset Account is required in GL Company Configuration.'
 	RETURN -1
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM glhstmst)
 BEGIN
-	SELECT 'Origin table is empty'
+	SELECT 'Origin table is empty.'
 	RETURN -1
 END
 
