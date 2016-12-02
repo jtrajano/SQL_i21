@@ -299,8 +299,8 @@ SELECT
 	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
 	,[ysnBlended]							= ARSI.[ysnBlended]
 	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
-	,[intSubCurrencyId]						= NULL
-	,[dblSubCurrencyRate]					= 1
+	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
+	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 FROM
 	vyuARShippedItems ARSI
 WHERE
@@ -525,7 +525,9 @@ INSERT INTO @EntriesForInvoice
 	,[ysnClearDetailTaxes]
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
-	,[intStorageScheduleTypeId])
+	,[intStorageScheduleTypeId]
+	,[intSubCurrencyId] 
+	,[dblSubCurrencyRate])
 SELECT 
 	 [strSourceTransaction]
 	,[intSourceId]
@@ -628,6 +630,8 @@ SELECT
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
 	,@StorageScheduleTypeId
+	,[intSubCurrencyId] 
+	,[dblSubCurrencyRate]
  FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId ASC, ysnInventory DESC
 	
 IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)
