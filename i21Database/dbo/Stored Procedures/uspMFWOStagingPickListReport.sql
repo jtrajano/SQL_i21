@@ -74,7 +74,7 @@ BEGIN
 		,FSL.strName AS strFromStorageLocation
 		,T.intToStorageLocationId
 		,TSL.strName AS strToStorageLocation
-		,OH.strOrderNo
+		,CASE WHEN OH.intOrderTypeId = 5 THEN OH.strReferenceNo ELSE OH.strOrderNo END AS strOrderNo 
 		,@strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress
 		,@strContactName AS strCompanyContactName

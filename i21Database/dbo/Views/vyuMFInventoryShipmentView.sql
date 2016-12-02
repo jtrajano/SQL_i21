@@ -200,6 +200,7 @@ SELECT Shipment.intInventoryShipmentId
 			THEN ''
 		END AS strCompanyAddress
 		,OH.strOrderNo
+		,OH.intOrderHeaderId
 		,OH.dtmCreatedOn AS dtmStagingOrderCreatedOn
 		,US.strUserName AS strStagingOrderCreatedBy
 FROM tblICInventoryShipment Shipment

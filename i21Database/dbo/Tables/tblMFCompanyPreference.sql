@@ -25,6 +25,7 @@
 	[ysnShowCostInSalesOrderPickList] BIT NULL DEFAULT 0, 
 	[intDefaultShipmentStagingLocation] INT,
 	[ysnPickByLotCode] BIT NULL DEFAULT 0, 
+	[ysnGenerateInvShipmentStagingOrder] BIT NULL DEFAULT 0,
 
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )
