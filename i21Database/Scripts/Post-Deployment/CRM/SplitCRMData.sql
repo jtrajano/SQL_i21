@@ -1091,7 +1091,7 @@ SET @queryResultAct = CURSOR FOR
 	select
 		intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.strRecordNo = convert(nvarchar(50), tblHDProject.intProjectId) and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'CRM.view.Opportunity'))
 		,strType = 'Task'
-		,strSubject = tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject
+		,strSubject = (case when len(tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject) > 100 then SUBSTRING(tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject, 1, 97) + '...' else tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject end)
 		,intEntityContactId = tblHDTicket.intCustomerContactId
 		,intEntityId = tblHDTicket.intCustomerId
 		,intCompanyLocationId = tblHDTicket.intCompanyLocationId
@@ -1194,7 +1194,7 @@ BEGIN
 			select 
 				intTransactionId = @intTransactionIdAct
 				,strType = @strTypeAct
-				,strSubject = (case when len(@strSubjectAct) > 100 then SUBSTRING(@strSubjectAct, 1,97) + '...' else @strSubjectAct end)
+				,strSubject = @strSubjectAct--(case when len(@strSubjectAct) > 100 then SUBSTRING(@strSubjectAct, 1,97) + '...' else @strSubjectAct end)
 				,intEntityContactId = @intEntityContactIdAct
 				,intEntityId = @intEntityIdAct
 				,intCompanyLocationId = @intCompanyLocationIdAct
