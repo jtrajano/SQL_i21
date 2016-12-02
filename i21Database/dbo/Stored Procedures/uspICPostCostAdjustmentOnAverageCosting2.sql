@@ -248,7 +248,8 @@ BEGIN
 		SET @RunningQty += dbo.fnCalculateQtyBetweenUOM(@CB_intItemUOMId, @StockItemUOMId, @CB_dblStockIn - @CB_dblStockOut)
 
 		-- 1. Process the source transaction. 
-		IF @CB_strTransactionId = @strSourceTransactionId AND @CB_dblStockIn > 0 
+		IF	@CB_strTransactionId = @strSourceTransactionId 
+			AND @CB_dblStockIn > 0 
 		BEGIN 
 			SET @AdjustQty = CASE WHEN @dblNewValue IS NULL THEN dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, @CB_intItemUOMId, @dblQty) ELSE 0 END 
 
@@ -345,7 +346,7 @@ BEGIN
 				SELECT	[intInventoryFIFOId]				= @CB_intInventoryFIFOId
 						,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
 						,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_Original_Cost
-						,[dblQty]							= @AdjustQty
+						,[dblQty]							= @CB_dblStockIn
 						,[dblCost]							= @CB_dblCost
 						,[dtmCreated]						= GETDATE()
 						,[intCreatedEntityUserId]			= @intEntityUserSecurityId
@@ -365,7 +366,7 @@ BEGIN
 				SELECT	[intInventoryFIFOId]				= @CB_intInventoryFIFOId
 						,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
 						,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_New_Cost
-						,[dblQty]							= @dblQty
+						,[dblQty]							= @AdjustQty
 						,[dblCost]							= @NewCost
 						,[dtmCreated]						= GETDATE()
 						,[intCreatedEntityUserId]			= @intEntityUserSecurityId
@@ -379,23 +380,44 @@ BEGIN
 
 			-- Process the lot-out. 
 			BEGIN 
-				EXEC uspICPostAdjustmentAverageCostingLoopCBOut @CB_intInventoryFIFOId, @AdjustAverageCost
+				EXEC uspICPostAdjustmentAverageCostingLoopCBOut 
+						@CB_intInventoryFIFOId
+						, @AdjustAverageCost
+						, @dtmDate
+						, @strTransactionId
+						, @intTransactionId
+						, @intTransactionDetailId
+						, @strBatchId
+						, @intEntityUserSecurityId
 			END
 		END 
 
 		-- Process the next cost bucket. 
 		ELSE IF @CB_dblStockIn > 0  
+			AND EXISTS (
+				SELECT	TOP 1 1 
+				FROM	tblICInventoryFIFOOut cbOut
+				WHERE	cbOut.intInventoryFIFOId = @CB_intInventoryFIFOId
+			)
 		BEGIN 		
 			-- Calculate a new average cost. 
 			SET @AdjustAverageCost = CASE WHEN @RunningQty > 0 THEN dbo.fnDivide(@AdjustmentValue, @RunningQty) ELSE @NewCost END 
 
-			-- TODO: If Running Qty is > 0, then process the lot-out. 
+			-- If Running Qty is > 0, then process the lot-out. 
 			IF @RunningQty > 0 
 			BEGIN 
-				EXEC uspICPostAdjustmentAverageCostingLoopCBOut @CB_intInventoryFIFOId, @AdjustAverageCost
+				EXEC uspICPostAdjustmentAverageCostingLoopCBOut 
+						@CB_intInventoryFIFOId
+						, @AdjustAverageCost
+						, @dtmDate
+						, @strTransactionId
+						, @intTransactionId
+						, @intTransactionDetailId
+						, @strBatchId
+						, @intEntityUserSecurityId
 			END 
 			
-			-- TODO: Otherwise, add an adjustment to re-align the average cost. 
+			-- Otherwise, add an adjustment to re-align the average cost. 
 			ELSE IF @RunningQty <= 0 
 			BEGIN 
 				-- Get the running value 
@@ -454,6 +476,12 @@ BEGIN
 					,@intFobPointId							= @intFobPointId 
 					,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 			END 
+		END 
+
+		-- Process negative stocks. 
+		ELSE IF @CB_dblStockOut > @CB_dblStockIn 
+		BEGIN 		
+			PRINT 'TODO: Process negative stocks' 
 		END 
 
 		-- Execute the stopper (if true). 
