@@ -12,6 +12,14 @@ DECLARE @sql NVARCHAR(MAX)
 DECLARE @ParmDefinition NVARCHAR(100)
 	SET @ParmDefinition = N'@intEntityId INT, @resultOut NVARCHAR(MAX) OUTPUT';  
 	SET @sql ='
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM glarcmst)
+BEGIN
+	SET @resultOut = ''SUCCESS ''
+    RETURN -1
+END
+
+
 DELETE h FROM glhstmst h
 INNER JOIN (SELECT MAX(glarc_period) AS period FROM glarcmst GROUP BY SUBSTRING( CONVERT(VARCHAR(10), glarc_period),1,4)) g
 ON h.glhst_period = g.period

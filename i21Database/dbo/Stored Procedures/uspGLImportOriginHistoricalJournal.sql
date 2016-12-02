@@ -7,10 +7,17 @@ DECLARE @result NVARCHAR(MAX)
 DECLARE @invalidDatesUpdated VARCHAR(1)
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption A join tblGLAccount B on A.OriginConversion_OffsetAccountId = B.intAccountId)
-	BEGIN
-		SELECT 'Importing Historical Journal error : Origin Offset Account is required in GL Company Configuration '
-		RETURN -1
-	END
+BEGIN
+	SELECT 'Origin Offset Account is required in GL Company Configuration'
+	RETURN -1
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM glhstmst)
+BEGIN
+	SELECT 'Origin table is empty'
+	RETURN -1
+END
+
 
 BEGIN TRANSACTION
 EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
