@@ -1095,10 +1095,10 @@ SET @queryResultAct = CURSOR FOR
 		,intEntityContactId = tblHDTicket.intCustomerContactId
 		,intEntityId = tblHDTicket.intCustomerId
 		,intCompanyLocationId = tblHDTicket.intCompanyLocationId
-		,dtmStartDate = tblHDTicket.dtmDueDate
-		,dtmEndDate = tblHDTicket.dtmDueDate
-		,dtmStartTime = tblHDTicket.dtmDueDate
-		,dtmEndTime = tblHDTicket.dtmDueDate
+		,dtmStartDate = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmEndDate = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmStartTime = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmEndTime = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
 		,strStatus = (select top 1 tblHDTicketStatus.strStatus from tblHDTicketStatus where tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId)
 		,strPriority = (select top 1 (case when tblHDTicketPriority.strPriority = 'Sev 1 - Blocker' then 'High' when tblHDTicketPriority.strPriority = 'Sev 2 - Major' then 'High' else 'Normal' end) from tblHDTicketPriority where tblHDTicketPriority.intTicketPriorityId = tblHDTicket.intTicketPriorityId)
 		,strCategory = (select top 1 tblHDTicketType.strType from tblHDTicketType where tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId)
