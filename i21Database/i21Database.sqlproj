@@ -4570,6 +4570,7 @@
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
+    <Build Include="dbo\Functions\fnSCCalculateDiscountSplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
