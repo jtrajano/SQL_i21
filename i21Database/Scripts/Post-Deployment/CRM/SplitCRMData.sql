@@ -1124,7 +1124,7 @@ SET @queryResultAct = CURSOR FOR
 		select
 		intTransactionId = null
 		,strType = 'Task'
-		,strSubject = tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject
+		,strSubject = (case when len(tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject) > 100 then SUBSTRING(tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject, 1, 97) + '...' else tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject end)
 		,intEntityContactId = tblHDTicket.intCustomerContactId
 		,intEntityId = tblHDTicket.intCustomerId
 		,intCompanyLocationId = tblHDTicket.intCompanyLocationId
@@ -1226,7 +1226,7 @@ BEGIN
 			select 
 				intTransactionId = @intTransactionIdAct
 				,strType = @strTypeAct
-				,strSubject = (case when len(@strSubjectAct) > 100 then SUBSTRING(@strSubjectAct, 1,97) + '...' else @strSubjectAct end)
+				,strSubject = @strSubjectAct
 				,intEntityContactId = @intEntityContactIdAct
 				,intEntityId = @intEntityIdAct
 				,intCompanyLocationId = @intCompanyLocationIdAct
