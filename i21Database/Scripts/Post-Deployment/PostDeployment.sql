@@ -366,6 +366,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_IntegrationSystem.sql
 :r .\TF\DefaultData\_TaxCriteria.sql
+:r .\TF\DefaultData\_CompanyPreference.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql

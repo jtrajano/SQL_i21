@@ -4722,6 +4722,7 @@
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
     <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

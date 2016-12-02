@@ -30,14 +30,6 @@ GO
 ALTER TABLE [dbo].[tblTFFilingPacket] CHECK CONSTRAINT [FK_tblTFFilingPacket_tblTFFrequency]
 GO
 
-ALTER TABLE [dbo].[tblTFFilingPacket]  WITH CHECK ADD  CONSTRAINT [FK_tblTFFilingPacket_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId])
-REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId])
-ON DELETE CASCADE
-GO
-
-ALTER TABLE [dbo].[tblTFFilingPacket] CHECK CONSTRAINT [FK_tblTFFilingPacket_tblTFReportingComponent]
-GO
-
 ALTER TABLE [dbo].[tblTFFilingPacket]  WITH CHECK ADD  CONSTRAINT [FK_tblTFFilingPacket_tblTFTaxAuthority] FOREIGN KEY([intTaxAuthorityId])
 REFERENCES [dbo].[tblTFTaxAuthority] ([intTaxAuthorityId])
 GO
