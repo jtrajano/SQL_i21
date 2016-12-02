@@ -146,7 +146,7 @@ DECLARE @InvTranId AS INT
 		,@InvTranSubLocationId AS INT
 		,@InvTranStorageLocationId AS INT 
 		,@InvTranCurrencyId AS INT
-		,@InvTranExchangeRate AS INT
+		,@InvTranExchangeRate AS NUMERIC(38,20)
 		,@InvTranStringTransactionId AS NVARCHAR(40)
 		,@InvTranIntTransactionId AS INT
 		,@InvTranTypeName AS NVARCHAR(200)
