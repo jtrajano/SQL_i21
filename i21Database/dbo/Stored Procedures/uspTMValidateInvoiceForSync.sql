@@ -67,7 +67,7 @@ BEGIN
 			GOTO DONEVALIDATING
 		END
 
-		IF((SELECT ISNULL(dblTotalCapacity,0.0) FROM tblTMSite WHERE intSiteID = @intSiteId) = 0)
+		IF((SELECT ISNULL(dblTotalCapacity,0.0) FROM tblTMSite WHERE intSiteID = @intSiteId AND strBillingType = 'Tank') = 0)
 		BEGIN
 			SET @ResultLog = @ResultLog + 'Exception:Site total capacity is Zero.' + CHAR(10)
 			GOTO DONEVALIDATING
