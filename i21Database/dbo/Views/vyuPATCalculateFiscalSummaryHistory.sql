@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateFiscalSummaryHistory]
 	AS
 WITH FiscalSum AS(
-	SELECT	R.intFiscalYearId,
+	SELECT	R.intRefundId,
+			R.intFiscalYearId,
 			RC.intCustomerId,
 			RC.intRefundTypeId,
 			dblVolume = SUM(RC.dblVolume),
@@ -26,11 +27,13 @@ WITH FiscalSum AS(
 				RC.intRefundTypeId,
 				intCustomerId,
 				RCat.dblVolume,
-				dblRefundAmount = RC.dblRefundAmount,
-				dblCashRefund = RC.dblCashRefund
+				dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate,
+				dblCashRefund = (RCat.dblVolume * RCat.dblRefundRate) * (RR.dblCashPayout/100)
 		FROM tblPATRefundCustomer RC
 		INNER JOIN tblPATRefundCategory RCat
-			ON RCat.intRefundCustomerId = RC.intRefundCustomerId) RC
+			ON RCat.intRefundCustomerId = RC.intRefundCustomerId
+		INNER JOIN tblPATRefundRate RR
+			ON RR.intRefundTypeId = RC.intRefundTypeId) RC
 	INNER JOIN tblPATRefund R
 		ON R.intRefundId = RC.intRefundId
 	INNER JOIN tblARCustomer AC
@@ -45,7 +48,8 @@ WITH FiscalSum AS(
 			R.intRefundId
 
 )
-SELECT	intFiscalYearId,
+SELECT	intRefundId,
+		intFiscalYearId,
 		dblVolume = SUM(dblVolume), 
 		dblRefundAmount = SUM(dblRefundAmount),
 		dblNonRefundAmount = SUM(dblNonRefundAmount),
@@ -59,4 +63,4 @@ SELECT	intFiscalYearId,
 		intProducers,
 		intOthers
 FROM FiscalSum
-GROUP BY intFiscalYearId, intVoting, intNonVoting, intProducers, intOthers
+GROUP BY intRefundId, intFiscalYearId, intVoting, intNonVoting, intProducers, intOthers

@@ -6,7 +6,6 @@ WITH ComPref AS(
 SELECT	Total.intCustomerId,
 		intFiscalYearId = Total.intFiscalYear,
 		strCustomerName = ENT.strName,
-		ysnEligibleRefund = CASE WHEN Total.dblRefundAmount >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
 		AC.strStockStatus,
 		TC.strTaxCode,
 		RR.intRefundTypeId,
@@ -22,8 +21,8 @@ SELECT	Total.intCustomerId,
 			SELECT	intCustomerId = B.intCustomerPatronId,
 				B.intFiscalYear,
 				RR.intRefundTypeId,
-				dblRefundAmount = CASE WHEN (RRD.dblRate * dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) END,
-				dblCashRefund = CASE WHEN (RRD.dblRate * dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) END,
+				dblRefundAmount = RRD.dblRate * dblVolume,
+				dblCashRefund = (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100),
 				RRD.intPatronageCategoryId
 				FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
@@ -41,14 +40,13 @@ SELECT	Total.intCustomerId,
 				ON ENT.intEntityId = Total.intCustomerId
 		INNER JOIN tblPATRefundRate RR
 				ON RR.intRefundTypeId = Total.intRefundTypeId
-		CROSS JOIN ComPref
 )
 
 SELECT  id = NEWID(),
 		intCustomerId,
 		intFiscalYearId,
 		strCustomerName,
-		ysnEligibleRefund,
+		ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
 		strStockStatus,
 		strTaxCode,
 		intRefundTypeId,
@@ -61,11 +59,12 @@ SELECT  id = NEWID(),
 		dblCashRefund = SUM(dblCashRefund),
 		dblEquityRefund = SUM(dblEquityRefund)
 	FROM Refunds
+	CROSS APPLY ComPref
 	GROUP BY intCustomerId,
 		intFiscalYearId,
 		strCustomerName,
-		ysnEligibleRefund,
 		strStockStatus,
+		ComPref.dblMinimumRefund,
 		strTaxCode,
 		intRefundTypeId,
 		strRefundType,

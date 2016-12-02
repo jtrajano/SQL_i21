@@ -17,7 +17,6 @@ SELECT	Total.intCustomerId,
 		Total.dblCashPayout,
 		AC.dtmLastActivityDate,
 		TC.strTaxCode,
-		ysnEligibleRefund = CASE WHEN Total.dblRefundAmount >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
 		dblTotalPurchases = Total.dblTotalPurchases,
 		dblTotalSales = Total.dblTotalSales,
 		dblRefundAmount = Total.dblRefundAmount,
@@ -35,9 +34,9 @@ SELECT	Total.intCustomerId,
 			RRD.intPatronageCategoryId,
 			dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END,
 			dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END,
-			dblRefundAmount = (CASE WHEN (RRD.dblRate * dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) END),
-			dblCashRefund = CASE WHEN (RRD.dblRate * dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) END,
-			dbLessFWT = CASE WHEN (RRD.dblRate * dblVolume) < ComPref.dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (CompLoc.dblWithholdPercent/100) END,
+			dblRefundAmount = (RRD.dblRate * dblVolume) ,
+			dblCashRefund = (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) ,
+			dbLessFWT = (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (CompLoc.dblWithholdPercent/100) ,
 			dblLessServiceFee = ComPref.dblServiceFee
 			FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
@@ -58,7 +57,6 @@ SELECT	Total.intCustomerId,
 			ON TC.intTaxCodeId = AC.intTaxCodeId
 	INNER JOIN tblEMEntity ENT
 			ON ENT.intEntityId = Total.intCustomerId
-	CROSS APPLY ComPref
 )
 
 SELECT	NEWID() AS id,
@@ -71,7 +69,7 @@ SELECT	NEWID() AS id,
 		dblCashPayout,
 		dtmLastActivityDate,
 		strTaxCode,
-		ysnEligibleRefund,
+		ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
 		dblTotalPurchases = SUM(dblTotalPurchases),
 		dblTotalSales = SUM(dblTotalSales),
 		dblRefundAmount = SUM(dblRefundAmount),
@@ -81,6 +79,7 @@ SELECT	NEWID() AS id,
 		dblLessServiceFee,
 		dblCheckAmount = SUM(dblCashRefund) - SUM(dblLessFWT) - dblLessServiceFee
 	FROM Refund
+	CROSS APPLY ComPref
 	GROUP BY intCustomerId,
 	intFiscalYearId,
 	intCompanyLocationId,
@@ -90,5 +89,5 @@ SELECT	NEWID() AS id,
 	dblCashPayout,
 	dtmLastActivityDate,
 	strTaxCode,
-	ysnEligibleRefund,
+	ComPref.dblMinimumRefund,
 	dblLessServiceFee

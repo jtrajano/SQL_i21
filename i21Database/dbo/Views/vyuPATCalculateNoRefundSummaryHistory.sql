@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateNoRefundSummaryHistory]
 	AS
-SELECT	NEWID() AS id,
+SELECT	NEWID() as id,
 		R.intRefundId,
 		RR.intCustomerId,
 		RR.intRefundTypeId,
@@ -8,10 +8,10 @@ SELECT	NEWID() AS id,
 		intFiscalYearId = R.intFiscalYearId,
 		RR.ysnEligibleRefund,
 		AC.strStockStatus,
-		dblTotalPurchases = RefMerge.dblTotalPurchases,
-		dblTotalSales = RefMerge.dblTotalSales,
-		dblRefundAmount = RefMerge.dblRefundAmount,
-		dblEquityRefund = RefMerge.dblRefundAmount - (RefMerge.dblRefundAmount * (RT.dblCashPayout/100))
+		dblTotalPurchases = SUM(RefMerge.dblTotalPurchases),
+		dblTotalSales = SUM(RefMerge.dblTotalSales),
+		dblRefundAmount = SUM(RefMerge.dblRefundAmount),
+		dblEquityRefund = SUM(RefMerge.dblRefundAmount - (RefMerge.dblRefundAmount * (RT.dblCashPayout/100)))
 	FROM tblPATRefundCustomer RR
 	INNER JOIN tblARCustomer AC
 		ON AC.intEntityCustomerId = RR.intCustomerId
@@ -32,3 +32,10 @@ SELECT	NEWID() AS id,
 		GROUP BY RCat.intRefundCustomerId, PC.strPurchaseSale
 	) RefMerge
 		ON RefMerge.intRefundCustomerId = RR.intRefundCustomerId
+	GROUP BY R.intRefundId,
+		RR.intCustomerId,
+		RR.intRefundTypeId,
+		ENT.strName,
+		R.intFiscalYearId,
+		RR.ysnEligibleRefund,
+		AC.strStockStatus
