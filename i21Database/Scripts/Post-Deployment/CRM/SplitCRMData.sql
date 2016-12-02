@@ -772,7 +772,7 @@ BEGIN
 		select
 			intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity')
 			,intRecordId = tblCRMOpportunity.intOpportunityId
-			,strTransactionNo = (case when len(tblCRMOpportunity.strName) > 50 THEN SUBSTRING(tblCRMOpportunity.strName, 0, 47) + '...' else tblCRMOpportunity.strName end)
+			,strTransactionNo = convert(nvarchar(50), tblCRMOpportunity.intOpportunityId)--(case when len(tblCRMOpportunity.strName) > 50 THEN SUBSTRING(tblCRMOpportunity.strName, 0, 47) + '...' else tblCRMOpportunity.strName end)
 			,intEntityId = tblCRMOpportunity.intInternalSalesPerson
 			,dtmDate = tblCRMOpportunity.dtmCreated
 			,strApprovalStatus = null
