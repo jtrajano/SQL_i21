@@ -24,6 +24,7 @@ DECLARE @SourceType_None AS INT = 0
 DECLARE @SourceType_Scale AS INT = 1
 DECLARE @SourceType_InboundShipment AS INT = 2
 DECLARE @SourceType_Transport AS INT = 3
+DECLARE @SourceType_SettleStorage AS INT = 4
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 
@@ -57,7 +58,24 @@ BEGIN
 	EXEC uspGRReverseOnReceiptDelete @ReceiptId
 
 	-- IC-3058 Increase the Storage ticket Open Balance and DP contract quantity if the Storage Ticket is a DP ticket when an IR created by Settle Storage is deleted.
-	EXEC uspGRReverseSettleStorage @ReceiptId, @UserId
+	IF @SourceType = @SourceType_SettleStorage
+	BEGIN
+		DECLARE @ItemId INT
+		DECLARE @SourceNumberId INT
+		DECLARE @Quantity DECIMAL(24, 10)
+
+		SELECT TOP 1 @SourceNumberId = intSourceNumberId, @ItemId = intItemId
+		FROM tblICTransactionDetailLog
+		WHERE intTransactionId = @ReceiptId
+			AND strTransactionType = 'Inventory Receipt'
+
+		SELECT @Quantity = SUM(dblQuantity)
+		FROM tblICTransactionDetailLog
+		WHERE intTransactionId = @ReceiptId
+			AND strTransactionType = 'Inventory Receipt'
+
+		EXEC uspGRReverseSettleStorage @ItemId, @SourceNumberId, @Quantity, @UserId
+	END
 
 	-- Call the quality sp when deleting the receipt.
 	EXEC uspQMInspectionDeleteResult @ReceiptId
