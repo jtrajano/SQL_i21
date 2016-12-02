@@ -846,11 +846,43 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         action(record);
     },
     
+    statics: {
+        getCustomerCurrency: function(customerId, action) {
+            if(customerId) {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryShipment/GetCustomerCurrency?customerId=' + customerId,
+                    method: 'GET',
+                    success: function(res) {
+                        var json = Ext.decode(res.responseText);
+                        action(true, json);
+                    },
+                    failure: function(err) {
+                        action(false, err);
+                    }
+                });
+            }
+        }
+    },
+
     onChargeCreateRecord: function (config, action) {
         var win = config.grid.up('window');
         var record = Ext.create('Inventory.model.ShipmentCharge');
         record.set('strAllocatePriceBy', 'Unit');
-        action(record);
+
+        if(config.dummy.intInventoryShipment.data.intEntityCustomerId) {
+            Inventory.view.InventoryShipmentViewController.getCustomerCurrency(config.dummy.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
+                if(success) {
+                    if(json.length > 0) {
+                        record.set('intCurrencyId', json[0].intCurrencyId);
+                        record.set('strCurrency', json[0].strCurrency);
+                    }
+                    action(record);   
+                } else
+                    action(record);
+            });
+        } else
+            action(record);
     },
 
     currentRecordChanged: function(current) {
@@ -1994,7 +2026,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             };
         };
     },
-
+    
     onChargeSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -2005,7 +2037,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var plugin = grid.getPlugin('cepCharges');
         var current = plugin.getActiveRecord();
         var masterRecord = win.viewModel.data.current;
-
+        
         if (combo.itemId === 'cboOtherCharge') {
             current.set('intChargeId', record.get('intItemId'));
             current.set('dblRate', record.get('dblAmount'));
@@ -2016,6 +2048,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('ysnPrice', record.get('ysnPrice'));
             if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
                 current.set('strCostMethod', 'Percentage');
+            }
+
+            if(!current.get('intCurrencyId')) {
+                Inventory.view.InventoryShipmentViewController.getCustomerCurrency(current.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
+                    if(success) {
+                        if(json.length > 0) {
+                            current.set('intCurrencyId', json[0].intCurrencyId);
+                            current.set('strCurrency', json[0].strCurrency);
+                        }
+                    }
+                });
             }
         }
 
