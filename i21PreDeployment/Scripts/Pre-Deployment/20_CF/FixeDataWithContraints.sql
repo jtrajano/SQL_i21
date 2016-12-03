@@ -183,6 +183,21 @@ BEGIN
 	BEGIN
 		EXEC ('update tblCFAccount set intFeeProfileId = NULL where intFeeProfileId = 0')
 	END
+
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFAccount'AND COLUMN_NAME = 'intLocalPriceProfileId')
+	BEGIN
+		EXEC ('update tblCFAccount set intLocalPriceProfileId = NULL where intLocalPriceProfileId = 0')
+	END
+
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFAccount'AND COLUMN_NAME = 'intRemotePriceProfileId')
+	BEGIN
+		EXEC ('update tblCFAccount set intRemotePriceProfileId = NULL where intRemotePriceProfileId = 0')
+	END
+
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFAccount'AND COLUMN_NAME = 'intExtRemotePriceProfileId')
+	BEGIN
+		EXEC ('update tblCFAccount set intExtRemotePriceProfileId = NULL where intExtRemotePriceProfileId = 0')
+	END
 	
 	print 'end updating account data'
 END
