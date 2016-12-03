@@ -4589,7 +4589,10 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCriteria.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
-
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ScheduleFields.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidOriginState.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidDestinationState.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

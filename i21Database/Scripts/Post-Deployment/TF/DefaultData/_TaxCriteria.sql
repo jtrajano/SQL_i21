@@ -1,4 +1,5 @@
-﻿GO
+﻿
+GO
 PRINT 'START TF tblTFTaxCriteria'
 GO
 DECLARE @intTaxAuthorityId INT
@@ -155,7 +156,7 @@ DECLARE @intTaxAuthorityId INT
 					VALUES(2, 50, 'IN', 'IN Excise Tax Diesel Clear', '<> 0')
 				END
 
-				IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFTaxCriteria WHERE intReportingComponentId = 50 AND strTaxCategory = 'IN Excise Tax Diesel Clear') 
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblTFTaxCriteria WHERE intReportingComponentId = 51 AND strTaxCategory = 'IN Excise Tax Diesel Clear') 
 				BEGIN 
 					INSERT INTO tblTFTaxCriteria([intTaxCategoryId],[intReportingComponentId],[strState],[strTaxCategory],[strCriteria])
 					VALUES(2, 51, 'IN', 'IN Excise Tax Diesel Clear', '= 0')
@@ -222,3 +223,5 @@ FROM tblTFTaxCriteria A WHERE NOT EXISTS (SELECT strTaxCategory FROM @tblTempSou
 GO
 PRINT 'END TF Tax Criteria Deployment Note'
 GO
+
+

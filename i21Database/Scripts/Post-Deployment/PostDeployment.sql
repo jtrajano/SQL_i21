@@ -359,6 +359,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_IntegrationSystem.sql
 :r .\TF\DefaultData\_CompanyPreference.sql
+:r .\TF\DefaultData\_ValidProductCode.sql
+:r .\TF\DefaultData\_ValidOriginState.sql
+:r .\TF\DefaultData\_ValidDestinationState.sql
+:r .\TF\DefaultData\_ScheduleFields.sql
+
 
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql
