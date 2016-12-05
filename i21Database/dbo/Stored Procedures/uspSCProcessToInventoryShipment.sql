@@ -352,7 +352,8 @@ BEGIN TRY
 					   IF	ISNULL(@intLoopContractId,0) != 0
 					   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
 					   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-				   
+					   
+					   SET @dblRemainingUnits -=@dblLoopContractUnits;
 					   -- Attempt to fetch next row from cursor
 					   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 					END;
