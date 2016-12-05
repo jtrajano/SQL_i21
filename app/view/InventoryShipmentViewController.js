@@ -2675,6 +2675,32 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onItemBeforeQuery: function(obj) {
+        if(obj.combo) {
+            if(obj.combo.itemId === 'cboItemNo') {
+                var win = obj.combo.up('window');
+                obj.combo.defaultFilters = [
+                    {
+                        column: 'strType',
+                        value: 'Inventory|^|Raw Material|^|Finished Good|^|Bundle|^|Kit',
+                        conjunction: 'and',
+                        condition: 'eq'
+                    },
+                    {
+                        column: 'intLocationId',
+                        value: win.viewModel.data.current.get('intShipFromLocationId'),
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'excludePhasedOutZeroStockItem',
+                        value: true,
+                        conjunction: 'and'
+                    }
+                ];
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -2691,7 +2717,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onOrderNumberSelect
             },
             "#cboItemNo": {
-                select: this.onItemNoSelect
+                select: this.onItemNoSelect,
+                beforequery: this.onItemBeforeQuery
             },
             "#cboUOM": {
                 select: this.onItemNoSelect
