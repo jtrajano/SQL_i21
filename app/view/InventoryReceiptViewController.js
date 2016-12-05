@@ -5733,6 +5733,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
     },
 
+    onCostUOMChange: function (combo, newValue, oldValue, eOpts) {
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+
+        if (current && (newValue === null || newValue === '')) {
+            current.set('dblCostUOMConvFactor', current.get('dblReceiveUOMConvFactor'));
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -5859,7 +5869,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onReceiptItemSelect
             },
             "#cboCostUOM": {
-                select: this.onReceiptItemSelect
+                select: this.onReceiptItemSelect,
+                change: this.onCostUOMChange
             },
             "#cboStorageLocation": {
                 select: this.onReceiptItemSelect
