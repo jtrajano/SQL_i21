@@ -57,9 +57,38 @@ FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
                                                          arCustGroupDetail.intConcurrencyId, arCustGroup.strGroupName
                                 FROM         dbo.tblARCustomerGroup AS arCustGroup INNER JOIN
                                                          dbo.tblARCustomerGroupDetail AS arCustGroupDetail ON arCustGroup.intCustomerGroupId = arCustGroupDetail.intCustomerGroupId) AS emGroup ON 
-                         emGroup.intEntityId = cfCardAccount.intCustomerId AND emGroup.ysnVolumeDiscount = 1 INNER JOIN
-                         dbo.vyuCFSiteItem AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId AND cfSiteItem.intARItemId = cfTrans.intARItemId AND 
-                         cfSiteItem.intItemId = cfTrans.intProductId INNER JOIN
+                         emGroup.intEntityId = cfCardAccount.intCustomerId AND emGroup.ysnVolumeDiscount = 1 
+						 
+						 INNER JOIN
+                         (SELECT  icfSite.* 
+									,icfItem.intItemId
+									,icfItem.intARItemId
+									,iicItemLoc.intItemLocationId
+									,iicItemLoc.intIssueUOMId
+									,iicItem.strDescription
+									,iicItem.strShortName
+									,iicItem.strItemNo
+									,icfItem.strProductNumber
+									,iicItemPricing.dblAverageCost
+							FROM tblCFSite icfSite
+							INNER JOIN tblCFNetwork icfNetwork
+							ON icfNetwork.intNetworkId = icfSite.intNetworkId
+							INNER JOIN tblCFItem icfItem
+							ON icfSite.intSiteId = icfItem.intSiteId 
+							OR icfNetwork.intNetworkId = icfItem.intNetworkId
+							INNER JOIN tblICItem iicItem
+							ON icfItem.intARItemId = iicItem.intItemId
+							LEFT JOIN tblICItemLocation iicItemLoc
+							ON iicItemLoc.intLocationId = icfSite.intARLocationId 
+							AND iicItemLoc.intItemId = icfItem.intARItemId
+							INNER JOIN
+                         dbo.vyuICGetItemPricing AS iicItemPricing ON iicItemPricing.intItemId = icfItem.intARItemId AND iicItemPricing.intLocationId = iicItemLoc.intLocationId AND 
+                         iicItemPricing.intItemLocationId = iicItemLoc.intItemLocationId)
+							AS cfSiteItem
+				ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
+				AND cfSiteItem.intItemId = cfTrans.intProductId
+						 
+						 INNER JOIN
                              (SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                 FROM         dbo.tblCFTransactionPrice
                                 WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId INNER JOIN
