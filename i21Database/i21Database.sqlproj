@@ -2447,7 +2447,6 @@
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFOCostAdjustmentLog.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFORevalueOutStock.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustment.sql" />
     <Build Include="dbo\User Defined Types\ItemCostAdjustmentTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryCostAdjustmentType.sql" />
@@ -2557,7 +2556,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetOnHoldBlendSheets.sql" />
     <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
     <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICRecalcAveCostOnCostAdjustment.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFOCostAdjustmentLog.sql" />
     <Build Include="dbo\Views\vyuGRGetVendors.sql" />
     <Build Include="dbo\Views\vyuGRGetSettleItem.sql" />
@@ -4592,8 +4590,9 @@
     <Build Include="dbo\Views\vyuRKM2MInquiryBasisNotMapping.sql" />
     <Build Include="dbo\Views\vyuRKM2MInquiryNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostAdjustmentAverageCostingLoopCBOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRecalcAveCostOnCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

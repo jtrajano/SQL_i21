@@ -5,10 +5,8 @@
 CREATE PROCEDURE [dbo].[uspICRecalcAveCostOnCostAdjustment]
 	@intItemId AS INT
 	,@intItemLocationId AS INT 
-	,@RevaluedQty AS NUMERIC(38,20)
-	,@CostBucketUOMQty AS NUMERIC(38,20)
-	,@dblNewCost AS NUMERIC(38,20)
-	,@CostBucketCost AS NUMERIC(38,20)
+	,@strTransactionId AS NVARCHAR(50) 
+	,@strBatchId AS NVARCHAR(50)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -16,6 +14,8 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+
+DECLARE @dblAdjustValue AS NUMERIC(38,20)
 
 -- Do not calculate if item location is an In-Transit
 IF EXISTS (
@@ -37,16 +37,22 @@ BEGIN
 			,@CurrentAverageCost AS NUMERIC(38,20)
 
 	SELECT TOP 1 
-			@CurrentStockQty = dblUnitOnHand
+			@CurrentStockQty = ISNULL(dblUnitOnHand, 0)
 	FROM	dbo.tblICItemStock
 	WHERE	intItemId = @intItemId
 			AND intItemLocationId = @intItemLocationId
 
 	SELECT	TOP 1
-			@CurrentAverageCost = dblAverageCost
+			@CurrentAverageCost = ISNULL(dblAverageCost, 0)
 	FROM	dbo.tblICItemPricing 
 	WHERE	intItemId = @intItemId
 			AND intItemLocationId = @intItemLocationId
+
+	SELECT	@dblAdjustValue = SUM(dblValue) 
+	FROM	tblICInventoryTransaction t
+	WHERE	t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strBatchId
+			AND t.ysnIsUnposted = 0 
 
 	MERGE	
 	INTO	dbo.tblICItemPricing 
@@ -55,22 +61,20 @@ BEGIN
 	USING (
 			SELECT	intItemId = @intItemId
 					,intItemLocationId = @intItemLocationId
-					,[UnsoldQty] = dbo.fnCalculateStockUnitQty(@RevaluedQty, @CostBucketUOMQty)
-					,[CostDifference] = dbo.fnCalculateUnitCost(@dblNewCost, @CostBucketUOMQty) - dbo.fnCalculateUnitCost(@CostBucketCost, @CostBucketUOMQty)
-					,[CurrentStock] = @CurrentStockQty
+					,dblCurrentStockValue = dbo.fnMultiply(@CurrentStockQty, @CurrentAverageCost) 
+					,dblNewAverageCost = 
+							dbo.fnDivide(
+								dbo.fnMultiply(@CurrentStockQty, @CurrentAverageCost) + ISNULL(@dblAdjustValue, 0)
+								,@CurrentStockQty
+							)
 	) AS StockToUpdate
 		ON ItemPricing.intItemId = StockToUpdate.intItemId
 		AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
 
-	-- If matched, update the average cost, last cost, and standard cost
+	-- If matched, recalculate the average cost
 	WHEN MATCHED THEN 
 		UPDATE 
-		SET		dblAverageCost = dbo.fnCalculateAverageCostAfterCostAdj(
-					StockToUpdate.[UnsoldQty]
-					,StockToUpdate.[CostDifference]
-					,StockToUpdate.[CurrentStock]
-					,@CurrentAverageCost
-				)
+		SET		dblAverageCost = StockToUpdate.dblNewAverageCost --CASE WHEN @CurrentStockQty <=0 THEN @CurrentAverageCost ELSE StockToUpdate.dblNewAverageCost END 
 
 	-- If none found, insert a new item pricing record
 	WHEN NOT MATCHED THEN 
