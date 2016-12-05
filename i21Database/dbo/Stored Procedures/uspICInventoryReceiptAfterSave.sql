@@ -64,17 +64,26 @@ BEGIN
 		DECLARE @SourceNumberId INT
 		DECLARE @Quantity DECIMAL(24, 10)
 
-		SELECT TOP 1 @SourceNumberId = intSourceNumberId, @ItemId = intItemId
-		FROM tblICTransactionDetailLog
-		WHERE intTransactionId = @ReceiptId
-			AND strTransactionType = 'Inventory Receipt'
+		DECLARE curReceipt CURSOR LOCAL FAST_FORWARD
+		FOR
+		SELECT t.intItemId, t.intSourceNumberId, SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, dbo.fnGetItemStockUOM(t.intItemId), t.dblQuantity))
+		FROM tblICTransactionDetailLog t
+		WHERE t.intTransactionId = @ReceiptId
+			AND t.strTransactionType = 'Inventory Receipt'
+		GROUP BY t.intItemId, t.intSourceNumberId
 
-		SELECT @Quantity = SUM(dblQuantity)
-		FROM tblICTransactionDetailLog
-		WHERE intTransactionId = @ReceiptId
-			AND strTransactionType = 'Inventory Receipt'
+		OPEN curReceipt
 
-		EXEC uspGRReverseSettleStorage @ItemId, @SourceNumberId, @Quantity, @UserId
+		FETCH NEXT FROM curReceipt INTO @ItemId, @SourceNumberId, @Quantity
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC uspGRReverseSettleStorage @ItemId, @SourceNumberId, @Quantity, @UserId
+			FETCH NEXT FROM curReceipt INTO @ItemId, @SourceNumberId, @Quantity
+		END
+
+		CLOSE curReceipt
+		DEALLOCATE curReceipt
+
 	END
 
 	-- Call the quality sp when deleting the receipt.
