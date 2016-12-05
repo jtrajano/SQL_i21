@@ -118,6 +118,7 @@ DECLARE @INV_TRANS_TYPE_Auto_Variance AS INT = 1
 
 DECLARE	@RunningQty AS NUMERIC(38, 20)
 		,@RunningValue AS NUMERIC(38, 20)
+		,@PreviousRunningQty AS NUMERIC(38, 20)
 
 		,@t_intInventoryTransactionId AS INT 
 		,@t_intItemId AS INT 
@@ -393,7 +394,8 @@ BEGIN
 			-- Calculate a new average cost adjustment 
 			SET @AdjustAverageCost = 						
 				dbo.fnDivide(
-					@AdjustmentValue
+					--@AdjustmentValue
+					dbo.fnMultiply(@PreviousRunningQty, @AdjustAverageCost) 
 					,CASE WHEN @RunningQty > 0 THEN @RunningQty ELSE @t_dblQty END 
 				) 
 			
@@ -496,6 +498,8 @@ BEGIN
 		BEGIN 
 			SET @BreakOnNextLoop = 1 
 		END 
+
+		SET @PreviousRunningQty = @RunningQty
 	END 
 
 	CLOSE loopInvTransactions;
