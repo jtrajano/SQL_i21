@@ -4598,7 +4598,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGatherVolumeForPatronage.sql" />
     <Build Include="dbo\Functions\fnRoundBanker.sql" />
-    <Build Include="Scripts\Post-Deployment\AR\DefaultData\25_UpdateTransactionAccountIds.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\25_UpdateTransactionAccountIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
