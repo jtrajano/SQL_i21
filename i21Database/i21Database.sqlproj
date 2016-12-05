@@ -4596,6 +4596,7 @@
     <Build Include="dbo\Functions\fnSCCalculateDiscountSplit.sql" />
     <Build Include="dbo\Functions\fnAPGetBillDetailReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGatherVolumeForPatronage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
