@@ -19,7 +19,7 @@ SELECT A.strInvoiceNumber
 	 , dblInvoiceTotal		= SUM(A.dblInvoiceTotal)
 	 , dblCredits			= SUM(B.dblAvailableCredit) * -1
 	 , dblPrepayments		= SUM(B.dblPrepayments) * -1
-	 , dblPrepaids			= 0.000000
+	 , dblPrepaids			= SUM(B.dblPrepayments) * -1
 	 , dtmDate
 	 , dtmDueDate
 	 , intCompanyLocationId	  
