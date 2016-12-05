@@ -363,8 +363,8 @@ BEGIN TRY
 					   -- example).
 					   IF	ISNULL(@intLoopContractId,0) != 0
 					   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-					   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
-				   
+					   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, 1;
+					   SET @dblRemainingUnits -=@dblLoopContractUnits;
 					   -- Attempt to fetch next row from cursor
 					   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 					END;
