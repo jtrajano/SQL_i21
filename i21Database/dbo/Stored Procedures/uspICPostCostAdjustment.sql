@@ -276,7 +276,7 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST) AND (@strActualCostId IS NULL)
 	BEGIN 
-		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnAverageCosting2
+		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnAverageCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId

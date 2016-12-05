@@ -27,6 +27,9 @@ AS
 BEGIN 
 	DECLARE	@result AS NUMERIC(38,20)
 
+	IF @dblQty = 0 
+		RETURN @dblQty; 
+
 	SELECT	@result = 
 			CASE	WHEN ISNULL(ItemUOMFrom.dblUnitQty, 0) = 0 OR ISNULL(ItemUOMTo.dblUnitQty, 0) = 0 THEN 
 						NULL 			
