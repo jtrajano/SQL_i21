@@ -150,8 +150,8 @@ BEGIN TRY
 				   -- uses a PRINT statement as that action (not a very good
 				   -- example).
 				   IF	ISNULL(@intLoopContractId,0) != 0
-				   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
 				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+				   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
@@ -362,8 +362,8 @@ BEGIN TRY
 					   -- uses a PRINT statement as that action (not a very good
 					   -- example).
 					   IF	ISNULL(@intLoopContractId,0) != 0
-					   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
 					   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+					   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
 				   
 					   -- Attempt to fetch next row from cursor
 					   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
