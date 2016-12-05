@@ -869,7 +869,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var win = config.grid.up('window');
         var record = Ext.create('Inventory.model.ShipmentCharge');
         record.set('strAllocatePriceBy', 'Unit');
-
         if(config.dummy.intInventoryShipment.data.intEntityCustomerId) {
             Inventory.view.InventoryShipmentViewController.getCustomerCurrency(config.dummy.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
                 if(success) {
@@ -2046,6 +2045,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strCostUOM', record.get('strCostUOM'));
             current.set('strOnCostType', record.get('strOnCostType'));
             current.set('ysnPrice', record.get('ysnPrice'));
+            current.set('ysnAccrue', record.get('ysnAccrue'));
             if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
                 current.set('strCostMethod', 'Percentage');
             }
