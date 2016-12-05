@@ -99,7 +99,10 @@ BEGIN
 						,vwcnt_loc_no=ptcnt_loc_no
 						,vwcnt_alt_cnt_no=CAST(ptcnt_alt_cnt_no AS CHAR(8)) 
 						,vwcnt_amt_orig=ptcnt_amt_orig
-						,vwcnt_amt_bal=ptcnt_amt_bal
+						,vwcnt_amt_bal= (CASE WHEN ptcnt_unlmd_qty_cnt = ''Y''
+										 THEN 999999 
+										 ELSE ptcnt_amt_bal 
+										 END)
 						,vwcnt_due_rev_dt= (CASE WHEN ptcnt_due_rev_dt = 0 THEN NULL 
 											ELSE
 												CONVERT(DATETIME, SUBSTRING(CAST(ptcnt_due_rev_dt AS NVARCHAR(8)),1,4) + ''/'' 
