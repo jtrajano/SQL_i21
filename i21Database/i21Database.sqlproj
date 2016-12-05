@@ -4594,6 +4594,7 @@
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
     <Build Include="dbo\Functions\fnSCCalculateDiscountSplit.sql" />
+    <Build Include="dbo\Functions\fnAPGetBillDetailReceiptTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
