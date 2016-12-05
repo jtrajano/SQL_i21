@@ -31,7 +31,7 @@ BEGIN
 			WHERE 
 				C.intEntityCustomerId = @customerId
 				AND (CB.ysnUsedBudget = 0 OR CB.dblBudgetAmount <> 0.0000000)
-				AND ISNULL(@datePaid, GETDATE()) BETWEEN DATEADD(DAY, -1, CB.dtmBudgetDate) AND DATEADD(MONTH, 1, CB.dtmBudgetDate)
+				AND (ISNULL(@datePaid, GETDATE()) >= CB.dtmBudgetDate AND ISNULL(@datePaid, GETDATE()) < DATEADD(MONTH, 1, CB.dtmBudgetDate))
 			ORDER BY
 				CB.dtmBudgetDate
 		END
@@ -47,7 +47,7 @@ BEGIN
 			WHERE 
 				C.intEntityCustomerId = @customerId
 				AND CB.dblAmountPaid <> 0.0000000
-				AND ISNULL(@datePaid, GETDATE()) BETWEEN DATEADD(DAY, -1, CB.dtmBudgetDate) AND DATEADD(MONTH, 1, CB.dtmBudgetDate)
+				AND (ISNULL(@datePaid, GETDATE()) >= CB.dtmBudgetDate AND ISNULL(@datePaid, GETDATE()) < DATEADD(MONTH, 1, CB.dtmBudgetDate))
 			ORDER BY
 				CB.dtmBudgetDate DESC
 		END
