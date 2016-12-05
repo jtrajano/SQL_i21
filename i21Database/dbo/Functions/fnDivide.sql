@@ -95,5 +95,11 @@ BEGIN
 
 	-- Finalize the return value by converting the string to numeric. 
 	SET @quotient = ISNULL(CAST(LEFT(@rawResult, 38) AS NUMERIC(38, 20)), 0)
+	
+	-- If the native method have a different result than fnDivide, then use the result from native calculation. 
+	-- Better to have an correct number with lesser decimal values than a wrong value. 
+	IF ROUND(@quotient, 5) <> ROUND(@dividend / @divisor, 5)
+		RETURN (@dividend / @divisor)
+
 	RETURN @quotient
 END
