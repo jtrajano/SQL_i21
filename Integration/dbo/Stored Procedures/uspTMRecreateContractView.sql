@@ -99,10 +99,8 @@ BEGIN
 						,vwcnt_loc_no=ptcnt_loc_no
 						,vwcnt_alt_cnt_no=CAST(ptcnt_alt_cnt_no AS CHAR(8)) 
 						,vwcnt_amt_orig=ptcnt_amt_orig
-						,vwcnt_amt_bal= (CASE WHEN ptcnt_unlmd_qty_cnt = ''Y''
-										 THEN 999999 
-										 ELSE ptcnt_amt_bal 
-										 END)
+						,vwcnt_amt_bal= ptcnt_amt_bal
+						
 						,vwcnt_due_rev_dt= (CASE WHEN ptcnt_due_rev_dt = 0 THEN NULL 
 											ELSE
 												CONVERT(DATETIME, SUBSTRING(CAST(ptcnt_due_rev_dt AS NVARCHAR(8)),1,4) + ''/'' 
@@ -111,7 +109,10 @@ BEGIN
 											END)
 						,vwcnt_hdr_comments=ptcnt_hdr_comments
 						,vwcnt_un_orig=ptcnt_un_orig
-						,vwcnt_un_bal=ptcnt_un_bal
+						,vwcnt_un_bal= (CASE WHEN ptcnt_unlmd_qty_cnt = ''Y''
+										 THEN 999999 
+										 ELSE ptcnt_un_bal 
+										 END)
 						,vwcnt_lc1_yn=ptcnt_lc1_yn
 						,vwcnt_lc2_yn=ptcnt_lc2_yn
 						,vwcnt_lc3_yn=ptcnt_lc3_yn
