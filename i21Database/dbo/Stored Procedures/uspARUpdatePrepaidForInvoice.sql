@@ -100,7 +100,6 @@ BEGIN TRY
 		,[dblAppliedInvoiceDetailAmount]
 		,[ysnApplied]
 		,[ysnPosted]
-		,[intRowNumber]
 		,[intConcurrencyId])
 	SELECT DISTINCT
 		 [intInvoiceId]						= @InvoiceId
@@ -113,7 +112,6 @@ BEGIN TRY
 		,[dblAppliedInvoiceDetailAmount]	= @ZeroDecimal
 		,[ysnApplied]						= 0
 		,[ysnPosted]						= 0
-		,[intRowNumber]						= ROW_NUMBER() OVER (PARTITION BY [intPrepaymentId] ORDER BY [intInvoiceDetailId])
 		,[intConcurrencyId]					= 1
 	FROM
 		vyuARPrepaidAndCredit ARPAC
@@ -126,7 +124,10 @@ BEGIN TRY
 		AND (ISNULL(ARPAC.[ysnRestricted],0) = 0
 			OR
 			(ISNULL(ARPAC.[ysnRestricted],0) = 1 AND EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intContractDetailId] = ARPAC.[intContractDetailId] AND ARID.[intInvoiceId] = @InvoiceId))
+			OR
+			(ISNULL(ARPAC.[ysnRestricted],0) = 1 AND ISNULL(ARPAC.[intContractDetailId],0) = 0 AND EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intItemId] = ARPAC.[intItemId] AND ARID.[intInvoiceId] = @InvoiceId))
 			)
+		
 		
 
 END TRY
@@ -137,6 +138,5 @@ BEGIN CATCH
 	SET @ErrorState    = ERROR_STATE()	
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
 END CATCH
-
 
 GO

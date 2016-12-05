@@ -4595,6 +4595,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
     <Build Include="dbo\Functions\fnSCCalculateDiscountSplit.sql" />
     <Build Include="dbo\Functions\fnAPGetBillDetailReceiptTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
