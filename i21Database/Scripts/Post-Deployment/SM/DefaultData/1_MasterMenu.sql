@@ -672,6 +672,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Entity Gr
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.EntityGroup' WHERE strMenuName = 'Entity Group' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Veterinary' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Veterinary', N'System Manager', @CommonInfoParentMenuId, N'Veterinary', N'Maintenance', N'Screen', N'EntityManagement.view.Entity?searchCommand=searchEntityVeterinary', N'small-menu-maintenance', 0, 0, 0, 1, 25, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.Entity?searchCommand=searchEntityVeterinary' WHERE strMenuName = 'Veterinary' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
 /* Start Delete */
 --DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reminder List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
