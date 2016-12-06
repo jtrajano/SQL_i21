@@ -45,6 +45,7 @@ BEGIN
 		WHERE vwcnt_cus_no = @strCustomerNumber
 			AND vwcnt_loc_no <> ''000''
 			AND vwcnt_due_rev_dt >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
+			AND vwcnt_un_bal > 0
 		RETURN
 	END
 	')
