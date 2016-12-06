@@ -148,7 +148,7 @@ IF (@Vendor IS NOT NULL)
 		  BEGIN
 			 set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 			 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-			 (select intCompanyLocationId from tblSTStore where strDestrict 
+			 (select intCompanyLocationId from tblSTStore where strDistrict 
 			 IN ( ''' + (@District) + ''')' + '))'
 		  END
 
@@ -242,7 +242,7 @@ IF (@Vendor IS NOT NULL)
 		  BEGIN
 			 set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 			 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-			 (select intCompanyLocationId from tblSTStore where strDestrict 
+			 (select intCompanyLocationId from tblSTStore where strDistrict 
 			 IN ( ''' + (@District) + ''')' + '))'
 		  END
 
@@ -337,7 +337,7 @@ IF (@Vendor IS NOT NULL)
 			BEGIN
 			 set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 			 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-			 (select intCompanyLocationId from tblSTStore where strDestrict 
+			 (select intCompanyLocationId from tblSTStore where strDistrict 
 			 IN ( ''' + (@District) + ''')' + '))'
 			END
 
@@ -434,7 +434,7 @@ IF (@Vendor IS NOT NULL)
 		 BEGIN
 			 set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 			 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-			 (select intCompanyLocationId from tblSTStore where strDestrict 
+			 (select intCompanyLocationId from tblSTStore where strDistrict 
 			 IN ( ''' + (@District) + ''')' + '))'
 		END
 
@@ -531,7 +531,7 @@ IF (@Vendor IS NOT NULL)
 			BEGIN
 			 set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 			 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-			 (select intCompanyLocationId from tblSTStore where strDestrict 
+			 (select intCompanyLocationId from tblSTStore where strDistrict 
 			 IN ( ''' + (@District) + ''')' + '))'
 			END
 
@@ -651,7 +651,7 @@ SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster WHERE OldData !=
 			    BEGIN
 			 		 set @SQL1 = @SQL1 +  ' and tblICItemPricing.intItemLocationId IN 
 					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strDestrict 
+					 (select intCompanyLocationId from tblSTStore where strDistrict 
 					 IN ( ''' + (@District) + ''')' + '))'
 				END
 
@@ -767,7 +767,7 @@ SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster WHERE OldData !=
 					BEGIN
 					 set @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
 					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strDestrict 
+					 (select intCompanyLocationId from tblSTStore where strDistrict 
 					 IN ( ''' + (@District) + ''')' + '))'
 					END
 
