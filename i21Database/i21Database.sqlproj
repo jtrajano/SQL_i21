@@ -4591,8 +4591,9 @@
     <Build Include="dbo\Views\vyuRKM2MInquiryNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostAdjustmentAverageCostingLoopCBOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCostingStockOut.sql" />
     <Build Include="dbo\Stored Procedures\uspICRecalcAveCostOnCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCostingCBOut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
