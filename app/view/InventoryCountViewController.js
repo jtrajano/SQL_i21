@@ -789,11 +789,15 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             }
             
             //Save the record first before showing the Print Count Sheets screen
-            win.context.data.saveRecord ({
-            successFn: function () {
+            if(!current.dirty)
                 showAddScreen();
-                }
-            });
+            else {
+                win.context.data.saveRecord ({
+                    successFn: function () {
+                        showAddScreen();
+                    }
+                });
+            }
         }
     },
 
