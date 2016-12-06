@@ -18,6 +18,7 @@ BEGIN
 	EXEC('
 	CREATE FUNCTION [dbo].[fnTMGetContractForCustomer](
 		@strCustomerNumber AS NVARCHAR(20)
+		,@intSiteId INT
 	)
 	RETURNS @tblSpecialPriceTableReturn TABLE(
 		strContractNumber NVARCHAR(20)
@@ -46,6 +47,12 @@ BEGIN
 			AND vwcnt_loc_no <> ''000''
 			AND vwcnt_due_rev_dt >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
 			AND vwcnt_un_bal > 0
+			AND A4GLIdentity NOT IN (SELECT DISTINCT intContractID 
+									FROM tblTMSiteLink
+									WHERE intSiteID <> @intSiteId
+										AND intContractID NOT IN (SELECT DISTINCT intContractID
+																  FROM tblTMSiteLink
+																  WHERE intSiteID = @intSiteId))
 		RETURN
 	END
 	')
