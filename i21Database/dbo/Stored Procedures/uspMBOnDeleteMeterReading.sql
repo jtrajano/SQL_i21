@@ -26,6 +26,10 @@ BEGIN TRY
 	WHERE intInvoiceId = @InvoiceId
 		AND ISNULL(ysnPosted, 0) <> 1
 
+	UPDATE tblMBMeterReading
+	SET intInvoiceId = NULL
+	WHERE intMeterReadingId = @MeterReadingId
+
 	EXEC uspARDeleteInvoice @InvoiceId, @UserId
 
 END TRY
