@@ -309,7 +309,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 					DECLARE @successfulCount int
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
 
-    				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,@successfulCount OUTPUT
+    				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
 
     				IF @successfulCount = @journalCount
     				BEGIN
