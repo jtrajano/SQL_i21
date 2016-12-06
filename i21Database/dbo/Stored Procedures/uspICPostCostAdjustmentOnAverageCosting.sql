@@ -208,7 +208,7 @@ BEGIN
 	SET @PreviousRunningQty = ISNULL(@RunningQty, 0) 
 END 
 
--- Loop thru the inventory transactions
+-- BEGIN: Loop thru the inventory transactions
 BEGIN 
 	-----------------------------------------------------------------------------------------------------------------------------
 	-- Create the cursor
@@ -232,6 +232,7 @@ BEGIN
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId >= @TransactionIdStartingPoint
+			AND t.dblQty <> 0 
 
 	OPEN loopInvTransactions;
 
@@ -386,7 +387,7 @@ BEGIN
 			UPDATE	cb
 			SET		cb.dblCost = @NewCost
 			FROM	tblICInventoryFIFO cb
-			WHERE	cb.intInventoryFIFOId = @t_intInventoryTransactionId
+			WHERE	cb.intInventoryFIFOId = @TopCostBucketId
 		END 
 
 		-- Process the next cost bucket. 
@@ -532,6 +533,65 @@ BEGIN
 
 	CLOSE loopInvTransactions;
 	DEALLOCATE loopInvTransactions;
+END 
+-- END: Loop thru the inventory transactions
+
+-- Create an auto-variance if the adjusted stock is the last in the loop. 
+IF @t_strTransactionId = @strSourceTransactionId AND @t_dblQty > 0 AND @NewCost <> 0 
+BEGIN 
+	-- Get the running value 
+	SELECT	@RunningValue =  SUM (
+				dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) 
+				+ ISNULL(t.dblValue, 0)
+			)
+	FROM	tblICInventoryTransaction t
+			OUTER APPLY (
+				SELECT	TOP 1 
+						t2.intInventoryTransactionId
+				FROM	tblICInventoryTransaction t2
+				WHERE	t2.intItemId = @intItemId
+						AND t2.intItemLocationId = @intItemLocationId
+						AND t2.strTransactionId = @strTransactionId
+						AND t2.intTransactionId = @intTransactionId
+						AND t2.intTransactionDetailId = @intTransactionDetailId
+				ORDER BY t2.intInventoryTransactionId DESC 
+			) t2
+	WHERE	t.intItemId = @intItemId
+			AND t.intItemLocationId = @intItemLocationId 
+			AND t.intInventoryTransactionId <= t2.intInventoryTransactionId
+
+	SET @AdjustmentValue = dbo.fnMultiply(@NewCost, @RunningQty) - @RunningValue
+
+	-- Create the 'Auto Variance'
+	EXEC [uspICPostInventoryTransaction]
+		@intItemId								= @intItemId
+		,@intItemLocationId						= @intItemLocationId
+		,@intItemUOMId							= @intItemUOMId
+		,@intSubLocationId						= @intSubLocationId
+		,@intStorageLocationId					= @intStorageLocationId
+		,@dtmDate								= @dtmDate
+		,@dblQty								= 0
+		,@dblUOMQty								= 0
+		,@dblCost								= 0
+		,@dblValue								= @AdjustmentValue
+		,@dblSalesPrice							= 0
+		,@intCurrencyId							= @intCurrencyId 
+		,@dblExchangeRate						= @dblExchangeRate
+		,@intTransactionId						= @intTransactionId
+		,@intTransactionDetailId				= @intTransactionDetailId
+		,@strTransactionId						= @strTransactionId
+		,@strBatchId							= @strBatchId
+		,@intTransactionTypeId					= @INV_TRANS_TYPE_Auto_Variance 
+		,@intLotId								= NULL  
+		,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
+		,@intRelatedTransactionId				= @t_intTransactionId 
+		,@strRelatedTransactionId				= @t_strTransactionId
+		,@strTransactionForm					= @strTransactionForm
+		,@intEntityUserSecurityId				= @intEntityUserSecurityId
+		,@intCostingMethod						= @AVERAGECOST
+		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+		,@intFobPointId							= @intFobPointId 
+		,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 END 
 
 -- Recalculate the average cost. 
