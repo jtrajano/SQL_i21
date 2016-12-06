@@ -16,7 +16,7 @@ SELECT
 	,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](C1.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone))
 	,intShipViaId
 	,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE [intEntityShipViaId] = A.intShipViaId)
-	,intTermsId
+	,A.intTermsId
 	,strTerm = (SELECT strTerm FROM dbo.tblSMTerm WHERE intTermID = A.intTermsId)
 	,B.dblQtyOrdered
 	,E.strUnitMeasure

@@ -337,6 +337,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\034_EntityClassData.sql
 :r .\EM\035_EncryptEFTAccountNumber.sql
 :r .\EM\034_UpdateEntityEmail.sql
+:r .\EM\036_MoveTheTermsPerType.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

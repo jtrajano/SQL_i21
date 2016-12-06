@@ -42,7 +42,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_state = SUBSTRING(Loc.strState,1,2),
 				agcus_zip = SUBSTRING(Loc.strZipCode,1,10),
 				agcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END),
-				agcus_terms_cd = Loc.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
+				agcus_terms_cd = Cus.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
 				--Contact
 				agcus_contact = SUBSTRING((Con.strName),1,20),
 				agcus_phone = ISNULL( (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END), '''' ),
@@ -174,7 +174,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Loc.strState,1,2) as strState,
 				SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
 				(CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
-				Loc.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
+				Cus.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
 				--Customer
 				SUBSTRING(Cus.strCustomerNumber,1,10) as strCustomerNumber,
 				(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
@@ -491,7 +491,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[ysnMarketAgreementSigned],	
 					[intMarketZoneId],			
 					[ysnHoldBatchGrainPayment],	
-					[ysnFederalWithholding])
+					[ysnFederalWithholding], 
+					[intTermsId])
 					VALUES						
 					(@EntityId,
 					 NULL, 
@@ -527,7 +528,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @ysnMarketAgreementSigned,	
 					 @intMarketZoneId,			
 					 @ysnHoldBatchGrainPayment,	
-					 @ysnFederalWithholding)
+					 @ysnFederalWithholding, 
+					 @intTermsId)
 				 
 					 --Get intEntityCustomerId
 					 SELECT @intEntityCustomerId = intEntityCustomerId FROM tblARCustomer WHERE intEntityCustomerId = @EntityId
@@ -1079,7 +1081,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[ysnApplySalesTax],
 					[dblBudgetAmountForBudgetBilling],
 					[strBudgetBillingBeginMonth],
-					[strBudgetBillingEndMonth]
+					[strBudgetBillingEndMonth], 
+					[intTermsId]
 					--Grain Tab
 					--[strDPAContract],
 					--[dtmDPADate],
@@ -1117,7 +1120,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @ysnApplySalesTax,
 					 @dblBudgetAmountForBudgetBilling,
 					 @strBudgetBillingBeginMonth,
-					 @strBudgetBillingEndMonth
+					 @strBudgetBillingEndMonth, 
+					 @intTermsId
 					 --@strDPAContract,
 					 --@dtmDPADate,
 					 --@strGBReceiptNumber,

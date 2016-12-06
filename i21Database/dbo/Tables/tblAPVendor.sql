@@ -32,6 +32,7 @@
 	[ysnOneBillPerPayment]	BIT NULL DEFAULT 0,
 	[strFLOId]						  NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,	
 	[intApprovalListId] INT NULL,
+	[intTermsId] INT NULL,
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityVendorId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
     --CONSTRAINT [UK_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC),
@@ -39,7 +40,8 @@
 	--CONSTRAINT [FK_tblAPVendor_tblEMEntity] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblAPVendor_tblEMEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblAPVendor_tblGLAccount] FOREIGN KEY ([intGLAccountExpenseId]) REFERENCES [tblGLAccount]([intAccountId]),
-	CONSTRAINT [FK_tblAPVendor_tblSMApprovalList] FOREIGN KEY ([intApprovalListId]) REFERENCES [tblSMApprovalList]([intApprovalListId])
+	CONSTRAINT [FK_tblAPVendor_tblSMApprovalList] FOREIGN KEY ([intApprovalListId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),	
+	CONSTRAINT [FK_tblAPVendor_tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	--CONSTRAINT [FK_tblAPVendor_tblAPVendorToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblAPVendorToContact]([intVendorToContactId])
 );
 
