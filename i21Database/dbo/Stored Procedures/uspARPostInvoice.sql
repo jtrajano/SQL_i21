@@ -3600,13 +3600,16 @@ IF @post = 1
 			END CATCH
 		END
 
-		BEGIN TRY 
-			EXEC dbo.uspGLBookEntries @GLEntries, @post
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
+		IF @recap = 0
+		BEGIN
+			BEGIN TRY 
+				EXEC dbo.uspGLBookEntries @GLEntries, @post
+			END TRY
+			BEGIN CATCH
+				SELECT @ErrorMerssage = ERROR_MESSAGE()										
+				GOTO Do_Rollback
+			END CATCH
+		END		
 
 	END   
 
