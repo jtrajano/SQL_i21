@@ -1,8 +1,8 @@
 ﻿/*
 	
 */
-CREATE PROCEDURE [dbo].[uspICPostAdjustmentAverageCostingLoopCBOut]
-	@intInventoryTransactionId AS INT 
+CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCostingCBOut]
+	@CostBucketId AS INT 
 	,@AdjustCost AS NUMERIC(38,20)
 	,@AdjustDate AS DATETIME 
 	,@strVoucherId AS NVARCHAR(50)
@@ -18,7 +18,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-IF @intInventoryTransactionId IS NULL OR @AdjustCost IS NULL 
+IF @CostBucketId IS NULL OR @AdjustCost IS NULL 
 	GOTO _Exit; 
 	
 -- Create the temp table if it does not exists. 
@@ -94,7 +94,13 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_ADJ_Lot_Merge AS INT = 19
 		,@INV_TRANS_TYPE_ADJ_Lot_Move AS INT = 20
 
-DECLARE	@tOut_intInventoryTransactionId AS INT
+DECLARE	@CBOut_intId AS INT 
+		,@CBOut_intInventoryFIFOId AS INT 
+		,@CBOut_intInventoryTransactionId AS INT
+		,@CBOut_intRevalueFifoId AS INT
+		,@CBOut_dblQty AS NUMERIC(38, 20)
+		,@CBOut_dblCostAdjustQty AS NUMERIC(38, 20)
+		,@tOut_intInventoryTransactionId AS INT
 		,@tOut_intItemId AS INT 
 		,@tOut_intItemUOMId AS INT 
 		,@tOut_intItemLocationId AS INT
@@ -123,37 +129,89 @@ DECLARE	@tOut_intInventoryTransactionId AS INT
 DECLARE @LoopTransactionTypeId AS INT 
 		,@CostAdjustmentTransactionType AS INT -- = @intTransactionTypeId		
 		
-
-SELECT  @tOut_intInventoryTransactionId = t.intInventoryTransactionId
-		,@tOut_intItemId = t.intItemId 
-		,@tOut_intItemUOMId = t.intItemUOMId 
-		,@tOut_intItemLocationId = t.intItemLocationId
-		,@tOut_intSubLocationId = t.intSubLocationId
-		,@tOut_intStorageLocationId = t.intStorageLocationId 
-		,@tOut_dblQty = t.dblQty
-		,@tOut_dblUOMQty = t.dblUOMQty
-		,@tOut_dblCost = t.dblCost
-		,@tOut_dblValue = t.dblValue
-		,@tOut_intCurrencyId = t.intCurrencyId
-		,@tOut_dblExchangeRate = t.dblExchangeRate
-		,@tOut_strTransactionId = t.strTransactionId 
-		,@tOut_intTransactionId = t.intTransactionId
-		,@tOut_intTransactionDetailId = t.intTransactionDetailId
-		,@tOut_strTransactionType = ty.strName 
-		,@tOut_intTransactionType = t.intTransactionTypeId  
-		,@tOut_strTransactionForm = t.strTransactionForm
-		,@tOut_strBatchId = t.strBatchId
-		,@tOut_intFobPointId = t.intFobPointId
-		,@tOut_intInTransitSourceLocationId = t.intInTransitSourceLocationId
-FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+-----------------------------------------------------------------------------------------------------------------------------
+-- Create the cursor
+-- Make sure the following options are used: 
+-- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
+-- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
+-----------------------------------------------------------------------------------------------------------------------------
+DECLARE loopCostBucketOut CURSOR LOCAL FAST_FORWARD
+FOR 
+SELECT  cbOut.intId
+		,cbOut.intInventoryFIFOId
+		,cbOut.intInventoryTransactionId
+		,cbOut.intRevalueFifoId
+		,cbOut.dblQty
+		,cbOut.dblCostAdjustQty
+		,t.intInventoryTransactionId
+		,t.intItemId 
+		,t.intItemUOMId 
+		,t.intItemLocationId
+		,t.intSubLocationId
+		,t.intStorageLocationId 
+		,t.dblQty
+		,t.dblUOMQty
+		,t.dblCost
+		,t.dblValue
+		,t.intCurrencyId
+		,t.dblExchangeRate
+		,t.strTransactionId 
+		,t.intTransactionId
+		,t.intTransactionDetailId
+		,strTransactionType = ty.strName 
+		,t.intTransactionTypeId  
+		,t.strTransactionForm
+		,t.strBatchId
+		,t.intFobPointId
+		,t.intInTransitSourceLocationId
+FROM	tblICInventoryFIFOOut cbOut INNER JOIN tblICInventoryTransaction t
+			ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId 
+		LEFT JOIN tblICInventoryTransactionType ty
 			ON ty.intTransactionTypeId = t.intTransactionTypeId 
-WHERE	t.intInventoryTransactionId = @intInventoryTransactionId
+WHERE	cbOut.intInventoryFIFOId = @CostBucketId
 		AND ISNULL(t.ysnIsUnposted, 0) = 0 
 
+OPEN loopCostBucketOut;
+
+-- Initial fetch attempt
+FETCH NEXT FROM loopCostBucketOut INTO 
+	@CBOut_intId 
+	,@CBOut_intInventoryFIFOId 
+	,@CBOut_intInventoryTransactionId 
+	,@CBOut_intRevalueFifoId 
+	,@CBOut_dblQty 
+	,@CBOut_dblCostAdjustQty 
+	,@tOut_intInventoryTransactionId
+	,@tOut_intItemId
+	,@tOut_intItemUOMId
+	,@tOut_intItemLocationId
+	,@tOut_intSubLocationId 
+	,@tOut_intStorageLocationId
+	,@tOut_dblQty
+	,@tOut_dblUOMQty
+	,@tOut_dblCost
+	,@tOut_dblValue
+	,@tOut_intCurrencyId
+	,@tOut_dblExchangeRate
+	,@tOut_strTransactionId
+	,@tOut_intTransactionId
+	,@tOut_intTransactionDetailId
+	,@tOut_strTransactionType
+	,@tOut_intTransactionType
+	,@tOut_strTransactionForm
+	,@tOut_strBatchId
+	,@tOut_intFobPointId 
+	,@tOut_intInTransitSourceLocationId
+;
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Start of the loop for sold/produced items. 
+-----------------------------------------------------------------------------------------------------------------------------
+WHILE @@FETCH_STATUS = 0 
 BEGIN 
 	
 	-- Calculate the Inv Adjust value.  
-	SET @InvAdjustValue = dbo.fnMultiply(@AdjustCost, @tOut_dblQty) 
+	SET @InvAdjustValue = dbo.fnMultiply(@AdjustCost, -@CBOut_dblQty) 
 
 	---------------------------------------------------------------------------
 	-- If stock was shipped or reduced from adj, then do the "Revalue Sold". 
@@ -390,6 +448,40 @@ BEGIN
 			WHERE	intInventoryTransactionId = @intInventoryTransactionEscalateId
 		END 
 	END 
+
+	-- Get the next cbOut record. 
+	FETCH NEXT FROM loopCostBucketOut INTO 
+		@CBOut_intId 
+		,@CBOut_intInventoryFIFOId 
+		,@CBOut_intInventoryTransactionId 
+		,@CBOut_intRevalueFifoId 
+		,@CBOut_dblQty 
+		,@CBOut_dblCostAdjustQty
+		,@tOut_intInventoryTransactionId
+		,@tOut_intItemId
+		,@tOut_intItemUOMId
+		,@tOut_intItemLocationId
+		,@tOut_intSubLocationId 
+		,@tOut_intStorageLocationId
+		,@tOut_dblQty
+		,@tOut_dblUOMQty
+		,@tOut_dblCost
+		,@tOut_dblValue
+		,@tOut_intCurrencyId
+		,@tOut_dblExchangeRate
+		,@tOut_strTransactionId
+		,@tOut_intTransactionId
+		,@tOut_intTransactionDetailId
+		,@tOut_strTransactionType
+		,@tOut_intTransactionType
+		,@tOut_strTransactionForm
+		,@tOut_strBatchId
+		,@tOut_intFobPointId 
+		,@tOut_intInTransitSourceLocationId
+	;
 END 
+
+CLOSE loopCostBucketOut;
+DEALLOCATE loopCostBucketOut;
 
 _Exit: 

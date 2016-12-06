@@ -205,6 +205,7 @@ BEGIN
 			AND t.intInventoryTransactionId < @TransactionIdStartingPoint
 
 	SET @RunningQty = ISNULL(@RunningQty, 0) 
+	SET @PreviousRunningQty = ISNULL(@RunningQty, 0) 
 END 
 
 -- Loop thru the inventory transactions
@@ -393,11 +394,14 @@ BEGIN
 		BEGIN 		
 			-- Calculate a new average cost adjustment 
 			SET @AdjustAverageCost = 						
-				dbo.fnDivide(
-					--@AdjustmentValue
-					dbo.fnMultiply(@PreviousRunningQty, @AdjustAverageCost) 
-					,CASE WHEN @RunningQty > 0 THEN @RunningQty ELSE @t_dblQty END 
-				) 
+					CASE	WHEN @PreviousRunningQty < 0  THEN 
+								0
+							ELSE 
+								dbo.fnDivide(
+									dbo.fnMultiply(@PreviousRunningQty, @AdjustAverageCost) 
+									,CASE WHEN @RunningQty > 0 THEN @RunningQty ELSE @t_dblQty END 
+								) 
+					END								
 			
 			-- Otherwise, add an adjustment to re-align the average cost. 
 			IF @RunningQty <= 0 
@@ -461,10 +465,34 @@ BEGIN
 		END 
 
 		-- Process reduce stocks 
-		ELSE IF @t_dblQty < 0 
+		ELSE IF @t_dblQty < 0 AND @AdjustAverageCost <> 0 
 		BEGIN 	
-			EXEC uspICPostAdjustmentAverageCostingLoopCBOut
+			EXEC uspICPostCostAdjustmentOnAverageCostingStockOut
 				@intInventoryTransactionId  = @t_intInventoryTransactionId
+				,@AdjustCost = @AdjustAverageCost
+				,@AdjustDate  = @dtmDate
+				,@strVoucherId = @strTransactionId
+				,@intVoucherId = @intTransactionId
+				,@intVoucherDetailId = @intTransactionDetailId
+				,@strBatchId = @strBatchId
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+		END 
+
+		-- If stocks was recovering from negative stock. 
+		IF @t_dblQty > 0 AND @PreviousRunningQty < 0 AND @AdjustAverageCost <> 0 
+		BEGIN 
+			SELECT	TOP 1 
+					@TopCostBucketId = cb.intInventoryFIFOId
+			FROM	tblICInventoryFIFO cb
+			WHERE	cb.intItemId = @intItemId
+					AND cb.intItemLocationId = @intItemLocationId
+					AND cb.intTransactionId = @t_intTransactionId
+					AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@t_intTransactionDetailId, 0)
+					AND cb.strTransactionId = @t_strTransactionId
+					AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+
+			EXEC uspICPostCostAdjustmentOnAverageCostingCBOut
+				@CostBucketId  = @TopCostBucketId
 				,@AdjustCost = @AdjustAverageCost
 				,@AdjustDate  = @dtmDate
 				,@strVoucherId = @strTransactionId
