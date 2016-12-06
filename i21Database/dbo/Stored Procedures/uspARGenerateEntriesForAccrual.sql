@@ -241,7 +241,7 @@ BEGIN
 		(
 			SELECT 
 				 intInvoiceId		= intInvoiceId
-				,dblDiscountTotal	= SUM(ISNULL(ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal))
+				,dblDiscountTotal	= SUM(ISNULL([dbo].fnRoundBanker(((dblDiscount/100.00) * [dbo].fnRoundBanker((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal))
 			FROM
 				tblARInvoiceDetail
 			GROUP BY
@@ -334,7 +334,7 @@ LEFT OUTER JOIN
 		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
 WHERE
 	ARI.intInvoiceId = @InvoiceId 
-	AND ARID.dblLicenseAmount <> @ZeroDecimal 
+	AND (ARID.dblLicenseAmount <> @ZeroDecimal OR ARID.dblMaintenanceAmount <> @ZeroDecimal)
 	AND ARID.strMaintenanceType = 'License/Maintenance'
 	AND ICI.strType = 'Software'
 	AND ARI.strType <> 'Debit Memo'
@@ -427,7 +427,7 @@ LEFT OUTER JOIN
 		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
 WHERE
 	ARI.intInvoiceId = @InvoiceId 
-	AND ARID.dblLicenseAmount <> @ZeroDecimal 
+	AND ARID.dblMaintenanceAmount <> @ZeroDecimal 
 	AND ARID.strMaintenanceType IN ('Maintenance Only', 'SaaS')
 	AND ICI.strType = 'Software'
 	AND ARI.strType <> 'Debit Memo'
@@ -465,12 +465,12 @@ BEGIN
 
 	SELECT TOP 1 
 		 @InvoiceDetailId				= intInvoiceDetailId
-		,@Total							= ISNULL(dblTotal, @ZeroDecimal) + ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+		,@Total							= ISNULL(dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((dblDiscount/100.00) * [dbo].fnRoundBanker((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
 		,@TotalWODiscount				= dblTotal
-		,@LicenseTotal					= CASE WHEN strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License Only') THEN ISNULL(dblTotal, @ZeroDecimal) + ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END
-		,@LicenseTotalWODiscount		= CASE WHEN strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License Only') THEN dblTotal ELSE ROUND(dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END --+ ROUND((ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(100.000000 - ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
-		,@MaintenanceTotal				= CASE WHEN strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License Only') THEN ISNULL(dblTotal, @ZeroDecimal) + ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END
-		,@MaintenanceTotalWODiscount	= CASE WHEN strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License Only') THEN dblTotal ELSE ROUND(dblTotal * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END --+ ROUND((ROUND(((dblDiscount/100.00) * ROUND((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
+		,@LicenseTotal					= CASE WHEN strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License Only') THEN ISNULL(dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((dblDiscount/100.00) * [dbo].fnRoundBanker((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE [dbo].fnRoundBanker(dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END
+		,@LicenseTotalWODiscount		= CASE WHEN strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License Only') THEN dblTotal ELSE [dbo].fnRoundBanker(dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END --+ [dbo].fnRoundBanker(([dbo].fnRoundBanker(((dblDiscount/100.00) * [dbo].fnRoundBanker((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
+		,@MaintenanceTotal				= CASE WHEN strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License Only') THEN ISNULL(dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((dblDiscount/100.00) * [dbo].fnRoundBanker((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE [dbo].fnRoundBanker(dblTotal * ([dbo].fnRoundBanker(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END
+		,@MaintenanceTotalWODiscount	= CASE WHEN strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License Only') THEN dblTotal ELSE [dbo].fnRoundBanker(dblTotal * ([dbo].fnRoundBanker(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END --+ [dbo].fnRoundBanker(([dbo].fnRoundBanker(((dblDiscount/100.00) * [dbo].fnRoundBanker((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(dblMaintenanceAmount, @ZeroDecimal) * dblQtyShipped) / dblTotal) * 100.000000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal())
 		,@UnitsTotal					= dblUnits
 		--,@MaintenanceType				= strMaintenanceType
 	FROM 
@@ -484,24 +484,24 @@ BEGIN
 	SET @MaintenanceRemainderWODiscount = @ZeroDecimal
 	SET @UnitsRemainder = @ZeroDecimal
 	
-	SET @TotalPerPeriod = ROUND((@Total/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @Remainder = ROUND(@Total, dbo.fnARGetDefaultDecimal()) - ROUND((@TotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @TotalPerPeriodWODiscount = ROUND((@TotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @RemainderWODiscount = ROUND(@TotalWODiscount, dbo.fnARGetDefaultDecimal()) - ROUND((@TotalPerPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @TotalPerPeriod = [dbo].fnRoundBanker((@Total/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @Remainder = [dbo].fnRoundBanker(@Total, dbo.fnARGetDefaultDecimal()) - [dbo].fnRoundBanker((@TotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @TotalPerPeriodWODiscount = [dbo].fnRoundBanker((@TotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @RemainderWODiscount = [dbo].fnRoundBanker(@TotalWODiscount, dbo.fnARGetDefaultDecimal()) - [dbo].fnRoundBanker((@TotalPerPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
 
-	SET @LicenseTotalPerPeriod = ROUND((@LicenseTotal/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @LicenseRemainder = ROUND(@LicenseTotal, dbo.fnARGetDefaultDecimal()) - ROUND((@LicenseTotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @LicenseTotalPeriodWODiscount = ROUND((@LicenseTotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @LicenseRemainderWODiscount = ROUND(@LicenseTotalWODiscount, dbo.fnARGetDefaultDecimal()) - ROUND((@LicenseTotalPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @LicenseTotalPerPeriod = [dbo].fnRoundBanker((@LicenseTotal/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @LicenseRemainder = [dbo].fnRoundBanker(@LicenseTotal, dbo.fnARGetDefaultDecimal()) - [dbo].fnRoundBanker((@LicenseTotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @LicenseTotalPeriodWODiscount = [dbo].fnRoundBanker((@LicenseTotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @LicenseRemainderWODiscount = [dbo].fnRoundBanker(@LicenseTotalWODiscount, dbo.fnARGetDefaultDecimal()) - [dbo].fnRoundBanker((@LicenseTotalPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
 
 
-	SET @MaintenanceTotalPerPeriod = ROUND((@MaintenanceTotal/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @MaintenanceRemainder = ROUND(@MaintenanceTotal, dbo.fnARGetDefaultDecimal()) - ROUND((@MaintenanceTotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @MaintenanceTotalPeriodWODiscount = ROUND((@MaintenanceTotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
-	SET @MaintenanceRemainderWODiscount = ROUND(@MaintenanceTotalWODiscount, dbo.fnARGetDefaultDecimal()) - ROUND((@MaintenanceTotalPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @MaintenanceTotalPerPeriod = [dbo].fnRoundBanker((@MaintenanceTotal/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @MaintenanceRemainder = [dbo].fnRoundBanker(@MaintenanceTotal, dbo.fnARGetDefaultDecimal()) - [dbo].fnRoundBanker((@MaintenanceTotalPerPeriod * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @MaintenanceTotalPeriodWODiscount = [dbo].fnRoundBanker((@MaintenanceTotalWODiscount/@AccrualPeriod), dbo.fnARGetDefaultDecimal())
+	SET @MaintenanceRemainderWODiscount = [dbo].fnRoundBanker(@MaintenanceTotalWODiscount, dbo.fnARGetDefaultDecimal()) - [dbo].fnRoundBanker((@MaintenanceTotalPeriodWODiscount * @AccrualPeriod), dbo.fnARGetDefaultDecimal())
 
-	SET @UnitsPerPeriod = ROUND((@UnitsTotal/@AccrualPeriod),6)
-	SET @UnitsRemainder = ROUND(@UnitsTotal,6) - ROUND((@UnitsPerPeriod * @AccrualPeriod),6)
+	SET @UnitsPerPeriod = [dbo].fnRoundBanker((@UnitsTotal/@AccrualPeriod),6)
+	SET @UnitsRemainder = [dbo].fnRoundBanker(@UnitsTotal,6) - [dbo].fnRoundBanker((@UnitsPerPeriod * @AccrualPeriod),6)
 	SET @LoopCounter = 0		
 
 	WHILE @LoopCounter < @AccrualPeriod
@@ -961,12 +961,12 @@ BEGIN
 	--SELECT TOP 1 
 	--	@InvoiceDetailTaxId	= intInvoiceDetailTaxId
 	--	,@TaxTotal				= dblAdjustedTax
-	--	,@TaxTotalPerPeriod		= ROUND((dblAdjustedTax/@AccrualPeriod),2)
+	--	,@TaxTotalPerPeriod		= [dbo].fnRoundBanker((dblAdjustedTax/@AccrualPeriod),2)
 	--FROM 
 	--	@InvoiceDetailTax
 		
 	--SET @TaxRemainder = @ZeroDecimal
-	--SET @TaxRemainder = ROUND(@TaxTotal,2) - ROUND((@TaxTotalPerPeriod * @AccrualPeriod),2)
+	--SET @TaxRemainder = [dbo].fnRoundBanker(@TaxTotal,2) - [dbo].fnRoundBanker((@TaxTotalPerPeriod * @AccrualPeriod),2)
 	--SET @TaxLoopCounter = 0		
 
 	--WHILE @TaxLoopCounter < @AccrualPeriod

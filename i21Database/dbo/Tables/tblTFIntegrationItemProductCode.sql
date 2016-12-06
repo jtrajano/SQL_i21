@@ -1,6 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblTFIntegrationItemProductCode](
 	[intIntegrationItemProductCodeId] [int] IDENTITY(1,1) NOT NULL,
-	[strSourceRecordConcatKey] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strItemNumber] [nvarchar](20) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTaxAuthority] [nvarchar](5) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strProductCode] [nvarchar](10) COLLATE Latin1_General_CI_AS NOT NULL,

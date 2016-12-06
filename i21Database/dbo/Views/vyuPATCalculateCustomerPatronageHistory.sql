@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateCustomerPatronageHistory]
 	AS
-SELECT	RCus.intRefundTypeId,
+SELECT	RCat.intRefundCategoryId,
+		RCat.intRefundCustomerId,
+		RCus.intRefundTypeId,
 		RCat.intPatronageCategoryId,
 		R.intRefundId,
 		RCus.intCustomerId,

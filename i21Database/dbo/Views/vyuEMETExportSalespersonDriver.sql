@@ -24,21 +24,14 @@ select
 union all
 
 select 
-	RIGHT(RTRIM(LTRIM(c.strEntityNo)), 3) bp_no,
-	c.strName as bpname,
-	dbo.fnEMSplitWithGetByIdx(b.strAddress, CHAR(10), 1) as addr1,
-	dbo.fnEMSplitWithGetByIdx(b.strAddress, CHAR(10), 2) as addr2,
-	dbo.fnEMSplitWithGetByIdx(b.strAddress, CHAR(10), 3) as addr3,
-	b.strZipCode zip,
-	b.strState [state],
-	b.strCity [city],
+	RIGHT(RTRIM(LTRIM(isnull(a.strLocationNumber,''))), 3) bp_no,
+	a.strLocationName as bpname,
+	dbo.fnEMSplitWithGetByIdx(a.strAddress, CHAR(10), 1) as addr1,
+	dbo.fnEMSplitWithGetByIdx(a.strAddress, CHAR(10), 2) as addr2,
+	dbo.fnEMSplitWithGetByIdx(a.strAddress, CHAR(10), 3) as addr3,
+	a.strZipPostalCode zip,
+	a.strStateProvince [state],
+	a.strCity [city],
 	'' as Authority1,
 	'' as Authority2
-	from tblEMEntity c
-	join tblEMEntityLocation b
-		on c.intEntityId = b.intEntityId and b.ysnDefaultLocation = 1
-	left join tblARSalesperson a
-		on a.intEntitySalespersonId = c.intEntityId	 and a.strType <> 'Driver'	
-	join tblETExportFilterLocation d
-		on b.intEntityLocationId = d.intCompanyLocationId	
-	where (RTRIM(LTRIM(c.strEntityNo)) <> '' and c.strEntityNo is not null)
+	from tblSMCompanyLocation a

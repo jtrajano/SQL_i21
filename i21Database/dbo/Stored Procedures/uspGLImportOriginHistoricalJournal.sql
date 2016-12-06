@@ -6,6 +6,19 @@ SET NOCOUNT ON
 DECLARE @result NVARCHAR(MAX)
 DECLARE @invalidDatesUpdated VARCHAR(1)
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption A join tblGLAccount B on A.OriginConversion_OffsetAccountId = B.intAccountId)
+BEGIN
+	SELECT 'Origin Offset Account is required in GL Company Configuration.'
+	RETURN -1
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM glhstmst)
+BEGIN
+	SELECT 'Origin table is empty.'
+	RETURN -1
+END
+
+
 BEGIN TRANSACTION
 EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
 
@@ -365,7 +378,7 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
                                         WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
 										WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
                                         						
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT	
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
     IF LEN(@result) > 0                                 
 		SET @result = @result + ',' + CAST(@intImportLogId AS NVARCHAR(40))  --'SUCCESS SELECT A.intJournalId FROM tblGLJournal A INNER JOIN tblGLCOAImportLogDetail B on A.strJournalId = B.strJournalId WHERE B.intImportLogId IN(' +  @result --(Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + ',' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('')) as intJournalId)
@@ -378,9 +391,11 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
+	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+
 COMMIT_INSERT:
 	COMMIT TRANSACTION
-	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans
 	GOTO IMPORT_EXIT
 ROLLBACK_INSERT:
 	ROLLBACK TRANSACTION		            

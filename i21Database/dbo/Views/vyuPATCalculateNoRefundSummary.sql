@@ -10,7 +10,6 @@ WITH ComPref AS(
 			intFiscalYearId = Total.intFiscalYear,
 			Total.intRefundTypeId,
 			AC.strStockStatus,
-			ysnEligibleRefund = CASE WHEN Total.dblRefundAmount < ComPref.dblMinimumRefund THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 			dblTotalPurchases = Total.dblTotalPurchases,
 			dblTotalSales = Total.dblTotalSales,
 			dblRefundAmount = Total.dblRefundAmount,
@@ -37,7 +36,6 @@ WITH ComPref AS(
 			ON AC.intEntityCustomerId = Total.intCustomerId
 		INNER JOIN tblEMEntity ENT
 			ON ENT.intEntityId = Total.intCustomerId
-		CROSS APPLY ComPref
 )
 
 SELECT	id = NEWID(),
@@ -46,15 +44,16 @@ SELECT	id = NEWID(),
 		intFiscalYearId,
 		intRefundTypeId,
 		strStockStatus,
-		ysnEligibleRefund,
+		ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) < ComPref.dblMinimumRefund THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 		dblTotalPurchases = SUM(dblTotalPurchases),
 		dblTotalSales = SUM(dblTotalSales),
 		dblRefundAmount = SUM(dblRefundAmount),
 		dblEquityRefund = SUM(dblEquityRefund)
 	FROM Refunds
+	CROSS APPLY ComPref
 	GROUP BY intCustomerId,
 		strCustomerName,
 		intFiscalYearId,
 		intRefundTypeId,
 		strStockStatus,
-		ysnEligibleRefund
+		ComPref.dblMinimumRefund

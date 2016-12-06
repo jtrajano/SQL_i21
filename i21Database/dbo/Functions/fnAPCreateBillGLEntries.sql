@@ -261,7 +261,7 @@ BEGIN
 									, E.intWeightUOMId
 									, E.dblUnitCost
 								) 
-								/ CASE WHEN ISNULL(A.intSubCurrencyCents, 0) = 0 THEN 1 ELSE A.intSubCurrencyCents END 
+								/ CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END 
 								* B.dblNetWeight
 
 							-- If Gross/Net UOM is missing: compute by the receive qty. 
@@ -272,7 +272,7 @@ BEGIN
 									, E.intUnitMeasureId
 									, E.dblUnitCost
 								) 
-								/ CASE WHEN ISNULL(A.intSubCurrencyCents, 0) = 0 THEN 1 ELSE A.intSubCurrencyCents END 
+								/ CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END  
 								* B.dblQtyReceived
 						END				
 						AS DECIMAL(18, 2)

@@ -44,14 +44,58 @@ SELECT
 	,strCurrency					= CUR.strCurrency
 	,intEntredById					= I.intEntityId
 	,strEnteredBy					= EB.strName
-	,dtmBatchDate					= GL.dtmDate	
+	,dtmBatchDate					= --GL.dtmDate	
+									  (
+										SELECT TOP 1
+											G.dtmDate
+										FROM
+											tblGLDetail G
+										WHERE
+											I.intInvoiceId = G.intTransactionId
+											AND I.strInvoiceNumber = G.strTransactionId
+											AND I.intAccountId = G.intAccountId
+											AND G.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Customer Prepayment')
+											AND G.ysnIsUnposted = 0
+											AND G.strCode = 'AR'
+										)
 	,strBatchId						= CASE WHEN I.strTransactionType = 'Customer Prepayment' 
 										THEN  (SELECT TOP 1 strBatchId FROM tblARPayment A 
 												INNER JOIN (SELECT intPaymentId, intInvoiceId FROM tblARPaymentDetail ) B ON A.intPaymentId = B.intPaymentId 
 												INNER JOIN (SELECT strTransactionId, strBatchId FROM tblGLDetail) C ON A.strRecordNumber = C.strTransactionId 
 												WHERE B.intInvoiceId = I.intInvoiceId) 
-										ELSE  GL.strBatchId END   
-	,strUserEntered					= GL.strName
+										ELSE  
+											--GL.strBatchId 
+											(
+											SELECT TOP 1
+												G.strBatchId
+											FROM
+												tblGLDetail G
+											WHERE
+												I.intInvoiceId = G.intTransactionId
+												AND I.strInvoiceNumber = G.strTransactionId
+												AND I.intAccountId = G.intAccountId
+												AND G.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Customer Prepayment')
+												AND G.ysnIsUnposted = 0
+												AND G.strCode = 'AR'
+											)
+										END   
+	,strUserEntered					= --GL.strName
+									  (
+										SELECT TOP 1
+											E.strName
+										FROM
+											tblGLDetail G
+										INNER JOIN
+											tblEMEntity E
+												ON G.intEntityId = E.intEntityId
+										WHERE
+											I.intInvoiceId = G.intTransactionId
+											AND I.strInvoiceNumber = G.strTransactionId
+											AND I.intAccountId = G.intAccountId
+											AND G.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Customer Prepayment')
+											AND G.ysnIsUnposted = 0
+											AND G.strCode = 'AR'
+										)	
 	,intEntityContactId				= I.intEntityContactId
 	,strContactName					= EC.strName
 	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -61,7 +105,7 @@ INNER JOIN
 	dbo.tblARCustomer AS C 
 		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
 LEFT OUTER JOIN
-	(SELECT strName, strEmail, intEntityContactId FROM vyuEMEntityContact) EC ON I.intEntityContactId = EC.intEntityContactId	
+	(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact) EC ON I.intEntityContactId = EC.intEntityContactId	
 INNER JOIN
 	dbo.tblEMEntity AS CE 
 		ON C.[intEntityCustomerId] = CE.intEntityId 
@@ -86,27 +130,27 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	dbo.tblEMEntity AS EB 
 		ON I.[intEntityId] = EB.intEntityId
-LEFT OUTER JOIN
-	(
-	SELECT --TOP 1
-		 G.intTransactionId
-		,G.strTransactionId
-		,G.intAccountId
-		,G.strTransactionType
-		,G.dtmDate
-		,G.strBatchId
-		,E.intEntityId
-		,E.strName
-	FROM
-		tblGLDetail G
-	LEFT OUTER JOIN
-		tblEMEntity E
-			ON G.intEntityId = E.intEntityId
-	WHERE
-		G.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Customer Prepayment')
-		AND G.ysnIsUnposted = 0
-		AND G.strCode = 'AR'
-	) GL
-		ON I.intInvoiceId = GL.intTransactionId
-		AND I.intAccountId = GL.intAccountId
-		AND I.strInvoiceNumber = GL.strTransactionId									 
+--LEFT OUTER JOIN
+--	(
+--	SELECT TOP 1
+--		 G.intTransactionId
+--		,G.strTransactionId
+--		,G.intAccountId
+--		,G.strTransactionType
+--		,G.dtmDate
+--		,G.strBatchId
+--		,E.intEntityId
+--		,E.strName
+--	FROM
+--		tblGLDetail G
+--	LEFT OUTER JOIN
+--		tblEMEntity E
+--			ON G.intEntityId = E.intEntityId
+--	WHERE
+--		G.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Customer Prepayment')
+--		AND G.ysnIsUnposted = 0
+--		AND G.strCode = 'AR'
+--	) GL
+--		ON I.intInvoiceId = GL.intTransactionId
+--		AND I.intAccountId = GL.intAccountId
+--		AND I.strInvoiceNumber = GL.strTransactionId					 

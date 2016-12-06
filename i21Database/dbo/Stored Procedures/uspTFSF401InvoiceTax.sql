@@ -496,7 +496,7 @@ DECLARE @TRRCId NVARCHAR(50)
 							  tblTFValidProductCode AS VPC INNER JOIN
 							  tblTFReportingComponent AS RC ON VPC.intReportingComponentId = RC.intReportingComponentId INNER JOIN
 							  tblTFIntegrationItemProductCode AS IPC ON VPC.strProductCode = IPC.strProductCode INNER JOIN
-							  tblTFIntegrationTransaction AS TR ON IPC.strSourceRecordConcatKey = TR.strSourceRecordConcatKey ON tblTFTaxCriteria.intReportingComponentId = RC.intReportingComponentId CROSS JOIN
+							  tblTFIntegrationTransaction AS TR ON IPC.strItemNumber = TR.strItemNumber ON tblTFTaxCriteria.intReportingComponentId = RC.intReportingComponentId CROSS JOIN
 							  tblSMCompanySetup AS SMCOMPSETUP
 							  WHERE (RC.intReportingComponentId IN(' + @TRRCId + ')) 
 							  AND TR.strSourceSystem NOT IN (''F'')

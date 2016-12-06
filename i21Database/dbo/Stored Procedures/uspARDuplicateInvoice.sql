@@ -362,7 +362,8 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]
 		,[intConcurrencyId]
 		,[dblOriginalItemWeight]
-		,[intStorageScheduleTypeId])
+		,[intStorageScheduleTypeId]
+		,[intPrepayTypeId])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= ''
@@ -432,6 +433,7 @@ BEGIN TRY
 		,[intConcurrencyId]				= 1
 		,[dblOriginalItemWeight]		= ARID.dblOriginalItemWeight
 		,[intStorageScheduleTypeId]		= ARID.intStorageScheduleTypeId
+		,[intPrepayTypeId]				= ARID.intPrepayTypeId
 	FROM
 		tblARInvoiceDetail ARID
 	LEFT OUTER JOIN

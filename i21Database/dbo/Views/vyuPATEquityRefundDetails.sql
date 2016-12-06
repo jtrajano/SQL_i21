@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuPATEquityRefundDetails]
 	AS
-SELECT	newid() as id,
+SELECT	NEWID() as id,
+		CE.intFiscalYearId,
 		RR.intRefundTypeId,
 		CE.strEquityType,
 		CE.intCustomerId,
@@ -8,8 +9,6 @@ SELECT	newid() as id,
 		CE.dblEquity,
 		RR.intConcurrencyId,
 		RR.ysnQualified 
-	FROM tblPATRefundRate RR
-	INNER JOIN tblPATRefundRateDetail RRD
-		ON RRD.intRefundTypeId = RR.intRefundTypeId
-	INNER JOIN tblPATCustomerEquity CE
+	FROM tblPATCustomerEquity CE
+	INNER JOIN tblPATRefundRate RR
 		ON CE.intRefundTypeId = RR.intRefundTypeId

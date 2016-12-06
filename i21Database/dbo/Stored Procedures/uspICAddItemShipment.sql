@@ -32,6 +32,17 @@ DECLARE
 	@intEntityId INT,
 	@CurrentShipmentId INT
 
+-- Validate Entries
+IF EXISTS(
+	SELECT TOP 1 1
+	FROM @Entries e
+		INNER JOIN tblICItem i ON i.intItemId = e.intItemId
+	WHERE i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle', 'Kit')
+)
+BEGIN
+	RAISERROR('Can''t ship non-inventory items.', 11, 1)
+	GOTO _Exit
+END
 -- Insert Raw Data
 -- 1. Shipment Header and Items
 INSERT INTO @ShipmentEntries(
@@ -435,3 +446,5 @@ END
 
 CLOSE cur
 DEALLOCATE cur 
+
+_Exit:

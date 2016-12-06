@@ -190,7 +190,7 @@ BEGIN
 						 set @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
 						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
 						 (select intCompanyLocationId from tblSTStore 
-						 where strDestrict IN ( ''' + (@Destrict) + ''')' + '))'
+						 where strDistrict IN ( ''' + (@Destrict) + ''')' + '))'
 						END
 
 						set @SQL1 = @SQL1 + ' and  strPromotionType = ''Discount'''   
@@ -268,7 +268,7 @@ BEGIN
 						 set @SQL1 = @SQL1 +  ' and tblICItemPricing.intItemLocationId IN 
 						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
 						 (select intCompanyLocationId from tblSTStore 
-						 where strDestrict IN ( ''' + (@Destrict) + ''')' + '))'
+						 where strDistrict IN ( ''' + (@Destrict) + ''')' + '))'
 					  END
 			      END
 
