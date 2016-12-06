@@ -47,7 +47,7 @@ BEGIN
 		,@ItemCategoryId			= intItemCategoryId
 		,@ItemCategory				= strItemCategory
 		,@UOMQuantity				= dblUOMQuantity
-		,@CustomerShipToLocationId	= intCustomerShipToLocationId
+		,@CustomerShipToLocationId	= @ShipToLocationId --intCustomerShipToLocationId
 		,@VendorShipFromLocationId	= intVendorShipFromLocationId
 	FROM
 		[dbo].[fnARGetLocationItemVendorDetailsForPricing](

@@ -72,6 +72,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@StorageScheduleTypeId		INT
 		,@ItemSubCurrencyId			INT
 		,@ItemSubCurrencyRate		NUMERIC(18,6)
+		,@ysnRecurringDuplicate		BIT = 0
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -537,6 +538,31 @@ BEGIN TRY
 	UPDATE tblARInvoice SET ysnRecurring =  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END, 
 	ysnImpactInventory = @IsImpactInventory, dblTotalWeight = @TotalWeight
 	WHERE intInvoiceId = @NewInvoiceId
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = @CurrentErrorMessage
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
+
+BEGIN TRY
+	SELECT 
+		@ysnRecurringDuplicate = ysnRecurring 
+	FROM 
+		tblARInvoice 
+	WHERE
+		intInvoiceId = @NewInvoiceId
+
+	IF (@ysnRecurringDuplicate = 1)
+	BEGIN
+		IF NOT EXISTS(SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @NewInvoiceId)
+		BEGIN
+			EXEC dbo.[uspARInsertRecurringInvoice] @NewInvoiceId, @UserId
+		END		
+	END
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

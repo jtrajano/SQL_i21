@@ -160,6 +160,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intSCBudgetId]
 	,[strSCBudgetDescription]
 	,[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]
 	,[strShipmentNumber]
 	,[intRecipeItemId]
 	,[intRecipeId]		
@@ -258,13 +259,14 @@ SELECT
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
 	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
-	,[ysnRecomputeTax]						= 0
+	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(ARSI.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)	
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
 	,[intSCBudgetId]						= NULL
 	,[strSCBudgetDescription]				= NULL
 	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId] 
-	,[strShipmentNumber]					= ARSI.strInventoryShipmentNumber 
+	,[intInventoryShipmentChargeId]			= ARSI.[intInventoryShipmentChargeId]
+	,[strShipmentNumber]					= ARSI.[strInventoryShipmentNumber] 
 	,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
 	,[intRecipeId]							= ARSI.[intRecipeId]
 	,[intSubLocationId]						= ARSI.[intSubLocationId]
@@ -369,12 +371,13 @@ SELECT
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= NULL
 	,[intStorageLocationId]					= NULL
-	,[ysnRecomputeTax]						= 0
+	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(SOD.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
 	,[intSCBudgetId]						= NULL
 	,[strSCBudgetDescription]				= NULL
 	,[intInventoryShipmentItemId]			= NULL 
+	,[intInventoryShipmentChargeId]			= NULL
 	,[strShipmentNumber]					= ICIS.strShipmentNumber
 	,[intRecipeItemId]						= SOD.intRecipeItemId 
 	,[intRecipeId]							= SOD.intRecipeId
@@ -489,6 +492,7 @@ INSERT INTO @EntriesForInvoice
 	,[intSCBudgetId]
 	,[strSCBudgetDescription]
 	,[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]
 	,[strShipmentNumber]
 	,[intRecipeItemId]
 	,[intRecipeId]		
@@ -590,6 +594,7 @@ SELECT
 	,[intSCBudgetId]
 	,[strSCBudgetDescription]
 	,[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]
 	,[strShipmentNumber]
 	,[intRecipeItemId]
 	,[intRecipeId]		

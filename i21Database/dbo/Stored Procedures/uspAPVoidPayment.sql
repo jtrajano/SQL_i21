@@ -238,7 +238,7 @@ BEGIN
 	UPDATE tblAPPaymentDetail
 	SET tblAPPaymentDetail.dblAmountDue = CASE WHEN A.ysnPrepay = 1 THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
 												ELSE 
-											(CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment - B.dblInterest ELSE (B.dblAmountDue + B.dblPayment) END)
+											(CASE WHEN B.dblAmountDue = 0 THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) ELSE (B.dblAmountDue + B.dblPayment) END)
 											END
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
@@ -246,20 +246,6 @@ BEGIN
 		LEFT JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
-
-	--UPDATE INVOICES
-	DECLARE @invoices Id
-	INSERT INTO @invoices
-	SELECT DISTINCT
-		B.intPaymentDetailId
-	FROM #tmpPayables A
-	INNER JOIN tblAPPaymentDetail B
-		ON A.intPaymentId = B.intPaymentId
-	WHERE B.intInvoiceId > 0
-	IF EXISTS(SELECT 1 FROM @invoices)
-	BEGIN
-		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @intUserId, @post = 0
-	END
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 	UPDATE C
@@ -275,6 +261,20 @@ BEGIN
 				INNER JOIN tblAPBill C
 						ON B.intBillId = C.intBillId
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+
+	--UPDATE INVOICES
+	DECLARE @invoices Id
+	INSERT INTO @invoices
+	SELECT DISTINCT
+		B.intPaymentDetailId
+	FROM #tmpPayables A
+	INNER JOIN tblAPPaymentDetail B
+		ON A.intPaymentId = B.intPaymentId
+	WHERE B.intInvoiceId > 0
+	IF EXISTS(SELECT 1 FROM @invoices)
+	BEGIN
+		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @intUserId, @post = 0
+	END
 
 	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 

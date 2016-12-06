@@ -20,44 +20,120 @@ DECLARE @ItemsForItemShipment AS ItemCostingTableType
 DECLARE @SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
 		,@SALES_ORDER AS NVARCHAR(50) = 'Sales Order'
 		,@TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+		,@SALES_ORDER_TYPE AS INT = 2
 
 BEGIN TRY
 	-- Get the items to process
-	INSERT INTO @ItemsForItemShipment (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,dblExchangeRate
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId 
-	)
-	EXEC dbo.uspICGetItemsForInventoryShipment
-		@intSourceTransactionId
-		,@strSourceType
+	DECLARE @Items ShipmentStagingTable
+	DECLARE @Charges ShipmentChargeStagingTable
+	DECLARE @ItemLots ShipmentItemLotStagingTable
+
+	INSERT INTO @Items(
+		intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId
+		, strSourceScreenName, strReferenceNumber, dtmRequestedArrivalDate, intShipToCompanyLocationId, strBOLNumber, intShipViaId
+		, strVessel, strProNumber, strDriverId, strSealNumber, strDeliveryInstruction, dtmAppointmentTime, dtmDepartureTime
+		, dtmArrivalTime, dtmDeliveredDate, dtmFreeTime, strReceivedBy, strComment, intItemId, intOwnershipType, dblQuantity
+		, intItemUOMId, intItemLotGroup, intOrderId, intSourceId, intLineNo, intSubLocationId, intStorageLocationId, intCurrencyId
+		, intWeightUOMId, dblUnitPrice, intDockDoorId, strNotes, intGradeId, intDiscountSchedule, intStorageScheduleTypeId)
+	SELECT
+		intOrderType					= @SALES_ORDER_TYPE
+		, intSourceType					= 0
+		, intEntityCustomerId			= SO.intEntityCustomerId
+		, dtmShipDate					= SO.dtmDate
+		, intShipFromLocationId			= SO.intCompanyLocationId
+		, intShipToLocationId			= SO.intShipToLocationId
+		, intFreightTermId				= SO.intFreightTermId
+		, strSourceScreenName			= @SALES_ORDER
+		, strReferenceNumber			= SO.strSalesOrderNumber
+		, dtmRequestedArrivalDate		= NULL
+		, intShipToCompanyLocationId	= NULL
+		, strBOLNumber					= SO.strBOLNumber
+		, intShipViaId					= SO.intShipViaId
+		, strVessel						= NULL
+		, strProNumber					= NULL
+		, strDriverId					= NULL
+		, strSealNumber					= NULL
+		, strDeliveryInstruction		= NULL
+		, dtmAppointmentTime			= NULL
+		, dtmDepartureTime				= NULL
+		, dtmArrivalTime				= NULL
+		, dtmDeliveredDate				= NULL
+		, dtmFreeTime					= NULL
+		, strReceivedBy					= NULL
+		, strComment					= SO.strComments
+		, intItemId						= SODetail.intItemId
+		, intOwnershipType				= CASE WHEN SODetail.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
+		, dblQuantity					= SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)
+		, intItemUOMId					= ItemUOM.intItemUOMId
+		, intItemLotGroup				= NULL
+		, intOrderId					= SODetail.intSalesOrderId
+		, intSourceId					= NULL
+		, intLineNo						= SODetail.intSalesOrderDetailId
+		, intSubLocationId				= COALESCE(SODetail.intSubLocationId, StorageLocation.intSubLocationId, ItemLocation.intSubLocationId)
+		, intStorageLocationId			= ISNULL(SODetail.intStorageLocationId, ItemLocation.intStorageLocationId)
+		, intCurrencyId					= 1
+		, intWeightUOMId				= NULL
+		, dblUnitPrice					= SODetail.dblPrice
+		, intDockDoorId					= NULL
+		, strNotes						= SODetail.strComments
+		, intGradeId					= NULL
+		, intDiscountSchedule			= NULL
+		, intStorageScheduleTypeId		= SODetail.intStorageScheduleTypeId
+		FROM dbo.tblSOSalesOrder SO
+			INNER JOIN dbo.tblSOSalesOrderDetail SODetail ON SO.intSalesOrderId = SODetail.intSalesOrderId
+			INNER JOIN dbo.tblICItemUOM ItemUOM ON SODetail.intItemId = ItemUOM.intItemId
+				AND SODetail.intItemUOMId = ItemUOM.intItemUOMId
+			INNER JOIN dbo.tblICItemLocation ItemLocation ON SODetail.intItemId = ItemLocation.intItemId
+				AND SO.intCompanyLocationId = ItemLocation.intLocationId
+			LEFT JOIN dbo.tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = SODetail.intStorageLocationId
+			LEFT JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemId = SODetail.intItemId
+				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+			LEFT OUTER JOIN (
+				SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped
+				FROM tblARInvoiceDetail ID
+				GROUP BY ID.intSalesOrderDetailId) AS InvoiceDetail ON InvoiceDetail.intSalesOrderDetailId = SODetail.intSalesOrderDetailId
+		WHERE SODetail.intSalesOrderId = @intSourceTransactionId
+			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
+			AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0	
+
+		--EXEC dbo.uspICGetItemsForInventoryShipment @intSourceTransactionId, @strSourceType
 
 	-- Validate the items to shipment 
 	EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 
-	-- Add the items into inventory shipment > sales order type. 
-	IF @strSourceType = @SALES_ORDER
+	-- Create the temp table if it does not exists. 
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
 	BEGIN 
-		EXEC dbo.uspICAddSalesOrderToInventoryShipment 
-			@intSourceTransactionId, 
-			@intEntityUserSecurityId, 
-			@InventoryShipmentId OUTPUT; 
+		CREATE TABLE #tmpAddItemShipmentResult (
+			intInventoryShipmentId INT
+		)
 	END
 
+	IF @strSourceType = @SALES_ORDER
+	BEGIN 
+
+		EXEC dbo.uspICAddItemShipment @Items, @Charges, @ItemLots, @intEntityUserSecurityId
+
+		DECLARE cur CURSOR LOCAL FAST_FORWARD
+		FOR SELECT intInventoryShipmentId FROM #tmpAddItemShipmentResult
+
+		OPEN cur
+
+		FETCH NEXT FROM cur INTO @InventoryShipmentId
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			-- Increase Stock Reservation
+			EXEC dbo.uspICReserveStockForInventoryShipment @intTransactionId = @InventoryShipmentId
+
+			FETCH NEXT FROM cur INTO @InventoryShipmentId	
+		END
+
+		CLOSE cur
+		DEALLOCATE cur
+	END
+
+	DELETE FROM #tmpAddItemShipmentResult
 END TRY
 BEGIN CATCH
 	SELECT 

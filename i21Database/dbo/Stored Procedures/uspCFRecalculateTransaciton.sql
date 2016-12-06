@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE  PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
 ,@CardId				INT				
@@ -481,6 +481,7 @@ BEGIN
 	DECLARE @intLoopTaxGroupID 	  INT
 	DECLARE @intLoopTaxCodeID 	  INT
 	DECLARE @intLoopTaxClassID	  INT
+	DECLARE @DisregardExemptionSetup	BIT
 
 	IF((@ysnPostedCSV IS NULL OR @ysnPostedCSV = 0 ) AND (@ysnPostedOrigin = 0 OR @ysnPostedCSV IS NULL))
 	BEGIN
@@ -710,6 +711,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					, 1 --@DisregardExemptionSetup
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -762,6 +764,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,0 -- @DisregardExemptionSetup
 				)
 
 				END
@@ -819,6 +822,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,1 --@DisregardExemptionSetup
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -871,6 +875,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,0 --@DisregardExemptionSetup
 				)
 
 				END
@@ -995,7 +1000,9 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,1 --@DisregardExemptionSetup
 				)
+
 					INSERT INTO @tblCFCalculatedTax	
 				(
 					 [intTaxGroupId]				
@@ -1046,6 +1053,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,0 -- @DisregardExemptionSetup
 				)
 
 				
@@ -1106,7 +1114,9 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,1 --@DisregardExemptionSetup
 				)
+
 					INSERT INTO @tblCFCalculatedTax	
 				(
 					 [intTaxGroupId]				
@@ -1157,6 +1167,7 @@ BEGIN
 					,NULL
 					,NULL
 					,NULL
+					,0 --@DisregardExemptionSetup
 				)
 
 				
@@ -1478,6 +1489,7 @@ BEGIN
 	AND intCardId = @intCardId
 	AND intProductId = @ProductId
 	AND intPumpNumber = @PumpId
+	AND intTransactionId != @intTransactionId
 
 	IF(@intDupTransCount > 0)
 	BEGIN

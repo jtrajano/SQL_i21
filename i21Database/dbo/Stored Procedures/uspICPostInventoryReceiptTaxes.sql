@@ -74,11 +74,7 @@ END
 -- Get Total Value of Other Charges Taxes
 DECLARE @OtherChargeTaxes AS NUMERIC(18, 6);
 
-	SELECT @OtherChargeTaxes = SUM(CASE 
-										WHEN ReceiptCharge.ysnPrice = 1
-											THEN ISNULL(ReceiptCharge.dblTax,0) * -1
-										ELSE ISNULL(ReceiptCharge.dblTax,0) 
-									END )
+	SELECT @OtherChargeTaxes = SUM(ISNULL(ReceiptCharge.dblTax,0))
 	FROM dbo.tblICInventoryReceiptCharge ReceiptCharge
 	WHERE ReceiptCharge.intInventoryReceiptId =  @intInventoryReceiptId
 

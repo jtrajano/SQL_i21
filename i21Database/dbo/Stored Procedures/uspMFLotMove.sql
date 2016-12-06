@@ -40,6 +40,7 @@ BEGIN TRY
 		,@intItemUOMId INT
 		,@ysnAllowMultipleLots INT
 		,@ysnAllowMultipleItems INT
+		,@intDestinationLotStatusId INT
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -55,6 +56,11 @@ BEGIN TRY
 		,@intItemUOMId = intItemUOMId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	SELECT @intDestinationLotStatusId = intLotStatusId
+	FROM tblICLot
+	WHERE strLotNumber = @strLotNumber
+		AND intStorageLocationId = @intNewStorageLocationId
 
 	SELECT @strStorageLocationName = strName
 	FROM tblICStorageLocation
@@ -189,6 +195,20 @@ BEGIN TRY
 				,11
 				,1
 				)
+	END
+
+	IF (ISNULL(@intDestinationLotStatusId, 0) <> 0)
+	BEGIN
+		IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
+		BEGIN
+			SET @ErrMsg = 'The status of the source and the destination lot differs. Cannot move.'
+
+			RAISERROR (
+					@ErrMsg
+					,11
+					,1
+					)
+		END
 	END
 
 	IF (@dblMoveQty = @dblLotAvailableQty)

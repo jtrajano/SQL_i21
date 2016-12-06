@@ -14,7 +14,7 @@ SELECT DISTINCT PL.intPickLotHeaderId
 	,CO.strDescription AS strCommodity
 	,SubLocation.strSubLocationName AS strWarehouse
 	,UM.strUnitMeasure AS strWeightUnitMeasure
-	,ysnShipped = L.ysnPosted
+	,ysnShipped = ISNULL(L.ysnPosted,0)
 FROM tblLGPickLotHeader PL
 JOIN tblLGPickLotDetail PLD ON PLD.intPickLotHeaderId = PL.intPickLotHeaderId
 JOIN tblEMEntity EN ON EN.intEntityId = PL.intCustomerEntityId

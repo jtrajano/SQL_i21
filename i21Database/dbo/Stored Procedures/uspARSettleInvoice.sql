@@ -65,6 +65,39 @@ WHERE
 	AND APPD.[dblPayment] <> @ZeroDecimal
 
 
+DECLARE @CustomerIds TABLE (intCustomerId INT)
+	
+INSERT INTO @CustomerIds
+SELECT DISTINCT ARI.intEntityCustomerId
+FROM
+	@PaymentDetailId PID
+INNER JOIN
+	tblAPPaymentDetail APPD
+		ON PID.[intId] = APPD.[intPaymentDetailId]
+INNER JOIN
+	tblARInvoice ARI
+		ON APPD.intInvoiceId = ARI.intInvoiceId
+INNER JOIN
+	tblAPPayment APP
+		ON APPD.[intPaymentId] = APP.[intPaymentId]
+WHERE
+	--APP.[ysnPosted] = 1
+	--AND 
+	ARI.[ysnPosted] = 1
+	AND APPD.[dblPayment] <> @ZeroDecimal
+
+WHILE EXISTS (SELECT NULL FROM @CustomerIds)
+	BEGIN
+		DECLARE @customerId	INT
+
+		SELECT TOP 1 @customerId = intCustomerId FROM @CustomerIds
+
+		EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = @customerId
+
+		DELETE FROM @CustomerIds WHERE intCustomerId = @customerId
+	END
+
+
 SELECT
 	@InvoiceIds = COALESCE(@InvoiceIds + ',' ,'') + CAST(ARI.[intInvoiceId] AS NVARCHAR(250))
 FROM

@@ -344,9 +344,9 @@ End
 If @intKitStatusId = 7
 Begin
 	Insert @tblReservedQty(intLotId,dblReservedQty)
-	Select sr.intLotId,sum(distinct sr.dblQty) 
-	from tblMFPickListDetail pld join tblICStockReservation sr on pld.intStageLotId=sr.intLotId 
-	Where pld.intPickListId=@intPickListId AND ISNULL(sr.ysnPosted,0)=0
+	Select sr.intLotId,sum(sr.dblQty) 
+	from tblICStockReservation sr Where sr.intLotId in (Select distinct intStageLotId From tblMFPickListDetail Where intPickListId=@intPickListId)
+	AND ISNULL(sr.ysnPosted,0)=0
 	Group by sr.intLotId
 
 	Insert Into @tblPickList
@@ -608,9 +608,9 @@ End
 If @intKitStatusId=12
 Begin
 	Insert @tblReservedQty(intLotId,dblReservedQty)
-	Select sr.intLotId,sum(distinct sr.dblQty) 
-	from tblMFPickListDetail pld join tblICStockReservation sr on pld.intStageLotId=sr.intLotId 
-	Where pld.intPickListId=@intPickListId AND ISNULL(sr.ysnPosted,0)=0
+	Select sr.intLotId,sum(sr.dblQty) 
+	from tblICStockReservation sr Where sr.intLotId in (Select distinct intStageLotId From tblMFPickListDetail Where intPickListId=@intPickListId)
+	AND ISNULL(sr.ysnPosted,0)=0
 	Group by sr.intLotId
 
 	--Bulk Items
@@ -818,9 +818,9 @@ Begin
 	If @intKitStatusId = 7
 	Begin
 		Insert @tblReservedQty(intLotId,dblReservedQty)
-		Select sr.intLotId,sum(distinct sr.dblQty) 
-		from tblMFPickListDetail pld join tblICStockReservation sr on pld.intStageLotId=sr.intLotId 
-		Where pld.intPickListId=@intPickListId AND ISNULL(sr.ysnPosted,0)=0
+		Select sr.intLotId,sum(sr.dblQty) 
+		from tblICStockReservation sr Where sr.intLotId in (Select distinct intStageLotId From tblMFPickListDetail Where intPickListId=@intPickListId)
+		AND ISNULL(sr.ysnPosted,0)=0
 		Group by sr.intLotId
 
 		Insert Into @tblPickList

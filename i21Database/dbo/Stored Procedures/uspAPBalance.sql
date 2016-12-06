@@ -26,7 +26,7 @@ CREATE TABLE #tmpAPAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMAL(
 INSERT INTO #tmpAPAccountBalance
 SELECT
 	B.strAccountId,
-	SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount) AS dblBalance
+	CAST(SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount)AS DECIMAL(18,2)) AS dblBalance
 FROM vyuAPPayables A
 INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 GROUP BY B.strAccountId

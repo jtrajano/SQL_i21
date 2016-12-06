@@ -88,11 +88,9 @@ BEGIN
 	FROM	[dbo].tblPATRefund A
 			INNER JOIN tblPATRefundCustomer B
 				ON A.intRefundId = B.intRefundId
-			INNER JOIN tblPATRefundCategory C
-				ON B.intRefundCustomerId = C.intRefundCustomerId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
-	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.dblEquityRefund <> 0
+	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnEligibleRefund = 1
 	UNION ALL
 	--AP Clearing
 	SELECT	
@@ -130,11 +128,9 @@ BEGIN
 	FROM	[dbo].tblPATRefund A
 			INNER JOIN tblPATRefundCustomer B
 				ON A.intRefundId = B.intRefundId
-			INNER JOIN tblPATRefundCategory C
-				ON B.intRefundCustomerId = C.intRefundCustomerId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
-	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.dblCashRefund <> 0
+	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnEligibleRefund = 1
 	UNION ALL
 	--GENERAL RESERVE
 	SELECT	
@@ -172,11 +168,9 @@ BEGIN
 	FROM	[dbo].tblPATRefund A
 			INNER JOIN tblPATRefundCustomer B
 				ON A.intRefundId = B.intRefundId
-			INNER JOIN tblPATRefundCategory C
-				ON B.intRefundCustomerId = C.intRefundCustomerId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
-	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
+	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnEligibleRefund = 1
 
 	RETURN
 END

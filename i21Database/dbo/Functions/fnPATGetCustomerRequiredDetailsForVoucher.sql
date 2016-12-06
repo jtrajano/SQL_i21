@@ -21,7 +21,7 @@ BEGIN
 	SELECT	RCus.intRefundCustomerId,
 			RCus.intCustomerId,
 			dblCheckAmount = RCus.dblCashRefund,
-			dblServiceFee = R.dblServiceFee
+			dblServiceFee = CASE WHEN R.dblServiceFee > RCus.dblCashRefund THEN RCus.dblCashRefund ELSE R.dblServiceFee END
 	FROM tblPATRefundCustomer RCus
 	INNER JOIN tblPATRefund R
 		ON RCus.intRefundId = R.intRefundId

@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateCustomerPatronageHistory]
 	AS
-SELECT	RCus.intRefundTypeId,
+SELECT	RCat.intRefundCategoryId,
+		RCat.intRefundCustomerId,
+		RCus.intRefundTypeId,
 		RCat.intPatronageCategoryId,
 		R.intRefundId,
 		RCus.intCustomerId,
@@ -8,7 +10,7 @@ SELECT	RCus.intRefundTypeId,
 		PC.strCategoryCode,
 		dblRate = RCat.dblRefundRate,
 		RCat.dblVolume,
-		dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate
+		dblRefundAmount =  CASE WHEN R.dblMinimumRefund > (RCat.dblRefundRate * RCat.dblVolume) THEN 0 ELSE (RCat.dblRefundRate * RCat.dblVolume) END
 FROM tblPATRefundCustomer RCus
 INNER JOIN tblPATRefund R
 	ON RCus.intRefundId = R.intRefundId

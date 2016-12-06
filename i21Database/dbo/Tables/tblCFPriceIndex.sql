@@ -6,3 +6,10 @@
     CONSTRAINT [PK_tblCFPriceIndex] PRIMARY KEY CLUSTERED ([intPriceIndexId] ASC)
 );
 
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFPriceIndex_intPriceIndexId]
+    ON [dbo].[tblCFPriceIndex]([intPriceIndexId] ASC);
+

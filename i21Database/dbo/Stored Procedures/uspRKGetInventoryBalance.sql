@@ -6,6 +6,8 @@
 	   @intItemId int= null
 AS
 
+--DECLARE @intItemId int = 0
+
 DECLARE @tblResultInventory TABLE
 (Id INT identity(1,1),
 dtmDate datetime,

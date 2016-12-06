@@ -31,16 +31,20 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON ItemLocation.intItemId = Item.intItemId
 				AND ItemLocation.intLocationId = Header.intLocationId
-			LEFT JOIN dbo.tblICItemStock ItemStock
-				ON ItemStock.intItemId = Item.intItemId
-				AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
+			LEFT JOIN dbo.tblICItemStockUOM ItemStockUOM
+				ON ItemStockUOM.intItemId = Item.intItemId
+				AND ItemStockUOM.intItemLocationId = ItemLocation.intItemLocationId
+				AND ItemStockUOM.intItemUOMId = Detail.intItemUOMId
+				AND ItemStockUOM.intStorageLocationId = Detail.intStorageLocationId
+				AND ItemStockUOM.intSubLocationId = Detail.intSubLocationId
+				AND ItemStockUOM.intItemLocationId = ItemLocation.intItemLocationId
 			LEFT JOIN dbo.tblICLot Lot
 				ON Detail.intLotId = Lot.intLotId
 	WHERE	Header.strAdjustmentNo = @strTransactionId	
 			AND Header.intAdjustmentType = @ADJUSTMENT_TYPE_QuantityChange
 			AND 1 = 
 				CASE	WHEN Detail.intLotId IS NOT NULL AND (ROUND(Detail.dblQuantity, 6) <> ROUND(Lot.dblQty, 6)) THEN 1
-						WHEN Detail.intLotId IS NULL AND (ROUND(Detail.dblQuantity, 6) <> ROUND(ItemStock.dblUnitOnHand, 6)) THEN 1
+						WHEN Detail.intLotId IS NULL AND (ROUND(Detail.dblQuantity, 6) <> ROUND(ItemStockUOM.dblOnHand, 6)) THEN 1
 						ELSE 0
 				END 
 

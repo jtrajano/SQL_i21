@@ -38,7 +38,8 @@ SELECT Receipt.intLoadReceiptId
 	, Receipt.strReceiptLine
 	, Receipt.intLoadDetailId
 	, LoadSchedule.strLoadNumber
-	, strZipCode = ISNULL(SupplyPoint.strZipCode, CompanyLocation.strZipPostalCode)
+	, strZipCode = (CASE WHEN ISNULL(Receipt.intSupplyPointId, '') <> '' THEN ISNULL(SupplyPoint.strZipCode, CompanyLocation.strZipPostalCode)
+						ELSE CompanyLocation.strZipPostalCode END)
 	, dblOrderedQuantity  = CASE WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Net' THEN Receipt.dblNet
 								WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Gross' THEN Receipt.dblGross
 								WHEN ISNULL(LoadSchedule.dblQuantity,0) != 0 THEN LoadSchedule.dblQuantity END

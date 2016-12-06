@@ -61,7 +61,8 @@ SELECT LG.intLoadId
 	, LG.ysnInProgress
 	, intOutboundLoadId = LG.intLoadId
 	, strSupplierLoadNumber = LG.strExternalLoadNumber
-	, LG.strZipCode
+	, strZipCode = (CASE WHEN ISNULL(LG.intVendorEntityLocationId, '') <> '' THEN LG.strZipCode
+						ELSE ReceiptLocation.strZipPostalCode END)
 	, intRackPriceSupplyPointId = CASE WHEN (LG.strType != 'Outbound') THEN SP.intRackPriceSupplyPointId
 										ELSE NULL END
 	, LG.intItemUOMId
@@ -77,11 +78,12 @@ SELECT LG.intLoadId
 	, LG.strInboundTaxGroup
 	, LG.intOutboundTaxGroupId
 	, LG.strOutboundTaxGroup
+	, LG.dblDeliveredQuantity
 FROM vyuLGLoadDetailView LG
+LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
 LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = Config.intSellerId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLocationId AND SP.intEntityVendorId = LG.intVendorEntityId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = LG.intCustomerEntityId
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
 WHERE ISNULL(LG.ysnDispatched, 0) = 1
-	AND ISNULL(LG.dblDeliveredQuantity, 0) <= 0

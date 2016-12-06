@@ -334,7 +334,7 @@ LEFT OUTER JOIN
 		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
 WHERE
 	ARI.intInvoiceId = @InvoiceId 
-	AND ARID.dblLicenseAmount <> @ZeroDecimal 
+	AND (ARID.dblLicenseAmount <> @ZeroDecimal OR ARID.dblMaintenanceAmount <> @ZeroDecimal)
 	AND ARID.strMaintenanceType = 'License/Maintenance'
 	AND ICI.strType = 'Software'
 	AND ARI.strType <> 'Debit Memo'
@@ -427,7 +427,7 @@ LEFT OUTER JOIN
 		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
 WHERE
 	ARI.intInvoiceId = @InvoiceId 
-	AND ARID.dblLicenseAmount <> @ZeroDecimal 
+	AND ARID.dblMaintenanceAmount <> @ZeroDecimal 
 	AND ARID.strMaintenanceType IN ('Maintenance Only', 'SaaS')
 	AND ICI.strType = 'Software'
 	AND ARI.strType <> 'Debit Memo'
