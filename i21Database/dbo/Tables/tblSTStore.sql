@@ -4,7 +4,7 @@
     [intStoreNo] INT NOT NULL, 
     [strDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [strRegion] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
-    [strDestrict] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
+    [strDistrict] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strAddress] NVARCHAR(60) COLLATE Latin1_General_CI_AS NULL, 
     [strCity] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [strState] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
