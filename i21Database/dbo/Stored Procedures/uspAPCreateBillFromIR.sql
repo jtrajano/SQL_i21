@@ -242,10 +242,10 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[dblTotal]					=	ISNULL((dbo.fnAPGetBillDetailReceiptTotal (@receiptId)),0),
-		[dblCost]					=	ABS(CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
+		[dblCost]					=	CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
 											 THEN (CASE WHEN E1.dblCashPrice IS NOT NULL THEN E1.dblCashPrice ELSE B.dblUnitCost END)
 											 ELSE B.dblUnitCost
-										END),
+										END,
 		[dblOldCost]				=	NULL,
 		[dblClaimAmount]			=	ISNULL(CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
 										(
@@ -336,8 +336,8 @@ BEGIN
 		[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	A.intAccountId,
-		[dblTotal]					=	ABS(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
-		[dblCost]					=	ABS(A.dblUnitCost),
+		[dblTotal]					=	CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END,
+		[dblCost]					=	A.dblUnitCost,
 		[dblOldCost]				=	NULL,
 		[dblClaimAmount]			=	0,
 		[dblNetWeight]				=	0,
