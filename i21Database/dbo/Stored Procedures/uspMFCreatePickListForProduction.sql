@@ -22,6 +22,7 @@ DECLARE @dtmDate DATETIME=Convert(DATE, GetDate())
 DECLARE @dblReservedQty NUMERIC(38,20)
 DECLARE @ysnWOStagePick bit=0
 DECLARE @intConsumptionMethodId int
+DECLARE @strPackagingCategory NVARCHAR(50)
 
 DECLARE @tblInputItem TABLE (
 	intRowNo INT IDENTITY(1, 1)
@@ -111,6 +112,11 @@ FROM tblMFRecipe
 WHERE intItemId = @intOutputItemId
 	AND intLocationId = @intLocationId
 	AND ysnActive = 1
+
+Select @strPackagingCategory=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Packaging Category'
 
 SELECT @intDayOfYear = DATEPART(dy, @dtmDate)
 
@@ -270,6 +276,12 @@ While @intMinItem is not null
 Begin
 	Select @intItemId=intItemId,@dblRequiredQty=dblRequiredQty,@dblItemRequiredQty=dblRequiredQty,@intItemUOMId=intItemUOMId,@strLotTracking=strLotTracking,@intConsumptionMethodId=intConsumptionMethodId 
 	From @tblInputItem Where intRowNo=@intMinItem
+
+	If (Select c.strCategoryCode From tblICItem i Join tblICCategory c on i.intCategoryId=c.intCategoryId Where i.intItemId=@intItemId)=@strPackagingCategory
+		Begin
+			Set @dblRequiredQty = CEILING(@dblRequiredQty)
+			Set @dblItemRequiredQty = CEILING(@dblRequiredQty)
+		End
 
 	DELETE FROM @tblLot
 
