@@ -602,3 +602,5 @@ GO
 GO
 	UPDATE tblSMEmailRecipient SET intEntityContactId = NULL WHERE intEntityContactId = -1
 GO
+	UPDATE tblSMDocumentMaintenanceMessage set strMessageOld = '<p>' + strMessage + '</p>'
+GO
