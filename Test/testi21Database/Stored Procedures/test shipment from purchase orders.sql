@@ -1,15 +1,23 @@
 ﻿CREATE PROCEDURE testi21Database.[test shipment from purchase orders]
 AS
 BEGIN
-	CREATE TABLE expected_tblICInventoryShipmentItem (intItemId INT, intOwnershipType INT, 
-		dblQuantity NUMERIC(38, 20), intItemUOMId INT)
+	CREATE TABLE expected_tblICInventoryShipmentItem (
+		intItemId INT
+		, intOwnershipType INT
+		, dblQuantity NUMERIC(38, 20)
+		, intItemUOMId INT
+	)
 		
-	CREATE TABLE actual_tblICInventoryShipmentItem (intItemId INT, intOwnershipType INT, 
-		dblQuantity NUMERIC(38, 20), intItemUOMId INT)
+	CREATE TABLE actual_tblICInventoryShipmentItem (
+		intItemId INT
+		, intOwnershipType INT
+		, dblQuantity NUMERIC(38, 20)
+		, intItemUOMId INT
+	)
 
 	DECLARE 
-		@ExpectedShipmentNumber VARCHAR(50) = 'IS-75',
-		@ActualShipmentNumber VARCHAR(50),
+		@ExpectedShipmentNumber NVARCHAR(50) = 'T-INVSHP-1001',
+		@ActualShipmentNumber NVARCHAR(50),
 		@intUserId INT = 1,
 		@ShipmentEntries ShipmentStagingTable,
 		@ShipmentCharges ShipmentChargeStagingTable,
@@ -33,15 +41,32 @@ BEGIN
 		DECLARE @intItemId INT = 2,	@intOwnerShipType INT = @OWNERSHIP_TYPE_Storage, 
 		@dblQuantity INT = 1, @intItemUOMId INT = 7
 
-	INSERT INTO @ShipmentEntries(
-		intOrderType, intSourceType, intEntityCustomerId, dtmShipDate,
-		intShipFromLocationId, intShipToLocationId, intFreightTermId, 
-		strBOLNumber, strSourceScreenName,
-		
-		intItemId, intOwnershipType,
-		dblQuantity, intItemUOMId, intItemLotGroup,
+	-- Fake data
+	BEGIN 
+		EXEC [testi21Database].[Fake IC Starting Numbers]; 
+	END 
 
-		intOrderId, intSourceId, intLineNo, dblUnitPrice, intWeightUOMId)
+	INSERT INTO @ShipmentEntries(
+		intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, strBOLNumber
+		, strSourceScreenName
+		, intItemId
+		, intOwnershipType
+		, dblQuantity
+		, intItemUOMId
+		, intItemLotGroup
+		, intOrderId
+		, intSourceId
+		, intLineNo
+		, dblUnitPrice
+		, intWeightUOMId
+	)
 	SELECT
 		intOrderType = @ORDER_TYPE_SalesOrder, -- Sales Order
 		intSourceType = @SOURCE_TYPE_None, -- No Source
@@ -67,8 +92,8 @@ BEGIN
 
 	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @intUserId
 
-	SELECT TOP 1 @ActualShipmentNumber = strShipmentNumber
-	FROM tblICInventoryShipment
+	SELECT	TOP 1 @ActualShipmentNumber = strShipmentNumber
+	FROM	tblICInventoryShipment
 	ORDER BY intInventoryShipmentId DESC
 
 	EXEC tSQLt.AssertEqualsString @ExpectedShipmentNumber, @ActualShipmentNumber, N'Error creating shipment.'

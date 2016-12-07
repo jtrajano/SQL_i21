@@ -14,8 +14,7 @@ AS
 DECLARE @query NVARCHAR(MAX)
 TRUNCATE TABLE tblTFIntegrationError
 
-SET @query = 'SELECT DISTINCT CONVERT(NVARCHAR(30), pxrpt_trans_rev_dt) + ''_'' + REPLACE(pxrpt_ord_no, ''   '', '''')  + ''_'' + pxrpt_trans_type + ''_'' + CONVERT(NVARCHAR(50), pxrpt_seq_no) AS strSourceRecordConcatKey, 
-				pxrpt_itm_no, (CASE TaxAuthority
+SET @query = 'SELECT DISTINCT pxrpt_itm_no, (CASE TaxAuthority
   				WHEN ''pxrpt_pur_txc_in_prod_cd'' THEN ''IN''
 				WHEN ''pxrpt_sls_txc_in_prod_cd'' THEN ''IN'' 
 				END) AS ''TaxAuthority'', ProductCode, 0
@@ -23,20 +22,10 @@ SET @query = 'SELECT DISTINCT CONVERT(NVARCHAR(30), pxrpt_trans_rev_dt) + ''_'' 
 				([pxrpt_pur_txc_in_prod_cd],
 				[pxrpt_sls_txc_in_prod_cd]))AS unpvt where ProductCode <> '''' 
 				AND NOT EXISTS (SELECT * FROM tblTFIntegrationItemProductCode
-				WHERE pxrpt_itm_no COLLATE Latin1_General_CI_AS = strItemNumber)
+				WHERE CONVERT(NVARCHAR(30), pxrpt_itm_no) COLLATE Latin1_General_CI_AS = strItemNumber)
 				AND convert(datetime, convert(varchar(20), pxrpt_trans_rev_dt), 112) >= CONVERT(NVARCHAR(20), ''' + @DateFrom + ''')
 				AND convert(datetime, convert(varchar(20), pxrpt_trans_rev_dt), 112) <= CONVERT(NVARCHAR(20), ''' + @DateTo + ''')
-				AND EXISTS (select * from tblTFProductCode where strProductCode COLLATE Latin1_General_CI_AS = ProductCode)
-				AND pxrpt_itm_no NOT IN (SELECT DISTINCT pxrpt_itm_no 
-				FROM (SELECT * FROM pxrptmst) px UNPIVOT
-					(ProductCode FOR TaxAuthority IN 
-					([pxrpt_pur_txc_in_prod_cd],
-					[pxrpt_sls_txc_in_prod_cd]))AS unpvt WHERE ProductCode <> '''' 
-					AND NOT EXISTS (SELECT * FROM tblTFIntegrationItemProductCode
-					WHERE pxrpt_itm_no COLLATE Latin1_General_CI_AS = strItemNumber)
-					AND CONVERT(datetime, CONVERT(varchar(20), pxrpt_trans_rev_dt), 112) >= CONVERT(NVARCHAR(20), ''' + @DateFrom + ''')
-					AND CONVERT(datetime, CONVERT(varchar(20), pxrpt_trans_rev_dt), 112) <= CONVERT(NVARCHAR(20), ''' + @DateTo + ''')
-					AND NOT EXISTS (SELECT * FROM tblTFProductCode where strProductCode COLLATE Latin1_General_CI_AS = ProductCode))'
+				AND EXISTS (select * from tblTFProductCode where strProductCode COLLATE Latin1_General_CI_AS = ProductCode)'
 
 INSERT INTO tblTFIntegrationItemProductCode
 EXEC (@query)
@@ -379,6 +368,5 @@ dtmTransactionDate
     0
   FROM tblTFIntegrationTransaction AS tr
   LEFT OUTER JOIN tblTFIntegrationItemProductCode
-  ON tr.strSourceRecordConcatKey = tblTFIntegrationItemProductCode.strSourceRecordConcatKey
+  ON tr.strItemNumber = tblTFIntegrationItemProductCode.strItemNumber
   CROSS JOIN tblSMCompanySetup AS cl
-

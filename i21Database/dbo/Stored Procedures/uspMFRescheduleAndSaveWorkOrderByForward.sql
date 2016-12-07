@@ -1344,7 +1344,7 @@ BEGIN TRY
 						AND S.intStatusId <> 1
 						AND intManufacturingCellId = @intManufacturingCellId2
 						AND ysnUnableToSchedule = 0
-					)
+					) AND @ysnScheduleByManufacturingCell = 1
 			BEGIN
 				SELECT @intWorkOrderId = intWorkOrderId
 				FROM @tblMFScheduleWorkOrder S
@@ -1366,7 +1366,60 @@ BEGIN TRY
 
 				RETURN
 			END
+			IF EXISTS (
+					SELECT *
+					FROM @tblMFScheduleWorkOrder S
+					WHERE intNoOfUnit > 0
+						AND S.intStatusId NOt in (1,3)
+						AND intManufacturingCellId = @intManufacturingCellId2
+						AND ysnUnableToSchedule = 0
+					) AND @ysnScheduleByManufacturingCell = 0
+			BEGIN
+				SELECT @intWorkOrderId = intWorkOrderId
+				FROM @tblMFScheduleWorkOrder S
+				WHERE intNoOfUnit > 0
+					AND S.intStatusId <> 1
+					AND intManufacturingCellId = @intManufacturingCellId2
+				ORDER BY intExecutionOrder DESC
 
+				SELECT @strWorkOrderNo = strWorkOrderNo
+				FROM tblMFWorkOrder
+				WHERE intWorkOrderId = @intWorkOrderId
+
+				RAISERROR (
+						51185
+						,11
+						,1
+						,@strWorkOrderNo
+						)
+
+				RETURN
+			END
+			IF EXISTS (
+					SELECT *
+					FROM @tblMFScheduleWorkOrder S
+					WHERE intNoOfUnit > 0
+						AND S.intStatusId <> 1
+						AND intManufacturingCellId = @intManufacturingCellId2
+						AND ysnUnableToSchedule = 0
+					) AND @ysnScheduleByManufacturingCell = 0
+			BEGIN
+
+						UPDATE @tblMFScheduleWorkOrder
+						SET ysnUnableToSchedule = 1
+							,intCalendarDetailId = 0
+							,intRequiredDuration = 1
+							,dtmPlannedStartDate = NULL
+							,intPlannedShiftId = NULL
+							,dtmPlannedEndDate = NULL
+							,intDuration = NULL
+							,strNote = 'Unable to Schedule'
+						WHERE intNoOfUnit > 0
+						AND intStatusId = 3
+						AND intManufacturingCellId = @intManufacturingCellId2
+						AND ysnUnableToSchedule = 0
+
+			END
 			IF @intPreferenceId = 1
 			BEGIN
 				SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)

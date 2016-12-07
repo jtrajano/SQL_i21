@@ -21,6 +21,10 @@ DECLARE @receiptLocation INT;
 DECLARE @userLocation INT;
 DECLARE @location INT;
 DECLARE @cashPrice DECIMAL;
+DECLARE @receiptAmount DECIMAL(18,6);
+DECLARE @totalReceiptAmount DECIMAL(18,6);
+DECLARE @totalLineItem DECIMAL(18,6);
+DECLARE @totalCharges DECIMAL(18,6);
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -95,6 +99,18 @@ BEGIN
 		--GOTO DONE
 	END
 		
+	----GET THE TOTAL IR AMOUNT
+	SELECT @receiptAmount = SUM(A.dblLineTotal) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
+	
+	SELECT @totalCharges = ISNULL((SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00)),0.00)
+	FROM vyuAPChargesForBilling WHERE intInventoryReceiptId = @receiptId
+	
+	SELECT @totalLineItem =  SUM(A.dblLineTotal)
+	FROM tblICInventoryReceiptItem A 
+	WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
+	
+	SET @totalReceiptAmount = @totalLineItem + @totalCharges;
+
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -145,16 +161,16 @@ BEGIN
 		[intShipViaId]			=	A.intShipViaId,
 		[intShipFromId]			=	A.intShipFromId,
 		[intShipToId]			=	A.intLocationId,
-		[dtmDate] 				=	GETDATE(),
+		[dtmDate] 				=	(SELECT DATEADD(DD, 0, DATEDIFF(DD,0, GETDATE()))),
 		[dtmDateCreated] 		=	GETDATE(),
-		[dtmBillDate] 			=	GETDATE(),
-		[dtmDueDate] 			=	GETDATE(),
+		[dtmBillDate] 			=	(SELECT DATEADD(DD, 0, DATEDIFF(DD,0, GETDATE()))),
+		[dtmDueDate] 			=	(SELECT DATEADD(DD, 0, DATEDIFF(DD,0, GETDATE()))),
 		[intCurrencyId]			=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT)),
 		[intAccountId] 			=	@APAccount,
 		[strBillId]				=	@generatedBillRecordId,
 		[strReference] 			=	A.strBillOfLading,
-		[dblTotal] 				=	A.dblInvoiceAmount,
-		[dblAmountDue]			=	A.dblInvoiceAmount,
+		[dblTotal] 				=	@totalReceiptAmount,
+		[dblAmountDue]			=	@totalReceiptAmount,
 		[intEntityId]			=	@userId,
 		[ysnPosted]				=	0,
 		[ysnPaid]				=	0,
@@ -240,12 +256,12 @@ BEGIN
 											 ELSE B.dblUnitCost
 										END,
 		[dblOldCost]				=	NULL,
-		[dblClaimAmount]			=	CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
+		[dblClaimAmount]			=	ISNULL(CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
 										(
 										 (ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
 										 (CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) 
 											   WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * ( CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) ELSE B.dblUnitCost END) / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END
-										) ELSE 0.00 END,
+										) ELSE 0.00 END,0),
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0),
 		[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),

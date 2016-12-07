@@ -1,19 +1,20 @@
 ﻿CREATE FUNCTION [dbo].[fnGetItemTaxComputationForCustomer]
 (
-	 @ItemId				INT
-	,@CustomerId			INT
-	,@TransactionDate		DATETIME
-	,@ItemPrice				NUMERIC(18,6)
-	,@QtyShipped			NUMERIC(18,6)
-	,@TaxGroupId			INT
-	,@CompanyLocationId		INT
-	,@CustomerLocationId	INT	
-	,@IncludeExemptedCodes	BIT
-	,@IsCustomerSiteTaxable	BIT
-	,@SiteId				INT
-	,@FreightTermId			INT
-	,@CardId				INT
-	,@VehicleId				INT
+	 @ItemId					INT
+	,@CustomerId				INT
+	,@TransactionDate			DATETIME
+	,@ItemPrice					NUMERIC(18,6)
+	,@QtyShipped				NUMERIC(18,6)
+	,@TaxGroupId				INT
+	,@CompanyLocationId			INT
+	,@CustomerLocationId		INT	
+	,@IncludeExemptedCodes		BIT
+	,@IsCustomerSiteTaxable		BIT
+	,@SiteId					INT
+	,@FreightTermId				INT
+	,@CardId					INT
+	,@VehicleId					INT
+	,@DisregardExemptionSetup	BIT
 )
 RETURNS @returntable TABLE
 (
@@ -120,7 +121,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId)
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup)
 															
 			
 	-- Calculate Item Tax

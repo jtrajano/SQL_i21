@@ -13,6 +13,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tSQLt", "tSQLt\tSQLt.sqlpro
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TestAP", "TestAP\TestAP.sqlproj", "{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TestIC", "TestIC\TestIC.sqlproj", "{F6B12C0A-FD8C-411F-BC00-84A4BFBB68F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,12 @@ Global
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{F6B12C0A-FD8C-411F-BC00-84A4BFBB68F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6B12C0A-FD8C-411F-BC00-84A4BFBB68F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6B12C0A-FD8C-411F-BC00-84A4BFBB68F2}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F6B12C0A-FD8C-411F-BC00-84A4BFBB68F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6B12C0A-FD8C-411F-BC00-84A4BFBB68F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6B12C0A-FD8C-411F-BC00-84A4BFBB68F2}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

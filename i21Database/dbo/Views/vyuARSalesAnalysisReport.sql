@@ -79,7 +79,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARGIA.intAccountId 
+	  , intItemAccountId			= ARID.intAccountId 
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -105,8 +105,8 @@ FROM
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
-		CROSS APPLY
-			dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, NULL) ARGIA
+		--CROSS APPLY
+		--	dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, NULL) ARGIA
 		LEFT OUTER JOIN (
 			SELECT intTransactionId
 				 , strTransactionId
@@ -194,7 +194,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= ARGIA.intAccountId 
+	 , intItemAccountId				= ISNULL(INV.intAccountId, SOD.intAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -235,6 +235,7 @@ FROM
 			 , ID.intItemId
 			 , ID.intOrderUOMId
 			 , ICIT.dblCost
+			 , ID.intAccountId
 		FROM 
 			tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
@@ -305,8 +306,8 @@ FROM
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo
-	CROSS APPLY
-		dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, NULL) ARGIA
+	--CROSS APPLY
+	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, NULL) ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
 		AND ICI.strType <> 'Software'
@@ -325,7 +326,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARGIA.intAccountId 
+	  , intItemAccountId			= ARID.intLicenseAccountId 
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -351,8 +352,8 @@ FROM
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
-		CROSS APPLY
-			dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, 'License') ARGIA
+		--CROSS APPLY
+		--	dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, 'License') ARGIA
 		LEFT OUTER JOIN (
 			SELECT intTransactionId
 				 , strTransactionId
@@ -441,7 +442,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= ARGIA.intAccountId 
+	 , intItemAccountId				= ISNULL(INV.intLicenseAccountId, SOD.intLicenseAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -482,6 +483,7 @@ FROM
 			 , ID.intItemId
 			 , ID.intOrderUOMId
 			 , ICIT.dblCost
+			 , ID.intLicenseAccountId
 		FROM 
 			tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
@@ -552,8 +554,8 @@ FROM
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo
-	CROSS APPLY
-		dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'License') ARGIA
+	--CROSS APPLY
+	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'License') ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
 		AND ICI.strType = 'Software'
@@ -573,7 +575,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARGIA.intAccountId 
+	  , intItemAccountId			= ARID.intMaintenanceAccountId
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -599,8 +601,8 @@ FROM
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
-		CROSS APPLY
-			dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, 'Maintenance') ARGIA
+		--CROSS APPLY
+		--	dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, 'Maintenance') ARGIA
 		LEFT OUTER JOIN (
 			SELECT intTransactionId
 				 , strTransactionId
@@ -689,7 +691,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= ARGIA.intAccountId 
+	 , intItemAccountId				= ISNULL(INV.intMaintenanceAccountId, SOD.intMaintenanceAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -730,6 +732,7 @@ FROM
 			 , ID.intItemId
 			 , ID.intOrderUOMId
 			 , ICIT.dblCost
+			 , ID.intMaintenanceAccountId
 		FROM 
 			tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
@@ -753,7 +756,7 @@ FROM
 			 , ICISI.intLineNo
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
-			 , ICIT.dblCost		 
+			 , ICIT.dblCost	 
 		FROM
 			tblICInventoryShipmentItem ICISI	
 		INNER JOIN tblICInventoryShipment ICIS
@@ -800,8 +803,8 @@ FROM
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo
-	CROSS APPLY
-		dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'Maintenance') ARGIA
+	--CROSS APPLY
+	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'Maintenance') ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
 		AND ICI.strType = 'Software'

@@ -55,6 +55,7 @@
 		,(0, N'strScheduleCode', 0)
 		,(0, N'strScheduleName', 0)
 		,(0, N'dblTaxExempt', 0)
+		,(0, N'strTerminalControlNumber', 0)
 		,(0, N'strConsignorName', 0)
 		,(0, N'strConsignorFederalTaxId', 0)
 --END

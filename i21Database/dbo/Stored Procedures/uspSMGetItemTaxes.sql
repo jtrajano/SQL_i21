@@ -1,16 +1,17 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMGetItemTaxes]
-	 @ItemId				INT
-	,@LocationId			INT
-	,@TransactionDate		DATETIME
-	,@TransactionType		NVARCHAR(20) -- Purchase/Sale
-	,@EntityId				INT				= NULL
-	,@TaxGroupId			INT				= NULL
-	,@BillShipToLocationId	INT				= NULL
-	,@IncludeExemptedCodes	BIT				= NULL
-	,@SiteId				INT				= NULL
-	,@FreightTermId			INT				= NULL
-	,@CardId				INT				= NULL
-	,@VehicleId				INT				= NULL
+	 @ItemId					INT
+	,@LocationId				INT
+	,@TransactionDate			DATETIME
+	,@TransactionType			NVARCHAR(20) -- Purchase/Sale
+	,@EntityId					INT				= NULL
+	,@TaxGroupId				INT				= NULL
+	,@BillShipToLocationId		INT				= NULL
+	,@IncludeExemptedCodes		BIT				= NULL
+	,@SiteId					INT				= NULL
+	,@FreightTermId				INT				= NULL
+	,@CardId					INT				= NULL
+	,@VehicleId					INT				= NULL
+	,@DisregardExemptionSetup	BIT				= 0
 AS
 
 BEGIN
@@ -47,7 +48,7 @@ BEGIN
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, NULL, @CardId, @VehicleId)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, NULL, @CardId, @VehicleId, @DisregardExemptionSetup)
 					
 			RETURN 1
 		END

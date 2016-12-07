@@ -9,6 +9,7 @@
 	[intServiceChargeAccountId]		INT NULL,
 	[strServiceChargeCalculation]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strServiceChargeFrequency]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[intConversionAccountId]			INT NULL,
+	[intConversionAccountId]		INT NULL,
+	[ysnLineItemAccountUpdate]		BIT NULL DEFAULT 0,
 	[intConcurrencyId]				INT NOT NULL DEFAULT 1
 )

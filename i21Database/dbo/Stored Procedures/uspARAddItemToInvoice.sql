@@ -32,6 +32,7 @@
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
+	,@ItemInventoryShipmentChargeId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
@@ -141,6 +142,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemSCInvoiceId				= @ItemSCInvoiceId
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
+			,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemRecipeId					= @ItemRecipeId
 			,@ItemSublocationId				= @ItemSublocationId

@@ -22,3 +22,7 @@ GO
 
 ALTER TABLE [dbo].[tblTFTaxCriteria] CHECK CONSTRAINT [FK_tblTFTaxCriteria_tblTFReportingComponent]
 GO
+
+ALTER TABLE [dbo].[tblTFTaxCriteria] ADD  CONSTRAINT [DF_tblTFTaxCriteria_intConcurrencyId]  DEFAULT ((1)) FOR [intConcurrencyId]
+GO
+

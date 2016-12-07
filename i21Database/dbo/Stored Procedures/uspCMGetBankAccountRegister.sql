@@ -83,7 +83,7 @@ INTO #tempTransaction
 FROM tblCMBankTransaction A
 WHERE intBankAccountId = @intBankAccountId
 AND (ysnPosted = 1 OR ysnCheckVoid = 1)
-ORDER BY intTransactionId
+ORDER BY dtmDate
 
 WHILE EXISTS (SELECT TOP 1 1 FROM #tempTransaction)
 BEGIN
@@ -103,6 +103,7 @@ BEGIN
 		,@ysnCheckVoid = ysnCheckVoid
 		,@ysnClr = ysnClr
 	FROM #tempTransaction 
+	ORDER BY dtmDate
 
 	IF @ysnCheckVoid = 0 AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(GETDATE(),@dtmDate) AS FLOAT)) AS DATETIME)	
 	BEGIN

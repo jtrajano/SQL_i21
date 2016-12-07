@@ -160,6 +160,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intSCBudgetId]
 	,[strSCBudgetDescription]
 	,[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]
 	,[strShipmentNumber]
 	,[intRecipeItemId]
 	,[intRecipeId]		
@@ -264,7 +265,8 @@ SELECT
 	,[intSCBudgetId]						= NULL
 	,[strSCBudgetDescription]				= NULL
 	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId] 
-	,[strShipmentNumber]					= ARSI.strInventoryShipmentNumber 
+	,[intInventoryShipmentChargeId]			= ARSI.[intInventoryShipmentChargeId]
+	,[strShipmentNumber]					= ARSI.[strInventoryShipmentNumber] 
 	,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
 	,[intRecipeId]							= ARSI.[intRecipeId]
 	,[intSubLocationId]						= ARSI.[intSubLocationId]
@@ -375,6 +377,7 @@ SELECT
 	,[intSCBudgetId]						= NULL
 	,[strSCBudgetDescription]				= NULL
 	,[intInventoryShipmentItemId]			= NULL 
+	,[intInventoryShipmentChargeId]			= NULL
 	,[strShipmentNumber]					= ICIS.strShipmentNumber
 	,[intRecipeItemId]						= SOD.intRecipeItemId 
 	,[intRecipeId]							= SOD.intRecipeId
@@ -489,6 +492,7 @@ INSERT INTO @EntriesForInvoice
 	,[intSCBudgetId]
 	,[strSCBudgetDescription]
 	,[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]
 	,[strShipmentNumber]
 	,[intRecipeItemId]
 	,[intRecipeId]		
@@ -590,6 +594,7 @@ SELECT
 	,[intSCBudgetId]
 	,[strSCBudgetDescription]
 	,[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]
 	,[strShipmentNumber]
 	,[intRecipeItemId]
 	,[intRecipeId]		

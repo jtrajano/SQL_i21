@@ -3,11 +3,18 @@
 
 SELECT
 	intKey = CAST(ROW_NUMBER() OVER(ORDER BY ItemStock.intItemId
-			, ItemStock.intItemLocationId
-			, ItemStock.intSubLocationId
-			, ItemStock.intStorageLocationId
-			, ItemStock.intItemUOMId) AS INT)
+	, ItemStock.intItemLocationId
+	, ItemStock.intSubLocationId
+	, ItemStock.intStorageLocationId
+	, ItemStock.intItemUOMId) AS INT)
 	, ItemStock.intItemId
+	, ItemStock.intItemLocationId
+	, ItemStock.intSubLocationId
+	, ItemStock.intStorageLocationId
+	, ItemStock.intItemUOMId
+	, ItemStock.dblStockIn
+	, ItemStock.dblStockOut
+	, ItemStock.dblOnHand
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
@@ -15,27 +22,20 @@ SELECT
 	, Category.strCategoryCode
 	, Item.intCommodityId
 	, Commodity.strCommodityCode
-	, ItemStock.intItemLocationId
 	, ItemLocation.intLocationId
 	, ItemLocation.intCountGroupId
 	, Location.strLocationName
-	, ItemStock.intSubLocationId
 	, SubLocation.strSubLocationName
-	, ItemStock.intStorageLocationId
 	, strStorageLocationName = StorageLocation.strName
-	, ItemStock.intItemUOMId
 	, UOM.strUnitMeasure
-	, ItemStock.dblStockIn
-	, ItemStock.dblStockOut
-	, ItemStock.dblOnHand
 	, dblConversionFactor = ItemUOM.dblUnitQty
 	, ItemPricing.dblLastCost
 	, dblTotalCost = ItemStock.dblOnHand * ItemUOM.dblUnitQty * ItemPricing.dblLastCost
 FROM (
 	SELECT intItemId
 			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
+			, intSubLocationId = COALESCE(tblCostingBuckets.intSubLocationId, s.intSubLocationId)
+			, intStorageLocationId = COALESCE(tblCostingBuckets.intStorageLocationId, s.intStorageLocationId)
 			, intItemUOMId
 			, dblStockIn = SUM(dblStockIn)
 			, dblStockOut = SUM(dblStockOut)
@@ -123,13 +123,22 @@ FROM (
 			, SUM(dblStockIn) - SUM(dblStockOut)
 		FROM tblICInventoryLotStorage
 		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId
-		) tblCostingBuckets
-	GROUP BY intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intItemUOMId
-	) ItemStock
+	) tblCostingBuckets
+	CROSS APPLY (
+		SELECT intSubLocationId = MAX(uom.intSubLocationId), intStorageLocationId = MAX(uom.intStorageLocationId)
+		FROM tblICItemStockUOM uom
+		WHERE uom.intItemId = tblCostingBuckets.intItemId
+			AND uom.intItemLocationId = tblCostingBuckets.intItemLocationId
+			AND uom.intItemUOMId = tblCostingBuckets.intItemUOMId
+	) s
+	GROUP BY tblCostingBuckets.intItemId
+			, tblCostingBuckets.intItemLocationId
+			, tblCostingBuckets.intSubLocationId
+			, tblCostingBuckets.intStorageLocationId
+			, tblCostingBuckets.intItemUOMId
+			, s.intSubLocationId
+			, s.intStorageLocationId
+) ItemStock
 	LEFT JOIN tblICItem Item ON Item.intItemId = ItemStock.intItemId
 	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId

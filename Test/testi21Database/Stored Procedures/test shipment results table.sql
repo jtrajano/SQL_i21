@@ -7,8 +7,14 @@ BEGIN
 			intInventoryShipmentId INT
 		)
 	END
+
+	-- Fake data
+	BEGIN 
+		EXEC [testi21Database].[Fake IC Starting Numbers]; 
+	END 
+
 	DECLARE 
-		@ExpectedShipmentNumber VARCHAR(50) = 'IS-75',
+		@ExpectedShipmentNumber VARCHAR(50) = 'T-INVSHP-1001',
 		@ActualShipmentNumber VARCHAR(50),
 		@intUserId INT = 1,
 		@ShipmentEntries ShipmentStagingTable,

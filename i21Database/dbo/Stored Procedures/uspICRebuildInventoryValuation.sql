@@ -816,6 +816,11 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+
+				-- Special delete on #tmpICInventoryTransaction
+				-- Produce and Consume transactions typically shares a batch but hold different transaction ids. 
+				DELETE	FROM #tmpICInventoryTransaction
+				WHERE	strBatchId = @strBatchId
 			END
 
 			--ELSE IF @strTransactionForm = 'Inventory Transfer'
@@ -1572,7 +1577,8 @@ BEGIN
 							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 						LEFT JOIN dbo.tblICLot lot
 							ON lot.intLotId = RebuilInvTrans.intLotId 
-				WHERE	strBatchId = @strBatchId
+				WHERE	RebuilInvTrans.strBatchId = @strBatchId
+						AND RebuilInvTrans.intTransactionId = @intTransactionId
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -1681,8 +1687,9 @@ BEGIN
 			END CATCH 
 		END 
 
-		DELETE FROM #tmpICInventoryTransaction
-		WHERE strBatchId = @strBatchId
+		DELETE	FROM #tmpICInventoryTransaction
+		WHERE	strBatchId = @strBatchId
+				AND intTransactionId = @intTransactionId
 	END 
 END 
 

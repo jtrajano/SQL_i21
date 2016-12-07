@@ -206,6 +206,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql
 :r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
+:r .\AR\DefaultData\25_UpdateTransactionAccountIds.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -357,6 +358,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_TaxReportTemplate.sql
 :r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_IntegrationSystem.sql
+:r .\TF\DefaultData\_CompanyPreference.sql
+:r .\TF\DefaultData\_ValidProductCode.sql
+:r .\TF\DefaultData\_ValidOriginState.sql
+:r .\TF\DefaultData\_ValidDestinationState.sql
+:r .\TF\DefaultData\_ScheduleFields.sql
+:r .\TF\DefaultData\_FilingPacket.sql
 
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql

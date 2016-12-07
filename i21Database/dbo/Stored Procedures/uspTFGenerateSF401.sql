@@ -115,14 +115,14 @@ SET @FaxNumber = (SELECT TOP 1 strFax FROM tblSMCompanySetup)
 									SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A')
 
 									INSERT INTO tblTFTaxReportSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
-									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 1, 'Summary','Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
+									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 1, 'Summary','Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Special Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 									
 									
 									INSERT INTO tblTFTaxReportSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 2, 'Summary','Column B Gasoline (Gasoline, Gasohol)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Gasoline (Gasoline, Gasohol)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
+									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 2, 'Summary','Column B Gasoline (Gasoline, Gasohol)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 									-- OTHERS
 									INSERT INTO tblTFTaxReportSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 3, 'Summary','Column C Other Products (Jet Fuel, Kerosene)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Other Products (Jet Fuel, Kerosene)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
+									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 3, 'Summary','Column C Other Products (Jet Fuel, Kerosene)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Other Products' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 									
 									DELETE FROM @tblSchedule
 								END
@@ -132,13 +132,13 @@ SET @FaxNumber = (SELECT TOP 1 strFax FROM tblSMCompanySetup)
 									DECLARE @paramScheduleCode NVARCHAR(MAX)
 									SET @paramScheduleCode = (SELECT strTempScheduleCode FROM @tblTempScheduleCodeParam WHERE strTempScheduleCode = @tplScheduleCode)
 									PRINT @paramScheduleCode
-									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Special Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 
 									
-									SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline (Gasoline, Gasohol)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 
 
-									SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Other Products (Jet Fuel, Kerosene)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Other Products' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 									
 									-- GAS
 									DECLARE @SmryDetailItemId NVARCHAR(MAX)

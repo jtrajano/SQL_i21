@@ -126,6 +126,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intSCBudgetId]						INT												NULL		-- Service Charge Budget Id
 	,[strSCBudgetDescription]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Service Charge Budget Description	
 	,[intInventoryShipmentItemId]			INT												NULL		-- Key Value from tblICInventoryShipmentItem (Inventory Shipment)
+	,[intInventoryShipmentChargeId]			INT												NULL		-- Key Value from tblICInventoryShipmentCharge (Inventory Shipment)
 	,[strShipmentNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Inventory Shipment Number (Inventory Shipment)
 	,[intRecipeItemId]						INT												NULL		-- Key Value from tblMFRecipeItem (Manufacturing Cost)
 	,[intRecipeId]							INT												NULL
