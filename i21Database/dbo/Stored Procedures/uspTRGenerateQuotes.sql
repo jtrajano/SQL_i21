@@ -231,6 +231,7 @@ BEGIN TRY
 					, NULL
 					, NULL
 					, NULL
+					, 0
 				)
 
 				SELECT @Tax = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
