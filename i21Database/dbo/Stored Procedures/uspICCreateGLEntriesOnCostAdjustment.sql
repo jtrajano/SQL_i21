@@ -318,6 +318,7 @@ WITH ForGLEntries_CTE (
 	,strTransactionForm
 	,intInTransitSourceLocationId
 	,strItemNo 
+	,intRelatedTransactionId
 	,strRelatedTransactionId
 	,strBatchId 
 	,intLotId
@@ -342,6 +343,7 @@ AS
 			,'Bill' -- t.strTransactionForm 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
+			,t.intRelatedTransactionId
 			,t.strRelatedTransactionId
 			,t.strBatchId
 			,t.intLotId 
@@ -980,7 +982,17 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
+		CROSS APPLY (
+			SELECT	TOP 1 
+					ysnGLEntriesRequired = CAST(1 AS BIT) 
+			FROM	tblICInventoryTransfer it
+			WHERE	it.intInventoryTransferId = ForGLEntries_CTE.intRelatedTransactionId 
+					AND it.strTransferNo = ForGLEntries_CTE.strRelatedTransactionId 
+					AND it.intFromLocationId <> intToLocationId
+		) it
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Transfer
+		AND it.ysnGLEntriesRequired = 1
+
 UNION ALL  
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1040,8 +1052,18 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(ForGLEntries_CTE.dblQty, 0), ISNULL(ForGLEntries_CTE.dblCost, 0)) + ISNULL(ForGLEntries_CTE.dblValue, 0) 			
 		) Credit
+		CROSS APPLY (
+			SELECT	TOP 1 
+					ysnGLEntriesRequired = CAST(1 AS BIT) 
+			FROM	tblICInventoryTransfer it
+			WHERE	it.intInventoryTransferId = ForGLEntries_CTE.intRelatedTransactionId 
+					AND it.strTransferNo = ForGLEntries_CTE.strRelatedTransactionId 
+					AND it.intFromLocationId <> intToLocationId
+		) it
+
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Transfer
 		AND CostAdjustment.intInventoryTransactionId IS NOT NULL 
+		AND it.ysnGLEntriesRequired = 1
 
 -----------------------------------------------------------------------------------
 -- This part is for Revalue Build Assembly. 
