@@ -2,7 +2,8 @@
 (
 	@budgetCode INT,
 	@intFiscalYearId INT,
-	@dtmDateTo DATETIME,
+	@dtmDateFrom DATETIME ='1900-01-01',
+	@dtmDateTo DATETIME ='2100-01-01',
 	@intAccountId INT,
 	@budget DECIMAL (18,6) OUT
 )
@@ -18,17 +19,32 @@ BEGIN
 	DECLARE @sql NVARCHAR(max)
 	DECLARE @ParamDefinition NVARCHAR(500)
 
-	--SELECT @dtmPeriod1 = dtmStartDate from tblGLFiscalYearPeriod where @dtmDateFrom >= dtmStartDate and @dtmDateFrom <= dtmEndDate and intFiscalYearId = @intFiscalYearId
+	SELECT @dtmPeriod1 = dtmStartDate from tblGLFiscalYearPeriod where @dtmDateFrom >= dtmStartDate and @dtmDateFrom <= dtmEndDate and intFiscalYearId = @intFiscalYearId
 	SELECT @dtmPeriod2 = dtmStartDate from tblGLFiscalYearPeriod where @dtmDateTo >= dtmStartDate and @dtmDateTo <= dtmEndDate and intFiscalYearId = @intFiscalYearId
+
 	IF @dtmPeriod2 IS NULL RETURN -1 
-	SELECT @periodOrder2 = COUNT(1) FROM tblGLFiscalYearPeriod WHERE dtmStartDate <= @dtmPeriod2 and intFiscalYearId = @intFiscalYearId
+
 	IF NOT EXISTS
 	(
-		SELECT  TOP 1 1 FROM tblFRBudget A join tblFRBudgetCode B ON A.intBudgetCode = B.intBudgetCode 
-		WHERE A.intBudgetCode = @budgetCode	AND intFiscalYearId = @intFiscalYearId AND A.intAccountId = @intAccountId
+		SELECT  TOP 1 1 FROM vyuGLAccountFiscalBudget
+		WHERE intBudgetCode = @budgetCode	AND intFiscalYearId = @intFiscalYearId AND intAccountId = @intAccountId
 	)
 	RETURN -1 
+
 	SET @periodOrder1 = 1
+	SELECT @periodOrder2 = COUNT(1) FROM tblGLFiscalYearPeriod WHERE dtmStartDate <= @dtmPeriod2 and intFiscalYearId = @intFiscalYearId
+	
+
+	DECLARE @BalanceType BIT = 0
+	SELECT @BalanceType = 1 FROM vyuGLAccountDetail A
+	WHERE intAccountId = @intAccountId AND strAccountType IN ('Revenue','Expense')
+
+
+	IF @BalanceType =1
+		SELECT @periodOrder1 = COUNT(1) FROM tblGLFiscalYearPeriod WHERE dtmStartDate <= @dtmPeriod1 and intFiscalYearId = @intFiscalYearId	
+	
+		
+
 	--COMPUTE THE BUDGET
 	WHILE @periodOrder1 <= @periodOrder2
 	BEGIN
@@ -42,8 +58,8 @@ BEGIN
 	'SELECT @budgetOut =SUM(budgets)
 	FROM 
 	   (
-	   SELECT ' + @strBudgetFieldName + ' FROM tblFRBudget A join tblFRBudgetCode B ON A.intBudgetCode = B.intBudgetCode WHERE A.intBudgetCode = @budgetCode	
-	   AND intFiscalYearId = @intFiscalYearId AND A.intAccountId = @intAccountId
+	   SELECT ' + @strBudgetFieldName + ' FROM vyuGLAccountFiscalBudget WHERE intBudgetCode = @budgetCode	
+	   AND intFiscalYearId = @intFiscalYearId AND intAccountId = @intAccountId
 	   ) p
 	UNPIVOT
 	   (budgets FOR Budgets IN 
