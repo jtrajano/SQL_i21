@@ -7,6 +7,7 @@
 	dtmCreated DATETIME,
 	intLastModifiedById INT,
 	dtmLastModified DATETIME,
+	intConcurrencyId INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceContract_intPriceContractId] PRIMARY KEY CLUSTERED (intPriceContractId ASC),
 	CONSTRAINT [UQ_tblCTPriceContract_strPriceContractNo] UNIQUE (strPriceContractNo), 
