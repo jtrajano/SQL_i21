@@ -28,7 +28,7 @@ USING (
 				,Aggregrate_InTransitOutboundQty = SUM(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(tblICItemUOM.dblUnitQty, 0))) 	-- Convert the qty to stock unit. 			
 		FROM	@ItemsToIncreaseInTransitOutBound ItemsToIncreaseInTransitOutBound LEFT JOIN dbo.tblICItemUOM 
 					ON ItemsToIncreaseInTransitOutBound.intItemUOMId = tblICItemUOM.intItemUOMId
-		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_ORIGIN) = @FOB_DESTINATION
+		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
 		GROUP BY ItemsToIncreaseInTransitOutBound.intItemId
 				, ItemsToIncreaseInTransitOutBound.intItemLocationId
 ) AS Source_Query  
@@ -71,7 +71,7 @@ USING (
 				,Aggregrate_InTransitOutboundQty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseInTransitOutBound ItemsToIncreaseInTransitOutBound INNER JOIN dbo.tblICItemUOM 
 					ON ItemsToIncreaseInTransitOutBound.intItemUOMId = tblICItemUOM.intItemUOMId
-		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_ORIGIN) = @FOB_DESTINATION			
+		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
 		GROUP BY ItemsToIncreaseInTransitOutBound.intItemId
 				, ItemsToIncreaseInTransitOutBound.intItemLocationId
 				, ItemsToIncreaseInTransitOutBound.intItemUOMId
@@ -87,7 +87,7 @@ USING (
 					ON StockUOM.intItemId = ItemsToIncreaseInTransitOutBound.intItemId 
 					AND StockUOM.ysnStockUnit = 1
 					AND StockUOM.intItemUOMId <> tblICItemUOM.intItemUOMId
-		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_ORIGIN) = @FOB_DESTINATION
+		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
 		GROUP BY ItemsToIncreaseInTransitOutBound.intItemId
 				, ItemsToIncreaseInTransitOutBound.intItemLocationId
 				, StockUOM.intItemUOMId
