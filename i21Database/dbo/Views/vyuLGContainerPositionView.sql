@@ -57,8 +57,8 @@ SELECT * FROM (
 		AND ISNULL(LC.ysnRejected, 0) = 0
 	LEFT JOIN (
 		SELECT DISTINCT Seq.intContractHeaderId
-			,Samp.intItemId
-			,COUNT(*) intApprovalCount
+                       ,Seq.intItemId
+					   ,COUNT(*) intApprovalCount
 		FROM tblQMSample Samp
 		JOIN tblQMSampleDetail SampDetail ON SampDetail.intSampleId = Samp.intSampleId
 		JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttributeId
@@ -69,13 +69,12 @@ SELECT * FROM (
 		JOIN tblCTContractDetail Seq ON Seq.intContractDetailId = Samp.intContractDetailId
 		GROUP BY Seq.intItemId
 			,Seq.intContractHeaderId
-			,Samp.intItemId
 		) Samp ON Samp.intContractHeaderId = CH.intContractHeaderId
 		AND Samp.intItemId = CD.intItemId
 	LEFT JOIN (
 		SELECT DISTINCT Seq.intContractHeaderId
-			,Samp.intItemId
-			,COUNT(*) intApprovalCount
+					   ,Seq.intItemId
+					   ,COUNT(*) intApprovalCount
 		FROM tblQMSample Samp
 		JOIN tblQMSampleDetail SampDetail ON SampDetail.intSampleId = Samp.intSampleId
 		JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttributeId
@@ -86,7 +85,6 @@ SELECT * FROM (
 		JOIN tblCTContractDetail Seq ON Seq.intContractDetailId = Samp.intContractDetailId
 		GROUP BY Seq.intItemId
 			,Seq.intContractHeaderId
-			,Samp.intItemId
 		) RSamp ON RSamp.intContractHeaderId = CH.intContractHeaderId
 		AND RSamp.intItemId = CD.intItemId
 	WHERE ISNULL(LC.ysnRejected, 0) = 0
