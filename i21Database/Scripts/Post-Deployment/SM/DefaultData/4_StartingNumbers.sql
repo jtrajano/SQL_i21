@@ -8,6 +8,29 @@
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Comment Maintenance'
 
 GO
+	PRINT N'BEGIN RENAME OF TRANSACTION'
+
+	UPDATE tblSMStartingNumber SET strPrefix = 'PCE-'
+	WHERE strPrefix = 'CE-' AND strTransactionType = N'Cancel Equity' AND strModule = 'Patronage'
+
+
+	UPDATE tblSMStartingNumber SET strPrefix = 'PSS-'
+	WHERE strPrefix = 'SS-' AND strTransactionType = N'Change Stock Status Number' AND strModule = 'Patronage'	
+
+	UPDATE tblSMStartingNumber SET strPrefix = 'PADJ-'
+	WHERE strPrefix = 'ADJ-' AND strTransactionType = N'Adjustment Number' AND strModule = 'Patronage'	
+
+	UPDATE tblSMStartingNumber SET strPrefix = 'PCRT-'
+	WHERE strPrefix = 'CRT-' AND strTransactionType = N'Certificate Number' AND strModule = 'Patronage'	
+
+	UPDATE tblSMStartingNumber
+	SET [strPrefix] = 'PDIV-'
+	WHERE strTransactionType = N'Dividend Number' AND strModule = 'Patronage'
+
+	UPDATE tblSMStartingNumber SET strPrefix = 'PTR-'
+	WHERE strPrefix = 'TRF-' AND strTransactionType = N'Transfer' AND strModule = 'Patronage'	
+
+GO
 	PRINT N'BEGIN DELETE OF TRANSACTION'
 
 	DELETE FROM tblSMStartingNumber
@@ -730,7 +753,7 @@ GO
 	UNION ALL
     SELECT  [intStartingNumberId]   = 80
             ,[strTransactionType]   = N'Transfer'
-            ,[strPrefix]			= N'TRF-'
+            ,[strPrefix]			= N'PTR-'
             ,[intNumber]            = 1
             ,[strModule]			= 'Patronage'
             ,[ysnEnable]			= 1
@@ -750,7 +773,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 82
 			,[strTransactionType]	= N'Dividend Number'
-			,[strPrefix]			= N''
+			,[strPrefix]			= N'PDIV-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
@@ -760,7 +783,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 83
 			,[strTransactionType]	= N'Certificate Number'
-			,[strPrefix]			= N'CRT-'
+			,[strPrefix]			= N'PCRT-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
@@ -780,7 +803,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 85
 			,[strTransactionType]	= N'Adjustment Number'
-			,[strPrefix]			= N'ADJ-'
+			,[strPrefix]			= N'PADJ-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
@@ -800,7 +823,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 87
 			,[strTransactionType]	= N'Change Stock Status Number'
-			,[strPrefix]			= N'SS-'
+			,[strPrefix]			= N'PSS-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
@@ -820,7 +843,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 89
 			,[strTransactionType]	= N'Cancel Equity'
-			,[strPrefix]			= N'CE-'
+			,[strPrefix]			= N'PCE-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
@@ -985,6 +1008,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Shipping Instruction')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 106
+			,[strTransactionType]	= N'Process Refund'
+			,[strPrefix]			= N'PR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Process Refund')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
@@ -1019,13 +1052,6 @@ GO
 		UPDATE tblSMStartingNumber
 		SET [strPrefix] = 'DO-'
 		WHERE strTransactionType = N'Delivery Orders'
-	END
-	
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Dividend Number')
-	BEGIN
-		UPDATE tblSMStartingNumber
-		SET [strPrefix] = 'D-'
-		WHERE strTransactionType = N'Dividend Number'
 	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Notice')
@@ -1062,5 +1088,3 @@ GO
 GO
 	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR GENERAL LEDGER'
 GO
-
-
