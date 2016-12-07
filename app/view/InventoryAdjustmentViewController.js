@@ -1371,10 +1371,51 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         i21.ModuleMgr.Inventory.showScreen(value, 'LotStatus');
     },
 
+    onItemNoBeforeQuery: function (obj) {
+        if (obj.combo) {
+            var win = obj.combo.up('window'),
+                cboAdjustmentType = win.down('#cboAdjustmentType'),
+                cboLocation = win.down('#cboLocation'),
+                store = obj.combo.store;
+
+            if (store) {
+                store.remoteFilter = true;
+                store.remoteSort = true;
+            }
+
+		    //Show only lot tracked items for Adjustments Types: Lot Status Change, Split Lot, Lot Merge, Lot Move
+            if(cboAdjustmentType.getValue() == 4 || cboAdjustmentType.getValue() == 5 || cboAdjustmentType.getValue() == 7 || cboAdjustmentType.getValue() == 8) {
+                obj.combo.defaultFilters = [
+                    {
+                        column: 'intLocationId',
+                        value: cboLocation.getValue(),
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strLotTracking',
+                        value: 'No',
+                        condition: 'noteq',
+                        conjunction: 'and'
+                    }
+                ];
+            }
+            else {
+                obj.combo.defaultFilters = [
+                    {
+                        column: 'intLocationId',
+                        value: cboLocation.getValue(),
+                        conjunction: 'and'
+                    }
+                ];
+            }
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboItemNo": {
-                select: this.onAdjustmentDetailSelect
+                beforequery: this.onItemNoBeforeQuery,
+                select: this.onAdjustmentDetailSelect,
             },
             "#cboNewItemNo": {
                 select: this.onAdjustmentDetailSelect
