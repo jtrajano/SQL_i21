@@ -92,8 +92,8 @@ BEGIN TRY
 			,SHI.intItemId
 			,SHI.dblQuantity
 			,SHI.intItemUOMId
-			,SHI.dblQuantity
-			,SHI.intItemUOMId
+			,dbo.fnCTConvertQtyToTargetItemUOM(SHI.intItemUOMId,SHI.intWeightUOMId,SHI.dblQuantity)
+			,SHI.intWeightUOMId
 			,IU.dblUnitQty
 			,ISNULL(NULL, I.intUnitPerLayer)
 			,ISNULL(NULL, I.intLayerPerPallet)
