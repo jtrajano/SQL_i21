@@ -4591,6 +4591,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
     <Build Include="dbo\Functions\fnSCCalculateDiscountSplit.sql" />
     <Build Include="dbo\Views\vyuGLAccountFiscalBudget.sql" />
+    <Build Include="dbo\Views\vyuEMEntityLocationWithType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
