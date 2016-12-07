@@ -363,7 +363,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_ValidOriginState.sql
 :r .\TF\DefaultData\_ValidDestinationState.sql
 :r .\TF\DefaultData\_ScheduleFields.sql
-
+:r .\TF\DefaultData\_FilingPacket.sql
 
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql

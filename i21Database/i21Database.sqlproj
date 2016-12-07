@@ -4593,6 +4593,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidOriginState.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidDestinationState.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_FilingPacket.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
