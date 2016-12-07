@@ -12,6 +12,7 @@
 	[ysnBOL] BIT NOT NULL DEFAULT 0,
 	[ysnInvoice] BIT NOT NULL DEFAULT 0,
 	[ysnScaleTicket] BIT NOT NULL DEFAULT 0, 
+	[ysnInventoryTransfer] BIT NOT NULL DEFAULT 0, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMDocumentMaintenanceMessage_tblSMDocumentMaintenance] FOREIGN KEY ([intDocumentMaintenanceId]) REFERENCES [tblSMDocumentMaintenance]([intDocumentMaintenanceId]) ON DELETE CASCADE
 )
