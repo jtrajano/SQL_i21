@@ -4601,6 +4601,7 @@
     <Build Include="dbo\Functions\fnRoundBanker.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\25_UpdateTransactionAccountIds.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateReservedStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

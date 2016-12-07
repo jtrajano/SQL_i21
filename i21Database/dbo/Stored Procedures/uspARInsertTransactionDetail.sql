@@ -25,7 +25,10 @@ BEGIN
 		,[intTicketId]
 		,[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]
-		,[intSiteId])
+		,[intSiteId]
+		,[intCompanyLocationSubLocationId]
+		,[intStorageLocationId]
+		,[intOwnershipTypeId])
 	SELECT
 		 [intTransactionDetailId]				= [intInvoiceDetailId]
 		,[intTransactionId]						= [intInvoiceId] 
@@ -46,6 +49,9 @@ BEGIN
         ,[intTicketHoursWorkedId]				= [intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]			= [intOriginalInvoiceDetailId]
         ,[intSiteId]							= [intSiteId]
+		,[intCompanyLocationSubLocationId]		= [intCompanyLocationSubLocationId]
+		,[intStorageLocationId]					= [intStorageLocationId]
+		,[intOwnershipTypeId]					= NULL
 
 	FROM
 		[tblARInvoiceDetail]

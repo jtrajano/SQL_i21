@@ -20,6 +20,9 @@ BEGIN
 		,[intSalesOrderDetailId]
 		,[intContractHeaderId]
 		,[intContractDetailId]
+		,[intCompanyLocationSubLocationId]
+		,[intStorageLocationId]
+		,[intOwnershipTypeId]
 		,[intConcurrencyId])
 	SELECT
 		 [intTransactionDetailId]			= SOD.[intSalesOrderDetailId]
@@ -35,7 +38,10 @@ BEGIN
 		,[intInventoryShipmentItemId]		= NULL
 		,[intSalesOrderDetailId]			= NULL
 		,[intContractHeaderId]				= SOD.[intContractHeaderId]
-		,[intContractDetailId]				= SOD.[intContractDetailId]
+		,[intContractDetailId]				= SOD.[intContractDetailId]		
+		,[intCompanyLocationSubLocationId]	= SOD.[intSubLocationId]
+		,[intStorageLocationId]				= SOD.[intStorageLocationId] 
+		,[intOwnershipTypeId]				= NULL
 		,[intConcurrencyId]					= 1
 	FROM
 		[tblSOSalesOrderDetail] SOD
