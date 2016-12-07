@@ -1,4 +1,4 @@
-﻿ALTER VIEW vyuGLAccountFiscalBudget
+﻿CREATE VIEW vyuGLAccountFiscalBudget
 AS
 SELECT A.intBudgetId,
 B.strBudgetCode,
