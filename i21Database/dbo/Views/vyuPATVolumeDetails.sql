@@ -11,8 +11,7 @@ SELECT	id = NEWID(),
 		dblSale = SUM(CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolume ELSE 0 END),
 		dtmLastActivityDate = MAX(AR.dtmLastActivityDate),
 		dblTotalVolume = SUM(CV.dblVolume),
-		CV.ysnRefundProcessed,
-		CV.intConcurrencyId
+		CV.ysnRefundProcessed
 	FROM tblPATCustomerVolume CV
 INNER JOIN tblEMEntity ENT
 		ON ENT.intEntityId = intCustomerPatronId
@@ -30,5 +29,4 @@ LEFT JOIN tblSMTaxCode TC
 					FY.strFiscalYear,
 					AR.strStockStatus, 
 					TC.strTaxCode, 
-					CV.intConcurrencyId, 
 					CV.ysnRefundProcessed

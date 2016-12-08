@@ -2,6 +2,7 @@
 (
 	[intAdjustmentDetailId] INT NOT NULL IDENTITY, 
     [intAdjustmentId] INT NULL, 
+	[intFiscalYearId] INT NULL,
     [intPatronageCategoryId] INT NULL, 
     [dblQuantityAvailable] NUMERIC(18, 6) NULL, 
     [dblQuantityAdjusted] NUMERIC(18, 6) NULL, 
