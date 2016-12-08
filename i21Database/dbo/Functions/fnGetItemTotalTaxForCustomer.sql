@@ -15,7 +15,7 @@
 	,@CardId					INT
 	,@VehicleId					INT
 	,@DisregardExemptionSetup	BIT
-	,@ExcludeChecfOff			BIT
+	,@ExcludeCheckOff			BIT
 )
 RETURNS NUMERIC(18,6)
 AS
@@ -25,7 +25,7 @@ BEGIN
 	SELECT
 		@LineItemTotal = SUM([dblAdjustedTax])
 	FROM
-		[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @CompanyLocationId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @SiteId, @FreightTermId, @CardId, @VehicleId, @DisregardExemptionSetup, @ExcludeChecfOff)
+		[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @CompanyLocationId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @SiteId, @FreightTermId, @CardId, @VehicleId, @DisregardExemptionSetup, @ExcludeCheckOff)
 		
 	RETURN @LineItemTotal		
 END

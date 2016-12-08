@@ -10,7 +10,7 @@
 	,@VendorLocationId		INT
 	,@IncludeExemptedCodes	BIT
 	,@FreightTermId			INT
-	,@ExcludeChecfOff		BIT
+	,@ExcludeCheckOff		BIT
 )
 RETURNS @returntable TABLE
 (
@@ -221,11 +221,11 @@ BEGIN
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeChecfOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@ItemCost * @Quantity) * (@TaxRate/100.000000) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@ItemCost * @Quantity) * (@TaxRate/100.000000) END))
 									END
 								ELSE
 									BEGIN
-										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeChecfOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@Quantity * @TaxRate) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@Quantity * @TaxRate) END))
 									END
 							END
 					END 
@@ -248,7 +248,7 @@ BEGIN
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
 
-			IF(@ExcludeChecfOff = 1 AND @CheckoffTax = 1)
+			IF(@ExcludeCheckOff = 1 AND @CheckoffTax = 1)
 				SET @ItemTaxAmount = @ZeroDecimal;
 			
 			UPDATE

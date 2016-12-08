@@ -17,7 +17,7 @@
 	,@CardId					INT								= NULL
 	,@VehicleId					INT								= NULL
 	,@DisregardExemptionSetup	BIT								= 0
-	,@ExcludeChecfOff			BIT								= 0
+	,@ExcludeCheckOff			BIT								= 0
 )
 RETURNS @returntable TABLE
 (
@@ -116,7 +116,7 @@ BEGIN
 						,@CardId
 						,@VehicleId
 						,@DisregardExemptionSetup
-						,@ExcludeChecfOff
+						,@ExcludeCheckOff
 					) 	
 		END
 
@@ -319,7 +319,7 @@ BEGIN
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND [ysnCheckoffTax] = 1
 				AND [ysnTaxExempt] = 0
-				AND @ExcludeChecfOff = 0
+				AND @ExcludeCheckOff = 0
 				
 			SET @TotalUnitTax = ((ISNULL(@UnitTax, @ZeroDecimal) - ISNULL(@CheckOffUnitTax, @ZeroDecimal)) + ISNULL(@TaxableByOtherUnitTax, @ZeroDecimal))
 			
@@ -340,7 +340,7 @@ BEGIN
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND [ysnCheckoffTax] = 1
 				AND [ysnTaxExempt] = 0
-				AND @ExcludeChecfOff = 0
+				AND @ExcludeCheckOff = 0
 
 			DELETE FROM @TaxableByOtherTaxUnit
 			INSERT INTO @TaxableByOtherTaxUnit(
@@ -417,7 +417,7 @@ BEGIN
 						@ItemTaxes
 					WHERE
 						[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodesR))
-						AND NOT ([ysnCheckoffTax] = 1 AND @ExcludeChecfOff = 1)
+						AND NOT ([ysnCheckoffTax] = 1 AND @ExcludeCheckOff = 1)
 						AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
 
 					--SELECT
@@ -557,11 +557,11 @@ BEGIN
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeChecfOff = 1 AND @CheckoffTax = 1)) THEN 0.00 ELSE (@ItemPrice * @Quantity) * (@TaxRate/100.00) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.00 ELSE (@ItemPrice * @Quantity) * (@TaxRate/100.00) END))
 									END
 								ELSE
 									BEGIN
-										SET @OtherTaxAmount = (@OtherTaxAmount) + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeChecfOff = 1 AND @CheckoffTax = 1)) THEN 0.00 ELSE (@Quantity * @TaxRate) END))
+										SET @OtherTaxAmount = (@OtherTaxAmount) + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.00 ELSE (@Quantity * @TaxRate) END))
 									END
 							END
 					END 
@@ -587,7 +587,7 @@ BEGIN
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
 
-			IF(@ExcludeChecfOff = 1 AND @CheckoffTax = 1)
+			IF(@ExcludeCheckOff = 1 AND @CheckoffTax = 1)
 				SET @ItemTaxAmount = @ZeroDecimal;
 			
 			UPDATE
