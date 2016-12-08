@@ -186,7 +186,7 @@ BEGIN
 																				ELSE 
 																					B.dblTotal 
 																		END																		
-																		+ CAST(ISNULL(Taxes.dblTotalICTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
+																		+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
 															END
 															/ 
 															CASE WHEN B.dblRate > 0 AND @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END 
@@ -239,16 +239,16 @@ BEGIN
 
 			OUTER APPLY (
 				--Add the tax from IR
+				SELECT 
+					SUM(D.dblTax) dblTotalTax
+				FROM tblAPBillDetailTax D
+				WHERE D.intBillDetailId = B.intBillDetailId
+				GROUP BY D.intBillDetailId
 				--SELECT 
 				--	SUM(D.dblTax) dblTotalICTax
-				--FROM tblAPBillDetailTax D
-				--WHERE D.intBillDetailId = B.intBillDetailId
-				--GROUP BY D.intBillDetailId
-				SELECT 
-					SUM(D.dblTax) dblTotalICTax
-				FROM tblICInventoryReceiptItemTax D
-				WHERE D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-				GROUP BY D.intInventoryReceiptItemId
+				--FROM tblICInventoryReceiptItemTax D
+				--WHERE D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+				--GROUP BY D.intInventoryReceiptItemId
 			) Taxes
 			OUTER APPLY (
 				SELECT dblTotal = CAST (
@@ -439,13 +439,23 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
 		--[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
-		[dblDebit]						=	CASE WHEN B.dblOldCost IS NOT NULL THEN 0 ELSE 
-														(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) 
-														WHEN B.dblRate > 0 THEN  CAST(SUM(D.dblTax) / CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END AS DECIMAL(18,2))
-														ELSE SUM(D.dblTax) END) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END) 
-											END,
+		--[dblDebit]						=	CASE WHEN B.dblOldCost IS NOT NULL THEN 0 ELSE 
+		--												(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) 
+		--												WHEN B.dblRate > 0 THEN  CAST(SUM(D.dblTax) / CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END AS DECIMAL(18,2))
+		--												ELSE SUM(D.dblTax) END) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END) 
+		--									END,
+		[dblDebit]						=	
+											(CASE WHEN B.dblOldCost IS NOT NULL 
+												 THEN  																				
+												    CASE WHEN B.dblOldCost = 0 THEN 0 
+														 WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax)  --COST ADJUSTMENT
+													END 
+												ELSE (CASE  WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax)
+														WHEN B.dblRate > 0 THEN  CAST(SUM(D.dblTax) / CASE WHEN 3 != A.intCurrencyId THEN B.dblRate ELSE 1 END AS DECIMAL(18,2))
+														ELSE SUM(D.dblTax) END) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END)
+											END	),			
 		[dblCredit]						=	(CASE WHEN B.dblOldCost IS NOT NULL THEN (CASE WHEN B.dblOldCost = 0 THEN 0 --AP-2458
-																						   ELSE CAST((Taxes.dblTotalICTax - SUM(D.dblTax)) AS DECIMAL(18,2)) END) 
+																						   ELSE CAST((Taxes.dblTotalTax - SUM(D.dblTax)) AS DECIMAL(18,2)) END) 
 												  ELSE 0 END),--COST ADJUSTMENT,  --AP-2792
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -482,10 +492,15 @@ BEGIN
 				ON B.intBillDetailId = D.intBillDetailId
 			OUTER APPLY (
 				SELECT 
-					SUM(D.dblTax) dblTotalICTax
-				FROM tblICInventoryReceiptItemTax D
-				WHERE D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-				GROUP BY D.intInventoryReceiptItemId
+					SUM(D.dblTax) dblTotalTax
+				FROM tblAPBillDetailTax D
+				WHERE D.intBillDetailId = B.intBillDetailId
+				GROUP BY D.intBillDetailId
+				--SELECT 
+				--	SUM(D.dblTax) dblTotalICTax
+				--FROM tblICInventoryReceiptItemTax D
+				--WHERE D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+				--GROUP BY D.intInventoryReceiptItemId
 			) Taxes
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType IN (1,3)
@@ -507,7 +522,7 @@ BEGIN
 	,A.intBillId
 	,B.dblRate
 	,B.dblOldCost
-	,dblTotalICTax
+	,dblTotalTax
 
 	UPDATE A
 		SET A.strDescription = B.strDescription
