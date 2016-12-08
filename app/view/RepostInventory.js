@@ -22,16 +22,14 @@ Ext.define('Inventory.view.RepostInventory', {
         'Ext.button.Button',
         'Ext.form.Panel',
         'Ext.form.field.ComboBox',
-        'Ext.form.field.Display',
-        'Ext.grid.Panel',
-        'Ext.grid.column.Date',
-        'Ext.grid.View'
+        'Ext.form.field.Display'
     ],
 
-    height: 403,
+    height: 197,
     hidden: false,
     margin: '',
-    width: 520,
+    resizable: false,
+    width: 483,
     layout: 'fit',
     title: 'Repost Inventory',
     modal: true,
@@ -70,12 +68,11 @@ Ext.define('Inventory.view.RepostInventory', {
                     items: [
                         {
                             xtype: 'form',
-                            region: 'north',
+                            region: 'center',
                             border: false,
-                            height: 106,
                             itemId: 'frmRebuildInventory',
                             ui: 'i21-form',
-                            bodyPadding: 3,
+                            bodyPadding: 8,
                             items: [
                                 {
                                     xtype: 'container',
@@ -88,6 +85,8 @@ Ext.define('Inventory.view.RepostInventory', {
                                         {
                                             xtype: 'combobox',
                                             flex: 2,
+                                            publishes: 'value',
+                                            reference: 'fiscalmonth',
                                             itemId: 'cboFiscalMonth',
                                             fieldLabel: 'Fiscal Month',
                                             displayField: 'strMonth',
@@ -98,6 +97,8 @@ Ext.define('Inventory.view.RepostInventory', {
                                             xtype: 'datefield',
                                             flex: 1,
                                             margins: '',
+                                            publishes: 'value',
+                                            reference: 'fiscaldate',
                                             itemId: 'cboFiscalDate',
                                             padding: '0 0 0 5',
                                             fieldLabel: 'Fiscal Month',
@@ -108,6 +109,8 @@ Ext.define('Inventory.view.RepostInventory', {
                                 {
                                     xtype: 'combobox',
                                     anchor: '100%',
+                                    publishes: 'value',
+                                    reference: 'postorder',
                                     itemId: 'cboPostOrder',
                                     fieldLabel: 'Post Order',
                                     displayField: 'strPostOrder',
@@ -142,6 +145,8 @@ Ext.define('Inventory.view.RepostInventory', {
                                         }
                                     ],
                                     anchor: '100%',
+                                    publishes: 'value',
+                                    reference: 'item',
                                     itemId: 'cboItem',
                                     fieldLabel: 'Item (optional)',
                                     displayField: 'strItemNo',
@@ -156,28 +161,6 @@ Ext.define('Inventory.view.RepostInventory', {
                                     hideLabel: true,
                                     value: 'Please fill out the required fields above.',
                                     fieldStyle: 'font-size: 8pt; color: gray; font-style: italic;'
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'gridpanel',
-                            region: 'center',
-                            border: true,
-                            itemId: 'grdLog',
-                            title: 'Messages',
-                            hideHeaders: true,
-                            rowLines: false,
-                            columns: [
-                                {
-                                    xtype: 'gridcolumn',
-                                    width: 380,
-                                    dataIndex: 'string',
-                                    text: 'Message'
-                                },
-                                {
-                                    xtype: 'datecolumn',
-                                    dataIndex: 'date',
-                                    text: 'Date'
                                 }
                             ]
                         }

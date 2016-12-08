@@ -13,7 +13,8 @@ Ext.define('Inventory.model.RepostInventory', {
         { name: 'strPostOrder', type: 'string' },
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intMonth', type: 'int' },
-        { name: 'strMonth', type: 'string' }
+        { name: 'strMonth', type: 'string' },
+        { name: 'strItemNo', type: 'string', allowNull: true}
     ],
 
     validators: [

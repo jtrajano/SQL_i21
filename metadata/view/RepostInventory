@@ -9,17 +9,21 @@
         "bodyPadding": null,
         "designer|userAlias": "icrepostinventory",
         "designer|userClassName": "RepostInventory",
-        "height": 403,
+        "height": 197,
         "hidden": false,
         "layout": "fit",
         "margin": "",
         "modal": true,
         "padding": null,
         "reference": null,
+        "resizable": false,
         "title": "Repost Inventory",
-        "width": 520
+        "width": 483
     },
     "name": "MyWindow",
+    "configAlternates": {
+        "resizable": "boolean"
+    },
     "designerId": "a2df62ae-287a-41b3-ad0c-dc9ed643501d",
     "viewControllerInstanceId": "637e2a4e-0b41-479c-b588-a56b190b5f4a",
     "viewModelInstanceId": "7ad81c96-3967-4e86-a0b5-4fd6a7dd60ff",
@@ -101,7 +105,8 @@
                     "codeClass": null,
                     "userConfig": {
                         "designer|displayName": "container",
-                        "layout": "border"
+                        "layout": "border",
+                        "padding": null
                     },
                     "name": "MyContainer2",
                     "designerId": "509053b3-107f-4fef-bb10-5850141049d5",
@@ -114,13 +119,12 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "bodyPadding": 3,
+                                "bodyPadding": 8,
                                 "border": false,
                                 "designer|displayName": "frmRepostInventory",
                                 "designer|uiInterfaceName": "i21-form",
-                                "height": 106,
                                 "itemId": "frmRebuildInventory",
-                                "layout|region": "north",
+                                "layout|region": "center",
                                 "title": null,
                                 "ui": "i21-form"
                             },
@@ -294,67 +298,6 @@
                                     },
                                     "name": "MyDisplayField",
                                     "designerId": "8cea60c7-49e2-4ed1-91f8-c424b00bca08"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.grid.Panel",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "bodyPadding": null,
-                                "border": true,
-                                "hideHeaders": true,
-                                "itemId": "grdLog",
-                                "layout|region": "center",
-                                "margin": null,
-                                "rowLines": false,
-                                "title": "Messages"
-                            },
-                            "name": "MyGridPanel",
-                            "designerId": "8a78e30e-67b1-4e3f-ba4e-b89dba4e3332",
-                            "cn": [
-                                {
-                                    "type": "Ext.grid.column.Column",
-                                    "reference": {
-                                        "name": "columns",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "dataIndex": "string",
-                                        "text": "Message",
-                                        "width": 380
-                                    },
-                                    "name": "MyColumn",
-                                    "designerId": "0d259b0d-d404-439c-8718-38e2bb9134b0"
-                                },
-                                {
-                                    "type": "Ext.grid.column.Date",
-                                    "reference": {
-                                        "name": "columns",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "dataIndex": "date",
-                                        "text": "Date"
-                                    },
-                                    "name": "MyDateColumn",
-                                    "designerId": "954fd61b-c76a-4e2a-9be9-6913f2848bf8"
-                                },
-                                {
-                                    "type": "Ext.grid.View",
-                                    "reference": {
-                                        "name": "viewConfig",
-                                        "type": "object"
-                                    },
-                                    "codeClass": null,
-                                    "name": "MyGridView",
-                                    "designerId": "ab05a03b-7896-466e-831e-ddd3885259ae"
                                 }
                             ]
                         }
