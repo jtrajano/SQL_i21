@@ -40,7 +40,7 @@ BEGIN
 				@dblFXCostUnitQty	NUMERIC(18,6)
 
 	SELECT		@dblCashPrice		=	CD.dblCashPrice,
-				@dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN ISNULL(intCent,1) ELSE 1 END,
+				@dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(intCent,0) = 0 THEN 1 ELSE intCent END ELSE 1 END,
 				@intCurrencyId		=	CD.intCurrencyId,
 				@intMainCurrencyId	=	ISNULL(CY.intMainCurrencyId,CD.intCurrencyId),
 				@ysnSubCurrency		=	CY.ysnSubCurrency,
@@ -71,7 +71,7 @@ BEGIN
 		IF EXISTS(SELECT * FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intFromCurrencyId = @intMainCurrencyId)
 		BEGIN
 			SELECT @intSeqCurrencyId = intToCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intFromCurrencyId = @intMainCurrencyId
-			SELECT @dblRate = 1/@dblRate
+			SELECT @dblRate = 1 / CASE WHEN ISNULL(@dblRate,0) = 0 THEN 1 ELSE @dblRate END
 		END
 		ELSE
 		BEGIN
