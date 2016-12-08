@@ -243,6 +243,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmExportedDate { get; set; }
         public int? intSort { get; set; }
         public bool? ysnSubCurrency { get; set; }
+        public int? intTaxGroupId { get; set; }
         
         private string _orderNumber;
         [NotMapped]
@@ -835,7 +836,25 @@ namespace iRely.Inventory.Model
                 _pricingType = value;
             }
         }
-        
+        private string _itemTaxGroup;
+        [NotMapped]
+        public string strTaxGroup
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemTaxGroup))
+                    if (vyuICInventoryReceiptItemLookUp != null)
+                        return vyuICInventoryReceiptItemLookUp.strTaxGroup;
+                    else
+                        return null;
+                else
+                    return _itemTaxGroup;
+            }
+            set
+            {
+                _itemTaxGroup = value;
+            }
+        }
         /* private decimal _franchise;
          [NotMapped]
          public decimal dblFranchise
@@ -997,6 +1016,7 @@ namespace iRely.Inventory.Model
         public decimal? dblContainerWeightPerQty { get; set; }
         public string strSubCurrency { get; set; }
         public string strPricingType { get; set; }
+        public string strTaxGroup { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
@@ -1030,6 +1050,7 @@ namespace iRely.Inventory.Model
    //     public int? intCent { get; set; }
         public bool? ysnSubCurrency { get; set; }
         public decimal? dblTax { get; set; }
+        public int? intTaxGroupId { get; set; }
 
         private string _contractNo;
         [NotMapped]
@@ -1204,6 +1225,26 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _chargeTaxGroup;
+        [NotMapped]
+        public string strTaxGroup
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_chargeTaxGroup))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strTaxGroup;
+                    else
+                        return null;
+                else
+                    return _chargeTaxGroup;
+            }
+            set
+            {
+                _chargeTaxGroup = value;
+            }
+        }
+
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public vyuICGetInventoryReceiptCharge vyuICGetInventoryReceiptCharge { get; set; }
         public ICollection<tblICInventoryReceiptChargeTax> tblICInventoryReceiptChargeTaxes { get; set; }
@@ -1234,6 +1275,7 @@ namespace iRely.Inventory.Model
         public bool? ysnSubCurrency { get; set; }
         public string strCurrency { get; set; }
      //   public int? intCent { get; set; }
+        public string strTaxGroup { get; set; }
 
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }

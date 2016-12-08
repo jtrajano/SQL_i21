@@ -120,7 +120,8 @@ namespace iRely.Inventory.WebApi
         public HttpResponseMessage GetTaxGroupId(int id)
         {
             int? taxGroup = null;
-            var result = _bl.GetTaxGroupId(id, out taxGroup);
+            string taxGroupName = null;
+            var result = _bl.GetTaxGroupId(id, out taxGroup, out taxGroupName);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
@@ -128,6 +129,7 @@ namespace iRely.Inventory.WebApi
                 message = new
                 {
                     taxGroupId = taxGroup,
+                    taxGroupN = taxGroupName,
                     statusText = result.Exception.Message,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()

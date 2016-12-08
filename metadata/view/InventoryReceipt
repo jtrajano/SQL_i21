@@ -1378,6 +1378,7 @@
                                                                 "displayField": "strTaxGroup",
                                                                 "enableDrillDown": true,
                                                                 "fieldLabel": "Tax Group",
+                                                                "hidden": true,
                                                                 "hideTrigger": null,
                                                                 "itemId": "cboTaxGroup",
                                                                 "labelWidth": 95,
@@ -2675,6 +2676,78 @@
                                                                             "group": "(Custom Properties)",
                                                                             "name": "dataType",
                                                                             "type": "string"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "strTaxGroup",
+                                                                        "itemId": "colItemTaxGroup",
+                                                                        "text": "Tax Group"
+                                                                    },
+                                                                    "name": "MyColumn49",
+                                                                    "designerId": "1614627a-7a58-409e-8aa6-a3e81ec46857",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "allowEmpty": true,
+                                                                                "columns": [
+                                                                                    "[",
+                                                                                    "{",
+                                                                                    "dataIndex: 'intTaxGroupId',",
+                                                                                    "dataType: 'numeric',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strTaxGroup',",
+                                                                                    "dataType: 'string',",
+                                                                                    "text: 'Tax Group',",
+                                                                                    "flex: 1",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strDescription',",
+                                                                                    "dataType: 'string',",
+                                                                                    "text: 'Description',",
+                                                                                    "flex: 1",
+                                                                                    "}",
+                                                                                    "]"
+                                                                                ],
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strTaxGroup",
+                                                                                "itemId": "cboItemTaxGroup",
+                                                                                "valueField": "strTaxGroup"
+                                                                            },
+                                                                            "name": "MyComboBox14",
+                                                                            "configAlternates": {
+                                                                                "enableDrillDown": "boolean",
+                                                                                "columns": "array",
+                                                                                "allowEmpty": "boolean"
+                                                                            },
+                                                                            "designerId": "c9f3cb62-a30c-492b-b540-958120e96f2b",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "columns",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "allowEmpty",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -5420,6 +5493,70 @@
                                                     },
                                                     "name": "MyCheckboxSelectionModel12",
                                                     "designerId": "e87981ce-4c10-408f-86a5-0ad0052c0bb2"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Column",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "dataIndex": "strTaxGroup",
+                                                        "itemId": "colChargeTaxGroup",
+                                                        "text": "Tax Group"
+                                                    },
+                                                    "name": "MyColumn52",
+                                                    "designerId": "24351ab0-a4bd-4321-adb9-115eb6957926",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "{",
+                                                                    "dataIndex: 'intTaxGroupId',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'strTaxGroup',",
+                                                                    "dataType: 'string',",
+                                                                    "text: 'Tax Group',",
+                                                                    "flex: 1",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'strDescription',",
+                                                                    "dataType: 'string',",
+                                                                    "text: 'Description',",
+                                                                    "flex: 1",
+                                                                    "}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strTaxGroup",
+                                                                "itemId": "cboChargeTaxGroup",
+                                                                "valueField": "strTaxGroup"
+                                                            },
+                                                            "name": "MyComboBox24",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "398fde24-ff79-4931-ab26-04c957b7477a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.column.Number",
