@@ -93,6 +93,7 @@
 
 -- RPT
 :r .\10_RPT\1_1430_to_1430.sql
+:r .\10_RPT\2_InvalidArchiveReport.sql
 
 -- IC
 :r .\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql
