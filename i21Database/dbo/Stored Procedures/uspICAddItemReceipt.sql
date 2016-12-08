@@ -732,7 +732,7 @@ BEGIN
 						,[strTaxCode]					= [strTaxCode]
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
-				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId)
+				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0)
 
 			-- Removed this part as taxes are already computed in fnGetItemTaxComputationForVendor
 			  /*	--Compute the tax
