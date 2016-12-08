@@ -4782,4 +4782,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\Reports\5_DeleteInvalidReports.sql" />
+  </ItemGroup>
 </Project>

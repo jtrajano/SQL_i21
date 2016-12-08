@@ -165,7 +165,6 @@
     <None Include="Scripts\Pre-Deployment\4_SM\6_TicketManagement.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\7_CRM.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\8_TransactionManagement.sql" />
-    <None Include="Scripts\Pre-Deployment\10_RPT\2_InvalidArchiveReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />

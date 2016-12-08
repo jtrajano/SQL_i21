@@ -49,6 +49,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\Reports\2_ReportDeleteOldData.sql
 :r .\Reports\3_ReportEnableConstraints.sql
 :r .\Reports\4_ReportData.sql
+:r .\Reports\5_DeleteInvalidReports.sql
 :r .\Reports\Pxcyctag.sql
 
 -- Tank Management
