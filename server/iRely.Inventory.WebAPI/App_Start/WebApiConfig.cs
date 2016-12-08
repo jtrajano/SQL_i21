@@ -1,4 +1,5 @@
 ﻿using iRely.Common;
+using iRely.Inventory.WebApi.Controllers;
 using System.Web.Http;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ModelBinding.Binders;

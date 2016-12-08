@@ -33,7 +33,7 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
             ],
             showNew: false,
             showOpenSelected: false,
-            enableDblClick: false
+            enableDblClick: false,
             // TODO:
             // Add button allows the user to pick the UOM to display per item. See IC-2421 for more info.
             // The mentioned about showing it in stock unit. However, we will need to adjust the inventory valuation
@@ -48,6 +48,17 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
             //         width: 80
             //     }
             // ]
+
+            buttons: [
+                {
+                    text: 'Rebuild',
+                    itemId: 'btnRepost',
+                    clickHandler: function(e) {
+                        iRely.Functions.openScreen('Inventory.view.RepostInventory', { action: 'new', viewConfig: { modal: true }});
+                    },
+                    width: 80
+                }
+            ],
         }
     },
 
