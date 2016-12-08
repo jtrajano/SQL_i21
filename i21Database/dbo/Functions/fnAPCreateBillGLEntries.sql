@@ -129,7 +129,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	C.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	B.dblAmountApplied,
+		[dblCredit]						=	CAST(B.dblAmountApplied / CASE WHEN Rate.dblRate > 0 AND 3 != A.intCurrencyId THEN Rate.dblRate ELSE 1 END AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	C.strReference,
@@ -164,6 +164,10 @@ BEGIN
 	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
 	LEFT JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityVendorId
+	CROSS APPLY
+	(
+		SELECT TOP 1 dblRate FROM dbo.tblAPBillDetail A WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	) Rate
 	WHERE B.dblAmountApplied <> 0
 	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	--DEBIT
