@@ -4596,6 +4596,7 @@
     <Build Include="dbo\Views\vyuCTPriceContractFixation.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPriceContractSave.sql" />
+    <Build Include="dbo\Tables\tblSMLicenseType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

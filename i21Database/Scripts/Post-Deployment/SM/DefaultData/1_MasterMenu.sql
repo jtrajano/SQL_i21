@@ -390,14 +390,20 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'License G
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.License', intSort = 14 WHERE strMenuName = 'License Generator' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'License Types' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'License Types', N'System Manager', @SystemManagerParentMenuId, N'License Types', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.LicenseType', N'small-menu-maintenance', 0, 0, 0, 1, 15, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.LicenseType', intSort = 15 WHERE strMenuName = 'License Types' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Screen Designer' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Screen Designer', N'System Manager', @SystemManagerParentMenuId, N'Screen Designer', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.ScreenDesigner', N'small-menu-maintenance', 0, 0, 0, 1, 15, 1)
+	VALUES (N'Screen Designer', N'System Manager', @SystemManagerParentMenuId, N'Screen Designer', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.ScreenDesigner', N'small-menu-maintenance', 0, 0, 0, 1, 16, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.ScreenDesigner', intSort = 15 WHERE strMenuName = 'Screen Designer' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.ScreenDesigner', intSort = 16 WHERE strMenuName = 'Screen Designer' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Utilities' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = N'', intSort = 16 WHERE strMenuName = N'Utilities' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+UPDATE tblSMMasterMenu SET strCommand = N'', intSort = 17 WHERE strMenuName = N'Utilities' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 
 DECLARE @UtilitiesParentMenuId INT
 SELECT @UtilitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
@@ -415,16 +421,13 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Announcement
 UPDATE tblSMMasterMenu SET strModuleName = 'System Manager' WHERE strMenuName = N'Announcement Types' AND strModuleName = N'Help Desk'
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Maintenance' AND strModuleName = N'Help Desk' AND strDescription = 'Announcement Maintenance')
 UPDATE tblSMMasterMenu SET strModuleName = 'System Manager' WHERE strMenuName = N'Maintenance' AND strModuleName = N'Help Desk' AND strDescription = 'Announcement Maintenance'
-
 /* End of Remodule*/
 
-/* Start File Download Screen */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'File Downloads' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'File Downloads', N'System Manager', @UtilitiesParentMenuId, N'File Downloads', N'Maintenance', N'Screen', N'i21.view.FileDownloads', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.FileDownloads' WHERE strMenuName = 'File Downloads' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
-/* End File Download Screen*/
 
 /* Start Move */
 DECLARE @CommonInfoMenuId INT
