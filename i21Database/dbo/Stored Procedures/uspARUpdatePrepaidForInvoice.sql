@@ -100,6 +100,7 @@ BEGIN TRY
 		,[dblAppliedInvoiceDetailAmount]
 		,[ysnApplied]
 		,[ysnPosted]
+		,[intRowNumber]
 		,[intConcurrencyId])
 	SELECT DISTINCT
 		 [intInvoiceId]						= @InvoiceId
@@ -112,7 +113,9 @@ BEGIN TRY
 		,[dblAppliedInvoiceDetailAmount]	= @ZeroDecimal
 		,[ysnApplied]						= 0
 		,[ysnPosted]						= 0
+		,[intRowNumber]						= ROW_NUMBER() OVER(ORDER BY ARPAC.intInvoiceId ASC)
 		,[intConcurrencyId]					= 1
+		
 	FROM
 		vyuARPrepaidAndCredit ARPAC
 	WHERE
