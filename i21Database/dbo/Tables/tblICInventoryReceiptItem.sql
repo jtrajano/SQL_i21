@@ -43,8 +43,8 @@ Type the overview for the table here.
 		[dtmExportedDate] DATETIME NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
-		[strComments] CHAR(50) NULL, 
-		[intPaymentOn] INT NULL
+		[strComments] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[intTaxGroupId] INT NULL,
     CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
@@ -55,7 +55,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItem_CostUOM] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblGRDiscountId] FOREIGN KEY ([intDiscountSchedule]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
 		--CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
-		CONSTRAINT [Check_AllowOnlyWeightOrVolumeTypeOnGrossNetUOM] CHECK (dbo.fnICIsShrinkableUOM(intWeightUOMId) = 1)
+		CONSTRAINT [Check_AllowOnlyWeightOrVolumeTypeOnGrossNetUOM] CHECK (dbo.fnICIsShrinkableUOM(intWeightUOMId) = 1),
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId])
 	)
 	GO
 
