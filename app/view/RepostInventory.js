@@ -25,13 +25,14 @@ Ext.define('Inventory.view.RepostInventory', {
         'Ext.form.field.Display'
     ],
 
-    height: 197,
+    height: 219,
     hidden: false,
     margin: '',
-    resizable: false,
-    width: 483,
+    maxHeight: 225,
+    width: 554,
     layout: 'fit',
     title: 'Repost Inventory',
+    titleCollapse: false,
     modal: true,
 
     dockedItems: [
@@ -149,7 +150,7 @@ Ext.define('Inventory.view.RepostInventory', {
                                     reference: 'item',
                                     itemId: 'cboItem',
                                     fieldLabel: 'Item (optional)',
-                                    displayField: 'strItemNo',
+                                    displayField: 'strDescription',
                                     valueField: 'strItemNo'
                                 },
                                 {

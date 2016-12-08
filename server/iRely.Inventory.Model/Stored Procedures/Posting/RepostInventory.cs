@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
             this.Database.CommandTimeout = 120000;
             return await this.Database.ExecuteSqlCommandAsync(
                 "dbo.uspICRebuildInventoryValuation @dtmStartDate, @strItemNo, @isPeriodic, @ysnRegenerateBillGLEntries",
-                new SqlParameter("@dtmStartDate", startDate,
+                new SqlParameter("@dtmStartDate", startDate),
                 paramStrNo,
                 new SqlParameter("@isPeriodic", isPeriodic),
                 new SqlParameter("@ysnRegenerateBillGLEntries", generateBillGLEntries)

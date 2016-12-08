@@ -2,7 +2,7 @@ Ext.define('Inventory.view.RepostInventoryViewModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.icrepostinventory',
     requires: [
-        'Inventory.store.BufferedItemStockDetailView',
+        'Inventory.store.Item',
     ],
 
     stores: {
@@ -18,7 +18,7 @@ Ext.define('Inventory.view.RepostInventoryViewModel', {
             ]
         },
         items: {
-            type: 'icbuffereditemstockdetailview'
+            type: 'icitem'
         },
         fiscalMonths: {
             data: [

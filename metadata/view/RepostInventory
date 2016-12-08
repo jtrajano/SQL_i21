@@ -9,16 +9,17 @@
         "bodyPadding": null,
         "designer|userAlias": "icrepostinventory",
         "designer|userClassName": "RepostInventory",
-        "height": 197,
+        "height": 219,
         "hidden": false,
         "layout": "fit",
         "margin": "",
+        "maxHeight": 225,
         "modal": true,
         "padding": null,
         "reference": null,
-        "resizable": false,
         "title": "Repost Inventory",
-        "width": 483
+        "titleCollapse": false,
+        "width": 554
     },
     "name": "MyWindow",
     "configAlternates": {
@@ -251,7 +252,7 @@
                                             "}]"
                                         ],
                                         "designer|createAlias": "gridcombobox",
-                                        "displayField": "strItemNo",
+                                        "displayField": "strDescription",
                                         "fieldLabel": "Item (optional)",
                                         "itemId": "cboItem",
                                         "layout|anchor": "100%",

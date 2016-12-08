@@ -68,7 +68,7 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
         var jsondata = {
             dtmStartDate: combo.rawValue,
             strItemNo: vm.data.current.data.strItemNo,
-            strPostOrder: vm.data.current.data.strPostOrder === 'Periodic'
+            isPeriodic: vm.data.current.data.strPostOrder === 'Periodic'
         };
         jQuery.ajax({
             url: '../Inventory/api/InventoryValuation/RepostInventory',
@@ -83,7 +83,10 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
                 iRely.Msg.showWait('Reposting inventory...');
             },
             success: function (data, status, jqXHR) {
-                console.log(data);
+                if(data.success)
+                    iRely.Functions.showInfoDialog(data.message);
+                else
+                    iRely.Functions.showErrorDialog(data.message);
                 iRely.Msg.close();
             },
             error: function (jqXHR, status, error) {
