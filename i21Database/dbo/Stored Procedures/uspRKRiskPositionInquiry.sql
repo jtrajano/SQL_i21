@@ -4,7 +4,9 @@
         @intFutureMarketId INTEGER,  
         @intFutureMonthId INTEGER,  
         @intUOMId INTEGER,  
-        @intDecimal INTEGER   
+        @intDecimal INTEGER,
+		@intForecastWeeklyConsumption INTEGER = null,
+		@intForecastWeeklyConsumptionUOMId INTEGER = null   
 AS  
   
 DECLARE @strUnitMeasure nvarchar(50)  
@@ -17,12 +19,14 @@ DECLARE @strFutureMonth  nvarchar(15)
 SELECT @dblContractSize= convert(int,dblContractSize) FROM tblRKFutureMarket WHERE intFutureMarketId=@intFutureMarketId  
 SELECT TOP 1 @dtmFutureMonthsDate=dtmFutureMonthsDate FROM tblRKFuturesMonth WHERE intFutureMonthId=@intFutureMonthId  
 
-
 SELECT top 1 @strUnitMeasure= strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId=@intUOMId  
 select @intUOMId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId and intUnitMeasureId=@intUOMId  
 SELECT @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge FROM tblRKCompanyPreference  
-SELECT @strRiskView = strRiskView FROM tblRKCompanyPreference  
-  
+SELECT @strRiskView = strRiskView FROM tblRKCompanyPreference 
+
+select @intForecastWeeklyConsumptionUOMId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId and intUnitMeasureId=@intForecastWeeklyConsumptionUOMId  
+select @intForecastWeeklyConsumption=isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intUOMId,@intForecastWeeklyConsumptionUOMId,@intForecastWeeklyConsumption),1)
+
 DECLARE @List as Table (  
      intRowNumber int identity(1,1),  
      Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
@@ -83,13 +87,12 @@ end) as dblNoOfContract,
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
    cv.intContractHeaderId,null as intFutOptTransactionHeaderId    
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
-     JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
+  JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
   JOIN tblICItem ic on ic.intItemId=cv.intItemId and cv.intItemId not in(select intItemId from tblICItem ici    
-       JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId   
-       AND ici.intProductLineId=pl.intCommodityProductLineId)   
+  JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId AND ici.intProductLineId=pl.intCommodityProductLineId)   
   LEFT JOIN tblARProductType pt on pt.intProductTypeId=ic.intProductTypeId    
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId and um.intUnitMeasureId=cv.intUnitMeasureId  
@@ -589,6 +592,13 @@ FROM(
        GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
        )t 
 GROUP BY Selection,PriceStatus,strAccountNumber,strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
+
+-----Outright coverage (Weeks) ------------
+INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
+SELECT CASE WHEN @strRiskView='Processor' THEN 'Outright coverage(Weeks)' ELSE 'Net market risk(Weeks)' END AS Selection,'Net market risk(Weeks)' as PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract)/@intForecastWeeklyConsumption,strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
+		,intContractHeaderId,intFutOptTransactionHeaderId FROM @List 
+WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
+GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
 --- Switch Position ---------
 INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract),strTradeNo,TransactionDate,TranType,CustVendor,(dblNoOfLot), (dblQuantity),intContractHeaderId,intFutOptTransactionHeaderId  
@@ -617,7 +627,8 @@ SELECT TOP 1 @strFutureMonth=strFutureMonth FROM @List where  strFutureMonth<>'P
 
 update @List set strFutureMonth=@strFutureMonth where Selection='Switch position' and strFutureMonth='Previous'
 update @List set strFutureMonth=@strFutureMonth where Selection=case when @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END and strFutureMonth='Previous'
-  
+update @List set strFutureMonth=@strFutureMonth where Selection=case when @strRiskView='Processor' THEN 'Outright coverage(Weeks)' ELSE 'Net market risk(Weeks)' END and strFutureMonth='Previous'
+
  IF NOT EXISTS ( SELECT *
        FROM tblRKFutOptTransaction ft  
        JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
@@ -640,6 +651,7 @@ update @List set intOrderByHeading=6 WHERE Selection = 'Delta options'
 update @List set intOrderByHeading=7 WHERE Selection = 'F&O'
 update @List set intOrderByHeading=8 WHERE Selection like ('%Total F&O(b. in%')
 update @List set intOrderByHeading=9 WHERE Selection in('Outright coverage','Net market risk')
+update @List set intOrderByHeading=9 WHERE Selection in('Outright coverage(Weeks)','Net market risk(Weeks)')
 update @List set intOrderByHeading=10 WHERE Selection in('Switch position','Futures required')
 
 SELECT intRowNumber,Selection,PriceStatus,strFutureMonth,strAccountNumber,  

@@ -4,7 +4,9 @@
  ,@intFutureMarketId INTEGER
  ,@intFutureMonthId INTEGER
  ,@intUOMId INTEGER
- ,@intDecimal INTEGER
+ ,@intDecimal INTEGER,
+ @intForecastWeeklyConsumption INTEGER = null,
+ @intForecastWeeklyConsumptionUOMId INTEGER = null   
 AS
 DECLARE @tblFinalDetail TABLE (
  intRowNumber INT
@@ -31,7 +33,8 @@ EXEC uspRKRiskPositionInquiry @intCommodityId = @intCommodityId
  ,@intFutureMonthId = @intFutureMonthId
  ,@intUOMId = @intUOMId
  ,@intDecimal = @intDecimal
-
+ ,@intForecastWeeklyConsumption=@intForecastWeeklyConsumption
+ ,@intForecastWeeklyConsumptionUOMId=@intForecastWeeklyConsumptionUOMId
 DECLARE @tblMonthFinal TABLE (
  intRowNum INT identity(1, 1)
  ,strFutureMonth NVARCHAR(500) COLLATE Latin1_General_CI_AS
