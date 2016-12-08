@@ -26,6 +26,7 @@ SELECT DISTINCT SSH.intStockSalesHeaderId
 	  ,(SELECT TOP 1 intFutureMarketId FROM tblCTContractDetail D WHERE D.intContractDetailId = CD.intContractDetailId) AS intFutureMarketId
 	  ,(SELECT TOP 1 intFutureMonthId FROM tblCTContractDetail D WHERE D.intContractDetailId = CD.intContractDetailId) AS intFutureMonthId
 	  ,(SELECT TOP 1 strFixationBy FROM tblCTContractDetail D WHERE D.intContractDetailId = CD.intContractDetailId) AS strFixationBy
+	  ,(SELECT TOP 1 dblCashPrice FROM tblCTContractDetail D WHERE D.intContractDetailId = CD.intContractDetailId) AS dblCashPrice
 	  ,CH.ysnMultiplePriceFixation
 	  ,CH.strPrintableRemarks
 	  ,(SELECT TOP 1 strCurrency FROM tblSMCurrency C WHERE C.intCurrencyID = CD.intCurrencyId) AS strCurrency
