@@ -4597,6 +4597,7 @@
     <Build Include="dbo\Views\vyuCTPriceContractFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPriceContractSave.sql" />
     <Build Include="dbo\Tables\tblSMLicenseType.sql" />
+    <Build Include="dbo\Functions\fnEMGetEntityAreaOfInterest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

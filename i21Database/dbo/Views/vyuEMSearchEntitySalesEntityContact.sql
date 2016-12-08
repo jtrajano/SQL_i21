@@ -15,8 +15,28 @@ select
 			case when Competitor = 1 then 'Competitor, ' else '' end +
 			case when [Partner] = 1 then 'Partner, ' else '' end +
 			case when Prospect = 1 then 'Prospect, ' else '' end,
-		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC)
-
+		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC),
+		
+		
+		g.strSuffix,
+		g.strTitle,
+		g.strNickName,
+		strMobile = i.strPhone,
+		j.strLocationName,
+		j.strAddress,
+		j.strCity,
+		j.strState,
+		j.strZipCode,
+		j.strCountry,
+		j.strTimezone,
+		g.strContactMethod,
+		f.ysnPortalAccess,
+		
+		strEntityAssociation = l.strName,
+		strContactLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(g.intEntityId),
+		strContactAreaOfInterest = dbo.fnEMGetEntityAreaOfInterest(g.intEntityId),
+		k.ysnOutOfAdvertising,
+		k.dtmOutDate
     FROM         
             tblEMEntity a
         join vyuEMEntityType b
@@ -27,5 +47,13 @@ select
             on f.intEntityContactId = g.intEntityId
 		left join tblEMEntityPhoneNumber h
 			on h.intEntityId = g.intEntityId
+		left join tblEMEntityMobileNumber i
+			on i.intEntityId = g.intEntityId
+		left join tblEMEntityLocation j
+			on f.intEntityLocationId = j.intEntityLocationId
+		left join tblEMEntityCRMInformation k
+			on g.intEntityId = k.intEntityId
+		left join tblEMEntity l
+			on k.intEntityId = l.intEntityId
 
 	where Vendor = 1 or Customer = 1 or Competitor = 1 or [Partner] = 1 or Prospect = 1
