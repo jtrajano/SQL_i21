@@ -4603,6 +4603,7 @@
     <Build Include="dbo\Stored Procedures\uspARGetItemAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateReservedStock.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityLob.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateContainerLinkInSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
