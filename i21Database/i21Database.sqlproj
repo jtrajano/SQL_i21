@@ -4598,6 +4598,8 @@
     <Build Include="dbo\Stored Procedures\uspCTPriceContractSave.sql" />
     <Build Include="dbo\Tables\tblSMLicenseType.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityAreaOfInterest.sql" />
+    <Build Include="dbo\Views\vyuPATAdjustmentVolumeDetail.sql" />
+    <Build Include="dbo\Views\vyuPATCustomerVolumeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
