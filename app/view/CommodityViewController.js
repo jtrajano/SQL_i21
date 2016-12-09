@@ -43,8 +43,14 @@ Ext.define('Inventory.view.CommodityViewController', {
                 readOnly: '{!current.ysnExchangeTraded}'
             },
             txtDecimalsOnDpr: '{current.intDecimalDPR}',
-            txtConsolidateFactor: '{current.dblConsolidateFactor}',
-            chkFxExposure: '{current.ysnFXExposure}',
+            txtConsolidateFactor: {
+                value: '{current.dblConsolidateFactor}',
+                hidden: true //obsolete
+            },
+            chkFxExposure: {
+                value: '{current.ysnFXExposure}',
+                hidden: true //obsolete
+            },
             txtPriceChecksMin: '{current.dblPriceCheckMin}',
             txtPriceChecksMax: '{current.dblPriceCheckMax}',
             txtCheckoffTaxDesc: '{current.strCheckoffTaxDesc}',
