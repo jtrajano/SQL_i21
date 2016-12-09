@@ -2,6 +2,7 @@
 	AS
 WITH Refunds AS(
 SELECT	R.intRefundId,
+		R.strRefundNo,
 		R.intFiscalYearId,
 		RC.intRefundTypeId,
 		RC.intCustomerId,
@@ -50,6 +51,7 @@ LEFT OUTER JOIN tblARCustomer C
 LEFT OUTER JOIN tblAPVendor APV
 	ON APV.intEntityVendorId = RC.intCustomerId
 GROUP BY R.intRefundId,
+		R.strRefundNo,
 		R.intFiscalYearId,
 		RC.intCustomerId,
 		RC.ysnEligibleRefund,
@@ -66,6 +68,7 @@ GROUP BY R.intRefundId,
         R.intConcurrencyId
 )
 SELECT	intRefundId,
+		strRefundNo,
 		intFiscalYearId,
 		strFiscalYear,
 		dblTotalPurchases = SUM(dblTotalPurchases),
@@ -87,6 +90,7 @@ SELECT	intRefundId,
 		intConcurrencyId
 FROM Refunds
 GROUP BY	intRefundId,
+			strRefundNo,
 			intFiscalYearId,
 			strFiscalYear,
 			dtmRefundDate,
