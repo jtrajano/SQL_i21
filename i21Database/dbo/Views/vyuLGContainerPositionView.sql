@@ -23,7 +23,7 @@ SELECT * FROM (
 		,dblSeqQuantity = SUM(CD.dblQuantity)
 		,dblContractQuantity = CH.dblQuantity
 		,strQuantityUOM = MAX(UM.strUnitMeasure)
-		,dblWeight = ISNULL(dbo.fnCalculateQtyBetweenUOM(CD.intNetWeightUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), CD.dblNetWeight), 0)
+		,dblWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), CD.dblQuantity), 0))
 		,dblShippedWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(LoadDetail.intWeightItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), LoadDetail.dblNet), 0))
 		,intNoOfContainers = COUNT(CD.intContractDetailId)
 		,intNoOfApprovals = ISNULL(Samp.intApprovalCount, 0)
@@ -93,4 +93,4 @@ SELECT * FROM (
 		,U2.strUnitMeasure,CU.strCurrency,CH.dblQuantity,UM.strUnitMeasure,CD.intNetWeightUOMId
 		,CD.dblNetWeight,Samp.intApprovalCount,RSamp.intApprovalCount,CH.strInternalComment,CD.dtmEndDate
 	) tbl
-WHERE intTrucksRemaining > 0
+WHERE intTrucksRemaining > 0 
