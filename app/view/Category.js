@@ -626,7 +626,7 @@ Ext.define('Inventory.view.Category', {
                                     {
                                         xtype: 'panel',
                                         layout: 'fit',
-                                        title: 'Locations',
+                                        title: 'Point of Sale',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgLocations'
