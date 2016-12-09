@@ -5488,7 +5488,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "allowDeselect": true,
+                                                        "allowDeselect": null,
                                                         "mode": "SINGLE"
                                                     },
                                                     "name": "MyCheckboxSelectionModel12",

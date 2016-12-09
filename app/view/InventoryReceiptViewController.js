@@ -902,6 +902,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colChargeTaxGroup: {
                     dataIndex: 'strTaxGroup',
                     editor: {
+                        readOnly: '{readyOnlyChargeTaxGroup}',
                         origValueField: 'intTaxGroupId',
                         origUpdateField: 'intTaxGroupId',
                         store: '{taxGroup}',

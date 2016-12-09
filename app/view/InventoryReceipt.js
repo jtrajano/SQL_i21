@@ -2617,7 +2617,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         ],
                                                         selModel: {
                                                             selType: 'checkboxmodel',
-                                                            allowDeselect: true,
                                                             mode: 'SINGLE'
                                                         }
                                                     },
