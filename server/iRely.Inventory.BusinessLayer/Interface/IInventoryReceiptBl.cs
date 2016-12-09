@@ -21,7 +21,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType, int CurrencyId);
         Task<SearchResult> GetReceiptVouchers(GetParameter param);
         SaveResult UpdateReceiptInspection(int receiptId);
-        SaveResult GetTaxGroupId(int receiptId, out int? taxGroup);
+        SaveResult GetTaxGroupId(int receiptId, out int? taxGroup, out string taxGroupName);
         Task<SearchResult> GetChargeTaxDetails(GetParameter param, int ChargeId, int ReceiptId);
         SaveResult GetStatusUnitCost(int receiptId, out int? newStatus);
     }

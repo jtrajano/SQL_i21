@@ -709,10 +709,11 @@ namespace iRely.Inventory.BusinessLayer
             return saveResult;
         }
 
-        public SaveResult GetTaxGroupId(int receiptId, out int? taxGroup)
+        public SaveResult GetTaxGroupId(int receiptId, out int? taxGroup, out string taxGroupName)
         {
             SaveResult saveResult = new SaveResult();
             int? newTaxGroupId = null;
+            string newTaxGroupName = null;
 
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
@@ -724,8 +725,15 @@ namespace iRely.Inventory.BusinessLayer
                     outParam.Direction = System.Data.ParameterDirection.Output;
                     outParam.DbType = System.Data.DbType.Int32;
                     outParam.SqlDbType = System.Data.SqlDbType.Int;
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspICGetTaxGroupIdOnInventoryReceipt @ReceiptId, @intTaxGroupId OUTPUT", idParameter, outParam);
+                    var outParam2 = new SqlParameter("@strTaxGroup", newTaxGroupName);
+                    outParam2.Direction = System.Data.ParameterDirection.Output;
+                    outParam2.DbType = System.Data.DbType.String;
+                    outParam2.SqlDbType = System.Data.SqlDbType.NVarChar;
+                    outParam2.Size = 50;
+
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICGetTaxGroupIdOnInventoryReceipt @ReceiptId, @intTaxGroupId OUTPUT, @strTaxGroup OUTPUT", idParameter, outParam, outParam2);
                     newTaxGroupId = (int)outParam.Value;
+                    newTaxGroupName = (string)outParam2.Value;
                     saveResult = _db.Save(false);
                     transaction.Commit();
                 }
@@ -737,6 +745,7 @@ namespace iRely.Inventory.BusinessLayer
                 }
             }
             taxGroup = newTaxGroupId;
+            taxGroupName = newTaxGroupName;
             return saveResult;
         }
 

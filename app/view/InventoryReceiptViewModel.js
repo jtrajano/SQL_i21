@@ -809,6 +809,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
            else {
                return false;
            }
+       },
+       readyOnlyChargeTaxGroup: function(get) {
+           if(get('grdCharges.selection.intEntityVendorId') == null || (get('grdCharges.selection.intEntityVendorId') == get('current.intEntityVendorId'))) {
+              return false;
+            }
+           else {
+                return true;
+           }
        }
     }
 });
