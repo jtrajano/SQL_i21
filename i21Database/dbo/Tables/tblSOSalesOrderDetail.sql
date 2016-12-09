@@ -65,5 +65,5 @@
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [dbo].[tblGRStorageType] ([intStorageScheduleTypeId]),
-	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
 );
