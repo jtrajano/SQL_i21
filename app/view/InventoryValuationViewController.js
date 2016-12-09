@@ -62,6 +62,15 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
         }
     },
 
+    init: function(cfg) {
+        var task = new Ext.util.DelayedTask(function () {
+            var btnRepost = Ext.ComponentQuery.query("#btnRepost")[0];
+            if(btnRepost)
+                btnRepost.setVisible(iRely.Configuration.Security.IsAdmin);
+        });
+        task.delay(500);
+    },
+
     show: function(config){
         var me = this,
             win = this.getView();
