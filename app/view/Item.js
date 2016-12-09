@@ -42,7 +42,7 @@ Ext.define('Inventory.view.Item', {
 
     height: 650,
     hidden: false,
-    width: 950,
+    width: 935,
     layout: 'fit',
     collapsible: true,
     title: 'Inventory Items',
@@ -432,7 +432,7 @@ Ext.define('Inventory.view.Item', {
                                                 itemId: 'grdUnitOfMeasure',
                                                 title: 'Unit of Measure',
                                                 columnLines: true,
-                                                forceFit: true,
+                                                forceFit: false,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -1458,7 +1458,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'txtMaintenanceCalculationMethod',
+                                                                        itemId: 'cboMaintenanceCalculationMethod',
                                                                         fieldLabel: 'Maintenance Calculation Method',
                                                                         labelWidth: 125,
                                                                         displayField: 'strDescription',
@@ -3376,7 +3376,7 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intVendorId',
+                                                                                    dataIndex: 'intEntityVendorId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Vendor Id',
                                                                                     hidden: true
@@ -4110,7 +4110,8 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 0.8,
                                                         format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            itemId: 'txtStandardCost'
                                                         }
                                                     },
                                                     {

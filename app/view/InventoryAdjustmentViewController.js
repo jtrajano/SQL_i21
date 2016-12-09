@@ -1,5 +1,5 @@
 Ext.define('Inventory.view.InventoryAdjustmentViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventoryadjustment',
     requires: [
         'CashManagement.common.Text',
@@ -309,12 +309,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
                             },
-                            {
+                           /* {
                                 column: 'intLocationId',
                                 value: '',
                                 conjunction: 'or',
                                 condition: 'blk'
-                            },
+                            },*/
                             {
                                 column: 'intItemId',
                                 value: '{grdInventoryAdjustment.selection.intItemId}',
@@ -513,9 +513,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     },
 
     setupContext: function (options) {
+        "use strict";
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 });
+            store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 }),
+            grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
@@ -524,6 +526,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             include: 'tblICInventoryAdjustmentDetails.vyuICGetInventoryAdjustmentDetail',
+            onSaveClick: me.saveAndPokeGrid(win, grdInventoryAdjustment),
             createRecord: me.createRecord,
             validateRecord: me.validateRecord,
             binding: me.config.binding,
@@ -535,7 +538,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 {
                     key: 'tblICInventoryAdjustmentDetails',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdInventoryAdjustment'),
+                        grid: grdInventoryAdjustment,
                         deleteButton: win.down('#btnRemoveItem')
                     })
                 }
@@ -600,33 +603,63 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     validateRecord: function (config, action) {
         var win = config.window;
         this.validateRecord(config, function (result) {
-            var lineItems = config.viewModel.data.current.tblICInventoryAdjustmentDetails();
-            var zeroCost = false;
-            zeroCost = Ext.Array.each(lineItems.data.items, function (detail) {
-                if (!detail.dummy) {
-                    var hasModification = !_.isUndefined(detail.modified);
-                    var defined =  hasModification && !_.isUndefined(detail.modified.dblNewCost);
-                    var notNull = hasModification && !_.isNull(detail.modified.dblNewCost);
-                    var checkCost = defined && notNull;
+           if (result) {
+                var controller = config.window.controller;
+                var vm = config.window.viewModel;
+                var current = vm.data.current;
+                var win = config.window;
+                var colNewUnitCost = win.down('#colNewUnitCost');
 
-                    if (detail.get('dblNewCost') <= 0 && (checkCost &&  (detail.modified.dblNewCost !== detail.get('dblNewCost')))) {
-                        return true;
+                if(current) {
+                    var lineItems = config.viewModel.data.current.tblICInventoryAdjustmentDetails();
+
+                    var lotIds = [];
+                    _.each(lineItems.data.items, function (value, key, list) {
+                        if(!value.dummy)
+                            lotIds.push(value.data.intLotId);
+                    });
+                    if(_.size(lotIds) !== _.size(_.uniq(lotIds))) {
+                        iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
+                        return;
                     }
+
+                    var zeroCost = false;
+                        zeroCost = Ext.Array.each(lineItems.data.items, function (detail) {
+                            if (!detail.dummy) {
+                                if(!iRely.Functions.isEmpty(detail.get('dblNewCost')) || detail.modified.dblNewCost !== null) {
+                                   /* var hasModification = !_.isUndefined(detail.modified);
+                                    var defined =  hasModification && !_.isUndefined(detail.modified.dblNewCost);
+                                    var notNull = hasModification && !_.isNull(detail.modified.dblNewCost);
+                                    var checkCost = defined && notNull;
+
+                                    if (detail.get('dblNewCost') <= 0 && (checkCost &&  (detail.modified.dblNewCost !== detail.get('dblNewCost')))) {
+                                        return true;
+                                    }*/
+
+                                    if(detail.get('dblNewCost') == 0) {
+                                        return true;
+                                    }
+                                }
+                            }
+                            return false;
+                        });
+
+                        if (zeroCost && colNewUnitCost.hidden == false) {
+                            var msgAction = function (button) {
+                                if (button === 'yes') {
+                                    action(true);
+                                }
+                                else action(false);
+                            };
+                            iRely.Functions.showCustomDialog('question', 'yesnocancel', 'One of your line items has a zero (0) New Unit Cost.<br>Are you sure you want to set your new unit cost to zero(0)?', msgAction);
+                        }
+                        else {
+                            action(true);
+                        }
                 }
-                return false;
-            });
-
-            if (zeroCost) {
-                var msgAction = function (button) {
-                    if (button === 'yes') {
-                        action(true);
-                    }
-                    else action(false);
-                };
-                iRely.Functions.showCustomDialog('question', 'yesnocancel', 'One of your line items has a zero (0) New Unit Cost.<br>Are you sure you want to set your new unit cost to zero(0)?', msgAction);
-            }
-            else {
-                action(true);
+                else {
+                     action(true);
+                }
             }
         });
     },
@@ -850,6 +883,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
 
             current.set('dblNewQuantity', newQty);
+
+            //Set Sub and Storage Locations
+            current.set('intStorageLocationId', record.get('intStorageLocationId'));
+            current.set('strStorageLocation', record.get('strStorageLocationName'));
+            current.set('intSubLocationId', record.get('intStorageLocationId'));
+            current.set('strSubLocation', record.get('strSubLocationName'));
+
+            //Set Available Quantity Per UOm
+            current.set('dblQuantity', record.get('dblOnHand'));
         }
 
         else if (combo.itemId === 'cboNewWeightUOM') {
@@ -1378,6 +1420,32 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 cboLocation = win.down('#cboLocation'),
                 store = obj.combo.store;
 
+        if(newValue == null) {
+            current.set('intSubLocationId', null);
+            me.getStockQuantity(current, win);
+        }
+    },
+
+    onStorageLocationChange: function (obj, newValue, oldValue, eOpts) {
+        var me = this;
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        var win = obj.up('window');
+
+        if(newValue == null) {
+            current.set('intStorageLocationId', null);
+            me.getStockQuantity(current, win);
+        }
+    },
+
+    onItemNoBeforeQuery: function (obj) {
+        if (obj.combo) {
+            var win = obj.combo.up('window'),
+                cboAdjustmentType = win.down('#cboAdjustmentType'),
+                cboLocation = win.down('#cboLocation'),
+                store = obj.combo.store;
+
             if (store) {
                 store.remoteFilter = true;
                 store.remoteSort = true;
@@ -1421,13 +1489,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboStorageLocation": {
-                select: this.onAdjustmentDetailSelect
+                select: this.onAdjustmentDetailSelect,
+                change: this.onStorageLocationChange
             },
             "#cboLotNumber": {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboSubLocation": {
-                select: this.onAdjustmentDetailSelect
+                select: this.onAdjustmentDetailSelect,
+                change: this.onSubLocationChange
             },
             "#cboUOM": {
                 select: this.onAdjustmentDetailSelect,

@@ -1,7 +1,7 @@
 Ext.define('Inventory.view.ItemViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icitem',
-    
+
     config: {
         helpURL: '/display/DOC/Items',
         searchConfig: {
@@ -116,7 +116,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 {
                     title: 'Pricing',
                     api: {
-                        read: '../Inventory/api/ItemPricing/GetItemPricingViews'
+                        read: '../Inventory/api/ItemPricing/GetItemStockPricingViews'
                     },
                     columns: [
                         {dataIndex: 'intPricingKey', text: 'Pricing Key', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },
@@ -402,13 +402,13 @@ Ext.define('Inventory.view.ItemViewController', {
                             column: 'strAccountCategory',
                             value: 'Write-Off Sold',
                             conjunction: 'and',
-                            condition: 'noteq'    
+                            condition: 'noteq'
                         },
                         {
                             column: 'strAccountCategory',
                             value: 'Revalue Sold',
                             conjunction: 'and',
-                            condition: 'noteq'    
+                            condition: 'noteq'
                         }]
                     }
                 },
@@ -509,7 +509,7 @@ Ext.define('Inventory.view.ItemViewController', {
             txtUserGroupFee: '{current.dblUserGroupFee}',
             txtWgtTolerance: '{current.dblWeightTolerance}',
             txtOverReceiveTolerance: '{current.dblOverReceiveTolerance}',
-            txtMaintenanceCalculationMethod: {
+            cboMaintenanceCalculationMethod: {
                 value: '{current.strMaintenanceCalculationMethod}',
                 store: '{maintenancaCalculationMethods}'
             },
@@ -597,7 +597,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.intWeightUOMId}',
                 store: '{weightUOMs}',
                 defaultFilters: [
-                    { 
+                    {
                         name: 'intUnitMeasureId',
                         condition: 'eq',
                         value: 0
@@ -1210,11 +1210,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colOwnerDefault: 'ysnActive'
             },
-            
+
             //----------//
             //Others Tab//
             //----------//
-            
+
             txtInvoiceComments: '{current.strInvoiceComments}',
             txtPickListComments: '{current.strPickListComments}'
         }
@@ -1269,6 +1269,7 @@ Ext.define('Inventory.view.ItemViewController', {
             enableAudit: true,
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
+            onSaveClick: me.saveAndPokeGrid(win, grdUOM),
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -1470,7 +1471,7 @@ Ext.define('Inventory.view.ItemViewController', {
         colLocationLocation.renderer = function(value, opt, record) {
             return '<a style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration=\'none\'" onMouseOver="this.style.textDecoration=\'underline\'" href="javascript:void(0);">' + value + '</a>';
         };
-        
+
 
         var colStockOnOrder = grdStock.columns[2];
         colStockOnOrder.summaryRenderer = this.StockSummaryRenderer;
@@ -1577,9 +1578,34 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             }
         }
+
         this.validateRecord(config, function (result) {
             if (result) {
-                action(true);
+                var uomStore = config.viewModel.data.current.tblICItemUOMs();
+                
+                if(uomStore) {
+                    var uoms = uomStore.data.items;
+                    var cnt = false;
+                    for(var i = 0; i < uoms.length; i++) {
+                        var u = uoms[i];
+                        if (!u.dummy) {
+                            if (cnt > 1)
+                                break;
+                            if (u.data.dblUnitQty === 1) {
+                                cnt++;
+                            }
+                        }
+                    }
+                    if(cnt > 1) {
+                        var tabItem = win.down('#tabItem');
+                        tabItem.setActiveTab('pgeDetails');
+                        var grid = win.down('#grdUnitOfMeasure');
+                        iRely.Msg.showError('UOMs must not have the same Unit Qty.', Ext.MessageBox.OK, win);
+                        action(false);
+                    } else
+                        action(true);
+                } else
+                    action(true);
             }
             else {
                 var tabItem = win.down('#tabItem');
@@ -1854,7 +1880,7 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);
-            
+
             var itemStore = grid.store;
             var stockUnit = itemStore.findRecord('ysnStockUnit', true);
             if (stockUnit) {
@@ -1867,6 +1893,7 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
+        iRely.Msg.showWait('Converting units...');
         Ext.Ajax.request({
             timeout: 120000,
             url: '../Inventory/api/UnitMeasure/Search',
@@ -1882,28 +1909,30 @@ Ext.define('Inventory.view.ItemViewController', {
                         callback(dblConversionToStock);
                     }
                 }
+                iRely.Msg.close();
             },
             failure: function (response) {
                 var jsonData = Ext.decode(response.responseText);
+                iRely.Msg.close();
                 iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
             }
         });
     },
-    
+
     beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
             var win = obj.up('window');
             var current = win.viewModel.data.current;
-            
+
             if (checked === false && current.get('intPatronageCategoryId') > 0)
                 {
                    iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
                    return false;
                 }
-        }  
+        }
     },
-    
+
     onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
         var me = this;
         if (obj.dataIndex === 'ysnStockUnit'){
@@ -1913,18 +1942,18 @@ Ext.define('Inventory.view.ItemViewController', {
             var uomConversion = win.viewModel.storeInfo.uomConversion;
             var me = this;
             Ext.Ajax.request({
-            url: '../Inventory/api/Item/CheckStockUnit?ItemId=' + current.get('intItemId') + 
+            url: '../Inventory/api/Item/CheckStockUnit?ItemId=' + current.get('intItemId') +
             '&ItemStockUnit=' + current.get('ysnStockUnit') + '&ItemUOMId=' + current.get('intItemUOMId'),
             method: 'post',
             success: function (response) {
                     var jsonData = Ext.decode(response.responseText);
-                    if (!jsonData.success) 
+                    if (!jsonData.success)
                     {
                        //iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                        
+
                          var result = function (button) {
                             if (button === 'yes') {
-                                
+
                                     if (checked === true){
                                     var uoms = grid.store.data.items;
                                     if (uoms) {
@@ -1935,7 +1964,8 @@ Ext.define('Inventory.view.ItemViewController', {
                                             if (uom !== current){
                                                 uom.set('ysnStockUnit', false);
                                                 var unitMeasureId = current.get('intUnitMeasureId');
-                                                me.getConversionValue(unitMeasureId, uom.get('intUnitMeasureId'), function (value) {
+                                                me.getConversionValue(uom.get('intUnitMeasureId'), unitMeasureId, function (value) {
+
                                                     uom.set('dblUnitQty', value);
                                                 });
                                             }
@@ -1947,17 +1977,17 @@ Ext.define('Inventory.view.ItemViewController', {
                                         current.set('dblUnitQty', 1);
                                     }
                                 }
-                                
+
                                 Ext.Ajax.request({
-                                 url: '../Inventory/api/Item/ConvertItemToNewStockUnit?ItemId=' + current.get('intItemId') + 
+                                 url: '../Inventory/api/Item/ConvertItemToNewStockUnit?ItemId=' + current.get('intItemId') +
                                 '&ItemUOMId=' + current.get('intItemUOMId'),
                                 method: 'post',
                                 success: function (response) {
                                     var jsonData = Ext.decode(response.responseText);
-                                        if (!jsonData.success) 
+                                        if (!jsonData.success)
                                             {
                                                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                                                
+
                                             }
                                         else
                                             {
@@ -1974,8 +2004,8 @@ Ext.define('Inventory.view.ItemViewController', {
                                         iRely.Functions.showErrorDialog('Connection Failed!');
                                     }
                                 });
-                            } 
-                             
+                            }
+
                              else
                                  {
                                      current.set('ysnStockUnit', false);
@@ -1988,7 +2018,7 @@ Ext.define('Inventory.view.ItemViewController', {
                                 current.set('ysnStockUnit', true);
                             }
                         else
-                            { 
+                            {
                                 var msgBox = iRely.Functions;
                                 msgBox.showCustomDialog(
                                 msgBox.dialogType.WARNING,
@@ -1998,10 +2028,10 @@ Ext.define('Inventory.view.ItemViewController', {
                                );
                             }
                     }
-                
+
                 else
                     {
-                        
+
                             if (checked === true){
                             var uoms = grid.store.data.items;
                             if (uoms) {
@@ -2012,7 +2042,7 @@ Ext.define('Inventory.view.ItemViewController', {
                                     if (uom !== current){
                                         uom.set('ysnStockUnit', false);
                                         var unitMeasureId = current.get('intUnitMeasureId');
-                                        me.getConversionValue(unitMeasureId, uom.get('intUnitMeasureId'), function (value) {
+                                        me.getConversionValue(uom.get('intUnitMeasureId'), unitMeasureId, function (value) {
                                             uom.set('dblUnitQty', value);
                                         });
                                     }
@@ -2031,8 +2061,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 var jsonData = Ext.decode(response.responseText);
                 iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
             }
-        
-          }); 
+
+          });
         }
     },
 
@@ -2163,7 +2193,9 @@ Ext.define('Inventory.view.ItemViewController', {
                                 intLocationId: location.data.intCompanyLocationId,
                                 intIssueUOMId: defaultUOMId,
                                 intReceiveUOMId: defaultUOMId,
-                                strLocationName: location.data.strLocationName
+                                strLocationName: location.data.strLocationName,
+                                intAllowNegativeInventory: 3,
+                                intCostingMethod: 1,
                             };
                             currentVM.tblICItemLocations().add(newRecord);
 
@@ -2186,6 +2218,8 @@ Ext.define('Inventory.view.ItemViewController', {
                                     dblStandardCost: 0.00,
                                     dblAverageCost: 0.00,
                                     dblEndMonthCost: 0.00,
+                                    intAllowNegativeInventory: newRecord.intAllowNegativeInventory,
+                                    intCostingMethod: newRecord.intCostingMethod,
                                     intSort: newRecord.intSort
                                 });
                                 currentVM.tblICItemPricings().add(newPrice);
@@ -2352,72 +2386,90 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = combo.up('window');
         var grid = combo.up('grid');
         var selection = grid.getSelectionModel().getSelection();
-        var copyLocation = records[0];
+        var current = win.viewModel.data.current;
+        
+        var filter = [
+            {
+                c: 'intItemLocationId',
+                v: records[0].data.intItemLocationId,
+                cj: 'and',
+                g: 'g0'
+            }
+        ];
+        Ext.Ajax.request({
+            timeout: 120000,
+            url: '../Inventory/api/ItemLocation/Search?page=1&start=0&limit=50&sort=[]&filter=' +
+                JSON.stringify(filter),
+            method: 'GET',
+            success: function(response) {
+                var json = JSON.parse(response.responseText);
+                var copyLocation = json.data[0];
+                Ext.Array.each(selection, function (location) {
+                    if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
+                        location.set('intVendorId', copyLocation.intVendorId);
+                        location.set('strDescription', copyLocation.strDescription);
+                        location.set('intCostingMethod', copyLocation.intCostingMethod);
+                        location.set('strCostingMethod', copyLocation.strCostingMethod);
+                        location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
+                        //location.set('intSubLocationId', copyLocation.intSubLocationId);
+                        //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
+                        location.set('intIssueUOMId', copyLocation.intIssueUOMId);
+                        location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
+                        location.set('intFamilyId', copyLocation.intFamilyId);
+                        location.set('intClassId', copyLocation.intClassId);
+                        location.set('intProductCodeId', copyLocation.intProductCodeId);
+                        location.set('intFuelTankId', copyLocation.intFuelTankId);
+                        location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
+                        location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
+                        location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
+                        location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
+                        location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
+                        location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
+                        location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
+                        location.set('intMixMatchId', copyLocation.intMixMatchId);
+                        location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
+                        location.set('intDepositPLUId', copyLocation.intDepositPLUId);
+                        location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
+                        location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
+                        location.set('ysnScaleItem', copyLocation.ysnScaleItem);
+                        location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
+                        location.set('ysnReturnable', copyLocation.ysnReturnable);
+                        location.set('ysnPrePriced', copyLocation.ysnPrePriced);
+                        location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
+                        location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
+                        location.set('strVendorCategory', copyLocation.strVendorCategory);
+                        location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
+                        location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
+                        location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
+                        location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
+                        location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
+                        location.set('intMinimumAge', copyLocation.intMinimumAge);
+                        location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
+                        location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
+                        location.set('ysnCarWash', copyLocation.ysnCarWash);
+                        location.set('intItemTypeCode', copyLocation.intItemTypeCode);
+                        location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
+                        location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
+                        location.set('intFreightMethodId', copyLocation.intFreightMethodId);
+                        location.set('dblFreightRate', copyLocation.dblFreightRate);
+                        location.set('intShipViaId', copyLocation.intShipViaId);
+                        location.set('intNegativeInventory', copyLocation.intNegativeInventory);
+                        location.set('dblReorderPoint', copyLocation.dblReorderPoint);
+                        location.set('dblMinOrder', copyLocation.dblMinOrder);
+                        location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
+                        location.set('dblLeadTime', copyLocation.dblLeadTime);
+                        location.set('strCounted', copyLocation.strCounted);
+                        location.set('intCountGroupId', copyLocation.intCountGroupId);
+                        location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
+                        location.set('strVendorId', copyLocation.strVendorId);
+                        location.set('strCategory', copyLocation.strCategory);
+                        location.set('strUnitMeasure', copyLocation.strUnitMeasure);
+                    }
+                });
 
-        Ext.Array.each(selection, function(location) {
-            if (location.get('intItemLocationId') !== copyLocation.get('intItemLocationId')) {
-                location.set('intVendorId', copyLocation.get('intVendorId'));
-                location.set('strDescription', copyLocation.get('strDescription'));
-                location.set('intCostingMethod', copyLocation.get('intCostingMethod'));
-                location.set('strCostingMethod', copyLocation.get('strCostingMethod'));
-                location.set('intAllowNegativeInventory', copyLocation.get('intAllowNegativeInventory'));
-                location.set('intSubLocationId', copyLocation.get('intSubLocationId'));
-                location.set('intStorageLocationId', copyLocation.get('intStorageLocationId'));
-                location.set('intIssueUOMId', copyLocation.get('intIssueUOMId'));
-                location.set('intReceiveUOMId', copyLocation.get('intReceiveUOMId'));
-                location.set('intFamilyId', copyLocation.get('intFamilyId'));
-                location.set('intClassId', copyLocation.get('intClassId'));
-                location.set('intProductCodeId', copyLocation.get('intProductCodeId'));
-                location.set('intFuelTankId', copyLocation.get('intFuelTankId'));
-                location.set('strPassportFuelId1', copyLocation.get('strPassportFuelId2'));
-                location.set('strPassportFuelId2', copyLocation.get('strPassportFuelId2'));
-                location.set('strPassportFuelId3', copyLocation.get('strPassportFuelId3'));
-                location.set('ysnTaxFlag1', copyLocation.get('ysnTaxFlag1'));
-                location.set('ysnTaxFlag2', copyLocation.get('ysnTaxFlag2'));
-                location.set('ysnTaxFlag3', copyLocation.get('ysnTaxFlag3'));
-                location.set('ysnPromotionalItem', copyLocation.get('ysnPromotionalItem'));
-                location.set('intMixMatchId', copyLocation.get('intMixMatchId'));
-                location.set('ysnDepositRequired', copyLocation.get('ysnDepositRequired'));
-                location.set('intDepositPLUId', copyLocation.get('intDepositPLUId'));
-                location.set('intBottleDepositNo', copyLocation.get('intBottleDepositNo'));
-                location.set('ysnQuantityRequired', copyLocation.get('ysnQuantityRequired'));
-                location.set('ysnScaleItem', copyLocation.get('ysnScaleItem'));
-                location.set('ysnFoodStampable', copyLocation.get('ysnFoodStampable'));
-                location.set('ysnReturnable', copyLocation.get('ysnReturnable'));
-                location.set('ysnPrePriced', copyLocation.get('ysnPrePriced'));
-                location.set('ysnOpenPricePLU', copyLocation.get('ysnOpenPricePLU'));
-                location.set('ysnLinkedItem', copyLocation.get('ysnLinkedItem'));
-                location.set('strVendorCategory', copyLocation.get('strVendorCategory'));
-                location.set('ysnCountBySINo', copyLocation.get('ysnCountBySINo'));
-                location.set('strSerialNoBegin', copyLocation.get('strSerialNoBegin'));
-                location.set('strSerialNoEnd', copyLocation.get('strSerialNoEnd'));
-                location.set('ysnIdRequiredLiquor', copyLocation.get('ysnIdRequiredLiquor'));
-                location.set('ysnIdRequiredCigarette', copyLocation.get('ysnIdRequiredCigarette'));
-                location.set('intMinimumAge', copyLocation.get('intMinimumAge'));
-                location.set('ysnApplyBlueLaw1', copyLocation.get('ysnApplyBlueLaw1'));
-                location.set('ysnApplyBlueLaw2', copyLocation.get('ysnApplyBlueLaw2'));
-                location.set('ysnCarWash', copyLocation.get('ysnCarWash'));
-                location.set('intItemTypeCode', copyLocation.get('intItemTypeCode'));
-                location.set('intItemTypeSubCode', copyLocation.get('intItemTypeSubCode'));
-                location.set('ysnAutoCalculateFreight', copyLocation.get('ysnAutoCalculateFreight'));
-                location.set('intFreightMethodId', copyLocation.get('intFreightMethodId'));
-                location.set('dblFreightRate', copyLocation.get('dblFreightRate'));
-                location.set('intShipViaId', copyLocation.get('intShipViaId'));
-                location.set('intNegativeInventory', copyLocation.get('intNegativeInventory'));
-                location.set('dblReorderPoint', copyLocation.get('dblReorderPoint'));
-                location.set('dblMinOrder', copyLocation.get('dblMinOrder'));
-                location.set('dblSuggestedQty', copyLocation.get('dblSuggestedQty'));
-                location.set('dblLeadTime', copyLocation.get('dblLeadTime'));
-                location.set('strCounted', copyLocation.get('strCounted'));
-                location.set('intCountGroupId', copyLocation.get('intCountGroupId'));
-                location.set('ysnCountedDaily', copyLocation.get('ysnCountedDaily'));
-                location.set('strVendorId', copyLocation.get('strVendorId'));
-                location.set('strCategory', copyLocation.get('strCategory'));
-                location.set('strUnitMeasure', copyLocation.get('strUnitMeasure'));
+                win.context.data.saveRecord();
             }
         });
-
-        win.context.data.saveRecord();
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
@@ -2526,10 +2578,10 @@ Ext.define('Inventory.view.ItemViewController', {
             case "Kit":
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 break;
-                
+
             case "Comment":
                 break;
-                
+
             default:
                 iRely.Functions.showErrorDialog('Please select an Inventory Type.');
                 break;
@@ -2733,6 +2785,31 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onSpecialPricingBeforeQuery: function (obj) {
+        if (obj.combo) {
+            var store = obj.combo.store;
+            var win = obj.combo.up('window');
+            var grid = win.down('#grdSpecialPricing');
+            if (store) {
+                store.remoteFilter = true;
+                store.remoteSort = true;
+            }
+
+            if (obj.combo.itemId === 'cboSpecialPricingDiscountBy') {
+                var promotionType = grid.selection.data.strPromotionType;
+                store.clearFilter();
+                store.filterBy(function (rec, id) {
+                    if (promotionType !== 'Terms Discount' && promotionType !== '') {
+                        if (rec.get('strDescription') !== 'Terms Rate')
+                            return true;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        }
+    },
+    
     onSpecialPricingSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -2786,7 +2863,125 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    /* TODO: Create unit test for getPricingLevelUnitPrice */
+    getPricingLevelUnitPrice: function (price) {
+        var unitPrice = price.salePrice;
+        var msrpPrice = price.msrpPrice;
+        var standardCost = price.standardCost;
+        var amt = price.amount;
+        var qty = price.qty;
+        var retailPrice = 0;
+        switch (price.pricingMethod) {
+            case 'Discount Retail Price':
+                unitPrice = unitPrice - (unitPrice * (amt / 100));
+                retailPrice = unitPrice * qty
+                break;
+            case 'MSRP Discount':
+                msrpPrice = msrpPrice - (msrpPrice * (amt / 100));
+                retailPrice = msrpPrice * qty
+                break;
+            case 'Percent of Margin (MSRP)':
+                var percent = amt / 100;
+                unitPrice = ((msrpPrice - standardCost) * percent) + standardCost;
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Fixed Dollar Amount':
+                unitPrice = (standardCost + amt);
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Markup Standard Cost':
+                var markup = (standardCost * (amt / 100));
+                unitPrice = (standardCost + markup);
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Percent of Margin':
+                unitPrice = (standardCost / (1 - (amt / 100)));
+                retailPrice = unitPrice * qty;
+                break;
+            case 'None':
+                break;
+            default:
+                retailPrice = 0;
+                break;
+        }
+        return retailPrice;
+    },
+
+    /* TODO:Create unit test for getSalePrice */
+    getSalePrice: function (price, errorCallback) {
+        var salePrice = 0;
+        switch (price.pricingMethod) {
+            case "None":
+                salePrice = price.cost;
+                break;
+            case "Fixed Dollar Amount":
+                salePrice = price.cost + price.amount;
+                break;
+            case "Markup Standard Cost":
+                salePrice = (price.cost * (price.amount / 100)) + price.cost;
+                break;
+            case "Percent of Margin":
+                salePrice = price.amount < 100 ? (price.cost / (1 - (price.amount / 100))) : errorCallback();
+                break;
+        }
+        return salePrice;
+    },
+
+    updatePricing: function (pricing, data, validationCallback) {
+        var me = this;
+        var salePrice = me.getSalePrice({
+            cost: data.standardCost,
+            amount: data.amount,
+            pricingMethod: data.pricingMethod
+        }, validationCallback);
+
+        if (iRely.Functions.isEmpty(data.pricingMethod) || data.pricingMethod === 'None') {
+            pricing.set('dblAmountPercent', 0.00);
+        }
+        pricing.set('dblSalePrice', salePrice);
+    },
+
+    updatePricingLevel: function (item, pricing, data) {
+        var me = this;
+        _.each(item.tblICItemPricingLevels().data.items, function (p) {
+            if (p.data.intItemLocationId === pricing.data.intItemLocationId) {
+                var retailPrice = me.getPricingLevelUnitPrice({
+                    pricingMethod: p.data.strPricingMethod,
+                    salePrice: data.unitPrice,
+                    msrpPrice: data.msrpPrice,
+                    standardCost: data.standardCost,
+                    amount: p.data.dblAmountRate,
+                    qty: p.data.dblUnit
+                });
+                p.set('dblUnitPrice', retailPrice);
+            }
+        });
+    },
+
+    onPricingStandardCostChange: function (e, newValue, oldValue) {
+        var vm = this.view.viewModel;
+        var currentItem = vm.data.current;
+        var cep = e.ownerCt.editingPlugin;
+        var currentPricing = cep.activeRecord;
+        var me = this;
+        var win = cep.grid.up('window');
+        var grdPricing = win.down('#grdPricing');
+
+        var data = {
+            unitPrice: currentPricing.data.dblSalePrice,
+            msrpPrice: currentPricing.data.dblMSRPPrice,
+            standardCost: newValue,
+            pricingMethod: currentPricing.data.strPricingMethod,
+            amount: currentPricing.data.dblAmountPercent
+        };
+        this.updatePricing(currentPricing, data, function () {
+            win.context.data.validator.validateGrid(grdPricing);
+        });
+        this.updatePricingLevel(currentItem, currentPricing, data);
+    },
+
     onEditPricingLevel: function (editor, context, eOpts) {
+        var me = this;
         if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate') {
             if (context.record) {
                 var win = context.grid.up('window');
@@ -2815,39 +3010,15 @@ Ext.define('Inventory.view.ItemViewController', {
                             var msrpPrice = selectedLoc.get('dblMSRPPrice');
                             var standardCost = selectedLoc.get('dblStandardCost');
                             var qty = context.record.get('dblUnit');
-                            var retailPrice = 0;
-                            switch (pricingMethod) {
-                                case 'Discount Retail Price':
-                                    unitPrice = unitPrice - (unitPrice * (amount / 100));
-                                    retailPrice = unitPrice * qty
-                                    break;
-                                case 'MSRP Discount':
-                                    msrpPrice = msrpPrice - (msrpPrice * (amount / 100));
-                                    retailPrice = msrpPrice * qty
-                                    break;
-                                case 'Percent of Margin (MSRP)':
-                                    var percent = amount / 100;
-                                    unitPrice = ((msrpPrice - standardCost) * percent) + standardCost;
-                                    retailPrice = unitPrice * qty;
-                                    break;
-                                case 'Fixed Dollar Amount':
-                                    unitPrice = (standardCost + amount);
-                                    retailPrice = unitPrice * qty;
-                                    break;
-                                case 'Markup Standard Cost':
-                                    var markup = (standardCost * (amount / 100));
-                                    unitPrice = (standardCost + markup);
-                                    retailPrice = unitPrice * qty;
-                                    break;
-                                case 'Percent of Margin':
-                                    unitPrice = (standardCost / (1 - (amount / 100)));
-                                    retailPrice = unitPrice * qty;
-                                    break;
-                                case 'None':
-                                default:
-                                    retailPrice = 0;
-                                    break;
-                            }
+                            var retailPrice = me.getPricingLevelUnitPrice({
+                                pricingMethod: pricingMethod,
+                                salePrice: unitPrice,
+                                msrpPrice: msrpPrice,
+                                standardCost: standardCost,
+                                amount: amount,
+                                qty: qty
+                            });
+
                             context.record.set('dblUnitPrice', retailPrice);
                         }
                     }
@@ -2856,7 +3027,8 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onEditPricing: function(editor, context, eOpts) {
+    onEditPricing: function (editor, context, eOpts) {
+        var me = this;
         if (context.field === 'strPricingMethod' || context.field === 'dblAmountPercent' || context.field === 'dblStandardCost') {
             if (context.record) {
                 var win = context.grid.up('window');
@@ -2875,26 +3047,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     cost = context.value;
                 }
 
-                if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'None'){
-                    context.record.set('dblSalePrice', cost);
-                    context.record.set('dblAmountPercent', 0.00);
-                }
-                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Fixed Dollar Amount'){
-                    context.record.set('dblSalePrice', (cost + amount));
-                }
-                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Markup Standard Cost'){
-                    var markup = (cost * (amount / 100));
-                    context.record.set('dblSalePrice', (cost + markup));
-                }
-                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Percent of Margin') {
-                    if (amount < 100){
-                        var markup = (cost / (1 - (amount / 100)));
-                        context.record.set('dblSalePrice', markup);
-                    }
-                    else {
-                        win.context.data.validator.validateGrid(grdPricing);
-                    }
-                }
+                var data = {
+                    standardCost: cost,
+                    pricingMethod: pricingMethod,
+                    amount: amount
+                };
+                this.updatePricing(context.record, data, function () {
+                    win.context.data.validator.validateGrid(grdPricing);
+                });
             }
         }
     },
@@ -3386,56 +3546,56 @@ Ext.define('Inventory.view.ItemViewController', {
     onUOMHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.InventoryUOM', grid, 'intUnitMeasureId');
     },
 
     onCategoryHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Category', grid, 'intCategoryId');
     },
 
     onCountryHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('i21.view.Country', grid, 'intCountryID');
     },
 
     onDocumentHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.ContractDocument', grid, 'intDocumentId');
     },
 
     onCertificationHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.CertificationProgram', grid, 'intCertificationId');
     },
 
     onManufacturingCellHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Manufacturing.view.ManufacturingCell', grid, 'intManufacturingCellId');
     },
 
     onCustomerHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
+
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityCustomer', grid, 'intOwnerId');
     },
 
     onPatronageBeforeSelect: function(combo, record) {
         if (record.length <= 0)
             return;
-		
+
 		var stockUnitExist = false;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
@@ -3449,16 +3609,16 @@ Ext.define('Inventory.view.ItemViewController', {
                         }
                     });
                 }
-            
+
         }
-		
+
 		if (stockUnitExist == false)
 		{
 			iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
             return false;
 		}
     },
-    
+
     onUPCEnterTab: function(field, e, eOpts) {
         var win = field.up('window');
         var grd = field.up('grid');
@@ -3475,15 +3635,15 @@ Ext.define('Inventory.view.ItemViewController', {
                         record.set('strUpcCode', i21.ModuleMgr.Inventory.getShortUPCString(record.get('strLongUPCCode')));
                         if(record.get('strUpcCode') !== null) {
                             record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')));
-                        }  
-                     }   
+                        }
+                     }
                 });
 
                 task.delay(10);
-            }  
+            }
         }
     },
-    
+
     //</editor-fold>
     onLocationCellClick: function(view, cell, cellIndex, record, row, rowIndex, e) {
         var linkClicked = (e.target.tagName == 'A');
@@ -3589,7 +3749,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 select: this.onSpecialPricingSelect
             },
             "#cboSpecialPricingDiscountBy": {
-                select: this.onSpecialPricingSelect
+                select: this.onSpecialPricingSelect,
+                beforequery: this.onSpecialPricingBeforeQuery
             },
             "#cboBundleUOM": {
                 select: this.onBundleSelect
@@ -3634,6 +3795,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
+            },
+            "#txtStandardCost": {
+                change: this.onPricingStandardCostChange
             },
             "#txtShortUPCCode": {
                 specialKey: this.onUPCEnterTab
@@ -3706,6 +3870,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 drilldown: this.onPatronageDirectDrilldown
             }
         });
-        
+
     }
 });

@@ -116,5 +116,29 @@ namespace iRely.Inventory.WebApi
                 }
             });
         }
+
+        [HttpGet]
+        [ActionName("GetCustomerCurrency")]
+        public async Task<HttpResponseMessage> GetCustomerCurrency(int customerId)
+        {
+            InventoryRepository repo = new InventoryRepository();
+            var query = @"  SELECT c.intEntityCustomerId, c.strCustomerNumber, c.intCurrencyId, cr.strCurrency, cr.strDescription, cr.ysnSubCurrency, cr.intMainCurrencyId, cr.intCent
+                            FROM tblARCustomer c
+                                INNER JOIN tblSMCurrency cr ON cr.intCurrencyID = c.intCurrencyId
+                            WHERE c.intEntityCustomerId = @customerId";
+            System.Data.SqlClient.SqlParameter p = new System.Data.SqlClient.SqlParameter("@customerId", customerId);
+            p.SqlDbType = System.Data.SqlDbType.Int;
+            var ctx = repo.ContextManager.Database.SqlQuery<Customer>(query, new object[] { p });
+            var customer = await ctx.ToListAsync();
+            return Request.CreateResponse(HttpStatusCode.OK, customer.AsQueryable());
+        }
+    }
+
+    class Customer
+    {
+        public int intEntityCustomerId { get; set; }
+        public string strCustomerNumber { get; set; }
+        public int intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
     }
 }

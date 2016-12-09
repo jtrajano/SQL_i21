@@ -12,7 +12,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>iRely.Inventory.WebApi</RootNamespace>
-    <AssemblyName>iRely Template</AssemblyName>
+    <AssemblyName>iRely.Inventory.WebApi</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
@@ -53,12 +53,8 @@
       <HintPath>..\packages\Autofac.WebApi2.4.0.1\lib\net45\Autofac.Integration.WebApi.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AutoMapper, Version=3.3.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.3.3.1\lib\net40\AutoMapper.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="AutoMapper.Net4, Version=3.3.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.3.3.1\lib\net40\AutoMapper.Net4.dll</HintPath>
+    <Reference Include="AutoMapper, Version=5.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.5.1.1\lib\net45\AutoMapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DelegateDecompiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=93b26a10a04705bd, processorArchitecture=MSIL">
@@ -203,40 +199,40 @@
       <HintPath>..\packages\EPPlus.4.1.0\lib\net40\EPPlus.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FluentValidation, Version=5.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentValidation.5.1.0.0\lib\Net40\FluentValidation.dll</HintPath>
+    <Reference Include="FluentValidation, Version=6.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentValidation.6.2.1.0\lib\Net45\FluentValidation.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="IdeaBlade.Core, Version=7.2.0.0, Culture=neutral, PublicKeyToken=287b5094865421c0, processorArchitecture=MSIL">
-      <HintPath>..\packages\IdeaBlade.DevForce.Core.7.2.0\lib\net45\IdeaBlade.Core.dll</HintPath>
+    <Reference Include="IdeaBlade.Core, Version=7.4.0.0, Culture=neutral, PublicKeyToken=287b5094865421c0, processorArchitecture=MSIL">
+      <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="IdeaBlade.EntityModel, Version=7.2.0.0, Culture=neutral, PublicKeyToken=287b5094865421c0, processorArchitecture=MSIL">
-      <HintPath>..\packages\IdeaBlade.DevForce.Core.7.2.0\lib\net45\IdeaBlade.EntityModel.dll</HintPath>
+    <Reference Include="IdeaBlade.EntityModel, Version=7.4.0.0, Culture=neutral, PublicKeyToken=287b5094865421c0, processorArchitecture=MSIL">
+      <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.EntityModel.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="IdeaBlade.Linq, Version=7.2.0.0, Culture=neutral, PublicKeyToken=287b5094865421c0, processorArchitecture=MSIL">
-      <HintPath>..\packages\IdeaBlade.DevForce.Core.7.2.0\lib\net45\IdeaBlade.Linq.dll</HintPath>
+    <Reference Include="IdeaBlade.Linq, Version=7.4.0.0, Culture=neutral, PublicKeyToken=287b5094865421c0, processorArchitecture=MSIL">
+      <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Linq.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="IdeaBlade.Validation, Version=7.2.0.0, Culture=neutral, PublicKeyToken=287b5094865421c0, processorArchitecture=MSIL">
-      <HintPath>..\packages\IdeaBlade.DevForce.Core.7.2.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
+    <Reference Include="IdeaBlade.Validation, Version=7.4.0.0, Culture=neutral, PublicKeyToken=287b5094865421c0, processorArchitecture=MSIL">
+      <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=16.4.6180.19528, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\iRely.Common.16.4.6180.19528\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=16.4.6186.16022, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\iRely.Common.16.4.6186.16022\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="iRely.Reports.Helper, Version=16.4.6178.9254, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\iRely.Reports.Helper.16.4.6178.9254\lib\net45\iRely.Reports.Helper.dll</HintPath>
+    <Reference Include="iRely.Reports.Helper, Version=16.4.6187.5389, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\iRely.Reports.Helper.16.4.6187.5389\lib\net45\iRely.Reports.Helper.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="itextsharp, Version=5.5.9.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
-      <HintPath>..\packages\iTextSharp.5.5.9\lib\itextsharp.dll</HintPath>
+    <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\iTextSharp.5.5.10\lib\itextsharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="itextsharp.xmlworker, Version=5.5.9.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
-      <HintPath>..\packages\itextsharp.xmlworker.5.5.9\lib\itextsharp.xmlworker.dll</HintPath>
+    <Reference Include="itextsharp.xmlworker, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itextsharp.xmlworker.5.5.10\lib\itextsharp.xmlworker.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MailBee.NET.45, Version=10.0.45.502, Culture=neutral, PublicKeyToken=cd85b70fb26f9fc1, processorArchitecture=MSIL">
@@ -246,8 +242,8 @@
     <Reference Include="Microsoft.CSharp">
       <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Reflection, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Reflection.1.0.0.0\lib\Mono.Reflection.dll</HintPath>
+    <Reference Include="Mono.Reflection, Version=1.1.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Reflection.1.1.0.0\lib\Mono.Reflection.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -355,6 +351,7 @@
     <Compile Include="Controllers\InventoryReceiptChargeTaxController.cs" />
     <Compile Include="Controllers\ImportDataController.cs" />
     <Compile Include="Controllers\InventoryReceiptItemLotController.cs" />
+    <Compile Include="Controllers\InventoryValuationController.cs" />
     <Compile Include="Controllers\MeasurementController.cs" />
     <Compile Include="Controllers\ParentLotController.cs" />
     <Compile Include="Controllers\ReadingPointController.cs" />
@@ -600,7 +597,6 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <Import Project="..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

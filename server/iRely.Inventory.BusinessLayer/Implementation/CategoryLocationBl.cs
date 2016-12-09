@@ -45,6 +45,11 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        private string BlankLocationErrMsg(string op)
+        {
+            return "The " + op + " statement conflicted with the FOREIGN KEY constraint \"FK_tblICCategoryLocation_tblSMCompanyLocation\"";
+        }
+
         public override async Task<BusinessResult<tblICCategoryLocation>> SaveAsync(bool continueOnConflict)
         {
             var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
@@ -55,6 +60,10 @@ namespace iRely.Inventory.BusinessLayer
                 if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICCategoryLocation'"))
                 {
                     msg = "Category Location must be unique.";
+                } 
+                else if(result.BaseException.Message.Contains(BlankLocationErrMsg("INSERT")) || result.BaseException.Message.Contains(BlankLocationErrMsg("UPDATE")))
+                {
+                    msg = "You must specify the Location for this Category.";
                 }
             }
 

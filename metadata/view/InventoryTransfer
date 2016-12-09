@@ -2015,6 +2015,22 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Check",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "ysnWeights",
+                                                "itemId": "chkDestinationWeights",
+                                                "text": "Destination Weights",
+                                                "width": 120
+                                            },
+                                            "name": "MyCheck2",
+                                            "designerId": "19062049-a5e8-4e12-b326-0b613d1282cf"
+                                        },
+                                        {
                                             "type": "Ext.grid.plugin.CellEditing",
                                             "reference": {
                                                 "name": "plugins",
@@ -2216,7 +2232,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

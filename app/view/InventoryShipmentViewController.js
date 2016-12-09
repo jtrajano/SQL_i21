@@ -1,5 +1,5 @@
 Ext.define('Inventory.view.InventoryShipmentViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventoryshipment',
     requires: [
         'CashManagement.common.Text',
@@ -386,17 +386,70 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         ]
                     }
                 },
-                colGrade: {
-                    dataIndex: 'strGrade',
+                // Grade from Commodity Attributes is now obsolete and will be removed
+                // colGrade: {
+                //     dataIndex: 'strGrade',
+                //     editor: {
+                //         readOnly: '{hasItemCommodity}',
+                //         store: '{grade}',
+                //         origValueField: 'intCommodityAttributeId',
+                //         origUpdateField: 'intGradeId',
+                //         defaultFilters: [
+                //             {
+                //                 column: 'intCommodityId',
+                //                 value: '{grdInventoryShipment.selection.intCommodityId}',
+                //                 conjunction: 'and'
+                //             }
+                //         ]
+                //     }
+                // },
+                colDestGrades: {
+                    dataIndex: 'strDestinationGrades',
                     editor: {
-                        readOnly: '{hasItemCommodity}',
-                        store: '{grade}',
-                        origValueField: 'intCommodityAttributeId',
-                        origUpdateField: 'intGradeId',
+                        readOnly: '{readOnlyWeightsGrades}',
+                        store: '{weightsGrades}',
+                        origValueField: 'intWeightGradeId',
+                        origUpdateField: 'intDestinationGradeId',
                         defaultFilters: [
                             {
-                                column: 'intCommodityId',
-                                value: '{grdInventoryShipment.selection.intCommodityId}',
+                                column: 'ysnActive',
+                                value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'ysnGrade',
+                                value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intOriginDest',
+                                value: 2,
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
+                colDestWeights: {
+                    dataIndex: 'strDestinationWeights',
+                    editor: {
+                        readOnly: '{readOnlyWeightsGrades}',
+                        store: '{weightsGrades}',
+                        origValueField: 'intWeightGradeId',
+                        origUpdateField: 'intDestinationWeightId',
+                        defaultFilters: [
+                            {
+                                column: 'ysnActive',
+                                value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'ysnWeight',
+                                value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intOriginDest',
+                                value: 2,
                                 conjunction: 'and'
                             }
                         ]
@@ -499,11 +552,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             column: 'intOwnershipType',
                             value: '{grdInventoryShipment.selection.intOwnershipType}',
                             conjunction: 'and'
-                        },{
-                            column: 'intGradeId',
-                            value: '{grdInventoryShipment.selection.intGradeId}',
-                            conjunction: 'and'
-                        },{
+                        },
+                        // Grade in Commodity Attributes is now obsolete and will be removed.
+                        // {
+                        //     column: 'intGradeId',
+                        //     value: '{grdInventoryShipment.selection.intGradeId}',
+                        //     conjunction: 'and'
+                        // },
+                        {
                             column: 'dblQty',
                             value: 0,
                             conjunction: 'and',
@@ -643,6 +699,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
+            onSaveClick: me.saveAndPokeGrid(win, grdInventoryShipment),
             include: 'vyuICGetInventoryShipment, ' +
             'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
             'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem, ' +
@@ -789,11 +846,42 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         action(record);
     },
     
+    statics: {
+        getCustomerCurrency: function(customerId, action) {
+            if(customerId) {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryShipment/GetCustomerCurrency?customerId=' + customerId,
+                    method: 'GET',
+                    success: function(res) {
+                        var json = Ext.decode(res.responseText);
+                        action(true, json);
+                    },
+                    failure: function(err) {
+                        action(false, err);
+                    }
+                });
+            }
+        }
+    },
+
     onChargeCreateRecord: function (config, action) {
         var win = config.grid.up('window');
         var record = Ext.create('Inventory.model.ShipmentCharge');
         record.set('strAllocatePriceBy', 'Unit');
-        action(record);
+        if(config.dummy.intInventoryShipment.data.intEntityCustomerId) {
+            Inventory.view.InventoryShipmentViewController.getCustomerCurrency(config.dummy.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
+                if(success) {
+                    if(json.length > 0) {
+                        record.set('intCurrencyId', json[0].intCurrencyId);
+                        record.set('strCurrency', json[0].strCurrency);
+                    }
+                    action(record);   
+                } else
+                    action(record);
+            });
+        } else
+            action(record);
     },
 
     currentRecordChanged: function(current) {
@@ -1092,7 +1180,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
 
         else if (combo.itemId === 'cboCustomerStorage') {
-            current.set('intCustomerStorageId', records[0].get('intCustomerStorageId'));
+            current.set('intStorageScheduleTypeId', records[0].get('intStorageTypeId'));
 
         }
     },
@@ -1331,12 +1419,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice successfully processed. Do you want to view this Invoice?', buttonAction);
                     }
                     else {
-                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        var jsonData = Ext.decode(response.responseText);
+                        var msg = jsonData.ExceptionMessage;
+                        if(!jsonData.success) {
+                            if(jsonData.message.statusText === " " && jsonData.message.status === 9998)
+                                msg = "Can't process Invoice for Items that don't have order number.";
+                        }
+                        iRely.Functions.showErrorDialog(msg);
                     }
                 },
                 failure: function(response) {
                     var jsonData = Ext.decode(response.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    var msg = jsonData.ExceptionMessage;
+                    if(!jsonData.success) {
+                        if(jsonData.message.statusText === " " && jsonData.message.status === 9998)
+                                msg = "Can't process Invoice for Items that don't have order number.";
+                    }
+                    iRely.Functions.showErrorDialog(msg);
                 }
             });
         }
@@ -1926,7 +2025,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             };
         };
     },
-
+    
     onChargeSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -1937,7 +2036,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var plugin = grid.getPlugin('cepCharges');
         var current = plugin.getActiveRecord();
         var masterRecord = win.viewModel.data.current;
-
+        
         if (combo.itemId === 'cboOtherCharge') {
             current.set('intChargeId', record.get('intItemId'));
             current.set('dblRate', record.get('dblAmount'));
@@ -1946,8 +2045,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strCostUOM', record.get('strCostUOM'));
             current.set('strOnCostType', record.get('strOnCostType'));
             current.set('ysnPrice', record.get('ysnPrice'));
+            current.set('ysnAccrue', record.get('ysnAccrue'));
             if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
                 current.set('strCostMethod', 'Percentage');
+            }
+
+            if(!current.get('intCurrencyId')) {
+                Inventory.view.InventoryShipmentViewController.getCustomerCurrency(current.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
+                    if(success) {
+                        if(json.length > 0) {
+                            current.set('intCurrencyId', json[0].intCurrencyId);
+                            current.set('strCurrency', json[0].strCurrency);
+                        }
+                    }
+                });
             }
         }
 
@@ -2209,6 +2320,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', width: 100, dataType: 'float' },
                 { dataIndex: 'intGradeId', text: 'Grade Id', width: 100, dataType: 'numeric', hidden: true },
                 { dataIndex: 'strGrade', text: 'Grade', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intDestinationGradeId', text: 'Destination Grade Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strDestinationGrades', text: 'Destination Grades', width: 100, dataType: 'string' },
+                { dataIndex: 'intDestinationWeightId', text: 'Destination Weight Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strDestinationWeights', text: 'Destination Weights', width: 100, dataType: 'string' },
 
                 {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
@@ -2355,6 +2470,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strLotTracking: order.get('strLotTracking'),
                                 dblItemUOMConv: order.get('dblItemUOMConv'),
                                 dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
+                                intDestinationGradeId: order.get('intDestinationGradeId'),
+                                strDestinationGrades: order.get('strDestinationGrades'),
+                                intDestinationWeightId: order.get('intDestinationWeightId'),
+                                strDestinationWeights: order.get('strDestinationWeights'),
+
                                 strOwnershipType: 'Own',
                                 intOwnershipType: 1,
                                 intCommodityId: order.get('intCommodityId')
@@ -2458,6 +2578,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intShipToCompanyLocationId', null);
             current.set('intShipToLocationId', null);
             current.set('strShipToAddress', null);
+
+            //Change Source Type to "None" for "Direct" or "Sales Order" Order Type
+            if(current.get('intOrderType') == 4 || current.get('intOrderType') == 2) {
+                current.set('intSourceType', 0);
+                current.set('strSourceType', 'None');
+            }
         }
     },
 
@@ -2549,6 +2675,32 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onItemBeforeQuery: function(obj) {
+        if(obj.combo) {
+            if(obj.combo.itemId === 'cboItemNo') {
+                var win = obj.combo.up('window');
+                obj.combo.defaultFilters = [
+                    {
+                        column: 'strType',
+                        value: 'Inventory|^|Raw Material|^|Finished Good|^|Bundle|^|Kit',
+                        conjunction: 'and',
+                        condition: 'eq'
+                    },
+                    {
+                        column: 'intLocationId',
+                        value: win.viewModel.data.current.get('intShipFromLocationId'),
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'excludePhasedOutZeroStockItem',
+                        value: true,
+                        conjunction: 'and'
+                    }
+                ];
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -2565,7 +2717,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onOrderNumberSelect
             },
             "#cboItemNo": {
-                select: this.onItemNoSelect
+                select: this.onItemNoSelect,
+                beforequery: this.onItemBeforeQuery
             },
             "#cboUOM": {
                 select: this.onItemNoSelect

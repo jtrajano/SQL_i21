@@ -131,7 +131,7 @@ Ext.define('Inventory.view.StorageUnit', {
                         {
                             xtype: 'panel',
                             bodyPadding: 10,
-                            title: 'Detail',
+                            title: 'Details',
                             layout: {
                                 type: 'hbox',
                                 align: 'stretch'

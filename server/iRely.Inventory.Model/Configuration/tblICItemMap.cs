@@ -167,12 +167,13 @@ namespace iRely.Inventory.Model
                 .HasForeignKey(p => p.intCommodityId);
 
             this.HasMany(p => p.tblICItemUOMs)
-                .WithRequired(p => p.tblICItem)
+                .WithRequired(p => p.tblICItem) 
                 .HasForeignKey(p => p.intItemId);
+
             this.HasMany(p => p.tblICItemLocations)
                 .WithRequired(p => p.tblICItem)
-                .HasForeignKey(p => p.intItemId);
-            
+                .HasForeignKey(p => p.intItemId);                              
+
             this.HasMany(p => p.tblICItemPOSCategories)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
@@ -623,6 +624,30 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
             this.Property(t => t.strAccountId).HasColumnName("strAccountId");
             this.Property(t => t.strAccountType).HasColumnName("strAccountType");
+        }
+    }
+
+    public class vyuICGetItemStockUOMTotalsMap : EntityTypeConfiguration<vyuICGetItemStockUOMTotals>
+    {
+        public vyuICGetItemStockUOMTotalsMap()
+        {
+            this.HasKey(p => p.intItemStockUOMId);
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemStockUOMTotals");
+            this.Property(t => t.intItemStockUOMId).HasColumnName("intItemStockUOMId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty");
+            this.Property(t => t.dblStorageQty).HasColumnName("dblStorageQty");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
         }
     }
 

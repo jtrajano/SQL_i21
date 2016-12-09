@@ -642,7 +642,34 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     text: 'Unit Qty',
                                                                     flex: 1,
                                                                     hidden: true
-                                                                }
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intStorageLocationId',
+                                                                    dataType: 'float',
+                                                                    text: 'Unit Qty',
+                                                                    flex: 1,
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStorageLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intSubLocationId',
+                                                                    dataType: 'float',
+                                                                    text: 'Unit Qty',
+                                                                    flex: 1,
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                
                                                             ],
                                                             itemId: 'cboUOM',
                                                             displayField: 'strUnitMeasure',

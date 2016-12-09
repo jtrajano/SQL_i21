@@ -107,6 +107,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblFreightRate).HasColumnName("dblFreightRate").HasPrecision(18, 6);
             this.Property(t => t.dblFreightAmount).HasColumnName("dblFreightAmount").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.ysnWeights).HasColumnName("ysnWeights");
 
             this.HasOptional(p => p.vyuICGetInventoryTransferDetail)
                 .WithRequired(p => p.tblICInventoryTransferDetail);
@@ -141,6 +142,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder").HasPrecision(38, 20);
             this.Property(t => t.dblReservedQty).HasColumnName("dblReservedQty").HasPrecision(38, 20);
             this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(38, 20);
+            this.Property(t => t.ysnWeights).HasColumnName("ysnWeights");
         }
     }
 }

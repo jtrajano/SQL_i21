@@ -835,6 +835,7 @@ namespace iRely.Inventory.Model
                 _pricingType = value;
             }
         }
+        
         /* private decimal _franchise;
          [NotMapped]
          public decimal dblFranchise

@@ -1,5 +1,5 @@
 Ext.define('Inventory.view.InventoryReceiptViewController', {
-    extend: 'Ext.app.ViewController',
+    extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventoryreceipt',
     requires: [
         'CashManagement.common.Text',
@@ -368,13 +368,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{current.ysnPosted}',
                 disabled: '{current.ysnOrigin}'
             },
-            lblWeightLossMsg: {
-                text: '{getWeightLossText}'
-            },
-            lblWeightLossMsgValue: {
-              //  text: '{getWeightLossValueText}',
-                hidden: '{hidelblWeightLossMsgValue}'
-            },
+            // lblWeightLossMsg: {
+            //     text: '{getWeightLossText}'
+            // },
+            // txtWeightLossMsgValue: '{current.strVessel}',
             grdInventoryReceipt: {
                 readOnly: '{readOnlyReceiptItemGrid}',
                 colOrderNumber: {
@@ -954,7 +951,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    setupContext: function (options) {
+    setupContext: function(options) {
         "use strict";
         var me = this,
             win = options.window,
@@ -970,26 +967,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
 
         // Update the summary fields whenever the receipt item data changed.
-        me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function (store) {
-            store.on('update', function () {
+        me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function(store) {
+            store.on('update', function() {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
 
-            store.on('datachanged', function () {
+            store.on('datachanged', function() {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
         });
 
         // Update the summary fields whenever the other charges data changed.
-        me.getViewModel().bind('{current.tblICInventoryReceiptCharges}', function (store) {
-            store.on('update', function () {
+        me.getViewModel().bind('{current.tblICInventoryReceiptCharges}', function(store) {
+            store.on('update', function() {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
 
-            store.on('datachanged', function () {
+            store.on('datachanged', function() {
                 me.showSummaryTotals(win);
                 me.showOtherCharges(win);
             });
@@ -1007,6 +1004,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
+            onSaveClick: me.saveAndPokeGrid(win, grdInventoryReceipt),
             include: 'tblICInventoryReceiptInspections,' +
             'vyuICInventoryReceiptLookUp,' +
             'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
@@ -1200,10 +1198,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.showOtherCharges(win);
         }
     },
+    updateWeightLossText: function(window, clear, weightLoss) {
+        if(clear) {
+            window.down("#txtWeightLossMsgValue").setValue("");
+            window.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
+        } else {
+            window.down("#txtWeightLossMsgValue").setValue(Ext.util.Format.number(weightLoss, '0,000.00'));
+
+            if(weightLoss === 0) {
+                document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'black';
+            }
+            else {
+                document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'red';
+            }
+        }
+    },
+
     createRecord: function (config, action) {
         var win = config.window;
-        win.down("#lblWeightLossMsgValue").setText("");
+        win.down("#txtWeightLossMsgValue").setValue("");
         win.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
+        
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
@@ -1788,6 +1803,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')) {
                 current.set('strWeightUOM', records[0].get('strUnitMeasure'));
                 current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+                current.set('dblWeightUOMConvFactor', current.get('dblItemUOMConvFactor'));
             }
         }
         else if (combo.itemId === 'cboWeightUOM') {
@@ -1822,9 +1838,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
-        else if (combo.itemId === 'cboSubLocation' || combo.itemId === 'cboStorageLocation') {
-            current.set('intSubLocationId', records[0].get('intSubLocationId'));
-            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+        else if (combo.itemId === 'cboSubLocation') {
+            current.set('intStorageLocationId', null);
+            current.set('strStorageLocationName', null);
+            var lots = current.tblICInventoryReceiptItemLots();
+
+            if (lots) {
+                Ext.Array.each(lots.data.items, function (lot) {
+                    if (!lot.dummy) {
+                        lot.set('intStorageLocationId', null);
+                        lot.set('strStorageLocation', null);
+                    }
+                });
+            }
         }
 
         // Calculate the taxes
@@ -2045,7 +2071,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             costCentsFactor = 1;
         }
 
-
         // Compute the line total with respect to the Item UOM
         if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
             // Sanitize the cost conversion factor.
@@ -2147,16 +2172,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
-                        var otherChargeTax = charge.get('dblTax');
-                        
-
-                        if (charge.get('ysnPrice') === true) {
-                            totalChargeTaxes -= otherChargeTax;
-                        }
-                        else {
-                            totalChargeTaxes += otherChargeTax;
-                        }
-
+                        var otherChargeTax = charge.get('dblTax');  
+                        totalChargeTaxes += otherChargeTax;
                     }
                 });
             }
@@ -2319,7 +2336,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
             if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
 
-            // If there is not Gross/Net UOM, do not calculate the lot gross and net.
+            // If there is no Gross/Net UOM, do not calculate the lot gross and net.
             if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === '') {
                 totalGross = 0;
             }
@@ -2812,6 +2829,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var context = win.context;
         var current = win.viewModel.data.current;
         var btnReceive = win.down('#btnReceive');
+        var pnlLotTracking = win.down('#pnlLotTracking');
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+
+        //Hide Lot Grid
+        pnlLotTracking.setVisible(false);
+        //Deselect all rows in Item Grid
+        grdInventoryReceipt.getSelectionModel().deselectAll();
 
         var postReceipt = function () {
             var doPost = function () {
@@ -2939,6 +2963,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var cboCurrency = win.down('#cboCurrency');
         var context = win.context;
+        var pnlLotTracking = win.down('#pnlLotTracking');
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+
+        //Hide Lot Tracking Grid
+        pnlLotTracking.setVisible(false);
+        //Deselect all rows in Item Grid
+        grdInventoryReceipt.getSelectionModel().deselectAll();
 
         var doRecap = function (recapButton, currentRecord, currency) {
 
@@ -4399,8 +4430,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     return;
                 var w = selModel.views[0].up('window');
                 var plt = w.down("#pnlLotTracking");
-                w.down("#lblWeightLossMsgValue").setText("");
-                w.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
+                this.updateWeightLossText(w, true, 0);
                 plt.setVisible(false);
                 return;
             }
@@ -4422,6 +4452,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 else {
                     pnlLotTracking.setVisible(false);
                     vm.data.currentReceiptItem = null;
+                }
+                
+                if(!current.phantom && !current.dirty) {
+                    win.down("#grdLotTracking").setLoading("Loading lots...");
+                    current.tblICInventoryReceiptItemLots().load({
+                        callback: function(records, operation, success) {
+                            win.down("#grdLotTracking").setLoading(false);
+                        }
+                    });
                 }
             }
             else {
@@ -4927,11 +4966,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Initialize the target tare weight.
             var addedTareWeight = 0.00;
+            var excessTareWeight = 0.00;
 
             // If Unit-Type is a 'Packed' type, get the ceiling value. A packaging can't have a fractional value.
             if (strUnitType == "Packed") {
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
                 lastQty = Math.ceil(lastQty);
+            //Process Excess Lot
+                //Add another line for excess lot if the last replicated lot is more than one
+                if (addedTareWeight > 0 && lastQty > 1) {
+                    //Compute Tare Weight for the Excess Lot
+                    excessTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
+                    //Subtract 1 from lastQty because the excess lot will be added later
+                    lastQty = lastQty - 1;
+                }
+                //Just add tare if the last replicated lot is equal to 1
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
                 // addedTareWeight = i21.ModuleMgr.Inventory.roundDecimalValue(addedTareWeight, 6);
             }
@@ -5031,10 +5080,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 */
             }
 
+            var countReplicateLot = 0;
+            if (excessTareWeight > 0) {
+                countReplicateLot = replicaCount + 1;
+            }
+            else {
+                countReplicateLot = replicaCount;
+            }
             // Show a progress message box.
             Ext.MessageBox.show({
                 title: "Please wait.",
-                msg: "Replicating as " + replicaCount + " copies of the lot.",
+                msg: "Replicating as " + countReplicateLot + " copies of the lot.",
                 progressText: "Initializing...",
                 width: 300,
                 progress: true,
@@ -5129,8 +5185,72 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                             }, Ext.MessageBox.YESNO, win);*/
                     } else {
-                       //currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
-                       grdLotTracking.store.add(newLot);
+                        //currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+                        grdLotTracking.store.add(newLot);
+
+                        //Notify user if the last lot has excess/loss
+                        if(ctr == replicaCount - 1 && addedTareWeight > 0) {
+                            iRely.Functions.showCustomDialog('information','ok','Excess tare/loss noticed for the last lot. Please verify and correct if required.');
+                        }
+                        //Add Excess Lot
+                        if(ctr == replicaCount - 1 && excessTareWeight > 0) {
+                            // Calculate the last Gross and Tare weights.
+                            if ((replicaCount * lotQty) < convertedItemQty) {
+                                // Compute the last gross qty.
+                                if (lastGrossWgt > 0) {
+                                    lastGrossWgt = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
+                                }
+
+                                // Compute the last net weight.
+                                lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
+                                lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt + excessTareWeight : excessTareWeight;
+                                lastNetWgt = lastGrossWgt - lastTareWgt;
+                            }
+
+                            var lastNewLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                strUnitMeasure: currentLot.get('strUnitMeasure'),
+                                intItemUnitMeasureId: currentLot.get('intItemUnitMeasureId'),
+                                dblNetWeight: ctr === replicaCount - 1 ? lastNetWgt : lotNetWgt,
+                                dblStatedNetPerUnit: currentLot.get('dblStatedNetPerUnit'),
+                                dblPhyVsStated: currentLot.get('dblPhyVsStated'),
+                                strOrigin: currentLot.get('strOrigin'),
+                                intSubLocationId: currentLot.get('intSubLocationId'),
+                                intStorageLocationId: currentLot.get('intStorageLocationId'),
+                                dblQuantity: 1,
+                                dblGrossWeight: ctr === replicaCount - 1 ? lastGrossWgt : lotGrossWgt,
+                                dblTareWeight: ctr === replicaCount - 1 ? lastTareWgt : lotTareWgt,
+                                dblCost: currentLot.get('dblCost'),
+                                intUnitPallet: currentLot.get('intUnitPallet'),
+                                dblStatedGrossPerUnit: currentLot.get('dblStatedGrossPerUnit'),
+                                dblStatedTarePerUnit: currentLot.get('dblStatedTarePerUnit'),
+                                strContainerNo: currentLot.get('strContainerNo'),
+                                intEntityVendorId: currentLot.get('intEntityVendorId'),
+                                strGarden: currentLot.get('strGarden'),
+                                strMarkings: currentLot.get('strMarkings'),
+                                strGrade: currentLot.get('strGrade'),
+                                intOriginId: currentLot.get('intOriginId'),
+                                intSeasonCropYear: currentLot.get('intSeasonCropYear'),
+                                strVendorLotId: currentLot.get('strVendorLotId:'),
+                                dtmManufacturedDate: currentLot.get('dtmManufacturedDate'),
+                                strRemarks: currentLot.get('strRemarks'),
+                                strCondition: currentLot.get('strCondition'),
+                                dtmCertified: currentLot.get('dtmCertified'),
+                                dtmExpiryDate: currentLot.get('dtmExpiryDate'),
+                                intSort: currentLot.get('intSor:'),
+                                strWeightUOM: currentLot.get('strWeightUOM'),
+                                intParentLotId: currentLot.get('intParentLotId'),
+                                strParentLotNumber: currentLot.get('strParentLotNumber'),
+                                strParentLotAlias: currentLot.get('strParentLotAlias'),
+                                strStorageLocation: currentLot.get('strStorageLocation'),
+                                strSubLocationName: currentLot.get('strSubLocationName'),
+                                dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
+                            });
+                                        
+                                //currentReceiptItem.tblICInventoryReceiptItemLots().add(lastNewLot);
+                                grdLotTracking.store.add(lastNewLot);
+                                //Notify user that the last lot has excess/loss
+                                iRely.Functions.showCustomDialog('information','ok','Excess tare/loss noticed for the last lot. Please verify and correct if required.');
+                            }
                     }
 
                     // call f function from above within a setTimeout.
@@ -5236,13 +5356,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                           dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
                       if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
                           dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
-
-                    if (iRely.Functions.isEmpty(item.get('dblNet'))) item.get('dblNet') = 0.00;
-                    if (iRely.Functions.isEmpty(item.get('dblOrderQty'))) item.get('dblOrderQty') = 0.00;
-                    if (iRely.Functions.isEmpty(item.get('dblContainerWeightPerQty'))) item.get('dblContainerWeightPerQty') = 0.00;
+                    var netQty = 0.00, orderQty = 0.00, wgtQty = 0.00;
+                    if (!iRely.Functions.isEmpty(item.get('dblNet'))) netQty = item.get('dblNet');
+                    if (!iRely.Functions.isEmpty(item.get('dblOrderQty'))) orderQty = item.get('dblOrderQty');
+                    if (!iRely.Functions.isEmpty(item.get('dblContainerWeightPerQty'))) wgtQty = item.get('dblContainerWeightPerQty');
                     
-                    dblNetReceivedWt = item.get('dblNet');
-                    dblNetShippedWt = item.get('dblOrderQty') * item.get('dblContainerWeightPerQty');
+                    dblNetReceivedWt = netQty;
+                    dblNetShippedWt = orderQty * wgtQty;
                     dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
                 }
             });
@@ -5256,17 +5376,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     validateWeightLoss: function (win, ReceiptItems) {
         win.viewModel.data.weightLoss = 0;
-        var lblWeightLossMsgValue = win.down('#lblWeightLossMsgValue');
-
+        var me = this;
         var action = function (weightLoss) {
             win.viewModel.set('weightLoss', weightLoss);
-            lblWeightLossMsgValue.setText(Ext.util.Format.number(weightLoss, '0,000.00'));
-            if(weightLoss == 0) {
-                lblWeightLossMsgValue.setStyle({color: 'black'});
-            }
-            else {
-                lblWeightLossMsgValue.setStyle({color: 'red'});
-            }
+            me.updateWeightLossText(win, false, weightLoss);
         };
 
         var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
@@ -5304,10 +5417,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                               if (itemDetailTax.strCalculationMethod === 'Percentage') {
                                  taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                               } else {
-                                 taxAmount = taxableAmount * itemDetailTax.dblRate;
+                                  //If calculation method is 'Unit', unit will be considered as 1 since other charges do not have quantity
+                                 taxAmount = itemDetailTax.dblRate;
                               }
                               if (itemDetailTax.ysnCheckoffTax) {
-                                 taxAmount = taxAmount * -1;
+                                 taxAmount = -(taxAmount);
+                              }
+
+                              if (charge.get('ysnPrice')) {
+                                  taxAmount = -(taxAmount);
                               }
 
                               taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
@@ -5401,7 +5519,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var task = new Ext.util.DelayedTask(function () {
                             me.doOtherChargeTaxCalculate(win);
                         });
-                        task.delay(1500);
+                        task.delay(1700);
                     }
                 },
                 failure: function (response) {
@@ -5602,6 +5720,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onReceiptTypeSelect: function (combo, records, eOpts) {
+        var win = combo.up('window'),
+            current = win.viewModel.data.current;
+
+            if (current) {
+                //Change Source Type to "None" for "Direct" or "Purchase Order" or "Transfer Order" Receipt Type
+                if(current.get('strReceiptType') == 'Direct' || current.get('strReceiptType') == 'Purchase Order' || current.get('strReceiptType') === 'Transfer Order') {
+                    current.set('intSourceType', 0);
+                    current.set('strSourceType', 'None');
+                }
+            }
+    },
+
     onCostUOMChange: function (combo, newValue, oldValue, eOpts) {
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
@@ -5783,6 +5914,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnChargeTaxDetails": {
                 click: this.onChargeTaxDetailsClick
             },
+            "#cboReceiptType": {
+                select: this.onReceiptTypeSelect
+            }
         })
     }
 

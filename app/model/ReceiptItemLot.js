@@ -25,7 +25,7 @@ Ext.define('Inventory.model.ReceiptItemLot', {
                             direction: 'DESC',
                             property: 'intSort'
                         },
-                        autoLoad: true,
+                        autoLoad: false,
                         pruneModifiedRecords: false,
                         proxy: {
                             api: {
@@ -43,6 +43,11 @@ Ext.define('Inventory.model.ReceiptItemLot', {
                             writer: {
                                 type: 'json',
                                 allowSingle: false
+                            },
+                            sortOnLoad: true,
+                            sorters: {
+                                direction: 'DESC',
+                                property: 'intSort'
                             }
                         }
                     }

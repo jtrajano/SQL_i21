@@ -15,7 +15,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'Inventory.store.BufferedStatus',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemWeightUOM',
-        'Inventory.store.BufferedUnitMeasure'
+        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedItemStockUOMViewTotals'
     ],
 
     stores: {
@@ -90,10 +91,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             type: 'icbufferedlot'
         },
         fromSubLocation: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemstockuomviewtotals'
         },
         fromStorageLocation: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemstockuomviewtotals'
         },
         toSubLocation: {
             type: 'smcompanylocationsublocationbuffered'
@@ -137,6 +138,12 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
     },
 
     formulas: {
+        destinationWeightsDisabled: function(get) {
+            if(!(get('current.ysnShipmentRequired') && get('current.strTransferType') === 'Location to Location') || get('current.ysnPosted') || get('current.intSourceType') === 1) {
+                return true;
+            }
+            return false;
+        },
         checkTransportPosting: function(get) {
             if (get('current.intSourceType') === 3) {
                 return true;

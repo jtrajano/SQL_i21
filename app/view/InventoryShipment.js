@@ -1060,9 +1060,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCustomerStorageId',
+                                                                                    dataIndex: 'intStorageTypeId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Customer Storage Id',
+                                                                                    text: 'Storage Type Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -1345,33 +1345,54 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colGrade',
-                                                                        width: 100,
-                                                                        dataIndex: 'strSubLocation',
-                                                                        text: 'Grade',
+                                                                        itemId: 'colDestWeights',
+                                                                        width: 120,
+                                                                        dataIndex: 'strDestinationWeights',
+                                                                        text: 'Weights',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCommodityAttributeId',
+                                                                                    dataIndex: 'intWeightGradeId',
                                                                                     dataType: 'numeric',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'intCommodityId',
-                                                                                    dataType: 'numeric',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strDescription',
+                                                                                    dataIndex: 'strWeightGradeDesc',
                                                                                     dataType: 'string',
-                                                                                    text: 'Grade',
+                                                                                    text: 'Weights',
                                                                                     flex: 1
                                                                                 }
                                                                             ],
-                                                                            itemId: 'cboGrade',
-                                                                            displayField: 'strDescription',
-                                                                            valueField: 'strDescription'
+                                                                            itemId: 'cboDestWeights',
+                                                                            displayField: 'strWeightGradeDesc',
+                                                                            valueField: 'strWeightGradeDesc'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colDestGrades',
+                                                                        width: 120,
+                                                                        dataIndex: 'intDestinationGradeId',
+                                                                        text: 'Grades',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intWeightGradeId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strWeightGradeDesc',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Grades',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboDestGrades',
+                                                                            displayField: 'strWeightGradeDesc',
+                                                                            valueField: 'strWeightGradeDesc'
                                                                         }
                                                                     },
                                                                     {
@@ -1988,7 +2009,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intVendorId',
+                                                                    dataIndex: 'intEntityVendorId',
                                                                     dataType: 'numeric',
                                                                     text: 'Vendor Id',
                                                                     hidden: true

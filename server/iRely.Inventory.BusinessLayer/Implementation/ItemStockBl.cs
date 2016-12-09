@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
+using System.Data.SqlClient;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -31,6 +32,33 @@ namespace iRely.Inventory.BusinessLayer
             {
                 data = data.AsQueryable(),
                 total = await query.CountAsync()
+            };
+        }
+        
+        public async Task<SearchResult> GetItemStockUOMViewTotals(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockUOMTotals>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> GetLocationStockOnHand(int intLocationId, int intItemId)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockUOM>()
+                .Where(w => w.intLocationId == intLocationId && w.intItemId == intItemId)
+                .GroupBy(o => o.intLocationId)
+                .Select(g => new { dblOnHand = g.Sum(i => i.dblOnHand) });
+            var data = await query.ToListAsync();
+
+            return new SearchResult() 
+            {
+                data = query.AsQueryable()
             };
         }
 

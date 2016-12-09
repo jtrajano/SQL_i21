@@ -248,11 +248,21 @@ namespace iRely.Inventory.BusinessLayer
                     {
                         // Validate locations
                         var rid = new SqlParameter("intTransactionId", receipt.intInventoryReceiptId);
-                        var ysnValidLocation = new SqlParameter("ysnValidLocation", SqlDbType.Bit);
+                        
+                        var ysnValidLocation = new SqlParameter("ysnValidLocation", SqlDbType.Bit);                        
                         ysnValidLocation.Direction = ParameterDirection.Output;
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT", rid, ysnValidLocation);
+
+                        var strItemNo = new SqlParameter("strItemNo", SqlDbType.NVarChar);
+                        strItemNo.Size = 50; 
+                        strItemNo.Direction = ParameterDirection.Output;
+
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT, @strItemNo OUTPUT", rid, ysnValidLocation, strItemNo);
                         if ((bool)ysnValidLocation.Value == false)
-                            throw new Exception("Please ensure that the line items and lots are located in the receipt's origin.");
+                        {
+                            //throw new Exception("Please ensure that the line items and lots are located in the receipt's origin.");
+                            var msg = System.String.Format("The sub location and storage location in {0} does not match.", strItemNo.Value);
+                            throw new Exception(msg); 
+                        }
 
                         await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICUpdateStatusOnReceiptSave @intReceiptNo"
