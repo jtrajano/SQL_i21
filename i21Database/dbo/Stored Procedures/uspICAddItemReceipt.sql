@@ -370,7 +370,7 @@ BEGIN
 				,intCostUOMId
 				,intDiscountSchedule
 				,ysnSubCurrency
-				,intPaymentOn
+				,intTaxGroupId
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -439,8 +439,8 @@ BEGIN
 										  RawData.dblNet
 				,intCostUOMId			= RawData.intCostUOMId
 				,intDiscountSchedule	= RawData.intDiscountSchedule
-				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0) 
-				,intPaymentOn			= ISNULL(RawData.intPaymentOn, ItemLocation.intPaymentOn)
+				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
+				,intTaxGroupId			= ISNULL(RawData.intTaxGroupId,RawHeaderData.intTaxGroupId)
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -514,6 +514,7 @@ BEGIN
 				,[ysnSubCurrency]
 				,[intCurrencyId]
 				,[intCent]
+				,[intTaxGroupId]
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -532,6 +533,7 @@ BEGIN
 				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
 				,[intCurrencyId]			= RawData.intCostCurrencyId
 				,[intCent]					= CostCurrency.intCent
+				,[intTaxGroupId]			= ISNULL(RawData.intTaxGroupId, RawHeaderData.intTaxGroupId)
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -592,7 +594,7 @@ BEGIN
 					,Receipt.intEntityVendorId
 					,ReceiptItem.intInventoryReceiptItemId
 					,Receipt.intShipFromId
-					,Receipt.intTaxGroupId
+					,ISNULL(ReceiptItem.intTaxGroupId, Receipt.intTaxGroupId)
 					,Receipt.intFreightTermId 
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

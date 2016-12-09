@@ -226,7 +226,7 @@ BEGIN
 			,Receipt.intEntityVendorId
 			,ReceiptItem.intInventoryReceiptItemId
 			,Receipt.intShipFromId
-			,Receipt.intTaxGroupId
+			,ISNULL(ReceiptItem.intTaxGroupId, Receipt.intTaxGroupId)
 			,Receipt.intFreightTermId 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -377,7 +377,7 @@ BEGIN
 				,intItemId					= ReceiptItem.intItemId
 
 				-- Taxes fields
-				,intTaxGroupId				= Receipt.intTaxGroupId
+				,intTaxGroupId				= ISNULL(ReceiptItem.intTaxGroupId, Receipt.intTaxGroupId)
 				,intTaxCodeId				= ItemTax.intTaxCodeId
 				,intTaxClassId				= ItemTax.intTaxClassId
 				,strTaxableByOtherTaxes		= ItemTax.strTaxableByOtherTaxes

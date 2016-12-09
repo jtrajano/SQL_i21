@@ -54,7 +54,7 @@ BEGIN
 					,ISNULL(Charge.intEntityVendorId, Receipt.intEntityVendorId)
 					,Charge.intInventoryReceiptChargeId
 					,Receipt.intShipFromId
-					,Receipt.intTaxGroupId
+					,ISNULL(Charge.intTaxGroupId, Receipt.intTaxGroupId)
 					,Receipt.intFreightTermId 
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 						ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
