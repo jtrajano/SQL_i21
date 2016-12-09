@@ -335,6 +335,15 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         }
     },
 
+    onItemDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.Item', combo.getValue());
+        }
+    },
+
     onCommodityDrilldown: function(combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
             iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
@@ -363,6 +372,9 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             },
             "#cboSubLocation": {
                 drilldown: this.onSubLocationDrilldown
+            },
+            "#cboItem": {
+                drilldown: this.onItemDrilldown
             },
             "#cboCommodity": {
                 drilldown: this.onCommodityDrilldown
