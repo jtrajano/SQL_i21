@@ -1,11 +1,12 @@
-﻿CREATE VIEW [dbo].[vyuCTYetToPriceFix]
+﻿CREATE VIEW [dbo].[vyuCTSearchPriceContract]
 
 AS 
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractHeaderId) AS INT) AS intUniqueId,* 
 	FROM
 	(
-		SELECT 		CAST (NULL AS INT) AS intPriceFixationId,
+		SELECT 		CAST (NULL AS INT) AS intPriceContractId,
+					CAST (NULL AS INT) AS intPriceFixationId,
 					intContractDetailId, 
 					intContractHeaderId,
 					strContractNumber,
@@ -59,7 +60,8 @@ AS
 		
 		UNION ALL
 		
-		SELECT 		CAST (NULL AS INT)			AS	intPriceFixationId,
+		SELECT 		CAST (NULL AS INT)			AS	intPriceContractId,
+					CAST (NULL AS INT)			AS	intPriceFixationId,
 					CAST (NULL AS INT)			AS	intContractDetailId, 
 					CD.intContractHeaderId,
 					CD.strContractNumber,
@@ -127,7 +129,8 @@ AS
 
 		UNION ALL
 
-		SELECT 		PF.intPriceFixationId,
+		SELECT 		PF.intPriceContractId,
+					PF.intPriceFixationId,
 					PF.intContractDetailId, 
 					PF.intContractHeaderId,
 					strContractNumber,
@@ -185,7 +188,8 @@ AS
 
 		UNION ALL
 		
-		SELECT 		PF.intPriceFixationId,
+		SELECT 		PF.intPriceContractId,
+					PF.intPriceFixationId,
 					CAST (NULL AS INT)			AS	intContractDetailId, 
 					CD.intContractHeaderId,
 					CD.strContractNumber,
@@ -256,5 +260,6 @@ AS
 					PF.intLotsHedged,
 					PF.intPriceFixationId,
 					CU.intCommodityUnitMeasureId,
-					CD.strEntityContract
+					CD.strEntityContract,
+					PF.intPriceContractId
 	)t

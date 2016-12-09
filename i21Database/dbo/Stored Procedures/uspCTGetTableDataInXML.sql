@@ -2,7 +2,8 @@
 	@TableName		NVARCHAR(MAX),
 	@Condition		NVARCHAR(MAX),
 	@XML			NVARCHAR(MAX) OUTPUT,
-	@TagName		NVARCHAR(MAX) = NULL
+	@TagName		NVARCHAR(MAX) = NULL,
+	@Columns		NVARCHAR(MAX) = NULL
 AS
 BEGIN
 	
@@ -16,6 +17,11 @@ BEGIN
 		SET @Condition = ' WHERE ' + @Condition + ' '
     END
 
+	IF ISNULL(@Columns,'') = ''
+	BEGIN
+		SET	@Columns = '*'
+	END
+
 	IF @TableName LIKE '#%'
 	BEGIN
 	 SELECT @TableName = object_name
@@ -28,7 +34,7 @@ BEGIN
 	DECLARE @SQL NVARCHAR(MAX)	
 	SET @SQL = ' 
 	SELECT @TableData = (												
-	SELECT * 												
+	SELECT '+@Columns+' ' +'   												
 	FROM '+@TableName+' '+@TagName + ISNULL(@Condition,'') +'												
 	FOR XML AUTO, ELEMENTS,root('''+@TagName+'s'') 												
 	)'	

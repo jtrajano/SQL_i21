@@ -27,7 +27,8 @@ AS
 					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
 			END																			AS	dblAppliedQty,
 			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)						AS	strSequenceNumber,
-			
+			C1.intCommodityUnitMeasureId												AS	intPriceCommodityUOMId,
+
 			--Header
 			CH.intContractHeaderId,	CH.intContractTypeId,		CH.intCommodityId,								
 			CH.strContractNumber,	CH.dtmContractDate,			CH.ysnSigned,					
@@ -38,24 +39,26 @@ AS
 			EY.intEntityId,										CO.strDescription		AS	strCommodityDescription
 			
 			
-	FROM	tblCTContractDetail		CD	
-	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
-	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-	JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId			
-	JOIN	tblCTContractType		TP	ON	TP.intContractTypeId		=	CH.intContractTypeId		LEFT
-	JOIN	tblICCommodity			CO	ON	CO.intCommodityId			=	CH.intCommodityId			LEFT
+	FROM	tblCTContractDetail			CD	
+	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
+	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
+	JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CH.intEntityId			
+	JOIN	tblCTContractType			TP	ON	TP.intContractTypeId		=	CH.intContractTypeId		LEFT
+	JOIN	tblICCommodity				CO	ON	CO.intCommodityId			=	CH.intCommodityId			LEFT
 			
-	JOIN	tblCTContractStatus		CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
-	JOIN	tblCTPricingType		PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
-	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId				LEFT
-	JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId				=	CD.intItemUOMId				LEFT
-	JOIN	tblICUnitMeasure		QM	ON	QM.intUnitMeasureId			=	QU.intUnitMeasureId			LEFT
-	JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
-	JOIN	tblICUnitMeasure		PM	ON	PM.intUnitMeasureId			=	PU.intUnitMeasureId			LEFT	
-	JOIN	tblICItemUOM			WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		LEFT
-	JOIN	tblICUnitMeasure		WM	ON	WM.intUnitMeasureId			=	WU.intUnitMeasureId			LEFT	
+	JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
+	JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
+	JOIN	tblICItem					IM	ON	IM.intItemId				=	CD.intItemId				LEFT
+	JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId				=	CD.intItemUOMId				LEFT
+	JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId			=	QU.intUnitMeasureId			LEFT
+	JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
+	JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId			=	PU.intUnitMeasureId			LEFT	
+	JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		LEFT
+	JOIN	tblICUnitMeasure			WM	ON	WM.intUnitMeasureId			=	WU.intUnitMeasureId			LEFT	
 	
-	JOIN	tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
-	JOIN	tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
-	JOIN	tblSMCurrency			CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
-	JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID			=	CU.intMainCurrencyId		
+	JOIN	tblRKFutureMarket			FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
+	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
+	JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
+	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID			=	CU.intMainCurrencyId		LEFT
+	JOIN	tblICCommodityUnitMeasure	C1	ON	C1.intCommodityId			=	CH.intCommodityId
+											AND	C1.intUnitMeasureId			=	PU.intUnitMeasureId

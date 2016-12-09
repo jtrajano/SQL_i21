@@ -14,7 +14,34 @@ BEGIN TRY
 			@intContractHeaderId	INT,
 			@intContractDetailId	INT,
 			@intUserId				INT,
-			@strRowState			NVARCHAR(50)
+			@strRowState			NVARCHAR(50),
+			@Condition				NVARCHAR(MAX),
+			@intPriceFixationDetailId	INT,
+			@intFutOptTransactionId		INT,
+			@intBrokerId				INT,
+			@intBrokerageAccountId		INT,
+			@intFutureMarketId			INT,
+			@intCommodityId				INT,
+			@intLocationId				INT,
+			@intTraderId				INT,
+			@intCurrencyId				INT,
+			@strBuySell					NVARCHAR(50),
+			@intNoOfContract			INT,
+			@intHedgeFutureMonthId		INT,
+			@dblHedgePrice				NUMERIC(18,6),
+			@intBookId					INT,
+			@intSubBookId				INT,
+			@ysnHedge					BIT,
+			@strAction					NVARCHAR(50) = '',
+			@intOutputId				INT
+
+
+	IF @strXML = 'Delete'
+	BEGIN
+		SET	@strAction = @strXML
+		SET @Condition = 'intPriceContractId = ' + STR(@intPriceContractId)
+		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTPriceFixation', @Condition, @strXML OUTPUT,null,'intPriceFixationId,intContractHeaderId,intContractDetailId,''Delete'' AS strRowState'
+	END
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML      
 
@@ -28,8 +55,6 @@ BEGIN TRY
 	WITH
 	(
 		intPriceFixationId	INT,
-		intContractHeaderId	INT,
-		intContractDetailId INT,
 		strRowState			NVARCHAR(50)
 	)      
 
@@ -40,20 +65,84 @@ BEGIN TRY
 	WHILE ISNULL(@intUniqueId,0) > 0
 	BEGIN
 		SELECT	@intPriceFixationId		=	NULL,
-				@intContractHeaderId	=	NULL,
-				@intContractDetailId	=	NULL,
-				@strRowState			=	NULL
+				@strRowState			=	NULL,
+				@intPriceFixationDetailId = NULL
 
 		SELECT	@intPriceFixationId		=	intPriceFixationId,
-				@intContractHeaderId	=	intContractHeaderId,
-				@intContractDetailId	=	intContractDetailId,
 				@strRowState			=	strRowState
 		FROM	#ProcessFixation 
 		WHERE	intUniqueId				=	 @intUniqueId
 		
-		IF @strRowState = 'Added'
+		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
+		
+		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0 AND @strAction <> 'Delete'
 		BEGIN
-			SELECT @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId AND intContractDetailId = @intContractDetailId
+		
+			SELECT	@intFutOptTransactionId	=	FD.intFutOptTransactionId,	
+					@intBrokerId			=	FD.intBrokerId,
+					@intBrokerageAccountId	=	FD.intBrokerageAccountId,
+					@intFutureMarketId		=	FD.intFutureMarketId,
+					@intCommodityId			=	CD.intCommodityId,
+					@intLocationId			=	CD.intCompanyLocationId,
+					@intTraderId			=	CD.intSalespersonId,
+					@intCurrencyId			=	CD.intCurrencyId,
+					@strBuySell				=	CASE WHEN CD.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,
+					@intNoOfContract		=	FD.dblNoOfLots,
+					@intHedgeFutureMonthId	=	FD.intHedgeFutureMonthId,
+					@dblHedgePrice			=	FD.dblHedgePrice,
+					@intBookId				=	CD.intBookId,
+					@intSubBookId			=	CD.intSubBookId,
+					@ysnHedge				=	FD.ysnHedge,
+					@intContractHeaderId	=	PF.intContractHeaderId,
+					@intContractDetailId	=	PF.intContractDetailId
+			FROM	tblCTPriceFixationDetail	FD
+			JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
+			JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
+			WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
+
+			IF @ysnHedge = 1 AND @strRowState <> 'Delete' AND @strXML <> 'Delete'
+			BEGIN
+				SET @strXML = '<root>'
+				IF ISNULL(@intFutOptTransactionId,0) > 0
+					SET @strXML = @strXML +  '<intFutOptTransactionId>' + STR(@intFutOptTransactionId) + '</intFutOptTransactionId>'
+				SET @strXML = @strXML +  '<intFutOptTransactionHeaderId>1</intFutOptTransactionHeaderId>'
+				SET @strXML = @strXML +  '<intContractHeaderId>' + STR(@intContractHeaderId) + '</intContractHeaderId>'
+				IF ISNULL(@intContractDetailId,0) > 0
+					SET @strXML = @strXML +  '<intContractDetailId>' + STR(@intContractDetailId) + '</intContractDetailId>'
+				SET @strXML = @strXML +  '<dtmTransactionDate>' + LTRIM(GETDATE()) + '</dtmTransactionDate>'
+				SET @strXML = @strXML +  '<intEntityId>' + STR(@intBrokerId) + '</intEntityId>'
+				SET @strXML = @strXML +  '<intBrokerageAccountId>' + STR(@intBrokerageAccountId) + '</intBrokerageAccountId>'
+				SET @strXML = @strXML +  '<intFutureMarketId>' + STR(@intFutureMarketId) + '</intFutureMarketId>'
+				SET @strXML = @strXML +  '<intInstrumentTypeId>1</intInstrumentTypeId>'
+				SET @strXML = @strXML +  '<intCommodityId>' + STR(@intCommodityId) + '</intCommodityId>'
+				SET @strXML = @strXML +  '<intLocationId>' + STR(@intLocationId) + '</intLocationId>'
+				SET @strXML = @strXML +  '<intTraderId>' + STR(@intTraderId) + '</intTraderId>'
+				SET @strXML = @strXML +  '<intCurrencyId>' + STR(@intCurrencyId) + '</intCurrencyId>'
+				SET @strXML = @strXML +  '<intSelectedInstrumentTypeId>1</intSelectedInstrumentTypeId>'
+				SET @strXML = @strXML +  '<strBuySell>' + @strBuySell + '</strBuySell>'
+				SET @strXML = @strXML +  '<intNoOfContract>' + STR(@intNoOfContract) + '</intNoOfContract>'
+				SET @strXML = @strXML +  '<intFutureMonthId>' + STR(@intHedgeFutureMonthId) + '</intFutureMonthId>'
+				SET @strXML = @strXML +  '<dblPrice>' + STR(@dblHedgePrice) + '</dblPrice>'
+				SET @strXML = @strXML +  '<strStatus>' + 'Filled' + '</strStatus>'
+				SET @strXML = @strXML +  '<dtmFilledDate>' + LTRIM(GETDATE()) + '</dtmFilledDate>'
+				if ISNULL(@intBookId,0) > 0
+					SET @strXML = @strXML +  '<intBookId>' + STR(@intBookId) + '</intBookId>'
+				if ISNULL(@intSubBookId,0) > 0
+					SET @strXML = @strXML +  '<intSubBookId>' + STR(@intSubBookId) + '</intSubBookId>'
+				SET @strXML = @strXML +  '</root>'
+
+				EXEC uspRKAutoHedge @strXML,@intOutputId OUTPUT
+
+				IF ISNULL(@intFutOptTransactionId,0) = 0
+					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+			END
+			
+			IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
+			BEGIN
+				EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
+			END
+			 
+			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 		END
 		
 		EXEC uspCTPriceFixationSave @intPriceFixationId,@strRowState,@intUserId

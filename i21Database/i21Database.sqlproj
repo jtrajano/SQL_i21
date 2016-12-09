@@ -2312,7 +2312,7 @@
     <Build Include="dbo\Views\vyuTMSiteEventHistory.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityCompanyLocationRolePermission.sql" />
     <Build Include="dbo\Tables\tblMigrationLog.sql" />
-    <Build Include="dbo\Views\vyuCTYetToPriceFix.sql" />
+    <Build Include="dbo\Views\vyuCTSearchPriceContract.sql" />
     <Build Include="dbo\Views\vyuTMSiteCustomer.sql" />
     <Build Include="dbo\Tables\tblHDTicketLink.sql" />
     <Build Include="dbo\Tables\tblHDTicketLinkType.sql" />
@@ -2807,7 +2807,7 @@
     <Build Include="dbo\Tables\tblCTInvPlngReportMaster.sql" />
     <Build Include="dbo\Tables\tblCTInvPlngReportMaterial.sql" />
     <Build Include="dbo\Tables\tblCTInvPlngReportAttributeValue.sql" />
-    <Build Include="dbo\Views\vyuCTPriceFixationDetailView.sql" />
+    <Build Include="dbo\Views\vyuCTSearchPriceContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Generate.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupIdForVendor.sql" />

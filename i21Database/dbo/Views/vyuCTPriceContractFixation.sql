@@ -32,12 +32,14 @@ AS
 
 			CD.dblQuantity,
 			CD.strItemUOM,
+			CD.intItemUOMId,
 			CD.strFutMarketName AS strFutureMarket,
 			CD.strFutureMonth,
 			CD.intContractSeq,
 			CD.strContractType,
 			CD.strEntityName,
 			CD.strContractNumber,
+			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId, CD.intPriceCommodityUOMId ,CD.dblBasis)	AS dblConvertedBasis,
 			CY.strCurrency	AS strMarketCurrency,
 			UM.strUnitMeasure AS strMarketUOM
 

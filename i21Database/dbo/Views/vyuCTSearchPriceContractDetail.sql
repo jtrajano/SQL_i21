@@ -1,9 +1,10 @@
-﻿CREATE VIEW [dbo].[vyuCTPriceFixationDetailView]
+﻿CREATE VIEW [dbo].[vyuCTSearchPriceContractDetail]
 
 AS 
 
 
-	SELECT	PD.intPriceFixationDetailId,
+	SELECT	PF.intPriceContractId,
+			PD.intPriceFixationDetailId,
 			PD.intConcurrencyId,
 			PD.intPriceFixationId,
 			PD.strTradeNo,
@@ -36,9 +37,10 @@ AS
 			BA.strAccountNumber,
 			MA.strOptMarketName,
 			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') AS strPricingMonth,
-			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth
+			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth,
+			CU.intCommodityId
 
-	FROM tblCTPriceFixationDetail PD
+	FROM	tblCTPriceFixationDetail PD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	PD.intBrokerId				LEFT
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId			LEFT
