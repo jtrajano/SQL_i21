@@ -31,4 +31,5 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[intContractHeaderId] INT NULL															-- Contract Header
 	,[intContractDetailId] INT NULL															-- Contract Detail
 	,[ysnSubCurrency] BIT NULL 
+	,[intTaxGroupId] INT NULL																-- Overriding Tax Group Id per other charge item.
 )
