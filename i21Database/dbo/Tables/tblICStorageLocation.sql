@@ -36,6 +36,7 @@ Type the overview for the table here.
 		[intRelativeY] INT NULL DEFAULT ((0)), 
 		[intRelativeZ] INT NULL DEFAULT ((0)), 
 		[intCommodityId] INT NULL, 
+		[intItemId] INT NULL,
 		[dblPackFactor] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblEffectiveDepth] NUMERIC(18, 6) DEFAULT ((0)),
 		[dblUnitPerFoot] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -46,6 +47,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICStorageLocation_tblICStorageUnitType] FOREIGN KEY ([intStorageUnitTypeId]) REFERENCES [tblICStorageUnitType]([intStorageUnitTypeId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblICRestriction] FOREIGN KEY ([intRestrictionId]) REFERENCES [tblICRestriction]([intRestrictionId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
+		CONSTRAINT [FK_tblICStorageLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblICUnitMeasure] FOREIGN KEY ([intBatchSizeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 		CONSTRAINT [FK_tblICStorageLocation_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) 
