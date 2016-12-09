@@ -7174,7 +7174,6 @@
                             "cn": [
                                 {
                                     "id": "d41a0da5-33be-4922-90cc-5b43036d42e8",
-                                    "expanded": false,
                                     "cn": [
                                         {
                                             "id": "860b68fe-8a90-4eee-b7dd-06c9a9de5bf1"
@@ -7217,6 +7216,7 @@
                                                 },
                                                 {
                                                     "id": "6756f793-bfa9-4422-af5e-2d928febc376",
+                                                    "expanded": false,
                                                     "cn": [
                                                         {
                                                             "id": "b5a27cc2-5588-4dfc-8314-9681d922eb09",
@@ -7263,6 +7263,9 @@
                                                     "cn": [
                                                         {
                                                             "id": "31787237-f06e-4742-903a-0e4c3573d3ce"
+                                                        },
+                                                        {
+                                                            "id": "a4560ce4-bb14-4fef-b3b2-0c7b864a0024"
                                                         },
                                                         {
                                                             "id": "51136bd2-8976-42fb-82c4-eac169772bba"
@@ -10229,15 +10232,16 @@
     },
     "tabState": {
         "openTabs": [
-            "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
+            "b6b8ef41-1eb1-4854-99ef-98f5a7167844",
+            "af43af41-ae3a-4659-bd76-e0a2c57eaced"
         ]
     },
     "canvasState": {
-        "topInstance": "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
+        "topInstance": "af43af41-ae3a-4659-bd76-e0a2c57eaced"
     },
     "inspectorState": {
-        "topInstance": "b6b8ef41-1eb1-4854-99ef-98f5a7167844",
-        "selectedInstance": "e87981ce-4c10-408f-86a5-0ad0052c0bb2"
+        "topInstance": "af43af41-ae3a-4659-bd76-e0a2c57eaced",
+        "selectedInstance": "a4560ce4-bb14-4fef-b3b2-0c7b864a0024"
     },
     "editMode": "design",
     "userSettings": {

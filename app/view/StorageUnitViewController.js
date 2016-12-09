@@ -40,6 +40,23 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             bind: {
                 title: 'Storage Location - {current.strName}'
             },
+            cboItem: {
+                value: '{current.intItemId}',
+                store: '{items}',
+                defaultFilters: [
+                    {
+                        column: 'strType',
+                        value: 'Inventory|^|Raw Material|^|Finished Good|^|Bundle|^|Kit',
+                        conjunction: 'Or',
+                        condition: 'eq'
+                    },
+                    {
+                        column: 'intLocationId',
+                        value: '{current.intLocationId}',
+                        conjunction: 'And',
+                        condition: 'eq'
+                    }]
+            },
             txtName: '{current.strName}',
             txtDescription: '{current.strDescription}',
             cboUnitType: {

@@ -500,11 +500,47 @@ Ext.define('Inventory.view.StorageUnit', {
                                                         }
                                                     ],
                                                     enableDrillDown: true,
+                                                    hidden: true,
                                                     itemId: 'cboCommodity',
                                                     fieldLabel: 'Commodity',
                                                     labelWidth: 105,
                                                     displayField: 'strCommodityCode',
                                                     valueField: 'intCommodityId'
+                                                },
+                                                {
+                                                    xtype: 'gridcombobox',
+                                                    columns: [
+                                                        {
+                                                            dataIndex: 'intItemId',
+                                                            dataType: 'numeric',
+                                                            text: 'Item Id',
+                                                            hidden: true
+                                                        },
+                                                        {
+                                                            dataIndex: 'strItemNo',
+                                                            dataType: 'string',
+                                                            text: 'Item',
+                                                            flex: 1
+                                                        },
+                                                        {
+                                                            dataIndex: 'strType',
+                                                            dataType: 'string',
+                                                            text: 'Type',
+                                                            flex: 1
+                                                        },
+                                                        {
+                                                            dataIndex: 'strDescription',
+                                                            dataType: 'string',
+                                                            text: 'Description',
+                                                            flex: 1
+                                                        }
+                                                    ],
+                                                    enableDrillDown: true,
+                                                    itemId: 'cboItem',
+                                                    fieldLabel: 'Item',
+                                                    labelWidth: 105,
+                                                    displayField: 'strItemNo',
+                                                    valueField: 'intItemId'
                                                 },
                                                 {
                                                     xtype: 'numberfield',
