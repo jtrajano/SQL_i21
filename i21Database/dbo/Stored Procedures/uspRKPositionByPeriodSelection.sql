@@ -20,7 +20,7 @@
 	@ysnSummary bit = null,
 	@intItemId int = null
 AS
-select @intCommodityId
+
 DECLARE @intCent int
 DECLARE @ysnSubCurrency int
 DECLARE @intMainCurrencyId int
