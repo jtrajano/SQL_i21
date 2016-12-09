@@ -829,8 +829,8 @@ namespace iRely.Inventory.BusinessLayer
                     using (SqlCommand command = new SqlCommand("uspICChangeItemStockUOM", conn))
                     {
                         command.Parameters.Add(new SqlParameter("@intItemId", ItemId));
-                        command.Parameters.Add(new SqlParameter("@intItemUOMAsNewStockUnit", ItemUOMId));
-                        command.Parameters.Add(new SqlParameter("@entitySecurityUserId", iRely.Common.Security.GetEntityId()));
+                        command.Parameters.Add(new SqlParameter("@NewStockItemUOMId", ItemUOMId));
+                        command.Parameters.Add(new SqlParameter("@intEntitySecurityUserId", iRely.Common.Security.GetEntityId()));
                         
                         command.CommandType = System.Data.CommandType.StoredProcedure;
                         command.ExecuteNonQuery();
