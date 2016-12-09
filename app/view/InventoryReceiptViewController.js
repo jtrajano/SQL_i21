@@ -4600,6 +4600,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (combo.itemId === 'cboChargeTaxGroup') {
             this.doOtherChargeTaxCalculate(win);
         }
+
+        if (combo.itemId === 'cboCostVendor') {
+            //Do not compute tax for Third Party Vendor
+            if(current.get('intEntityVendorId') !== masterRecord.get('intEntityVendorId')) {
+                current.set('intTaxGroupId', null);
+                current.set('strTaxGroup', null);
+                current.set('dblTax', 0);
+            }
+        }
     },
 
     onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
@@ -5959,6 +5968,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onReceiptTypeSelect
             },
             "#cboChargeTaxGroup": {
+                select: this.onChargeSelect
+            },
+            "#cboCostVendor": {
                 select: this.onChargeSelect
             },
         })
