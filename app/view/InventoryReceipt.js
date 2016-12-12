@@ -1456,9 +1456,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                hidden: true,
                                                                                 itemId: 'colGrade',
                                                                                 width: 90,
                                                                                 dataIndex: 'strDescription',
+                                                                                hideable: false,
                                                                                 text: 'Grade',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',
@@ -2084,9 +2086,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                hidden: true,
                                                                                 itemId: 'colLotGrade',
                                                                                 width: 75,
                                                                                 dataIndex: 'string',
+                                                                                hideable: false,
                                                                                 text: 'Grade',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',

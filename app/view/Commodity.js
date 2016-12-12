@@ -1007,6 +1007,7 @@ Ext.define('Inventory.view.Commodity', {
                                                         xtype: 'advancefiltergrid',
                                                         includeFullTextSearch: false,
                                                         flex: 1,
+                                                        hidden: true,
                                                         itemId: 'grdGrade',
                                                         margin: '0 5 0 0',
                                                         title: 'Grades',

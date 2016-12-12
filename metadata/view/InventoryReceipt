@@ -2923,6 +2923,8 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "dataIndex": "strDescription",
+                                                                        "hidden": true,
+                                                                        "hideable": false,
                                                                         "itemId": "colGrade",
                                                                         "text": "Grade",
                                                                         "width": 90
@@ -4328,6 +4330,8 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
+                                                                        "hidden": true,
+                                                                        "hideable": false,
                                                                         "itemId": "colLotGrade",
                                                                         "text": "Grade",
                                                                         "width": 75

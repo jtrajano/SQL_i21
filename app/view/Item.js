@@ -5180,6 +5180,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        hidden: true,
                                                                         itemId: 'cboGrade',
                                                                         fieldLabel: 'Grade',
                                                                         displayField: 'strDescription',
