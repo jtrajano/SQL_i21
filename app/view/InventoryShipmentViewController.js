@@ -2039,7 +2039,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         
         if (combo.itemId === 'cboOtherCharge') {
             current.set('intChargeId', record.get('intItemId'));
-            current.set('dblRate', record.get('dblAmount'));
             current.set('intCostUOMId', record.get('intCostUOMId'));
             current.set('strCostMethod', record.get('strCostMethod'));
             current.set('strCostUOM', record.get('strCostUOM'));
@@ -2065,6 +2064,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (combo.itemId === 'cboChargeCurrency') { 
             current.set('intCurrencyId', record.get('intCurrencyID'));
             current.set('strCurrency', record.get('strCurrency'));
+        }
+
+        if(record.get('strCostMethod') === 'Amount') {
+            current.set('dblAmount', record.get('dblAmount'));
+        }
+        else {
+            current.set('dblRate', record.get('dblAmount'));
         }
     },
 
