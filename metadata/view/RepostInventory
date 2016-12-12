@@ -19,7 +19,7 @@
         "reference": null,
         "title": "Repost Inventory",
         "titleCollapse": false,
-        "width": 554
+        "width": 438
     },
     "name": "MyWindow",
     "configAlternates": {
@@ -155,7 +155,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "displayField": "strMonth",
+                                                "displayField": "strStartMonth",
                                                 "fieldLabel": "Fiscal Month",
                                                 "forceSelection": true,
                                                 "itemId": "cboFiscalMonth",
@@ -164,34 +164,10 @@
                                                     "value"
                                                 ],
                                                 "reference": "fiscalmonth",
-                                                "valueField": "strMonth"
+                                                "valueField": "strStartMonth"
                                             },
                                             "name": "MyComboBox7",
                                             "designerId": "0c339596-eedd-4229-91be-ee47d5adaa20"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "designer|createAlias": "datefield",
-                                                "fieldLabel": "Fiscal Month",
-                                                "hideLabel": true,
-                                                "itemId": "cboFiscalDate",
-                                                "layout|flex": 1,
-                                                "layout|margins": "",
-                                                "maxWidth": null,
-                                                "padding": "0 0 0 5",
-                                                "publishes": [
-                                                    "value"
-                                                ],
-                                                "reference": "fiscaldate"
-                                            },
-                                            "name": "MyComboBox",
-                                            "designerId": "32cddb8f-a209-4e43-817f-1292426b203f"
                                         }
                                     ]
                                 },
@@ -252,7 +228,7 @@
                                             "}]"
                                         ],
                                         "designer|createAlias": "gridcombobox",
-                                        "displayField": "strDescription",
+                                        "displayField": "strItemNo",
                                         "fieldLabel": "Item (optional)",
                                         "itemId": "cboItem",
                                         "layout|anchor": "100%",
@@ -288,7 +264,7 @@
                                         "fieldBodyCls": null,
                                         "fieldCls": null,
                                         "fieldLabel": null,
-                                        "fieldStyle": "font-size: 8pt; color: gray; font-style: italic;",
+                                        "fieldStyle": "font-size: 8pt; font-style: italic;",
                                         "hideEmptyLabel": false,
                                         "hideLabel": true,
                                         "itemId": "lblDescription",

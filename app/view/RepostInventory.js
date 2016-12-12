@@ -29,7 +29,7 @@ Ext.define('Inventory.view.RepostInventory', {
     hidden: false,
     margin: '',
     maxHeight: 225,
-    width: 554,
+    width: 438,
     layout: 'fit',
     title: 'Repost Inventory',
     titleCollapse: false,
@@ -90,20 +90,9 @@ Ext.define('Inventory.view.RepostInventory', {
                                             reference: 'fiscalmonth',
                                             itemId: 'cboFiscalMonth',
                                             fieldLabel: 'Fiscal Month',
-                                            displayField: 'strMonth',
+                                            displayField: 'strStartMonth',
                                             forceSelection: true,
-                                            valueField: 'strMonth'
-                                        },
-                                        {
-                                            xtype: 'datefield',
-                                            flex: 1,
-                                            margins: '',
-                                            publishes: 'value',
-                                            reference: 'fiscaldate',
-                                            itemId: 'cboFiscalDate',
-                                            padding: '0 0 0 5',
-                                            fieldLabel: 'Fiscal Month',
-                                            hideLabel: true
+                                            valueField: 'strStartMonth'
                                         }
                                     ]
                                 },
@@ -150,7 +139,7 @@ Ext.define('Inventory.view.RepostInventory', {
                                     reference: 'item',
                                     itemId: 'cboItem',
                                     fieldLabel: 'Item (optional)',
-                                    displayField: 'strDescription',
+                                    displayField: 'strItemNo',
                                     valueField: 'strItemNo'
                                 },
                                 {
@@ -161,7 +150,7 @@ Ext.define('Inventory.view.RepostInventory', {
                                     hideEmptyLabel: false,
                                     hideLabel: true,
                                     value: 'Please fill out the required fields above.',
-                                    fieldStyle: 'font-size: 8pt; color: gray; font-style: italic;'
+                                    fieldStyle: 'font-size: 8pt; font-style: italic;'
                                 }
                             ]
                         }
