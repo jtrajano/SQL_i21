@@ -4601,6 +4601,30 @@
     <Build Include="dbo\Functions\fnRoundBanker.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\25_UpdateTransactionAccountIds.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemAccount.sql" />
+    <Build Include="dbo\User Defined Types\TFProductCodes.sql" />
+    <Build Include="dbo\User Defined Types\TFTerminalControlNumbers.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponents.sql" />
+    <Build Include="dbo\User Defined Types\TFFilingPackets.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeProductCodes.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeTerminalControlNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeReportingComponents.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeFilingPackets.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\01_TaxAuthority.sql" />
+    <Build Include="dbo\User Defined Types\TFTaxCategories.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeTaxCategories.sql" />
+    <Build Include="dbo\User Defined Types\TFOriginDestinationStates.sql" />
+    <Build Include="dbo\User Defined Types\TFTaxCriteria.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeTaxCriteria.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeOriginDestinationState.sql" />
+    <Build Include="dbo\User Defined Types\TFValidProductCodes.sql" />
+    <Build Include="dbo\User Defined Types\TFValidOriginStates.sql" />
+    <Build Include="dbo\User Defined Types\TFValidDestinationStates.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeValidProductCodes.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeValidDestinationStates.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeValidOriginStates.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponentOutputDesigners.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeReportingComponentConfigurations.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeReportingComponentOutputDesigners.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4731,6 +4755,10 @@
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
     <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\IN_Indiana.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponentConfigurations.sql">
+      <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
