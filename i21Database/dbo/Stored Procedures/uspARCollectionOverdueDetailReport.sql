@@ -5,10 +5,10 @@
 	
 AS
 
-DECLARE @dtmDateFromLocal			DATETIME = NULL,
-		@dtmDateToLocal				DATETIME = NULL,
-		@strSalespersonLocal		NVARCHAR(100) = NULL
-		
+DECLARE @dtmDateFromLocal			DATETIME,  
+		@dtmDateToLocal				DATETIME,  
+		@strSalespersonLocal		NVARCHAR(100)  
+				
 SET @dtmDateFromLocal			= @dtmDateFrom
 SET	@dtmDateToLocal				= @dtmDateTo
 SET @strSalespersonLocal		= @strSalesperson
@@ -22,6 +22,7 @@ IF @dtmDateToLocal IS NULL
 IF RTRIM(LTRIM(@strSalespersonLocal)) = ''
     SET @strSalespersonLocal = NULL
 
+SET NOCOUNT ON;
 SELECT A.strInvoiceNumber
      , A.strRecordNumber
      , A.intInvoiceId
@@ -436,3 +437,5 @@ AND A.dblAvailableCredit = B.dblAvailableCredit
 AND A.intPaymentId		 = B.intPaymentId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit <> 0
+
+SET NOCOUNT OFF;
