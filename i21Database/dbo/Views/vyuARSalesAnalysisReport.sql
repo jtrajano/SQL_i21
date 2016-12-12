@@ -14,6 +14,7 @@ SELECT
 	  , intCommodityId			= IC.intCommodityId
 	  , intCategoryId			= IC.intCategoryId
 	  , intEntitySalespersonId	= SAR.intEntitySalespersonId
+	  , intTicketId				= SAR.intTicketId
 	  , strTransactionType		= SAR.strTransactionType
 	  , strType					= SAR.strType
 	  , dblQtyOrdered			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyOrdered, 0) ELSE ISNULL(SAR.dblQtyOrdered, 0) END
@@ -64,8 +65,8 @@ SELECT
 	 , strShipTo				= RTRIM(SAR.strShipToLocationName)
 	 , strSiteNumber			= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0')
 	 , strSiteDescription		= TMS.strDescription
-	 , strTicketNumbers			= CASE WHEN SAR.strTransactionType <> 'Order' THEN dbo.fnARGetScaleTicketNumbersFromInvoice(SAR.intTransactionId) ELSE NULL END
-	 , strCustomerReferences	= CASE WHEN SAR.strTransactionType <> 'Order' THEN dbo.fnARGetCustomerReferencesFromInvoice(SAR.intTransactionId) ELSE NULL END
+	 , strTicketNumber			= SCT.strTicketNumber
+	 , strCustomerReference		= SCT.strCustomerReference
 FROM
 (
 --NON SOftware
@@ -99,6 +100,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strBillToLocationName		= ARI.strBillToLocationName
 	  , strShipToLocationName		= ARI.strShipToLocationName
 	  , intSiteId					= ARID.intSiteId
+	  , intTicketId					= ARID.intTicketId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -214,6 +216,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strBillToLocationName		= SO.strBillToLocationName
 	 , strShipToLocationName		= SO.strShipToLocationName
 	 , intSiteId					= NULL
+	 , intTicketId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	INNER JOIN 
@@ -346,6 +349,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strBillToLocationName		= ARI.strBillToLocationName
 	  , strShipToLocationName		= ARI.strShipToLocationName
 	  , intSiteId					= ARID.intSiteId
+	  , intTicketId					= ARID.intTicketId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -462,6 +466,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strBillToLocationName		= SO.strBillToLocationName
 	 , strShipToLocationName		= SO.strShipToLocationName
 	 , intSiteId					= NULL
+	 , intTicketId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	INNER JOIN 
@@ -595,6 +600,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strBillToLocationName		= ARI.strBillToLocationName
 	  , strShipToLocationName		= ARI.strShipToLocationName
 	  , intSiteId					= ARID.intSiteId
+	  , intTicketId					= ARID.intTicketId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -711,6 +717,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strBillToLocationName		= SO.strBillToLocationName
 	 , strShipToLocationName		= SO.strShipToLocationName
 	 , intSiteId					= NULL
+	 , intTicketId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	INNER JOIN 
@@ -854,3 +861,5 @@ LEFT JOIN
 		ON SAR.intItemUOMId = UOM.intItemUOMId		
 LEFT JOIN 
 	tblTMSite TMS ON SAR.intSiteId = TMS.intSiteID
+LEFT JOIN
+	tblSCTicket SCT ON SAR.intTicketId = SCT.intTicketId
