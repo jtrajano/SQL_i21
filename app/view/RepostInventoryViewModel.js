@@ -3,6 +3,7 @@ Ext.define('Inventory.view.RepostInventoryViewModel', {
     alias: 'viewmodel.icrepostinventory',
     requires: [
         'Inventory.store.Item',
+        'Inventory.store.FiscalPeriod'
     ],
 
     stores: {
@@ -21,34 +22,12 @@ Ext.define('Inventory.view.RepostInventoryViewModel', {
             type: 'icitem'
         },
         fiscalMonths: {
-            data: [
-                { intId: 1, strMonth: 'January' }, 
-                { intId: 2, strMonth: 'February' },
-                { intId: 3, strMonth: 'March' },
-                { intId: 4, strMonth: 'April' },
-                { intId: 5, strMonth: 'May' },
-                { intId: 6, strMonth: 'June' },
-                { intId: 7, strMonth: 'July' },
-                { intId: 8, strMonth: 'August' },
-                { intId: 9, strMonth: 'September' },
-                { intId: 10, strMonth: 'October' },
-                { intId: 11, strMonth: 'November' },
-                { intId: 12, strMonth: 'December' }
-            ],
-            fields: [
-                { name: 'intId' },
-                { name: 'strMonth' }
-            ]
+            type: 'icfiscalperiod'
         }
     },
 
     data: {
         selectedItem: null
-        // current: {
-        //     strMonth: null,
-        //     strItemNo: null,
-        //     strPostOrder: 'Perpetual'
-        // }
     },
 
     formulas: {
@@ -62,6 +41,20 @@ Ext.define('Inventory.view.RepostInventoryViewModel', {
             } catch(e) {}
             var year = get('current.dtmDate').getFullYear();
             return 'Repost inventory for ' + item + ' in a ' + order.toLowerCase() + ' order from ' + month + ' ' + year + ' onwards.';
+        },
+        prompt: function(get) {
+            var month = get('current.strMonth');
+            var order = get('current.strPostOrder');
+            var item = 'all items';
+            try {
+                if(get('current.strItemNo'))
+                    item = '"' + get('current.strItemNo') + '" item';
+            } catch(e) {}
+            var year = get('current.dtmDate').getFullYear();
+            return 'Inventory will be rebuilt for ' + item + ' from ' + month + '-' + moment(get('current.dtmDate')).format('l') + ' onwards. Do you want to continue?';
+        },
+        canPost: function(get) {
+            return get('current.strPostOrder') && get('current.strMonth'); 
         }
     }
 });

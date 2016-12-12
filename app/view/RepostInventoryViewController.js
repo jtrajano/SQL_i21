@@ -43,6 +43,9 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
                         condition: 'eq'
                     }
                 ]
+            },
+            btnRepost: {
+                disabled: '{!canPost}'
             }
         }
     },
@@ -53,11 +56,8 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
 
     onMonthSelect: function (combo, record) {
         var current = this.getView().viewModel.data.current;
-        var month = _.findWhere(months, { strMonth: record.data.strMonth });
-        var date = current.get('dtmDate');
-        var newDate = new Date(date.getFullYear(), month.intId - 1, 1); //date.getDate()
-        current.set('intMonth', month.intId);
-        current.set('dtmDate', newDate);
+        current.set('intMonth', record.data.intStartMonth);
+        current.set('dtmDate', record.data.dtmStartDate);
     },
 
     onRepostClick: function (e) {
@@ -65,11 +65,22 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
         var vm = me.getView().viewModel;
         var win = e.up('window');
         var combo = win.down('#cboFiscalDate');
+        var cboFiscalMonth = win.down('#cboFiscalMonth');
+
         var jsondata = {
-            dtmStartDate: combo.rawValue,
+            dtmStartDate: moment(vm.data.current.data.dtmDate).format('l'),
             strItemNo: vm.data.current.data.strItemNo,
             isPeriodic: vm.data.current.data.strPostOrder === 'Periodic'
         };
+        var callback = function (button) {
+            if (button === 'yes') {
+                me.repost(jsondata);
+            }
+        };
+        iRely.Functions.showCustomDialog('question', 'yesno', vm.data.prompt, callback);
+    },
+
+    repost: function (jsondata) {
         jQuery.ajax({
             url: '../Inventory/api/InventoryValuation/RepostInventory',
             method: "post",
@@ -83,7 +94,7 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
                 iRely.Msg.showWait('Reposting inventory...');
             },
             success: function (data, status, jqXHR) {
-                if(data.success)
+                if (data.success)
                     iRely.Functions.showInfoDialog(data.message);
                 else
                     iRely.Functions.showErrorDialog(data.message);
@@ -96,13 +107,6 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
         });
     },
 
-    onDateSelect: function (picker, date) {
-        var current = this.getView().viewModel.data.current;
-        current.set('intMonth', date.getMonth() + 1);
-        var month = _.findWhere(months, { intId: date.getMonth() + 1 });
-        current.set('strMonth', month.strMonth);
-    },
-
     init: function (cfg) {
         this.control({
             '#cboItem': {
@@ -110,9 +114,6 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
             },
             '#cboFiscalMonth': {
                 select: this.onMonthSelect
-            },
-            '#cboFiscalDate': {
-                select: this.onDateSelect
             },
             '#btnRepost': {
                 click: this.onRepostClick
