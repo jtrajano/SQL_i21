@@ -64,6 +64,8 @@ SELECT
 	 , strShipTo				= RTRIM(SAR.strShipToLocationName)
 	 , strSiteNumber			= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0')
 	 , strSiteDescription		= TMS.strDescription
+	 , strTicketNumbers			= CASE WHEN SAR.strTransactionType <> 'Order' THEN dbo.fnARGetScaleTicketNumbersFromInvoice(SAR.intTransactionId) ELSE NULL END
+	 , strCustomerReferences	= CASE WHEN SAR.strTransactionType <> 'Order' THEN dbo.fnARGetCustomerReferencesFromInvoice(SAR.intTransactionId) ELSE NULL END
 FROM
 (
 --NON SOftware

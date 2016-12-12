@@ -47,6 +47,8 @@ SELECT
 	,dblTermAPR						= SMT.dblAPR	
 	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = ARI.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + ARI.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	,dblTotalTermDiscount			= ARI.dblTotalTermDiscount
+	,strTicketNumbers				= dbo.fnARGetScaleTicketNumbersFromInvoice(ARI.intInvoiceId)
+	,strCustomerReferences			= dbo.fnARGetCustomerReferencesFromInvoice(ARI.intInvoiceId)
 	,ysnExcludeForPayment			= CASE WHEN ARI.strTransactionType = 'Customer Prepayment' 
 										AND (EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intInvoiceId = ARI.intInvoiceId AND (ISNULL(ysnRestricted, 0) = 1 OR ISNULL(intContractDetailId, 0) <> 0)) 
 										--OR NOT EXISTS(SELECT NULL FROM tblARInvoice ARI1 INNER JOIN tblARPayment ARP ON ARI1.intPaymentId  = ARP.intPaymentId AND ARI1.intInvoiceId = ARI.intInvoiceId  AND ARP.ysnPosted = 1 AND ARI1.strTransactionType = 'Customer Prepayment'

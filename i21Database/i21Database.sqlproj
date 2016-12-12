@@ -4611,6 +4611,10 @@
     <Build Include="dbo\Tables\tblMFRecipeGuide.sql" />
     <Build Include="dbo\Tables\tblMFRecipeGuideNutrient.sql" />
     <Build Include="dbo\Tables\tblMFNutrient.sql" />
+    <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromInvoice.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerReferencesFromInvoice.sql" />
+    <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromPayment.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerReferencesFromPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
