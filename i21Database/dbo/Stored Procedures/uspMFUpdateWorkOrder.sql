@@ -10,6 +10,7 @@ BEGIN TRY
 		,@strLotNumber NVARCHAR(50)
 		,@strVendorLotNo NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
+		,@strReferenceNo NVARCHAR(50)
 		,@intItemUOMId INT
 		,@intManufacturingCellId INT
 		,@intLocationId INT
@@ -47,6 +48,7 @@ BEGIN TRY
 
 	SELECT @intWorkOrderId = intWorkOrderId
 		,@strWorkOrderNo = strWorkOrderNo
+		,@strReferenceNo = strReferenceNo
 		,@dtmOrderDate = dtmOrderDate
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intManufacturingCellId = intManufacturingCellId
@@ -76,6 +78,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
+			,strReferenceNo NVARCHAR(50)
 			,dtmOrderDate DATETIME
 			,dtmExpectedDate DATETIME
 			,intManufacturingProcessId INT
@@ -170,6 +173,7 @@ BEGIN TRY
 
 	UPDATE dbo.tblMFWorkOrder
 	SET strWorkOrderNo = @strWorkOrderNo
+		,strReferenceNo = @strReferenceNo
 		,dtmOrderDate = @dtmOrderDate
 		,intManufacturingProcessId = @intManufacturingProcessId
 		,intItemId = @intItemId

@@ -2,6 +2,7 @@
 (
 	[intWorkOrderId] INT NOT NULL IDENTITY(1,1), 
     [strWorkOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL , 
+	strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmOrderDate] DATETIME NULL, 
     [intItemId] INT NULL, 
     [dblQuantity] NUMERIC(18, 6) NULL, 

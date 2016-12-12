@@ -4,6 +4,7 @@ SELECT C.intManufacturingCellId
 	,C.strCellName
 	,W.intWorkOrderId
 	,W.strWorkOrderNo
+	,W.strReferenceNo
 	,W.dblQuantity
 	,W.dtmExpectedDate
 	,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
