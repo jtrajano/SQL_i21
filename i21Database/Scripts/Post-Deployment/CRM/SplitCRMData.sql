@@ -1649,6 +1649,98 @@ END
 CLOSE @queryResultNote
 DEALLOCATE @queryResultNote
 
+Print 'Fixing Opportunity Lines of Business'
+
+DECLARE @queryResultOpportunity CURSOR;
+declare @intOpportunityId int;
+declare @strLinesOfBusinessId nvarchar(50);
+
+declare @queryResultLobItem cursor;
+declare @Item nvarchar(5);
+declare @intItem int;
+
+SET @queryResultOpportunity = CURSOR FOR
+
+	select
+		intOpportunityId
+		,strLinesOfBusinessId = ltrim(rtrim(strLinesOfBusinessId))
+	from
+		tblCRMOpportunity
+	where
+		strLinesOfBusinessId is not null
+		and ltrim(rtrim(strLinesOfBusinessId)) <> ''
+
+OPEN @queryResultOpportunity
+FETCH NEXT
+FROM
+	@queryResultOpportunity
+INTO
+	@intOpportunityId
+	,@strLinesOfBusinessId
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	/*---------------------------------------------------------------*/
+	SET @queryResultLobItem = CURSOR FOR
+
+		select
+			Item
+		from
+			dbo.fnSplitString(@strLinesOfBusinessId, ',')
+
+	OPEN @queryResultLobItem
+	FETCH NEXT
+	FROM
+		@queryResultLobItem
+	INTO
+		@Item
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		set @intItem = convert(int, @Item);
+		
+		--Print 'Opportunity Id = ' + convert(nvarchar(50), @intOpportunityId) + ' - LOB Id = ' + convert(nvarchar(50), @intItem)
+
+		IF NOT EXISTS (select * from tblCRMOpportunityLob where intOpportunityId = @intOpportunityId and intLineOfBusinessId = @intItem)
+		begin
+
+			INSERT INTO [dbo].[tblCRMOpportunityLob]
+					   ([intOpportunityId]
+					   ,[intLineOfBusinessId]
+					   ,[intConcurrencyId])
+				 VALUES
+					   (@intOpportunityId
+					   ,@intItem
+					   ,1)
+
+		end
+
+		FETCH NEXT
+		FROM
+			@queryResultLobItem
+		INTO
+			@Item
+	END
+
+	CLOSE @queryResultLobItem
+	DEALLOCATE @queryResultLobItem
+	/*---------------------------------------------------------------*/
+
+    FETCH NEXT
+    FROM
+		@queryResultOpportunity
+	INTO
+	@intOpportunityId
+	,@strLinesOfBusinessId
+END
+
+CLOSE @queryResultOpportunity
+DEALLOCATE @queryResultOpportunity
+
+Print 'End Fixing Opportunity Lines of Business'
+
 insert into tblSMTypeValue
 (
 	strType, strValue, ysnDefault, intConcurrencyId

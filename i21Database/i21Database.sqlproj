@@ -4625,6 +4625,20 @@
     <Build Include="dbo\User Defined Types\TFReportingComponentOutputDesigners.sql" />
     <Build Include="dbo\Stored Procedures\uspTFUpgradeReportingComponentConfigurations.sql" />
     <Build Include="dbo\Stored Procedures\uspTFUpgradeReportingComponentOutputDesigners.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateReservedStock.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityLob.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateContainerLinkInSample.sql" />
+    <Build Include="dbo\Views\vyuLGOpenPickLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeGuideItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemNutrients.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveRecipeGuide.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeGuide.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeGuideNutrient.sql" />
+    <Build Include="dbo\Tables\tblMFNutrient.sql" />
+    <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromInvoice.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerReferencesFromInvoice.sql" />
+    <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromPayment.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerReferencesFromPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4805,5 +4819,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\Reports\5_DeleteInvalidReports.sql" />
   </ItemGroup>
 </Project>

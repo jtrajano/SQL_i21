@@ -101,6 +101,9 @@ WHERE
 --Committed QUatities
 EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
 
+--Reserved QUatities
+EXEC dbo.[uspARUpdateReservedStock] @TransactionId, @post, @userId, 1
+
 --In Transit Outbound Quantities 
 EXEC dbo.[uspARUpdateInTransit] @TransactionId, @post, 0
 

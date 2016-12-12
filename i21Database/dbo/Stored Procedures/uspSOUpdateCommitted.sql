@@ -52,8 +52,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId 
 	FROM 
 		tblSOSalesOrderDetail Detail
 	INNER JOIN
@@ -100,8 +100,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetailComponent SOSODC
 	INNER JOIN 
@@ -148,8 +148,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetail Detail
 	INNER JOIN
@@ -195,8 +195,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetailComponent SOSODC
 	INNER JOIN 
@@ -242,8 +242,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	TD.intCompanyLocationSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetail Detail
 	INNER JOIN
@@ -288,8 +288,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	TD.intCompanyLocationSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetailComponent SOSODC
 	INNER JOIN 
@@ -334,8 +334,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetail Detail
 	INNER JOIN
@@ -380,8 +380,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetailComponent SOSODC
 	INNER JOIN 
@@ -427,8 +427,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetail Detail
 	INNER JOIN
@@ -471,8 +471,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetailComponent SOSODC
 	INNER JOIN 
@@ -513,8 +513,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	TD.intCompanyLocationSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId
 	FROM 
 		tblARTransactionDetail TD
 	INNER JOIN
@@ -554,8 +554,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	TD.intCompanyLocationSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetailComponent SOSODC
 	INNER JOIN 
@@ -597,8 +597,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	TD.intCompanyLocationSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetail Detail
 	INNER JOIN
@@ -642,8 +642,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	TD.intCompanyLocationSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetailComponent SOSODC
 	INNER JOIN 
@@ -687,8 +687,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	TD.intCompanyLocationSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetail Detail
 	INNER JOIN
@@ -733,8 +733,8 @@ BEGIN
 		,[strTransactionId]			=	Header.strSalesOrderNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
+		,[intSubLocationId]			=	TD.intCompanyLocationSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId
 	FROM 
 		tblSOSalesOrderDetailComponent SOSODC
 	INNER JOIN 

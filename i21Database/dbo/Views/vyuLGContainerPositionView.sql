@@ -23,7 +23,7 @@ SELECT * FROM (
 		,dblSeqQuantity = SUM(CD.dblQuantity)
 		,dblContractQuantity = CH.dblQuantity
 		,strQuantityUOM = MAX(UM.strUnitMeasure)
-		,dblWeight = ISNULL(dbo.fnCalculateQtyBetweenUOM(CD.intNetWeightUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), CD.dblNetWeight), 0)
+		,dblWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), CD.dblQuantity), 0))
 		,dblShippedWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(LoadDetail.intWeightItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), LoadDetail.dblNet), 0))
 		,intNoOfContainers = COUNT(CD.intContractDetailId)
 		,intNoOfApprovals = ISNULL(Samp.intApprovalCount, 0)
@@ -57,8 +57,8 @@ SELECT * FROM (
 		AND ISNULL(LC.ysnRejected, 0) = 0
 	LEFT JOIN (
 		SELECT DISTINCT Seq.intContractHeaderId
-			,Samp.intItemId
-			,COUNT(*) intApprovalCount
+                       ,Seq.intItemId
+					   ,COUNT(*) intApprovalCount
 		FROM tblQMSample Samp
 		JOIN tblQMSampleDetail SampDetail ON SampDetail.intSampleId = Samp.intSampleId
 		JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttributeId
@@ -69,13 +69,12 @@ SELECT * FROM (
 		JOIN tblCTContractDetail Seq ON Seq.intContractDetailId = Samp.intContractDetailId
 		GROUP BY Seq.intItemId
 			,Seq.intContractHeaderId
-			,Samp.intItemId
 		) Samp ON Samp.intContractHeaderId = CH.intContractHeaderId
 		AND Samp.intItemId = CD.intItemId
 	LEFT JOIN (
 		SELECT DISTINCT Seq.intContractHeaderId
-			,Samp.intItemId
-			,COUNT(*) intApprovalCount
+					   ,Seq.intItemId
+					   ,COUNT(*) intApprovalCount
 		FROM tblQMSample Samp
 		JOIN tblQMSampleDetail SampDetail ON SampDetail.intSampleId = Samp.intSampleId
 		JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttributeId
@@ -86,7 +85,6 @@ SELECT * FROM (
 		JOIN tblCTContractDetail Seq ON Seq.intContractDetailId = Samp.intContractDetailId
 		GROUP BY Seq.intItemId
 			,Seq.intContractHeaderId
-			,Samp.intItemId
 		) RSamp ON RSamp.intContractHeaderId = CH.intContractHeaderId
 		AND RSamp.intItemId = CD.intItemId
 	WHERE ISNULL(LC.ysnRejected, 0) = 0
@@ -95,4 +93,4 @@ SELECT * FROM (
 		,U2.strUnitMeasure,CU.strCurrency,CH.dblQuantity,UM.strUnitMeasure,CD.intNetWeightUOMId
 		,CD.dblNetWeight,Samp.intApprovalCount,RSamp.intApprovalCount,CH.strInternalComment,CD.dtmEndDate
 	) tbl
-WHERE intTrucksRemaining > 0
+WHERE intTrucksRemaining > 0 

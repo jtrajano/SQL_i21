@@ -8,5 +8,5 @@
 	[intConcurrencyId] [int] NOT NULL, 
     CONSTRAINT [PK_tblSMCommentWatcher] PRIMARY KEY ([intCommentWatcherId]),
 	CONSTRAINT [FK_tblSMCommentWatcher_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]), 
-	CONSTRAINT [FK_tblSMCommentWatcher_tblSMActivity] FOREIGN KEY ([intActivityId]) REFERENCES [tblSMActivity]([intActivityId])
+	CONSTRAINT [FK_tblSMCommentWatcher_tblSMActivity] FOREIGN KEY ([intActivityId]) REFERENCES [tblSMActivity]([intActivityId]) ON DELETE CASCADE
 )

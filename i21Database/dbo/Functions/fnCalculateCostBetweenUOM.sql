@@ -1,5 +1,5 @@
 ﻿/*
-	This function convert the qty to the stock unit qty. 
+	This function convert the cost to the stock unit qty. 
 	Remember, the unit conversions are taken from the Item UOM table and NOT from the Unit of Measure table. 
 
 	Parameters: 

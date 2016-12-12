@@ -6,21 +6,23 @@ SELECT
 	,P.intEntityId
 	,P.intEntityCustomerId
 	,P.intBankAccountId
-	,LTRIM(RTRIM(BA.strBankAccountNo)) AS strBankAccountNo
-	,LTRIM(RTRIM(E.strName)) AS strCustomerName
-	,ISNULL(C.strCustomerNumber, E.strEntityNo) AS strCustomerNumber
+	,strBankAccountNo		= LTRIM(RTRIM(BA.strBankAccountNo))
+	,strCustomerName		= LTRIM(RTRIM(E.strName))
+	,strCustomerNumber		= ISNULL(C.strCustomerNumber, E.strEntityNo)
 	,P.dtmDatePaid
 	,P.intPaymentMethodId
-	,PM.strPaymentMethod AS strPaymentMethod
-	,P.dblAmountPaid AS dblAmountPaid
+	,strPaymentMethod		= PM.strPaymentMethod
+	,dblAmountPaid			= P.dblAmountPaid
 	,P.ysnPosted
-	,'Payment' AS strPaymentType
-	,dbo.fnARGetInvoiceNumbersFromPayment(intPaymentId) AS strInvoices
+	,strPaymentType			= 'Payment'
+	,strInvoices			= dbo.fnARGetInvoiceNumbersFromPayment(intPaymentId)
 	,P.intLocationId 
 	,CL.strLocationName
-	,GL.dtmDate AS dtmBatchDate
+	,dtmBatchDate			= GL.dtmDate
 	,GL.strBatchId
-	,ISNULL(GL.strName, EM.strName) strUserEntered
+	,strUserEntered			= ISNULL(GL.strName, EM.strName)
+	,strTicketNumbers		= dbo.fnARGetScaleTicketNumbersFromPayment(P.intPaymentId)
+	,strCustomerReferences	= dbo.fnARGetCustomerReferencesFromPayment(P.intPaymentId)
 FROM
 	tblARPayment P 
 LEFT OUTER JOIN (SELECT intEntityId, strName FROM tblEMEntity ) EM ON P.intEntityId = EM.intEntityId

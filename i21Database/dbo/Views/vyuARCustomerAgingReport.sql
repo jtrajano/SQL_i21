@@ -367,6 +367,6 @@ AND A.intInvoiceId			= B.intInvoiceId
 AND A.dblInvoiceTotal		= B.dblInvoiceTotal
 AND A.dblAmountPaid			= B.dblAmountPaid
 AND A.dblAvailableCredit	= B.dblAvailableCredit
-AND B.dblPrepayments		= B.dblPrepayments
+AND A.dblPrepayments		= B.dblPrepayments
 
 GROUP BY A.strCustomerName, A.intEntityCustomerId, A.strEntityNo

@@ -8,6 +8,7 @@
 	[strName] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
 	[strDisplayName] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
+	[strModule] [nvarchar] (100) COLLATE Latin1_General_CI_AS NULL,
 	[blbReport] [varbinary] (max) NULL,
 	[ysnIsActive] [bit] NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT 1,

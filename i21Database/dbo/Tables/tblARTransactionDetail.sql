@@ -21,6 +21,9 @@
 	[intTicketHoursWorkedId]				INT				NULL,
 	[intOriginalInvoiceDetailId]			INT				NULL,
 	[intSiteId]								INT				NULL,
+	[intCompanyLocationSubLocationId]		INT				NULL,
+	[intStorageLocationId]					INT				NULL,
+	[intOwnershipTypeId]					INT				NULL,
 	[intConcurrencyId]						INT				CONSTRAINT [DF_tblARTransactionDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARTransactionDetail] PRIMARY KEY CLUSTERED ([intId] ASC)
 )

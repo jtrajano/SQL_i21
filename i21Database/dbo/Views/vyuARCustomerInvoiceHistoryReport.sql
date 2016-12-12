@@ -16,14 +16,14 @@ SELECT DISTINCT
 	 , ysnPaid				= CASE WHEN I.ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , intPaymentId			= ISNULL(P.intPaymentId, APP.intPaymentId)	 
 	 , I.intEntityCustomerId
-	 , PM.strPaymentMethod
+	 , strPaymentMethod		= ISNULL(PM.strPaymentMethod, APPM.strPaymentMethod)
 	 , I.intInvoiceId
 FROM tblARInvoice I
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId AND P.ysnPosted = 1
 							         LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID) 
 		ON I.intEntityCustomerId = P.intEntityCustomerId AND PD.intInvoiceId = I.intInvoiceId
 	LEFT JOIN (tblAPPaymentDetail APPD INNER JOIN tblAPPayment APP ON APP.intPaymentId = APPD.intPaymentId AND APP.ysnPosted = 1
-									 LEFT JOIN tblSMPaymentMethod PM ON APP.intPaymentMethodId = PM.intPaymentMethodID) 
+									 LEFT JOIN tblSMPaymentMethod APPM ON APP.intPaymentMethodId = APPM.intPaymentMethodID) 
 		ON APPD.intInvoiceId = I.intInvoiceId
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE I.ysnPosted = 1

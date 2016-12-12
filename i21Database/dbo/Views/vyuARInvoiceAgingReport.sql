@@ -26,7 +26,7 @@ FROM
 	 , dblInvoiceTotal		= SUM(A.dblInvoiceTotal)
 	 , dblCredits			= SUM(B.dblAvailableCredit) * -1
 	 , dblPrepayments		= SUM(B.dblPrepayments) * -1
-	 , dblPrepaids			= 0.000000
+	 , dblPrepaids			= SUM(B.dblPrepayments) * -1
 	 , A.dtmDate
 	 , A.dtmDueDate
 	 , A.intCompanyLocationId	 

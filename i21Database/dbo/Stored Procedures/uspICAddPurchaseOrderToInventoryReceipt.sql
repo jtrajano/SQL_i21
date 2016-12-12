@@ -226,7 +226,7 @@ BEGIN
 			,Receipt.intEntityVendorId
 			,ReceiptItem.intInventoryReceiptItemId
 			,Receipt.intShipFromId
-			,Receipt.intTaxGroupId
+			,ISNULL(ReceiptItem.intTaxGroupId, Receipt.intTaxGroupId)
 			,Receipt.intFreightTermId 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -337,7 +337,7 @@ BEGIN
 				,[strTaxCode]					= [strTaxCode]
 				,[intSort]						= 1
 				,[intConcurrencyId]				= 1
-		FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId)
+		FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0)
 
 		--Compute the tax
 		BEGIN 
@@ -377,7 +377,7 @@ BEGIN
 				,intItemId					= ReceiptItem.intItemId
 
 				-- Taxes fields
-				,intTaxGroupId				= Receipt.intTaxGroupId
+				,intTaxGroupId				= ISNULL(ReceiptItem.intTaxGroupId, Receipt.intTaxGroupId)
 				,intTaxCodeId				= ItemTax.intTaxCodeId
 				,intTaxClassId				= ItemTax.intTaxClassId
 				,strTaxableByOtherTaxes		= ItemTax.strTaxableByOtherTaxes

@@ -172,6 +172,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, dblFranchise = ISNULL(LogisticsView.dblFranchise, 0.00)
 		, dblContainerWeightPerQty = ISNULL(LogisticsView.dblContainerWeightPerQty, 0.00)
 		, ContractView.strPricingType
+		, strTaxGroup = SMTaxGroup.strTaxGroup
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -205,7 +206,8 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON SubCurrency.intMainCurrencyId = Receipt.intCurrencyId
 		LEFT JOIN tblSMCurrency TransactionCurrency
 			ON TransactionCurrency.intCurrencyID = Receipt.intCurrencyId
-
+		LEFT JOIN tblSMTaxGroup SMTaxGroup
+			ON SMTaxGroup.intTaxGroupId = ReceiptItem.intTaxGroupId
 		-- Integrations with the other modules: 
 		-- 1. Purchase Order
 		LEFT JOIN vyuPODetails POView

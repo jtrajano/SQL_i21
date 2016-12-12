@@ -49,8 +49,10 @@ BEGIN
 	BEGIN
 		SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
 		FROM (
-			SELECT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
-			FROM vyuARCustomer
+			SELECT 
+				CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
+			FROM 
+				tblARCustomer
 			FOR XML PATH ('')
 		) c (intEntityCustomerId)
 	END
@@ -796,7 +798,17 @@ BEGIN
 			CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
 	END
 	
-	DECLARE @PlaceHolderTable AS PlaceHolderTable
+	DECLARE @PlaceHolderTable AS PlaceHolderTable,
+		@strCompanyName			NVARCHAR(100),
+		@strCompanyAddress		NVARCHAR(100),
+		@strCompanyPhone		NVARCHAR(50)
+
+	SELECT TOP 1 
+		@strCompanyName		= @strCompanyName, 
+		@strCompanyAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL),
+		@strCompanyPhone	= strPhone
+	FROM 
+		tblSMCompanySetup
 
 	INSERT INTO @PlaceHolderTable(
 		intPlaceHolderId
@@ -822,16 +834,84 @@ BEGIN
 	SELECT
 		SC.*
 		, blbMessage			= dbo.[fnARConvertLetterMessage](@strMessage, SC.intEntityCustomerId , @PlaceHolderTable)
-		, strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-		, strCompanyAddress		= (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
-		, strCompanyPhone		= (SELECT TOP 1 strPhone FROM tblSMCompanySetup)
+		, strCompanyName		= @strCompanyName
+		, strCompanyAddress		= @strCompanyAddress
+		, strCompanyPhone		= @strCompanyPhone
 		, strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
+								  + CHAR(13) + (SELECT ISNULL(strAccountNumber,'') FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
 		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
 	FROM
 		@SelectedCustomer SC
 	INNER JOIN 
-		(SELECT 
-			intEntityCustomerId, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId, strName
-		FROM 
-			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
+		(
+			SELECT 
+				intEntityCustomerId, 
+				strBillToAddress, 
+				strBillToCity, 
+				strBillToCountry, 
+				strBillToLocationName, 
+				strBillToState, 
+				strBillToZipCode, 
+				intTermsId, 
+				strName
+			FROM 
+			(
+			SELECT 
+				ARC.intEntityCustomerId
+				, strCustomerNumber					= ISNULL(ARC.strCustomerNumber, EME.strEntityNo)
+				, EME.strName
+				, BillToLoc.strBillToAddress
+				, BillToLoc.strBillToCity
+				, BillToLoc.strBillToCountry
+				, BillToLoc.strBillToLocationName
+				, BillToLoc.strBillToState
+				, BillToLoc.strBillToZipCode
+				, EMEL.intTermsId
+				, EMEL.strTerm
+			FROM 
+				(SELECT 
+					intEntityCustomerId, 
+					strCustomerNumber, 
+					intBillToId					
+				FROM 
+					tblARCustomer) ARC
+				INNER JOIN (
+							SELECT 
+								intEntityId, 
+								strEntityNo, 
+								strName								 
+							FROM 
+								tblEMEntity
+							) EME ON ARC.intEntityCustomerId = EME.intEntityId
+				LEFT JOIN (
+							SELECT 
+								Loc.intEntityId, 
+								Loc.intEntityLocationId,
+								Loc.intTermsId,
+								SMT.strTerm																
+							FROM 
+								tblEMEntityLocation Loc
+							INNER JOIN (
+										SELECT 
+											intTermID,
+											strTerm 
+										FROM 
+											tblSMTerm) SMT ON Loc.intTermsId = SMT.intTermID
+							WHERE Loc.ysnDefaultLocation = 1
+							) EMEL ON ARC.intEntityCustomerId = EMEL.intEntityId
+				LEFT JOIN (
+							SELECT 
+								intEntityId, 
+								intEntityLocationId,
+								strBillToAddress		= strAddress,
+								strBillToCity			= strCity,
+								strBillToLocationName	= strLocationName,
+								strBillToCountry		= strCountry,
+								strBillToState			= strState,
+								strBillToZipCode		= strZipCode
+							FROM 
+								tblEMEntityLocation
+							) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
+			) Cus
+		) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
 END

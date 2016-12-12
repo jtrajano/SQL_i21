@@ -222,16 +222,17 @@ BEGIN
 	END
 
 	--Department
-	IF (@strDepartmentId != '')
+	IF (@strDepartmentId != '' AND @intAccountId > 0)
 	BEGIN 
 		SELECT @intDepartmentId = intDepartmentId 
 		FROM tblCFDepartment 
-		WHERE strDepartment = @strDepartmentId
+		WHERE strDepartment = @strDepartmentId AND intAccountId = @intAccountId
+
 		IF (@intDepartmentId = 0)
 		BEGIN
-			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-			VALUES (@strCardNumber,'Unable to find match for '+ @strDepartmentId +' on department list')
-			SET @ysnHasError = 1
+			INSERT tblCFDepartment (intAccountId,strDepartment)
+			VALUES (@intAccountId,@strDepartmentId)
+			SET @intDepartmentId = SCOPE_IDENTITY()
 		END
 	END
 	ELSE
