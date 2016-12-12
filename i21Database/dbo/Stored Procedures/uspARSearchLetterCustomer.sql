@@ -1,17 +1,4 @@
-﻿ 
-
-/****** Object:  StoredProcedure [dbo].[uspARSearchLetterCustomer]    Script Date: 12/12/2016 10:11:13 AM ******/
-DROP PROCEDURE [dbo].[uspARSearchLetterCustomer]
-GO
-
-/****** Object:  StoredProcedure [dbo].[uspARSearchLetterCustomer]    Script Date: 12/12/2016 10:11:13 AM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE PROCEDURE [dbo].[uspARSearchLetterCustomer]
+﻿CREATE PROCEDURE [dbo].[uspARSearchLetterCustomer]
 (
 	@intLetterId INT
 )
