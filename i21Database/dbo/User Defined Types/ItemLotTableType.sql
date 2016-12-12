@@ -212,7 +212,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[dblQty]					NUMERIC(38, 20) DEFAULT ((0)) NOT NULL
 	,[dtmExpiryDate]			DATETIME NULL
 	,[strLotAlias]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,[intLotStatusId]			INT NOT NULL DEFAULT ((1))
+	,[intLotStatusId]			INT NULL -- As this is a mandatory field, if this is null, it will default to 1 (Active) in SP uspICCreateUpdateLotNumber; First hand checking needs the actual value
 	,[intParentLotId]			INT NULL
 	,[strParentLotNumber]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strParentLotAlias]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
