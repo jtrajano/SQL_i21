@@ -54,7 +54,7 @@ BEGIN
 				,A.intCustomerID
 				,A.intConcurrencyId
 				,A.intLocationId
-				,intOpenCount = ISNULL(M.intOpenCount,0)
+				
 			FROM tblTMSite A
 			INNER JOIN tblTMWorkOrder B
 				ON A.intSiteID = B.intSiteID
@@ -76,17 +76,7 @@ BEGIN
 				ON J.intEntityId = K.intEntityUserSecurityId
 			LEFT JOIN vwitmmst L
 				ON A.intProduct = L.A4GLIdentity
-			LEFT JOIN (
-				SELECT intSiteId = intSiteID
-					,intOpenCount = COUNT(intSiteID)
-				FROM tblTMWorkOrder 
-				WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
-											 FROM tblTMWorkStatusType 
-											 WHERE strWorkStatus = ''Open'' 
-												AND ysnDefault = 1)
-				GROUP BY intSiteID
-			) M
-				ON A.intSiteID = M.intSiteId
+			
 		')
 	END
 	ELSE
@@ -118,7 +108,7 @@ BEGIN
 				,A.intCustomerID
 				,A.intConcurrencyId
 				,A.intLocationId
-				,intOpenCount = ISNULL(M.intOpenCount,0)
+				
 			FROM tblTMSite A
 			INNER JOIN tblTMWorkOrder B
 				ON A.intSiteID = B.intSiteID
@@ -142,17 +132,7 @@ BEGIN
 				ON J.intEntityId = K.intEntityUserSecurityId
 			LEFT JOIN tblICItem L
 				ON A.intProduct = L.intItemId
-			LEFT JOIN (
-				SELECT intSiteId = intSiteID
-					,intOpenCount = COUNT(intSiteID)
-				FROM tblTMWorkOrder 
-				WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
-											 FROM tblTMWorkStatusType 
-											 WHERE strWorkStatus = ''Open'' 
-												AND ysnDefault = 1)
-				GROUP BY intSiteID
-			) M
-				ON A.intSiteID = M.intSiteId
+			
 		')
 	END
 END

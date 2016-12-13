@@ -59,6 +59,7 @@ BEGIN
 				,intLocationId = B.intLocationId
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
+				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 			,strLocation = B.strLocation
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
@@ -75,6 +76,17 @@ BEGIN
 				ON A.intDriverID = G.A4GLIdentity
 			LEFT JOIN tblSMUserSecurity H
 				ON A.intUserID = H.intEntityUserSecurityId
+			LEFT JOIN (
+					SELECT intSiteId = intSiteID
+						,intOpenCount = COUNT(intSiteID)
+					FROM tblTMWorkOrder 
+					WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
+													FROM tblTMWorkStatusType 
+													WHERE strWorkStatus = ''Open'' 
+													AND ysnDefault = 1)
+					GROUP BY intSiteID
+				) M
+					ON A.intSiteID = M.intSiteId
 		')
 	END
 	ELSE
@@ -111,6 +123,7 @@ BEGIN
 				,strLocation = B.strLocation
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
+				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -126,6 +139,17 @@ BEGIN
 				ON A.intDriverID = G.intEntityId
 			LEFT JOIN tblSMUserSecurity H
 				ON A.intUserID = H.intEntityUserSecurityId
+			LEFT JOIN (
+					SELECT intSiteId = intSiteID
+						,intOpenCount = COUNT(intSiteID)
+					FROM tblTMWorkOrder 
+					WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
+													FROM tblTMWorkStatusType 
+													WHERE strWorkStatus = ''Open'' 
+													AND ysnDefault = 1)
+					GROUP BY intSiteID
+				) M
+					ON A.intSiteID = M.intSiteId
 		')
 	END
 END
