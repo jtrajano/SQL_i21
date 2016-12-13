@@ -29,8 +29,8 @@ BEGIN TRY
 	AS		TARGET
 	USING (
 		SELECT TaxCrit.*, TaxCat.intTaxCategoryId, RC.intReportingComponentId FROM @TaxCriteria TaxCrit
-		LEFT JOIN tblTFTaxCategory TaxCat ON TaxCat.strTaxCategory = TaxCrit.strTaxCategory
-			AND TaxCat.strState = TaxCrit.strState
+		LEFT JOIN tblTFTaxCategory TaxCat ON TaxCat.strTaxCategory COLLATE Latin1_General_CI_AS = TaxCrit.strTaxCategory COLLATE Latin1_General_CI_AS
+			AND TaxCat.strState COLLATE Latin1_General_CI_AS = TaxCrit.strState COLLATE Latin1_General_CI_AS
 		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = TaxCrit.strFormCode COLLATE Latin1_General_CI_AS
 			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = TaxCrit.strScheduleCode COLLATE Latin1_General_CI_AS
 			AND RC.strType COLLATE Latin1_General_CI_AS = TaxCrit.strType COLLATE Latin1_General_CI_AS
