@@ -4639,6 +4639,7 @@
     <Build Include="dbo\Functions\fnARGetCustomerReferencesFromInvoice.sql" />
     <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromPayment.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerReferencesFromPayment.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeGuide.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
