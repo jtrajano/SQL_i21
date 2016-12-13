@@ -14,7 +14,19 @@ SELECT
 	StockUOM.intStorageLocationId,
 	strStorageLocationName = StorageLocation.strName,
 	dblOnHand = SUM((CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN ISNULL(StockUOM.dblOnHand, 0) ELSE ISNULL(Lot.dblQty, 0) END)),	
-	dblAvailableQty = SUM((CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN (ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserve.dblTotalQty, 0)) ELSE ISNULL(Lot.dblQty, 0) END)),
+	dblAvailableQty = 
+		SUM(
+			CASE	WHEN Lot.intLotId IS NOT NULL THEN 
+						Lot.dblQty
+					ELSE 
+						ISNULL(StockUOM.dblOnHand, 0)  
+						- (
+								ISNULL(StockUOM.dblUnitReserved, 0) 
+								+ ISNULL(StockUOM.dblInTransitOutbound, 0) 
+								+ ISNULL(StockUOM.dblConsignedSale, 0)
+						)
+			END
+		),
 	dblStorageQty = SUM(StockUOM.dblUnitStorage),
 	ysnStockUnit = ItemUOM.ysnStockUnit
 FROM tblICItemStockUOM StockUOM
