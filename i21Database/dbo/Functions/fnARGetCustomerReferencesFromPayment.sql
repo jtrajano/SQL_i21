@@ -19,7 +19,7 @@ BEGIN
 				SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @tmpTable ORDER BY intInvoiceId
 				
 				IF (SELECT COUNT(*) FROM @tmpTable) > 1
-					SELECT @strReferences = ISNULL(@strReferences, '') + dbo.fnARGetCustomerReferencesFromInvoice(@intInvoiceId)
+					SELECT @strReferences = ISNULL(@strReferences, '') + dbo.fnARGetCustomerReferencesFromInvoice(@intInvoiceId) + ', '
 				ELSE
 					SELECT @strReferences = ISNULL(@strReferences, '') + dbo.fnARGetCustomerReferencesFromInvoice(@intInvoiceId)
 
