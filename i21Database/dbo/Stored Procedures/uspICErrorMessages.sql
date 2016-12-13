@@ -30,7 +30,7 @@ EXEC sp_addmessage 80002,11,@strmessage,'us_english','False'
 
 -- was 50029
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80003) EXEC sp_dropmessage 80003, 'us_english'	
-SET @strmessage = 'Negative stock quantity is not allowed for %s on %s.'
+SET @strmessage = 'Negative stock quantity is not allowed for %s in %s.'
 EXEC sp_addmessage 80003,11,@strmessage,'us_english','False'
 
 -- was 50031
@@ -458,3 +458,7 @@ EXEC sp_addmessage 80094,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80095) EXEC sp_dropmessage 80095, 'us_english'	
 SET @strmessage = 'The %s cannot be accrued to the same Shipment Customer.'
 EXEC sp_addmessage 80095,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80096) EXEC sp_dropmessage 80096, 'us_english'	
+SET @strmessage = 'Check the date on the transaction. As of %s, there is no stock available for %s in %s.'
+EXEC sp_addmessage 80096,11,@strmessage,'us_english','False'
