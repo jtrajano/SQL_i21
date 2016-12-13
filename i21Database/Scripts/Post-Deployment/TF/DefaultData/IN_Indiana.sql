@@ -1,4 +1,5 @@
 ﻿-- Declare the Tax Authority Code that will be used all throughout Indiana Default Data
+PRINT ('Deploying Indiana Tax Forms')
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'IN'
 
 
@@ -161,7 +162,7 @@ where intTaxAuthorityId =
 DECLARE @TerminalControlNumbers AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalControlNumbers(
-	intProductCodeId
+	intTerminalControlNumberId
 	, strTerminalControlNumber
 	, strName
 	, strAddress
@@ -461,11 +462,11 @@ INSERT INTO @ValidProductCodes(
 	, strProductCode
 	, strFormCode
 	, strScheduleCode
-	, strProductCode
-	, strScheduleCode
+	, strType
+	, strFilter
 )
 -- Insert generated script here. Remove first instance of "UNION ALL "
-SELECT intValidProductCodeId = 1, strProductCode = 'B00', strFormCode = 'SF-401', strScheduleCode = '1A', c = 'Special Fuel', strFilter = ''
+SELECT intValidProductCodeId = 1, strProductCode = 'B00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 2, strProductCode = 'B11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 3, strProductCode = 'D00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 4, strProductCode = 'D11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
@@ -1505,7 +1506,6 @@ INSERT INTO @ValidOriginStates(
 )
 SELECT intValidOriginStateId = 4, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strState = 'IN', strStatus = '', strFilter = 'Include'
 UNION ALL SELECT intValidOriginStateId = 5, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 6, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strState = 'IN', strStatus = '', strFilter = NULL
 UNION ALL SELECT intValidOriginStateId = 10, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'IN', strStatus = '', strFilter = 'Include'
 UNION ALL SELECT intValidOriginStateId = 15, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strState = 'IN', strStatus = '', strFilter = 'Exclude'
 UNION ALL SELECT intValidOriginStateId = 16, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strState = 'IN', strStatus = '', strFilter = 'Exclude'
@@ -1624,12 +1624,22 @@ WHERE RC.intTaxAuthorityId =
 DECLARE @ReportingComponentConfigurations AS TFReportingComponentConfigurations
 
 INSERT INTO @ReportingComponentConfigurations(
-	intFilingPacketId
+	intReportTemplateId
 	, strFormCode
 	, strScheduleCode
 	, strType
-	, ysnStatus
-	, intFrequency
+	, strTemplateItemId
+	, strReportSection
+	, intReportItemSequence
+	, intTemplateItemNumber
+	, strDescription
+	, strScheduleList
+	, strConfiguration
+	, ysnConfiguration
+	, ysnDynamicConfiguration
+	, strLastIndexOf
+	, strSegment
+	, intSort
 )
 -- Insert generated script here. Remove first instance of "UNION ALL "
 SELECT intReportTemplateId = 166, strFormCode = 'MF-360', strScheduleCode = '', strType = '', strTemplateItemId = 'MF-360-LicenseNumber', strReportSection = 'HEADER', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'License Number', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = NULL, ysnDynamicConfiguration = '1', strLastIndexOf = '', strSegment = 'HEADER', intConfigurationSequence = '5'
@@ -1725,12 +1735,15 @@ where intTaxAuthorityId =
 DECLARE @ReportingComponentOutputDesigners AS TFReportingComponentOutputDesigners
 
 INSERT INTO @ReportingComponentOutputDesigners(
-	intFilingPacketId
+	intScheduleColumnId
 	, strFormCode
 	, strScheduleCode
 	, strType
-	, ysnStatus
-	, intFrequency
+	, strColumn
+	, strCaption
+	, strFormat
+	, strFooter
+	, intWidth
 )
 -- Insert generated script here. Remove first instance of "UNION ALL "
 SELECT intScheduleColumnId = 1, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = '0'

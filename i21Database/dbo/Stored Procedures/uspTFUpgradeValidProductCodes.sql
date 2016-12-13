@@ -27,14 +27,14 @@ BEGIN TRY
 			AND RC.strType COLLATE Latin1_General_CI_AS = VPC.strType COLLATE Latin1_General_CI_AS
 
 	) AS SOURCE
-		ON TARGET.intProductCodeId = SOURCE.intProductCodeId
-			AND TARGET.intTaxAintReportingComponentIduthorityId = intReportingComponentId
+		ON TARGET.intProductCode = SOURCE.intProductCodeId
+			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
 
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
 			intReportingComponentId	= SOURCE.intReportingComponentId
-			, intProductCode		= SOURCE.intProductCode
+			, intProductCode		= SOURCE.intProductCodeId
 			, strProductCode		= SOURCE.strProductCode
 			, strFilter				= SOURCE.strFilter
 	WHEN NOT MATCHED THEN 
@@ -46,7 +46,7 @@ BEGIN TRY
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
-			, SOURCE.intProductCode
+			, SOURCE.intProductCodeId
 			, SOURCE.strProductCode
 			, SOURCE.strFilter
 		);

@@ -27,7 +27,7 @@ BEGIN TRY
 			AND RC.strType COLLATE Latin1_General_CI_AS = VDS.strType COLLATE Latin1_General_CI_AS
 	) AS SOURCE
 		ON TARGET.intOriginDestinationStateId = SOURCE.intOriginDestinationStateId
-			AND TARGET.intReportingComponentId = intReportingComponentId
+			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
 
 	WHEN MATCHED THEN 
 		UPDATE

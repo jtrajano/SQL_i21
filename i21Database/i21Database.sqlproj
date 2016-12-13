@@ -4773,6 +4773,7 @@
     <Build Include="dbo\User Defined Types\TFReportingComponentConfigurations.sql">
       <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
     </Build>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\00_Cleanup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

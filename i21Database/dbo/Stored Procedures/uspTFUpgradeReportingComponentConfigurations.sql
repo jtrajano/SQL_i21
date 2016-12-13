@@ -20,13 +20,12 @@ BEGIN TRY
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT FP.*, RCC.intReportingComponentId FROM @ReportingComponentConfigurations RCC
+		SELECT RCC.*, RC.intReportingComponentId FROM @ReportingComponentConfigurations RCC
 		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
 			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
 			AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
 	) AS SOURCE
-		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
-			AND TARGET.strDescription = SOURCE.strDescription
+		ON TARGET.strTemplateItemId = SOURCE.strTemplateItemId
 
 	WHEN MATCHED THEN 
 		UPDATE

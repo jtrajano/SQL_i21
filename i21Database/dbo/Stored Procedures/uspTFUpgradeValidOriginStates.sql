@@ -20,14 +20,14 @@ BEGIN TRY
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT VDS.*, ODS.intOriginDestinationStateId, RC.intReportingComponentId FROM @ValidOriginStates VOS
+		SELECT VOS.*, ODS.intOriginDestinationStateId, RC.intReportingComponentId FROM @ValidOriginStates VOS
 		LEFT JOIN tblTFOriginDestinationState ODS ON ODS.strOriginDestinationState COLLATE Latin1_General_CI_AS = VOS.strState COLLATE Latin1_General_CI_AS
 		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = VOS.strFormCode COLLATE Latin1_General_CI_AS
 			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = VOS.strScheduleCode COLLATE Latin1_General_CI_AS
 			AND RC.strType COLLATE Latin1_General_CI_AS = VOS.strType COLLATE Latin1_General_CI_AS
 	) AS SOURCE
 		ON TARGET.intOriginDestinationStateId = SOURCE.intOriginDestinationStateId
-			AND TARGET.intReportingComponentId = intReportingComponentId
+			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
 
 	WHEN MATCHED THEN 
 		UPDATE
