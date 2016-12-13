@@ -14,11 +14,12 @@ AS
 
 			--Detail Join
 			IM.strItemNo,			PT.strPricingType,		IM.strDescription			AS	strItemDescription,
-			FM.strFutMarketName,	MO.strFutureMonth,		QM.strUnitMeasure			AS	strItemUOM,
+			FM.strFutMarketName,							QM.strUnitMeasure			AS	strItemUOM,
 			CL.strLocationName,		IM.strShortName,		PM.strUnitMeasure			AS	strPriceUOM,			
 			CU.intMainCurrencyId,	CU.strCurrency,			PU.intUnitMeasureId			AS	intPriceUnitMeasureId,
 			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,
-			
+			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')						AS	strFutureMonth,
+
 			--Detail Computed Columns
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)									AS	ysnSubCurrency,
 			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)					AS	dblAvailableQty,
