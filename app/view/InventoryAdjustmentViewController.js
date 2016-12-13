@@ -1413,19 +1413,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         i21.ModuleMgr.Inventory.showScreen(value, 'LotStatus');
     },
 
-    onItemNoBeforeQuery: function (obj) {
-        if (obj.combo) {
-            var win = obj.combo.up('window'),
-                cboAdjustmentType = win.down('#cboAdjustmentType'),
-                cboLocation = win.down('#cboLocation'),
-                store = obj.combo.store;
-
-        if(newValue == null) {
-            current.set('intSubLocationId', null);
-            me.getStockQuantity(current, win);
-        }
-    },
-
     onStorageLocationChange: function (obj, newValue, oldValue, eOpts) {
         var me = this;
         var grid = obj.up('grid');
