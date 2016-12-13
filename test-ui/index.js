@@ -1,15 +1,15 @@
-var Harness = new Siesta.Harness.Browser.ExtJS (),
+var Harness = Siesta.Harness.Browser.ExtJS,
     version = Math.floor(Math.random() * 9999) + 1,
-    functionalTest = '../../../../TestFramework/FunctionalTest.js';
+    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version;
 
 Harness.configure({
     title: 'i21 Test Suite',
-    hostPageUrl: '../../../i21',
+    hostPageUrl: '../../i21/',
     forceDOMVisible: false,
     waitForExtReady: false,
-    sandbox: false,
+    sandbox:false,
     viewportWidth: 1800,
-    viewPortHeight: 1800
+    viewportHeight: 1000
 
 });
 
@@ -27,7 +27,7 @@ Harness.start(
                 title: 'PreSetup',
                 preload: [
                     functionalTest,
-                    '../../CommonIC.js'
+                    'CommonIC.js'
                 ]
             }
         ]
@@ -37,7 +37,7 @@ Harness.start(
     { group: 'Item',
         items: [
             {
-                url: '../Item/AddInventory.js?v='+version,
+                url: 'Item/AddInventory.js?v='+version,
                 title: 'AddInventory',
                 preload: [
                     functionalTest
@@ -45,7 +45,7 @@ Harness.start(
             },
 
             {
-                url: '../Item/DeleteInventory.js?v='+version,
+                url: 'Item/DeleteInventory.js?v='+version,
                 title: 'DeleteInventory',
                 preload: [
                     functionalTest
@@ -57,8 +57,15 @@ Harness.start(
     { group: 'Commodity',
         items: [
             {
-                url: '../Commodity/AddCommodity.js?v='+version,
+                url: 'Commodity/AddCommodity.js?v='+version,
                 title: 'AddCommodity',
+                preload: [
+                    functionalTest
+                ]
+            },
+            {
+                url: 'Commodity/DeleteCommodity.js?v='+version,
+                title: 'DeleteCommodity',
                 preload: [
                     functionalTest
                 ]
@@ -69,7 +76,7 @@ Harness.start(
     { group: 'Category',
         items: [
             {
-                url: '../Category/AddCategory.js?v='+version,
+                url: 'Category/AddCategory.js?v='+version,
                 title: 'AddCategory',
                 preload: [
                     functionalTest
@@ -81,7 +88,7 @@ Harness.start(
     { group: 'FuelCategory',
         items: [
             {
-                url: '../FuelCategory/AddFuelCategory.js?v='+version,
+                url: 'FuelCategory/AddFuelCategory.js?v='+version,
                 title: 'AddFuelCategory',
                 preload: [
                     functionalTest
@@ -93,7 +100,7 @@ Harness.start(
     { group: 'FeedStock',
         items: [
             {
-                url: '../FeedStock/AddFeedStock.js?v='+version,
+                url: 'FeedStock/AddFeedStock.js?v='+version,
                 title: 'AddFeedStock',
                 preload: [
                     functionalTest
@@ -105,7 +112,7 @@ Harness.start(
     { group: 'FuelCode',
         items: [
             {
-                url: '../FuelCode/AddFuelCode.js?v='+version,
+                url: 'FuelCode/AddFuelCode.js?v='+version,
                 title: 'AddFuelCode',
                 preload: [
                     functionalTest
@@ -117,7 +124,7 @@ Harness.start(
     { group: 'ProductionProcess',
         items: [
             {
-                url: '../ProductionProcess/AddProductionProcess.js?v='+version,
+                url: 'ProductionProcess/AddProductionProcess.js?v='+version,
                 title: 'AddProductionProcess',
                 preload: [
                     functionalTest
@@ -129,7 +136,7 @@ Harness.start(
     { group: 'FeedStockUOM',
         items: [
             {
-                url: '../FeedStockUOM/AddFeedStockUOM.js?v='+version,
+                url: 'FeedStockUOM/AddFeedStockUOM.js?v='+version,
                 title: 'AddFeedStockUOM',
                 preload: [
                     functionalTest
@@ -141,7 +148,7 @@ Harness.start(
     { group: 'FuelType',
         items: [
             {
-                url: '../FuelType/AddFuelType.js?v='+version,
+                url: 'FuelType/AddFuelType.js?v='+version,
                 title: 'AddFuelType',
                 preload: [
                     functionalTest
@@ -153,7 +160,7 @@ Harness.start(
     { group: 'InventoryUOM',
         items: [
             {
-                url: '../InventoryUOM/AddInventoryUOM.js?v='+version,
+                url: 'InventoryUOM/AddInventoryUOM.js?v='+version,
                 title: 'AddInventoryUOM',
 
                 preload: [
@@ -166,7 +173,7 @@ Harness.start(
     { group: 'StorageLocation',
         items: [
             {
-                url: '../StorageLocation/AddStorageLocation.js?v='+version,
+                url: 'StorageLocation/AddStorageLocation.js?v='+version,
                 title: 'AddStorageLocation',
                 preload: [
                     functionalTest
@@ -179,7 +186,7 @@ Harness.start(
         items: [
             {
 
-                url: '../InventoryReceipt/AddInventoryReceipt.js?v='+version,
+                url: 'InventoryReceipt/AddInventoryReceipt.js?v='+version,
                 title: 'AddInventoryReceipt',
                 preload: [
                     functionalTest
@@ -191,7 +198,7 @@ Harness.start(
     { group: 'InventoryShipment',
         items: [
             {
-                url: '../InventoryShipment/AddInventoryShipment.js?v='+version,
+                url: 'InventoryShipment/AddInventoryShipment.js?v='+version,
                 title: 'AddInventoryShipment',
                 preload: [
                     functionalTest
@@ -203,7 +210,7 @@ Harness.start(
     { group: 'InventoryTransfer',
         items: [
             {
-                url: '../InventoryTransfer/AddInventoryTransfer.js?v='+version,
+                url: 'InventoryTransfer/AddInventoryTransfer.js?v='+version,
                 title: 'AddInventoryTransfer',
                 preload: [
                     functionalTest
@@ -215,7 +222,7 @@ Harness.start(
     { group: 'InventoryAdjustment',
         items: [
             {
-                url: '../InventoryAdjustment/AddInventoryAdjustment.js?v='+version,
+                url: 'InventoryAdjustment/AddInventoryAdjustment.js?v='+version,
                 title: 'AddInventoryAdjustment',
                 preload: [
                     functionalTest
@@ -227,11 +234,11 @@ Harness.start(
     { group: 'InventoryCount',
         items: [
             {
-                url: '../InventoryCount/AddInventoryCount.js?v='+version,
+                url: 'InventoryCount/AddInventoryCount.js?v='+version,
                 title: 'AddInventoryCount',
                 preload: [
                     functionalTest,
-                    '../CommonIC.js'
+                    'CommonIC.js'
                 ]
             }
         ]
@@ -240,11 +247,11 @@ Harness.start(
     { group: 'StorageMeasurementReading',
         items: [
             {
-                url: '../StorageMeasurementReading/AddSMR.js?v='+version,
+                url: 'StorageMeasurementReading/AddSMR.js?v='+version,
                 title: 'AddSMR',
                 preload: [
                     functionalTest,
-                    '../CommonIC.js'
+                    'CommonIC.js'
                 ]
             }
         ]
@@ -253,35 +260,35 @@ Harness.start(
     { group: 'SmokeTesting',
         items: [
             {
-                url: '../SmokeTesting/ICSmokeTests.js?v='+version,
+                url: 'SmokeTesting/ICSmokeTests.js?v='+version,
                 title: 'ICSmokeTests',
                 preload: [
                     functionalTest,
-                    '../CommonIC.js'
+                    'CommonIC.js'
                 ]
             },
             {
-                url: '../SmokeTesting/ICOpenScreens.js?v='+version,
+                url: 'SmokeTesting/ICOpenScreens.js?v='+version,
                 title: 'ICOpenScreens',
                 preload: [
                     functionalTest,
-                    '../CommonIC.js'
+                    'CommonIC.js'
                 ]
             },
             {
-                url: '../SmokeTesting/ICAddMaintenance.js?v='+version,
+                url: 'SmokeTesting/ICAddMaintenance.js?v='+version,
                 title: 'ICAddMaintenance',
                 preload: [
                     functionalTest,
-                    '../CommonIC.js'
+                    'CommonIC.js'
                 ]
             },
             {
-                url: '../SmokeTesting/ICAddTransactions.js?v='+version,
+                url: 'SmokeTesting/ICAddTransactions.js?v='+version,
                 title: 'ICAddTransactions',
                 preload: [
                     functionalTest,
-                    '../CommonIC.js'
+                    'CommonIC.js'
                 ]
             }
 
