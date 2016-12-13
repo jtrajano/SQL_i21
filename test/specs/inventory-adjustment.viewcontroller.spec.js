@@ -1,6 +1,6 @@
 UnitTestEngine.testViewController({
     name: 'Inventory.view.InventoryAdjustmentViewController',
     alias: 'controller.icinventoryadjustment',
-    base: 'Ext.app.ViewController',
+    base: 'Inventory.view.InventoryBaseViewController',
     dependencies: ["CashManagement.common.Text", "CashManagement.common.BusinessRules"]
 });

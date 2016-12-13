@@ -1,7 +1,7 @@
 UnitTestEngine.testViewController({
     name: 'Inventory.view.ItemViewController',
     alias: 'controller.icitem',
-    base: 'Ext.app.ViewController',
+    base: 'Inventory.view.InventoryBaseViewController',
     dependencies: [],
     init: function (controller) {
         describe('sale/retail price', function () {

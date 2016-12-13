@@ -1,4 +1,10 @@
 [{
+    "pattern": "app/Application.js"
+}, {
+    "pattern": "app/controller/Inventory.js"
+}, {
+    "pattern": "app/controller/Main.js"
+}, {
     "pattern": "app/model/ItemUPC.js"
 }, {
     "pattern": "app/model/StockReservation.js"
@@ -173,61 +179,11 @@
 }, {
     "pattern": "app/store/InventoryTag.js"
 }, {
-    "pattern": "app/model/ItemUOM.js"
-}, {
     "pattern": "app/model/ItemLocation.js"
 }, {
-    "pattern": "app/model/ItemVendorXref.js"
-}, {
-    "pattern": "app/model/ItemCustomerXref.js"
-}, {
-    "pattern": "app/model/ItemContractDocument.js"
-}, {
-    "pattern": "app/model/ItemContract.js"
-}, {
-    "pattern": "app/model/ItemCertification.js"
-}, {
-    "pattern": "app/model/ItemPOSSLA.js"
-}, {
-    "pattern": "app/model/ItemPOSCategory.js"
-}, {
-    "pattern": "app/model/ItemManufacturingUOM.js"
-}, {
-    "pattern": "app/model/ItemAccount.js"
-}, {
-    "pattern": "app/model/ItemCommodityCost.js"
-}, {
-    "pattern": "app/model/ItemStock.js"
+    "pattern": "app/store/ItemLocation.js"
 }, {
     "pattern": "app/model/ItemPricing.js"
-}, {
-    "pattern": "app/model/ItemPricingLevel.js"
-}, {
-    "pattern": "app/model/ItemSpecialPricing.js"
-}, {
-    "pattern": "app/model/ItemAssembly.js"
-}, {
-    "pattern": "app/model/ItemBundle.js"
-}, {
-    "pattern": "app/model/ItemKitDetail.js"
-}, {
-    "pattern": "app/model/ItemKit.js"
-}, {
-    "pattern": "app/model/ItemNote.js"
-}, {
-    "pattern": "app/model/ItemOwner.js"
-}, {
-    "pattern": "app/model/ItemFactoryManufacturingCell.js"
-}, {
-    "pattern": "app/model/ItemFactory.js"
-}, {
-    "pattern": "app/model/ItemMotorFuelTax.js"
-}, {
-    "pattern": "app/model/Item.js"
-}, {
-    "pattern": "app/store/Item.js"
-}, {
-    "pattern": "app/store/ItemLocation.js"
 }, {
     "pattern": "app/store/ItemPricing.js"
 }, {
@@ -290,6 +246,10 @@
     "pattern": "app/store/ReceiptItemChargeTax.js"
 }, {
     "pattern": "app/store/ReceiptItemTax.js"
+}, {
+    "pattern": "app/model/RepostInventory.js"
+}, {
+    "pattern": "app/store/RepostInventory.js"
 }, {
     "pattern": "app/model/ShipmentItemLot.js"
 }, {
@@ -360,6 +320,8 @@
     "pattern": "app/view/BuildAssemblyBlendViewController.js"
 }, {
     "pattern": "app/store/BufferedAssemblyItem.js"
+}, {
+    "pattern": "app/model/ItemUOM.js"
 }, {
     "pattern": "app/store/BufferedItemUnitMeasure.js"
 }, {
@@ -526,6 +488,8 @@
     "pattern": "app/store/BufferedItemStockUOMForAdjustmentView.js"
 }, {
     "pattern": "app/view/InventoryAdjustmentViewModel.js"
+}, {
+    "pattern": "app/view/InventoryBaseViewController.js"
 }, {
     "pattern": "app/view/InventoryCount.js"
 }, {
@@ -739,6 +703,62 @@
 }, {
     "pattern": "app/view/ReasonViewModel.js"
 }, {
+    "pattern": "app/view/RepostInventory.js"
+}, {
+    "pattern": "app/model/ItemVendorXref.js"
+}, {
+    "pattern": "app/model/ItemCustomerXref.js"
+}, {
+    "pattern": "app/model/ItemContractDocument.js"
+}, {
+    "pattern": "app/model/ItemContract.js"
+}, {
+    "pattern": "app/model/ItemCertification.js"
+}, {
+    "pattern": "app/model/ItemPOSSLA.js"
+}, {
+    "pattern": "app/model/ItemPOSCategory.js"
+}, {
+    "pattern": "app/model/ItemManufacturingUOM.js"
+}, {
+    "pattern": "app/model/ItemAccount.js"
+}, {
+    "pattern": "app/model/ItemCommodityCost.js"
+}, {
+    "pattern": "app/model/ItemStock.js"
+}, {
+    "pattern": "app/model/ItemPricingLevel.js"
+}, {
+    "pattern": "app/model/ItemSpecialPricing.js"
+}, {
+    "pattern": "app/model/ItemAssembly.js"
+}, {
+    "pattern": "app/model/ItemBundle.js"
+}, {
+    "pattern": "app/model/ItemKitDetail.js"
+}, {
+    "pattern": "app/model/ItemKit.js"
+}, {
+    "pattern": "app/model/ItemNote.js"
+}, {
+    "pattern": "app/model/ItemOwner.js"
+}, {
+    "pattern": "app/model/ItemFactoryManufacturingCell.js"
+}, {
+    "pattern": "app/model/ItemFactory.js"
+}, {
+    "pattern": "app/model/ItemMotorFuelTax.js"
+}, {
+    "pattern": "app/model/Item.js"
+}, {
+    "pattern": "app/store/Item.js"
+}, {
+    "pattern": "app/model/FiscalPeriod.js"
+}, {
+    "pattern": "app/store/FiscalPeriod.js"
+}, {
+    "pattern": "app/view/RepostInventoryViewModel.js"
+}, {
     "pattern": "app/view/Statusbar1ViewController.js"
 }, {
     "pattern": "app/view/Statusbar1ViewModel.js"
@@ -776,4 +796,8 @@
     "pattern": "app/store/BufferedReadingPoint.js"
 }, {
     "pattern": "app/view/StorageUnitViewModel.js"
+}, {
+    "pattern": "app/view/Main.js"
+}, {
+    "pattern": "app/view/Viewport.js"
 }]
