@@ -4603,6 +4603,7 @@
     <Build Include="dbo\Tables\tblRKReconciliationBrokerStatementHeader.sql" />
     <Build Include="dbo\Tables\tblRKReconciliationBrokerStatement.sql" />
     <Build Include="dbo\Views\vyuRKReconciliationNotMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAutoAssignFutOptTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
