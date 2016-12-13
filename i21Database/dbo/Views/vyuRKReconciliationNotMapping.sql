@@ -1,0 +1,6 @@
+﻿CREATE VIEW vyuRKReconciliationNotMapping
+AS
+select intReconciliationBrokerStatementHeaderId,strFutMarketName,strCommodityCode,strName from tblRKReconciliationBrokerStatementHeader bs
+join tblRKFutureMarket fm on fm.intFutureMarketId=bs.intFutureMarketId
+join tblICCommodity c on bs.intCommodityId=c.intCommodityId
+join tblEMEntity e on e.intEntityId=bs.intEntityId
