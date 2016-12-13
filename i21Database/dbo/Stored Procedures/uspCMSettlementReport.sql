@@ -146,7 +146,7 @@ BEGIN
 	0 as OutboundDiscount,
 	PYMTDTL.dblTotal as InboundNetDue,
 	0 as OutboundNetDue,
-	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId IS NULL),0) AS VoucherAdjustment,
+	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
 	0 as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount
 	 
@@ -227,7 +227,7 @@ BEGIN
 	0 as InboundGNetDue,
 	PYMTDTL.dblTotal as OutboundNetDue,
 	0 as VoucherAdjustment,
-	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentItemId IS NULL),0) AS SalesAdjustment,
+	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND (intInventoryShipmentItemId IS NULL AND intInventoryShipmentChargeId IS NULL)),0) AS SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount
 
 	FROM tblCMBankTransaction BNKTRN
@@ -308,7 +308,7 @@ BEGIN
 	0 as OutboundDiscount,
 	PYMTDTL.dblTotal as InboundNetDue,
 	0 as OutboundNetDue,
-	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId IS NULL),0) AS VoucherAdjustment,
+	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
 	0 as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount
 	 
@@ -389,7 +389,7 @@ BEGIN
 	0 as InboundGNetDue,
 	PYMTDTL.dblTotal as OutboundNetDue,
 	0 as VoucherAdjustment,
-	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentItemId IS NULL),0) AS SalesAdjustment,
+	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND (intInventoryShipmentItemId IS NULL AND intInventoryShipmentChargeId IS NULL)),0) AS SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount
 
 	FROM tblCMBankTransaction BNKTRN
