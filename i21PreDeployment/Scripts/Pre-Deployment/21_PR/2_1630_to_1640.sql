@@ -35,6 +35,31 @@ EXEC('UPDATE tblPREmployeeEarning
 
 END
 
+
+/* 
+   tblPRPayGroup.intBankAccountId NULL to NOT NULL 
+   Attempts to update null tblPRPayGroup.intBankAccountId with values from logical sources
+*/
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intBankAccountId' AND OBJECT_ID = OBJECT_ID(N'tblPRPayGroup')) 
+BEGIN
+
+--Try to use the default bank account from payroll company configuration
+EXEC('UPDATE tblPRPayGroup
+		SET intBankAccountId = (SELECT TOP 1 intBankAccountId FROM tblPRCompanyPreference WHERE intBankAccountId IS NOT NULL)
+		WHERE intBankAccountId IS NULL')
+
+--Try to use top bank accounts from pay groups table
+EXEC('UPDATE tblPRPayGroup
+		SET intBankAccountId = (SELECT TOP 1 intBankAccountId FROM tblPRPayGroup WHERE intBankAccountId IS NOT NULL)
+		WHERE intBankAccountId IS NULL')
+
+--Try to use top bank account from the bank accounts table
+EXEC('UPDATE tblPRPayGroup
+		SET intBankAccountId = (SELECT TOP 1 intBankAccountId FROM tblCMBankAccount WHERE ysnActive = 1)
+		WHERE intBankAccountId IS NULL')
+
+END
+
 GO
 	PRINT 'END PR 1640'
 GO
