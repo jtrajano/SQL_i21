@@ -4,6 +4,7 @@
     [strName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [blbMessage] VARBINARY(MAX) NULL, 
+	[ysnSystemDefined] BIT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSMLetter] PRIMARY KEY ([intLetterId]), 
     CONSTRAINT [UQ_tblSMLetter_strName] UNIQUE ([strName]) 
