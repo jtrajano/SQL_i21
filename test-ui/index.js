@@ -1,6 +1,6 @@
 var Harness = new Siesta.Harness.Browser.ExtJS (),
     version = Math.floor(Math.random() * 9999) + 1,
-    functionalTest = '../../../TestFramework/FunctionalTest.js';
+    functionalTest = '../../../../TestFramework/FunctionalTest.js';
 
 Harness.configure({
     title: 'i21 Test Suite',
@@ -20,14 +20,14 @@ localStorage.setItem('i21RememberMe', true);
 
 Harness.start(
 
-    { group: 'FunctionalTest',
+    { group: 'PreSetup',
         items: [
             {
-                url: '../FunctionalTest/PreSetup.js?v='+version,
+                url: 'PreSetup/PreSetup.js?v='+version,
                 title: 'PreSetup',
                 preload: [
                     functionalTest,
-                    '../CommonIC.js'
+                    '../../CommonIC.js'
                 ]
             }
         ]
