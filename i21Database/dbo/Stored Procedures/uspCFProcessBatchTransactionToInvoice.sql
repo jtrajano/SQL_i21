@@ -320,6 +320,7 @@ END
 	,@CreatedIvoices			= @CreatedIvoices OUTPUT
 	,@UpdatedIvoices			= @UpdatedIvoices OUTPUT
 	,@BatchIdForNewPost			= @BatchId OUTPUT
+	,@BatchIdForExistingPost	= @BatchId OUTPUT
 	,@BatchIdForNewPostRecap	= @BatchId OUTPUT
 	,@BatchIdForExistingRecap	= @BatchId OUTPUT
 

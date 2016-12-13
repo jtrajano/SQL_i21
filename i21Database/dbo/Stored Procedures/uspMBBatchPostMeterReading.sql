@@ -227,7 +227,9 @@ BEGIN
 		,@CreatedIvoices			= @CreatedInvoices OUTPUT
 		,@UpdatedIvoices			= @UpdatedInvoices OUTPUT
 		,@BatchIdForNewPost			= @BatchId OUTPUT
+		,@BatchIdForExistingPost	= @BatchId OUTPUT
 		,@BatchIdForNewPostRecap	= @BatchId OUTPUT
+		,@BatchIdForExistingRecap	= @BatchId OUTPUT
 
 	DECLARE @InvoiceId INT
 	
