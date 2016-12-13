@@ -426,30 +426,30 @@ BEGIN TRY
 					IF @post = 1
 						BEGIN
 							
-							DECLARE @StorageTicketInfoByFIFO AS TABLE(
-								 [intId]					INT IDENTITY (1, 1)
-								,[intCustomerStorageId]		INT
-								,[strStorageTicketNumber]	NVARCHAR(40) COLLATE Latin1_General_CI_AS
-								,[dblOpenBalance]			NUMERIC(18, 6)
-								,[intUnitMeasureId]			INT
-								,[strUnitMeasure]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
-								,[strItemType]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
-								,[intItemId]				INT
-								,[strItem]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
-								,[dblCharge]				DECIMAL(24, 10)						
-							)
+							--DECLARE @StorageTicketInfoByFIFO AS TABLE(
+							--	 [intId]					INT IDENTITY (1, 1)
+							--	,[intCustomerStorageId]		INT
+							--	,[strStorageTicketNumber]	NVARCHAR(40) COLLATE Latin1_General_CI_AS
+							--	,[dblOpenBalance]			NUMERIC(18, 6)
+							--	,[intUnitMeasureId]			INT
+							--	,[strUnitMeasure]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							--	,[strItemType]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							--	,[intItemId]				INT
+							--	,[strItem]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+							--	,[dblCharge]				DECIMAL(24, 10)						
+							--)
 
-							INSERT INTO @StorageTicketInfoByFIFO(
-								 [intCustomerStorageId]
-								,[strStorageTicketNumber]
-								,[dblOpenBalance]
-								,[intUnitMeasureId]
-								,[strUnitMeasure]
-								,[strItemType]
-								,[intItemId]
-								,[strItem]
-								,[dblCharge]						
-							)				
+							--INSERT INTO @StorageTicketInfoByFIFO(
+							--	 [intCustomerStorageId]
+							--	,[strStorageTicketNumber]
+							--	,[dblOpenBalance]
+							--	,[intUnitMeasureId]
+							--	,[strUnitMeasure]
+							--	,[strItemType]
+							--	,[intItemId]
+							--	,[strItem]
+							--	,[dblCharge]						
+							--)				
 							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
 								 @strOptionType		= 'Update'
 								,@strSourceType		= 'Invoice'
@@ -460,74 +460,74 @@ BEGIN TRY
 								,@IntSourceKey		= @InvoiceId
 								,@intUserId			= @UserEntityID							
 
-							WHILE EXISTS (SELECT NULL FROM @StorageTicketInfoByFIFO)
-								BEGIN
-									DECLARE 
-										 @GrainId				INT
-										,@GrainItemId			INT										
-										,@GrainItemUOMId		INT
-										,@dblCharge				NUMERIC (18,6)
-										,@NewDetailId			INT		
-										,@ErrorMessage			NVARCHAR(250)				
-										,@CurrentErrorMessage	NVARCHAR(250)
-										,@ItemDesc				NVARCHAR(250)				
+							--WHILE EXISTS (SELECT NULL FROM @StorageTicketInfoByFIFO)
+							--	BEGIN
+							--		DECLARE 
+							--			 @GrainId				INT
+							--			,@GrainItemId			INT										
+							--			,@GrainItemUOMId		INT
+							--			,@dblCharge				NUMERIC (18,6)
+							--			,@NewDetailId			INT		
+							--			,@ErrorMessage			NVARCHAR(250)				
+							--			,@CurrentErrorMessage	NVARCHAR(250)
+							--			,@ItemDesc				NVARCHAR(250)				
 
-									SELECT TOP 1 
-										 @GrainId			= STI.intId 
-										,@CustomerStorageId	= STI.intCustomerStorageId
-										,@GrainItemUOMId	= ICIU.[intItemUOMId]
-										,@GrainItemId		= STI.[intItemId]
-										,@dblCharge			= STI.[dblCharge]
-										,@ItemDesc			= ICI.strDescription
-									FROM 
-										@StorageTicketInfoByFIFO STI
-									INNER JOIN 
-										tblICItemUOM ICIU
-											ON STI.intItemId = ICIU.intItemId
-											AND STI.intUnitMeasureId = ICIU.intUnitMeasureId
-									INNER JOIN
-										tblICItem ICI
-											ON STI.intItemId = ICI.intItemId  
+							--		SELECT TOP 1 
+							--			 @GrainId			= STI.intId 
+							--			,@CustomerStorageId	= STI.intCustomerStorageId
+							--			,@GrainItemUOMId	= ICIU.[intItemUOMId]
+							--			,@GrainItemId		= STI.[intItemId]
+							--			,@dblCharge			= STI.[dblCharge]
+							--			,@ItemDesc			= ICI.strDescription
+							--		FROM 
+							--			@StorageTicketInfoByFIFO STI
+							--		INNER JOIN 
+							--			tblICItemUOM ICIU
+							--				ON STI.intItemId = ICIU.intItemId
+							--				AND STI.intUnitMeasureId = ICIU.intUnitMeasureId
+							--		INNER JOIN
+							--			tblICItem ICI
+							--				ON STI.intItemId = ICI.intItemId  
 										
 									
-									BEGIN TRY					
-										EXEC [dbo].[uspARAddItemToInvoice]
-											@InvoiceId						= @InvoiceId	
-											,@ItemId						= @GrainItemId										
-											,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
-											,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
-											,@RaiseError					= @raiseError							 
-											,@ItemCustomerStorageId			= @CustomerStorageId				
-											,@RecomputeTax					= 0
-											,@ItemUOMId						= @GrainItemUOMId
-											,@ItemQtyShipped				= 1
-											,@ItemPrice						= @dblCharge
-											,@ItemDescription				= @ItemDesc
+							--		BEGIN TRY					
+							--			EXEC [dbo].[uspARAddItemToInvoice]
+							--				@InvoiceId						= @InvoiceId	
+							--				,@ItemId						= @GrainItemId										
+							--				,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
+							--				,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
+							--				,@RaiseError					= @raiseError							 
+							--				,@ItemCustomerStorageId			= @CustomerStorageId				
+							--				,@RecomputeTax					= 0
+							--				,@ItemUOMId						= @GrainItemUOMId
+							--				,@ItemQtyShipped				= 1
+							--				,@ItemPrice						= @dblCharge
+							--				,@ItemDescription				= @ItemDesc
 					
 
-										IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
-											BEGIN
-												IF ISNULL(@raiseError,0) = 0
-													ROLLBACK TRANSACTION
-												SET @ErrorMessage = @CurrentErrorMessage;
-												IF ISNULL(@raiseError,0) = 1
-													RAISERROR(@ErrorMessage, 16, 1);
-												RETURN 0;
-											END
-									END TRY
-									BEGIN CATCH
-										IF ISNULL(@raiseError,0) = 0
-											ROLLBACK TRANSACTION
-										SET @ErrorMessage = ERROR_MESSAGE();
-										IF ISNULL(@raiseError,0) = 1
-											RAISERROR(@ErrorMessage, 16, 1);
-										RETURN 0;
-									END CATCH			
+							--			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+							--				BEGIN
+							--					IF ISNULL(@raiseError,0) = 0
+							--						ROLLBACK TRANSACTION
+							--					SET @ErrorMessage = @CurrentErrorMessage;
+							--					IF ISNULL(@raiseError,0) = 1
+							--						RAISERROR(@ErrorMessage, 16, 1);
+							--					RETURN 0;
+							--				END
+							--		END TRY
+							--		BEGIN CATCH
+							--			IF ISNULL(@raiseError,0) = 0
+							--				ROLLBACK TRANSACTION
+							--			SET @ErrorMessage = ERROR_MESSAGE();
+							--			IF ISNULL(@raiseError,0) = 1
+							--				RAISERROR(@ErrorMessage, 16, 1);
+							--			RETURN 0;
+							--		END CATCH			
 
-									UPDATE tblARInvoiceDetail SET intCustomerStorageId = @CustomerStorageId WHERE intInvoiceDetailId = @NewDetailId
-									DELETE FROM @StorageTicketInfoByFIFO  WHERE intId  = @GrainId
-								END
-								DELETE FROM @StorageTicketInfoByFIFO WHERE intItemId = @ItemId
+							--		UPDATE tblARInvoiceDetail SET intCustomerStorageId = @CustomerStorageId WHERE intInvoiceDetailId = @NewDetailId
+							--		DELETE FROM @StorageTicketInfoByFIFO  WHERE intId  = @GrainId
+							--	END
+								--DELETE FROM @StorageTicketInfoByFIFO WHERE intItemId = @ItemId
 							END
 					ELSE
 						BEGIN
@@ -537,7 +537,7 @@ BEGIN TRY
 									@intUserId		= @UserEntityID
 
 							UPDATE tblARInvoiceDetail SET intCustomerStorageId = NULL WHERE intInvoiceDetailId = @InvoiceDetailId
-							DELETE FROM tblARInvoiceDetail WHERE intCustomerStorageId IS NOT NULL AND intInvoiceId = @InvoiceId
+							--DELETE FROM tblARInvoiceDetail WHERE intCustomerStorageId IS NOT NULL AND intInvoiceId = @InvoiceId
 						END						
 					END TRY
 					BEGIN CATCH

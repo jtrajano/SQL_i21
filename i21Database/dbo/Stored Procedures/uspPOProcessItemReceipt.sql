@@ -36,7 +36,14 @@ BEGIN
 				ON PO.intPurchaseId = PODetail.intPurchaseId
 				AND PODetail.intPurchaseId = @poId WHERE intUnitOfMeasureId IS NULL AND intItemId IS NOT NULL)
 	BEGIN
-		RAISERROR('Cannot process to inventory, Item UOM is missing.', 16, 1);
+		RAISERROR('Cannot process to receipt, Item UOM is missing.', 16, 1);
+		RETURN;
+	END
+
+	--PO is for approval
+	IF(EXISTS(SELECT 1 FROM vyuAPForApprovalTransaction WHERE intTransactionId = @poId AND strScreenName = 'Purchase Order'))
+	BEGIN
+		RAISERROR('Cannot process to receipt, PO is for approval.', 16, 1);
 		RETURN;
 	END
     
