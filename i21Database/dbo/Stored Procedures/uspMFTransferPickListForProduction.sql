@@ -29,6 +29,11 @@ Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
 DECLARE @strInActiveLots NVARCHAR(MAX) 
 Declare @intPickListDetailId int
+		,@dtmProductionDate Datetime
+		,@intShiftId int
+		,@dtmBusinessDate datetime
+		,@intBusinessShiftId int
+		,@dblInputWeight numeric(38,20)
 
 Declare @strBulkItemXml nvarchar(max)
 		,@dblPickQuantity numeric(38,20)
@@ -54,8 +59,16 @@ Declare @tblChildLot table
 	intPickUOMId int,
 	intPickListDetailId int
 )
+SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
-Select @intPickListId=intPickListId,@intBlendItemId=intItemId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+	SELECT @intBusinessShiftId = intShiftId
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+
+Select @intPickListId=intPickListId,@intBlendItemId=intItemId,@dtmProductionDate=dtmPlannedDate,@intShiftId=intPlannedShiftId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 
 If (Select intKitStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) = 8
 Begin
@@ -133,10 +146,13 @@ End
 			Exec uspMFKitItemMove @intPickListDetailId,@intProductionStagingLocationId,@intUserId
 
 			Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,intStorageLocationId)
+			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,intStorageLocationId,dtmProductionDate,intShiftId,dtmActualInputDateTime
+		,dtmBusinessDate
+		,intBusinessShiftId
+		)
 			Select @intWorkOrderId,NULL,@intItemId,@dblPickQuantity,@intPickUOMId,
 			@dblPickQuantity,@intPickUOMId,null,
-			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null,@intProductionStagingLocationId
+			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null,@intProductionStagingLocationId,@dtmProductionDate,@intShiftId,@dtmCurrentDateTime,@dtmBusinessDate,@intBusinessShiftId
 
 			GOTO NEXT_RECORD
 		End
@@ -172,13 +188,63 @@ End
 						@intUserId=@intUserId
 			
 		Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
+			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,intStorageLocationId , dtmProductionDate,intShiftId,dtmActualInputDateTime
+		,dtmBusinessDate
+		,intBusinessShiftId)
 			Select @intWorkOrderId,@intNewLotId,@intItemId,dblPickQuantity,intPickUOMId,
 			dblPickQuantity,intPickUOMId,null,
-			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null
+			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null,@intProductionStagingLocationId,@dtmProductionDate,@intShiftId,@dtmCurrentDateTime,@dtmBusinessDate,@intBusinessShiftId
 			From @tblChildLot where intRowNo = @intMinChildLot
 
+
+
 		Update tblMFPickListDetail set intStageLotId=@intNewLotId Where intPickListDetailId=@intPickListDetailId
+		Select @dblInputWeight=NULL
+		Select @dblInputWeight=dblPickQuantity from @tblChildLot where intRowNo = @intMinChildLot
+
+		IF NOT EXISTS (
+			SELECT *
+			FROM tblMFProductionSummary
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intItemId = @intItemId
+			)
+	BEGIN
+		INSERT INTO tblMFProductionSummary (
+			intWorkOrderId
+			,intItemId
+			,dblOpeningQuantity
+			,dblOpeningOutputQuantity
+			,dblOpeningConversionQuantity
+			,dblInputQuantity
+			,dblConsumedQuantity
+			,dblOutputQuantity
+			,dblOutputConversionQuantity
+			,dblCountQuantity
+			,dblCountOutputQuantity
+			,dblCountConversionQuantity
+			,dblCalculatedQuantity
+			)
+		SELECT @intWorkOrderId
+			,@intItemId
+			,0
+			,0
+			,0
+			,@dblInputWeight
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+	END
+	ELSE
+	BEGIN
+		UPDATE tblMFProductionSummary
+		SET dblInputQuantity = dblInputQuantity + @dblInputWeight
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intItemId
+	END
 
 		NEXT_RECORD:
 		Select @intMinChildLot=Min(intRowNo) from @tblChildLot where intRowNo>@intMinChildLot
