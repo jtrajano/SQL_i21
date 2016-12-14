@@ -291,9 +291,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 defaultFilters: [
                     {
                         column: 'intEntityId',
-                        value: '{current.intEntityVendorId}'
-                    }
-                ],
+                        value: '{current.intEntityVendorId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'ysnActive',
+                        value: true,
+                        conjunction: 'and'
+                    }                    
+                ],                
                 readOnly: '{isReceiptReadonly}'
             },
             cboReceiver: {
