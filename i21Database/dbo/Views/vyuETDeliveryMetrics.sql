@@ -14,7 +14,7 @@
    ,C.strLocationName  AS strLocation 
    ,CAST(intEndingOdometerReading-intBeginningOdometerReading as DECIMAL(18,6))   AS dblMilesPerDay --Odometer End - Obometer Start
    ,dblGallonsDelivered/intTotalInvoice  AS dblGallonsPerStop --Gallons Delivered / Invoices
-   ,dblGallonsDelivered/(intEndingOdometerReading-intBeginningOdometerReading)  AS dblGallonsPerMile --Gallons Delivered / (Odometer End - Odometer Start)
+   ,dblGallonsDelivered/NULLIF(intEndingOdometerReading-intBeginningOdometerReading,0) AS dblGallonsPerMile  --Gallons Delivered / (Odometer End - Odometer Start)
 	FROM tblETDeliveryMetrics A
 	LEFT JOIN tblEMEntity B ON A.strDriverNumber = RIGHT(RTRIM(LTRIM(B.strEntityNo)), 3)
 	LEFT JOIN [tblEMEntityLocation] C ON B.intEntityId = C.intEntityId
