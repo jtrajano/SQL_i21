@@ -8,7 +8,7 @@
 	[strTradeType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL ,
 	[strOrder] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL ,
 	[intNewFutureMarketId] INT,
-	[intNewFutureMonthId] INT NOT NULL,
+	[intNewFutureMonthId] INT,
 	[intOldFutureMarketId] INT,
 	[intOldFutureMonthId] INT,
 	[strBuySell] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL ,

@@ -92,7 +92,7 @@ BEGIN TRY
 		WHERE	intCommodityId		=	@intCommodityId 
 		AND		intUnitMeasureId	=	@intUnitMeasureId
 
-		IF @intPricingTypeId = 2
+		IF @intPricingTypeId = 2 AND @strAction <> 'Delete'
 		BEGIN
 			UPDATE tblCTContractDetail SET dblOriginalBasis = dblBasis WHERE intContractDetailId = @intContractDetailId
 		END
