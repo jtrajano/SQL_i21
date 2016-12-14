@@ -224,20 +224,20 @@ BEGIN TRY
 				)
 	END
 
-	IF NOT EXISTS (
-			SELECT 1
-			FROM dbo.tblMFWorkOrderRecipe R
-			JOIN dbo.tblICLot L ON L.intItemId = R.intItemId
-				AND R.intLocationId = @intLocationId
-				AND R.intManufacturingProcessId = @intManufacturingProcessId
-			)
-	BEGIN
-		RAISERROR (
-				51057
-				,11
-				,1
-				)
-	END
+	--IF NOT EXISTS (
+	--		SELECT 1
+	--		FROM dbo.tblMFWorkOrderRecipe R
+	--		JOIN dbo.tblICLot L ON L.intItemId = R.intItemId
+	--			AND R.intLocationId = @intLocationId
+	--			AND R.intManufacturingProcessId = @intManufacturingProcessId
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			51057
+	--			,11
+	--			,1
+	--			)
+	--END
 
 	SELECT @CurrentDate = Convert(CHAR, @dtmCurrentDate, 108)
 
