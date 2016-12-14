@@ -4613,6 +4613,14 @@
     <Build Include="dbo\Views\vyuCTSearchPriceContract.sql" />
     <Build Include="dbo\Views\vyuCTSearchPriceContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStartCycleCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemNutrients.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeGuideSOItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeGuideItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveRecipeGuide.sql" />
+    <Build Include="dbo\Tables\tblMFNutrient.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeGuideNutrient.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeGuide.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeGuide.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
