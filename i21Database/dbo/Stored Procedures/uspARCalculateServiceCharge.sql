@@ -165,7 +165,7 @@ AS
 						BEGIN
 							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
 
-							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
+							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
 							SELECT TOP 1 @dblMinimumSC = dblMinimumCharge FROM tblARCustomer C 
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.intEntityCustomerId = @entityId
 			
