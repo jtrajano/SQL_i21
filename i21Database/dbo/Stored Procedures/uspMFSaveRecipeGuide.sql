@@ -13,13 +13,6 @@ BEGIN TRY
 
 	DECLARE @idoc INT
 	DECLARE @ErrMsg NVARCHAR(Max)
-	DECLARE @ysnEnableParentLot BIT = 0
-	DECLARE @intBlendItemId INT
-	DECLARE @intLocationId INT
-	DECLARE @dblPlannedQuantity NUMERIC(38,20)
-	DECLARE @dblBulkReqQuantity NUMERIC(38,20)
-	Declare @intCategoryId int
-	Declare @intCellId int
 	Declare @strName nvarchar(50)
 
 	Set @intRecipeGuideId=0

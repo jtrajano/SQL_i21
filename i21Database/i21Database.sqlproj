@@ -4642,6 +4642,7 @@
     <Build Include="dbo\Views\vyuMFGetRecipeGuide.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildZeroCostReceipts.sql" />
     <Build Include="dbo\Functions\fnGetSeqMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeGuideSOItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
