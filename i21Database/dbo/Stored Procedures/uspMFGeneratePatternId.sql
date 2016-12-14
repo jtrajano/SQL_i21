@@ -92,7 +92,7 @@ BEGIN
 		,strSubPatternFormat
 	FROM dbo.tblMFPatternDetail
 	WHERE intPatternId = @intPatternId
-	ORDER BY intOrdinalPosition
+	ORDER BY intOrdinalPosition,strSubPatternName 
 
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFPatternDetail
