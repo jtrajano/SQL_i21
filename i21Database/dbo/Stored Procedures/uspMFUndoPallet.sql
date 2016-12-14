@@ -28,6 +28,8 @@ BEGIN TRY
 		,@INVENTORY_PRODUCE AS INT = 9
 		,@dtmDate DATETIME
 		,@intTransactionDetailId INT
+		,@strLotTracking NVARCHAR(50)
+
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
 		,intItemId INT
@@ -76,6 +78,10 @@ BEGIN TRY
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
+		SELECT @strLotTracking = strLotTracking
+	FROM dbo.tblICItem
+	WHERE intItemId = @intItemId
+
 	SELECT @intItemLocationId = intItemLocationId
 	FROM tblICItemLocation
 	WHERE intLocationId = @intLocationId
@@ -87,7 +93,8 @@ BEGIN TRY
 		,@intTransactionDetailId = intWorkOrderProducedLotId
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
-		AND intLotId = @intLotId
+		--AND intLotId = @intLotId
+		And intBatchId=@intBatchId
 
 	--IF EXISTS (
 	--		SELECT *
@@ -110,7 +117,7 @@ BEGIN TRY
 			SELECT *
 			FROM tblMFWorkOrderProducedLot
 			WHERE intWorkOrderId = @intWorkOrderId
-				AND intLotId = @intLotId
+				AND intBatchId=@intBatchId
 				AND ysnProductionReversed = 1
 			)
 	BEGIN
@@ -129,7 +136,7 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 				AND intLotStatusId = 2
 			)
-		AND @ysnForceUndo = 0
+		AND @ysnForceUndo = 0 AND @strLotTracking = 'Yes'
 	BEGIN
 		RAISERROR (
 				51139
@@ -146,7 +153,7 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 				AND dblQty = 0
 			)
-		AND @ysnForceUndo = 0
+		AND @ysnForceUndo = 0 AND @strLotTracking = 'Yes'
 	BEGIN
 		RAISERROR (
 				90017
@@ -407,15 +414,15 @@ BEGIN TRY
 	SET ysnProductionReversed = 1
 		,dtmLastModified = GETDATE()
 		,intLastModifiedUserId = @intUserId
-	WHERE intLotId = @intLotId
-		AND intWorkOrderId = @intWorkOrderId
+	WHERE intWorkOrderId = @intWorkOrderId
+	And intBatchId=@intBatchId
 
 	SELECT @dblQuantity = dblQuantity
 		,@intItemUOMId = intItemUOMId
 		,@dblPhysicalCount = dblPhysicalCount
 	FROM tblMFWorkOrderProducedLot
-	WHERE intLotId = @intLotId
-		AND intWorkOrderId = @intWorkOrderId
+	WHERE intWorkOrderId = @intWorkOrderId
+	And intBatchId=@intBatchId
 
 	UPDATE tblMFWorkOrder
 	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) - (
