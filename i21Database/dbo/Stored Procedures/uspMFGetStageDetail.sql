@@ -16,8 +16,8 @@ BEGIN
 		,W.intWorkOrderId
 		,SL.intStorageLocationId
 		,SL.strName AS strStorageLocationName
-		,W.intMachineId
-		,M.strName AS strMachineName
+		,IsNULL(W.intMachineId,0) AS intMachineId
+		,IsNULL(M.strName,'') AS strMachineName
 		,W.ysnConsumptionReversed
 		,W.strReferenceNo
 		,W.dtmActualInputDateTime
