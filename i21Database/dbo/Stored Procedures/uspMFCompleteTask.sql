@@ -131,6 +131,7 @@ BEGIN TRANSACTION
 			,intOrderHeaderId
 		FROM tblMFTask
 		WHERE intOrderHeaderId = @intOrderHeaderId
+		And intTaskStateId <>4
 
 		SELECT @intMinTaskRecordId = MIN(intTaskRecordId)
 		FROM @tblTasks
@@ -142,6 +143,14 @@ BEGIN TRANSACTION
 			SELECT @intTaskId = intTaskId
 			FROM @tblTasks
 			WHERE intTaskRecordId = @intMinTaskRecordId
+
+			SELECT @intNewSubLocationId = NULL,
+					@intNewStorageLocationId = NULL,
+					@dblMoveQty = NULL,
+					@intMoveItemUOMId = NULL,
+					@blnValidateLotReservation = 1,
+					@blnInventoryMove = 0,
+					@intLotId = NULL
 
 			SELECT @intNewSubLocationId = SL.intSubLocationId,
 					@intNewStorageLocationId = T.intToStorageLocationId,
