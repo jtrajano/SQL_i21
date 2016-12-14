@@ -6,7 +6,7 @@ BEGIN
 			, @strCustomerIds			NVARCHAR(MAX)		
 			, @intLetterId				INT
 			, @strLetterId				NVARCHAR(10)  
-			 ,@LetterName				NVARCHAR(MAX)				
+			 ,@strLetterName				NVARCHAR(MAX)				
 			, @query					NVARCHAR(MAX)
 			, @intEntityCustomerId		INT
 			, @blb						VARBINARY(MAX)
@@ -45,16 +45,30 @@ BEGIN
 	WHERE 
 		[fieldname] = 'intEntityCustomerId' 
 
+	SELECT 
+		@intLetterId = [from]
+	FROM 
+		@temp_params 
+	WHERE [fieldname] = 'intLetterId'
+		
+	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
+
+	SELECT @strLetterName = strName FROM tblSMLetter WHERE intLetterId = @intLetterId	
+
+
 	IF (@strCustomerIds IS NULL OR @strCustomerIds = '')
 	BEGIN
+ 
 		SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
 		FROM (
 			SELECT 
 				CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
 			FROM 
-				tblARCustomer
+				tblARCollectionOverdue
 			FOR XML PATH ('')
 		) c (intEntityCustomerId)
+ 
+
 	END
 	
 	SET @strCustomerIds = REPLACE (@strCustomerIds, '|^|', ',')
@@ -64,16 +78,6 @@ BEGIN
 		msgAsHTML VARCHAR(max)
 	);
 	 
-	SELECT 
-		@intLetterId = [from]
-	FROM 
-		@temp_params 
-	WHERE [fieldname] = 'intLetterId'
-		
-	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
-
-	SELECT @LetterName = strName FROM tblSMLetter WHERE intLetterId = @intLetterId	
-
 	DECLARE @strMessage VARCHAR(MAX)
 	SELECT
 		@strMessage = CONVERT(VARCHAR(MAX), blbMessage)
@@ -173,7 +177,7 @@ BEGIN
 		ORDER BY 
 			intEntityCustomerId
 
-	IF @LetterName = 'Recent Overdue Collection Letter'
+	IF @strLetterName = 'Recent Overdue Collection Letter'
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl10DaysSum = (dbl10DaysSum + dbl30DaysSum + dbl60DaysSum + dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId 
 		INSERT INTO #TransactionLetterDetail
@@ -222,7 +226,7 @@ BEGIN
 			AND dbl121Days  <> 0
 		) ABC
 	END
-	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
+	ELSE IF @strLetterName = '30 Day Overdue Collection Letter'					
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl30DaysSum =  (dbl60DaysSum + dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
 		INSERT INTO #TransactionLetterDetail
@@ -263,7 +267,7 @@ BEGIN
 			AND dbl121Days  <> 0
 		) ABC
 	END
-	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
+	ELSE IF @strLetterName = '60 Day Overdue Collection Letter'					
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl60DaysSum =  (dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
 		INSERT INTO #TransactionLetterDetail
@@ -300,7 +304,7 @@ BEGIN
 			AND dbl121Days  <> 0
 		) ABC
 	END
-	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
+	ELSE IF @strLetterName = '90 Day Overdue Collection Letter'					
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl90DaysSum =  (dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
 		INSERT INTO #TransactionLetterDetail
@@ -333,7 +337,7 @@ BEGIN
 			AND dbl121Days  <> 0
 		) ABC
 	END
-	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
+	ELSE IF @strLetterName = 'Final Overdue Collection Letter'					
 	BEGIN		
 		UPDATE tblARCollectionOverdue SET dbl121DaysSum =  (dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
 		INSERT INTO #TransactionLetterDetail
