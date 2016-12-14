@@ -3,6 +3,7 @@
 	,@strItemNo AS NVARCHAR(50) = NULL 
 	,@isPeriodic AS BIT = 1
 	,@ysnRegenerateBillGLEntries AS BIT = 0
+	,@intUserId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
