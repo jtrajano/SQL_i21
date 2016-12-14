@@ -746,6 +746,10 @@ BEGIN
         ,0
         ,'select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName AS DisplayMember from tblICStorageLocation'
 END
+Else
+Begin
+	Update tblMFAttribute SEt intAttributeTypeId =1 Where intAttributeId = 36
+End
 GO
 
 IF NOT EXISTS (
