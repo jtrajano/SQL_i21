@@ -9,8 +9,12 @@
 	[intConcurrencyId]		[int]												NOT NULL DEFAULT ((1)), 
 	[intRecordId]			[int]												NOT NULL,
 	[dblAmount]				[numeric](18, 6)									NULL,
+	[ysnLocked]				[bit]												NULL,
+	[dtmLockedDate]			DATETIME											NULL,
+	[intLockedBy]			[int]												NULL,
 	[intCurrencyId]			[int]												NULL,
     CONSTRAINT [FK_tblSMTransaction_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]),
     CONSTRAINT [PK_tblSMTransaction] PRIMARY KEY ([intTransactionId]), 
+	CONSTRAINT [FK_tblSMTransaction_tblEMEntity] FOREIGN KEY ([intLockedBy]) REFERENCES [tblEMEntity]([intEntityId]),
     CONSTRAINT [UC_tblSMTransaction_intScreenId_intRecordId] UNIQUE ([intScreenId] ASC, [intRecordId] ASC)
 )
