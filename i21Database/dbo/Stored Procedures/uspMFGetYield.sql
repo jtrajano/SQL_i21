@@ -69,10 +69,10 @@ BEGIN
 			,SUM(dblOutputQuantity) AS dblOutputQuantity
 			,SUM(dblCountQuantity) AS dblCountQuantity
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
-			,SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) AS dblYieldQuantity
+			,0 AS dblYieldQuantity
 			,CASE 
 				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) > 0
-					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) * 100, 2)
+					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity+dblInputQuantity  ) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
 			,C.intCategoryId
@@ -107,10 +107,10 @@ BEGIN
 			,0 AS dblOutputQuantity
 			,SUM(dblCountQuantity) AS dblCountQuantity
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
-			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) AS dblYieldQuantity
+			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity +dblInputQuantity ) AS dblYieldQuantity
 			,CASE 
 				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) > 0
-					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) * 100, 2)
+					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity+dblInputQuantity  ) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
 			,C.intCategoryId
@@ -118,7 +118,7 @@ BEGIN
 			,C.strDescription As strCategoryDescription
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
-			AND I.intCategoryId <> @intCategoryId
+			--AND I.intCategoryId <> @intCategoryId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN tblMFWorkOrderRecipeItem RI on RI.intItemId=PS.intItemId and RI.intWorkOrderId=@intWorkOrderId and RI.intRecipeItemTypeId =1
 		WHERE PS.intWorkOrderId = @intWorkOrderId
@@ -130,6 +130,7 @@ BEGIN
 			,C.intCategoryId
 			,C.strCategoryCode
 			,C.strDescription
+			Order by strTransactionType
 		
 	END
 	ELSE
@@ -147,10 +148,10 @@ BEGIN
 			,SUM(dblOutputQuantity) AS dblOutputQuantity
 			,SUM(dblCountQuantity) AS dblCountQuantity
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
-			,SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) AS dblYieldQuantity
+			,SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity +dblInputQuantity ) AS dblYieldQuantity
 			,CASE 
 				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) > 0
-					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) * 100, 2)
+					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity +dblInputQuantity ) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
 			,C.intCategoryId
@@ -180,10 +181,10 @@ BEGIN
 			,0 AS dblOutputQuantity
 			,SUM(dblCountQuantity) AS dblCountQuantity
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
-			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) AS dblYieldQuantity
+			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity +dblInputQuantity ) AS dblYieldQuantity
 			,CASE 
 				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) > 0
-					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity ) * 100, 2)
+					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity +dblInputQuantity ) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
 			,C.intCategoryId
@@ -191,7 +192,7 @@ BEGIN
 			,C.strDescription As strCategoryDescription
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
-			AND I.intCategoryId <> @intCategoryId
+			--AND I.intCategoryId <> @intCategoryId
 			AND I.intItemId <> @intItemId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		WHERE intWorkOrderId = @intWorkOrderId
@@ -202,5 +203,6 @@ BEGIN
 			,C.intCategoryId
 			,C.strCategoryCode
 			,C.strDescription
+		Order by strTransactionType
 	END
 END
