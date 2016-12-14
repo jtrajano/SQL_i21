@@ -518,7 +518,7 @@ SELECT
 	,[strShippedItemId]					= 'icis:' + CAST(ICIS.[intInventoryShipmentId] AS NVARCHAR(250))
 	,[intEntityCustomerId]				= ICIS.[intEntityCustomerId]
 	,[strCustomerName]					= EME.[strName]
-	,[intCurrencyId]					= ISNULL(ISNULL(ARCC.[intCurrencyId], ARC.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
+	,[intCurrencyId]					= ISNULL(ISNULL(ISNULL(ARCC.[intCurrencyId], ARC.[intCurrencyId]), SCCC.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderId]					= NULL
 	,[intSalesOrderDetailId]			= NULL
 	,[strSalesOrderNumber]				= ''
@@ -533,10 +533,10 @@ SELECT
 	,[strLoadNumber]					= NULL
 	,[intLoadDetailId]					= NULL
 	,[intRecipeItemId]					= NULL
-	,[intContractHeaderId]				= ISNULL(ARCC.[intContractHeaderId], LGICShipment.[intContractHeaderId])
-	,[strContractNumber]				= ISNULL(ARCC.[strContractNumber], LGICShipment.[strContractNumber])
-	,[intContractDetailId]				= ISNULL(ARCC.[intContractDetailId], LGICShipment.[intContractDetailId])
-	,[intContractSeq]					= ISNULL(ARCC.[intContractSeq], LGICShipment.[intContractSeq])
+	,[intContractHeaderId]				= ISNULL(ISNULL(ARCC.[intContractHeaderId], LGICShipment.[intContractHeaderId]), SCCC.[intContractHeaderId])
+	,[strContractNumber]				= ISNULL(ISNULL(ARCC.[strContractNumber], LGICShipment.[strContractNumber]), SCCC.[strContractNumber])
+	,[intContractDetailId]				= ISNULL(ISNULL(ARCC.[intContractDetailId], LGICShipment.[intContractDetailId]), SCCC.[intContractDetailId])
+	,[intContractSeq]					= ISNULL(ISNULL(ARCC.[intContractSeq], LGICShipment.[intContractSeq]), SCCC.[intContractSeq])
 	,[intCompanyLocationId]				= ICIS.[intShipFromLocationId]
 	,[strLocationName]					= SMCL.[strLocationName] 
 	,[intShipToLocationId]				= ICIS.[intShipToLocationId]
@@ -544,23 +544,23 @@ SELECT
 	,[intItemId]						= ICISI.[intItemId]	
 	,[strItemNo]						= ICI.[strItemNo] 
 	,[strItemDescription]				= ICI.[strDescription] 
-	,[intItemUOMId]						= ISNULL(ICISI.[intItemUOMId], ARCC.[intItemUOMId])
-	,[strUnitMeasure]					= ISNULL(ICUM.[strUnitMeasure], ARCC.[strUnitMeasure])
-	,[intOrderUOMId]					= ARCC.[intOrderUOMId]
-	,[strOrderUnitMeasure]				= ARCC.[strOrderUnitMeasure]
+	,[intItemUOMId]						= ISNULL(ISNULL(ICISI.[intItemUOMId], ARCC.[intItemUOMId]), SCCC.[intItemUOMId])
+	,[strUnitMeasure]					= ISNULL(ISNULL(ICUM.[strUnitMeasure], ARCC.[strUnitMeasure]), SCCC.[strUnitMeasure])
+	,[intOrderUOMId]					= ISNULL(ARCC.[intOrderUOMId], SCCC.[intOrderUOMId])
+	,[strOrderUnitMeasure]				= ISNULL(ARCC.[strOrderUnitMeasure], SCCC.[strOrderUnitMeasure])
 	,[intShipmentItemUOMId]				= ICISI.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
-	,[dblQtyShipped]					= ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]) 	
-	,[dblQtyOrdered]					= CASE WHEN ARCC.[intContractDetailId] IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END 
-	,[dblShipmentQuantity]				= ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity])  --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
-	,[dblShipmentQtyShippedTotal]		= ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]) 
-	,[dblQtyRemaining]					= ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]) 
+	,[dblQtyShipped]					= ISNULL(ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]), SCCC.[dblShipQuantity]) 	
+	,[dblQtyOrdered]					= CASE WHEN ARCC.[intContractDetailId] IS NOT NULL THEN ARCC.dblDetailQuantity WHEN SCCC.[intContractDetailId] IS NOT NULL THEN SCCC.dblDetailQuantity ELSE 0 END 
+	,[dblShipmentQuantity]				= ISNULL(ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]), SCCC.[dblShipQuantity])  --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
+	,[dblShipmentQtyShippedTotal]		= ISNULL(ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]), SCCC.[dblShipQuantity]) 
+	,[dblQtyRemaining]					= ISNULL(ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]), SCCC.[dblShipQuantity]) 
 	,[dblDiscount]						= 0 
-	,[dblPrice]							= ISNULL(ICISI.[dblUnitPrice], ARCC.[dblCashPrice])
-	,[dblShipmentUnitPrice]				= ISNULL(ICISI.[dblUnitPrice], ARCC.[dblCashPrice])
+	,[dblPrice]							= ISNULL(ISNULL(ICISI.[dblUnitPrice], ARCC.[dblCashPrice]), SCCC.[dblCashPrice])
+	,[dblShipmentUnitPrice]				= ISNULL(ISNULL(ICISI.[dblUnitPrice], ARCC.[dblCashPrice]), SCCC.[dblCashPrice])
 	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
-	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ISNULL(ICISI.[dblUnitPrice], ARCC.[dblCashPrice])
+	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ISNULL(ISNULL(ICISI.[dblUnitPrice], ARCC.[dblCashPrice]), SCCC.[dblCashPrice])
 	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
 	,[strStorageLocationName]			= ICSL.[strName]
 	,[intTermID]						= NULL
@@ -591,8 +591,8 @@ SELECT
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
-	,[intSubCurrencyId]					= ARCC.[intSubCurrencyId]
-	,[dblSubCurrencyRate]				= ARCC.[dblSubCurrencyRate]
+	,[intSubCurrencyId]					= ISNULL(ARCC.[intSubCurrencyId], SCCC.[intSubCurrencyId])
+	,[dblSubCurrencyRate]				= ISNULL(ARCC.[dblSubCurrencyRate], SCCC.[dblSubCurrencyRate])
 	,[strSubCurrency]					= SMC.[strCurrency]
 FROM
 	tblICInventoryShipmentItem ICISI
@@ -678,13 +678,17 @@ LEFT OUTER JOIN
 		ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 LEFT OUTER JOIN
 	[tblSMCompanyLocation] SMCL
-		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN
-	tblSMCurrency SMC
-		ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]	
+		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
 LEFT OUTER JOIN
 	tblSCTicket SCT
 		ON ICISI.[intSourceId] = SCT.[intTicketId]
+LEFT OUTER JOIN
+	vyuARCustomerContract SCCC	
+		ON SCT.[intContractId] = SCCC.[intContractDetailId]
+		AND ICIS.[intOrderType] = 4
+LEFT OUTER JOIN
+	tblSMCurrency SMC
+		ON ISNULL(ARCC.[intSubCurrencyId], SCCC.[intSubCurrencyId]) = SMC.[intCurrencyID]
 						
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 
