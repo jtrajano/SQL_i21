@@ -370,7 +370,7 @@ select 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(intTaxCriteriaId AS NVARCHA
 from tblTFTaxCriteria TaxCrit
 left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCategoryId
 left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
-where RC.intTaxAuthorityId = 
+where RC.intTaxAuthorityId =  and TaxCat.intTaxAuthorityId = 
 */
 DECLARE @TaxCriteria AS TFTaxCriteria
 
@@ -402,10 +402,6 @@ UNION ALL SELECT intTaxCriteriaId = 17, strTaxCategory = 'IN Excise Tax Gasoline
 UNION ALL SELECT intTaxCriteriaId = 18, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '= 0'
 UNION ALL SELECT intTaxCriteriaId = 19, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strCriteria = '= 0'
 UNION ALL SELECT intTaxCriteriaId = 20, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 22, strTaxCategory = 'IL Excise Tax Diesel Clear', strState = 'IL', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 23, strTaxCategory = 'KY Excise Tax Diesel Clear', strState = 'KY', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 24, strTaxCategory = 'MI Excise Tax Diesel Clear', strState = 'MI', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 25, strTaxCategory = 'KY Excise Tax Diesel Clear', strState = 'KY', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strCriteria = '<> 0'
 UNION ALL SELECT intTaxCriteriaId = 26, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strCriteria = '<> 0'
 UNION ALL SELECT intTaxCriteriaId = 27, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strCriteria = '<> 0'
 UNION ALL SELECT intTaxCriteriaId = 28, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strCriteria = '<> 0'
