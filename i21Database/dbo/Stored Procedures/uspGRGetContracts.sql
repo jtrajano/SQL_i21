@@ -50,7 +50,11 @@ BEGIN TRY
     ,ysnAllowedToShow   
     ,intContractStatusId
 	,dblScheduleQty
-	,intItemUOMId FROM vyuCTContractDetailView WHERE '+@strSearchCriteria+' Order By intContractDetailId'    
+	,intItemUOMId
+	,intStorageScheduleRuleId
+    ,intFarmFieldId
+    ,intGradeId
+    ,intWeightId FROM vyuCTContractDetailView WHERE '+@strSearchCriteria+' Order By intContractDetailId'    
  ELSE  
   SET @sql='SELECT * FROM vyuCTContractDetailView Order By intContractDetailId'  
     
