@@ -40,7 +40,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	@QuantityToPost 
+		,[dblQty]					=	CASE WHEN @QuantityToPost > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE @QuantityToPost END
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
@@ -79,6 +79,7 @@ BEGIN
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
 		AND ISNULL((@QuantityToPost),0) <> 0
 
+
 	UNION ALL
 
 
@@ -88,7 +89,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	@QuantityToPost * SOSODC.dblQuantity
+		,[dblQty]					=	(CASE WHEN @QuantityToPost > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE @QuantityToPost END) * SOSODC.dblQuantity
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
