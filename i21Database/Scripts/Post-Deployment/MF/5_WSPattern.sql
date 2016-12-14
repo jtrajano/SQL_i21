@@ -2,6 +2,9 @@
 DECLARE @strPatternName NVARCHAR(50)
 	,@strDescription NVARCHAR(100)
 	,@intPatternId INT
+	,@strSubPatternTypeDetail0 NVARCHAR(50)
+	,@strSubPatternName0 NVARCHAR(50)
+	,@intSubPatternTypeId0 INT
 	,@strSubPatternTypeDetail NVARCHAR(50)
 	,@strSubPatternName NVARCHAR(50)
 	,@intSubPatternTypeId INT
@@ -15,6 +18,13 @@ DECLARE @strPatternName NVARCHAR(50)
 	,@strSubPatternName4 NVARCHAR(50)
 	,@intSubPatternTypeId4 INT
 	,@intPatternCode INT
+
+SELECT @intSubPatternTypeId0 = 4
+
+SELECT @strSubPatternName0 = 'Part0'
+
+SELECT @strSubPatternTypeDetail0 = 'tblICCategory.strCategoryCode'
+
 
 SELECT @intSubPatternTypeId = 3
 
@@ -61,6 +71,30 @@ WHERE NOT EXISTS (
 SELECT @intPatternId = intPatternId
 FROM dbo.tblMFPattern
 WHERE intPatternCode = @intPatternCode
+
+INSERT dbo.tblMFPatternDetail (
+	intPatternId
+	,strSubPatternName
+	,intSubPatternTypeId
+	,intSubPatternSize
+	,strSubPatternTypeDetail
+	,strSubPatternFormat
+	,intOrdinalPosition
+	)
+SELECT intPatternId = @intPatternId
+	,strSubPatternName = @strSubPatternName0
+	,intSubPatternTypeId = @intSubPatternTypeId0
+	,intSubPatternSize = 1
+	,strSubPatternTypeDetail = @strSubPatternTypeDetail0
+	,strSubPatternFormat = 'Left(<?>,1)'
+	,intOrdinalPosition = 0
+WHERE NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFPatternDetail
+		WHERE intPatternId = @intPatternId
+			AND strSubPatternName = @strSubPatternName0
+		)
+
 
 INSERT dbo.tblMFPatternDetail (
 	intPatternId
@@ -182,6 +216,10 @@ DECLARE @strPatternString NVARCHAR(50)
 DECLARE @strPatternName NVARCHAR(50)
 	,@strDescription NVARCHAR(100)
 	,@intPatternId INT
+		,@strSubPatternTypeDetail0 NVARCHAR(50)
+	,@strSubPatternName0 NVARCHAR(50)
+	,@intSubPatternTypeId0 INT
+
 	,@strSubPatternTypeDetail NVARCHAR(50)
 	,@strSubPatternName NVARCHAR(50)
 	,@intSubPatternTypeId INT
@@ -195,6 +233,12 @@ DECLARE @strPatternName NVARCHAR(50)
 	,@strSubPatternName4 NVARCHAR(50)
 	,@intSubPatternTypeId4 INT
 	,@intPatternCode INT
+
+	SELECT @intSubPatternTypeId0 = 4
+
+SELECT @strSubPatternName0 = 'Part0'
+
+SELECT @strSubPatternTypeDetail0 = 'tblICCategory.strCategoryCode'
 
 SELECT @intSubPatternTypeId = 3
 
@@ -241,6 +285,31 @@ WHERE NOT EXISTS (
 SELECT @intPatternId = intPatternId
 FROM dbo.tblMFPattern
 WHERE intPatternCode = @intPatternCode
+
+INSERT dbo.tblMFPatternDetail (
+	intPatternId
+	,strSubPatternName
+	,intSubPatternTypeId
+	,intSubPatternSize
+	,strSubPatternTypeDetail
+	,strSubPatternFormat
+	,intOrdinalPosition
+	)
+SELECT intPatternId = @intPatternId
+	,strSubPatternName = @strSubPatternName0
+	,intSubPatternTypeId = @intSubPatternTypeId0
+	,intSubPatternSize = 1
+	,strSubPatternTypeDetail = @strSubPatternTypeDetail0
+	,strSubPatternFormat = 'Left(<?>,1)'
+	,intOrdinalPosition = 0
+WHERE NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFPatternDetail
+		WHERE intPatternId = @intPatternId
+			AND strSubPatternName = @strSubPatternName0
+		)
+
+
 
 INSERT dbo.tblMFPatternDetail (
 	intPatternId
