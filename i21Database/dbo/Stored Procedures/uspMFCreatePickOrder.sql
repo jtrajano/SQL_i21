@@ -267,13 +267,13 @@ BEGIN TRY
 			,ri.intItemId
 			,CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 20))
+					THEN CAST(CEILING((ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
 				ELSE (ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))
 				END
 			,ri.intItemUOMId
 			,CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 20))
+					THEN CAST(CEILING((ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
 				ELSE (ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))
 				END
 			,ri.intItemUOMId
@@ -290,7 +290,7 @@ BEGIN TRY
 			,NULL
 			,''
 		FROM dbo.tblMFRecipeItem ri
-		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId and r.ysnActive =1 and r.intLocationId =@intLocationId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ri.intItemUOMId
 		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId

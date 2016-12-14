@@ -34,7 +34,7 @@ BEGIN TRY
 	WHERE strName = @strLotSourceLocation
 
 	SELECT @intAlternateLotId = intLotId
-		  ,@dblAlternateLotQty = dblWeight
+		  ,@dblAlternateLotQty = Case When intWeightUOMId is not null then dblWeight else dblQty End
 	FROM tblICLot
 	WHERE strLotNumber = @strAlternateLotNo
 		AND intStorageLocationId = @intStorageLocationId
