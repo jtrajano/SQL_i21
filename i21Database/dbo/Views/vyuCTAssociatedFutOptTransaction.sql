@@ -25,7 +25,9 @@ AS
 				CD.intNumberOfContainers,
 				CD.dblNoOfLots,
 				IM.strItemNo,
-			
+				CD.intContractDetailId,
+				MD.dblMatchQty,
+
 				'Long' AS strDirectAssociation,
 
 				FS.intFutOptTransactionId		AS	intShortFutOptTransactionId,
@@ -144,6 +146,8 @@ AS
 				CD.intNumberOfContainers,
 				CD.dblNoOfLots,
 				IM.strItemNo,
+				CD.intContractDetailId,
+				MD.dblMatchQty,
 
 				'Short' AS strDirectAssociation,
 
