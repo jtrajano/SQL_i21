@@ -531,6 +531,7 @@ BEGIN TRY
 		intItemId INT
 		,dblQtyInProductionStagingLocation NUMERIC(18, 6)
 		,dblOpeningQty NUMERIC(18, 6)
+		,dblQtyInProdStagingLocation NUMERIC(18, 6)
 		)
 	DECLARE @tblMFLot TABLE (
 		intItemId INT
@@ -575,10 +576,12 @@ BEGIN TRY
 		intItemId
 		,dblQtyInProductionStagingLocation
 		,dblOpeningQty
+		,dblQtyInProdStagingLocation
 		)
 	SELECT I.intItemId
 		,IsNULL(L.dblQty, 0) - IsNULL(I.dblRequiredQty, 0)
 		,IsNULL(L.dblQty, 0) - IsNULL(WI.dblQuantity, 0)
+		,IsNULL(L.dblQty, 0)
 	FROM @tblICItem I
 	LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
 	LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
@@ -607,6 +610,8 @@ BEGIN TRY
 		,intLotId
 		,intItemId
 		,dblQuantity
+		,dblQtyInProdStagingLocation
+		,dblRequiredQty
 		,dblSystemQty
 		,intCreatedUserId
 		,dtmCreated
@@ -619,6 +624,12 @@ BEGIN TRY
 		,NULL
 		,I.intItemId
 		,NULL
+		,(
+			SELECT PS.dblQtyInProdStagingLocation
+			FROM @tblMFQtyInProductionStagingLocation PS
+			WHERE PS.intItemId = I.intItemId
+			)
+		,I.dblRequiredQty 
 		,(
 			SELECT PS.dblQtyInProductionStagingLocation
 			FROM @tblMFQtyInProductionStagingLocation PS

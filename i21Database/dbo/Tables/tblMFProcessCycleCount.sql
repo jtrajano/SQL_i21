@@ -5,6 +5,8 @@
 	,intLotId INT NULL
 	,intItemId INT NOT NULL
 	,dblQuantity NUMERIC(18, 6) NULL
+	,dblQtyInProdStagingLocation NUMERIC(18, 6) NULL
+	,dblRequiredQty NUMERIC(18, 6) NULL
 	,dblSystemQty NUMERIC(18, 6) NULL
 	,intCreatedUserId INT NOT NULL
 	,dtmCreated DATETIME NOT NULL CONSTRAINT DF_tblMFProcessCycleCount_dtmCreated DEFAULT(getdate())

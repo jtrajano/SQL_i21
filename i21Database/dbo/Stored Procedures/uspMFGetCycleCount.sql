@@ -13,6 +13,8 @@ SELECT CC.intCycleCountSessionId
 		,I.strDescription
 		,I.strType
 		,CC.dblQuantity
+		,CC.dblQtyInProdStagingLocation 
+		,CC.dblRequiredQty 
 		,CC.dblSystemQty
 		,CC.intCreatedUserId 
 		,U.strUserName strCreatedUser
