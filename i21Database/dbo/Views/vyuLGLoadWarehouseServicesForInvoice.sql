@@ -1,6 +1,34 @@
 ﻿CREATE VIEW vyuLGLoadWarehouseServicesForInvoice
 AS 
-SELECT * FROM (
+SELECT strTransactionType
+	,strTransactionNumber
+	,NULL AS strShippedItemId
+	,intEntityCustomerId
+	,strCustomerName
+	,intCurrencyId
+	,dtmProcessDate
+	,intLoadId
+	,NULL AS intLoadDetailId
+	,strLoadNumber
+	,intContractHeaderId
+	,'' COLLATE Latin1_General_CI_AS AS strContractNumber
+	,intContractDetailId
+	,intContractSeq
+	,intCompanyLocationId
+	,strLocationName
+	,intItemId
+	,strItemNo
+	,strItemDescription
+	,intShipmentItemUOMId
+	,SUM(dblPrice) AS dblPrice
+	,SUM(dblShipmentUnitPrice) AS dblShipmentUnitPrice
+	,SUM(dblTotal) AS dblTotal
+	,intAccountId
+	,intCOGSAccountId
+	,intSalesAccountId
+	,intInventoryAccountId
+	,ysnPosted
+FROM (
 	SELECT [strTransactionType] = 'Load Schedule'
 		,[strTransactionNumber] = L.[strLoadNumber]
 		,[strShippedItemId] = 'ld:' + CAST(LD.intLoadDetailId AS NVARCHAR(250))
@@ -16,10 +44,10 @@ SELECT * FROM (
 		,L.intLoadId
 		,LD.intLoadDetailId
 		,L.[strLoadNumber]
-		,[intContractHeaderId] = ISNULL(CH.[intContractHeaderId], CD.[intContractHeaderId])
-		,[strContractNumber] = CH.strContractNumber
-		,[intContractDetailId] = ISNULL(CD.[intContractDetailId], LD.[intPContractDetailId])
-		,[intContractSeq] = CD.[intContractSeq]
+		,[intContractHeaderId] = NULL
+		,[strContractNumber] = NULL
+		,[intContractDetailId] = NULL
+		,[intContractSeq] = NULL
 		,[intCompanyLocationId] = LD.intSCompanyLocationId
 		,[strLocationName] = SMCL.[strLocationName]
 		,[intItemId] = ICI.[intItemId]
@@ -79,9 +107,6 @@ SELECT * FROM (
 		,SMCL.[strLocationName]
 		,ICI.strItemNo
 		,ICI.strDescription
-		,CD.intContractHeaderId
-		,CH.strContractNumber
-		,LD.intPContractDetailId
 		,CD.intContractSeq
 		,LD.intItemUOMId
 		,ARC.[intCurrencyId]
@@ -107,3 +132,26 @@ SELECT * FROM (
 		,LWS.dblUnitRate
 	) tbl
 WHERE dblTotal > 0
+GROUP BY strTransactionType
+	,strTransactionNumber
+	,intEntityCustomerId
+	,strCustomerName
+	,intCurrencyId
+	,dtmProcessDate
+	,intLoadId
+	,strLoadNumber
+	,intContractHeaderId
+	,strContractNumber
+	,intContractDetailId
+	,intContractSeq
+	,intCompanyLocationId
+	,strLocationName
+	,intItemId
+	,strItemNo
+	,strItemDescription
+	,intShipmentItemUOMId
+	,intAccountId
+	,intCOGSAccountId
+	,intSalesAccountId
+	,intInventoryAccountId
+	,ysnPosted
