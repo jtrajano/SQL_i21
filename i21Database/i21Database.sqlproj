@@ -4610,6 +4610,8 @@
     <Build Include="dbo\Tables\tblICBackupDetailTransactionDetailLog.sql" />
     <Build Include="dbo\Tables\tblICBackupDetailInventoryTransactionStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICBackupInventory.sql" />
+    <Build Include="dbo\Functions\fnGetSeqMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildZeroCostReceipts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

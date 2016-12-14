@@ -1,0 +1,9 @@
+﻿
+CREATE FUNCTION [dbo].[fnGetSeqMonth](
+	@dtmDate AS DATETIME 
+)
+RETURNS NVARCHAR(10)
+AS
+BEGIN
+	RETURN LEFT(DATENAME(MONTH, @dtmDate), 3) + ' ' + DATENAME(YEAR, @dtmDate)
+END
