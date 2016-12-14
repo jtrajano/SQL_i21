@@ -2,6 +2,16 @@
 	PRINT N'Begin splitting CRM and Help Desk data..'
 GO
 
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDSalesPipeStatus'))
+BEGIN
+
+	IF not EXISTS(SELECT * FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblHDSalesPipeStatus' AND COLUMN_NAME = 'strProjectStatus')
+	begin
+		exec('ALTER TABLE tblHDSalesPipeStatus ADD strProjectStatus VARCHAR(255) null;')
+	end
+
+end
+
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketPriority'))
 BEGIN
 
@@ -1705,16 +1715,17 @@ BEGIN
 
 		IF NOT EXISTS (select * from tblCRMOpportunityLob where intOpportunityId = @intOpportunityId and intLineOfBusinessId = @intItem)
 		begin
-
-			INSERT INTO [dbo].[tblCRMOpportunityLob]
-					   ([intOpportunityId]
-					   ,[intLineOfBusinessId]
-					   ,[intConcurrencyId])
-				 VALUES
-					   (@intOpportunityId
-					   ,@intItem
-					   ,1)
-
+			IF EXISTS (select * from tblSMLineOfBusiness where intLineOfBusinessId = @intItem)
+			begin
+				INSERT INTO [dbo].[tblCRMOpportunityLob]
+						   ([intOpportunityId]
+						   ,[intLineOfBusinessId]
+						   ,[intConcurrencyId])
+					 VALUES
+						   (@intOpportunityId
+						   ,@intItem
+						   ,1)
+			end
 		end
 
 		FETCH NEXT
