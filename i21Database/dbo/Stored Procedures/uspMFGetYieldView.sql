@@ -154,6 +154,7 @@ BEGIN TRY
 		,WP.intItemId
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
+	And WP.ysnProductionReversed =0
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -480,12 +481,23 @@ BEGIN TRY
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intInputItemId = @intInputItemId
 
-				SELECT @dblInput = SUM(dblQuantity)
-				FROM ##tblMFTransaction
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND strTransactionType = 'Input'
+				if @intInputItemId = @intItemId
+					Begin
+						SELECT @dblInput = SUM(dblQuantity)
+						FROM ##tblMFTransaction
+						WHERE intWorkOrderId = @intWorkOrderId
+							AND strTransactionType = 'Input'
+					end
+					Else
+					Begin
+						SELECT @dblInput = SUM(dblQuantity)
+						FROM ##tblMFTransaction
+						WHERE intWorkOrderId = @intWorkOrderId
+						AND intInputItemId = @intInputItemId
+							AND strTransactionType = 'Input'
+					End
 
-				SELECT @dblInput = 0
+				--SELECT @dblInput = 0
 
 				SELECT @dblOutput = SUM(dblQuantity)
 				FROM ##tblMFTransaction
@@ -503,10 +515,21 @@ BEGIN TRY
 						END
 					AND strTransactionType = 'dblCountQuantity'
 
-				SELECT @dblInputOB = SUM(dblQuantity)
-				FROM ##tblMFTransaction
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND strTransactionType = 'dblOpeningQuantity'
+				if @intInputItemId = @intItemId
+				Begin
+					SELECT @dblInputOB = SUM(dblQuantity)
+					FROM ##tblMFTransaction
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND strTransactionType = 'dblOpeningQuantity'
+				End
+				Else
+				Begin
+					SELECT @dblInputOB = SUM(dblQuantity)
+					FROM ##tblMFTransaction
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND strTransactionType = 'dblOpeningQuantity'
+						AND intInputItemId=@intInputItemId
+				End
 
 				SELECT @dblOutputCC = SUM(dblQuantity)
 				FROM ##tblMFTransaction
@@ -1005,13 +1028,13 @@ BEGIN TRY
 			,TR.intShiftId
 			,TR.intInputItemId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,CAST(W.dblProducedQuantity * RI.dblCalculatedQuantity / (
+			,SUM(CAST(W.dblProducedQuantity * RI.dblCalculatedQuantity / (
 					CASE 
 						WHEN R.dblQuantity = 0
 							THEN 1
 						ELSE R.dblQuantity
 						END
-					) AS NUMERIC(18, 6)) AS dblRequiredQty
+					) AS NUMERIC(18, 6))) AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
@@ -1032,6 +1055,13 @@ BEGIN TRY
 				,'OUTPUT'
 				,'dblOpeningQuantity'
 				)
+				Group by TR.intItemId
+			,TR.dtmDate
+			,TR.intShiftId
+			,TR.intInputItemId
+			,RI.intItemUOMId
+			,W.intItemId
+			,strTransactionType
 
 		SELECT @intYieldId = MIN(intYieldId)
 		FROM ##tblMFInputItemYieldByDate
@@ -1075,14 +1105,14 @@ BEGIN TRY
 				WHERE intItemId = @intPrimaryItemId
 					AND dtmDate = @dtmDate
 					AND intShiftId = IsNULL(@intShiftId, intShiftId)
-					--AND intInputItemId = CASE 
-					--	WHEN @intInputItemId = @intItemId
-					--		THEN intInputItemId
-					--	ELSE @intInputItemId
-					--	END
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'Input'
 
-				SELECT @dblInput = 0
+				--SELECT @dblInput = 0
 
 				SELECT @dblOutput = SUM(dblQuantity)
 				FROM ##tblMFTransaction
@@ -1104,17 +1134,25 @@ BEGIN TRY
 						END
 					AND strTransactionType = 'dblCountQuantity'
 
-				SELECT @dblInputOB = SUM(dblQuantity)
-				FROM ##tblMFTransaction
-				WHERE intItemId = @intPrimaryItemId
-					AND dtmDate = @dtmDate
-					AND intShiftId = IsNULL(@intShiftId, intShiftId)
-					--AND intInputItemId = CASE 
-					--	WHEN @intInputItemId = @intItemId
-					--		THEN intInputItemId
-					--	ELSE @intInputItemId
-					--	END
-					AND strTransactionType = 'dblOpeningQuantity'
+				IF @intInputItemId = @intItemId
+				BEGIN
+					SELECT @dblInputOB = SUM(dblQuantity)
+					FROM ##tblMFTransaction
+					WHERE intItemId = @intPrimaryItemId
+						AND dtmDate = @dtmDate
+						AND intShiftId = IsNULL(@intShiftId, intShiftId)
+							AND strTransactionType = 'dblOpeningQuantity'
+				End
+				Else
+				Begin
+					SELECT @dblInputOB = SUM(dblQuantity)
+					FROM ##tblMFTransaction
+					WHERE intItemId = @intPrimaryItemId
+						AND dtmDate = @dtmDate
+						AND intShiftId = IsNULL(@intShiftId, intShiftId)
+						AND intInputItemId = @intInputItemId
+						AND strTransactionType = 'dblOpeningQuantity'
+				End
 
 				SELECT @dblOutputCC = SUM(dblQuantity)
 				FROM ##tblMFTransaction
@@ -1228,10 +1266,9 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblRequiredQty = 0
 
-					SELECT @dblRequiredQty = dblRequiredQty
+					SELECT @dblRequiredQty = SUM(dblRequiredQty)
 					FROM ##tblMFInputItemYieldByDate
-					WHERE intYieldId = @intYieldId
-						AND intInputItemId = @intInputItemId
+					WHERE intInputItemId = @intInputItemId
 
 					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL((@dblTInput - @dblTOutput), 0) = 0
@@ -1241,7 +1278,7 @@ BEGIN TRY
 				END
 
 				UPDATE ##tblMFInputItemYieldByDate
-				SET dblActualYield = ((@dblYieldP * 100)/@dblCalculatedQuantity)*100
+				SET dblActualYield = Case When @intInputItemId = @intItemId then ((@dblYieldP * 100)/@dblCalculatedQuantity)*100 Else ((@dblYieldP * 100)/@dblCalculatedQuantity)*100 end
 					,dblTotalInput = @dblTInput
 					,dblTotalOutput = @dblTOutput
 					,dblStandardYield = 100
