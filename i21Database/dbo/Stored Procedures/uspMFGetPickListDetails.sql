@@ -815,7 +815,7 @@ End
 Else --Process Production Pick List
 Begin
 
-	If @intKitStatusId = 7
+	If @intKitStatusId in(7,12) 
 	Begin
 		Insert @tblReservedQty(intLotId,dblReservedQty)
 		Select sr.intLotId,sum(sr.dblQty) 
