@@ -4612,6 +4612,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildZeroCostReceipts.sql" />
     <Build Include="dbo\Views\vyuCTSearchPriceContract.sql" />
     <Build Include="dbo\Views\vyuCTSearchPriceContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUndoStartCycleCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
