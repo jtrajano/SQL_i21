@@ -62,7 +62,6 @@ FROM (
 		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
-		, intPaymentOn				= ItemLocation.intPaymentOn
 		, LC.ysnRejected
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 

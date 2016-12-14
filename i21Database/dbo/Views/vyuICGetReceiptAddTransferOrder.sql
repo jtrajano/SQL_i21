@@ -62,7 +62,6 @@ FROM (
 		, strSubCurrency			= CAST(NULL AS NVARCHAR(50)) 
 		, dblGross					= CAST(0 AS NUMERIC(38, 20)) -- There is no gross from transfer
 		, dblNet					= CAST(0 AS NUMERIC(38, 20)) -- There is no net from transfer
-		, intPaymentOn				= fromLocation.intPaymentOn
 	FROM	dbo.tblICInventoryTransfer h INNER JOIN dbo.tblICInventoryTransferDetail d
 				ON d.intInventoryTransferId = h.intInventoryTransferId
 			

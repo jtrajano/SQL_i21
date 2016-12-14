@@ -62,7 +62,6 @@ FROM (
 		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) 
 		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from PO
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from PO
-		, intPaymentOn	= ItemLocation.intPaymentOn
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure

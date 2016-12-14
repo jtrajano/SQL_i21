@@ -660,7 +660,7 @@ BEGIN
 
 				SELECT TOP 1
 				 -- Use 1 to compute Line Total and Taxes based on Quantity, 2 to compute based on Net, and null to compute based on default setup (If Gross/Net UOM is available, compute based on Net, else based on Quantity)
-					 @Amount = CASE	WHEN (ReceiptItem.intPaymentOn = 2 OR (ReceiptItem.intPaymentOn IS NULL AND ReceiptItem.intWeightUOMId IS NOT NULL)) THEN 
+					 @Amount = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
 										 dbo.fnMultiply(
 											 dbo.fnDivide(
 												 ISNULL(dblUnitCost, 0) 
@@ -683,7 +683,7 @@ BEGIN
 											 )
 										)																	
 								END 
-					,@Qty	 = CASE	WHEN (ReceiptItem.intPaymentOn = 2 OR (ReceiptItem.intPaymentOn IS NULL AND ReceiptItem.intWeightUOMId IS NOT NULL)) THEN 
+					,@Qty	 = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
 										ReceiptItem.dblNet 
 									ELSE 
 										ReceiptItem.dblOpenReceive 
@@ -905,11 +905,10 @@ BEGIN
 
 		-- Re-update the line total 
 		UPDATE	ReceiptItem 
-		 -- Use 1 to compute Line Total and Taxes based on Quantity, 2 to compute based on Net, and null to compute based on default setup (If Gross/Net UOM is available, compute based on Net, else based on Quantity)
 		SET		dblLineTotal = 
 					ROUND(
 						--ISNULL(dblTax, 0) + 
-						CASE	WHEN (ReceiptItem.intPaymentOn = 2 OR (ReceiptItem.intPaymentOn IS NULL AND ReceiptItem.intWeightUOMId IS NOT NULL)) THEN 
+						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
 									dbo.fnMultiply(
 										ISNULL(ReceiptItem.dblNet, 0)
 										,dbo.fnMultiply(

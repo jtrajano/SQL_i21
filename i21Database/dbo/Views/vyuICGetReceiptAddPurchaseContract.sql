@@ -63,7 +63,6 @@ FROM (
 		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(ContractView.intContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(0 AS NUMERIC(38, 20))-- There is no gross from contracts.
 		, dblNet					= CAST(ContractView.dblAvailableNetWeight AS NUMERIC(38, 20))
-		, intPaymentOn				= ItemLocation.intPaymentOn
 	FROM	vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
