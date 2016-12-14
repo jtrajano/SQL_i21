@@ -1,15 +1,20 @@
 ﻿CREATE VIEW [dbo].[vyuPATEquityRefundDetails]
 	AS
-SELECT	newid() as id,
-		RR.intRefundTypeId,
+SELECT	NEWID() as id,
+		CE.intFiscalYearId,
+		FY.strFiscalYear,
+		CE.intRefundTypeId,
 		CE.strEquityType,
 		CE.intCustomerId,
-		RR.strRefundType,
+		EM.strName,
+		strRefundType = ISNULL(RR.strRefundType, ''),
 		CE.dblEquity,
-		RR.intConcurrencyId,
-		RR.ysnQualified 
-	FROM tblPATRefundRate RR
-	INNER JOIN tblPATRefundRateDetail RRD
-		ON RRD.intRefundTypeId = RR.intRefundTypeId
-	INNER JOIN tblPATCustomerEquity CE
+		CE.intConcurrencyId,
+		ysnQualified = CASE WHEN ISNULL(RR.ysnQualified, 0) = 1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	FROM tblPATCustomerEquity CE
+	LEFT JOIN tblPATRefundRate RR
 		ON CE.intRefundTypeId = RR.intRefundTypeId
+	INNER JOIN tblGLFiscalYear FY
+		ON CE.intFiscalYearId = FY.intFiscalYearId
+	INNER JOIN tblEMEntity EM
+		ON CE.intCustomerId = EM.intEntityId

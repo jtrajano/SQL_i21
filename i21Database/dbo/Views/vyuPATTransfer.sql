@@ -88,7 +88,8 @@ SELECT	TD.intTransferDetailId,
 	LEFT OUTER JOIN tblPATRefundRate transferorRR
 		ON transferorRR.intRefundTypeId = TD.intRefundTypeId
 )
-SELECT	PT.intTransferId,
+SELECT	NEWID() AS id,
+		PT.intTransferId,
 		PT.strTransferNo,
 		PT.dtmTransferDate,
 		PT.intTransferType,
