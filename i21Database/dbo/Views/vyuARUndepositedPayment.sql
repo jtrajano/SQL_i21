@@ -30,6 +30,7 @@ LEFT OUTER JOIN
 		ON A.intPaymentMethodId = SMPM.intPaymentMethodID
 WHERE
 	A.ysnPosted = 1
+	AND A.ysnImportedFromOrigin <> 'Y'
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
 	
