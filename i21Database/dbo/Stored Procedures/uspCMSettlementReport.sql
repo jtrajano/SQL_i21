@@ -170,7 +170,7 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
-	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId  --AND BNKTRN.strTransactionId = @strTransactionId
 
 	UNION ALL SELECT
 	BNKTRN.intBankAccountId,
@@ -250,7 +250,7 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON INVDTL.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
-	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId  --AND BNKTRN.strTransactionId = @strTransactionId
 END
 ELSE
 BEGIN
