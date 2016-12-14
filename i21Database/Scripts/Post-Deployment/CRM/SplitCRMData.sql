@@ -1818,6 +1818,21 @@ insert into tblSMTypeValue
 	) as priorityType
 )
 
+Print N'Start fixing CRM opportunity Sales Person';
+
+exec('
+	update tblCRMOpportunity set tblCRMOpportunity.intInternalSalesPerson = (select top 1 ec.intEntityId from tblEMEntityToContact ec where ec.intEntityContactId = tblCRMOpportunity.intInternalSalesPerson) where tblCRMOpportunity.intInternalSalesPerson in
+		(
+		select
+			tblEMEntityToContact.intEntityContactId
+		from tblARSalesperson, tblEMEntityToContact
+		where
+			tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+		)
+	');
+
+Print N'End fixing CRM opportunity Sales Person';
+
 GO
 	PRINT N'End splitting CRM and Help Desk data..'
 GO
