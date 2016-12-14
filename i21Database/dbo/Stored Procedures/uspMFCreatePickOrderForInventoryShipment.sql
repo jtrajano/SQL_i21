@@ -92,9 +92,9 @@ BEGIN TRY
 			,SHI.intItemId
 			,SHI.dblQuantity
 			,SHI.intItemUOMId
-			,dbo.fnCTConvertQtyToTargetItemUOM(SHI.intItemUOMId,SHI.intWeightUOMId,SHI.dblQuantity)
-			,SHI.intWeightUOMId
-			,IU.dblUnitQty
+			,SHI.dblQuantity
+			,SHI.intItemUOMId
+			,1
 			,ISNULL(NULL, I.intUnitPerLayer)
 			,ISNULL(NULL, I.intLayerPerPallet)
 			,(SELECT TOP 1 intPickListPreferenceId  FROM tblMFPickListPreference ) 
@@ -104,9 +104,9 @@ BEGIN TRY
 	FROM dbo.tblICInventoryShipment ISH
 	JOIN tblICInventoryShipmentItem SHI ON SHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 	JOIN dbo.tblICItem I ON I.intItemId = SHI.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SHI.intItemUOMId
-	JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
-	JOIN dbo.tblICItem P ON SHI.intItemId = P.intItemId
+	--JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SHI.intItemUOMId
+	--JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+	--JOIN dbo.tblICItem P ON SHI.intItemId = P.intItemId
 	WHERE ISH.intInventoryShipmentId = @intInventoryShipmentId	
 
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
