@@ -15,6 +15,7 @@ Ext.define('Inventory.view.StockDetailViewController', {
                 { dataIndex: 'strType', text: 'Item Type', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCategoryCode', text: 'Category', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewCategory' },
                 { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewLocation' },
+                { dataIndex: 'strStockUOM', text: 'Stock UOM', flex: 1, dataType: 'string', drillDownText: 'View UOM', drillDownClick: 'onViewUOM'},
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblUnitOnHand', text: 'On Hand', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblOnOrder', text: 'On Order', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblOrderCommitted', text: 'Committed', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
@@ -356,6 +357,11 @@ Ext.define('Inventory.view.StockDetailViewController', {
             strSourceType: 'Storage Measurement Reading',
             intTicketFileId: record.get('intStorageMeasurementReadingConversionId')
         });
+    },
+
+    onViewUOM: function(value, record) {
+        var uom = record.get('strStockUOM');
+        i21.ModuleMgr.Inventory.showScreen(uom, 'UOM');
     },
 
     onViewMeasurementReading: function(button, e, opts) {
