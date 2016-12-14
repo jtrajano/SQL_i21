@@ -4604,6 +4604,12 @@
     <Build Include="dbo\Tables\tblRKReconciliationBrokerStatement.sql" />
     <Build Include="dbo\Views\vyuRKReconciliationNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoAssignFutOptTransaction.sql" />
+    <Build Include="dbo\Tables\tblICBackup.sql" />
+    <Build Include="dbo\Tables\tblICBackupDetailLot.sql" />
+    <Build Include="dbo\Tables\tblICBackupDetailInventoryTransaction.sql" />
+    <Build Include="dbo\Tables\tblICBackupDetailTransactionDetailLog.sql" />
+    <Build Include="dbo\Tables\tblICBackupDetailInventoryTransactionStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBackupInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
