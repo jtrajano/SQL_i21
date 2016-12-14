@@ -124,6 +124,7 @@ END
 					,[ysnVirtualMeterReading]
 					,[ysnClearDetailTaxes]					
 					,[intTempDetailIdForTaxes]
+					,[strType]	
 				)
 				SELECT
 					 [strSourceTransaction]					= 'Card Fueling Transaction'
@@ -207,6 +208,7 @@ END
 					,[ysnVirtualMeterReading]				= NULL
 					,[ysnClearDetailTaxes]					= 0
 					,[intTempDetailIdForTaxes]				= @strRecord
+					,[strType]								= 'Card Fueling'
 				FROM tblCFTransaction cfTrans
 				INNER JOIN tblCFNetwork cfNetwork
 				ON cfTrans.intNetworkId = cfNetwork.intNetworkId
