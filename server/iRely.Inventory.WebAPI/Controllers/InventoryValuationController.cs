@@ -34,7 +34,7 @@ namespace iRely.Inventory.WebApi.Controllers
                 var dtmStartDate = parameters.dtmStartDate;
                 var strItemNo = parameters.strItemNo;
                 var isPeriodic = parameters.isPeriodic;
-                await db.RepostInventory(dtmStartDate, strItemNo, isPeriodic, false);
+                await db.RepostInventory(dtmStartDate, strItemNo, isPeriodic, false, iRely.Common.Security.GetEntityId());
                 success = true;
                 msg = "Inventory reposted successfully.";
             }

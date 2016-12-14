@@ -94,11 +94,11 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
                 iRely.Msg.showWait('Reposting inventory...');
             },
             success: function (data, status, jqXHR) {
+                iRely.Msg.close();
                 if (data.success)
                     iRely.Functions.showInfoDialog(data.message);
                 else
                     iRely.Functions.showErrorDialog(data.message);
-                iRely.Msg.close();
             },
             error: function (jqXHR, status, error) {
                 iRely.Msg.close();
