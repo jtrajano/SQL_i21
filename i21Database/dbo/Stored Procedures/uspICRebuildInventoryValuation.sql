@@ -3,6 +3,7 @@
 	,@strItemNo AS NVARCHAR(50) = NULL 
 	,@isPeriodic AS BIT = 1
 	,@ysnRegenerateBillGLEntries AS BIT = 0
+	,@intUserId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -62,6 +63,16 @@ END
 
 BEGIN TRANSACTION 
 
+-- Backup Inventory
+DECLARE @strRemarks VARCHAR(200)
+DECLARE @strItems VARCHAR(50)
+
+SET @strItems = (CASE WHEN @intItemId IS NOT NULL THEN '"' + @strItemNo + '" item' ELSE 'all items' END)
+SET @strRemarks = 'Rebuild inventory for ' + @strItems + ' in a '+
+	(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
+	' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
+
+EXEC dbo.uspICBackupInventory @intUserId = @intUserId, @strOperation = 'Rebuild Inventory', @strRemarks = @strRemarks
 
 -- Return all the "Out" stock qty back to the cost buckets. 
 BEGIN 
