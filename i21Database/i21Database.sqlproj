@@ -4640,6 +4640,8 @@
     <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromPayment.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerReferencesFromPayment.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipeGuide.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildZeroCostReceipts.sql" />
+    <Build Include="dbo\Functions\fnGetSeqMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
