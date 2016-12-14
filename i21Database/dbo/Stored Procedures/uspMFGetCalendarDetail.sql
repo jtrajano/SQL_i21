@@ -325,7 +325,7 @@ BEGIN
 	IF Len(@strMachineName1) > 0
 		SELECT @strMachineName1 = Left(@strMachineName1, Len(@strMachineName1) - 1)
 
-	SELECT @SQL = 'SELECT dtmCalendarDate,Day,intShiftId,strShiftName,intStartOffset,intEndOffset,dtmShiftStartTime,dtmCalendarDate+CAST(dtmShiftEndTime - dtmShiftStartTime AS TIME) dtmDuration,dtmShiftEndTime,intNoOfMachine,ysnHoliday, intConcurrencyId,' + @strMachineName1 + '
+	SELECT @SQL = 'SELECT dtmCalendarDate,Day,intShiftId,strShiftName,intStartOffset,intEndOffset,dtmShiftStartTime,dtmCalendarDate+CAST(dtmShiftEndTime - dtmShiftStartTime AS DATETIME) dtmDuration,dtmShiftEndTime,intNoOfMachine,ysnHoliday, intConcurrencyId,' + @strMachineName1 + '
 		FROM (
 			SELECT CD.dtmCalendarDate,DATENAME(dw,CD.dtmCalendarDate) AS Day
 				,CD.intShiftId
