@@ -443,6 +443,15 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
            else {
                return false;
            }
-       }
+       },
+        checkHidePostUnpost: function(get) {
+            // Hide the Post & Unpost buttons if:
+            switch (get('current.intSourceType')) {
+                case 1: // Scale  
+                    return true; 
+                default:  
+                    return false;  
+            }              
+        }       
     }
 });

@@ -337,12 +337,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
             return get('current.strReceiptNumber');
         },
-        checkTransportPosting: function(get) {
-            if (get('current.intSourceType') === 3) {
-                return true;
-            }
-            else {
-                return false;
+        checkHidePostUnpost: function(get) {
+            switch (get('current.intSourceType')) {
+                case 1: // Scale  
+                case 3: // Transport Load
+                case 4: // Settle Storage 
+                    return true; 
+                default:  
+                    return false;  
             }
         },
         checkHiddenAddOrders: function(get) {

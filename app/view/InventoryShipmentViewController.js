@@ -158,7 +158,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             btnShip: {
                 text: '{getShipButtonText}',
-                iconCls: '{getShipButtonIcon}'
+                iconCls: '{getShipButtonIcon}',
+                hidden: '{checkHidePostUnpost}'
             },
             btnInvoice: {
                 hidden: '{!current.ysnPosted}'
@@ -1338,6 +1339,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 scope: me,
                 success: function(){
                     // If data is generated, show the recap screen.
+
+                    // Hide the post/unpost button if: 
+                    var showButton;
+                    switch (currentRecord.get('intSourceType')) {
+                        case 1: // Scale  
+                            showButton = false; 
+                            break; 
+                        default:  
+                            showButton = true;
+                            break;   
+                    }                    
+
+                    // If data is generated, show the recap screen.
                     CashManagement.common.BusinessRules.showRecap({
                         strTransactionId: currentRecord.get('strShipmentNumber'),
                         ysnPosted: currentRecord.get('ysnPosted'),
@@ -1345,6 +1359,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         strCurrencyId: null,
                         dblExchangeRate: 1,
                         scope: me,
+                        showPostButton: showButton,
+                        showUnpostButton: showButton,
                         postCallback: function(){
                             me.onShipClick(recapButton);
                         },
