@@ -38,9 +38,11 @@ BEGIN TRY
 			,ysnNegativeQtyAllowed BIT
 			,intUserId INT
 			)
-
+			declare @dblPhysicalCount decimal(38,24),@intPhysicalItemUOMId int
 	SELECT @dblProduceQty = SUM(dblQuantity)
 		,@intItemUOMId = MIN(intItemUOMId)
+		,@dblPhysicalCount = SUM(dblPhysicalCount)
+		,@intPhysicalItemUOMId = MIN(intPhysicalItemUOMId)
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
@@ -112,7 +114,13 @@ BEGIN TRY
 				,@intPatternCode = 33
 				,@ysnProposed = 0
 				,@strPatternString = @intBatchId OUTPUT
-
+IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderRecipe
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intItemUOMId = @intItemUOMId
+				)
+		BEGIN
 			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblProduceQty
 				,@intProduceUOMId = @intItemUOMId
@@ -131,7 +139,28 @@ BEGIN TRY
 				,@ysnPostConsumption = 1
 				,@intBatchId = @intBatchId
 				,@ysnPostGL = 0
+				END
+		ELSE
+		BEGIN
+		EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblPhysicalCount
+				,@intProduceUOMId = @intPhysicalItemUOMId
+				,@intBatchId = @intBatchId
+				,@intUserId = @intUserId
+				,@strPickPreference = 'Substitute Item'
+				,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
+				,@dblUnitQty = NULL
 
+			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblPhysicalCount
+				,@intProduceUOMKey = @intPhysicalItemUOMId
+				,@intUserId = @intUserId
+				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+				,@strRetBatchId = @strRetBatchId OUTPUT
+				,@ysnPostConsumption = 1
+				,@intBatchId = @intBatchId
+				,@ysnPostGL = 0
+				END
 			EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
 		END
 	END
