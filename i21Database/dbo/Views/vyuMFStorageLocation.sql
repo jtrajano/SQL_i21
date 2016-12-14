@@ -17,5 +17,6 @@ SELECT sl.intStorageLocationId
 	,sl.ysnAllowMultipleItem
 	,sl.ysnAllowConsume
 FROM tblICStorageLocation sl
-LEFT JOIN tblICStorageUnitType ut ON ut.intStorageUnitTypeId = sl.intStorageUnitTypeId
+JOIN tblICStorageUnitType ut ON ut.intStorageUnitTypeId = sl.intStorageUnitTypeId
 LEFT JOIN tblICRestriction r ON r.intRestrictionId = sl.intRestrictionId
+Where ut.strInternalCode <>'Storage'
