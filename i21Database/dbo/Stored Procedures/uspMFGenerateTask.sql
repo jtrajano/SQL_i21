@@ -30,13 +30,20 @@ BEGIN TRY
 	DECLARE @dblRemainingLotWeight NUMERIC(18, 6)
 	DECLARE @intLotId INT
 	DECLARE @intTaskCount INT
-	DECLARE @ysnPickByLotCode BIT
+	DECLARE @ysnPickByLotCode BIT,@intLotCodeStartingPosition int,@intLotCodeNoOfDigits int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 	
-	SELECT @ysnPickByLotCode  = ysnPickByLotCode FROM tblMFCompanyPreference
+	SELECT @ysnPickByLotCode  = ysnPickByLotCode,@intLotCodeStartingPosition=intLotCodeStartingPosition,@intLotCodeNoOfDigits=intLotCodeNoOfDigits FROM tblMFCompanyPreference
+
+	If @intLotCodeStartingPosition is null
+	Select @intLotCodeStartingPosition=2
+
+	If @intLotCodeNoOfDigits is null
+	Select @intLotCodeNoOfDigits=5
+
 
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
@@ -194,6 +201,8 @@ BEGIN TRY
 				,L.dtmDateCreated
 				,1
 			FROM tblICLot L
+			Join tblICStorageLocation SL on SL.intStorageLocationId =L.intStorageLocationId 
+			Join tblICStorageUnitType UT on UT.intStorageUnitTypeId =SL.intStorageUnitTypeId and UT.ysnAllowPick =1
 			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
 				AND T.intTaskTypeId NOT IN (5,6,8,9,10,11)
 			WHERE L.intItemId = @intItemId
@@ -226,24 +235,24 @@ BEGIN TRY
 				,L.dtmDateCreated
 				,L.dtmManufacturedDate
 				,L.strLotNumber
-			HAVING L.dblWeight - (
+			HAVING (Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End) - (
 					SUM(ISNULL(CASE 
 								WHEN T.intTaskTypeId = 13
-									THEN L.dblWeight - T.dblWeight
+									THEN (Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End) - T.dblWeight
 								ELSE T.dblWeight
 								END, 0))
 					) > 0
-			ORDER BY ABS((
-						L.dblWeight - (
+			ORDER BY CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE CONVERT(INT,Substring(L.strLotNumber,@intLotCodeStartingPosition,@intLotCodeNoOfDigits  )) END ASC
+,ABS((
+						(Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End) - (
 							SUM(ISNULL(CASE 
 										WHEN T.intTaskTypeId = 13
-											THEN L.dblWeight - T.dblWeight
+											THEN (Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End) - T.dblWeight
 										ELSE T.dblWeight
 										END, 0))
 							)
 						) - @dblRequiredWeight)
-				,CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE CONVERT(INT,LEFT(L.strLotNumber,5)) END ASC
-
+				
 			--- INSERT ALL THE LOTS OUTSIDE ALLOWABLE PICK DAY RANGE
 			INSERT INTO @tblLot (
 				intLotId
@@ -280,6 +289,8 @@ BEGIN TRY
 				,L.dtmDateCreated
 				,2
 			FROM tblICLot L
+			Join tblICStorageLocation SL on SL.intStorageLocationId =L.intStorageLocationId 
+			Join tblICStorageUnitType UT on UT.intStorageUnitTypeId =SL.intStorageUnitTypeId and UT.ysnAllowPick =1
 			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
 				AND T.intTaskTypeId NOT IN (5,6,8,9,10,11)
 			WHERE L.intItemId = @intItemId
@@ -305,23 +316,23 @@ BEGIN TRY
 					,L.dtmDateCreated
 					,L.dtmManufacturedDate
 					,L.strLotNumber
-			HAVING L.dblWeight - (
+			HAVING (Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End) - (
 					SUM(ISNULL(CASE 
 								WHEN T.intTaskTypeId = 13
-									THEN L.dblWeight - L.dblWeight
+									THEN (Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End) - L.dblWeight
 								ELSE T.dblWeight
 								END, 0))
 					) > 0
-			ORDER BY ABS((
-						L.dblWeight - (
+			ORDER BY CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE Substring(L.strLotNumber,@intLotCodeStartingPosition,@intLotCodeNoOfDigits  ) END ASC,ABS((
+						(Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End)- (
 							SUM(ISNULL(CASE 
 										WHEN T.intTaskTypeId = 13
-											THEN L.dblWeight - T.dblWeight
+											THEN (Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End) - T.dblWeight
 										ELSE T.dblWeight
 										END, 0))
 							)
 						) - @dblRequiredWeight)
-				,CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE CONVERT(INT,LEFT(L.strLotNumber,5)) END ASC
+				
 
 			SELECT @intLotRecordId = MIN(intLotRecordId)
 			FROM @tblLot
@@ -331,8 +342,8 @@ BEGIN TRY
 				SELECT @dblQty = dblQty
 					,@intLotId = intLotId
 					,@dblRemainingLotQty = dblRemainingLotQty
-					,@dblWeght = dblWeight
-					,@dblRemainingLotWeight = dblRemainingLotWeight
+					,@dblWeght = (Case When intWeightUOMId is NULL Then dblQty Else dblWeight End)--dblWeight
+					,@dblRemainingLotWeight = (Case When intWeightUOMId is NULL Then dblRemainingLotQty Else dblRemainingLotWeight End)--dblRemainingLotWeight
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
@@ -345,7 +356,7 @@ BEGIN TRY
 					EXEC [uspMFCreateSplitAndPickTask] @intOrderHeaderId = @intOrderHeaderId
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
-						,@dblSplitAndPickWeight = @dblPutbackWeight
+						,@dblSplitAndPickWeight = @dblRequiredWeight
 						,@intTaskTypeId = 2
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight

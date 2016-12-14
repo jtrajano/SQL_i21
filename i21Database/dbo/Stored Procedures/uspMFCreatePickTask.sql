@@ -83,11 +83,11 @@ BEGIN TRY
 		,@intToStorageLocationId
 		,@intItemId
 		,@intLotId
-		,@dblLotQty
-		,@intItemUOMId
+		,Case When @intWeightUOMId is NULL Then @dblLotQty Else @dblLotWeight End
+		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
 		,@dblLotWeight
-		,@intWeightUOMId
-		,@dblWeightPerQty
+		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
+		,Case When @intWeightUOMId is NULL Then 1 Else @dblWeightPerQty End
 		,@intEntityUserSecurityId
 		,GETDATE()
 		,@intEntityUserSecurityId

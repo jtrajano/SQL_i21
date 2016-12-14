@@ -30,7 +30,7 @@ BEGIN TRY
 	FROM tblMFOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
-	SELECT @dblSplitAndPickQty = @dblSplitAndPickWeight/dblWeightPerQty
+	SELECT @dblSplitAndPickQty = @dblSplitAndPickWeight/(Case When dblWeightPerQty=0 Then 1 Else dblWeightPerQty End)
 		  ,@intItemUOMId = intItemUOMId
 		  ,@intWeightUOMId = intWeightUOMId
 		  ,@dblWeightPerQty = dblWeightPerQty
@@ -88,11 +88,11 @@ BEGIN TRY
 		,@intToStorageLocationId
 		,@intItemId
 		,@intLotId
-		,@dblSplitAndPickQty
-		,@intItemUOMId
+		,Case When @intWeightUOMId is NULL Then @dblSplitAndPickQty Else @dblSplitAndPickWeight End
+		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
 		,@dblSplitAndPickWeight
-		,@intWeightUOMId
-		,@dblWeightPerQty
+		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
+		,Case When @intWeightUOMId is NULL Then 1 Else @dblWeightPerQty End
 		,@intEntityUserSecurityId
 		,GETDATE()
 		,@intEntityUserSecurityId
