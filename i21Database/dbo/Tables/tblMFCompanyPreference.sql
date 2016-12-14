@@ -26,6 +26,7 @@
 	[intDefaultShipmentStagingLocation] INT,
 	[ysnPickByLotCode] BIT NULL DEFAULT 0, 
 	[ysnGenerateInvShipmentStagingOrder] BIT NULL DEFAULT 0,
-
+	[intLotCodeStartingPosition] INT NULL, 
+    [intLotCodeNoOfDigits] INT NULL, 
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )
