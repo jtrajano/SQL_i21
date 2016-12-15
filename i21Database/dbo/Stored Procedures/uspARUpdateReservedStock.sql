@@ -607,7 +607,6 @@ BEGIN
 		AND ARI.[intInvoiceId] = @InvoiceId
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-		AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0	
 							
 		
 	UPDATE
