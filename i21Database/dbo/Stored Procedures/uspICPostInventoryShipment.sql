@@ -135,59 +135,80 @@ BEGIN
 		END  
 	END   
 
-		-- Do not allow unpost if other charge is already included in invoice. 
-		IF @ysnPost = 0 AND @ysnRecap = 0 
+	-- Do not allow unpost if Shipment is already processed to Sales Invoice. 
+	IF @ysnPost = 0 AND @ysnRecap = 0 
+	BEGIN 
+		SET @strInvoiceNumber = NULL 
+		SELECT	TOP 1 
+				@strInvoiceNumber = Invoice.strInvoiceNumber
+		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
+					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+				LEFT JOIN dbo.tblARInvoiceDetail InvoiceItems
+					ON InvoiceItems.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
+					AND InvoiceItems.intItemId = ShipmentItem.intItemId 
+				INNER JOIN dbo.tblARInvoice Invoice
+					ON Invoice.intInvoiceId = InvoiceItems.intInvoiceId
+		WHERE	Shipment.intInventoryShipmentId = @intTransactionId
+				AND InvoiceItems.intInvoiceId IS NOT NULL
+
+		IF @strInvoiceNumber IS NOT NULL 
 		BEGIN 
-			SET @strInvoiceNumber = NULL 
-			SELECT	TOP 1 
-					@strInvoiceNumber = Invoice.strInvoiceNumber
-					,@strChargeItem = Item.strItemNo
-			FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge
-						ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
-					INNER JOIN dbo.tblICItem Item
-						ON Item.intItemId = Charge.intChargeId				
-					LEFT JOIN dbo.tblARInvoiceDetail InvoiceItems
-						ON InvoiceItems.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId
-					INNER JOIN dbo.tblARInvoice Invoice
-						ON Invoice.intInvoiceId = InvoiceItems.intInvoiceId
-			WHERE	Shipment.intInventoryShipmentId = @intTransactionId
-					AND InvoiceItems.intInvoiceId IS NOT NULL
-
-			IF ISNULL(@strInvoiceNumber, '') <> ''
-			BEGIN 
-				RAISERROR(80089, 11, 1)  
-				GOTO Post_Exit    
-			END 
-
-		END
-		
-		-- Do not allow unpost if other charge is already billed. 
-		IF @ysnPost = 0 AND @ysnRecap = 0 
-		BEGIN 
-			SET @strBillNumber = NULL 
-			SELECT	TOP 1 
-					@strBillNumber = Bill.strBillId
-					,@strChargeItem = Item.strItemNo
-			FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge
-						ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
-					INNER JOIN dbo.tblICItem Item
-						ON Item.intItemId = Charge.intChargeId				
-					LEFT JOIN dbo.tblAPBillDetail BillItems
-						ON BillItems.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId
-					INNER JOIN dbo.tblAPBill Bill
-						ON Bill.intBillId = BillItems.intBillId
-			WHERE	Shipment.intInventoryShipmentId = @intTransactionId
-					AND BillItems.intBillDetailId IS NOT NULL
-
-			IF ISNULL(@strBillNumber, '') <> ''
-			BEGIN 
-				-- 'Unable to unpost the Inventory Shipment. The {Other Charge} was billed.'
-				RAISERROR(80091, 11, 1, @strChargeItem)  
-				GOTO Post_Exit    
-			END 
-
+			RAISERROR(80089, 11, 1, @strInvoiceNumber)  
+			GOTO Post_Exit    
 		END 
+	END 
 
+	-- Do not allow unpost if other charge is already included in invoice. 
+	IF @ysnPost = 0 AND @ysnRecap = 0 
+	BEGIN 
+		SET @strInvoiceNumber = NULL 
+		SELECT	TOP 1 
+				@strInvoiceNumber = Invoice.strInvoiceNumber
+				,@strChargeItem = Item.strItemNo
+		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge
+					ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = Charge.intChargeId				
+				LEFT JOIN dbo.tblARInvoiceDetail InvoiceItems
+					ON InvoiceItems.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId
+				INNER JOIN dbo.tblARInvoice Invoice
+					ON Invoice.intInvoiceId = InvoiceItems.intInvoiceId
+		WHERE	Shipment.intInventoryShipmentId = @intTransactionId
+				AND InvoiceItems.intInvoiceId IS NOT NULL
+
+		IF @strInvoiceNumber IS NOT NULL 
+		BEGIN 
+			RAISERROR(80089, 11, 1, @strInvoiceNumber)  
+			GOTO Post_Exit    
+		END 
+	END
+		
+	-- Do not allow unpost if other charge is already billed. 
+	IF @ysnPost = 0 AND @ysnRecap = 0 
+	BEGIN 
+		SET @strBillNumber = NULL 
+		SELECT	TOP 1 
+				@strBillNumber = Bill.strBillId
+				,@strChargeItem = Item.strItemNo
+		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge
+					ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = Charge.intChargeId				
+				LEFT JOIN dbo.tblAPBillDetail BillItems
+					ON BillItems.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId
+				INNER JOIN dbo.tblAPBill Bill
+					ON Bill.intBillId = BillItems.intBillId
+		WHERE	Shipment.intInventoryShipmentId = @intTransactionId
+				AND BillItems.intBillDetailId IS NOT NULL
+
+		IF @strBillNumber IS NOT NULL 
+		BEGIN 
+			-- 'Unable to unpost the Inventory Shipment. The {Other Charge} was billed.'
+			RAISERROR(80091, 11, 1, @strChargeItem)  
+			GOTO Post_Exit    
+		END 
+	END 
+	
 	-- Check if the Shipment quantity matches the total Quantity in the Lot
 	BEGIN 
 		SET @strItemNo = NULL 
