@@ -31,9 +31,12 @@ AS
 			PF.ysnSplit,
 
 			CD.dblQuantity,
+			CD.strPriceUOM,
 			CD.strItemUOM,
 			CD.intItemUOMId,
+			CD.intFutureMarketId,
 			CD.strFutMarketName AS strFutureMarket,
+			CD.intFutureMonthId,
 			CD.strFutureMonth,
 			CD.intContractSeq,
 			CD.strContractType,

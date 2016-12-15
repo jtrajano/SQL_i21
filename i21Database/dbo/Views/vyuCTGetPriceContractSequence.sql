@@ -13,6 +13,7 @@ AS
 			PU.intCommodityUnitMeasureId	AS	intFinalPriceUOMId,
 			CD.dblQuantity,
 			CD.intItemUOMId,
+			CD.strPriceUOM,
 			CD.strItemUOM,
 			CD.strFutMarketName AS strFutureMarket,
 			CD.strFutureMonth,
