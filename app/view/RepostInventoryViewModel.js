@@ -40,7 +40,7 @@ Ext.define('Inventory.view.RepostInventoryViewModel', {
                     item = '"' + get('current.strItemNo') + '" item';
             } catch(e) {}
             var year = get('current.dtmDate').getFullYear();
-            return 'Repost inventory for ' + item + ' in a ' + order.toLowerCase() + ' order from ' + month + ' ' + year + ' onwards.';
+            return 'Repost inventory for ' + item + ' in a ' + order.toLowerCase() + ' order from ' + month + ' ' + year + ' onwards including item(s) that are used for production.';
         },
         prompt: function(get) {
             var month = get('current.strMonth');
@@ -51,7 +51,7 @@ Ext.define('Inventory.view.RepostInventoryViewModel', {
                     item = '"' + get('current.strItemNo') + '" item';
             } catch(e) {}
             var year = get('current.dtmDate').getFullYear();
-            return 'Inventory will be rebuilt for ' + item + ' from ' + month + '-' + moment(get('current.dtmDate')).format('l') + ' onwards. Do you want to continue?';
+            return 'Inventory will be rebuilt for ' + item + ' from ' + month + '-' + moment(get('current.dtmDate')).format('l') + ' onwards including item(s) that are used for production. Do you want to continue?';
         },
         canPost: function(get) {
             return get('current.strPostOrder') && get('current.strMonth'); 
