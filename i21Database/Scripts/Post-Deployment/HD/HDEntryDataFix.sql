@@ -422,4 +422,20 @@ GO
 
 GO
 	PRINT N'End updating HD Ticket Sequence in Project.'
+	Print N'Start fixing CRM opportunity Sales Person';
+GO
+
+exec('
+		update tblHDProject set tblHDProject.intInternalSalesPerson = (select top 1 ec.intEntityId from tblEMEntityToContact ec where ec.intEntityContactId = tblHDProject.intInternalSalesPerson) where tblHDProject.intInternalSalesPerson in
+			(
+			select
+				tblEMEntityToContact.intEntityContactId
+			from tblARSalesperson, tblEMEntityToContact
+			where
+				tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+			)
+	');
+
+GO
+	Print N'End fixing CRM opportunity Sales Person';
 GO
