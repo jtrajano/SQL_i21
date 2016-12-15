@@ -56,7 +56,7 @@ BEGIN TRY
 		,[intPaymentMethodId]					= 0
 		,[strInvoiceOriginId]					= ''
 		,[strPONumber]							= DH.strPurchaseOrder
-		,[strBOLNumber]							= NULL
+		,[strBOLNumber]							= TR.strBillOfLading
 		,[strDeliverPickup]						= 'Deliver'
 		,[strComments]							= (CASE WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
 														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
@@ -155,6 +155,214 @@ BEGIN TRY
 						ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 		WHERE TL.intLoadHeaderId = @intLoadHeaderId
 			AND DH.strDestination = 'Customer'
+
+
+	-- Concatenate PO Number, BOL Number, and Comments in cases there are different values and they are not used as a grouping option
+	DECLARE @concatPONumber NVARCHAR(MAX) = ''
+		, @concatBOLNumber NVARCHAR(MAX) = ''
+		, @concatComment NVARCHAR(MAX) = ''
+		, @currentId INT
+		, @QueryString NVARCHAR(MAX)
+		, @EntityCustomerId INT
+		, @SourceId INT
+		, @CompanyLocationId INT
+		, @Date DATETIME
+		, @TermId INT
+		, @ShipViaId INT
+		, @EntitySalespersonId INT
+		, @Comments NVARCHAR(200) = ''
+		, @PONumber NVARCHAR(200) = ''
+		, @BOLNumber NVARCHAR(200) = ''
+
+	-- Update multiple comment concatenation.
+	SELECT DISTINCT intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId, strComments
+	INTO #tmpComment
+	FROM #tmpSourceTable
+	WHERE ISNULL(strComments, '') <> ''
+	ORDER BY intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId
+
+	DECLARE @Count INT
+	SELECT @Count = COUNT(*) FROM #tmpComment
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpComment)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1
+				FROM #tmpComment
+				WHERE intEntityCustomerId = @EntityCustomerId
+					AND intSourceId = @SourceId
+					AND intCompanyLocationId = @CompanyLocationId
+					AND dtmDate = @Date
+					AND intTermId = @TermId
+					AND intShipViaId = @ShipViaId
+					AND intEntitySalespersonId = @EntitySalespersonId
+		)
+		BEGIN
+			SET @concatComment += ''
+		END
+
+		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId
+			, @SourceId = intSourceId
+			, @CompanyLocationId = intCompanyLocationId
+			, @Date = dtmDate
+			, @TermId = intTermId
+			, @ShipViaId = intShipViaId
+			, @EntitySalespersonId = intEntitySalespersonId
+			, @Comments = strComments
+		FROM #tmpComment
+
+		IF (LEN(@concatComment) > 0)
+		BEGIN
+			SET @concatComment += ', '
+		END
+		SET @concatComment += @Comments
+
+		UPDATE #tmpSourceTable
+			SET strComments = @concatComment
+		WHERE intEntityCustomerId = @EntityCustomerId
+			AND intSourceId = @SourceId
+			AND intCompanyLocationId = @CompanyLocationId
+			AND dtmDate = @Date
+			AND intTermId = @TermId
+			AND intShipViaId = @ShipViaId
+			AND intEntitySalespersonId = @EntitySalespersonId
+
+		DELETE FROM #tmpComment
+		WHERE intEntityCustomerId = @EntityCustomerId
+			AND intSourceId = @SourceId
+			AND intCompanyLocationId = @CompanyLocationId
+			AND dtmDate = @Date
+			AND intTermId = @TermId
+			AND intShipViaId = @ShipViaId
+			AND intEntitySalespersonId = @EntitySalespersonId
+			AND strComments = @Comments
+	END	
+	DROP TABLE #tmpComment
+
+	-- Update multiple BOL Number concatenation.
+	SELECT DISTINCT intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId, strBOLNumber
+	INTO #tmpBOL
+	FROM #tmpSourceTable
+	WHERE ISNULL(strBOLNumber, '') <> ''
+	ORDER BY intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId
+
+	SELECT @Count = COUNT(*) FROM #tmpBOL
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpBOL)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1
+				FROM #tmpBOL
+				WHERE intEntityCustomerId = @EntityCustomerId
+					AND intSourceId = @SourceId
+					AND intCompanyLocationId = @CompanyLocationId
+					AND dtmDate = @Date
+					AND intTermId = @TermId
+					AND intShipViaId = @ShipViaId
+					AND intEntitySalespersonId = @EntitySalespersonId
+		)
+		BEGIN
+			SET @concatBOLNumber += ''
+		END
+
+		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId
+			, @SourceId = intSourceId
+			, @CompanyLocationId = intCompanyLocationId
+			, @Date = dtmDate
+			, @TermId = intTermId
+			, @ShipViaId = intShipViaId
+			, @EntitySalespersonId = intEntitySalespersonId
+			, @BOLNumber = strBOLNumber
+		FROM #tmpBOL
+
+		IF (LEN(@concatBOLNumber) > 0)
+		BEGIN
+			SET @concatBOLNumber += ', '
+		END
+		SET @concatBOLNumber += @BOLNumber
+
+		UPDATE #tmpSourceTable
+			SET strBOLNumber = @concatBOLNumber
+		WHERE intEntityCustomerId = @EntityCustomerId
+			AND intSourceId = @SourceId
+			AND intCompanyLocationId = @CompanyLocationId
+			AND dtmDate = @Date
+			AND intTermId = @TermId
+			AND intShipViaId = @ShipViaId
+			AND intEntitySalespersonId = @EntitySalespersonId
+
+		DELETE FROM #tmpBOL
+		WHERE intEntityCustomerId = @EntityCustomerId
+			AND intSourceId = @SourceId
+			AND intCompanyLocationId = @CompanyLocationId
+			AND dtmDate = @Date
+			AND intTermId = @TermId
+			AND intShipViaId = @ShipViaId
+			AND intEntitySalespersonId = @EntitySalespersonId
+			AND strBOLNumber = @BOLNumber
+	END	
+	DROP TABLE #tmpBOL
+
+	-- Update multiple PO Number concatenation.
+	SELECT DISTINCT intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId, strPONumber
+	INTO #tmpPO
+	FROM #tmpSourceTable
+	WHERE ISNULL(strPONumber, '') <> ''
+	ORDER BY intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId
+
+	SELECT @Count = COUNT(*) FROM #tmpPO
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpPO)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1
+				FROM #tmpPO
+				WHERE intEntityCustomerId = @EntityCustomerId
+					AND intSourceId = @SourceId
+					AND intCompanyLocationId = @CompanyLocationId
+					AND dtmDate = @Date
+					AND intTermId = @TermId
+					AND intShipViaId = @ShipViaId
+					AND intEntitySalespersonId = @EntitySalespersonId
+		)
+		BEGIN
+			SET @concatPONumber += ''
+		END
+
+		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId
+			, @SourceId = intSourceId
+			, @CompanyLocationId = intCompanyLocationId
+			, @Date = dtmDate
+			, @TermId = intTermId
+			, @ShipViaId = intShipViaId
+			, @EntitySalespersonId = intEntitySalespersonId
+			, @PONumber = strPONumber
+		FROM #tmpPO
+
+		IF (LEN(@concatPONumber) > 0)
+		BEGIN
+			SET @concatPONumber += ', '
+		END
+		SET @concatPONumber += @PONumber
+
+		UPDATE #tmpSourceTable
+			SET strPONumber = @concatPONumber
+		WHERE intEntityCustomerId = @EntityCustomerId
+			AND intSourceId = @SourceId
+			AND intCompanyLocationId = @CompanyLocationId
+			AND dtmDate = @Date
+			AND intTermId = @TermId
+			AND intShipViaId = @ShipViaId
+			AND intEntitySalespersonId = @EntitySalespersonId
+
+		DELETE FROM #tmpPO
+		WHERE intEntityCustomerId = @EntityCustomerId
+			AND intSourceId = @SourceId
+			AND intCompanyLocationId = @CompanyLocationId
+			AND dtmDate = @Date
+			AND intTermId = @TermId
+			AND intShipViaId = @ShipViaId
+			AND intEntitySalespersonId = @EntitySalespersonId
+			AND strPONumber = @PONumber
+	END	
+	DROP TABLE #tmpPO	
 
 	--VALIDATE FREIGHT AND SURCHARGE ITEM
 	DECLARE @intLocationId		INT
@@ -874,7 +1082,7 @@ BEGIN TRY
 	EXEC [dbo].[uspARProcessInvoices]
 			 @InvoiceEntries	= @EntriesForInvoice
 			,@UserId			= @intUserId
-			,@GroupingOption	= 11
+			,@GroupingOption	= 8
 			,@RaiseError		= 1
 			,@ErrorMessage		= @ErrorMessage OUTPUT
 			,@CreatedIvoices	= @CreatedInvoices OUTPUT
@@ -914,13 +1122,6 @@ BEGIN TRY
 			SET ysnPosted = @ysnPostOrUnPost
 			WHERE intLoadHeaderId = @intLoadHeaderId
 
-			SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @intLoadHeaderId, ',', 'strReceiptLink'))
-			SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
-		
-			UPDATE tblARInvoice
-			SET strBOLNumber = @strBOL
-			WHERE intInvoiceId = @InvoiceId
-
 			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @InvoiceId
 		END
 	END
@@ -935,13 +1136,6 @@ BEGIN TRY
 			UPDATE tblTRLoadHeader 
 			SET ysnPosted = @ysnPostOrUnPost
 			WHERE intLoadHeaderId = @intLoadHeaderId
-
-			SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @intLoadHeaderId, ',', 'strReceiptLink'))
-			SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
-		
-			UPDATE tblARInvoice
-			SET strBOLNumber = @strBOL
-			WHERE intInvoiceId = @InvoiceId
 
 			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
 		END
