@@ -286,10 +286,10 @@
             // 
             // sqlDataSource1
             // 
-            this.sqlDataSource1.ConnectionName = "JOY\\SQL2012_i21Source01Connection";
+            this.sqlDataSource1.ConnectionName = "";
             msSqlConnectionParameters1.AuthorizationType = DevExpress.DataAccess.ConnectionParameters.MsSqlAuthorizationType.SqlServer;
-            msSqlConnectionParameters1.DatabaseName = "i21Source01";
-            msSqlConnectionParameters1.ServerName = "JOY\\SQL2012";
+            msSqlConnectionParameters1.DatabaseName = "";
+            msSqlConnectionParameters1.ServerName = "";
             this.sqlDataSource1.ConnectionParameters = msSqlConnectionParameters1;
             this.sqlDataSource1.Name = "sqlDataSource1";
             storedProcQuery1.Name = "uspICBillOfLadingReport";

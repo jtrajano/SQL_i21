@@ -102,10 +102,10 @@
             // 
             // sqlDataSource1
             // 
-            this.sqlDataSource1.ConnectionName = "lawrencenb\\sql2014_1540AGConnection";
+            this.sqlDataSource1.ConnectionName = "";
             msSqlConnectionParameters1.AuthorizationType = DevExpress.DataAccess.ConnectionParameters.MsSqlAuthorizationType.Windows;
-            msSqlConnectionParameters1.DatabaseName = "1540AG";
-            msSqlConnectionParameters1.ServerName = "lawrencenb\\sql2014";
+            msSqlConnectionParameters1.DatabaseName = "";
+            msSqlConnectionParameters1.ServerName = "";
             this.sqlDataSource1.ConnectionParameters = msSqlConnectionParameters1;
             this.sqlDataSource1.Name = "sqlDataSource1";
             storedProcQuery1.Name = "uspLGGetWarehouseInstructionReport";
