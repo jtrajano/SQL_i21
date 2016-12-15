@@ -241,7 +241,26 @@ BEGIN
 		[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
-		[dblTotal]					=	ISNULL((dbo.fnAPGetBillDetailReceiptTotal (@receiptId)),0),
+		[dblTotal]					=	ISNULL((CASE WHEN B.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
+										 THEN (CASE WHEN B.intWeightUOMId > 0 
+													THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) 
+																   THEN E1.dblCashPrice 
+																   ELSE B.dblUnitCost 
+															  END / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+													WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
+													THEN CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)) *  (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+													ELSE CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
+											   END) 
+										 ELSE (CASE WHEN B.intWeightUOMId > 0
+													THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) 
+																   THEN E1.dblCashPrice 
+																   ELSE B.dblUnitCost 
+															  END * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+													WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
+													THEN CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+													ELSE CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END  AS DECIMAL(18,2))  --Orig Calculation
+											   END)
+										 END),0),
 		[dblCost]					=	CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
 											 THEN (CASE WHEN E1.dblCashPrice IS NOT NULL THEN E1.dblCashPrice ELSE B.dblUnitCost END)
 											 ELSE B.dblUnitCost
