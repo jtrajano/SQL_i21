@@ -66,9 +66,15 @@ BEGIN TRY
 		,@intRecipeItemUOMId INT
 		,@intProductionStagingId INT
 		,@intProductionStageLocationId INT
-		,@ysnPickByLotCode BIT,@intLotCodeStartingPosition int,@intLotCodeNoOfDigits int
+		,@ysnPickByLotCode BIT
+		,@intLotCodeStartingPosition INT
+		,@intLotCodeNoOfDigits INT
+		,@dblLowerToleranceReqQty NUMERIC(18, 6)
 
-	SELECT @ysnPickByLotCode  = ysnPickByLotCode,@intLotCodeStartingPosition=intLotCodeStartingPosition,@intLotCodeNoOfDigits=intLotCodeNoOfDigits FROM tblMFCompanyPreference
+	SELECT @ysnPickByLotCode = ysnPickByLotCode
+		,@intLotCodeStartingPosition = intLotCodeStartingPosition
+		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
+	FROM tblMFCompanyPreference
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -134,6 +140,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,intConsumptionMethodId INT
 		,strLotTracking NVARCHAR(50)
+		,dblLowerToleranceReqQty NUMERIC(18, 6)
 		)
 	DECLARE @tblSubstituteItem TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -295,8 +302,10 @@ BEGIN TRY
 	--			,0
 	--			,0
 	--			);
-
-	Delete from tblICStockReservation WHERE intTransactionId=@intWorkOrderId and strTransactionId =@strWorkOrderNo 
+	DELETE
+	FROM tblICStockReservation
+	WHERE intTransactionId = @intWorkOrderId
+		AND strTransactionId = @strWorkOrderNo
 
 	INSERT INTO @tblItem (
 		intItemId
@@ -305,6 +314,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,intConsumptionMethodId
 		,strLotTracking
+		,dblLowerToleranceReqQty
 		)
 	SELECT ri.intItemId
 		,CASE 
@@ -330,6 +340,25 @@ BEGIN TRY
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
 		,I.strLotTracking
+		,CASE 
+			WHEN C.strCategoryCode = @strPackagingCategory
+				AND @ysnProducedQtyByWeight = 1
+				AND P.dblMaxWeightPerPack > 0
+				THEN (CAST(CEILING((ri.dblCalculatedLowerTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+			WHEN C.strCategoryCode = @strPackagingCategory
+				THEN CAST(CEILING((ri.dblCalculatedLowerTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
+			ELSE (
+					ri.dblCalculatedLowerTolerance * (
+						dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
+							CASE 
+								WHEN r.intRecipeTypeId = 1
+									THEN r.dblQuantity
+								ELSE 1
+								END
+							)
+						)
+					)
+			END
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -397,6 +426,27 @@ BEGIN TRY
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
 		,I.strLotTracking
+		,(
+			CASE 
+				WHEN C.strCategoryCode = @strPackagingCategory
+					AND @ysnProducedQtyByWeight = 1
+					AND P.dblMaxWeightPerPack > 0
+					THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+				WHEN C.strCategoryCode = @strPackagingCategory
+					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
+				ELSE (
+						ri.dblCalculatedQuantity * (
+							dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
+								CASE 
+									WHEN r.intRecipeTypeId = 1
+										THEN r.dblQuantity
+									ELSE 1
+									END
+								)
+							)
+						)
+				END
+			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -477,6 +527,7 @@ BEGIN TRY
 			,@intStorageLocationId = intStorageLocationId
 			,@intConsumptionMethodId = intConsumptionMethodId
 			,@strLotTracking = strLotTracking
+			,@dblLowerToleranceReqQty = dblLowerToleranceReqQty
 		FROM @tblItem
 		WHERE intItemRecordId = @intItemRecordId
 
@@ -556,7 +607,9 @@ BEGIN TRY
 							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 							FROM tblICStockReservation SR
 							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-							WHERE SR.intLotId = L.intLotId and SR.intTransactionId<>@intWorkOrderId and SR.strTransactionId <>@strWorkOrderNo 
+							WHERE SR.intLotId = L.intLotId
+								AND SR.intTransactionId <> @intWorkOrderId
+								AND SR.strTransactionId <> @strWorkOrderNo
 								AND ISNULL(ysnPosted, 0) = 0
 							), 0)
 					,(
@@ -576,7 +629,9 @@ BEGIN TRY
 							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 							FROM tblICStockReservation SR
 							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-							WHERE SR.intLotId = L.intLotId and SR.intTransactionId<>@intWorkOrderId and SR.strTransactionId <>@strWorkOrderNo 
+							WHERE SR.intLotId = L.intLotId
+								AND SR.intTransactionId <> @intWorkOrderId
+								AND SR.strTransactionId <> @strWorkOrderNo
 								AND ISNULL(ysnPosted, 0) = 0
 							), 0) / (
 						CASE 
@@ -622,8 +677,11 @@ BEGIN TRY
 							END
 						)
 					AND L.dblQty > 0
-				ORDER BY CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE CONVERT(INT,Substring(L.strLotNumber,@intLotCodeStartingPosition,@intLotCodeNoOfDigits  )) END ASC
-				
+				ORDER BY CASE 
+						WHEN @ysnPickByLotCode = 0
+							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+						ELSE CONVERT(INT, Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+						END ASC
 			END
 
 			INSERT INTO @tblLot (
@@ -652,7 +710,9 @@ BEGIN TRY
 						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 						FROM tblICStockReservation SR
 						JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-						WHERE SR.intLotId = L.intLotId and SR.intTransactionId<>@intWorkOrderId and SR.strTransactionId <>@strWorkOrderNo  
+						WHERE SR.intLotId = L.intLotId
+							AND SR.intTransactionId <> @intWorkOrderId
+							AND SR.strTransactionId <> @strWorkOrderNo
 							AND ISNULL(ysnPosted, 0) = 0
 						), 0)
 				,(
@@ -672,7 +732,9 @@ BEGIN TRY
 						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 						FROM tblICStockReservation SR
 						JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-						WHERE SR.intLotId = L.intLotId and SR.intTransactionId<>@intWorkOrderId and SR.strTransactionId <>@strWorkOrderNo  
+						WHERE SR.intLotId = L.intLotId
+							AND SR.intTransactionId <> @intWorkOrderId
+							AND SR.strTransactionId <> @strWorkOrderNo
 							AND ISNULL(ysnPosted, 0) = 0
 						), 0) / (
 					CASE 
@@ -715,7 +777,11 @@ BEGIN TRY
 						END
 					)
 				AND L.dblQty > 0
-				ORDER BY CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE CONVERT(INT,Substring(L.strLotNumber,@intLotCodeStartingPosition,@intLotCodeNoOfDigits  )) END ASC
+			ORDER BY CASE 
+					WHEN @ysnPickByLotCode = 0
+						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+					ELSE CONVERT(INT, Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+					END ASC
 
 			IF NOT EXISTS (
 					SELECT *
@@ -749,7 +815,9 @@ BEGIN TRY
 							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 							FROM tblICStockReservation SR
 							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-							WHERE SR.intLotId = L.intLotId and SR.intTransactionId<>@intWorkOrderId and SR.strTransactionId <>@strWorkOrderNo 
+							WHERE SR.intLotId = L.intLotId
+								AND SR.intTransactionId <> @intWorkOrderId
+								AND SR.strTransactionId <> @strWorkOrderNo
 								AND ISNULL(ysnPosted, 0) = 0
 							), 0)
 					,(
@@ -769,7 +837,9 @@ BEGIN TRY
 							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 							FROM tblICStockReservation SR
 							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-							WHERE SR.intLotId = L.intLotId and SR.intTransactionId<>@intWorkOrderId and SR.strTransactionId <>@strWorkOrderNo 
+							WHERE SR.intLotId = L.intLotId
+								AND SR.intTransactionId <> @intWorkOrderId
+								AND SR.strTransactionId <> @strWorkOrderNo
 								AND ISNULL(ysnPosted, 0) = 0
 							), 0) / (
 						CASE 
@@ -812,7 +882,7 @@ BEGIN TRY
 							END
 						)
 					AND L.dblQty = 0
-				ORDER BY IsNULL(L.dtmManufacturedDate,L.dtmDateCreated) DESC
+				ORDER BY IsNULL(L.dtmManufacturedDate, L.dtmDateCreated) DESC
 
 				IF EXISTS (
 						SELECT *
@@ -952,7 +1022,7 @@ BEGIN TRY
 						,@intPatternCode = 24
 						,@ysnProposed = 0
 						,@strPatternString = @strLotNumber OUTPUT
-						,@intShiftId=@intBusinessShiftId
+						,@intShiftId = @intBusinessShiftId
 				END
 
 				IF @intConsumptionMethodId = 2
@@ -1111,7 +1181,11 @@ BEGIN TRY
 							END
 						)
 					AND L.dblQty > 0
-					ORDER BY CASE WHEN @ysnPickByLotCode = 0 THEN ISNULL(L.dtmManufacturedDate,L.dtmDateCreated) ELSE CONVERT(INT,Substring(L.strLotNumber,@intLotCodeStartingPosition,@intLotCodeNoOfDigits  )) END ASC
+				ORDER BY CASE 
+						WHEN @ysnPickByLotCode = 0
+							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+						ELSE CONVERT(INT, Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+						END ASC
 			END
 		END
 
@@ -1139,7 +1213,7 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT SUM(dblQty)
 					FROM @tblLot
-					HAVING SUM(dblQty) < [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblReqQty)
+					HAVING SUM(dblQty) < [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
 					)
 			BEGIN
 				IF @ysnExcessConsumptionAllowed = 0
