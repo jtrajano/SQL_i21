@@ -95,6 +95,14 @@ UnitTestEngine.testModel({
         "name": "dblTax",
         "type": "float",
         "allowNull": false
+    }, {
+        "name": "intTaxGroupId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strTaxGroup",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

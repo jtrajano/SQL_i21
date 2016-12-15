@@ -171,6 +171,10 @@ UnitTestEngine.testModel({
         "name": "strPricingType",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "strTaxGroup",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{
