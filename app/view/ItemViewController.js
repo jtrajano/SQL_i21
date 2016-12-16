@@ -1553,7 +1553,8 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     validateRecord: function(config, action) {
-        var win = config.window;
+        var win = config.window,
+            current = win.viewModel.data.current;
 
         var pricings = config.viewModel.data.current.tblICItemPricings();
         if(pricings) {
@@ -1591,12 +1592,25 @@ Ext.define('Inventory.view.ItemViewController', {
                         if (!u.dummy) {
                             if (cnt > 1)
                                 break;
-                            if (u.data.dblUnitQty === 1) {
-                                cnt++;
+                           // if (u.data.dblUnitQty === 1) {
+                           //     cnt++;
+                           // }
+                            else {
+                                //Check if all the Unit Quanitities have Unique values
+                                var currentUnitQty = u.data.dblUnitQty;
+
+                                for(var j = 0; j < uoms.length; j++) {
+                                    var eachUOM = uoms[j];
+                                    if (!eachUOM.dummy) {
+                                        if (j !== i && eachUOM.data.dblUnitQty === currentUnitQty) {
+                                            cnt++;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
-                    if(cnt > 1) {
+                    if(cnt > 1 && (current.get('strType') === 'Inventory' || current.get('strType') === 'Finished Good' || current.get('strType') === 'Raw Material')) {
                         var tabItem = win.down('#tabItem');
                         tabItem.setActiveTab('pgeDetails');
                         var grid = win.down('#grdUnitOfMeasure');
