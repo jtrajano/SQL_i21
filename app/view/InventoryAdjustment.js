@@ -567,15 +567,15 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strStorageLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Storage Location Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
                                                                     text: 'Sub Location Name',
+                                                                    flex: 1
+                                                                },                                                                
+                                                                {
+                                                                    dataIndex: 'strStorageLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Location Name',
                                                                     flex: 1
                                                                 }
                                                             ],
