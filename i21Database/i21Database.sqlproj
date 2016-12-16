@@ -4621,6 +4621,7 @@
     <Build Include="dbo\Tables\tblMFRecipeGuideNutrient.sql" />
     <Build Include="dbo\Tables\tblMFRecipeGuide.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipeGuide.sql" />
+    <Build Include="dbo\Views\vyuMFLabelValues.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
