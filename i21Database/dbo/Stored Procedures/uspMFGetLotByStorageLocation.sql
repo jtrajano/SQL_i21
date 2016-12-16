@@ -27,6 +27,9 @@ BEGIN
 		AND L.intStorageLocationId = @intStorageLocationId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+					AND SL.ysnAllowConsume = 1
+	JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 	WHERE L.intLotStatusId = 1
 		AND ISNULL(dtmExpiryDate,@dtmCurrentDate) >= @dtmCurrentDate
 		AND L.dblQty > 0

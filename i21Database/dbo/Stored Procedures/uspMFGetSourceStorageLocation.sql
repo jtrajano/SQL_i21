@@ -21,6 +21,7 @@ BEGIN
 			,SL.strName
 			,SL.intSubLocationId
 		FROM dbo.tblICStorageLocation SL
+		JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 		WHERE intLocationId = @intLocationId
 			AND SL.ysnAllowConsume = 1
 			AND SL.strName LIKE @strName + '%'
@@ -39,6 +40,7 @@ BEGIN
 			,SL.strName
 			,SL.intSubLocationId
 		FROM dbo.tblICStorageLocation SL
+		JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 		WHERE intLocationId = @intLocationId
 			AND SL.ysnAllowConsume = 1
 			AND SL.strName LIKE @strName + '%'

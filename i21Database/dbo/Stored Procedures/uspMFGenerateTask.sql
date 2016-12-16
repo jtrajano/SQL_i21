@@ -208,6 +208,7 @@ BEGIN TRY
 			Join tblICStorageUnitType UT on UT.intStorageUnitTypeId =SL.intStorageUnitTypeId and UT.ysnAllowPick =1
 			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
 				AND T.intTaskTypeId NOT IN (5,6,8,9,10,11)
+			JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 			WHERE L.intItemId = @intItemId
 				AND L.intLotStatusId IN (1)
 				AND L.dtmDateCreated BETWEEN (
@@ -296,6 +297,7 @@ BEGIN TRY
 			FROM tblICLot L
 			Join tblICStorageLocation SL on SL.intStorageLocationId =L.intStorageLocationId 
 			Join tblICStorageUnitType UT on UT.intStorageUnitTypeId =SL.intStorageUnitTypeId and UT.ysnAllowPick =1
+			JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
 				AND T.intTaskTypeId NOT IN (5,6,8,9,10,11)
 			WHERE L.intItemId = @intItemId

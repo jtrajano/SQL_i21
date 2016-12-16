@@ -2364,3 +2364,13 @@ UPDATE tblMFCompanyPreference
 SET intWastageWorkOrderDuration = 2
 WHERE intWastageWorkOrderDuration IS NULL
 GO
+UPDATE tblICStorageLocation
+SET intRestrictionId = 1
+WHERE intRestrictionId IS NULL
+Go
+UPDATE tblMFCompanyPreference
+SET ysnPickByLotCode = 0
+	,intLotCodeStartingPosition = 2
+	,intLotCodeNoOfDigits = 5
+WHERE ysnPickByLotCode IS NULL
+Go

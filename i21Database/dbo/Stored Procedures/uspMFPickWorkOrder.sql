@@ -662,6 +662,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
+				JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
@@ -763,6 +764,7 @@ BEGIN TRY
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
+			JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
@@ -868,6 +870,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
+				JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
@@ -1167,6 +1170,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
+				JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
