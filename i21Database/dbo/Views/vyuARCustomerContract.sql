@@ -12,6 +12,7 @@ SELECT
 	,[strContractStatus]	= CTCS.[strContractStatus]
 	,[intEntityCustomerId]	= CTCH.[intEntityId]
 	,[intCurrencyId]		= ISNULL((SELECT [intMainCurrencyId] FROM tblSMCurrency WHERE intCurrencyID = CTCD.[intCurrencyId]), CTCD.[intCurrencyId])
+	,[strCurrency]			= ISNULL((SELECT [strCurrency] FROM tblSMCurrency WHERE intCurrencyID = CTCD.[intCurrencyId]), SMC.[strCurrency])
 	,[intCompanyLocationId]	= CTCD.[intCompanyLocationId]	
 	,[intItemId]			= CTCD.[intItemId]
 	,[strItemNo]			= ICI.[strItemNo]
