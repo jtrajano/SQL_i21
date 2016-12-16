@@ -43,6 +43,31 @@ StartTest (function (t) {
         .displayText('=====  Scenario 2: Delete Used Commodity Done=====')
         //endregion
 
+        //region Scenario 3: Delete Multiple UnUsed Commodity
+        .displayText('=====  Scenario 3: Delete Multiple UnUsed Commodity =====')
+        .selectSearchRowNumber([15,16,17,18])
+        .clickButton('OpenSelected')
+        .waitUntilLoaded()
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .displayText('=====  Scenario 3: Delete Multiple UnUsed Commodity Done=====')
+        //endregion
+
+
 
 
         .done();
