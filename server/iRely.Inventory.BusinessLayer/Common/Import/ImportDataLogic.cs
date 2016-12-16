@@ -351,9 +351,18 @@ namespace iRely.Inventory.BusinessLayer
             {
                 int entityId = iRely.Common.Security.GetEntityId();
 
+                //context.ContextManager.Database.ExecuteSqlCommand(
+                //    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @actionIcon='small-import'",
+                //    viewNamespace, id.ToString(), entityId, action));
+
                 context.ContextManager.Database.ExecuteSqlCommand(
-                    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @actionIcon='small-import'",
-                    viewNamespace, id.ToString(), entityId, action));
+                            "uspSMAuditLog @screenName, @keyValue, @entityId, @actionType, @actionIcon",
+                            new SqlParameter("screenName", viewNamespace),
+                            new SqlParameter("keyValue", id.ToString()),
+                            new SqlParameter("entityId", entityId),
+                            new SqlParameter("actionType", action),
+                            new SqlParameter("actionIcon", "small-import")
+                );
             }
             catch (Exception ex)
             {
@@ -372,9 +381,21 @@ namespace iRely.Inventory.BusinessLayer
             {
                 int entityId = iRely.Common.Security.GetEntityId();
 
+                //context.ContextManager.Database.ExecuteSqlCommand(
+                //    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @changeDescription = '{4}', @fromValue = '{5}', @toValue='{6}', @actionIcon='small-import'",
+                //    viewNamespace, id.ToString(), entityId, action, description, fromValue, toValue));
+
                 context.ContextManager.Database.ExecuteSqlCommand(
-                    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @changeDescription = '{4}', @fromValue = '{5}', @toValue='{6}', @actionIcon='small-import'",
-                    viewNamespace, id.ToString(), entityId, action, description, fromValue, toValue));
+                            "uspSMAuditLog @screenName, @keyValue, @entityId, @actionType, @changeDescription, @fromValue, @toValue, @actionIcon",
+                            new SqlParameter("screenName", viewNamespace),
+                            new SqlParameter("keyValue", id.ToString()),
+                            new SqlParameter("entityId", entityId),
+                            new SqlParameter("actionType", action),
+                            new SqlParameter("changeDescription", description),
+                            new SqlParameter("fromValue", fromValue),
+                            new SqlParameter("toValue", toValue),
+                            new SqlParameter("actionIcon", "small-import")
+                );
 
             }
             catch (Exception ex)
@@ -394,9 +415,19 @@ namespace iRely.Inventory.BusinessLayer
             {
                 int entityId = iRely.Common.Security.GetEntityId();
 
+                //context.ContextManager.Database.ExecuteSqlCommand(
+                //    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @details = '{4}', @actionIcon='small-import'",
+                //    viewNamespace, id.ToString(), entityId, action, details));
+
                 context.ContextManager.Database.ExecuteSqlCommand(
-                    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @details = '{4}', @actionIcon='small-import'",
-                    viewNamespace, id.ToString(), entityId, action, details));
+                            "uspSMAuditLog @screenName, @keyValue, @entityId, @actionType, @details, @actionIcon",
+                            new SqlParameter("screenName", viewNamespace),
+                            new SqlParameter("keyValue", id.ToString()),
+                            new SqlParameter("entityId", entityId),
+                            new SqlParameter("actionType", action),
+                            new SqlParameter("details", details),
+                            new SqlParameter("actionIcon", "small-import")
+                );
 
             }
             catch (Exception ex)
