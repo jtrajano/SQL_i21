@@ -49,7 +49,7 @@ BEGIN TRANSACTION
 			dblCheckAmount = null
 		WHERE intCustomerStockId IN (SELECT [intTransactionId] FROM @tmpTransacions)
 
-	SELECT @totalRecords = [intTransactionId] FROM @tmpTransacions
+	SELECT @totalRecords = COUNT([intTransactionId]) FROM @tmpTransacions
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -59,9 +59,10 @@ Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
 	SET @successfulCount = @totalRecords
-	
+	GOTO Post_Exit
 Post_Rollback:
 	ROLLBACK TRANSACTION	
 	SET @success = 0
-		
+Post_Exit:
+	
 END
