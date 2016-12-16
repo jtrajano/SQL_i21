@@ -36,6 +36,8 @@
 	[strMerchantId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strMerchantPassword] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strPaymentServer] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strDateFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strNumberFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intCompanySetupId] INT NOT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
