@@ -139,7 +139,7 @@ StartTest (function (t) {
         .verifyMessageBox('iRely i21','Are you sure you want to delete Item 87G?','yesno','question')
         .clickMessageBoxButton('yes')
         .waitUntilLoaded('')
-        .verifyMessageBox('iRely i21','The record you are trying to delete is being used.','ok','question')
+        .verifyMessageBox('iRely i21','The record you are trying to delete is being used.','ok','error')
         .clickMessageBoxButton('ok')
         .waitUntilLoaded('')
         .clickButton('Close')
