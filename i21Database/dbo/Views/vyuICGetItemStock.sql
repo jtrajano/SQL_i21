@@ -98,7 +98,7 @@ SELECT
 				ISNULL(ItemStock.dblUnitOnHand, 0)  
 				- (
 						ISNULL(ItemStock.dblUnitReserved, 0) 
-						+ ISNULL(ItemStock.dblInTransitOutbound, 0) 
+						-- + ISNULL(ItemStock.dblInTransitOutbound, 0) 
 						+ ISNULL(ItemStock.dblConsignedSale, 0)
 				),
 	
