@@ -168,6 +168,14 @@ END
 			AND IC.strType != 'Non-Inventory'
 			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
     group by TR.intLoadReceiptId
+	ORDER BY intEntityVendorId
+		,strBillOfLadding
+		,strReceiptType
+		,intLocationId
+		,intShipViaId
+		,intShipFromId
+		,intSourceType
+		,intTaxGroupId
 
    SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
    SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
