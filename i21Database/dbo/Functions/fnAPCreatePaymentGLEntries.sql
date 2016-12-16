@@ -382,7 +382,7 @@ BEGIN
 			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 			[strBatchId]				=	@batchId,
 			[intAccountId]				=	(SELECT TOP 1 intAccountId FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intId FROM @paymentIds)), --use the first AP account only
-			[dblDebit]					=	A.dblUnapplied * -1,
+			[dblDebit]					=	A.dblUnapplied,
 			[dblCredit]					=	0,
 			[dblDebitUnit]				=	0,
 			[dblCreditUnit]				=	0,
