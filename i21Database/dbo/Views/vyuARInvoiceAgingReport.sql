@@ -204,14 +204,7 @@ SELECT dtmDate				= I.dtmPostDate
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
 	 , I.strBOLNumber
-	 , dblAmountPaid		= (CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') 
-								THEN 
-									CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 
-										THEN ISNULL(PD.dblPayment, 0) + ISNULL(APPD.dblPayment, 0) 
-										ELSE 0 
-									END 
-								ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) 
-							  END) + ISNULL(PC.dblAppliedInvoiceAmount, 0)
+	 , dblAmountPaid		= ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)
      , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) = (I.dblInvoiceTotal * -1) 
 								THEN I.dblInvoiceTotal * -1 
 								ELSE 
@@ -403,14 +396,7 @@ UNION ALL
 SELECT I.strInvoiceNumber
   , I.intInvoiceId
   , I.strBOLNumber
-  , dblAmountPaid			= (CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') 
-								THEN 
-									CASE WHEN ISNULL(P.dblAmountPaid, 0) + ISNULL(APP.dblAmountPaid, 0) < 0 
-										THEN ISNULL(PD.dblPayment, 0) + ISNULL(APPD.dblPayment, 0) 
-										ELSE 0 
-									END 
-								ELSE ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) 
-							  END) + ISNULL(PC.dblAppliedInvoiceAmount, 0)
+  , dblAmountPaid			= ISNULL(PD.dblPayment,0) + ISNULL(APPD.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)
   , dblInvoiceTotal			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) = (I.dblInvoiceTotal * -1) 
 								THEN I.dblInvoiceTotal * -1 
 								ELSE 
