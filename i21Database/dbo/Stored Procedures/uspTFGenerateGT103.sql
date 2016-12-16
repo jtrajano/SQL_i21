@@ -68,6 +68,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 
 	SET @TemplateItemCount = (SELECT COUNT(*) FROM @tblTempSummaryItem)
 
+	
 	WHILE(@TemplateItemCount > 0) -- LOOP ON SUMMARY ITEMS AND INSERT INTO SUMMARY TABLE
 		BEGIN
 			-- GET SCHEDULE CODE PARAMETERS FOR FILTERING
@@ -82,7 +83,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				SET @ReportItemSequence = (SELECT intReportItemSequence FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
 				SET @TemplateItemNumber = (SELECT intTemplateItemNumber FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
 				SET @ReportSection = (SELECT strReportSection FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
-				SET @TemplateConfiguration = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
+				SET @TemplateConfiguration = (SELECT (CASE WHEN strConfiguration = '' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
 				-- INSERT COMPUTED VALUES ON TEMPORARY TOTAL TABLE
 
 				IF @TemplateItemId = 'GT-103-Summary-001'
