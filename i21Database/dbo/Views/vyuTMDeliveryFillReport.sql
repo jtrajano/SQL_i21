@@ -92,7 +92,7 @@ SELECT
 	, O.strRouteId
 	, P.strFillMethod
 	, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
-							ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
+							ELSE R.strDescription
 						END)  
 	, strLocation = CL.strLocationName
 	,C.dtmForecastedDelivery
@@ -157,6 +157,8 @@ LEFT JOIN tblTMRoute O
 	ON C.intRouteId = O.intRouteId
 LEFT JOIN tblTMFillMethod P
 	ON C.intFillMethodId = P.intFillMethodId
+LEFT JOIN tblTMGlobalJulianCalendar R
+	ON C.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 ,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) Q
 ,(SELECT TOP 1 intFillMethodId FROM tblTMFillMethod WHERE strFillMethod = 'Julian Calendar') U
 ,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
