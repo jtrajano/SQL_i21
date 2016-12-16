@@ -119,7 +119,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 0.73%
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -151,7 +151,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--7. Penalty Due. If late, the penalty is 10% of the tax due on Line 6 or $5, whichever is greater.
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -167,7 +167,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--8. Interest Due. If late, multiply Line 6 by the interest rate (see Departmental Notice #3)
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -183,7 +183,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--9. Electronic Funds Transfer Credit
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -200,7 +200,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--10. Adjustments. If negative entry, use a negative sign. (You must provide an explanation and
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
