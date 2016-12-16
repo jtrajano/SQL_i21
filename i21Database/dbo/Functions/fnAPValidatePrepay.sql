@@ -21,6 +21,21 @@ BEGIN
 
 	IF @post = 1
 	BEGIN
+		--VALIDATE PREPAY DIFFERENT CURRENCY   
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 'Posting different Currency are not yet implemented.',
+				'Payable',
+			   A.strPaymentRecordNum,
+			   A.intPaymentId
+
+		FROM dbo.tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+		INNER JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
+		CROSS APPLY
+		(
+			SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference
+		) BaseCurrency
+		WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND C.intCurrencyId != BaseCurrency.intDefaultCurrencyId     
 		--MAKE SURE PAYMENT DETAILS ONLY HAS ONE RECORD
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
