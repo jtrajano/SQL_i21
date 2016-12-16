@@ -59,6 +59,10 @@ BEGIN TRY
 		,@strAttributeValue NVARCHAR(50)
 		,@intSampleStatusId INT
 		,@strCellName NVARCHAR(50)
+		,@dtmSampleCreated DATETIME
+		,@strLineSampleMandatory NVARCHAR(50)
+		,@intDurationBetweenLineSample INT
+		,@dtmStartedDate DATETIME
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -376,6 +380,7 @@ BEGIN TRY
 		SELECT @intProductId = intItemId
 			,@dblRequiredQuantity = dblQuantity
 			,@intManufacturingProcessId = intManufacturingProcessId
+			,@dtmStartedDate = dtmStartedDate
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -649,6 +654,7 @@ BEGIN TRY
 		END
 
 		SELECT TOP 1 @intSampleStatusId = intSampleStatusId
+			,@dtmSampleCreated = dtmCreated
 		FROM tblQMSample
 		WHERE intProductTypeId = 12
 			AND intProductValueId = @intWorkOrderId
@@ -666,6 +672,40 @@ BEGIN TRY
 					,1
 					,@strCellName
 					)
+		END
+
+		SELECT @strLineSampleMandatory = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 84
+
+		IF @strLineSampleMandatory = 'True'
+		BEGIN
+			SELECT @intDurationBetweenLineSample = strAttributeValue
+			FROM tblMFManufacturingProcessAttribute
+			WHERE intManufacturingProcessId = @intManufacturingProcessId
+				AND intLocationId = @intLocationId
+				AND intAttributeId = 85
+
+			IF @dtmSampleCreated IS NULL
+			BEGIN
+				SELECT @dtmSampleCreated = @dtmStartedDate
+			END
+
+			IF DateDiff(MINUTE, @dtmSampleCreated, GETDATE()) > @intDurationBetweenLineSample
+			BEGIN
+				SELECT @strCellName = strCellName
+				FROM tblMFManufacturingCell
+				WHERE intManufacturingCellId = @intManufacturingProcessId
+
+				RAISERROR (
+						90024
+						,11
+						,1
+						,@strCellName
+						)
+			END
 		END
 	END
 END TRY
