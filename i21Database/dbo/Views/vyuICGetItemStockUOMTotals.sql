@@ -22,7 +22,7 @@ SELECT
 						ISNULL(StockUOM.dblOnHand, 0)  
 						- (
 								ISNULL(StockUOM.dblUnitReserved, 0) 
-								+ ISNULL(StockUOM.dblInTransitOutbound, 0) 
+								--+ ISNULL(StockUOM.dblInTransitOutbound, 0) 
 								+ ISNULL(StockUOM.dblConsignedSale, 0)
 						)
 			END
