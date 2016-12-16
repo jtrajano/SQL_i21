@@ -123,8 +123,8 @@ BEGIN
 					, strProductDescription = G.vwitm_desc COLLATE Latin1_General_CI_AS
 					, O.strRouteId
 					, P.strFillMethod
-					, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
-											ELSE GC.strDescription
+					, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN GC.strDescription
+											ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 										END)  		
 					, strLocation =  vwloc_loc_no
 					,C.dtmForecastedDelivery
@@ -277,8 +277,8 @@ BEGIN
 				, strProductDescription = G.strDescription
 				, O.strRouteId
 				, P.strFillMethod
-				, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
-										ELSE R.strDescription
+				, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN R.strDescription
+										ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 									END)  
 				, strLocation = CL.strLocationName
 				,C.dtmForecastedDelivery
