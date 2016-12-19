@@ -1831,6 +1831,34 @@ exec('
 		)
 	');
 
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblSMLineOfBusiness'))
+begin
+	exec('
+			update tblSMLineOfBusiness set tblSMLineOfBusiness.intEntityId = (select top 1 ec.intEntityId from tblEMEntityToContact ec where ec.intEntityContactId = tblSMLineOfBusiness.intEntityId) where tblSMLineOfBusiness.intEntityId in
+				(
+				select
+					tblEMEntityToContact.intEntityContactId
+				from tblARSalesperson, tblEMEntityToContact
+				where
+					tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+				)
+		');
+end
+
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMCampaign'))
+begin
+	exec('
+			update tblCRMCampaign set tblCRMCampaign.intEntityId = (select top 1 ec.intEntityId from tblEMEntityToContact ec where ec.intEntityContactId = tblCRMCampaign.intEntityId) where tblCRMCampaign.intEntityId in
+				(
+				select
+					tblEMEntityToContact.intEntityContactId
+				from tblARSalesperson, tblEMEntityToContact
+				where
+					tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+				)
+		');
+end
+
 Print N'End fixing CRM opportunity Sales Person';
 
 GO
