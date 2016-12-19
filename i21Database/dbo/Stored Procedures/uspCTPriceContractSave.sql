@@ -82,22 +82,28 @@ BEGIN TRY
 					@intBrokerId			=	FD.intBrokerId,
 					@intBrokerageAccountId	=	FD.intBrokerageAccountId,
 					@intFutureMarketId		=	FD.intFutureMarketId,
-					@intCommodityId			=	CD.intCommodityId,
-					@intLocationId			=	CD.intCompanyLocationId,
-					@intTraderId			=	CD.intSalespersonId,
-					@intCurrencyId			=	CD.intCurrencyId,
-					@strBuySell				=	CASE WHEN CD.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,
 					@intNoOfContract		=	FD.dblNoOfLots,
 					@intHedgeFutureMonthId	=	FD.intHedgeFutureMonthId,
 					@dblHedgePrice			=	FD.dblHedgePrice,
-					@intBookId				=	CD.intBookId,
-					@intSubBookId			=	CD.intSubBookId,
 					@ysnHedge				=	FD.ysnHedge,
+
 					@intContractHeaderId	=	PF.intContractHeaderId,
-					@intContractDetailId	=	PF.intContractDetailId
+					@intContractDetailId	=	PF.intContractDetailId,
+
+					@intCommodityId			=	CH.intCommodityId,					
+					@intTraderId			=	CH.intSalespersonId,
+					@strBuySell				=	CASE WHEN CH.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,	
+
+					@intCurrencyId			=	TS.intCurrencyId,
+					@intBookId				=	TS.intBookId,
+					@intSubBookId			=	TS.intSubBookId,
+					@intLocationId			=	TS.intCompanyLocationId
+						
 			FROM	tblCTPriceFixationDetail	FD
 			JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
-			JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
+			JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	PF.intContractHeaderId
+			CROSS	
+			APPLY	fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) TS
 			WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
 
 			IF @ysnHedge = 1 AND @strRowState <> 'Delete' AND @strXML <> 'Delete'

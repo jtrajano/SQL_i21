@@ -4591,7 +4591,7 @@
     <Build Include="dbo\Views\vyuGLAccountFiscalBudget.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationWithType.sql" />
     <Build Include="dbo\Views\vyuCTGetPriceContractSequence.sql" />
-    <Build Include="dbo\Views\vyuCTPriceContractFixation.sql" />
+    <Build Include="dbo\Views\vyuCTGridPriceContractFixation.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPriceContractSave.sql" />
     <Build Include="dbo\Tables\tblSMLicenseType.sql" />
@@ -4622,6 +4622,9 @@
     <Build Include="dbo\Tables\tblMFRecipeGuide.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipeGuide.sql" />
     <Build Include="dbo\Views\vyuMFLabelValues.sql" />
+    <Build Include="dbo\Views\vyuCTGridPriceContractSpreadArbitrage.sql" />
+    <Build Include="dbo\Functions\fnCTGetTopOneSequence.sql" />
+    <Build Include="dbo\Views\vyuCTGridPriceContractCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

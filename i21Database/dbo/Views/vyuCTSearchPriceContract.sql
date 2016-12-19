@@ -99,7 +99,7 @@ AS
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
 					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId,
-					CAST (NULL AS INT)			AS	intBasisCommodityUOMId,
+					CU.intCommodityUnitMeasureId			AS	intBasisCommodityUOMId,
 					CD.strEntityContract,
 					MAX(CD.dtmStartDate)		AS	dtmStartDate,
 					MAX(CD.dtmEndDate)			AS	dtmEndDate
