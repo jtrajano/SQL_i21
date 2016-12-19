@@ -82,8 +82,9 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
 
     repost: function (data) {
         iRely.Msg.showWait('Reposting inventory...');
-
+        var id = 234;
         ic.utils.ajax({
+            timeout: 120000,
             url: '../Inventory/api/InventoryValuation/RepostInventory',
             method: "post",
             headers: {
@@ -101,7 +102,12 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
                 else
                     iRely.Functions.showErrorDialog(json.message);
             }, 
-            error => iRely.Functions.showErrorDialog(JSON.parse(error.responseText).message)
+            error => {
+                if(error.timedout)
+                    iRely.Functions.showErrorDialog("Looks like the server is taking to long to respond, this can be caused by either poor connectivity or an error with our servers. Please try again in a while.");
+                else
+                    iRely.Functions.showErrorDialog(JSON.parse(error.responseText).message);
+            }
         );
     },
 
