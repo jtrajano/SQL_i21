@@ -4625,6 +4625,9 @@
     <Build Include="dbo\Views\vyuCTGridPriceContractSpreadArbitrage.sql" />
     <Build Include="dbo\Functions\fnCTGetTopOneSequence.sql" />
     <Build Include="dbo\Views\vyuCTGridPriceContractCost.sql" />
+    <Build Include="dbo\Functions\fnPATCreateTransferInstrumentsGLEntries.sql" />
+    <Build Include="dbo\Functions\fnPATReverseTransferInstrumentsGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATPostTransferInstruments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

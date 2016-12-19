@@ -56,4 +56,3 @@ SELECT	TD.intTransferDetailId,
 		ON transferorRR.intRefundTypeId = TD.intRefundTypeId
 	LEFT OUTER JOIN tblPATCustomerStock transfereeCS
 		ON transfereeCS.intStockId = TD.intToStockId
-GO

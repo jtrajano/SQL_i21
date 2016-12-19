@@ -113,4 +113,3 @@ SELECT	NEWID() AS id,
 		ON PTD.intTransferId = PT.intTransferId
 	INNER JOIN tblPATTransferType T
 		ON T.intTransferType = PT.intTransferType
-GO
