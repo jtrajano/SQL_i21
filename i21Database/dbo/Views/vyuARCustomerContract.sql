@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerContract]
-	AS
-
+AS
 SELECT
 	 [intContractHeaderId]	= CTCD.[intContractHeaderId]
 	,[intContractDetailId]	= CTCD.[intContractDetailId]
@@ -20,7 +19,7 @@ SELECT
 	,[intOrderUOMId]		= CTCD.[intItemUOMId]
 	,[strOrderUnitMeasure]	= ICUMO.[strUnitMeasure]
 	,[intItemUOMId]			= CTCD.[intPriceItemUOMId]
-	,[strUnitMeasure]		= ICUMP.[strUnitMeasure]
+	,[strUnitMeasure]		= ISNULL(ICUMO.[strUnitMeasure], ICUMP.[strUnitMeasure])
 	,[intPricingTypeId]		= CTPT.[intPricingTypeId]
 	,[strPricingType]		= CTPT.[strPricingType]
 	,[dblOrderPrice]		= CTCD.[dblCashPrice] / (CASE WHEN CTCD.[intItemUOMId] <> CTCD.[intPriceItemUOMId] THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
@@ -37,44 +36,90 @@ SELECT
 	,[dblShipQuantity]		= dbo.fnCalculateQtyBetweenUOM(CTCD.[intItemUOMId], CTCD.[intPriceItemUOMId], CTCD.[dblQuantity] )
 	,[ysnUnlimitedQuantity]	= CAST(ISNULL(CTCH.[ysnUnlimitedQuantity],0) AS BIT)
 	,[ysnLoad]				= CAST(ISNULL(CTCH.[ysnLoad],0) AS BIT)
-	,[ysnAllowedToShow]		= CAST(CASE WHEN CTCD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)
+	,[ysnAllowedToShow]		= CAST(CASE WHEN CTCD.[intContractStatusId] IN (1,4) THEN 1 ELSE 0 END AS BIT)
 	,[intFreightTermId]		= CTCD.[intFreightTermId]
 	,[intTermId]			= CTCH.[intTermId]
-	,[intShipViaId]			= CTCD.[intShipViaId] 
+	,[intShipViaId]			= CTCD.[intShipViaId] 	
 	FROM
-		tblCTContractDetail CTCD
+		(SELECT [intContractHeaderId],
+				[intContractDetailId],
+				[intContractSeq],
+				[dtmStartDate],
+				[dtmEndDate],
+				[intCurrencyId],
+				[intCompanyLocationId],
+				[intItemId],
+				[intItemUOMId],
+				[intPriceItemUOMId],
+				[dblCashPrice],
+				[dblBalance],
+				[dblScheduleQty],
+				[dblQuantity],
+				[intContractStatusId],
+				[intFreightTermId],
+				[intShipViaId],
+				[intPricingTypeId]
+		 FROM 
+			tblCTContractDetail) CTCD 
 	INNER JOIN
-		tblCTContractHeader CTCH
-			ON CTCD.[intContractHeaderId] = CTCH.[intContractHeaderId]
+		(SELECT	[intContractHeaderId],
+				[strContractNumber],
+				[intEntityId],
+				[ysnUnlimitedQuantity],
+				[ysnLoad], 
+				[intTermId],
+				[intContractTypeId]
+		 FROM
+			tblCTContractHeader) CTCH ON CTCD.[intContractHeaderId] = CTCH.[intContractHeaderId]
 	LEFT OUTER JOIN
-		tblICItem ICI
-			ON CTCD.[intItemId] = ICI.[intItemId] 
+		(SELECT [intItemId],
+				[strItemNo],
+				[strDescription]
+		 FROM
+			tblICItem) ICI ON CTCD.[intItemId] = ICI.[intItemId] 
 	LEFT OUTER JOIN
-		tblCTPricingType CTPT
-			ON CTCD.[intPricingTypeId] = CTPT.[intPricingTypeId]
+		(SELECT [intPricingTypeId],
+				[strPricingType]
+		 FROM 
+			tblCTPricingType) CTPT ON CTCD.[intPricingTypeId] = CTPT.[intPricingTypeId]
 	LEFT OUTER JOIN
-		tblCTContractStatus CTCS
-			ON CTCD.[intContractStatusId] = CTCS.[intContractStatusId]
+		(SELECT [intContractStatusId],
+				[strContractStatus]
+		 FROM 
+			tblCTContractStatus) CTCS ON CTCD.[intContractStatusId] = CTCS.[intContractStatusId]
 	LEFT OUTER JOIN
-		tblCTContractType CTCT
-			ON CTCH.[intContractTypeId] = CTCT.[intContractTypeId]
+		(SELECT [intContractTypeId],
+				[strContractType]
+		 FROM 
+			tblCTContractType) CTCT ON CTCH.[intContractTypeId] = CTCT.[intContractTypeId]
 	LEFT OUTER JOIN
-		tblICItemUOM ICIUP
-			ON CTCD.[intPriceItemUOMId] = ICIUP.[intItemUOMId]
-			AND CTCD.[intItemId] = ICIUP.[intItemId]
+		(SELECT [intItemUOMId],
+				[intUnitMeasureId],
+				[intItemId],
+				dblUnitQty
+		 FROM 
+			tblICItemUOM) ICIUP ON CTCD.[intPriceItemUOMId] = ICIUP.[intItemUOMId] AND CTCD.[intItemId] = ICIUP.[intItemId]
 	LEFT OUTER JOIN
-		tblICUnitMeasure ICUMP
-			ON ICIUP.[intUnitMeasureId] = ICUMP.[intUnitMeasureId]
+		(SELECT [intUnitMeasureId],
+				[strUnitMeasure]
+		 FROM 
+			tblICUnitMeasure) ICUMP ON ICIUP.[intUnitMeasureId] = ICUMP.[intUnitMeasureId]
 	LEFT OUTER JOIN
-		tblICItemUOM ICIUO
-			ON CTCD.[intItemUOMId] = ICIUO.[intItemUOMId]
-			AND CTCD.[intItemId] = ICIUO.[intItemId]
+		(SELECT [intItemUOMId],
+				[intItemId],
+				[intUnitMeasureId]
+		 FROM 
+			tblICItemUOM) ICIUO ON CTCD.[intItemUOMId] = ICIUO.[intItemUOMId] AND CTCD.[intItemId] = ICIUO.[intItemId]
 	LEFT OUTER JOIN
-		tblICUnitMeasure ICUMO
-			ON ICIUO.[intUnitMeasureId] = ICUMO.[intUnitMeasureId]					
+		(SELECT [intUnitMeasureId],
+				[strUnitMeasure]
+		 FROM 
+			tblICUnitMeasure) ICUMO ON ICIUO.[intUnitMeasureId] = ICUMO.[intUnitMeasureId]					
 	LEFT OUTER JOIN
-		tblSMCurrency SMC
-			ON CTCD.[intCurrencyId] = SMC.[intCurrencyID]					 
+		(SELECT [intCurrencyID]
+				,[strCurrency]
+		 FROM 
+			tblSMCurrency) SMC ON CTCD.[intCurrencyId] = SMC.[intCurrencyID]					 
 	WHERE
 		CTCT.[strContractType] = 'Sale'
-		AND CTPT.[strPricingType] NOT IN ('Unit','Index')
+		AND CTPT.[strPricingType] NOT IN ('Unit','Index') 
