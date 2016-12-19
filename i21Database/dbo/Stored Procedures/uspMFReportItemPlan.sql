@@ -261,9 +261,6 @@ BEGIN
 		SELECT @intStartedStatusId = 10
 	END
 
-	--SELECT @intCategoryId = intCategoryId
-	--FROM tblICCategory
-	--WHERE strCategoryCode = 'Blend'
 	IF @strItemNo <> ''
 		AND @strItemGroupName <> ''
 	BEGIN
@@ -352,93 +349,170 @@ BEGIN
 
 	WHILE @intCompanyLocationId > 0
 	BEGIN
-		SELECT DISTINCT TOP (@intNoOfDays1) @dtmCalendarDate = CD.dtmCalendarDate
-		FROM dbo.tblMFSchedule S
-		JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
-			AND SW.intStatusId <> 13
-		JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON SWD.intScheduleWorkOrderId = SW.intScheduleWorkOrderId
-		JOIN dbo.tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
-		WHERE S.intLocationId = @intCompanyLocationId
-			AND S.ysnStandard = 1
-			AND CD.dtmCalendarDate >= @dtmCurrentDate
-		ORDER BY CD.dtmCalendarDate
+		IF EXISTS (
+				SELECT *
+				FROM tblMFSchedule
+				WHERE ysnStandard = 1
+				)
+		BEGIN
+			SELECT DISTINCT TOP (@intNoOfDays1) @dtmCalendarDate = CD.dtmCalendarDate
+			FROM dbo.tblMFSchedule S
+			JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
+				AND SW.intStatusId <> 13
+			JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON SWD.intScheduleWorkOrderId = SW.intScheduleWorkOrderId
+			JOIN dbo.tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
+			WHERE S.intLocationId = @intCompanyLocationId
+				AND S.ysnStandard = 1
+				AND CD.dtmCalendarDate >= @dtmCurrentDate
+			ORDER BY CD.dtmCalendarDate
 
-		INSERT INTO @tblMFWIPItem (
-			--strItemType
-			strCellName
-			,intWorkOrderId
-			,strWorkOrderNo
-			,dtmPlannedDateTime
-			,intItemId
-			,strItemNo
-			,strDescription
-			,intCompanyLocationId
-			,strCompanyLocationName
-			,dblItemRequired
-			,strOwner
-			,dtmPlannedDate
-			,strComments
-			,strQtyType
-			,intDisplayOrder
-			)
-		SELECT --'Blend'
-			MC.strCellName
-			,W.intWorkOrderId
-			,W.strWorkOrderNo
-			,NULL
-			,I.intItemId
-			,I.strItemNo
-			,I.strDescription
-			,CL.intCompanyLocationId
-			,CL.strLocationName
-			,SUM(RI.dblCalculatedQuantity * SWD.dblPlannedQty)
-			,'' AS strName
-			,CD.dtmCalendarDate
-			,'' strWorkInstruction
-			,'Demand#'
-			,0
-		FROM dbo.tblMFSchedule S
-		JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
-			AND SW.intStatusId <> 13
-		JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON SWD.intScheduleWorkOrderId = SW.intScheduleWorkOrderId
-		JOIN dbo.tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
-		JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
-		JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
-			AND R.ysnActive = 1
-		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-			AND RI.intRecipeItemTypeId = 1
-		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
-			AND C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			INSERT INTO @tblMFWIPItem (
+				strCellName
+				,intWorkOrderId
+				,strWorkOrderNo
+				,dtmPlannedDateTime
+				,intItemId
+				,strItemNo
+				,strDescription
+				,intCompanyLocationId
+				,strCompanyLocationName
+				,dblItemRequired
+				,strOwner
+				,dtmPlannedDate
+				,strComments
+				,strQtyType
+				,intDisplayOrder
 				)
-		JOIN @tblICItem I ON I.intItemId = II.intItemId
-		--JOIN dbo.tblEMEntity E ON E.intEntityId = I.intOwnerId
-		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-		WHERE S.intLocationId = @intCompanyLocationId
-			AND S.ysnStandard = 1
-			AND CD.dtmCalendarDate <= @dtmCalendarDate
-			AND SW.intStatusId IN (
-				@intOpenStatusId
-				,@intFrozenStatusId
-				,@intPausedStatusId
-				,@intReleaseStatusId
-				,@intStartedStatusId
+			SELECT 
+				MC.strCellName
+				,W.intWorkOrderId
+				,W.strWorkOrderNo
+				,NULL
+				,I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,CL.intCompanyLocationId
+				,CL.strLocationName
+				,SUM(RI.dblCalculatedQuantity * SWD.dblPlannedQty)
+				,'' AS strName
+				,CD.dtmCalendarDate
+				,'' strWorkInstruction
+				,'Demand#'
+				,0
+			FROM dbo.tblMFSchedule S
+			JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
+				AND SW.intStatusId <> 13
+			JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON SWD.intScheduleWorkOrderId = SW.intScheduleWorkOrderId
+			JOIN dbo.tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
+			JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
+			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
+			JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
+				AND R.ysnActive = 1
+			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				AND RI.intRecipeItemTypeId = 1
+			JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
+			JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
+				AND C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+			JOIN @tblICItem I ON I.intItemId = II.intItemId
+			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+			WHERE S.intLocationId = @intCompanyLocationId
+				AND S.ysnStandard = 1
+				AND CD.dtmCalendarDate <= @dtmCalendarDate
+				AND SW.intStatusId IN (
+					@intOpenStatusId
+					,@intFrozenStatusId
+					,@intPausedStatusId
+					,@intReleaseStatusId
+					,@intStartedStatusId
+					)
+			GROUP BY MC.strCellName
+				,W.intWorkOrderId
+				,W.strWorkOrderNo
+				,I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,CL.intCompanyLocationId
+				,CL.strLocationName
+				,CD.dtmCalendarDate
+			ORDER BY I.strItemNo
+				,CD.dtmCalendarDate
+				,W.strWorkOrderNo
+		END
+		ELSE
+		BEGIN
+			SELECT @dtmCalendarDate = @dtmCurrentDate + @intNoOfDays1
+
+			INSERT INTO @tblMFWIPItem (
+				strCellName
+				,intWorkOrderId
+				,strWorkOrderNo
+				,dtmPlannedDateTime
+				,intItemId
+				,strItemNo
+				,strDescription
+				,intCompanyLocationId
+				,strCompanyLocationName
+				,dblItemRequired
+				,strOwner
+				,dtmPlannedDate
+				,strComments
+				,strQtyType
+				,intDisplayOrder
 				)
-		GROUP BY MC.strCellName
-			,W.intWorkOrderId
-			,W.strWorkOrderNo
-			,I.intItemId
-			,I.strItemNo
-			,I.strDescription
-			,CL.intCompanyLocationId
-			,CL.strLocationName
-			,CD.dtmCalendarDate
-		ORDER BY I.strItemNo
-			,CD.dtmCalendarDate
-			,W.strWorkOrderNo
+			SELECT MC.strCellName
+				,W.intWorkOrderId
+				,W.strWorkOrderNo
+				,NULL
+				,I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,CL.intCompanyLocationId
+				,CL.strLocationName
+				,SUM(RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)
+				,'' AS strName
+				,W.dtmPlannedDate
+				,'' strWorkInstruction
+				,'Demand#'
+				,0
+			FROM dbo.tblMFManufacturingCell MC
+			JOIN dbo.tblMFWorkOrder W ON W.intManufacturingCellId = MC.intManufacturingCellId
+			JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
+				AND R.ysnActive = 1
+			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				AND RI.intRecipeItemTypeId = 1
+			JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
+			JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
+				AND C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+			JOIN @tblICItem I ON I.intItemId = II.intItemId
+			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
+			WHERE W.intLocationId = @intCompanyLocationId
+				AND W.dtmPlannedDate <= @dtmCalendarDate
+				AND W.intStatusId IN (
+					@intOpenStatusId
+					,@intFrozenStatusId
+					,@intPausedStatusId
+					,@intReleaseStatusId
+					,@intStartedStatusId
+					) and W.dblQuantity - W.dblProducedQuantity>0
+			GROUP BY MC.strCellName
+				,W.intWorkOrderId
+				,W.strWorkOrderNo
+				,I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,CL.intCompanyLocationId
+				,CL.strLocationName
+				,W.dtmPlannedDate
+			ORDER BY I.strItemNo
+				,W.dtmPlannedDate
+				,W.strWorkOrderNo
+		END
 
 		SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
 		FROM dbo.tblSMCompanyLocation
@@ -558,36 +632,6 @@ BEGIN
 	JOIN @tblMFQtyOnHand Q ON Q.intItemId = I.intItemId
 		AND I.intCompanyLocationId = Q.intCompanyLocationId
 
-	--IF OBJECT_ID('tempdb..##QOH') IS NOT NULL
-	--	DROP TABLE ##QOH
-	--SELECT DISTINCT ks.ItemID blend
-	--	,ks.Factory factoryname
-	--	,KS.QOH
-	--INTO ##QOH
-	--FROM dbo.KS_viRely_BlendUnPackedPounds KS
-	--INSERT INTO ##QOH
-	--SELECT DISTINCT blend
-	--	,ProductionWarehouse
-	--	,0
-	--FROM ##TotalBlend
-	--WHERE blend NOT IN (
-	--		SELECT blend
-	--		FROM ##BlendDateFactory
-	--		WHERE qoh IS NOT NULL
-	--		GROUP BY blend
-	--		)
-	--UPDATE tb
-	--SET tb.QOH = 0
-	--FROM ##BlendDateFactory tb
-	--JOIN ##TotalBlend tb1 ON tb1.Blend = tb.blend
-	--	AND tb1.ProductionWarehouse = tb.factoryname
-	--	AND tb.Wostartdate = tb1.wostartdate
-	--	AND tb1.blend NOT IN (
-	--		SELECT blend
-	--		FROM ##BlendDateFactory
-	--		WHERE qoh IS NOT NULL
-	--		GROUP BY blend
-	--		)
 	DECLARE @tblMFQtyInProduction TABLE (
 		intCompanyLocationId INT
 		,intItemId INT
@@ -637,7 +681,6 @@ BEGIN
 
 	INSERT INTO @tblMFWIPItem (
 		strCellName
-		--,strItemType
 		,strWorkOrderNo
 		,dtmPlannedDateTime
 		,intItemId
@@ -653,7 +696,6 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		--,strItemType
 		,'Demand Total'
 		,NULL
 		,intItemId
@@ -681,7 +723,6 @@ BEGIN
 
 	INSERT INTO @tblMFWIPItem (
 		strCellName
-		--,strItemType
 		,strWorkOrderNo
 		,dtmPlannedDateTime
 		,intItemId
@@ -698,8 +739,7 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		--,strItemType
-		,'Inventory - Blended'
+		,'Available Inventory'
 		,NULL
 		,RI.intItemId
 		,strItemNo
@@ -718,75 +758,8 @@ BEGIN
 		AND Q.intCompanyLocationId = RI.intCompanyLocationId
 	WHERE Q.dblWeight >= 0
 
-	--WITH CTE AS (
-	--		SELECT ROW_NUMBER() OVER (
-	--				PARTITION BY strItemNo
-	--				,dtmPlannedDate
-	--				,strCompanyLocationName ORDER BY strItemNo DESC
-	--				) AS intRowNumber
-	--			,'Blend'
-	--			,'' ProductionLine
-	--			,'Inventory - Blended' strWorkOrderNo
-	--			,NULL dtmPlannedStartDate
-	--			,RI.intItemId
-	--			,RI.strItemNo
-	--			,RI.strDescription
-	--			,RI.intCompanyLocationId
-	--			,RI.strCompanyLocationName 
-	--			,Q.dblWeight - dblDemandQty dblItemRequired
-	--			,'' strOwner
-	--			,RI.dtmPlannedDate
-	--			,RI.strComments
-	--			,'Inventory' strQtyType
-	--			,Q.dblWeight AS dblQuantity
-	--			,2 intDisplayOrder
-	--		FROM @tblMFRequiredItemByLocation RI
-	--		JOIN @tblMFWIPItem_Initial WI ON WI.intItemId = RI.intItemId
-	--			AND RI.intCompanyLocationId = WI.intCompanyLocationId
-	--		JOIN @tblMFQtyOnHand Q ON Q.intItemId = RI.intItemId
-	--			AND RI.intCompanyLocationId = Q.intCompanyLocationId
-	--		WHERE RI.dblQOH IS NULL
-	--			AND Q.dblWeight > 0
-	--		)
-	--INSERT INTO @tblMFWIPItem (
-	--	strCellName
-	--	,strItemType
-	--	,strWorkOrderNo
-	--	,dtmPlannedDate
-	--	,intItemId
-	--	,strItemNo
-	--	,strDescription
-	--	,intCompanyLocationId
-	--	,strCompanyLocationName
-	--	,dblItemRequired
-	--	,strOwner
-	--	,dtmPlannedDate
-	--	,strComments
-	--	,strQtyType
-	--	,dblQuantity
-	--	,intDisplayOrder
-	--	)
-	--SELECT strCellName
-	--	,ProductionLine
-	--	,strWorkOrderNo
-	--	,NULL
-	--	,intItemId
-	--	,strItemNo
-	--	,strDescription
-	--	,intCompanyLocationId
-	--	,strCompanyLocationName
-	--	,dblItemRequired
-	--	,strOwner
-	--	,dtmPlannedDate
-	--	,strComments
-	--	,strQtyType
-	--	,dblQuantity
-	--	,intDisplayOrder
-	--FROM CTE
-	--WHERE intRowNumber = 1
 	INSERT INTO @tblMFWIPItem (
 		strCellName
-		--,strItemType
 		,strWorkOrderNo
 		,intItemId
 		,strItemNo
@@ -802,8 +775,7 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		--,'Blend'
-		,'Inventory - Blended'
+		,'Available Inventory'
 		,DT.intItemId
 		,strItemNo
 		,strDescription
@@ -837,7 +809,6 @@ BEGIN
 
 	INSERT INTO @tblMFWIPItem (
 		strCellName
-		--,strItemType
 		,strWorkOrderNo
 		,dtmPlannedDateTime
 		,intItemId
@@ -854,7 +825,6 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		--,strItemType
 		,'Inventory - Unblended'
 		,NULL
 		,RI.intItemId
@@ -881,7 +851,6 @@ BEGIN
 
 	INSERT INTO @tblMFWIPItem (
 		strCellName
-		--,strItemType
 		,strWorkOrderNo
 		,dtmPlannedDateTime
 		,intItemId
@@ -898,7 +867,6 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		--,strItemType
 		,'Inventory - Unblended'
 		,NULL
 		,RI.intItemId
@@ -925,10 +893,7 @@ BEGIN
 
 	INSERT INTO @tblMFWIPItem (
 		strCellName
-		--,strItemType
-		--,intWorkOrderId 
 		,strWorkOrderNo
-		--,dtmPlannedDate
 		,intItemId
 		,strItemNo
 		,strDescription
@@ -943,7 +908,6 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		--,'Blend'
 		,'Inventory - Unblended'
 		,RI.intItemId
 		,strItemNo
@@ -1000,7 +964,6 @@ BEGIN
 	INSERT INTO @tblMFFinalWIPItem
 	SELECT strCellName
 		,strItemNo + ' - ' + strDescription AS strItemNo
-		--,strItemType
 		,intWorkOrderId
 		,strWorkOrderNo
 		,dtmPlannedDateTime
@@ -1031,11 +994,6 @@ BEGIN
 
 	UPDATE @tblMFFinalWIPItem
 	SET intRowNumber = NULL
-		--,strItemType = CASE 
-		--	WHEN strItemType = ''
-		--		THEN LEFT(strWorkOrderNo, 6)
-		--	ELSE strItemType
-		--	END
 		,dblQuantity = CASE 
 			WHEN dblQuantity IS NULL
 				THEN - 1
@@ -1045,10 +1003,11 @@ BEGIN
 		OR strWorkOrderNo LIKE 'Demand Total%'
 
 	UPDATE @tblMFFinalWIPItem
-	SET dtmPlannedDateTime = SW.dtmPlannedStartDate
+	SET dtmPlannedDateTime = IsNULL(SW.dtmPlannedStartDate, W.dtmPlannedDate + IsNULL(S.dtmShiftStartTime, 0) + IsNULL(S.intStartOffset, 0))
 	FROM @tblMFFinalWIPItem WI
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
-	JOIN tblMFScheduleWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
+	LEFT JOIN tblMFScheduleWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
+	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intDisplayOrder = 0
 
 	UPDATE @tblMFFinalWIPItem
@@ -1096,7 +1055,7 @@ BEGIN
 			AND a.strItemNo IN (
 				SELECT b.strItemNo
 				FROM @tblMFFinalWIPItem b
-				WHERE b.strWorkOrderNo = 'Inventory - Blended'
+				WHERE b.strWorkOrderNo = 'Available Inventory'
 					AND b.dblItemRequired < 0
 					AND b.strItemNo IN (
 						SELECT c.strItemNo
@@ -1158,7 +1117,7 @@ BEGIN
 					AND EXISTS (
 						SELECT d.strItemNo
 						FROM @tblMFFinalWIPItem d
-						WHERE d.strWorkOrderNo = 'Inventory - blended'
+						WHERE d.strWorkOrderNo = 'Available Inventory'
 							AND d.dblItemRequired < 0
 							AND d.strItemNo = a.strItemNo
 						)

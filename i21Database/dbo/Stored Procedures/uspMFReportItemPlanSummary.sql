@@ -117,6 +117,13 @@ BEGIN
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
 	SET @dtmCurrentDateTime = GetDate()
 
+	IF EXISTS (
+				SELECT *
+				FROM tblMFSchedule
+				WHERE ysnStandard = 1
+				)
+		BEGIN
+
 	INSERT INTO @tblMFItemPlan
 	SELECT DATEPART(Month, CD.dtmShiftStartTime) intMonthId
 		,DATENAME(Month, CD.dtmShiftStartTime) dtmShiftStartTime
@@ -169,6 +176,57 @@ BEGIN
 	ORDER BY strItemNo
 		,strStartingYear
 		,intMonthId
+	End
+	Else
+	BEgin
+		INSERT INTO @tblMFItemPlan
+	SELECT DATEPART(Month, W.dtmPlannedDate) intMonthId
+		,DATENAME(Month, W.dtmPlannedDate) dtmShiftStartTime
+		,II.strItemNo
+		,II.strDescription
+		,CL.strLocationName
+		,SUM(RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity) dblMaxPoundsRequired
+		,II.intItemId
+		,0 dblSafetyStockPounds
+		,0 dblUnPackedPounds
+		,0 dblPoundsAvailable
+		,0 dblTotalPoundsAvailable
+		,'' strWorkInstruction
+		,0 dblRunningTotal
+		,0 dblAvlQtyBreakUp
+		,CL.intCompanyLocationId
+		,0 dblUnpackedBreakUp
+		,0 dblAvlBreakup
+		,DATEPART(YEAR, W.dtmPlannedDate) strStartingYear
+	FROM dbo.tblMFManufacturingCell MC 
+	JOIN dbo.tblMFWorkOrder W ON MC.intManufacturingCellId = W.intManufacturingCellId
+	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
+	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
+		AND R.intLocationId = W.intLocationId
+		AND R.ysnActive = 1
+	JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+		AND RI.intRecipeItemTypeId = 1
+	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
+	JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
+		AND C.strCategoryCode IN (
+			SELECT Item Collate Latin1_General_CI_AS
+			FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			)
+	WHERE  W.dtmPlannedDate >= @dtmCurrentDate
+		and W.dblQuantity - W.dblProducedQuantity>0
+	GROUP BY DATEPART(MONTH, W.dtmPlannedDate)
+		,W.dtmPlannedDate
+		,II.strItemNo
+		,II.strDescription
+		,CL.strLocationName
+		,II.intItemId
+		--,II.strWorkInstruction
+		,CL.intCompanyLocationId
+		,DATEPART(YEAR, W.dtmPlannedDate)
+	ORDER BY strItemNo
+		,strStartingYear
+		,intMonthId
+	End
 
 	INSERT INTO @tblMFItemPlanSummary
 	SELECT intMonthId
