@@ -68,7 +68,7 @@ DECLARE @temp_aging_table TABLE(
 
 DECLARE @temp_statement_table TABLE(
      [intEntityCustomerId]		INT
-    ,[strCustomerNumber]		NVARCHAR(100)
+    ,[strCustomerNumber]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
     ,[strCustomerName]			NVARCHAR(100)
     ,[dblCreditLimit]			NUMERIC(18,6)
     ,[intInvoiceId]				INT
@@ -200,6 +200,20 @@ END
 
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
+
+MERGE INTO tblARStatementOfAccount AS Target
+USING (SELECT strCustomerNumber, @dtmDateTo, SUM(ISNULL(dblBalance, 0))
+FROM @temp_statement_table GROUP BY strCustomerNumber
+)
+AS Source (strCustomerNumber, dtmLastStatementDate, dblLastStatement)
+ON Target.strEntityNo = Source.strCustomerNumber
+
+WHEN MATCHED THEN
+UPDATE SET dtmLastStatementDate = Source.dtmLastStatementDate, dblLastStatement = Source.dblLastStatement
+
+WHEN NOT MATCHED BY TARGET THEN
+INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
+VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 SELECT STATEMENTREPORT.*
       ,dblCreditAvailable   = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
