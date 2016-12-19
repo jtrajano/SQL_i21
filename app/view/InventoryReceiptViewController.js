@@ -103,8 +103,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
                         { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
-                        { dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string' },
-                        { dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string', drillDownText: 'View Order', drillDownClick: 'onViewOrder'},
+                        { dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', drillDownText: 'View Source', drillDownClick: 'onViewSource'},
                         { dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string' },
 
                         { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float' },
@@ -119,7 +119,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true },
                         { dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: false },
                         { dataIndex: 'strVendorRefNo', text: 'Vendor Reference No.', flex: 1, dataType: 'string', hidden: false },
-                        { dataIndex: 'strShipFrom', text: 'Ship From', flex: 1, dataType: 'string', hidden: false }
+                        { dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string', hidden: true },
                     ]
                 },
                 {
@@ -2483,6 +2483,77 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onViewItemNo: function (value, record) {
         var itemId = record.get('intItemId');
         i21.ModuleMgr.Inventory.showScreen(itemId, 'ItemId');
+    },
+
+    onViewOrder: function (value, record) {
+        var orderType = record.get('strReceiptType');
+
+        if(orderType === 'Purchase Contract') {
+            iRely.Functions.openScreen('ContractManagement.view.Contract', {
+                    filters: [{
+                        column: 'intContractTypeId',
+                        value: 1,
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strContractNumber',
+                        value: value,
+                        conjunction: 'and'
+                    }]
+                });
+        }
+
+        else if (orderType === 'Purchase Order') {
+            i21.ModuleMgr.Inventory.showScreen(value, 'PONumber');
+        }
+
+        else if (orderType === 'Transfer Order') {
+            i21.ModuleMgr.Inventory.showScreen(value, 'TransferNo');
+        }
+    },
+
+    onViewSource: function (value, record) {
+        var sourceType = record.get('strSourceType');
+
+        if(sourceType === 'Scale') {
+            var scaleStore = Ext.create('Grain.store.ScaleTicket'),
+                filter = [{
+                    column: 'strTicketNumber',
+                    value: value,
+                    condition: 'eq',
+                    conjunction: 'or'
+                }];
+
+            scaleStore.setRemoteFilter(true);
+            scaleStore.clearFilter();
+            scaleStore.addFilter(filter, false);
+            scaleStore.load({
+                callback: function(records, operation, success) {
+                    iRely.Functions.openScreen('Grain.view.ScaleStationSelection', {
+                        action: 'edit', filters: filter, data: records });
+                }
+            });
+        }
+
+        else if (sourceType === 'Inbound Shipment') {
+            iRely.Functions.openScreen('Logistics.view.LoadSchedule', {
+                    filters: [{
+                        column: 'strLoadNumber',
+                        value: value,
+                        conjunction: 'and'
+                    }]
+                });
+        }
+
+        else if (sourceType === 'Transport') {
+            iRely.Functions.openScreen('Transports.view.TransportLoads', {
+                    filters: [{
+                        column: 'strTransaction',
+                        value: value,
+                        conjunction: 'and'
+                    }]
+                });
+        }
     },
 
     onItemHeaderClick: function (menu, column) {
