@@ -56,7 +56,8 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@invalidCount AS INT
 		,@success AS INT
 		,@batchIdUsed AS INT
-		,@recapId AS INT;
+		,@recapId AS INT
+		,@dblTotal AS DECIMAL(18,6);
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -514,8 +515,8 @@ BEGIN TRY
 				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
 				BEGIN
 					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
-					SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
-					IF ISNULL(@intBillId , 0) != 0
+					SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+					IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@dblTotal,0) > 0
 					BEGIN
 						EXEC [dbo].[uspAPPostBill]
 						@post = 1

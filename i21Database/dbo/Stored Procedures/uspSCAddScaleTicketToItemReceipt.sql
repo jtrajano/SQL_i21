@@ -65,11 +65,10 @@ BEGIN
 	)
 END 
 
-IF(@batchId IS NULL)
-	EXEC uspSMGetStartingNumber 105, @batchId OUT
+--IF(@batchId IS NULL)
+--	EXEC uspSMGetStartingNumber 105, @batchId OUT
 
-SET @ticketBatchId = @batchId
-
+--SET @ticketBatchId = @batchId
 
 -- Insert Entries to Stagging table that needs to processed to Transport Load
 INSERT into @ReceiptStagingTable(
@@ -120,7 +119,7 @@ SELECT
 		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityVendorId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
-		,strVendorRefNo				= @ticketBatchId
+		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
 
 		--Detail
 		,intItemId					= SC.intItemId
