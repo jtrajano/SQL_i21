@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSMCompanyLocationSubLocation]
 AS 
-SELECT intCompanyLocationSubLocationId
+SELECT DISTINCT intCompanyLocationSubLocationId
 ,SubLocation.intCompanyLocationId AS intCompanyLocationId
 ,strSubLocationName
 ,strSubLocationDescription
@@ -11,9 +11,9 @@ SELECT intCompanyLocationSubLocationId
 ,intNewLotBin
 ,intAuditBin
 ,SubLocation.strAddress AS strAddress
-,ZipCode.strCity AS strCity
-,ZipCode.strState AS strState
-,ZipCode.strZipCode AS strZipCode
+,SubLocation.strCity AS strCity
+,SubLocation.strState AS strState
+,SubLocation.strZipCode AS strZipCode
 ,ZipCode.strCountry AS strCountry
 ,Country.intCountryID AS intCountryId
 ,SubLocation.dblLatitude
