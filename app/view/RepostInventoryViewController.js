@@ -80,31 +80,29 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
         iRely.Functions.showCustomDialog('question', 'yesno', vm.data.prompt, callback);
     },
 
-    repost: function (jsondata) {
-        jQuery.ajax({
+    repost: function (data) {
+        iRely.Msg.showWait('Reposting inventory...');
+
+        ic.utils.ajax({
             url: '../Inventory/api/InventoryValuation/RepostInventory',
             method: "post",
             headers: {
-                'Authorization': iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId),
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             },
-            data: jsondata,
-            processData: true,
-            beforeSend: function (jqXHR, settings) {
-                iRely.Msg.showWait('Reposting inventory...');
-            },
-            success: function (data, status, jqXHR) {
-                iRely.Msg.close();
-                if (data.success)
-                    iRely.Functions.showInfoDialog(data.message);
+            params: data,
+            processData: true
+        })
+        .finally(() => iRely.Msg.close())
+        .subscribe(
+            data => {
+                var json = JSON.parse(data.responseText);
+                if (json.success)
+                    iRely.Functions.showInfoDialog(json.message);
                 else
-                    iRely.Functions.showErrorDialog(data.message);
-            },
-            error: function (jqXHR, status, error) {
-                iRely.Msg.close();
-                iRely.Functions.showErrorDialog(JSON.parse(jqXHR.responseText).message);
-            }
-        });
+                    iRely.Functions.showErrorDialog(json.message);
+            }, 
+            error => iRely.Functions.showErrorDialog(JSON.parse(error.responseText).message)
+        );
     },
 
     init: function (cfg) {

@@ -4,7 +4,9 @@
 Ext.define('Inventory.controller.Inventory', {
     extend: 'i21.controller.Module',
     alias: 'controller.inventory',
-
+    requires: [
+        'Inventory.Utils'
+    ],
     singleton: true,
 
     moduleName: 'Inventory',
@@ -89,7 +91,8 @@ Ext.define('Inventory.controller.Inventory', {
 
     init: function() {
         Ext.Loader.loadScript("../Inventory/app/lib/underscore.js");
-
+        Ext.Loader.loadScript("../Inventory/app/lib/rx.all.min.js");
+        
         Ext.Ajax.request({
             timeout: 120000,
             url: '../Inventory/api/Item/GetEmpty',
