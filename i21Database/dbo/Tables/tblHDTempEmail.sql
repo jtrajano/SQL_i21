@@ -14,6 +14,9 @@
 	[strBodyMessage] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strBodyMessageType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnSend] BIT NOT NULL DEFAULT 0,	
+	[intAttemp] [int] NOT NULL default 0,
+	[dtmCreated] [datetime] NOT NULL,
+	[dtmSent] [datetime] NULL,
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblHDTempEmail] PRIMARY KEY CLUSTERED 
 (
