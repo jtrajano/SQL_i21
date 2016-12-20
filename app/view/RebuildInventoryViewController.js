@@ -80,10 +80,22 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         iRely.Functions.showCustomDialog('question', 'yesno', vm.data.prompt, callback);
     },
 
-    repost: function (data) {
-        iRely.Msg.showWait('Rebuilding inventory...');
-        var id = 234;
-        ic.utils.ajax({
+    verifyValuation: function(date) {
+        return ic.utils.ajax({
+            timeout: 120000,
+            url: '../Inventory/api/InventoryValuation/CompareRebuiltValuationSnapshot',
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            params: {
+                dtmStartDate: date
+            }
+        });
+    },
+
+    rebuild: function(data) {
+        return ic.utils.ajax({
             timeout: 120000,
             url: '../Inventory/api/InventoryValuation/RebuildInventory',
             method: "post",
@@ -92,13 +104,26 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             },
             params: data,
             processData: true
-        })
+        });
+    },
+
+    repost: function (data) {
+        var me = this;
+        iRely.Msg.showWait('Rebuilding inventory...');
+        var rebuildObs = me.rebuild(data);
+        var verifyObs = me.verifyValuation(data.dtmStartDate);
+        rebuildObs
+        .flatMap(verifyObs)
         .finally(() => iRely.Msg.close())
         .subscribe(
             data => {
                 var json = JSON.parse(data.responseText);
-                if (json.success)
-                    iRely.Functions.showInfoDialog(json.message);
+                if (json.success) {
+                    if(data.status === 202)
+                        iRely.Functions.showWarningDialog(json.message);
+                    else
+                        iRely.Functions.showInfoDialog(json.message);
+                }
                 else
                     iRely.Functions.showErrorDialog(json.message);
             }, 

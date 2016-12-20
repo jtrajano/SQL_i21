@@ -89,7 +89,7 @@ namespace iRely.Inventory.WebApi
             var result = _bl.CalculateCharges(id);
 
             var httpStatusCode = HttpStatusCode.OK; 
-            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;            
+            if (result.HasError) httpStatusCode = HttpStatusCode.InternalServerError;            
 
             return Request.CreateResponse(httpStatusCode, new
             {

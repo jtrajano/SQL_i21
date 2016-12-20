@@ -23,5 +23,14 @@ namespace iRely.Inventory.Model
                 new SqlParameter("@intUserId", userId)
             );
         }
+
+        public async Task<int> CompareRebuiltValuationSnapshot(DateTime? startDate)
+        {
+            this.Database.CommandTimeout = 120000;
+            return await this.Database.ExecuteSqlCommandAsync(
+                "dbo.uspICCompareGLSnapshotOnRebuildInventoryValuation @dtmStartDate",
+                new SqlParameter("@dtmStartDate", startDate)
+            );
+        }
     }
 }

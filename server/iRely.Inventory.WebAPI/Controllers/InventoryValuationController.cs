@@ -52,6 +52,32 @@ namespace iRely.Inventory.WebApi.Controllers
             return Request.CreateResponse(response.success ? HttpStatusCode.OK : HttpStatusCode.InternalServerError, response);
         }
 
+        [HttpGet]
+        [ActionName("CompareRebuiltValuationSnapshot")]
+        public async Task<HttpResponseMessage> CompareRebuiltValuationSnapshot([FromUri]DateTime dtmStartDate)
+        {
+            var db = new InventoryEntities();
+            var success = false;
+            var msg = "An unknown error occurred.";
+            try
+            {
+                await db.CompareRebuiltValuationSnapshot(dtmStartDate);
+                success = true;
+                msg = "No changes.";
+            }
+            catch (Exception ex)
+            {
+                msg = ex.Message;
+            }
+
+            var response = new
+            {
+                success = msg.Contains("Check the Rebuild Valuation GL Snapshot") ? true : success,
+                message = msg
+            };
+
+            return Request.CreateResponse(response.success ? (msg.Contains("Check the Rebuild Valuation GL Snapshot") ? HttpStatusCode.Accepted : HttpStatusCode.OK) : HttpStatusCode.InternalServerError, response);
+        }
         class FiscalPeriod
         {
             public string strFiscalYear { get; set; }
