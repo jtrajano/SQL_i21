@@ -80,31 +80,58 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         iRely.Functions.showCustomDialog('question', 'yesno', vm.data.prompt, callback);
     },
 
-    repost: function (jsondata) {
-        jQuery.ajax({
+    verifyValuation: function(date) {
+        return ic.utils.ajax({
+            timeout: 120000,
+            url: '../Inventory/api/InventoryValuation/CompareRebuiltValuationSnapshot',
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            params: {
+                dtmStartDate: date
+            }
+        });
+    },
+
+    rebuild: function(data) {
+        return ic.utils.ajax({
+            timeout: 120000,
             url: '../Inventory/api/InventoryValuation/RebuildInventory',
             method: "post",
             headers: {
-                'Authorization': iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId),
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             },
-            data: jsondata,
-            processData: true,
-            beforeSend: function (jqXHR, settings) {
-                iRely.Msg.showWait('Rebuilding inventory...');
-            },
-            success: function (data, status, jqXHR) {
-                iRely.Msg.close();
-                if (data.success)
-                    iRely.Functions.showInfoDialog(data.message);
-                else
-                    iRely.Functions.showErrorDialog(data.message);
-            },
-            error: function (jqXHR, status, error) {
-                iRely.Msg.close();
-                iRely.Functions.showErrorDialog(JSON.parse(jqXHR.responseText).message);
-            }
+            params: data,
+            processData: true
         });
+    },
+
+    repost: function (data) {
+        var me = this;
+        iRely.Msg.showWait('Rebuilding inventory...');
+        var rebuildObs = me.rebuild(data);
+        var verifyObs = me.verifyValuation(data.dtmStartDate);
+        rebuildObs
+        .flatMap(verifyObs)
+        .finally(() => iRely.Msg.close())
+        .subscribe(
+            data => {
+                var json = JSON.parse(data.responseText);
+                if (json.success) {
+                    if(data.status === 202)
+                        iRely.Functions.showInfoDialog(json.message);
+                }
+                else
+                    iRely.Functions.showErrorDialog(json.message);
+            }, 
+            error => {
+                if(error.timedout)
+                    iRely.Functions.showErrorDialog("Looks like the server is taking to long to respond, this can be caused by either poor connectivity or an error with our servers. Please try again in a while.");
+                else
+                    iRely.Functions.showErrorDialog(JSON.parse(error.responseText).message);
+            }
+        );
     },
 
     init: function (cfg) {
