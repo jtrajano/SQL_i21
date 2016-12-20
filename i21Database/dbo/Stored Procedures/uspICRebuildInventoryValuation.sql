@@ -1737,11 +1737,11 @@ BEGIN
 END 
 
 
--- Compare the snapshot of the gl entries 
-BEGIN
-	EXEC uspICCompareGLSnapshotOnRebuildInventoryValuation
-		@dtmRebuildDate
-END
+---- Compare the snapshot of the gl entries 
+--BEGIN
+--	EXEC uspICCompareGLSnapshotOnRebuildInventoryValuation
+--		@dtmRebuildDate
+--END
 
 COMMIT TRANSACTION 
 GOTO _EXIT
