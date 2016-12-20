@@ -258,38 +258,13 @@ StartTest (function (t) {
         .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','CORN','strItemNo')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','Bushels','strUnitMeasure')
         .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colGross', '100000')
-        .verifyGridData('InventoryReceipt', 1, 'colNet', '100000')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Bushels')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000000')
 
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblGrossWgt').text;
-            if (total == 'Gross: 100,000.00') {
-                t.ok(true, 'Gross is correct.');
-            }
-            else {
-                t.ok(false, 'Gross is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblNetWgt').text;
-            if (total == 'Net: 100,000.00') {
-                t.ok(true, 'Net is correct.');
-            }
-            else {
-                t.ok(false, 'Net is incorrect.');
-            }
-            next();
-        })
         .addFunction(function (next){
             var win =  Ext.WindowManager.getActive(),
                 total = win.down('#lblTotal').text;
@@ -311,7 +286,7 @@ StartTest (function (t) {
         .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000000')
         .clickButton('Post')
         .waitUntilLoaded('')
-        .addResult('Successfully Posted',2000)
+        .addResult('Successfully Posted',3000)
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded('')

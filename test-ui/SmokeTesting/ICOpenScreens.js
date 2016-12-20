@@ -27,7 +27,7 @@ StartTest (function (t) {
             { dataIndex: 'ysnPosted', text: 'Posted'},
             { dataIndex: 'strShipFrom', text: 'Ship From'}
 
-        ])
+        ],2)
         .clickTab('Lots')
         .waitUntilLoaded()
         .verifySearchToolbarButton({openselected: false, openall: false, close: false})
@@ -35,7 +35,7 @@ StartTest (function (t) {
             { dataIndex: 'strReceiptNumber', text: 'Receipt No'},
             { dataIndex: 'strReceiptType', text: 'Order Type'}
 
-        ])
+        ],3)
         .clickTab('Vouchers')
         .waitUntilLoaded()
         .verifySearchToolbarButton({openselected: false, openall: false, close: false})
@@ -335,42 +335,42 @@ StartTest (function (t) {
         .clickTab('Details')
         .waitUntilLoaded()
         .verifySearchToolbarButton({openselected: false, openall: false, close: false})
-//        .verifyGridColumnNames('Search', [
-//            {dataIndex: 'strShipmentNumber', text: 'Shipment Number'},
-//            {dataIndex: 'dtmShipDate', text: 'Ship Date'},
-//            {dataIndex: 'strOrderType', text: 'Order Type'},
-//            {dataIndex: 'strSourceType', text: 'Source Type'},
-//            {dataIndex: 'strItemNo', text: 'Item No'},
-//            {dataIndex: 'strItemDescription', text: 'Description'},
-//
-//            {dataIndex: 'strOrderNumber', text: 'Order Number'},
-//            {dataIndex: 'strSourceNumber', text: 'Source Number'},
-//            {dataIndex: 'strUnitMeasure', text: 'Ship UOM'},
-//
-//            {dataIndex: 'dblQtyToShip', text: 'Quantity'},
-//            {dataIndex: 'dblPrice', text: 'Unit Price'},
-//            {dataIndex: 'dblLineTotal', text: 'Line Total'}
-//
-//        ])
+        .verifyGridColumnNames('Search', [
+            {dataIndex: 'strShipmentNumber', text: 'Shipment Number'},
+            {dataIndex: 'dtmShipDate', text: 'Ship Date'},
+            {dataIndex: 'strOrderType', text: 'Order Type'},
+            {dataIndex: 'strSourceType', text: 'Source Type'},
+            {dataIndex: 'strItemNo', text: 'Item No'},
+            {dataIndex: 'strItemDescription', text: 'Description'},
+
+            {dataIndex: 'strOrderNumber', text: 'Order Number'},
+            {dataIndex: 'strSourceNumber', text: 'Source Number'},
+            {dataIndex: 'strUnitMeasure', text: 'Ship UOM'},
+
+            {dataIndex: 'dblQtyToShip', text: 'Quantity'},
+            {dataIndex: 'dblPrice', text: 'Unit Price'},
+            {dataIndex: 'dblLineTotal', text: 'Line Total'}
+
+        ],2)
         .clickTab('Lots')
         .waitUntilLoaded()
         .verifySearchToolbarButton({openselected: false, openall: false, close: false})
-//        .verifyGridColumnNames('Search', [
-//            {dataIndex: 'strShipmentNumber', text: 'Shipment Number'},
-//            {dataIndex: 'dtmShipDate', text: 'Ship Date'},
-//            {dataIndex: 'strOrderType', text: 'Order Type'},
-//            {dataIndex: 'strSourceType', text: 'Source Type'},
-//            {dataIndex: 'strItemNo', text: 'Item No'},
-//            {dataIndex: 'strItemDescription', text: 'Description'},
-//            {dataIndex: 'strLotNumber', text: 'Lot Number'},
-//            {dataIndex: 'strSubLocationName', text: 'Sub Location'},
-//            {dataIndex: 'strStorageLocationName', text: 'Storage Location'},
-//            {dataIndex: 'strLotUOM', text: 'Lot UOM'},
-//            {dataIndex: 'dblLotQty', text: 'Lot Qty'},
-//            {dataIndex: 'dblGrossWeight', text: 'Gross Wgt'},
-//            {dataIndex: 'dblTareWeight', text: 'Tare Wgt'},
-//            {dataIndex: 'dblNetWeight', text: 'Net Wgt'}
-//        ])
+        .verifyGridColumnNames('Search', [
+            {dataIndex: 'strShipmentNumber', text: 'Shipment Number'},
+            {dataIndex: 'dtmShipDate', text: 'Ship Date'},
+            {dataIndex: 'strOrderType', text: 'Order Type'},
+            {dataIndex: 'strSourceType', text: 'Source Type'},
+            {dataIndex: 'strItemNo', text: 'Item No'},
+            {dataIndex: 'strItemDescription', text: 'Description'},
+            {dataIndex: 'strLotNumber', text: 'Lot Number'},
+            {dataIndex: 'strSubLocationName', text: 'Sub Location'},
+            {dataIndex: 'strStorageLocationName', text: 'Storage Location'},
+            {dataIndex: 'strLotUOM', text: 'Lot UOM'},
+            {dataIndex: 'dblLotQty', text: 'Lot Qty'},
+            {dataIndex: 'dblGrossWeight', text: 'Gross Wgt'},
+            {dataIndex: 'dblTareWeight', text: 'Tare Wgt'},
+            {dataIndex: 'dblNetWeight', text: 'Net Wgt'}
+        ],3)
         //New IS Screen
         .clickTab('Inventory Shipment')
         .waitUntilLoaded()
