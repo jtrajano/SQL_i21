@@ -4631,6 +4631,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReportStorageLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportItemLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetEmailInfo.sql" />
+    <Build Include="dbo\Tables\tblRKReconciliationBrokerStatementImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFreezeFutOptTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

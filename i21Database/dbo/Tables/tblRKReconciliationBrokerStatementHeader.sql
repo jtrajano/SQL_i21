@@ -5,9 +5,10 @@
 	[dtmReconciliationDate] DATETIME NOT NULL, 
 	[dtmFilledDate] DATETIME NOT NULL, 
     [intEntityId] INT  NULL, 
+	[intBrokerageAccountId] INT NULL,
     [intFutureMarketId] INT  NULL, 
     [intCommodityId] INT  NULL, 
-	[ysnImportStatus] BIT,
+	[strImportStatus]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strComments]  NVARCHAR(Max) COLLATE Latin1_General_CI_AS NULL, 
 
 	CONSTRAINT [PK_tblRKReconciliationBrokerStatementHeader_intReconciliationBrokerStatementHeaderId] PRIMARY KEY (intReconciliationBrokerStatementHeaderId),	
