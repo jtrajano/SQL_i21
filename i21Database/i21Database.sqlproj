@@ -4633,6 +4633,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetEmailInfo.sql" />
     <Build Include="dbo\Tables\tblRKReconciliationBrokerStatementImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFreezeFutOptTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKReconciliationBrokerStatementImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
