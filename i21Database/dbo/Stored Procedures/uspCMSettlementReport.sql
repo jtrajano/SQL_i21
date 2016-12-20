@@ -274,7 +274,7 @@ BEGIN
 
 	--Vendor Address
 	strEntityName = ENTITY.strName,
-	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipToAddress, Bill.strShipToCity, Bill.strShipToState,Bill.strShipToZipCode),
+	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	TICKET.intTicketId,
 	TICKET.strTicketNumber,
 	INVRCPT.strReceiptNumber,
