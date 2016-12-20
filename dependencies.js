@@ -247,9 +247,9 @@
 }, {
     "pattern": "app/store/ReceiptItemTax.js"
 }, {
-    "pattern": "app/model/RepostInventory.js"
+    "pattern": "app/model/RebuildInventory.js"
 }, {
-    "pattern": "app/store/RepostInventory.js"
+    "pattern": "app/store/RebuildInventory.js"
 }, {
     "pattern": "app/model/ShipmentItemLot.js"
 }, {
@@ -703,7 +703,7 @@
 }, {
     "pattern": "app/view/ReasonViewModel.js"
 }, {
-    "pattern": "app/view/RepostInventory.js"
+    "pattern": "app/view/RebuildInventory.js"
 }, {
     "pattern": "app/model/ItemVendorXref.js"
 }, {
@@ -757,7 +757,7 @@
 }, {
     "pattern": "app/store/FiscalPeriod.js"
 }, {
-    "pattern": "app/view/RepostInventoryViewModel.js"
+    "pattern": "app/view/RebuildInventoryViewModel.js"
 }, {
     "pattern": "app/view/Statusbar1ViewController.js"
 }, {

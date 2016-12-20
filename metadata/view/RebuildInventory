@@ -7,8 +7,8 @@
     "codeClass": null,
     "userConfig": {
         "bodyPadding": null,
-        "designer|userAlias": "icrepostinventory",
-        "designer|userClassName": "RepostInventory",
+        "designer|userAlias": "icrebuildinventory",
+        "designer|userClassName": "RebuildInventory",
         "height": 219,
         "hidden": false,
         "layout": "fit",
@@ -17,7 +17,7 @@
         "modal": true,
         "padding": null,
         "reference": null,
-        "title": "Repost Inventory",
+        "title": "Rebuild Inventory",
         "titleCollapse": false,
         "width": 438
     },
@@ -122,7 +122,7 @@
                             "userConfig": {
                                 "bodyPadding": 8,
                                 "border": false,
-                                "designer|displayName": "frmRepostInventory",
+                                "designer|displayName": "frmRebuildInventory",
                                 "designer|uiInterfaceName": "i21-form",
                                 "itemId": "frmRebuildInventory",
                                 "layout|region": "center",

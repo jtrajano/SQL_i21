@@ -12,9 +12,9 @@ var months = [
     { intId: 11, strMonth: 'November' },
     { intId: 12, strMonth: 'December' }
 ];
-Ext.define('Inventory.view.RepostInventoryViewController', {
+Ext.define('Inventory.view.RebuildInventoryViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.icrepostinventory',
+    alias: 'controller.icrebuildinventory',
 
     config: {
         binding: {
@@ -81,11 +81,11 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
     },
 
     repost: function (data) {
-        iRely.Msg.showWait('Reposting inventory...');
+        iRely.Msg.showWait('Rebuilding inventory...');
         var id = 234;
         ic.utils.ajax({
             timeout: 120000,
-            url: '../Inventory/api/InventoryValuation/RepostInventory',
+            url: '../Inventory/api/InventoryValuation/RebuildInventory',
             method: "post",
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -142,7 +142,7 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
     },
 
     createRecord: function (config, action) {
-        var record = Ext.create('Inventory.model.RepostInventory');
+        var record = Ext.create('Inventory.model.RebuildInventory');
         var d = new Date();
         record.set('intMonth', d.getMonth() + 1);
         record.set('strMonth', months[d.getMonth()].strMonth);
@@ -164,7 +164,7 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
         "use strict";
         var me = this,
             win = config.window,
-            store = Ext.create('Inventory.store.RepostInventory', { pageSize: 1 });
+            store = Ext.create('Inventory.store.RebuildInventory', { pageSize: 1 });
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
