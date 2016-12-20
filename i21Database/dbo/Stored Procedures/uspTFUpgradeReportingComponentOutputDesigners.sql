@@ -48,8 +48,8 @@ BEGIN TRY
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
-			, SOURCE.strCaption
 			, SOURCE.strColumn
+			, SOURCE.strCaption
 			, SOURCE.strFormat
 			, SOURCE.strFooter
 			, SOURCE.intWidth
