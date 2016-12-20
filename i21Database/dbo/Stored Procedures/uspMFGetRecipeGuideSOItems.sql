@@ -8,13 +8,15 @@ If @intRecipeGuideId>0
 
 If ISNULL(@intSalesOrderId,0)>0
 Begin
-	Select i.intItemId,i.strItemNo,i.strDescription,sd.dblQtyOrdered AS dblQuantity,sd.intItemUOMId,um.strUnitMeasure AS strUOM,
+	Select i.intItemId,i.strItemNo,i.strDescription,sd.dblQtyOrdered/rg.dblNoOfAcre AS dblQuantity,sd.intItemUOMId,um.strUnitMeasure AS strUOM,
 	sd.dblPrice AS dblCost
 	From tblSOSalesOrderDetail sd 
 	Join tblICItem i on sd.intItemId=i.intItemId 
 	Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Where intSalesOrderId=@intSalesOrderId
+	Join tblSOSalesOrder s on sd.intSalesOrderId=s.intSalesOrderId
+	Join tblMFRecipeGuide rg on s.intRecipeGuideId=rg.intRecipeGuideId
+	Where s.intSalesOrderId=@intSalesOrderId
 
 	Return
 End
