@@ -38,7 +38,7 @@ BEGIN TRY
 			, intProductCode		= SOURCE.intProductCodeId
 			, strProductCode		= SOURCE.strProductCode
 			, strFilter				= SOURCE.strFilter
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
 			, intProductCode
@@ -50,7 +50,9 @@ BEGIN TRY
 			, SOURCE.intProductCodeId
 			, SOURCE.strProductCode
 			, SOURCE.strFilter
-		);
+		)
+	WHEN NOT MATCHED BY SOURCE THEN 
+		DELETE;
 
 END TRY
 BEGIN CATCH

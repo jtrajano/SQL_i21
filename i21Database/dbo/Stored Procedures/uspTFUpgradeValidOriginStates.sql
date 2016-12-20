@@ -37,7 +37,7 @@ BEGIN TRY
 			, strOriginState				= SOURCE.strState
 			, strType						= SOURCE.strStatus
 			, strFilter						= SOURCE.strFilter
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
 			, intOriginDestinationStateId
@@ -51,7 +51,9 @@ BEGIN TRY
 			, SOURCE.strState
 			, SOURCE.strStatus
 			, SOURCE.strFilter
-		);
+		)
+	WHEN NOT MATCHED BY SOURCE THEN 
+		DELETE;
 
 END TRY
 BEGIN CATCH

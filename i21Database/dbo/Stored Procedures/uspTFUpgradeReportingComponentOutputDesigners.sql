@@ -37,7 +37,7 @@ BEGIN TRY
 			, strFormat				= SOURCE.strFormat
 			, strFooter				= SOURCE.strFooter
 			, intWidth				= SOURCE.intWidth
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
 			, strColumn
@@ -53,7 +53,9 @@ BEGIN TRY
 			, SOURCE.strFormat
 			, SOURCE.strFooter
 			, SOURCE.intWidth
-		);
+		)
+	WHEN NOT MATCHED BY SOURCE THEN 
+		DELETE;
 
 END TRY
 BEGIN CATCH
