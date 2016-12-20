@@ -91,7 +91,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 												THEN NONLOTTED.dblCost
 											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 												THEN LOTTED.dblCost
-											ELSE 0.000000
+											ELSE ISNULL(NONSO.dblCost, 0)
 										END)
 	  , dblPrice					= ARID.dblPrice
 	  ,	dblTax						= ARID.dblTotalTax
