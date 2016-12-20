@@ -1,16 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuPATCancelEquityDetails]
 	AS
-SELECT	CED.intCancelDetailId,
-		CED.intCancelId,
+SELECT	CED.intCancelEquityDetailId,
+		CED.intCancelEquityId,
 		CED.intFiscalYearId,
 		FY.strFiscalYear,
 		CED.intCustomerId,
 		ENT.strName,
+		CED.strEquityType,
 		CED.intRefundTypeId,
 		RR.strRefundType,
 		CED.dblQuantityAvailable,
-		CED.strCancelBy,
-		CED.dblCancelByPercentage,
 		CED.dblQuantityCancelled,
 		dblNewQuantity = ISNULL(CED.dblQuantityAvailable - CED.dblQuantityCancelled, 0),
 		CED.intConcurrencyId
@@ -21,4 +20,3 @@ SELECT	CED.intCancelDetailId,
 		ON RR.intRefundTypeId = CED.intRefundTypeId
 	INNER JOIN tblEMEntity ENT
 		ON ENT.intEntityId = CED.intCustomerId
-GO
