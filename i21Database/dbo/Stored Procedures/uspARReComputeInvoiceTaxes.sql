@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceTaxes]
-	  @InvoiceId		AS INT
+	 @InvoiceId	INT
+	,@DetailId	INT	= NULL
 AS
 
 BEGIN
@@ -56,6 +57,11 @@ FROM
 	tblARInvoiceDetail
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
+	AND (
+		ISNULL(@DetailId,0) = 0
+			OR
+		[intInvoiceDetailId] = @DetailId
+		)
 ORDER BY
 	[intInvoiceDetailId]
 	

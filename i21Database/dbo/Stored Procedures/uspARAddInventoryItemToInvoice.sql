@@ -379,7 +379,7 @@ SET @NewId = SCOPE_IDENTITY()
 		
 BEGIN TRY
 	IF @RecomputeTax = 1
-		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
+		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId  
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0	

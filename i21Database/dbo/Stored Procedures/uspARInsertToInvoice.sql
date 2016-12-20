@@ -641,7 +641,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				DELETE FROM @tblSODSoftware WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 			END
 
-		EXEC dbo.uspARReComputeInvoiceTaxes @SoftwareInvoiceId
+		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @SoftwareInvoiceId
 	END
 
 --CHECK IF THERE IS NON STOCK ITEMS
@@ -886,7 +886,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								FROM
 									[tblSOSalesOrderDetailTax]
 								WHERE
-									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
+									[intSalesOrderDetailId] = @ItemSalesOrderDetailId								
 
 								INSERT INTO tblARInvoiceDetailComponent
 									([intInvoiceDetailId]
@@ -907,7 +907,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								FROM
 									tblSOSalesOrderDetailComponent
 								WHERE
-									[intSalesOrderDetailId] = @ItemSalesOrderDetailId								
+									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
+								
+								IF @ItemQtyOrdered <> @ItemQtyShipped
+									EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId, @DetailId = @NewDetailId								
 						END
 
 						DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId

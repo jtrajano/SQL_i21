@@ -33,7 +33,7 @@ SET
 	 [dblRate]			= ISNULL([dblRate], @ZeroDecimal)
 	,[dblTax]			= ISNULL([dblTax], @ZeroDecimal)
 	,[dblAdjustedTax]	= [dbo].fnRoundBanker(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-	,[ysnTaxAdjusted]	= [dbo].fnRoundBanker(ISNULL([ysnTaxAdjusted], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	,[ysnTaxAdjusted]	= ISNULL([ysnTaxAdjusted], 0)
 WHERE 
 	intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceIdLocal)
 	
