@@ -100,6 +100,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'FuelCategory/DeleteFuelCategory.js?v='+version,
+                title: 'DeleteFuelCategory',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
