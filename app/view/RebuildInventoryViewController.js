@@ -12,9 +12,9 @@ var months = [
     { intId: 11, strMonth: 'November' },
     { intId: 12, strMonth: 'December' }
 ];
-Ext.define('Inventory.view.RepostInventoryViewController', {
+Ext.define('Inventory.view.RebuildInventoryViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.icrepostinventory',
+    alias: 'controller.icrebuildinventory',
 
     config: {
         binding: {
@@ -82,7 +82,7 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
 
     repost: function (jsondata) {
         jQuery.ajax({
-            url: '../Inventory/api/InventoryValuation/RepostInventory',
+            url: '../Inventory/api/InventoryValuation/RebuildInventory',
             method: "post",
             headers: {
                 'Authorization': iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId),
@@ -91,7 +91,7 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
             data: jsondata,
             processData: true,
             beforeSend: function (jqXHR, settings) {
-                iRely.Msg.showWait('Reposting inventory...');
+                iRely.Msg.showWait('Rebuilding inventory...');
             },
             success: function (data, status, jqXHR) {
                 iRely.Msg.close();
@@ -160,7 +160,7 @@ Ext.define('Inventory.view.RepostInventoryViewController', {
         "use strict";
         var me = this,
             win = config.window,
-            store = Ext.create('Inventory.store.RepostInventory', { pageSize: 1 });
+            store = Ext.create('Inventory.store.RebuildInventory', { pageSize: 1 });
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,

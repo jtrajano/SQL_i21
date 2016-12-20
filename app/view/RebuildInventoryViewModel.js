@@ -1,6 +1,6 @@
-Ext.define('Inventory.view.RepostInventoryViewModel', {
+Ext.define('Inventory.view.RebuildInventoryViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.icrepostinventory',
+    alias: 'viewmodel.icrebuildinventory',
     requires: [
         'Inventory.store.Item',
         'Inventory.store.FiscalPeriod'
@@ -40,7 +40,7 @@ Ext.define('Inventory.view.RepostInventoryViewModel', {
                     item = '"' + get('current.strItemNo') + '" item';
             } catch(e) {}
             var year = get('current.dtmDate').getFullYear();
-            return 'Repost inventory for ' + item + ' in a ' + order.toLowerCase() + ' order from ' + month + ' ' + year + ' onwards including item(s) that are used for production.';
+            return 'Rebuild inventory for ' + item + ' in a ' + order.toLowerCase() + ' order from ' + month + ' ' + year + ' onwards including item(s) that are used for production.';
         },
         prompt: function(get) {
             var month = get('current.strMonth');

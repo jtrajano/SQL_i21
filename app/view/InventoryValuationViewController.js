@@ -54,7 +54,7 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
                     text: 'Rebuild',
                     itemId: 'btnRepost',
                     clickHandler: function(e) {
-                        iRely.Functions.openScreen('Inventory.view.RepostInventory', { action: 'new', viewConfig: { modal: true }});
+                        iRely.Functions.openScreen('Inventory.view.RebuildInventory', { action: 'new', viewConfig: { modal: true }});
                     },
                     width: 80
                 }

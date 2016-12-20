@@ -10,7 +10,7 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public async Task<int> RepostInventory(DateTime? startDate, string itemNo, bool isPeriodic = true, bool generateBillGLEntries = false, int? userId = null)
+        public async Task<int> RebuildInventory(DateTime? startDate, string itemNo, bool isPeriodic = true, bool generateBillGLEntries = false, int? userId = null)
         {
             SqlParameter paramStrNo = string.IsNullOrEmpty(itemNo) ? new SqlParameter("@strItemNo", DBNull.Value)  : new SqlParameter("@strItemNo", itemNo);
             this.Database.CommandTimeout = 120000;

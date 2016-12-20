@@ -23,8 +23,8 @@ namespace iRely.Inventory.WebApi.Controllers
     public class InventoryValuationController : ApiController
     {
         [HttpPost]        
-        [ActionName("RepostInventory")]
-        public async Task<HttpResponseMessage> RepostInventory([FromBody]InventoryValuation parameters)
+        [ActionName("RebuildInventory")]
+        public async Task<HttpResponseMessage> RebuildInventory([FromBody]InventoryValuation parameters)
         {
             var db = new InventoryEntities();
             var success = false;
@@ -34,13 +34,13 @@ namespace iRely.Inventory.WebApi.Controllers
                 var dtmStartDate = parameters.dtmStartDate;
                 var strItemNo = parameters.strItemNo;
                 var isPeriodic = parameters.isPeriodic;
-                await db.RepostInventory(dtmStartDate, strItemNo, isPeriodic, false, iRely.Common.Security.GetEntityId());
+                await db.RebuildInventory(dtmStartDate, strItemNo, isPeriodic, false, iRely.Common.Security.GetEntityId());
                 success = true;
-                msg = "Inventory reposted successfully.";
+                msg = "Inventory rebuilt successfully.";
             }
             catch (Exception ex)
             {
-                msg = "Error reposting inventory. " + ex.Message;
+                msg = "Error rebuilding inventory. " + ex.Message;
             }
 
             var response = new

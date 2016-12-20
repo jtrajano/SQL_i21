@@ -1,4 +1,4 @@
-Ext.define('Inventory.model.RepostInventory', {
+Ext.define('Inventory.model.RebuildInventory', {
     extend: 'iRely.BaseEntity',
 
     requires: [
