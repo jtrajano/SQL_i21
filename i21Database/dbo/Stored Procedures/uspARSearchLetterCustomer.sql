@@ -765,11 +765,7 @@ BEGIN
 							ARC.intEntityCustomerId									 
 						FROM 
 							tblARCustomer ARC
-						INNER JOIN (SELECT 
-										intEntityCustomerId
-									FROM 
-										tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
-						 WHERE
+			            WHERE
 							dblCreditLimit = 0 AND ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 		) Cus
 
@@ -844,10 +840,6 @@ BEGIN
 							ARC.intEntityCustomerId									 
 						FROM 
 							tblARCustomer ARC
-						INNER JOIN (SELECT 
-										intEntityCustomerId
-									FROM 
-										tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
 						 WHERE
 							ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 		) Cus
@@ -923,10 +915,7 @@ BEGIN
 							ARC.intEntityCustomerId									 
 						FROM 
 							tblARCustomer ARC
-						INNER JOIN (SELECT 
-										intEntityCustomerId
-									FROM 
-										tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+						 
 						 WHERE
 							ARC.dblCreditLimit > 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 		) Cus	
