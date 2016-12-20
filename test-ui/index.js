@@ -81,6 +81,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'Category/DeleteCategory.js?v='+version,
+                title: 'DeleteCategory',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
