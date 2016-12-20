@@ -59,14 +59,17 @@ namespace iRely.Inventory.WebApi
             });
         }
 
-        [HttpPost]
+        [HttpGet]
         [ActionName("ProcessBill")]
         public HttpResponseMessage ProcessBill(int id)
         {
             int? newBill = null;
             var result = _bl.ProcessBill(id, out newBill);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
             {
                 success = !result.HasError,
                 message = new
@@ -79,13 +82,16 @@ namespace iRely.Inventory.WebApi
             });
         }
 
-        [HttpPost]
+        [HttpGet]
         [ActionName("CalculateCharges")]
         public HttpResponseMessage CalculateCharges(int id)
         {
             var result = _bl.CalculateCharges(id);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            var httpStatusCode = HttpStatusCode.OK; 
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;            
+
+            return Request.CreateResponse(httpStatusCode, new
             {
                 success = !result.HasError,
                 message = new
@@ -97,13 +103,16 @@ namespace iRely.Inventory.WebApi
             });
         }
 
-        [HttpPost]
+        [HttpGet]
         [ActionName("UpdateReceiptInspection")]
         public HttpResponseMessage UpdateReceiptInspection(int id)
         {
             var result = _bl.UpdateReceiptInspection(id);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
             {
                 success = !result.HasError,
                 message = new
@@ -115,7 +124,7 @@ namespace iRely.Inventory.WebApi
             });
         }
 
-        [HttpPost]
+        [HttpGet]
         [ActionName("GetTaxGroupId")]
         public HttpResponseMessage GetTaxGroupId(int id)
         {
@@ -123,7 +132,10 @@ namespace iRely.Inventory.WebApi
             string taxGroupName = null;
             var result = _bl.GetTaxGroupId(id, out taxGroup, out taxGroupName);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
             {
                 success = !result.HasError,
                 message = new
@@ -179,14 +191,17 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetChargeTaxDetails(param, ChargeId, ReceiptId));
         }
 
-        [HttpPost]
+        [HttpGet]
         [ActionName("GetStatusUnitCost")]
         public HttpResponseMessage GetStatusUnitCost(int id)
         {
             int? newStatus = null;
             var result = _bl.GetStatusUnitCost(id, out newStatus);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
             {
                 success = !result.HasError,
                 message = new

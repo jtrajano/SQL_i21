@@ -363,9 +363,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnCalculateCharges: {
                 hidden: '{isReceiptReadonly}'
             },
-            btnshowOtherCharges: {
-                hidden: '{current.ysnPosted}'
-            },
+            // btnshowOtherCharges: {
+            //     hidden: '{current.ysnPosted}'
+            // },
             btnBill: {
                 hidden: '{!current.ysnPosted}',
                 disabled: '{current.ysnOrigin}'
@@ -1634,35 +1634,39 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Save first before calculating the taxes
         win.context.data.saveRecord({
             successFn: function () {
-                Ext.Ajax.request({
-                    timeout: 120000,
-                    url: '../Inventory/api/InventoryReceipt/GetTaxGroupId?id=' + current.get('intInventoryReceiptId'),
-                    method: 'post',
-                    success: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        if (jsonData.success) {
-                           if (current.tblICInventoryReceiptItems()) {
-                                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
-                                    if (!item.dummy) {
-                                        //Set intTaxGroupId and strTaxGroup
-                                        item.set('intTaxGroupId', jsonData.message.taxGroupId);
-                                        item.set('strTaxGroup', jsonData.message.taxGroupN);
-                                    
-                                        //Calculate Taxes
-                                        win.viewModel.data.currentReceiptItem = item;
-                                        me.calculateItemTaxes();
-                                    }
-                                });
-                            }
-                        }    
+                ic.utils.ajax({
+                    url: '../Inventory/api/InventoryReceipt/GetTaxGroupId',
+                    params:{
+                        id: current.get('intInventoryReceiptId')
                     },
-                    failure: function (response) {
+                    method: 'get'  
+                })
+                .subscribe(
+                    successResponse => {
                         var jsonData = Ext.decode(response.responseText);
-                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                        var tblICInventoryReceiptItems = current.tblICInventoryReceiptItems(); 
+
+                        if (tblICInventoryReceiptItems) {
+                            Ext.Array.each(tblICInventoryReceiptItems.data.items, function (item) {
+                                if (!item.dummy) {
+                                    //Set intTaxGroupId and strTaxGroup
+                                    item.set('intTaxGroupId', jsonData.message.taxGroupId);
+                                    item.set('strTaxGroup', jsonData.message.taxGroupN);
+                                
+                                    //Calculate Taxes
+                                    win.viewModel.data.currentReceiptItem = item;
+                                    me.calculateItemTaxes();
+                                }
+                            });
+                        }; 
                     }
-                });
+                    ,failureResponse => {
+                        var jsonData = Ext.decode(failureResponse.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                    }
+                );                      
             }
-        });
+        })
     },
 
     onReceiptItemSelect: function (combo, records, eOpts) {
@@ -2398,65 +2402,62 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 iRely.Functions.showErrorDialog('Invalid receipt type. A voucher is not applicable to transfer orders.');
                 return;
             }
-
-            Ext.Ajax.request({
-                timeout: 120000,
-                url: '../Inventory/api/InventoryReceipt/GetStatusUnitCost?id=' + record.get('intInventoryReceiptId'),
-                method: 'post',
-                success: function (response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    if (jsonData.success)
-                        var receiptStatusId = jsonData.message.receiptItemsStatusId;
-
-                        var createNewVoucher = function() {
-                            me.processReceiptToVoucher(record.get('intInventoryReceiptId'), function(data) {
-                                    iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
-                                        filters: [
-                                            {
-                                                column: 'intBillId',
-                                                value: data.message.BillId
-                                            }
-                                        ],
-                                        action: 'view',
-                                        showAddReceipt: false,
-                                        listeners: {
-                                            close: function(e) {
-                                                dashboard.$initParent.grid.controller.reload();  
-                                            }
-                                        }
-                                    });        
-                                });
-                        }
-
-                        //All items have zero cost
-                        if (receiptStatusId == 1) {
-                            iRely.Functions.showCustomDialog('information','ok','Cannot process voucher for items with zero cost.');
-                        }
-                        
-                        //Some items have zero cost
-                        else if (receiptStatusId == 2) {
-                            var buttonAction = function (button) {
-                                if (button == 'yes') {
-                                    // Create Voucher for receipt containing items with cost and ignore items with zero cost
-                                    createNewVoucher();
-                                }
-                            }
-
-                            iRely.Functions.showCustomDialog('question','yesno','Items with zero cost will not be processed to voucher. Continue?', buttonAction);
-                        }
-
-                        //No items have zero cost
-                        else if (receiptStatusId == 3) {
-                            // Create voucher for receipt containing cost for all items
-                            createNewVoucher();
-                        }
-
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryReceipt/GetStatusUnitCost',
+                params:{
+                    id: record.get('intInventoryReceiptId')
                 },
-                failure: function (response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                method: 'get'  
+            })
+            .subscribe(
+                successResponse => {
+                    var jsonData = Ext.decode(successResponse.responseText);
+                    var message = jsonData.message;
+                    var receiptStatusId = message.receiptItemsStatusId;
+                    var createNewVoucher = function() {
+                        me.processReceiptToVoucher(record.get('intInventoryReceiptId'), function(data) {
+                            iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                                filters: [
+                                    {
+                                        column: 'intBillId',
+                                        value: data.message.BillId
+                                    }
+                                ],
+                                action: 'view',
+                                showAddReceipt: false,
+                                listeners: {
+                                    close: function(e) {
+                                        dashboard.$initParent.grid.controller.reload();  
+                                    }
+                                }                                
+                            });
+                        });
+                    };
+                    //All items have zero cost
+                    if (receiptStatusId == 1) {
+                        iRely.Functions.showCustomDialog('information','ok','Cannot process voucher for items with zero cost.');
+                    }
+                    //Some items have zero cost
+                    else if (receiptStatusId == 2) {
+                        var buttonAction = function (button) {
+                            if (button == 'yes') {
+                                // Create Voucher for receipt containing items with cost and ignore items with zero cost
+                                createNewVoucher();
+                            }
+                        }
+                        iRely.Functions.showCustomDialog('question','yesno','Items with zero cost will not be processed to voucher. Continue?', buttonAction);
+                    }
+                    //No items have zero cost
+                    else if (receiptStatusId == 3) {
+                        // Create voucher for receipt containing cost for all items
+                        createNewVoucher();
+                    }
                 }
-            });
+                ,failureResponse => {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                }
+            );                          
         }
         else {
             iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
@@ -2774,49 +2775,49 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onShowOtherChargesClick: function (button, e, eOpts) {
-        var win = button.up('window');
-        var context = win.context;
-        var current = win.viewModel.data.current;
+    // onShowOtherChargesClick: function (button, e, eOpts) {
+    //     var win = button.up('window');
+    //     var context = win.context;
+    //     var current = win.viewModel.data.current;
 
-        var doPost = function () {
-            if (current) {
-                Ext.Ajax.request({
-                    timeout: 120000,
-                    url: '../Inventory/api/InventoryReceipt/showOtherCharges?id=' + current.get('intInventoryReceiptId'),
-                    method: 'post',
-                    success: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        if (!jsonData.success) {
-                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                        }
-                        else {
-                            context.configuration.paging.store.load();
-                        }
-                    },
-                    failure: function (response) {
-                        var jsonData = Ext.decode(response.responseText);
-                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-                    }
-                });
-            }
-        };
+    //     var doPost = function () {
+    //         if (current) {
+    //             Ext.Ajax.request({
+    //                 timeout: 120000,
+    //                 url: '../Inventory/api/InventoryReceipt/showOtherCharges?id=' + current.get('intInventoryReceiptId'),
+    //                 method: 'post',
+    //                 success: function (response) {
+    //                     var jsonData = Ext.decode(response.responseText);
+    //                     if (!jsonData.success) {
+    //                         iRely.Functions.showErrorDialog(jsonData.message.statusText);
+    //                     }
+    //                     else {
+    //                         context.configuration.paging.store.load();
+    //                     }
+    //                 },
+    //                 failure: function (response) {
+    //                     var jsonData = Ext.decode(response.responseText);
+    //                     iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+    //                 }
+    //             });
+    //         }
+    //     };
 
-        // If there is no data change, do the post.
-        if (!context.data.hasChanges()) {
-            doPost();
-            return;
-        }
+    //     // If there is no data change, do the post.
+    //     if (!context.data.hasChanges()) {
+    //         doPost();
+    //         return;
+    //     }
 
-        // Save has data changes first before doing the post.
-        context.data.saveRecord({
-            successFn: function () {
-                doPost();
-            }
-        });
+    //     // Save has data changes first before doing the post.
+    //     context.data.saveRecord({
+    //         successFn: function () {
+    //             doPost();
+    //         }
+    //     });
 
 
-    },
+    // },
 
     onBillClick: function (button, e, eOpts) {
         var win = button.up('window'),
@@ -2868,24 +2869,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     processReceiptToVoucher: function (receiptId, callback) {
-        Ext.Ajax.request({
-            timeout: 120000,
-            url: '../Inventory/api/InventoryReceipt/ProcessBill?id=' + receiptId,
-            method: 'post',
-            success: function (response) {
-                var jsonData = Ext.decode(response.responseText);
-                if (jsonData.success) {
-                    callback(jsonData);
-                }
-                else {
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                }
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryReceipt/ProcessBill',
+            params:{
+                id: receiptId
             },
-            failure: function (response) {
-                var jsonData = Ext.decode(response.responseText);
-                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+            method: 'get'  
+        })
+        .subscribe(
+            successResponse => {
+                var jsonData = Ext.decode(successResponse.responseText);
+                callback(jsonData);
             }
-        });
+            ,failureResponse => {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                var message = jsonData.message; 
+                iRely.Functions.showErrorDialog(message.statusText);
+            }
+        );          
     },
 
     receiptToVoucherClick: function (receipt, button, win) {
@@ -5646,31 +5647,34 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
         var me = win.controller;
 
-        if (context && current) {
-            Ext.Ajax.request({
-                timeout: 120000,
-                url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
-                method: 'post',
-                success: function (response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    if (!jsonData.success) {
-                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                    }
-                    else {
-                        context.configuration.paging.store.load();
+        if (!(context && current)) return; 
 
-                        var task = new Ext.util.DelayedTask(function () {
-                            me.doOtherChargeTaxCalculate(win);
-                        });
-                        task.delay(1700);
-                    }
-                },
-                failure: function (response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryReceipt/CalculateCharges',
+            params:{
+                id: current.get('intInventoryReceiptId')
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            successResponse => {
+                var jsonData = Ext.decode(successResponse.responseText);
+                if (!jsonData.success) {
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
                 }
-            });
-        }
+                else {
+                    context.configuration.paging.store.load();
+                    var task = new Ext.util.DelayedTask(new function () {
+                        me.doOtherChargeTaxCalculate(win);
+                    });
+                    task.delay(1700);
+                };
+            }
+            ,failureResponse => {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+            }
+        );        
     },
 
     onCalculateChargeClick: function (button, e, eOpts) {
@@ -5718,25 +5722,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                 var doPost = function () {
                     if (current) {
-                        Ext.Ajax.request({
-                            timeout: 120000,
-                            url: '../Inventory/api/InventoryReceipt/UpdateReceiptInspection?id=' + current.get('intInventoryReceiptId'),
-                            method: 'post',
-                            success: function (response) {
-                                var jsonData = Ext.decode(response.responseText);
-                                if (!jsonData.success) {
-                                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                                }
-                                else {
-                                    context.configuration.paging.store.load();
-                                }
+                        ic.utils.ajax({
+                            url: '../Inventory/api/InventoryReceipt/UpdateReceiptInspection',
+                            params:{
+                                id: current.get('intInventoryReceiptId')
                             },
-                            failure: function (response) {
-                                var jsonData = Ext.decode(response.responseText);
-                                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                            method: 'get'  
+                        })
+                        .subscribe(
+                            successResponse => {
+                                //context.configuration.paging.store.load();
+                                context.configuration.paging.store.load();
                             }
-                        });
-                    }
+                            ,failureResponse => {
+                                var jsonData = Ext.decode(failureResponse.responseText);
+                                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                            }
+                        );  
+                    };
                 };
 
                 // If there is no data change, do the post.
@@ -5972,9 +5975,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnInsertCharge": {
                 click: this.onInsertChargeClick
             },
-            "#btnshowOtherCharges": {
-                click: this.onShowOtherChargesClick
-            },
+            // "#btnshowOtherCharges": {
+            //     click: this.onShowOtherChargesClick
+            // },
             "#cboShipFrom": {
                 beforequery: this.onShipFromBeforeQuery,
                 select: this.onShipFromSelect
