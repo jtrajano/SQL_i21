@@ -32,6 +32,7 @@
 	[intCommentTypeId] INT NULL,
 	[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intSequenceNo] INT NULL,
+	ysnPartialFillConsumption BIT NOT NULL CONSTRAINT [DF_tblMFRecipeItem_ysnPartialFillConsumption] DEFAULT 1,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
