@@ -138,6 +138,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'FuelCode/DeleteFuelCode.js?v='+version,
+                title: 'DeleteFuelCode',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
