@@ -119,8 +119,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             data => {
                 var json = JSON.parse(data.responseText);
                 if (json.success) {
-                    if(data.status === 202)
-                        iRely.Functions.showInfoDialog(json.message);
+                    iRely.Functions.showInfoDialog(json.message);
                 }
                 else
                     iRely.Functions.showErrorDialog(json.message);
