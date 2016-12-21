@@ -362,5 +362,6 @@
     <None Include="dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixImportedFromAPIVCMST.sql" />
   </ItemGroup>
 </Project>

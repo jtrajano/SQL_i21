@@ -14,7 +14,7 @@
 	from tblARSalesperson, tblEMEntity
 	where
 		tblEMEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
-
+	/*
 	union all
 
 		select
@@ -32,3 +32,4 @@
 	where
 		tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
 		and e.intEntityId = tblEMEntityToContact.intEntityContactId
+		*/

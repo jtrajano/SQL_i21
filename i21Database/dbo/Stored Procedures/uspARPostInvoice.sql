@@ -3275,6 +3275,15 @@ IF @post = 1
 						,@batchId  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@UserEntityID
+
+				DELETE FROM ICIT
+				FROM
+					tblICInventoryTransaction ICIT
+				INNER JOIN
+					@ItemsForPost SIFP
+						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
+						AND ICIT.[strTransactionId] = SIFP.[strTransactionId] 
+						AND @recap  = 1
 					
 			END TRY
 			BEGIN CATCH
@@ -3390,6 +3399,15 @@ IF @post = 1
 						,@batchId  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@UserEntityID
+
+				DELETE FROM ICIT
+				FROM
+					tblICInventoryTransaction ICIT
+				INNER JOIN
+					@InTransitItems SIFP
+						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
+						AND ICIT.[strTransactionId] = SIFP.[strTransactionId] 
+						AND @recap  = 1
 			END
 		END TRY 
 		BEGIN CATCH
@@ -3545,6 +3563,15 @@ IF @post = 1
 						@StorageItemsForPost  
 						,@batchId  		
 						,@UserEntityID
+
+				DELETE FROM ICIT
+				FROM
+					tblICInventoryTransaction ICIT
+				INNER JOIN
+					@StorageItemsForPost SIFP
+						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
+						AND ICIT.[strTransactionId] = SIFP.[strTransactionId] 
+						AND @recap  = 1
 					
 			END TRY
 			BEGIN CATCH
@@ -3552,14 +3579,17 @@ IF @post = 1
 				GOTO Do_Rollback
 			END CATCH
 		END
-
-		BEGIN TRY 
-			EXEC dbo.uspGLBookEntries @GLEntries, @post
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
+		
+		IF @recap = 0
+		BEGIN
+			BEGIN TRY 
+				EXEC dbo.uspGLBookEntries @GLEntries, @post
+			END TRY
+			BEGIN CATCH
+				SELECT @ErrorMerssage = ERROR_MESSAGE()										
+				GOTO Do_Rollback
+			END CATCH
+		END	
 
 	END   
 
