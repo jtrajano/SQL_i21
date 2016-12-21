@@ -119,6 +119,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'FeedStock/DeleteFeedStock.js?v='+version,
+                title: 'DeleteFeedStock',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },

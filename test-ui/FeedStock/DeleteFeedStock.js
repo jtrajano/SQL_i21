@@ -1,36 +1,67 @@
-/**
- * Created by RQuidato on 10/30/14.
- */
 StartTest (function (t) {
+    new iRely.FunctionalTest().start(t)
 
-    var engine = new iRely.TestEngine();
-    engine.start(t)
+        //region Scenario 1: Delete Unused Feed Stock
+        .displayText('===== NOTE!!! You can only execute this script when you finish executing Add Fuel Category up to Add Fuel type Script =====')
+        .displayText('=====  Scenario 1: Delete Unused Feed Stock =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Fuel Types','Screen')
+        .waitUntilLoaded()
 
-        /*1.Delete unused single record*/
-        .login('ssiadmin','summit','ag').wait(1500)
-        .addFunction(function(next){t.diag("Scenario 1. Delete unused record"); next();}).wait(100)
-        .expandMenu('Inventory').wait(100)
-        .expandMenu('Maintenance').wait(200)
-        .expandMenu('RIN').wait(100)
-        .openScreen('Feed Stock').wait(200)
-        .checkScreenShown ('feedstockcode').wait(100)
-        .selectGridRow('#grdGridTemplate',0)
-        .clickButton('#btnDelete').wait(100)
-        .checkMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
-        .clickMessageBoxButton('no').wait(10)
-        .checkGridData('#grdGridTemplate', 0, 'colRinFeedStockCode','fs04')
-        .checkGridData('#grdGridTemplate', 0, 'colDescription','feed stock 04')
-        .clickButton('#btnDelete').wait(100)
-        .checkMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
-        .clickMessageBoxButton('yes').wait(10) /*FRM-1553*/
-        .clickButton('#btnClose').wait(100)
-        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
-        .clickMessageBoxButton('yes').wait(100)
-        .checkIfScreenClosed('feedstockcode').wait(100)
+        .clickButton('FeedStock')
+        .waitUntilLoaded('icfeedstockcode')
+        .selectGridRowNumber('GridTemplate',[1])
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .displayText('=====  Scenario 1: Delete Unused Feed Stock Done=====')
+        //endregion
+
+        //region Scenario 2: Delete Used Feed Stock
+        .displayText('=====  Scenario 2: Delete Used Feed Stock =====')
+
+        .clickButton('FeedStock')
+        .waitUntilLoaded('icfeedstockcode')
+        .selectGridRowNumber('GridTemplate',[2])
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .verifyMessageBox('iRely i21','The record you are trying to delete is being used.','ok','error')
+        .clickMessageBoxButton('ok')
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .displayText('=====  Scenario 2: Delete Used Feed Stock Done=====')
+        //endregion
+
+        //region Scenario 3: Delete Multiple Feed Stock
+        .displayText('=====  Scenario 3: Delete Multiple Feed Stock =====')
+        .clickButton('FeedStock')
+        .waitUntilLoaded('icfeedstockcode')
+        .selectGridRowNumber('GridTemplate',[1,3])
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','You are about to delete 3 rows.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .displayText('=====  Scenario 3: Delete Multiple Feed Stock Done=====')
+        //endregion
 
 
-        .done()
+
+
+
+        .done();
+
 })
-
-
-
