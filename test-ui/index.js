@@ -235,6 +235,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'StorageLocation/DeleteStorageLocation.js?v='+version,
+                title: 'DeleteStorageLocation',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
