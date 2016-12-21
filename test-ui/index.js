@@ -157,6 +157,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'ProductionProcess/DeleteProductionProcess.js?v='+version,
+                title: 'DeleteProductionProcess',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
