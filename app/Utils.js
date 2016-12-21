@@ -19,7 +19,7 @@ Ext.define('Inventory.Utils', {
                     options.headers = {};
                 options.headers.Authorization = iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId);
             }
-            var o = Rx.Observable.defer(() => Ext.Ajax.request(options));
+            var o = Rx.Observable.defer(function() { Ext.Ajax.request(options); });
             return o;
         },
 
