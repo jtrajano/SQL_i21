@@ -31,184 +31,244 @@ GO
 	SET IDENTITY_INSERT [dbo].[tblSMModule] ON
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'General Ledger')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT  [intModuleId]					=		1,
 			[strApplicationName]			=		N'i21',		  
 			[strModule]						=		N'General Ledger',		  
 			[strAppCode]					=		N'',
 			[ysnSupported]					=		1,
-			[intSort]						=		1
+			[intSort]						=		1,
+			[strPrefix]						=		N'GL'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'GL' WHERE [strApplicationName] = 'i21' and [strModule] = 'General Ledger'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Tank Management')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT  [intModuleId]					=		2,
 			[strApplicationName]			=		N'i21',		  
 			[strModule]						=		N'Tank Management',
 			[strAppCode]					=		N'',
 			[ysnSupported]					=		1,
-			[intSort]						=		2
+			[intSort]						=		2,
+			[strPrefix]						=		N'TM'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'TM' WHERE [strApplicationName] = 'i21' and [strModule] = 'Tank Management'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Dashboard')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		3,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Dashboard',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		3
+           [intSort]						=		3,
+		   [strPrefix]						=		N'DB'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'DB' WHERE [strApplicationName] = 'i21' and [strModule] = 'Dashboard'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Sales')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		4,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Sales',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		4
+           [intSort]						=		4,
+		   [strPrefix]						=		N'AR'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'AR' WHERE [strApplicationName] = 'i21' and [strModule] = 'Sales'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Purchasing')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		5,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Purchasing',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		5
+           [intSort]						=		5,
+		   [strPrefix]						=		N'AP'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'AP' WHERE [strApplicationName] = 'i21' and [strModule] = 'Purchasing'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Cash Management')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		6,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Cash Management',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		6
+           [intSort]						=		6,
+		   [strPrefix]						=		N'CM'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'CM' WHERE [strApplicationName] = 'i21' and [strModule] = 'Cash Management'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Help Desk')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		7,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Help Desk',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		7
+           [intSort]						=		7,
+		   [strPrefix]						=		N'HD'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'HD' WHERE [strApplicationName] = 'i21' and [strModule] = 'Help Desk'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Inventory')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		8,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Inventory',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		8
+           [intSort]						=		8,
+		   [strPrefix]						=		N'IC'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'IC' WHERE [strApplicationName] = 'i21' and [strModule] = 'Inventory'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Notes Receivable')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		9,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Notes Receivable',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		9
+           [intSort]						=		9,
+		   [strPrefix]						=		N'NR'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'NR' WHERE [strApplicationName] = 'i21' and [strModule] = 'Notes Receivable'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Contract Management')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		10,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Contract Management',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		10
+           [intSort]						=		10,
+		   [strPrefix]						=		N'CT'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'CT' WHERE [strApplicationName] = 'i21' and [strModule] = 'Contract Management'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Financial Report Designer')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		11,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Financial Report Designer',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		11
+           [intSort]						=		11,
+		   [strPrefix]						=		N'FRD'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'FRD' WHERE [strApplicationName] = 'i21' and [strModule] = 'Financial Report Designer'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Payroll')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		12,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Payroll',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		12
+           [intSort]						=		12,
+		   [strPrefix]						=		N'PR'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'PR' WHERE [strApplicationName] = 'i21' and [strModule] = 'Payroll'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Risk Management')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		13,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Risk Management',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		13
+           [intSort]						=		13,
+		   [strPrefix]						=		N'RK'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'RK' WHERE [strApplicationName] = 'i21' and [strModule] = 'Risk Management'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Store')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		14,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Store',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		14
+	       [intSort]						=		14,
+		   [strPrefix]						=		N'ST'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'ST' WHERE [strApplicationName] = 'i21' and [strModule] = 'Store'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Ticket Management')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		15,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Ticket Management',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		15
+	       [intSort]						=		15,
+		   [strPrefix]						=		N'GR'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'GR' WHERE [strApplicationName] = 'i21' and [strModule] = 'Ticket Management'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Logistics')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		16,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Logistics',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		16
+	       [intSort]						=		16,
+		   [strPrefix]						=		N'LG'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'LG' WHERE [strApplicationName] = 'i21' and [strModule] = 'Logistics'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Card Fueling')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		17,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Card Fueling',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		17
+	       [intSort]						=		17,
+		   [strPrefix]						=		N'CF'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'CF' WHERE [strApplicationName] = 'i21' and [strModule] = 'Card Fueling'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Entity Management')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		18,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Entity Management',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		18
+	       [intSort]						=		18,
+		   [strPrefix]						=		N'EM'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'EM' WHERE [strApplicationName] = 'i21' and [strModule] = 'Entity Management'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Manufacturing')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		19,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Manufacturing',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		19
+	       [intSort]						=		19,
+		   [strPrefix]						=		N'MF'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'MF' WHERE [strApplicationName] = 'i21' and [strModule] = 'Manufacturing'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Credit Card Recon')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		20,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Credit Card Recon',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		20
+	       [intSort]						=		20,
+		   [strPrefix]						=		N'CC'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'CC' WHERE [strApplicationName] = 'i21' and [strModule] = 'Credit Card Recon'
 		
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'AG Degree Day')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -403,13 +463,16 @@ GO
 	       [intSort]						=		41
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Patronage')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		42,
 		   [strApplicationName]				=		N'Origin',		  
 		   [strModule]						=		N'Patronage',
 		   [strAppCode]						=		N'pa',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		42
+	       [intSort]						=		42,
+		   [STR]							=		N'PAT'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'PAT' WHERE [strApplicationName] = 'Origin' and [strModule] = 'Patronage'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'PT Cop')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -574,31 +637,40 @@ GO
 	       [intSort]						=		60
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Grain')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		61,
 		   [strApplicationName]				=		N'Origin',		  
 		   [strModule]						=		N'Grain',
 		   [strAppCode]						=		N'ga',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		61
+	       [intSort]						=		61,
+		   [strPrefix]						=		N'GR'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'GR' WHERE [strApplicationName] = 'Origin' and [strModule] = 'Grain'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Accounts Payable')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		62,
 		   [strApplicationName]				=		N'Origin',		  
 		   [strModule]						=		N'Accounts Payable',
 		   [strAppCode]						=		N'ap',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		62
+	       [intSort]						=		62,
+		   [strPrefix]						=		N'AP'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'AP' WHERE [strApplicationName] = 'Origin' and [strModule] = 'Accounts Payable'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'PayRoll')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		63,
 		   [strApplicationName]				=		N'Origin',		  
 		   [strModule]						=		N'PayRoll',
 		   [strAppCode]						=		N'pr',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		63
+	       [intSort]						=		63,
+		   [strPrefix]						=		N'PR'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'PR' WHERE [strApplicationName] = 'Origin' and [strModule] = 'PayRoll'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Fixed Assets')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -664,13 +736,16 @@ GO
 	       [intSort]						=		70
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Tank Management')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		71,
 		   [strApplicationName]				=		N'Origin',		  
 		   [strModule]						=		N'Tank Management',
 		   [strAppCode]						=		N'tm',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		71
+	       [intSort]						=		71,
+		   [strPrefix]						=		N'TM'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'TM' WHERE [strApplicationName] = 'Origin' and [strModule] = 'Tank Management'
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'C-Store Host')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -781,94 +856,124 @@ GO
 	       [intSort]						=		83
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Notes Receivable')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		84,
 		   [strApplicationName]				=		N'Origin',		  
 		   [strModule]						=		N'Notes Receivable',
 		   [strAppCode]						=		N'nr',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		84
+	       [intSort]						=		84,
+		   [strPrefix]						=		N'NR'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'NR' WHERE [strApplicationName] = 'i21' and [strModule] = 'Notes Receivable'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Transports')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		85,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Transports',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		85
+	       [intSort]						=		85,
+		   [strPrefix]						=		N'TR'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'TR' WHERE [strApplicationName] = 'i21' and [strModule] = 'Transports'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Quality')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		86,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Quality',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		86
+	       [intSort]						=		86,
+		   [strPrefix]						=		N'QM'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'QM' WHERE [strApplicationName] = 'i21' and [strModule] = 'Quality'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Reporting')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		87,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Reporting',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		87
+	       [intSort]						=		87,
+		   [strPrefix]						=		N'RPT'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'RPT' WHERE [strApplicationName] = 'i21' and [strModule] = 'Reporting'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Warehouse')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		88,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Warehouse',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		88
+	       [intSort]						=		88,
+		   [strPrefix]						=		N'WH'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'WH' WHERE [strApplicationName] = 'i21' and [strModule] = 'Warehouse'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Tax Form')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		89,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'Tax Form',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		89
+	       [intSort]						=		89,
+		   [strPrefix]						=		N'TF'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'TF' WHERE [strApplicationName] = 'i21' and [strModule] = 'Tax Form'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Patronage')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		90,
 		   [strApplicationName]				=		N'i21',
 		   [strModule]						=		N'Patronage',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		90
+	       [intSort]						=		90,
+		   [strPrefix]						=		N'PAT'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'PAT' WHERE [strApplicationName] = 'i21' and [strModule] = 'Patronage'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Energy Trac')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		91,
 		   [strApplicationName]				=		N'i21',
 		   [strModule]						=		N'Energy Trac',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		91
+	       [intSort]						=		91,
+		   [strPrefix]						=		N'ET'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'ET' WHERE [strApplicationName] = 'i21' and [strModule] = 'Energy Trac'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Scale')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		92,
 		   [strApplicationName]				=		N'i21',
 		   [strModule]						=		N'Scale',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		92
+	       [intSort]						=		92,
+		   [strPrefix]						=		N'SC'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'SC' WHERE [strApplicationName] = 'i21' and [strModule] = 'Scale'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'System Manager')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		93,
 		   [strApplicationName]				=		N'i21',
 		   [strModule]						=		N'System Manager',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		0,
-	       [intSort]						=		93
+	       [intSort]						=		93,
+		   [strPrefix]						=		N'SM'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'SM' WHERE [strApplicationName] = 'i21' and [strModule] = 'System Manager'
 
    	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Technical Support')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -889,13 +994,16 @@ GO
 	       [intSort]						=		95
 
    	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Motor Fuel Tax Forms')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		96,
 		   [strApplicationName]				=		N'i21',
 		   [strModule]						=		N'Motor Fuel Tax Forms',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		0,
-	       [intSort]						=		96
+	       [intSort]						=		96,
+		   [strPrefix]						=		N'TF'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'TF' WHERE [strApplicationName] = 'i21' and [strModule] = 'Motor Fuel Tax Forms'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Technical Support')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -925,13 +1033,16 @@ GO
 	       [intSort]						=		99
 
    	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Credit Card Recon')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		100,
 		   [strApplicationName]				=		N'Origin',
 		   [strModule]						=		N'Credit Card Recon',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		0,
-	       [intSort]						=		100
+	       [intSort]						=		100,
+		   [strPrefix]						=		N'CC'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'CC' WHERE [strApplicationName] = 'Origin' and [strModule] = 'Credit Card Recon'
 
    	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'ANY' AND strModule = 'Not Supported')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -970,22 +1081,28 @@ GO
 	       [intSort]						=		104
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integration')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		105,
 		   [strApplicationName]				=		N'i21',
 		   [strModule]						=		N'Integration',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		105
+	       [intSort]						=		105,
+		   [strPrefix]						=		N'IP'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'IP' WHERE [strApplicationName] = 'i21' and [strModule] = 'Integration'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Meter Billing')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		106,
 		   [strApplicationName]				=		N'i21',
 		   [strModule]						=		N'Meter Billing',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-	       [intSort]						=		106
+	       [intSort]						=		106,
+		   [strPrefix]						=		N'MB'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'MB' WHERE [strApplicationName] = 'i21' and [strModule] = 'Meter Billing'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Depot')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
@@ -1024,13 +1141,16 @@ GO
 	       [intSort]						=		110
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'CRM')
-	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		111,
 		   [strApplicationName]				=		N'i21',		  
 		   [strModule]						=		N'CRM',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
-           [intSort]						=		111
+           [intSort]						=		111,
+		   [strPrefix]						=		N'CRM'
+	ELSE
+	UPDATE [dbo].[tblSMModule] SET [strPrefix] = N'CRM' WHERE [strApplicationName] = 'i21' and [strModule] = 'CRM'
 
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
