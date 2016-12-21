@@ -1642,7 +1642,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     method: 'get'  
                 })
                 .subscribe(
-                    successResponse => {
+                    function(successResponse) {
                         var jsonData = Ext.decode(response.responseText);
                         var tblICInventoryReceiptItems = current.tblICInventoryReceiptItems(); 
 
@@ -1660,7 +1660,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             });
                         }; 
                     }
-                    ,failureResponse => {
+                    , function(failureResponse) {
                         var jsonData = Ext.decode(failureResponse.responseText);
                         iRely.Functions.showErrorDialog(jsonData.message.statusText);
                     }
@@ -2410,7 +2410,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 method: 'get'  
             })
             .subscribe(
-                successResponse => {
+                function(successResponse) {
                     var jsonData = Ext.decode(successResponse.responseText);
                     var message = jsonData.message;
                     var receiptStatusId = message.receiptItemsStatusId;
@@ -2453,7 +2453,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         createNewVoucher();
                     }
                 }
-                ,failureResponse => {
+                ,function(failureResponse) {
                     var jsonData = Ext.decode(failureResponse.responseText);
                     iRely.Functions.showErrorDialog(jsonData.message.statusText);
                 }
@@ -2877,11 +2877,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             method: 'get'  
         })
         .subscribe(
-            successResponse => {
+            function(successResponse) {
                 var jsonData = Ext.decode(successResponse.responseText);
                 callback(jsonData);
             }
-            ,failureResponse => {
+            ,function(failureResponse) {
                 var jsonData = Ext.decode(failureResponse.responseText);
                 var message = jsonData.message; 
                 iRely.Functions.showErrorDialog(message.statusText);
@@ -5657,7 +5657,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             method: 'get'  
         })
         .subscribe(
-            successResponse => {
+            function(successResponse) {
                 var jsonData = Ext.decode(successResponse.responseText);
                 if (!jsonData.success) {
                     iRely.Functions.showErrorDialog(jsonData.message.statusText);
@@ -5670,7 +5670,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     task.delay(1700);
                 };
             }
-            ,failureResponse => {
+            ,function(failureResponse) {
                 var jsonData = Ext.decode(failureResponse.responseText);
                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
             }
@@ -5730,11 +5730,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             method: 'get'  
                         })
                         .subscribe(
-                            successResponse => {
+                            function(successResponse) {
                                 //context.configuration.paging.store.load();
                                 context.configuration.paging.store.load();
                             }
-                            ,failureResponse => {
+                            ,function(failureResponse) {
                                 var jsonData = Ext.decode(failureResponse.responseText);
                                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
                             }

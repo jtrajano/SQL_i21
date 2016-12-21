@@ -105,8 +105,8 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
         iRely.Msg.showWait('Importing in progress...');
         var a = ic.utils.ajax(options)
             //.retry(3) -- Test: will retry call three times
-            .finally(() => iRely.Msg.close())
-            .subscribe(data => {
+            .finally(function() { iRely.Msg.close(); })
+            .subscribe(function(data) {
                 var type = 'info';
                 var msg = "File imported successfully.";
                 var json = JSON.parse(data.responseText);
@@ -132,7 +132,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                     }
                 });
             },
-            error => {
+            function(error) {
                 var json = JSON.parse(error.responseText);
                 i21.functions.showCustomDialog('error', 'ok', 'Import completed with error(s)! ' + json.info,
                     function () {

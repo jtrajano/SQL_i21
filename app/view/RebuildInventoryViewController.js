@@ -114,9 +114,9 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         var verifyObs = me.verifyValuation(data.dtmStartDate);
         rebuildObs
         .flatMap(verifyObs)
-        .finally(() => iRely.Msg.close())
+        .finally(function() { iRely.Msg.close(); })
         .subscribe(
-            data => {
+            function(data) {
                 var json = JSON.parse(data.responseText);
                 if (json.success) {
                     iRely.Functions.showInfoDialog(json.message);
@@ -124,7 +124,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                 else
                     iRely.Functions.showErrorDialog(json.message);
             }, 
-            error => {
+            function(error) {
                 if(error.timedout)
                     iRely.Functions.showErrorDialog("Looks like the server is taking to long to respond, this can be caused by either poor connectivity or an error with our servers. Please try again in a while.");
                 else

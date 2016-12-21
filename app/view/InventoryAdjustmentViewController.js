@@ -941,32 +941,35 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             storageLocationId = record.get('intStorageLocationId');
         var qty = 0;
 
-        Ext.Ajax.request({
-            timeout: 120000,
-            url: '../Inventory/api/Item/GetItemStockUOMSummary?ItemId=' + itemId
-                + '&LocationId=' + locationId
-                + '&SubLocationId=' + subLocationId
-                + '&StorageLocationId=' + storageLocationId,
-            method: 'get',
-            success: function (response) {
-                var jsonData = Ext.decode(response.responseText);
-                if (jsonData.success) {
-                    if (jsonData.data.length > 0) {
-                        var stockRecord = jsonData.data[0];
+        ic.utils.ajax({
+            timeout: 120000,   
+            url: '../Inventory/api/Item/GetItemStockUOMSummary',
+            params: {
+                ItemId: itemId,
+                LocationId: locationId,
+                SubLocationId: subLocationId,
+                StorageLocationId: storageLocationId
+            } 
+        })
+        .map(function(x) { return Ext.decode(x.responseText); })
+        .subscribe(
+            function(data) {
+                if (data.success) {
+                    if (data.data.length > 0) {
+                        var stockRecord = data.data[0];
                         qty = stockRecord.dblOnHand;
                     }
                 }
                 else {
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                    iRely.Functions.showErrorDialog(data.message.statusText);
                 }
                 record.set('dblQuantity', qty);
             },
-            failure: function (response) {
-                var jsonData = Ext.decode(response.responseText);
-                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+            function(error) {
+                var json = Ext.decode(error.responseText);
+                iRely.Functions.showErrorDialog(json.ExceptionMessage);
             }
-        });
-
+        );
     },
 
     /**
