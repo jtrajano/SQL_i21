@@ -168,7 +168,7 @@ SELECT DISTINCT
 	,[strVendorLocation]						=	NULL
 	,[str1099Form]				=	D2.str1099Form			 
 	,[str1099Type]				=	D2.str1099Type      
-FROM [vyuAPChargesForBilling] A
+FROM [vyuICChargesForBilling] A
 LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
 																																						THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
 																																						ELSE  ISNULL(A.intCurrencyId,0) END) 
