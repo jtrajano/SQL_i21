@@ -83,13 +83,27 @@ SELECT @strName,strAccountNumber,@strFutMarketName,@strCommodityCode,
 		CONVERT(VARCHAR,ft.dtmFilledDate, @ConvertYear) dtmFilledDate
 FROM vyuRKLFuturePSTransaction f
 	JOIN tblRKFutOptTransaction ft on ft.intFutOptTransactionId=f.intFutOptTransactionId
-	JOIN tblRKFuturesMonth fmon on fmon.intFutureMonthId=f.intFutureMonthId
+	JOIN tblRKFuturesMonth fmon on fmon.intFutureMonthId=f.intFutureMonthId and ysnExpired = 0
 	JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=f.intBrokerageAccountId
 WHERE ft.intSelectedInstrumentTypeId=1 and ft.intInstrumentTypeId=1
 AND f.intFutureMarketId=@intFutureMarketId and f.intCommodityId=@intCommodityId and f.intEntityId = @intBrokerId 
 AND f.intBrokerageAccountId=case when isnull(@intBorkerageAccountId,0)=0 then f.intBrokerageAccountId else @intBorkerageAccountId end 
-and CONVERT(VARCHAR,ft.dtmFilledDate, @ConvertYear) <= CONVERT(VARCHAR,@dtmFilledDate, @ConvertYear) 
-AND isnull(ft.ysnFreezed,0) = 0
+AND CONVERT(VARCHAR,ft.dtmFilledDate, @ConvertYear) <= CONVERT(VARCHAR,@dtmFilledDate, @ConvertYear) AND f.strBuySell = 'B'
+GROUP BY ft.strBuySell,ft.dblPrice,fmon.strFutureMonth,convert(varchar, ft.dtmFilledDate, @ConvertYear),strAccountNumber,f.dtmFilledDate
+union
+SELECT @strName,strAccountNumber,@strFutMarketName,@strCommodityCode,
+		ft.strBuySell
+		, sum(dblBalanceLot) intNoOfContract,
+		strFutureMonth,ft.dblPrice,
+		CONVERT(VARCHAR,ft.dtmFilledDate, @ConvertYear) dtmFilledDate
+FROM vyuRKSFuturePSTransaction f
+	JOIN tblRKFutOptTransaction ft on ft.intFutOptTransactionId=f.intFutOptTransactionId
+	JOIN tblRKFuturesMonth fmon on fmon.intFutureMonthId=f.intFutureMonthId and ysnExpired = 0
+	JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=f.intBrokerageAccountId
+WHERE ft.intSelectedInstrumentTypeId=1 and ft.intInstrumentTypeId=1
+AND f.intFutureMarketId=@intFutureMarketId and f.intCommodityId=@intCommodityId and f.intEntityId = @intBrokerId 
+AND f.intBrokerageAccountId=case when isnull(@intBorkerageAccountId,0)=0 then f.intBrokerageAccountId else @intBorkerageAccountId end 
+AND CONVERT(VARCHAR,ft.dtmFilledDate, @ConvertYear) <= CONVERT(VARCHAR,@dtmFilledDate, @ConvertYear)  AND f.strBuySell = 'S'
 GROUP BY ft.strBuySell,ft.dblPrice,fmon.strFutureMonth,convert(varchar, ft.dtmFilledDate, @ConvertYear),strAccountNumber,f.dtmFilledDate
 
 
