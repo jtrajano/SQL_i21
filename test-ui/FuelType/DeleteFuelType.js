@@ -1,34 +1,89 @@
-/**
- * Created by RQuidato on 10/30/14.
- */
 StartTest (function (t) {
+    new iRely.FunctionalTest().start(t)
 
-    var engine = new iRely.TestEngine();
-    engine.start(t)
+        //region Scenario 1: Delete Unused Fuel Type
+        .displayText('===== NOTE!!! You can only execute this script when you finish executing Add Fuel Category up to Add Fuel type Script =====')
+        .displayText('=====  Scenario 1: Delete Unused Fuel Type and Remaining Fuel Type Records =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Fuel Types','Screen')
+        .waitUntilLoaded()
 
-        /*Scenario 1. Delete unused single record */
-        /* 1.  */
-        .login('ssiadmin','summit','eo').wait(1500)
-        .addFunction(function(next){t.diag("Scenario 1. Delete unused record"); next();}).wait(100)
-        .expandMenu('Inventory').wait(100)
-        .expandMenu('Maintenance').wait(200)
-        .expandMenu('RIN').wait(100)
-        .openScreen('Fuel Type').wait(200)
-        .checkScreenShown ('fueltype').wait(100)
-        .selectGridRow('#grdGridTemplate',0)
-        .clickButton('#btnDelete').wait(100)
-        .checkMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
-        .clickMessageBoxButton('no').wait(10)
-        .checkGridData('#grdGridTemplate', 0, 'colRinFuelType','f04')
-        .checkGridData('#grdGridTemplate', 0, 'colDescription','fuel 04')
-        .clickButton('#btnDelete').wait(100)
-        .checkMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
-        .clickMessageBoxButton('yes').wait(10) /*FRM-1553*/
-        .clickButton('#btnClose').wait(100)
-        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
-        .clickMessageBoxButton('yes').wait(100)
-        .checkIfScreenClosed('fueltype').wait(100)
+        .selectSearchRowNumber([1])
+        .clickButton('OpenSelected')
+        .waitUntilLoaded('icfueltype')
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded()
+        .waitUntilLoaded('icfueltype')
+        .clickButton('Close')
+        .waitUntilLoaded()
+
+        .clickButton('FuelCategory')
+        .waitUntilLoaded('icfuelcategory')
+        .selectGridRowNumber('GridTemplate',[1])
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+
+        .clickButton('FeedStock')
+        .waitUntilLoaded('icfeedstockcode')
+        .selectGridRowNumber('GridTemplate',[1])
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+
+        .clickButton('FuelCode')
+        .waitUntilLoaded('icfuelcode')
+        .selectGridRowNumber('GridTemplate',[1])
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
 
 
-        .done()
+        .clickButton('ProductionProcess')
+        .waitUntilLoaded('icprocesscode')
+        .selectGridRowNumber('GridTemplate',[1])
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+
+        .clickButton('FeedStockUOM')
+        .waitUntilLoaded('icfeedstockuom')
+        .selectGridRowNumber('GridTemplate',[1])
+        .clickButton('Delete')
+        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+
+        .displayText('=====  Scenario 1: Delete Unused Fuel Type and Remaining Fuel Type Records Done =====')
+        //endregion
+
+
+        .done();
+
 })

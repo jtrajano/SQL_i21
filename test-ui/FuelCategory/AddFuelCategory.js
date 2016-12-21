@@ -1,6 +1,21 @@
 StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
-
+    /**
+     How to Run Fuel Types Script in order:
+     *Execute in order*
+     1. AddFuelCategory
+     2. AddFeedStock
+     3. AddFuelCode
+     4. AddProductionProcess
+     5. AddFeedStockUOM
+     6. AddFuelType
+     7. DeleteFuelCategory
+     2. DeleteFeedStock
+     3. DeleteFuelCode
+     4. DeleteProductionProcess
+     5. DeleteFeedStockUOM
+     6. DeleteFuelType
+     */
         //region Scenario 1: Fuel Category - Add a Record
         .displayText('===== Scenario 1: Fuel Category - Add a Record  =====')
         .clickMenuFolder('Inventory','Folder')
@@ -15,6 +30,7 @@ StartTest (function (t) {
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
+        //endregion
         
 
         //region Scenario 2: Fuel Category - Add Multiple Records

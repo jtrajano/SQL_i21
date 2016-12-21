@@ -195,6 +195,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'FuelType/DeleteFuelType.js?v='+version,
+                title: 'DeleteFuelType',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
