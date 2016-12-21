@@ -27,7 +27,6 @@ ClientBin/
 *.dbmdl
 [Dd]ebug*/
 Desktop.ini
-*.dll
 DocProject/buildhelp/
 DocProject/Help/*.HxT
 DocProject/Help/*.HxC
