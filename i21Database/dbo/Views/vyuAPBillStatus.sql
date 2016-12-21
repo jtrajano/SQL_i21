@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuAPBillStatus]
 AS
+
 SELECT
 	A.intBillId
 	,A.strBillId
@@ -18,7 +19,8 @@ SELECT
 	,A.ysnPosted
 	,A.ysnPaid
 	,A.ysnOrigin
-	,CASE WHEN (CASE WHEN A.intTransactionType !=1 THEN A.dblPayment * -1 ELSE A.dblPayment END) != Payments.dblPayment
+	,CASE WHEN ((CASE WHEN A.intTransactionType !=1 THEN A.dblPayment * -1 ELSE A.dblPayment END) != Payments.dblPayment
+			OR A.dblPayment > 0 AND Payments.dblPayment IS NULL)
 			THEN 'Invalid Payment'
 		  WHEN (CASE WHEN A.intTransactionType !=1 THEN A.dblDiscount * -1 ELSE A.dblDiscount END) != Payments.dblDiscount 
 			THEN 'Invalid Discount'
@@ -28,7 +30,7 @@ SELECT
 			THEN 'Invalid Withheld'
 		WHEN CAST((CASE WHEN A.intTransactionType !=1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END) AS DECIMAL(18,2)) != OpenPayables.dblAmountDue 
 			THEN 'Payables amount due do not matched with voucher amount due.'
-		WHEN A.dblTotal != GLData.dblCredit THEN 'Voucher and GL amount do not match.'
+		WHEN A.dblTotal != GLData.dblCredit AND A.ysnOrigin = 0 THEN 'Voucher and GL amount do not match.'
 		WHEN A.intBillId IS NULL AND GLRecord.intTransactionId IS NOT NULL THEN 'GL Record exists but not in voucher table.'
 		WHEN (A.ysnPaid = 1 AND (CASE WHEN A.intTransactionType !=1 THEN A.dblTotal * -1 ELSE A.dblTotal END)
 				 != ((CASE WHEN A.intTransactionType !=1 THEN A.dblPayment * -1 ELSE A.dblPayment END)
@@ -103,14 +105,17 @@ OUTER APPLY (
 	SELECT
 		SUM(dblCredit) dblCredit
 	FROM tblGLDetail G
+	INNER JOIN vyuGLAccountDetail H ON G.intAccountId = H.intAccountId
 	WHERE G.strTransactionType = 'Bill'
 	AND A.strBillId = G.strTransactionId AND A.intBillId = G.intTransactionId
 	AND G.ysnIsUnposted = 0
+	AND H.intAccountCategoryId = (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account')
+	GROUP BY G.intAccountId
 ) GLData
-RIGHT JOIN (
+OUTER APPLY (
 	SELECT TOP 1 F.intTransactionId, F.strTransactionId
 	FROM tblGLDetail F
 	WHERE F.strTransactionType = 'Bill'
+	AND A.intBillId = F.intTransactionId AND A.strBillId = F.strTransactionId
 	AND F.ysnIsUnposted = 0
-) GLRecord ON A.intBillId = GLRecord.intTransactionId AND A.strBillId = GLRecord.strTransactionId
-
+) GLRecord 
