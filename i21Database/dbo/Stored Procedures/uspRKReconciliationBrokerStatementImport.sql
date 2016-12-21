@@ -82,14 +82,13 @@ SELECT @strName,strAccountNumber,@strFutMarketName,@strCommodityCode,
 		strFutureMonth,ft.dblPrice,
 		CONVERT(VARCHAR,ft.dtmFilledDate, @ConvertYear) dtmFilledDate
 FROM vyuRKLFuturePSTransaction f
-JOIN tblRKFutOptTransaction ft on ft.intFutOptTransactionId=f.intFutOptTransactionId
-JOIN tblRKFuturesMonth fmon on fmon.intFutureMonthId=f.intFutureMonthId
-JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=f.intBrokerageAccountId
-
+	JOIN tblRKFutOptTransaction ft on ft.intFutOptTransactionId=f.intFutOptTransactionId
+	JOIN tblRKFuturesMonth fmon on fmon.intFutureMonthId=f.intFutureMonthId
+	JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=f.intBrokerageAccountId
 WHERE ft.intSelectedInstrumentTypeId=1 and ft.intInstrumentTypeId=1
 AND f.intFutureMarketId=@intFutureMarketId and f.intCommodityId=@intCommodityId and f.intEntityId = @intBrokerId 
 AND f.intBrokerageAccountId=case when isnull(@intBorkerageAccountId,0)=0 then f.intBrokerageAccountId else @intBorkerageAccountId end 
-and convert(datetime,(convert(varchar, replace(f.dtmFilledDate,'-','/'), @ConvertYear)),@ConvertYear)  <= convert(datetime,(convert(varchar, replace(@dtmFilledDate,'-','/'), @ConvertYear)),@ConvertYear) 
+and CONVERT(VARCHAR,ft.dtmFilledDate, @ConvertYear) <= CONVERT(VARCHAR,@dtmFilledDate, @ConvertYear) 
 AND isnull(ft.ysnFreezed,0) = 0
 GROUP BY ft.strBuySell,ft.dblPrice,fmon.strFutureMonth,convert(varchar, ft.dtmFilledDate, @ConvertYear),strAccountNumber,f.dtmFilledDate
 
@@ -115,6 +114,7 @@ IF EXISTS(SELECT 1 FROM @ImportedRec WHERE ImportId NOT IN (SELECT ImportId FROM
 			UNION
 			SELECT 1 FROM @tblTransRec WHERE Id NOT IN (SELECT Id FROM #impRec))
 BEGIN
+
 	INSERT INTO tblRKReconciliationBrokerStatementHeader
 	(intConcurrencyId,dtmReconciliationDate,dtmFilledDate,intEntityId,intBrokerageAccountId,intFutureMarketId,intCommodityId,strImportStatus,strComments)
 	SELECT 1 AS intConcurrencyId
@@ -131,6 +131,7 @@ BEGIN
 END	
 ELSE
 BEGIN
+
 	INSERT INTO tblRKReconciliationBrokerStatementHeader
 	(intConcurrencyId,dtmReconciliationDate,dtmFilledDate,intEntityId,intBrokerageAccountId,intFutureMarketId,intCommodityId,strImportStatus,strComments)
 	SELECT 1 AS intConcurrencyId
@@ -145,15 +146,17 @@ BEGIN
 	SET @intReconciliationBrokerStatementHeaderId=SCOPE_IDENTITY()
 	SET @strStatus = 'Success'
 
-	UPDATE tblRKFutOptTransaction set ysnFreezed=1 where intFutureMarketId=@intFutureMarketId and intCommodityId=@intCommodityId and intEntityId = @intBrokerId 
-	AND dtmFilledDate <= @dtmFilledDate AND intBrokerageAccountId=case when isnull(@intBorkerageAccountId,0)=0 then intBrokerageAccountId else @intBorkerageAccountId end 
+	UPDATE tblRKFutOptTransaction set ysnFreezed=1 
+    where intFutureMarketId=@intFutureMarketId and intCommodityId=@intCommodityId and intEntityId = @intBrokerId 
+	AND CONVERT(VARCHAR,dtmFilledDate, @ConvertYear) <= CONVERT(VARCHAR,@dtmFilledDate, @ConvertYear)  AND intBrokerageAccountId= case when isnull(@intBorkerageAccountId,0)=0 then intBrokerageAccountId else @intBorkerageAccountId end 
+	and intInstrumentTypeId=1  and intSelectedInstrumentTypeId = 1 and isnull(ysnFreezed,0) = 0
 
 END
 
 INSERT INTO tblRKReconciliationBrokerStatement
 (intReconciliationBrokerStatementHeaderId,intConcurrencyId,strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,strErrMessage)
 
-SELECT @intReconciliationBrokerStatementHeaderId,1 AS intConcurrencyId,strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate, strErrMessage
+SELECT @intReconciliationBrokerStatementHeaderId,1 AS intConcurrencyId,strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,convert(datetime,(convert(varchar, replace(dtmFilledDate,'-','/'), @ConvertYear)),@ConvertYear) , strErrMessage
 FROM 
 (
 	SELECT *,'Failed' AS strErrMessage FROM @ImportedRec WHERE ImportId NOT IN (SELECT ImportId FROM #impRec)
