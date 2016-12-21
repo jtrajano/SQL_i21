@@ -2374,3 +2374,8 @@ SET ysnPickByLotCode = 0
 	,intLotCodeNoOfDigits = 5
 WHERE ysnPickByLotCode IS NULL
 Go
+GO
+UPDATE tblMFCompanyPreference
+SET ysnDisplayRecipeTitleByItem = 0
+WHERE ysnDisplayRecipeTitleByItem IS NULL
+GO
