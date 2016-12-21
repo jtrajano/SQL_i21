@@ -103,7 +103,7 @@ BEGIN
 	SELECT @receiptAmount = SUM(A.dblLineTotal) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
 	
 	SELECT @totalCharges = ISNULL((SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00)),0.00)
-	FROM vyuAPChargesForBilling WHERE intInventoryReceiptId = @receiptId
+	FROM vyuICChargesForBilling WHERE intInventoryReceiptId = @receiptId
 	
 	SELECT @totalLineItem =  SUM(A.dblLineTotal)
 	FROM tblICInventoryReceiptItem A 
@@ -348,8 +348,8 @@ BEGIN
 		[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
 		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]				=	NULL,
-		[dblQtyOrdered]				=	1,
-		[dblQtyReceived]			=	1,
+		[dblQtyOrdered]				=	A.dblOrderQty,
+		[dblQtyReceived]			=	A.dblQuantityToBill,
 		[dblTax]					=	ISNULL(A.dblTax,0),
 		[dblRate]					=	ISNULL(G.dblRate,0),
 		[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
@@ -376,7 +376,7 @@ BEGIN
 		[intStorageLocationId]		=	NULL,
 		[int1099Form]				=	0,
 		[int1099Category]			=	0       
-	FROM [vyuAPChargesForBilling] A
+	FROM [vyuICChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
