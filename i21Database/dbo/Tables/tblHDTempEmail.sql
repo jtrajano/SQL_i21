@@ -17,6 +17,7 @@
 	[intAttemp] [int] NOT NULL default 0,
 	[dtmCreated] [datetime] NOT NULL,
 	[dtmSent] [datetime] NULL,
+	[strSendingStatus] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'ready',
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblHDTempEmail] PRIMARY KEY CLUSTERED 
 (
