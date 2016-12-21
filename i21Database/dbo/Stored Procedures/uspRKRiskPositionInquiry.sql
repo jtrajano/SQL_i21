@@ -594,11 +594,14 @@ FROM(
 GROUP BY Selection,PriceStatus,strAccountNumber,strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
 
 -----Outright coverage (Weeks) ------------
-INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
-SELECT CASE WHEN @strRiskView='Processor' THEN 'Outright coverage(Weeks)' ELSE 'Net market risk(Weeks)' END AS Selection,'Net market risk(Weeks)' as PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract)/@intForecastWeeklyConsumption,strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
-		,intContractHeaderId,intFutOptTransactionHeaderId FROM @List 
-WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
-GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
+if (@strRiskView = 'Processor')
+BEGIN
+	INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
+	SELECT CASE WHEN @strRiskView='Processor' THEN 'Outright coverage(Weeks)' ELSE 'Net market risk(Weeks)' END AS Selection,'Net market risk(Weeks)' as PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract)/@intForecastWeeklyConsumption,strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
+			,intContractHeaderId,intFutOptTransactionHeaderId FROM @List 
+	WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
+	GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
+END
 --- Switch Position ---------
 INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract),strTradeNo,TransactionDate,TranType,CustVendor,(dblNoOfLot), (dblQuantity),intContractHeaderId,intFutOptTransactionHeaderId  
@@ -641,7 +644,6 @@ update @List set strFutureMonth=@strFutureMonth where Selection=case when @strRi
        BEGIN
               DELETE FROM @List where Selection like '%F&O%'
        END
-       --select * from @List
 update @List set intOrderByHeading=1 WHERE Selection in ('Physical position / Differential cover','Physical position / Basis risk')
 update @List set intOrderByHeading=2 WHERE Selection = 'Specialities & Low grades'
 update @List set intOrderByHeading=3 WHERE Selection = 'Total speciality delta fixed'
