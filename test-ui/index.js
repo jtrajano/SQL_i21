@@ -215,6 +215,14 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'InventoryUOM/DeleteInventoryUOM.js?v='+version,
+                title: 'DeleteInventoryUOM',
+
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
