@@ -35,3 +35,5 @@ select
 	'' as Authority1,
 	'' as Authority2
 	from tblSMCompanyLocation a
+		join tblETExportFilterLocation b
+			on a.intCompanyLocationId = b.intCompanyLocationId
