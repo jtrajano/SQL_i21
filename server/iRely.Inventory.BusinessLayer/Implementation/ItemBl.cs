@@ -232,9 +232,9 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemStock>()
                 .Where(
-                    p => p.strType == "Inventory" ||
+                    p => (p.strType == "Inventory" ||
                     p.strType == "Finished Good" ||
-                    p.strType == "Raw Material"
+                    p.strType == "Raw Material") && p.intLocationId != null
                 )
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
