@@ -24,6 +24,7 @@
 	intDefSalespersonId	INT,
 	dtmDefEndDate DATETIME,
 	[strSignature] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	strDefPackingDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
