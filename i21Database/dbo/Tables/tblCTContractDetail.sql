@@ -70,6 +70,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [intDestinationCityId] INT NULL, 
     [intShipperId] INT NULL, 
 	[strRemark] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[intSubLocationId] INT,
+	[intStorageLocationId] INT,
 
 	[intFarmFieldId] INT NULL,
 	[intSplitId] INT NULL,
