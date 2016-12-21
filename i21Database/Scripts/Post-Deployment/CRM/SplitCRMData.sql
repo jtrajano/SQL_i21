@@ -12,6 +12,16 @@ BEGIN
 
 end
 
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDProject'))
+BEGIN
+
+	IF not EXISTS(SELECT * FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblHDProject' AND COLUMN_NAME = 'strProjectStatus')
+	begin
+		exec('ALTER TABLE tblHDProject ADD strProjectStatus VARCHAR(255) null;')
+	end
+
+end
+
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketPriority'))
 BEGIN
 
