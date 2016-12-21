@@ -176,6 +176,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'FeedStockUOM/DeleteFeedStockUOM.js?v='+version,
+                title: 'DeleteFeedStockUOM',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
