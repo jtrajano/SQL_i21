@@ -181,9 +181,6 @@ BEGIN TRY
 	WHERE ISNULL(strComments, '') <> ''
 	ORDER BY intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId
 
-	DECLARE @Count INT
-	SELECT @Count = COUNT(*) FROM #tmpComment
-
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpComment)
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1
@@ -197,7 +194,7 @@ BEGIN TRY
 					AND intEntitySalespersonId = @EntitySalespersonId
 		)
 		BEGIN
-			SET @concatComment += ''
+			SET @concatComment = ''
 		END
 
 		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId
@@ -245,8 +242,6 @@ BEGIN TRY
 	WHERE ISNULL(strBOLNumber, '') <> ''
 	ORDER BY intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId
 
-	SELECT @Count = COUNT(*) FROM #tmpBOL
-
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpBOL)
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1
@@ -260,7 +255,7 @@ BEGIN TRY
 					AND intEntitySalespersonId = @EntitySalespersonId
 		)
 		BEGIN
-			SET @concatBOLNumber += ''
+			SET @concatBOLNumber = ''
 		END
 
 		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId
@@ -307,9 +302,7 @@ BEGIN TRY
 	FROM #tmpSourceTable
 	WHERE ISNULL(strPONumber, '') <> ''
 	ORDER BY intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId
-
-	SELECT @Count = COUNT(*) FROM #tmpPO
-
+	
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpPO)
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1
@@ -323,7 +316,7 @@ BEGIN TRY
 					AND intEntitySalespersonId = @EntitySalespersonId
 		)
 		BEGIN
-			SET @concatPONumber += ''
+			SET @concatPONumber = ''
 		END
 
 		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId
