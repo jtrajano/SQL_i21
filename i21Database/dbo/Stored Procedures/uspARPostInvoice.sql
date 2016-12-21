@@ -3282,8 +3282,10 @@ IF @post = 1
 				INNER JOIN
 					@ItemsForPost SIFP
 						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
-						AND ICIT.[strTransactionId] = SIFP.[strTransactionId] 
-						AND @recap  = 1
+						AND ICIT.[strTransactionId] = SIFP.[strTransactionId]
+						AND ICIT.[ysnIsUnposted] <> 1
+						AND @recap = 1
+						AND @post = 1
 					
 			END TRY
 			BEGIN CATCH
@@ -3407,7 +3409,9 @@ IF @post = 1
 					@InTransitItems SIFP
 						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
 						AND ICIT.[strTransactionId] = SIFP.[strTransactionId] 
-						AND @recap  = 1
+						AND ICIT.[ysnIsUnposted] <> 1
+						AND @recap = 1
+						AND @post = 1
 			END
 		END TRY 
 		BEGIN CATCH
@@ -3571,7 +3575,9 @@ IF @post = 1
 					@StorageItemsForPost SIFP
 						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
 						AND ICIT.[strTransactionId] = SIFP.[strTransactionId] 
-						AND @recap  = 1
+						AND ICIT.[ysnIsUnposted] <> 1
+						AND @recap = 1
+						AND @post = 1
 					
 			END TRY
 			BEGIN CATCH
