@@ -1,72 +1,119 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATPostCancelEquity]
-	@intCancelId INT = NULL,
-	@ysnPosted BIT = NULL
+	@intCancelEquityId INT = NULL,
+	@ysnPosted BIT = NULL,
+	@intUserId INT = NULL,
+	@batchIdUsed NVARCHAR(40) = NULL OUTPUT,
+	@successfulCount INT = 0 OUTPUT,
+	@invalidCount INT = 0 OUTPUT,
+	@success BIT = 0 OUTPUT 
 AS
 BEGIN
-		SELECT CE.intCancelId,
-			   CED.intCustomerId,
-			   CED.intFiscalYearId,
-			   CED.dblQuantityAvailable,
-			   CED.dblQuantityCancelled
-		  INTO #tempStatus
-		  FROM tblPATCancelEquity CE
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
+
+--DECLARE VARIABLES
+DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.';
+DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.';
+DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage';
+DECLARE @SCREEN_NAME NVARCHAR(25) = 'Cancel Equity';
+DECLARE @totalRecords INT;
+DECLARE @GLEntries AS RecapTableType;
+DECLARE @error NVARCHAR(200);
+DECLARE @dateToday AS DATETIME = GETDATE();
+DECLARE @batchId NVARCHAR(40);
+
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
+SET @batchIdUsed = @batchId;
+
+	SELECT	CE.intCancelEquityId,
+			CE.dtmCancelDate,
+			CE.strCancelNo,
+			CE.strDescription,
+			CE.strCancelBy,
+			CE.dblCancelByValue,
+			CE.ysnPosted,
+			CED.intCancelEquityDetailId,
+			CED.intFiscalYearId,
+			CED.intCustomerId,
+			CED.strEquityType,
+			CED.intRefundTypeId,
+			CED.dblQuantityAvailable,
+			CED.dblQuantityCancelled
+	INTO #tempCancelEquity
+	FROM tblPATCancelEquity CE
 	INNER JOIN tblPATCancelEquityDetail CED
-			ON CED.intCancelId = CE.intCancelId
+		ON CED.intCancelEquityId = CE.intCancelEquityId
+	WHERE CE.intCancelEquityId = @intCancelEquityId
 
-		DECLARE @intCustomerId INT,
-				@intFiscalYearId NVARCHAR(MAX),
-				@dblQuantityAvailable NUMERIC(18,6),
-				@dblQuantityCancelled NUMERIC(18,6)
+	SELECT @totalRecords = COUNT(*) FROM #tempCancelEquity
 
-		IF(@ysnPosted = 1)
-		BEGIN
-			DECLARE equityCursor CURSOR FOR 	
-			SELECT DISTINCT intCustomerId, intFiscalYearId, dblQuantityAvailable, dblQuantityCancelled FROM #tempStatus
-			OPEN equityCursor
-			FETCH NEXT FROM equityCursor into @intCustomerId, @intFiscalYearId, @dblQuantityAvailable, @dblQuantityCancelled
-			WHILE (@@FETCH_STATUS <> -1)
-			BEGIN
-				UPDATE tblPATCustomerEquity
-				   SET dblEquity = @dblQuantityAvailable - @dblQuantityCancelled
-				 WHERE intCustomerId = @intCustomerId
-				   AND intFiscalYearId = @intFiscalYearId
+	BEGIN TRANSACTION
+	---------------- BEGIN - GET GL ENTRIES ----------------
+	IF(@ysnPosted = 1)
+	BEGIN
+		INSERT INTO @GLEntries
+		SELECT * FROM [dbo].[fnPATCreateCancelEquityGLEntries](@intCancelEquityId, @batchId, @intUserId)
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @GLEntries
+		SELECT * FROM [dbo].[fnPATReverseCancelEquityGLEntries](@intCancelEquityId, @dateToday, @batchId, @intUserId)
 
-				FETCH NEXT FROM equityCursor into @intCustomerId, @intFiscalYearId, @dblQuantityAvailable, @dblQuantityCancelled
-			END
-			CLOSE equityCursor
-			DEALLOCATE equityCursor
+		
+		UPDATE tblGLDetail SET ysnIsUnposted = 1
+		WHERE intTransactionId = @intCancelEquityId 
+		AND strModuleName = @MODULE_NAME AND strTransactionForm = @SCREEN_NAME
+	END
+	---------------- END - GET GL ENTRIES ----------------
 
-			UPDATE tblPATCancelEquity
-				SET ysnPosted = 1
-				WHERE intCancelId = @intCancelId
+	---------------- BEGIN - BOOK GL ----------------
+	BEGIN TRY
+		SELECT * FROM @GLEntries
+		EXEC uspGLBookEntries @GLEntries, @ysnPosted
+	END TRY
+	BEGIN CATCH
+		SET @error = ERROR_MESSAGE()
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback
+	END CATCH
+	---------------- END - BOOK GL ----------------
 
-		END
-		ELSE
-		BEGIN
-			
-			DECLARE equityCursor CURSOR FOR 	
-			SELECT DISTINCT intCustomerId, intFiscalYearId, dblQuantityAvailable, dblQuantityCancelled FROM #tempStatus
-			OPEN equityCursor
-			FETCH NEXT FROM equityCursor into @intCustomerId, @intFiscalYearId, @dblQuantityAvailable, @dblQuantityCancelled
-			WHILE (@@FETCH_STATUS <> -1)
-			BEGIN
-				UPDATE tblPATCustomerEquity
-				   SET dblEquity = @dblQuantityAvailable
-				 WHERE intCustomerId = @intCustomerId
-				   AND intFiscalYearId = @intFiscalYearId
+	---------------- BEGIN - UPDATE TABLES ----------------
+	UPDATE tblPATCancelEquity SET ysnPosted = @ysnPosted
+		WHERE intCancelEquityId = @intCancelEquityId
 
-				FETCH NEXT FROM equityCursor into @intCustomerId, @intFiscalYearId, @dblQuantityAvailable, @dblQuantityCancelled
-			END
-			CLOSE equityCursor
-			DEALLOCATE equityCursor
+	UPDATE CE
+	SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempCE.dblQuantityCancelled ELSE CE.dblEquity + tempCE.dblQuantityCancelled END
+	FROM tblPATCustomerEquity AS CE
+	INNER JOIN #tempCancelEquity AS tempCE
+		ON CE.intCustomerId = tempCE.intCustomerId AND CE.intFiscalYearId = tempCE.intFiscalYearId AND CE.intRefundTypeId = tempCE.intRefundTypeId 
+			AND CE.strEquityType = tempCE.strEquityType AND CE.ysnEquityPaid <> 1
 
-			UPDATE tblPATCancelEquity
-				SET ysnPosted = 0
-				WHERE intCancelId = @intCancelId
+	---------------- END - UPDATE TABLES ----------------
 
-		DROP TABLE #tempStatus
 
-		END
+IF @@ERROR <> 0	GOTO Post_Rollback;
+
+GOTO Post_Commit;
+
+Post_Commit:
+	COMMIT TRANSACTION
+	SET @success = 1
+	SET @successfulCount = @totalRecords
+	GOTO Post_Exit
+
+Post_Rollback:
+	ROLLBACK TRANSACTION	
+	SET @success = 0
+	GOTO Post_Exit
+
+Post_Exit:
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempCancelEquity')) DROP TABLE #tempCancelEquity
 END
-
-GO

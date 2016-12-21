@@ -4634,6 +4634,8 @@
     <Build Include="dbo\Tables\tblRKReconciliationBrokerStatementImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFreezeFutOptTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReconciliationBrokerStatementImport.sql" />
+    <Build Include="dbo\Functions\fnPATCreateCancelEquityGLEntries.sql" />
+    <Build Include="dbo\Functions\fnPATReverseCancelEquityGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
