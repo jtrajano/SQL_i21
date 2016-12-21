@@ -110,3 +110,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'REST
 BEGIN
 	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('RESTRICTED','REPACK',0,1,'dbo',GETDATE())
 END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'BONDED' AND strDisplayMember = 'BONDED')
+BEGIN
+	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('BONDED','BONDED',0,1,'dbo',GETDATE())
+END
