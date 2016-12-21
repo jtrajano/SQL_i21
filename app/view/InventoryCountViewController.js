@@ -436,11 +436,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     },
 
     getTotalLocationStockOnHand: function (intLocationId, intItemId, callback) {
-        Ext.Ajax.request({
+        ic.utils.ajax({
             timeout: 120000,
-            url: '../Inventory/api/ItemStock/GetLocationStockOnHand?intLocationId=' + intLocationId + '&intItemId=' + intItemId,
-            method: 'get',
-            success: function (response) {
+            url: '../Inventory/api/ItemStock/GetLocationStockOnHand',
+            params: {
+                intLocationId: intLocationId,
+                intItemId: intItemId
+            }
+        })
+        .subscribe(
+            function(response) {
                 var jsonData = Ext.decode(response.responseText);
                 if (jsonData.success) {
                     if(jsonData.data.length > 0)
@@ -450,11 +455,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 } else
                     callback(0);
             },
-            failure: function (response) {
-                var jsonData = Ext.decode(response.responseText);
+            function(error) {
+                var jsonData = Ext.decode(error.responseText);
                 callback(jsonData.ExceptionMessage, true);
             }
-        });
+        );
     },
 
     createLineItemRecord: function (config, action) {
