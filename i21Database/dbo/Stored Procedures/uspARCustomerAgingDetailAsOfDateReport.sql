@@ -340,7 +340,8 @@ WHERE I.ysnPosted  = 1
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 
  AND I.dblInvoiceTotal - (ISNULL(TOTALPAYMENT.dblPayment, 0) + ISNULL(TOTALSETTLEMENT.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)) <> 0
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
- AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))) AS A    
+ --AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ ) AS A    
 
 LEFT JOIN
     
@@ -577,7 +578,8 @@ WHERE I.ysnPosted  = 1
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 
  AND I.dblInvoiceTotal - (ISNULL(TOTALPAYMENT.dblPayment, 0) + ISNULL(TOTALSETTLEMENT.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)) <> 0
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
- AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))) AS TBL) AS B    
+ --AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ ) AS TBL) AS B    
 
 ON
 A.intEntityCustomerId	 = B.intEntityCustomerId
