@@ -109,7 +109,9 @@
 	,@ItemSubCurrencyId				INT				= NULL
 	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@DocumentMaintenanceId			INT				= NULL
-	,@StorageScheduleTypeId			INT				= NULL
+	,@ItemStorageScheduleTypeId		INT				= NULL
+	,@ItemDestinationGradeId		INT				= NULL
+	,@ItemDestinationWeightId		INT				= NULL
 	,@UseOriginIdAsInvoiceNumber    BIT				= 0
 AS
 
@@ -578,6 +580,9 @@ BEGIN TRY
 		,@ItemConversionAccountId		= @ItemConversionAccountId
 		,@ItemSubCurrencyId				= @ItemSubCurrencyId
 		,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
+		,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
+		,@ItemDestinationGradeId		= @ItemDestinationGradeId
+		,@ItemDestinationWeightId		= @ItemDestinationWeightId
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

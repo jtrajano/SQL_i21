@@ -56,6 +56,10 @@ SELECT
     ,[strBillToState]			= ARC.[strBillToState]
     ,[strBillToZipCode]			= ARC.[strBillToZipCode]
     ,[strBillToCountry]			= ARC.[strBillToCountry]
+	,[intDestinationGradeId]	= CustCon.[intDestinationGradeId]
+	,[strDestinationGrade]		= CustCon.[strDestinationGrade]
+	,[intDestinationWeightId]	= CustCon.[intDestinationWeightId]
+	,[strDestinationWeight]		= CustCon.[strDestinationWeight]
 
 FROM [vyuARCustomerContract] CustCon
 INNER JOIN [vyuARCustomerSearch] ARC ON CustCon.intEntityCustomerId = ARC.intEntityCustomerId

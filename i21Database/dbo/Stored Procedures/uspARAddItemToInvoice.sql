@@ -56,7 +56,6 @@
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL	
 	,@ItemCustomerStorageId			INT				= NULL		
-	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL			
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
@@ -73,7 +72,9 @@
 	,@EntitySalespersonId			INT				= NULL
 	,@ItemSubCurrencyId				INT				= NULL
 	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
-	,@StorageScheduleTypeId			INT				= NULL
+	,@ItemStorageScheduleTypeId		INT				= NULL
+	,@ItemDestinationGradeId		INT				= NULL
+	,@ItemDestinationWeightId		INT				= NULL
 AS
 
 BEGIN
@@ -183,6 +184,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemIsBlended					= @ItemIsBlended
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
+			,@ItemDestinationGradeId		= @ItemDestinationGradeId
+			,@ItemDestinationWeightId		= @ItemDestinationWeightId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -249,7 +252,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intCommentTypeId]
 				,[dblMargin]
 				,[dblRecipeQuantity]
-				,[intStorageScheduleTypeId])
+				,[intStorageScheduleTypeId]
+				,[intDestinationGradeId]
+				,[intDestinationWeightId])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -294,6 +299,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemMargin
 				,@ItemRecipeQty
 				,@ItemStorageScheduleTypeId
+				,@ItemDestinationGradeId
+				,@ItemDestinationWeightId
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -354,7 +361,7 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemMargin					= @ItemMargin
 			,@ItemRecipeQty					= @ItemRecipeQty
 			,@ItemConversionAccountId		= @ItemConversionAccountId
-			,@StorageScheduleTypeId			= @StorageScheduleTypeId
+			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN

@@ -4653,6 +4653,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertPriceProfileRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPaycheckMiddleReport.sql" />
     <Build Include="dbo\Views\vyuLGUnAllocatedContracts.sql" />
+    <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

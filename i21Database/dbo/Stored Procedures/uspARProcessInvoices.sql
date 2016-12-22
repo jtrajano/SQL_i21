@@ -245,7 +245,9 @@ DECLARE  @Id									INT
 		,@ItemSubCurrencyRate					NUMERIC(18, 8)
 		,@ItemIsBlended							BIT
 		,@ItemConversionAccountId				INT
-		,@StorageScheduleTypeId					INT
+		,@ItemStorageScheduleTypeId				INT
+		,@ItemDestinationGradeId				INT
+		,@ItemDestinationWeightId				INT
 
 --INSERT
 BEGIN TRY
@@ -388,9 +390,11 @@ BEGIN
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
 		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE NULL END)
 		,@ItemSubCurrencyRate			= (CASE WHEN @GroupingOption = 0 THEN [dblSubCurrencyRate] ELSE 1 END)
-		,@ItemIsBlended					= [ysnBlended]
+		,@ItemIsBlended					= (CASE WHEN @GroupingOption = 0 THEN [ysnBlended] ELSE 0 END)
 		,@ItemConversionAccountId		= (CASE WHEN @GroupingOption = 0 THEN [intConversionAccountId] ELSE NULL END)
-		,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
+		,@ItemStorageScheduleTypeId		= (CASE WHEN @GroupingOption = 0 THEN [intStorageScheduleTypeId] ELSE NULL END)
+		,@ItemDestinationGradeId		= (CASE WHEN @GroupingOption = 0 THEN [intDestinationGradeId] ELSE NULL END)
+		,@ItemDestinationWeightId		= (CASE WHEN @GroupingOption = 0 THEN [intDestinationWeightId] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -595,6 +599,9 @@ BEGIN
 			,@ItemConversionAccountId		= @ItemConversionAccountId
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
 			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
+			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
+			,@ItemDestinationGradeId		= @ItemDestinationGradeId
+			,@ItemDestinationWeightId		= @ItemDestinationWeightId
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -732,7 +739,9 @@ BEGIN
 					,@ItemSubCurrencyId				= [intSubCurrencyId]
 					,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
 					,@ItemIsBlended					= [ysnBlended]
-					,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
+					,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
+					,@ItemDestinationGradeId		= [intDestinationGradeId]
+					,@ItemDestinationWeightId		= [intDestinationWeightId]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -809,7 +818,9 @@ BEGIN
 						,@ItemSubCurrencyId				= @ItemSubCurrencyId
 						,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 						,@ItemIsBlended					= @ItemIsBlended
-						,@StorageScheduleTypeId			= @StorageScheduleTypeId
+						,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
+						,@ItemDestinationGradeId		= @ItemDestinationGradeId
+						,@ItemDestinationWeightId		= @ItemDestinationWeightId
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1336,7 +1347,9 @@ BEGIN TRY
 						,@ItemConversionAccountId		= [intConversionAccountId]
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
 						,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
-						,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
+						,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
+						,@ItemDestinationGradeId		= [intDestinationGradeId]
+						,@ItemDestinationWeightId		= [intDestinationWeightId]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1407,7 +1420,9 @@ BEGIN TRY
 							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 							,@ItemWeightUOMId				= @ItemWeightUOMId
 							,@ItemWeight					= @ItemWeight
-							,@StorageScheduleTypeId			= @StorageScheduleTypeId
+							,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
+							,@ItemDestinationGradeId		= @ItemDestinationGradeId
+							,@ItemDestinationWeightId		= @ItemDestinationWeightId
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
@@ -1585,7 +1600,9 @@ BEGIN TRY
 					,@ItemConversionAccountId		= [intConversionAccountId]
 					,@ItemSubCurrencyId				= [intSubCurrencyId]
 					,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
-					,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
+					,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
+					,@ItemDestinationGradeId		= [intDestinationGradeId]
+					,@ItemDestinationWeightId		= [intDestinationWeightId]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1697,7 +1714,9 @@ BEGIN TRY
 						,@ItemSubCurrencyId						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyId ELSE [intSubCurrencyId] END
 						,@ItemSubCurrencyRate					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyRate ELSE [dblSubCurrencyRate] END
 						,[intConcurrencyId]						= [intConcurrencyId] + 1
-						,[intStorageScheduleTypeId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @StorageScheduleTypeId ELSE [intStorageScheduleTypeId] END
+						,[intStorageScheduleTypeId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemStorageScheduleTypeId ELSE [intStorageScheduleTypeId] END
+						,[intDestinationGradeId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDestinationGradeId ELSE [intDestinationGradeId] END
+						,[intDestinationWeightId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDestinationWeightId ELSE [intDestinationWeightId] END
 					WHERE
 						[intInvoiceId] = @ExistingInvoiceId
 						AND [intInvoiceDetailId] = @InvoiceDetailId						

@@ -168,4 +168,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
     ,[intConversionAccountId]                INT                                            NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
 
 	,[intStorageScheduleTypeId]				INT												NULL		-- Indicates the Grain Bank of an Item
+	,[intDestinationGradeId]				INT												NULL		-- Key Value from tblCTWeightGrade (Grain Destination - Grade)
+	,[intDestinationWeightId]				INT												NULL		-- Key Value from tblCTWeightGrade (Grain Destination - Weight)
 )

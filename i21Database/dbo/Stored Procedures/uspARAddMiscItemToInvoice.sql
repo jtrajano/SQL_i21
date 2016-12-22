@@ -27,7 +27,9 @@
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@RecomputeTax					BIT				= 1
 	,@ItemConversionAccountId		INT				= NULL
-	,@StorageScheduleTypeId			INT				= NULL
+	,@ItemStorageScheduleTypeId		INT				= NULL
+	,@ItemDestinationGradeId		INT				= NULL
+	,@ItemDestinationWeightId		INT				= NULL
 AS
 
 BEGIN
@@ -151,7 +153,9 @@ BEGIN TRY
 		,[dblRecipeQuantity]
 		,[intConversionAccountId]
 		,[intConcurrencyId]
-		,[intStorageScheduleTypeId])
+		,[intStorageScheduleTypeId]
+		,[intDestinationGradeId]
+		,[intDestinationWeightId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -211,7 +215,9 @@ BEGIN TRY
 		,[dblRecipeQuantity]				= @ItemRecipeQty
 		,[intConversionAccountId]			= @ItemConversionAccountId
 		,[intConcurrencyId]					= 0
-		,[intStorageScheduleTypeId]			= @StorageScheduleTypeId
+		,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
+		,[intDestinationGradeId]			= @ItemDestinationGradeId
+		,[intDestinationWeightId]			= @ItemDestinationWeightId
 			
 END TRY
 BEGIN CATCH
