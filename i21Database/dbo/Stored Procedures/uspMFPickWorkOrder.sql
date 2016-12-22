@@ -662,7 +662,8 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+					AND R.strInternalCode = 'STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
@@ -764,7 +765,8 @@ BEGIN TRY
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
-			JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				AND R.strInternalCode = 'STOCK'
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
@@ -870,7 +872,8 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+					AND R.strInternalCode = 'STOCK'
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
@@ -1170,7 +1173,8 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R on R.intRestrictionId =SL.intRestrictionId and R.strInternalCode ='STOCK'
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+					AND R.strInternalCode = 'STOCK'
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
@@ -1190,6 +1194,47 @@ BEGIN TRY
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 						ELSE CONVERT(INT, Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
 						END ASC
+			END
+		END
+
+		IF EXISTS (
+				SELECT SUM(dblQty)
+				FROM @tblLot
+				HAVING SUM(dblQty) < [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
+				)
+		BEGIN
+			IF @ysnExcessConsumptionAllowed = 0
+			BEGIN
+				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty))
+				FROM @tblLot
+
+				SELECT @strReqQty = CONVERT(DECIMAL(24, 4), @dblReqQty)
+
+				SELECT @strItemNo = strItemNo
+				FROM dbo.tblICItem
+				WHERE intItemId = @intItemId
+
+				DECLARE @intUnitMeasureId INT
+					,@strUnitMeasure NVARCHAR(50)
+
+				SELECT @intUnitMeasureId = intUnitMeasureId
+				FROM dbo.tblICItemUOM
+				WHERE intItemUOMId = @intItemUOMId
+
+				SELECT @strUnitMeasure = ' ' + strUnitMeasure
+				FROM dbo.tblICUnitMeasure
+				WHERE intUnitMeasureId = @intUnitMeasureId
+
+				RAISERROR (
+						51096
+						,11
+						,1
+						,@strItemNo
+						,@strQty
+						,@strUnitMeasure
+						,@strReqQty
+						,@strUnitMeasure
+						)
 			END
 		END
 
@@ -1220,40 +1265,7 @@ BEGIN TRY
 					HAVING SUM(dblQty) < [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
 					)
 			BEGIN
-				IF @ysnExcessConsumptionAllowed = 0
-				BEGIN
-					SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty))
-					FROM @tblLot
-
-					SELECT @strReqQty = CONVERT(DECIMAL(24, 4), @dblReqQty)
-
-					SELECT @strItemNo = strItemNo
-					FROM dbo.tblICItem
-					WHERE intItemId = @intItemId
-
-					DECLARE @intUnitMeasureId INT
-						,@strUnitMeasure NVARCHAR(50)
-
-					SELECT @intUnitMeasureId = intUnitMeasureId
-					FROM dbo.tblICItemUOM
-					WHERE intItemUOMId = @intItemUOMId
-
-					SELECT @strUnitMeasure = ' ' + strUnitMeasure
-					FROM dbo.tblICUnitMeasure
-					WHERE intUnitMeasureId = @intUnitMeasureId
-
-					RAISERROR (
-							51096
-							,11
-							,1
-							,@strItemNo
-							,@strQty
-							,@strUnitMeasure
-							,@strReqQty
-							,@strUnitMeasure
-							)
-				END
-				ELSE
+				IF @ysnExcessConsumptionAllowed = 1
 				BEGIN
 					SELECT @dblAdjustByQuantity = [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblReqQty) - SUM(dblQty)
 					FROM @tblLot
