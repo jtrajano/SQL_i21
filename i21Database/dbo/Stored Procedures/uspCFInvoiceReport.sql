@@ -181,6 +181,13 @@ BEGIN
 			 @strPrintTimeStamp = [from]
 		FROM @temp_params WHERE [fieldname] = 'strPrintTimeStamp'
 
+
+		DECLARE @InvoiceDate NVARCHAR(MAX)
+		SELECT TOP 1
+			 @InvoiceDate = [from]
+		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
+		
+
 		--NON DISTRIBUTION LIST
 		SELECT TOP 1
 			 @From = [from]
@@ -295,6 +302,7 @@ BEGIN
 				BEGIN
 					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 
@@ -332,6 +340,7 @@ BEGIN
 
 					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
@@ -366,4 +375,4 @@ BEGIN
 	END
     
 END
-
+GO
