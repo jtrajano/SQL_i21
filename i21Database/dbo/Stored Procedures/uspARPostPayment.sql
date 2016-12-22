@@ -679,6 +679,32 @@ SET @batchIdUsed = @batchId
 					B.dblPayment <> 0 
 					AND C.ysnPaid = 0 
 					AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) < ((B.dblPayment - B.dblInterest) + B.dblDiscount)
+					AND C.strTransactionType IN ('Invoice', 'Debit Memo')
+
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'Payment on ' + C.strInvoiceNumber + ' is over the transaction''s amount due'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblARPaymentDetail B
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN
+					tblARInvoice C
+						ON B.intInvoiceId = C.intInvoiceId
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				WHERE
+					B.dblPayment <> 0 
+					AND C.ysnPaid = 0 
+					AND (((C.dblAmountDue + C.dblInterest) - C.dblDiscount) * -1) > ((B.dblPayment - B.dblInterest) + B.dblDiscount)
+					AND C.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 					
 				--If ysnAllowUserSelfPost is True in User Role
 				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
