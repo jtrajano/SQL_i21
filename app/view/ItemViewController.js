@@ -3376,16 +3376,34 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            Ext.Ajax.request({
+            ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/Item/DuplicateItem?ItemId=' + current.get('intItemId'),
-                method: 'GET',
-                success: function(response){
-                    var jsonData = Ext.decode(response.responseText);
+                url: '../Inventory/api/Item/DuplicateItem',
+                params: {
+                    ItemId: current.get('intItemId')
+                },
+                method: 'Get'  
+            })
+            .subscribe(
+                function (successResponse) {
+				    var jsonData = Ext.decode(successResponse.responseText);
                     context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
                     context.configuration.paging.moveFirst();
-                }
-            });
+				},
+				function (failureResponse) {
+				    console.log("Error: " + failureResponse);
+				}
+            );
+            // Ext.Ajax.request({
+            //     timeout: 120000,
+            //     url: '../Inventory/api/Item/DuplicateItem?ItemId=' + current.get('intItemId'),
+            //     method: 'GET',
+            //     success: function(response){
+            //         var jsonData = Ext.decode(response.responseText);
+            //         context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
+            //         context.configuration.paging.moveFirst();
+            //     }
+            // });
         }
     },
 
