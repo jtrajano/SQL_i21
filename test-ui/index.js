@@ -23,13 +23,30 @@ Harness.start(
     { group: 'PreSetup',
         items: [
             {
-                url: 'PreSetup/PreSetup.js?v='+version,
-                title: 'PreSetup',
+                url: 'PreSetup/UsersLocation.js?v='+version,
+                title: 'UserLocation',
                 preload: [
                     functionalTest,
                     'CommonIC.js'
                 ]
-            }
+            },
+            {
+                url: 'PreSetup/StorageLocation.js?v='+version,
+                title: 'StorageLocation',
+                preload: [
+                    functionalTest,
+                    'CommonIC.js'
+                ]
+            },
+            {
+                url: 'PreSetup/Items.js?v='+version,
+                title: 'Items',
+                preload: [
+                    functionalTest,
+                    'CommonIC.js'
+                ]
+            },
+
         ]
     },
 
@@ -249,9 +266,15 @@ Harness.start(
     { group: 'InventoryReceipt',
         items: [
             {
-
                 url: 'InventoryReceipt/AddInventoryReceipt.js?v='+version,
                 title: 'AddInventoryReceipt',
+                preload: [
+                    functionalTest
+                ]
+            },
+            {
+                url: 'InventoryReceipt/DeleteInventoryReceipt.js?v='+version,
+                title: 'DeleteInventoryReceipt',
                 preload: [
                     functionalTest
                 ]
