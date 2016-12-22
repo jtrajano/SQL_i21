@@ -1,93 +1,120 @@
 CREATE VIEW vyuLGAllocatedContracts
 AS
 SELECT
-	ALD.intAllocationDetailId
+	 ALD.intAllocationDetailId
 	,ALD.intAllocationHeaderId
 
--- Allocation Header details
+	-- Allocation Header details
 	,ALH.[strAllocationNumber]
 	,ALH.intCommodityId
-	,Comm.strDescription as strCommodity
+	,Comm.strDescription AS strCommodity
 	,ALH.intCompanyLocationId
 	,CompLoc.strLocationName
 	,ALH.intWeightUnitMeasureId
 	,WTUOM.strUnitMeasure
-	,ALH.strComments as strHeaderComments
-
--- Allocation Details
+	,ALH.strComments AS strHeaderComments
+	
+	-- Allocation Details
 	,ALD.dtmAllocatedDate
 	,ALD.intUserSecurityId
 	,UserId.strUserName
 	,ALD.strComments
-
--- Purchase Contract Details
+	
+	-- Purchase Contract Details
 	,ALD.intPContractDetailId
 	,ALD.dblPAllocatedQty
 	,ALD.intPUnitMeasureId
-	,PCT.strContractNumber as strPurchaseContractNumber
-	,PCT.intContractSeq as intPContractSeq
-	,strPContractNumber = Cast(PCT.strContractNumber as VarChar(100)) + '/' + Cast(PCT.intContractSeq as VarChar(100))
-	,PCT.intItemId as intPItemId
-	,PCT.strItemUOM as strPItemUOM
-	,PCT.strItemNo as strPItemNo
-	,PCT.strItemDescription as strPItemDescription
-	,PCT.dblDetailQuantity as dblPDetailQuantity
-	,PCT.dtmContractDate as dtmPContractDate
-	,PCT.dblBalance as dblPBalance
-	,PCT.dblBasis as dblPBasis
-	,PCT.dblCashPrice as dblPCashPrice
-	,PCT.dblFutures as dblPFutures
-	,PCT.dtmStartDate as dtmPStartDate
-	,PCT.dtmEndDate as dtmPEndDate
-	,PCT.strContractBasis as strPContractBasis
-	,PCT.strContractStatus as strPContractStatus
-	,PCT.strEntityName as strSeller
-	,PCT.strFixationBy as strPFixationBy
-	,PCT.strFutMarketName as strPFutMarketName
-	,PCT.strFutureMonth as strPFutureMonth
-	,PCT.strPosition as strPPosition
-	,PCT.strPriceUOM as strPPriceUOM
-	,PCT.strPricingType as strPPricingType
-	,PCT.strOriginDest as strPOriginDest
-	,PCT.dblNoOfLots as dblPNoOfLots
-
--- Sales Contract Details
+	,PCH.strContractNumber AS strPurchaseContractNumber
+	,PCT.intContractSeq AS intPContractSeq
+	,strPContractNumber = Cast(PCH.strContractNumber AS VARCHAR(100)) + '/' + Cast(PCT.intContractSeq AS VARCHAR(100))
+	,PCT.intItemId AS intPItemId
+	,U1.strUnitMeasure AS strPItemUOM
+	,IM.strItemNo AS strPItemNo
+	,IM.strDescription AS strPItemDescription
+	,PCT.dblQuantity AS dblPDetailQuantity
+	,PCH.dtmContractDate AS dtmPContractDate
+	,PCT.dblBalance AS dblPBalance
+	,PCT.dblBasis AS dblPBasis
+	,PCT.dblCashPrice AS dblPCashPrice
+	,PCT.dblFutures AS dblPFutures
+	,PCT.dtmStartDate AS dtmPStartDate
+	,PCT.dtmEndDate AS dtmPEndDate
+	,PCB.strContractBasis AS strPContractBasis
+	,PCS.strContractStatus AS strPContractStatus
+	,PEY.strEntityName AS strSeller
+	,PCT.strFixationBy AS strPFixationBy
+	,PFM.strFutMarketName AS strPFutMarketName
+	,PMO.strFutureMonth AS strPFutureMonth
+	,PPO.strPosition AS strPPosition
+	,U2.strUnitMeasure AS strPPriceUOM
+	,PPT.strPricingType AS strPPricingType
+	,PFR.strOrigin + ' - ' + PFR.strDest AS strPOriginDest
+	,PCT.dblNoOfLots AS dblPNoOfLots
+	
+	---- Sales Contract Details
 	,ALD.intSContractDetailId
 	,ALD.dblSAllocatedQty
 	,ALD.intSUnitMeasureId
-	,SCT.strContractNumber as strSalesContractNumber
+	,SCH.strContractNumber as strSalesContractNumber
 	,SCT.intContractSeq as intSContractSeq
-	,strSContractNumber = Cast(SCT.strContractNumber as VarChar(100)) + '/' + Cast(SCT.intContractSeq as VarChar(100))
+	,strSContractNumber = Cast(SCH.strContractNumber as VarChar(100)) + '/' + Cast(SCT.intContractSeq as VarChar(100))
 	,SCT.intItemId as intSItemId
-	,SCT.strItemUOM as strSItemUOM
-	,SCT.strItemNo as strSItemNo
-	,SCT.strItemDescription as strSItemDescription
-	,SCT.dblDetailQuantity as dblSDetailQuantity
-	,SCT.dtmContractDate as dtmSContractDate
+	,U3.strUnitMeasure as strSItemUOM
+	,SIM.strItemNo as strSItemNo
+	,SIM.strDescription as strSItemDescription
+	,SCT.dblQuantity as dblSDetailQuantity
+	,SCH.dtmContractDate as dtmSContractDate
 	,SCT.dblBalance as dblSBalance
 	,SCT.dblBasis as dblSBasis
 	,SCT.dblCashPrice as dblSCashPrice
 	,SCT.dblFutures as dblSFutures
 	,SCT.dtmStartDate as dtmSStartDate
 	,SCT.dtmEndDate as dtmSEndDate
-	,SCT.strContractBasis as strSContractBasis
-	,SCT.strContractStatus as strSContractStatus
-	,SCT.strEntityName as strBuyer
+	,SCB.strContractBasis as strSContractBasis
+	,SCS.strContractStatus as strSContractStatus
+	,SEY.strEntityName as strBuyer
 	,SCT.strFixationBy as strSFixationBy
-	,SCT.strFutMarketName as strSFutMarketName
-	,SCT.strFutureMonth as strSFutureMonth
-	,SCT.strPosition as strSPosition
-	,SCT.strPriceUOM as strSPriceUOM
-	,SCT.strPricingType as strSPricingType
-	,SCT.strOriginDest as strSOriginDest
+	,SFM.strFutMarketName as strSFutMarketName
+	,SMO.strFutureMonth as strSFutureMonth
+	,SPO.strPosition as strSPosition
+	,U2.strUnitMeasure as strSPriceUOM
+	,SPT.strPricingType as strSPricingType
+	,SFR.strOrigin+' - '+SFR.strDest as strSOriginDest
 	,SCT.dblNoOfLots as dblSNoOfLots
 	,ysnDelivered = CONVERT(BIT,(CASE WHEN SCT.dblBalance <= 0 THEN 1 ELSE 0 END))
-
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = ALH.intCommodityId
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = ALH.intCompanyLocationId
 LEFT JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = ALH.intWeightUnitMeasureId
 LEFT JOIN tblSMUserSecurity UserId ON UserId.[intEntityUserSecurityId] = ALD.intUserSecurityId
-LEFT JOIN vyuCTContractDetailView PCT ON PCT.intContractDetailId = ALD.intPContractDetailId
-LEFT JOIN vyuCTContractDetailView SCT ON SCT.intContractDetailId = ALD.intSContractDetailId
+LEFT JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = ALD.intPContractDetailId
+LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHeaderId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = PCT.intItemUOMId
+LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICItem IM ON IM.intItemId = PCT.intItemId
+LEFT JOIN tblCTContractBasis PCB ON PCB.intContractBasisId = PCH.intContractBasisId
+LEFT JOIN tblCTContractStatus PCS ON PCS.intContractStatusId = PCT.intContractStatusId
+LEFT JOIN vyuCTEntity PEY ON PEY.intEntityId = PCH.intEntityId AND PEY.strEntityType = 'Vendor'
+LEFT JOIN tblRKFutureMarket PFM ON PFM.intFutureMarketId = PCT.intFutureMarketId
+LEFT JOIN tblRKFuturesMonth PMO ON PMO.intFutureMonthId = PCT.intFutureMonthId
+LEFT JOIN tblCTPosition PPO ON PPO.intPositionId = PCH.intPositionId
+LEFT JOIN tblICItemUOM PPU ON PPU.intItemUOMId = PCT.intPriceItemUOMId
+LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PPU.intUnitMeasureId
+LEFT JOIN tblCTPricingType PPT ON PPT.intPricingTypeId = PCT.intPricingTypeId
+LEFT JOIN tblCTFreightRate PFR ON PFR.intFreightRateId = PCT.intFreightRateId
+LEFT JOIN tblCTContractDetail SCT ON SCT.intContractDetailId = ALD.intSContractDetailId
+LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHeaderId
+LEFT JOIN tblICItemUOM SIU ON SIU.intItemUOMId = SCT.intItemUOMId
+LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = SIU.intUnitMeasureId
+LEFT JOIN tblICItem SIM ON SIM.intItemId = SCT.intItemId
+LEFT JOIN tblCTContractBasis SCB ON SCB.intContractBasisId = SCH.intContractBasisId
+LEFT JOIN tblCTContractStatus SCS ON SCS.intContractStatusId = SCT.intContractStatusId
+LEFT JOIN vyuCTEntity SEY ON SEY.intEntityId = SCH.intEntityId AND SEY.strEntityType = 'Customer'
+LEFT JOIN tblRKFutureMarket SFM ON SFM.intFutureMarketId = SCT.intFutureMarketId
+LEFT JOIN tblRKFuturesMonth SMO ON SMO.intFutureMonthId = SCT.intFutureMonthId
+LEFT JOIN tblCTPosition SPO ON SPO.intPositionId = SCH.intPositionId
+LEFT JOIN tblICItemUOM SPU ON SPU.intItemUOMId = SCT.intPriceItemUOMId
+LEFT JOIN tblICUnitMeasure U4 ON U4.intUnitMeasureId = SPU.intUnitMeasureId
+LEFT JOIN tblCTPricingType SPT ON SPT.intPricingTypeId = SCT.intPricingTypeId
+LEFT JOIN tblCTFreightRate SFR ON SFR.intFreightRateId = SCT.intFreightRateId
