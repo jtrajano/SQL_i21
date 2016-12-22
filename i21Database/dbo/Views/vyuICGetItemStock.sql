@@ -20,8 +20,8 @@ SELECT
 	StorageLocation.strName AS strStorageLocationName,
 	SubLocation.strSubLocationName AS strSubLocationName,
 	ItemLocation.intStorageLocationId,
-	Location.strLocationName,
-	Location.strLocationType,
+	l.strLocationName,
+	l.strLocationType,
 	ItemLocation.intVendorId,
 	strVendorId = Vendor.strVendorId,
 	intStockUOMId = StockUOM.intUnitMeasureId, --StockUOM.intItemUOMId,
@@ -139,8 +139,8 @@ LEFT JOIN tblICItemPricing ItemPricing
 	ON ItemLocation.intItemId = ItemPricing.intItemId AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId
 LEFT JOIN tblICStorageLocation StorageLocation 
 	ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
-LEFT JOIN tblSMCompanyLocation Location 
-	ON Location.intCompanyLocationId = ItemLocation.intLocationId
+LEFT JOIN tblSMCompanyLocation l 
+	ON l.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblICItemStock ItemStock 
 	ON ItemStock.intItemId = Item.intItemId 
 	AND ItemLocation.intItemLocationId = ItemStock.intItemLocationId
