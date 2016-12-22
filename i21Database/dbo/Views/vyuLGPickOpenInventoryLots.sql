@@ -96,4 +96,5 @@ LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLoca
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = Lot.intLotStatusId
 LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = Lot.intWeightUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+WHERE Lot.dblQty > 0 
 ) InvLots
