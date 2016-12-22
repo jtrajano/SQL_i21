@@ -44,10 +44,12 @@ FROM (
 		,CH.strContractNumber
 		,CH.dtmContractDate
 		,CH.strCustomerContract
+		,EY.strEntityName
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
+	JOIN vyuCTEntity EY ON EY.intEntityId =	CH.intEntityId AND EY.strEntityType	= (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
 	LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
@@ -96,5 +98,6 @@ FROM (
 		,CH.strContractNumber
 		,CH.dtmContractDate
 		,CH.strCustomerContract
+		,EY.strEntityName
 	) tbl
 WHERE dblUnAllocatedQty > 0
