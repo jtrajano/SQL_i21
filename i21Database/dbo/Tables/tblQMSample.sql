@@ -84,3 +84,6 @@
 	CONSTRAINT [FK_tblQMSample_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblQMSample_tblMFWorkOrder] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE
 )
+GO
+CREATE STATISTICS [_dta_stat_1863273993_4_11_1] ON [dbo].[tblQMSample]([strSampleNumber], [intContractDetailId], [intSampleId])
+GO
