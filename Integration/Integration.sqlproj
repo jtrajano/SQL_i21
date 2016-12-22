@@ -370,6 +370,5 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportPaymentFromImportedPostedVoucher.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPFixImportedFromAPIVCMST.sql" />
   </ItemGroup>
 </Project>
