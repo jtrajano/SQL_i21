@@ -144,6 +144,25 @@ BEGIN
 			DELETE FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
 		END
 
+			--NON DISTRIBUTION LIST
+		SELECT TOP 1
+			 @From = [from]
+			,@To = [to]
+			,@Condition = [condition]
+			,@Fieldname = [fieldname]
+		FROM @temp_params WHERE [fieldname] = 'ysnNonDistibutionList'
+
+		IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'TRUE' OR @From = 1))
+		BEGIN
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				N' NOT (strEmailDistributionOption like ''%CF Invoice%'' AND (strEmail IS NOT NULL AND strEmail != ''''))'
+		END
+
+		SET @From = ''
+		SET @To = ''
+		SET @Condition = ''
+		SET @Fieldname = ''
+
 		
 		EXEC('SELECT * FROM vyuCFInvoiceReportSummary ' + @whereClause)
 	END

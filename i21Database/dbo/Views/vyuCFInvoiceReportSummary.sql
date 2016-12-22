@@ -1,5 +1,4 @@
 ﻿
-
 CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 SELECT 
@@ -31,7 +30,8 @@ cfCardAccount.intDiscountScheduleId, cfCardAccount.intTermsCode, cfCardAccount.i
              cfSiteItem.strTaxState, cfCardAccount.intAccountId, cfTrans.intCardId,  cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.ysnIncludeInQuantityDiscount, 
              ISNULL(SUM(FETTaxes.dblTaxCalculatedAmount), 0) AS TotalFET, ISNULL(SUM(SETTaxes.dblTaxCalculatedAmount), 0) AS TotalSET, ISNULL(SUM(SSTTaxes.dblTaxCalculatedAmount), 0) AS TotalSST, ISNULL(SUM(LCTaxes.dblTaxCalculatedAmount), 0) AS TotalLC, 
              cfTrans.intTransactionId,  cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, cfCardAccount.strInvoiceCycle,cfTrans.strInvoiceReportNumber, 
-             cfTrans.strPrintTimeStamp
+             cfTrans.strPrintTimeStamp, cfCardAccount.intCustomerId, 
+                         cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail
 FROM   dbo.vyuCFInvoice AS arInv INNER JOIN
              dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
              dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
@@ -112,5 +112,5 @@ WHERE (cfTrans.ysnPosted = 1)
 GROUP BY cfCardAccount.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId, cfTrans.intProductId, cfCardAccount.strCardNumber, cfCardAccount.strCardDescription, cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.strProductNumber, 
              cfSiteItem.strProductDescription, cfCardAccount.strDepartment,cfCardAccount.strDepartmentDescription, cfSiteItem.strTaxState, cfSiteItem.ysnIncludeInQuantityDiscount, cfVehicle.strVehicleNumber, cfVehicle.strVehicleDescription, cfCardAccount.intDiscountScheduleId, cfCardAccount.intTermsCode, 
              cfCardAccount.intTermsId, cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.strNetwork, arInv.dtmPostDate, cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, cfTrans.strInvoiceReportNumber, cfTrans.strPrintTimeStamp,arInv.strCustomerNumber,cfSiteItem.strItemNo,cfSiteItem.strDescription,
-			 cfSiteItem.strSiteNumber,cfSiteItem.strSiteAddress,cfSiteItem.strSiteCity,cfTrans.strTransactionId,cfTrans.intOdometer
-
+			 cfSiteItem.strSiteNumber,cfSiteItem.strSiteAddress,cfSiteItem.strSiteCity,cfTrans.strTransactionId,cfTrans.intOdometer, cfCardAccount.intCustomerId, 
+                         cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail

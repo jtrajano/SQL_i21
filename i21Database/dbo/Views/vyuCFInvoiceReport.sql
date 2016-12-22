@@ -1,4 +1,4 @@
-﻿CREATE VIEW dbo.vyuCFInvoiceReport
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 SELECT   ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, arInv.intTransactionId, arInv.strCustomerNumber, cfTrans.dtmTransactionDate, 
                          cfTrans.intOdometer, ISNULL
@@ -101,8 +101,3 @@ FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId LEFT OUTER JOIN
                          dbo.tblCFDepartment AS cfDep ON cfDep.intDepartmentId = cfCardAccount.intDepartmentId
 WHERE     (cfTrans.ysnPosted = 1)
-
-
-
-
-
