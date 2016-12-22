@@ -1909,12 +1909,13 @@ Ext.define('Inventory.view.ItemViewController', {
 
     getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
         iRely.Msg.showWait('Converting units...');
-        Ext.Ajax.request({
-            timeout: 120000,
+        ic.utils.ajax({
             url: '../Inventory/api/UnitMeasure/Search',
-            method: 'get',
-            success: function (response) {
-                var jsonData = Ext.decode(response.responseText);
+            method: 'Get'  
+        })
+        .subscribe(
+            function (successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
                 var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: stockUnitMeasureId });
                 if (stockUnitConversions) {
                     var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
@@ -1926,12 +1927,36 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
                 iRely.Msg.close();
             },
-            failure: function (response) {
-                var jsonData = Ext.decode(response.responseText);
-                iRely.Msg.close();
-                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+
+            function (failureResponse) {
+                 var jsonData = Ext.decode(failureResponse.responseText);
+                 iRely.Msg.close();
+                 iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
             }
-        });
+        );
+        // Ext.Ajax.request({
+        //     timeout: 120000,
+        //     url: '../Inventory/api/UnitMeasure/Search',
+        //     method: 'get',
+        //     success: function (response) {
+        //         var jsonData = Ext.decode(response.responseText);
+        //         var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: stockUnitMeasureId });
+        //         if (stockUnitConversions) {
+        //             var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
+        //                 { intUnitMeasureId: unitMeasureId, intStockUnitMeasureId: stockUnitMeasureId });
+        //             if (stockConversion) {
+        //                 var dblConversionToStock = stockConversion.dblConversionToStock;
+        //                 callback(dblConversionToStock);
+        //             }
+        //         }
+        //         iRely.Msg.close();
+        //     },
+        //     failure: function (response) {
+        //         var jsonData = Ext.decode(response.responseText);
+        //         iRely.Msg.close();
+        //         iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+        //     }
+        // });
     },
 
     beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
