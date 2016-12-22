@@ -2428,88 +2428,169 @@ Ext.define('Inventory.view.ItemViewController', {
         var selection = grid.getSelectionModel().getSelection();
         var current = win.viewModel.data.current;
         
-        var filter = [
-            {
-                c: 'intItemLocationId',
-                v: records[0].data.intItemLocationId,
-                cj: 'and',
-                g: 'g0'
-            }
-        ];
-        Ext.Ajax.request({
-            timeout: 120000,
-            url: '../Inventory/api/ItemLocation/Search?page=1&start=0&limit=50&sort=[]&filter=' +
-                JSON.stringify(filter),
-            method: 'GET',
-            success: function(response) {
-                var json = JSON.parse(response.responseText);
-                var copyLocation = json.data[0];
-                Ext.Array.each(selection, function (location) {
-                    if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
-                        location.set('intVendorId', copyLocation.intVendorId);
-                        location.set('strDescription', copyLocation.strDescription);
-                        location.set('intCostingMethod', copyLocation.intCostingMethod);
-                        location.set('strCostingMethod', copyLocation.strCostingMethod);
-                        location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
-                        //location.set('intSubLocationId', copyLocation.intSubLocationId);
-                        //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
-                        location.set('intIssueUOMId', copyLocation.intIssueUOMId);
-                        location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
-                        location.set('intFamilyId', copyLocation.intFamilyId);
-                        location.set('intClassId', copyLocation.intClassId);
-                        location.set('intProductCodeId', copyLocation.intProductCodeId);
-                        location.set('intFuelTankId', copyLocation.intFuelTankId);
-                        location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
-                        location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
-                        location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
-                        location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
-                        location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
-                        location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
-                        location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
-                        location.set('intMixMatchId', copyLocation.intMixMatchId);
-                        location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
-                        location.set('intDepositPLUId', copyLocation.intDepositPLUId);
-                        location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
-                        location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
-                        location.set('ysnScaleItem', copyLocation.ysnScaleItem);
-                        location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
-                        location.set('ysnReturnable', copyLocation.ysnReturnable);
-                        location.set('ysnPrePriced', copyLocation.ysnPrePriced);
-                        location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
-                        location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
-                        location.set('strVendorCategory', copyLocation.strVendorCategory);
-                        location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
-                        location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
-                        location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
-                        location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
-                        location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
-                        location.set('intMinimumAge', copyLocation.intMinimumAge);
-                        location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
-                        location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
-                        location.set('ysnCarWash', copyLocation.ysnCarWash);
-                        location.set('intItemTypeCode', copyLocation.intItemTypeCode);
-                        location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
-                        location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
-                        location.set('intFreightMethodId', copyLocation.intFreightMethodId);
-                        location.set('dblFreightRate', copyLocation.dblFreightRate);
-                        location.set('intShipViaId', copyLocation.intShipViaId);
-                        location.set('intNegativeInventory', copyLocation.intNegativeInventory);
-                        location.set('dblReorderPoint', copyLocation.dblReorderPoint);
-                        location.set('dblMinOrder', copyLocation.dblMinOrder);
-                        location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
-                        location.set('dblLeadTime', copyLocation.dblLeadTime);
-                        location.set('strCounted', copyLocation.strCounted);
-                        location.set('intCountGroupId', copyLocation.intCountGroupId);
-                        location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
-                        location.set('strVendorId', copyLocation.strVendorId);
-                        location.set('strCategory', copyLocation.strCategory);
-                        location.set('strUnitMeasure', copyLocation.strUnitMeasure);
-                    }
-                });
+        ic.utils.ajax({
+                timeout: 120000,
+                url: '../Inventory/api/ItemLocation/Search',
+                params: {
+                    intItemLocationId: records[0].data.intItemLocationId
+                },
+                method: 'Get'  
+            })
+        .subscribe(
+                function (successResponse) {
+                    var json = JSON.parse(response.responseText);
+                    var copyLocation = json.data[0];
+                    Ext.Array.each(selection, function (location) {
+                        if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
+                            location.set('intVendorId', copyLocation.intVendorId);
+                            location.set('strDescription', copyLocation.strDescription);
+                            location.set('intCostingMethod', copyLocation.intCostingMethod);
+                            location.set('strCostingMethod', copyLocation.strCostingMethod);
+                            location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
+                            //location.set('intSubLocationId', copyLocation.intSubLocationId);
+                            //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
+                            location.set('intIssueUOMId', copyLocation.intIssueUOMId);
+                            location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
+                            location.set('intFamilyId', copyLocation.intFamilyId);
+                            location.set('intClassId', copyLocation.intClassId);
+                            location.set('intProductCodeId', copyLocation.intProductCodeId);
+                            location.set('intFuelTankId', copyLocation.intFuelTankId);
+                            location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
+                            location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
+                            location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
+                            location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
+                            location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
+                            location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
+                            location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
+                            location.set('intMixMatchId', copyLocation.intMixMatchId);
+                            location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
+                            location.set('intDepositPLUId', copyLocation.intDepositPLUId);
+                            location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
+                            location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
+                            location.set('ysnScaleItem', copyLocation.ysnScaleItem);
+                            location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
+                            location.set('ysnReturnable', copyLocation.ysnReturnable);
+                            location.set('ysnPrePriced', copyLocation.ysnPrePriced);
+                            location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
+                            location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
+                            location.set('strVendorCategory', copyLocation.strVendorCategory);
+                            location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
+                            location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
+                            location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
+                            location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
+                            location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
+                            location.set('intMinimumAge', copyLocation.intMinimumAge);
+                            location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
+                            location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
+                            location.set('ysnCarWash', copyLocation.ysnCarWash);
+                            location.set('intItemTypeCode', copyLocation.intItemTypeCode);
+                            location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
+                            location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
+                            location.set('intFreightMethodId', copyLocation.intFreightMethodId);
+                            location.set('dblFreightRate', copyLocation.dblFreightRate);
+                            location.set('intShipViaId', copyLocation.intShipViaId);
+                            location.set('intNegativeInventory', copyLocation.intNegativeInventory);
+                            location.set('dblReorderPoint', copyLocation.dblReorderPoint);
+                            location.set('dblMinOrder', copyLocation.dblMinOrder);
+                            location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
+                            location.set('dblLeadTime', copyLocation.dblLeadTime);
+                            location.set('strCounted', copyLocation.strCounted);
+                            location.set('intCountGroupId', copyLocation.intCountGroupId);
+                            location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
+                            location.set('strVendorId', copyLocation.strVendorId);
+                            location.set('strCategory', copyLocation.strCategory);
+                            location.set('strUnitMeasure', copyLocation.strUnitMeasure);
+                        }
+                    });
 
-                win.context.data.saveRecord();
-            }
-        });
+                    win.context.data.saveRecord();
+				},
+				function (failureResponse) {
+                    //TO DO
+				}
+        );
+        // var filter = [
+        //     {
+        //         c: 'intItemLocationId',
+        //         v: records[0].data.intItemLocationId,
+        //         cj: 'and',
+        //         g: 'g0'
+        //     }
+        // ];
+        // Ext.Ajax.request({
+        //     timeout: 120000,
+        //     url: '../Inventory/api/ItemLocation/Search?page=1&start=0&limit=50&sort=[]&filter=' +
+        //         JSON.stringify(filter),
+        //     method: 'GET',
+        //     success: function(response) {
+        //         var json = JSON.parse(response.responseText);
+        //         var copyLocation = json.data[0];
+        //         Ext.Array.each(selection, function (location) {
+        //             if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
+        //                 location.set('intVendorId', copyLocation.intVendorId);
+        //                 location.set('strDescription', copyLocation.strDescription);
+        //                 location.set('intCostingMethod', copyLocation.intCostingMethod);
+        //                 location.set('strCostingMethod', copyLocation.strCostingMethod);
+        //                 location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
+        //                 //location.set('intSubLocationId', copyLocation.intSubLocationId);
+        //                 //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
+        //                 location.set('intIssueUOMId', copyLocation.intIssueUOMId);
+        //                 location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
+        //                 location.set('intFamilyId', copyLocation.intFamilyId);
+        //                 location.set('intClassId', copyLocation.intClassId);
+        //                 location.set('intProductCodeId', copyLocation.intProductCodeId);
+        //                 location.set('intFuelTankId', copyLocation.intFuelTankId);
+        //                 location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
+        //                 location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
+        //                 location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
+        //                 location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
+        //                 location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
+        //                 location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
+        //                 location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
+        //                 location.set('intMixMatchId', copyLocation.intMixMatchId);
+        //                 location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
+        //                 location.set('intDepositPLUId', copyLocation.intDepositPLUId);
+        //                 location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
+        //                 location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
+        //                 location.set('ysnScaleItem', copyLocation.ysnScaleItem);
+        //                 location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
+        //                 location.set('ysnReturnable', copyLocation.ysnReturnable);
+        //                 location.set('ysnPrePriced', copyLocation.ysnPrePriced);
+        //                 location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
+        //                 location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
+        //                 location.set('strVendorCategory', copyLocation.strVendorCategory);
+        //                 location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
+        //                 location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
+        //                 location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
+        //                 location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
+        //                 location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
+        //                 location.set('intMinimumAge', copyLocation.intMinimumAge);
+        //                 location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
+        //                 location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
+        //                 location.set('ysnCarWash', copyLocation.ysnCarWash);
+        //                 location.set('intItemTypeCode', copyLocation.intItemTypeCode);
+        //                 location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
+        //                 location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
+        //                 location.set('intFreightMethodId', copyLocation.intFreightMethodId);
+        //                 location.set('dblFreightRate', copyLocation.dblFreightRate);
+        //                 location.set('intShipViaId', copyLocation.intShipViaId);
+        //                 location.set('intNegativeInventory', copyLocation.intNegativeInventory);
+        //                 location.set('dblReorderPoint', copyLocation.dblReorderPoint);
+        //                 location.set('dblMinOrder', copyLocation.dblMinOrder);
+        //                 location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
+        //                 location.set('dblLeadTime', copyLocation.dblLeadTime);
+        //                 location.set('strCounted', copyLocation.strCounted);
+        //                 location.set('intCountGroupId', copyLocation.intCountGroupId);
+        //                 location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
+        //                 location.set('strVendorId', copyLocation.strVendorId);
+        //                 location.set('strCategory', copyLocation.strCategory);
+        //                 location.set('strUnitMeasure', copyLocation.strUnitMeasure);
+        //             }
+        //         });
+
+        //         win.context.data.saveRecord();
+        //     }
+        // });
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
@@ -3391,7 +3472,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     context.configuration.paging.moveFirst();
 				},
 				function (failureResponse) {
-				    console.log("Error: " + failureResponse);
+                    //TO DO
 				}
             );
             // Ext.Ajax.request({
