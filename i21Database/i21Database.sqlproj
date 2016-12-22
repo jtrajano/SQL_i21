@@ -4638,6 +4638,7 @@
     <Build Include="dbo\Functions\fnPATReverseCancelEquityGLEntries.sql" />
     <Build Include="dbo\Views\vyuLGLoadDocumentTracking.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetEmailInfo.sql" />
+    <Build Include="dbo\Views\vyuLGUnAllocatedContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
