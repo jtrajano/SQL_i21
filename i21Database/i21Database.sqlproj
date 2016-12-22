@@ -4652,6 +4652,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertDiscountScheduleRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertPriceProfileRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPaycheckMiddleReport.sql" />
+    <Build Include="dbo\Views\vyuLGUnAllocatedContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
