@@ -130,10 +130,10 @@ SELECT
 	,[strMiscDescription]						=	Item.strDescription
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
-	,[dblOrderQty]								=	1--CASE WHEN ReceiptCharge.dblAmount > 0 THEN -1 ELSE 1 END --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+	,[dblOrderQty]								=	CASE WHEN ReceiptCharge.dblAmount > 0 THEN -1 ELSE 1 END --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	1
-	,[dblQuantityToBill]						=	1--CASE WHEN ReceiptCharge.dblAmount > 0 THEN -1 ELSE 1 END --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+	,[dblQuantityToBill]						=	CASE WHEN ReceiptCharge.dblAmount > 0 THEN -1 ELSE 1 END --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId  --add for strSource reference
