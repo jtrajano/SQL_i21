@@ -20,7 +20,7 @@ BEGIN TRY
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE tblMFWorkOrder
-	SET intCountStatusId = NULL
+	SET intCountStatusId = 1
 		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = GetDate()
 	WHERE intWorkOrderId = @intWorkOrderId
