@@ -245,3 +245,13 @@ BEGIN
 	WHERE GR.intStorageScheduleTypeId < 0
 END
 GO
+IF EXISTS(SELECT 1 FROM tblGRDiscountScheduleCode WHERE intStorageTypeId IS NULL)
+BEGIN
+	UPDATE tblGRDiscountScheduleCode SET intStorageTypeId= -1 WHERE intStorageTypeId IS NULL
+END
+GO
+IF EXISTS(SELECT 1 FROM tblGRDiscountScheduleCode WHERE intCompanyLocationId IS NULL)
+BEGIN
+	UPDATE tblGRDiscountScheduleCode SET intCompanyLocationId=(SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation) WHERE intCompanyLocationId IS NULL
+END
+GO
