@@ -1,5 +1,4 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemStock]
-
 AS 
 
 SELECT 
@@ -115,22 +114,46 @@ SELECT
 	Item.ysnListBundleSeparately,
 	dblExtendedCost = ISNULL(ItemStock.dblUnitOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0)
 FROM tblICItem Item
-LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
-LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
-LEFT JOIN tblICItemUOM ReceiveUOMStock ON ReceiveUOMStock.intItemId = Item.intItemId AND ReceiveUOMStock.ysnStockUnit = 1
-LEFT JOIN tblICUnitMeasure rUOM ON rUOM.intUnitMeasureId = ReceiveUOM.intUnitMeasureId
-LEFT JOIN tblICUnitMeasure rUOMStock ON rUOMStock.intUnitMeasureId = ReceiveUOMStock.intUnitMeasureId
-LEFT JOIN tblICItemUOM IssueUOM ON IssueUOM.intItemUOMId = ItemLocation.intIssueUOMId
-LEFT JOIN tblICItemUOM IssueUOMStock ON IssueUOMStock.intItemId = Item.intItemId AND IssueUOMStock.ysnStockUnit = 1
-LEFT JOIN tblICUnitMeasure iUOM ON iUOM.intUnitMeasureId = IssueUOM.intUnitMeasureId
-LEFT JOIN tblICUnitMeasure iUOMStock ON iUOMStock.intUnitMeasureId = IssueUOMStock.intUnitMeasureId
-LEFT JOIN tblICItemPricing ItemPricing ON ItemLocation.intItemId = ItemPricing.intItemId AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId
-LEFT JOIN tblICStorageLocation StorageLocation ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
-LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
-LEFT JOIN tblICItemStock ItemStock ON ItemStock.intItemId = Item.intItemId AND ItemLocation.intItemLocationId = ItemStock.intItemLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON ItemLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
-LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
-LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
-LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
-LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = ItemLocation.intVendorId
-LEFT JOIN vyuICGetItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId AND StockUOM.ysnStockUnit = 1
+LEFT JOIN tblICItemLocation ItemLocation 
+	ON ItemLocation.intItemId = Item.intItemId
+	AND ItemLocation.intLocationId IS NOT NULL 
+LEFT JOIN tblICItemUOM ReceiveUOM 
+	ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
+LEFT JOIN tblICItemUOM ReceiveUOMStock 
+	ON ReceiveUOMStock.intItemId = Item.intItemId 
+	AND ReceiveUOMStock.ysnStockUnit = 1
+LEFT JOIN tblICUnitMeasure rUOM 
+	ON rUOM.intUnitMeasureId = ReceiveUOM.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure rUOMStock 
+	ON rUOMStock.intUnitMeasureId = ReceiveUOMStock.intUnitMeasureId
+LEFT JOIN tblICItemUOM IssueUOM 
+	ON IssueUOM.intItemUOMId = ItemLocation.intIssueUOMId
+LEFT JOIN tblICItemUOM IssueUOMStock 
+	ON IssueUOMStock.intItemId = Item.intItemId 
+	AND IssueUOMStock.ysnStockUnit = 1
+LEFT JOIN tblICUnitMeasure iUOM 
+	ON iUOM.intUnitMeasureId = IssueUOM.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure iUOMStock 
+	ON iUOMStock.intUnitMeasureId = IssueUOMStock.intUnitMeasureId
+LEFT JOIN tblICItemPricing ItemPricing 
+	ON ItemLocation.intItemId = ItemPricing.intItemId AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId
+LEFT JOIN tblICStorageLocation StorageLocation 
+	ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
+LEFT JOIN tblSMCompanyLocation Location 
+	ON Location.intCompanyLocationId = ItemLocation.intLocationId
+LEFT JOIN tblICItemStock ItemStock 
+	ON ItemStock.intItemId = Item.intItemId 
+	AND ItemLocation.intItemLocationId = ItemStock.intItemLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
+	ON ItemLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
+LEFT JOIN tblICCategory Category 
+	ON Category.intCategoryId = Item.intCategoryId
+LEFT JOIN tblICCommodity Commodity 
+	ON Commodity.intCommodityId = Item.intCommodityId
+LEFT JOIN tblICCommodityAttribute Grade 
+	ON Grade.intCommodityAttributeId = Item.intGradeId
+LEFT JOIN vyuAPVendor Vendor 
+	ON Vendor.intEntityVendorId = ItemLocation.intVendorId
+LEFT JOIN vyuICGetItemUOM StockUOM 
+	ON StockUOM.intItemId = Item.intItemId 
+	AND StockUOM.ysnStockUnit = 1

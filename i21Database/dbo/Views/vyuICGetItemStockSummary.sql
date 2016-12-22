@@ -18,7 +18,7 @@ SELECT
 	, ItemStock.intItemLocationId
 	, ItemLocation.intLocationId
 	, ItemLocation.intCountGroupId
-	, Location.strLocationName
+	, l.strLocationName
 	, ItemStock.intSubLocationId
 	, SubLocation.strSubLocationName
 	, ItemStock.intStorageLocationId
@@ -130,13 +130,23 @@ FROM (
 			, intStorageLocationId
 			, intItemUOMId
 	) ItemStock
-	LEFT JOIN tblICItem Item ON Item.intItemId = ItemStock.intItemId
-	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
-	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
-	LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = ItemStock.intItemLocationId
-	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
-	LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemStock.intItemLocationId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ItemStock.intItemUOMId
-	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ItemStock.intSubLocationId
-	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemStock.intStorageLocationId
+	LEFT JOIN tblICItem Item 
+		ON Item.intItemId = ItemStock.intItemId
+	LEFT JOIN tblICCategory Category 
+		ON Category.intCategoryId = Item.intCategoryId
+	LEFT JOIN tblICCommodity Commodity 
+		ON Commodity.intCommodityId = Item.intCommodityId
+	LEFT JOIN tblICItemLocation ItemLocation 
+		ON ItemLocation.intItemLocationId = ItemStock.intItemLocationId
+	LEFT JOIN tblSMCompanyLocation l 
+		ON l.intCompanyLocationId = ItemLocation.intLocationId
+	LEFT JOIN tblICItemPricing ItemPricing 
+		ON ItemPricing.intItemLocationId = ItemStock.intItemLocationId
+	LEFT JOIN tblICItemUOM ItemUOM 
+		ON ItemUOM.intItemUOMId = ItemStock.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM 
+		ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
+		ON SubLocation.intCompanyLocationSubLocationId = ItemStock.intSubLocationId
+	LEFT JOIN tblICStorageLocation StorageLocation 
+		ON StorageLocation.intStorageLocationId = ItemStock.intStorageLocationId
