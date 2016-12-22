@@ -64,6 +64,7 @@ SELECT C.intManufacturingCellId
 	,WS.strBackColorName
 	,SL.intSubLocationId 
 	,BR.strDemandNo
+	,W.intCountStatusId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
