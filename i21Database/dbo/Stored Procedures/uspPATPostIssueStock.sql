@@ -6,6 +6,7 @@
 	@ysnRetired BIT = NULL,
 	@intUserId INT = NULL,
 	@batchIdUsed NVARCHAR(40) = NULL OUTPUT,
+	@error NVARCHAR(200) = NULL OUTPUT,
 	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
 	@success BIT = 0 OUTPUT
@@ -23,13 +24,58 @@ BEGIN TRANSACTION -- START TRANSACTION
 DECLARE @dateToday AS DATETIME = GETDATE();
 DECLARE @GLEntries AS RecapTableType;
 DECLARE @totalRecords INT;
-DECLARE @error NVARCHAR(200);
 DECLARE @batchId NVARCHAR(40);
+DECLARE @isGLSucces AS BIT = 0;
+DECLARE @intCreatedBillId INT;
+
+CREATE TABLE #tempValidateTable (
+	[strError] [NVARCHAR](MAX),
+	[strTransactionType] [NVARCHAR](50),
+	[strTransactionNo] [NVARCHAR](50),
+	[intTransactionId] INT
+);
 
 IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 SET @batchIdUsed = @batchId;
+
+	SELECT	CS.intCustomerStockId,
+			CS.intCustomerPatronId,
+			CS.intStockId,
+			CS.strCertificateNo,
+			CS.strStockStatus,
+			CS.dblSharesNo,
+			CS.dtmIssueDate,
+			CS.strActivityStatus,
+			CS.dtmRetireDate,
+			CS.intTransferredFrom,
+			CS.dtmTransferredDate,
+			CS.dblParValue,
+			CS.dblFaceValue,
+			CS.intBillId,
+			CS.intInvoiceId,
+			CS.ysnPosted
+	INTO #tempCustomerStock
+	FROM tblPATCustomerStock CS
+		WHERE intCustomerStockId = @intCustomerStockId
+		
+
+IF(ISNULL(@ysnPosted,0) = 0)
+BEGIN
+	-------- VALIDATE IF CAN BE UNPOSTED
+	INSERT INTO #tempValidateTable
+	SELECT * FROM fnPATValidateAssociatedTransaction((SELECT intCustomerStockId FROM #tempCustomerStock),2)
+
+	SELECT * FROM #tempValidateTable
+	IF EXISTS(SELECT 1 FROM #tempValidateTable)
+	BEGIN
+		SELECT @error = V.strError FROM #tempValidateTable V
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback;
+	END
+END
+
 
 IF (@ysnRetired = 1)
 BEGIN
@@ -80,13 +126,11 @@ END
 BEGIN TRY
 IF(ISNULL(@ysnRecap, 0) = 0)
 BEGIN
-	SELECT * FROM @GLEntries
-	EXEC uspGLBookEntries @GLEntries, @ysnPosted
+	SELECT * FROM @GLEntries;
+	EXEC uspGLBookEntries @GLEntries, @ysnPosted;
 
-	
-------------UPDATE CUSTOMER STOCK TABLE---------------
+	SET @isGLSucces = 1;
 
-	UPDATE tblPATCustomerStock SET ysnPosted = @ysnPosted WHERE intCustomerStockId = @intCustomerStockId
 END
 ELSE
 BEGIN
@@ -156,6 +200,70 @@ BEGIN CATCH
 END CATCH
 
 
+IF(@isGLSucces = 1)
+BEGIN
+	---------- UPDATE CUSTOMER STOCK TABLE ---------------
+	UPDATE tblPATCustomerStock SET ysnPosted = @ysnPosted WHERE intCustomerStockId = @intCustomerStockId
+
+	--------------------- RETIRED STOCKS ------------------	
+	IF(@ysnRetired = 1)
+	BEGIN
+		IF(@ysnPosted = 1)
+		BEGIN
+			DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
+			DECLARE @intCustomerId AS INT;
+			DECLARE @dblFaceValue AS NUMERIC(18,6);
+			DECLARE @strVenderOrderNumber AS NVARCHAR(50);
+			DECLARE @apClearing AS INT;
+
+			SELECT 
+				@intCustomerId = tempCS.intCustomerPatronId,
+				@dblFaceValue = tempCS.dblFaceValue,
+				@strVenderOrderNumber = tempCS.strCertificateNo,
+				@apClearing = ComPref.intAPClearingGLAccount
+			FROM #tempCustomerStock tempCS
+			CROSS APPLY tblPATCompanyPreference ComPref
+
+			INSERT INTO @voucherDetailNonInventory([intAccountId], [strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost])
+			VALUES(@apClearing, 'Patronage Retired Stock', 1, 0, @dblFaceValue);
+
+			EXEC [dbo].[uspAPCreateBillData]
+				@userId	= @intUserId
+				,@vendorId = @intCustomerId
+				,@type = 1	
+				,@voucherNonInvDetails = @voucherDetailNonInventory
+				,@shipTo = NULL
+				,@vendorOrderNumber = @strVenderOrderNumber
+				,@voucherDate = @dateToday
+				,@billId = @intCreatedBillId OUTPUT
+
+			UPDATE tblPATCustomerStock SET intBillId = @intCreatedBillId WHERE intCustomerStockId = @intCustomerStockId
+
+			EXEC [dbo].[uspAPPostBill]
+				@batchId = @intCreatedBillId,
+				@billBatchId = NULL,
+				@transactionType = NULL,
+				@post = 1,
+				@recap = 0,
+				@isBatch = 0,
+				@param = NULL,
+				@userId = @intUserId,
+				@beginTransaction = @intCreatedBillId,
+				@endTransaction = @intCreatedBillId,
+				@success = @success OUTPUT
+
+		END
+		ELSE
+		BEGIN
+			DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tempCustomerStock) AND ysnPaid <> 1;
+			UPDATE tblPATCustomerStock SET intBillId = null WHERE intCustomerStockId = @intCustomerStockId
+			EXEC uspPATProcessVoid @intCustomerStockId, @intUserId
+		END
+
+	END
+
+END
+
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -175,5 +283,6 @@ Post_Rollback:
 	GOTO Post_Exit
 
 Post_Exit:
-
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempCustomerStock')) DROP TABLE #tempCustomerStock
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempValidateTable')) DROP TABLE #tempValidateTable
 END

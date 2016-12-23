@@ -180,7 +180,7 @@ SET @batchIdUsed = @batchId;
 			
 	END
 	---------------- END - UPDATE TABLES ----------------
-	SELECT * FROM #tempTransferDetails
+	
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

@@ -43,10 +43,7 @@ BEGIN TRANSACTION
 
 	UPDATE tblPATCustomerStock
 		SET strActivityStatus = 'Open',
-			dtmRetireDate = null,
-			strCheckNumber = null,
-			dtmCheckDate = null,
-			dblCheckAmount = null
+			dtmRetireDate = null
 		WHERE intCustomerStockId IN (SELECT [intTransactionId] FROM @tmpTransacions)
 
 	SELECT @totalRecords = COUNT([intTransactionId]) FROM @tmpTransacions

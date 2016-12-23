@@ -9,15 +9,15 @@
     [dtmIssueDate] DATETIME NOT NULL, 
     [strActivityStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[dtmRetireDate] DATETIME NULL,
-    [strCheckNumber] CHAR(25) COLLATE Latin1_General_CI_AS NULL, 
-    [dtmCheckDate] DATETIME NULL, 
-    [dblCheckAmount] NUMERIC(18, 6) NULL, 
     [intTransferredFrom] INT NULL, 
     [dtmTransferredDate] DATETIME NULL, 
 	[dblParValue] NUMERIC(18,6) NULL,
 	[dblFaceValue] NUMERIC(18,6) NULL,
 	[ysnPosted] BIT NULL DEFAULT 0,
+	[intBillId] INT NULL,
+	[intInvoiceId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT 0, 
-    CONSTRAINT [PK_tblPATIssueStock] PRIMARY KEY ([intCustomerStockId]), 
-    CONSTRAINT [FK_tblPATIssueStock_StockClassification] FOREIGN KEY ([intStockId]) REFERENCES [tblPATStockClassification]([intStockId])
+    CONSTRAINT [PK_tblPATCustomerStock] PRIMARY KEY ([intCustomerStockId]), 
+    CONSTRAINT [FK_tblPATCustomerStock_StockClassification] FOREIGN KEY ([intStockId]) REFERENCES [tblPATStockClassification]([intStockId]),
+	CONSTRAINT [UQ_tblPATCustomerStock_strCertificateNo] UNIQUE ([strCertificateNo])
 )
