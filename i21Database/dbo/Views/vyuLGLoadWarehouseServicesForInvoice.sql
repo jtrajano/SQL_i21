@@ -34,7 +34,7 @@ FROM (
 		,[strShippedItemId] = 'ld:' + CAST(LD.intLoadDetailId AS NVARCHAR(250))
 		,[intEntityCustomerId] = LD.intCustomerEntityId
 		,[strCustomerName] = EME.[strName]
-		,[intCurrencyId] = ISNULL(ISNULL(CD.[intCurrencyId], ARC.[intCurrencyId]), (
+		,[intCurrencyId] = ISNULL(ISNULL(WRMD.[intCurrencyId], ARC.[intCurrencyId]), (
 				SELECT TOP 1 intDefaultCurrencyId
 				FROM tblSMCompanyPreference
 				WHERE intDefaultCurrencyId IS NOT NULL
@@ -97,11 +97,12 @@ FROM (
 		AND LD.intSCompanyLocationId = ARIA.[intLocationId]
 	LEFT JOIN tblARInvoiceDetail ARID ON LD.intLoadDetailId = ARID.[intInventoryShipmentItemId]
 	LEFT JOIN [tblSMCompanyLocation] SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]
+	LEFT JOIN tblLGWarehouseRateMatrixHeader WRMD ON WRMD.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 	GROUP BY LWS.intLoadWarehouseServicesId
 		,L.[strLoadNumber]
 		,LD.intLoadDetailId
 		,EME.[strName]
-		,CD.intCurrencyId
+		,WRMD.intCurrencyId
 		,L.dtmScheduledDate
 		,L.intLoadId
 		,SMCL.[strLocationName]
