@@ -24,7 +24,7 @@ SELECT
 	l.strLocationType,
 	ItemLocation.intVendorId,
 	strVendorId = Vendor.strVendorId,
-	intStockUOMId = StockUOM.intUnitMeasureId, --StockUOM.intItemUOMId,
+	intStockUOMId = StockUOM.intItemUOMId,
 	strStockUOM = StockUOM.strUnitMeasure,
 	strStockUOMType = StockUOM.strUnitType,
 	dblStockUnitQty = StockUOM.dblUnitQty,
