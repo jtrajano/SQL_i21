@@ -49,6 +49,8 @@ SELECT
 	,[intSubCurrencyId]						= ARCC.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARCC.[dblSubCurrencyRate]
 	,[strSubCurrency]						= ARCC.[strSubCurrency]
+	,[intDestinationGradeId]				= ARCC.[intDestinationGradeId]
+	,[intDestinationWeightId]				= ARCC.[intDestinationWeightId]
 FROM
 	vyuLGDropShipmentDetails LGSPS
 INNER JOIN

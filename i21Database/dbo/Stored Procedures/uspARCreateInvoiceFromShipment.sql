@@ -194,6 +194,8 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
 	,[intStorageScheduleTypeId]
+	,[intDestinationGradeId]
+	,[intDestinationWeightId]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
 	)
@@ -299,6 +301,8 @@ SELECT
 	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
 	,[ysnBlended]							= ARSI.[ysnBlended]
 	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
+	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
+	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 FROM
@@ -411,6 +415,8 @@ SELECT
 	,[intTempDetailIdForTaxes]				= SOD.intSalesOrderDetailId
 	,[ysnBlended]							= 0
 	,[intStorageScheduleTypeId]				= SOD.intStorageScheduleTypeId
+	,[intDestinationGradeId]				= NULL
+	,[intDestinationWeightId]				= NULL
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
 FROM 
@@ -526,6 +532,8 @@ INSERT INTO @EntriesForInvoice
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
 	,[intStorageScheduleTypeId]
+	,[intDestinationGradeId]
+	,[intDestinationWeightId]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate])
 SELECT 
@@ -630,6 +638,8 @@ SELECT
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
 	,@StorageScheduleTypeId
+	,[intDestinationGradeId]
+	,[intDestinationWeightId]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate]
  FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId ASC, ysnInventory DESC
