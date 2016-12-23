@@ -210,6 +210,21 @@ GO
 			WHERE strNamespace = 'CRM.view.Campaign'
 		END
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.WorkOrder') 
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnCustomTab], [ysnActivity], [intConcurrencyId]) 
+			VALUES (N'WorkOrder', N'Work Order', N'Manufacturing.view.WorkOrder', N'Manufacturing', N'tblMFWorkOrder', 1, 1, 1, 0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET strTableName = N'tblMFWorkOrder',
+				ysnApproval = 1, 
+				ysnCustomTab = 1,
+				ysnActivity = 1
+			WHERE strNamespace = 'Manufacturing.view.WorkOrder'
+		END
+
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO

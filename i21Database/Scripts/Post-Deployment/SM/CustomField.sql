@@ -69,5 +69,19 @@ BEGIN
 	print('/*******************  END Creating Entity Contact Custom Table *******************/')
 END
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('cstMFWorkOrder'))
+BEGIN
+    print('/*******************  BEGIN Creating Work Order Custom Table *******************/')
+    EXEC('
+        CREATE TABLE [dbo].[cstMFWorkOrder]
+        (
+            [intId] INT NOT NULL,
+            CONSTRAINT [PK_cstMFWorkOrder] PRIMARY KEY CLUSTERED ([intId] ASC),
+            CONSTRAINT [FK_cstMFWorkOrder_tblMFWorkOrder] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblMFWorkOrder] ([intWorkOrderId]) ON DELETE CASCADE
+        );
+    ')
+    print('/*******************  END Creating Work Order Custom Table *******************/')
+END
+
 GO
 print('/*******************  END Creating Custom Field Tables *******************/')
