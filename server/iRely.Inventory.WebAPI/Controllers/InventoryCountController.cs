@@ -79,5 +79,11 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockSummaryByLot(param));
         }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetPrintVariance(GetParameter param, int CountId)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetPrintVariance(param, CountId));
+        }
     }
 }

@@ -725,7 +725,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             var showAddScreen = function () {
                 var search = i21.ModuleMgr.Search;
                 search.scope = me;
-                search.url = '../Inventory/api/InventoryCount/GetCountSheets?CountId=' + CountId;
+                search.url = '../Inventory/api/InventoryCount/GetPrintVariance?CountId=' + CountId;
                // search.filter = filters;
 
                 if (current.get('ysnIncludeOnHand')) {
@@ -1042,6 +1042,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('strSubLocationName', null);
                     current.set('intSubLocationId', null);
                     current.set('dblSystemCount', null);
+                    current.set('intItemUOMId', records[0].get('intStockUOMId'));
+                    current.set('strUnitMeasure', records[0].get('strStockUOM'));
                     me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
                         if (err) {
                             iRely.Functions.showErrorDialog(val);

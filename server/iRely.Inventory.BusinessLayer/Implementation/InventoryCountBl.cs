@@ -163,5 +163,19 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public async Task<SearchResult> GetPrintVariance(GetParameter param, int CountId)
+        {
+            var query = _db.GetQuery<vyuICGetCountSheet>()
+                .Where(p => p.intInventoryCountId == CountId && p.dblVariance != 0)
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryCountId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

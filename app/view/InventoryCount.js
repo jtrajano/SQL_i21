@@ -615,6 +615,16 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         dataType: 'string',
                                                         text: 'Category',
                                                         flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'intStockUOMId',
+                                                        dataType: 'numeric',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strStockUOM',
+                                                        dataType: 'string',
+                                                        hidden: true
                                                     }
                                                 ],
                                                 itemId: 'cboItem',

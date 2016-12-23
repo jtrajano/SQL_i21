@@ -16,5 +16,6 @@ namespace iRely.Inventory.BusinessLayer
         SaveResult PostInventoryCount(Common.Posting_RequestModel count, bool isRecap);
         Task<SearchResult> GetItemStockSummary(GetParameter param);
         Task<SearchResult> GetItemStockSummaryByLot(GetParameter param);
+        Task<SearchResult> GetPrintVariance(GetParameter param, int CountId);
     }
 }
