@@ -2,6 +2,8 @@
 AS
 SELECT CH.strContractNumber
 	,CD.intContractSeq
+	,Vendor.strName AS strVendorName
+	,Customer.strName AS strCustomerName
 	,I.strItemNo
 	,LOAD.intLoadId
 	,LOAD.intConcurrencyId
@@ -214,6 +216,8 @@ JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem I ON I.intItemId = CD.intItemId
 JOIN tblLGLoadDocuments LDOC ON LDOC.intLoadId = LOAD.intLoadId
 JOIN tblICDocument DOC ON DOC.intDocumentId = LDOC.intDocumentId
+LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = LOAD.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = LOAD.intDriverEntityId
