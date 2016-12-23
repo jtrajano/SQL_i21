@@ -122,4 +122,4 @@ FROM	tblICInventoryReceipt r
 						ON i.intItemId = ri.intItemId						
 			WHERE	ri.intInventoryReceiptId = r.intInventoryReceiptId
 		) ri 
-		
+WHERE	r.ysnPosted = 1
