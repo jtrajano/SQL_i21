@@ -24,7 +24,9 @@
 								CASE WHEN [Partner] IS NOT NULL THEN 1 ELSE 0 END AS  [Partner],
 								CASE WHEN [Lead] IS NOT NULL THEN 1 ELSE 0 END AS  [Lead],
 								CASE WHEN [Veterinary] IS NOT NULL THEN 1 ELSE 0 END AS  [Veterinary],
-								CASE WHEN [Lien] IS NOT NULL THEN 1 ELSE 0 END AS  [Lien]
+								CASE WHEN [Lien] IS NOT NULL THEN 1 ELSE 0 END AS  [Lien],
+								CASE WHEN [Broker] IS NOT NULL THEN 1 ELSE 0 END AS  [Broker]
+								
 								
 
 			FROM
@@ -57,9 +59,8 @@
 						[Partner],
 						[Lead],
 						[Veterinary],
-						[Lien]
-
-
+						[Lien],
+						[Broker]
 
 					)
 			) AS PivotTable

@@ -4640,6 +4640,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetEmailInfo.sql" />
     <Build Include="dbo\Views\vyuLGUnAllocatedContracts.sql" />
     <Build Include="dbo\Tables\tblRKVendorPriceFixationLimit.sql" />
+    <Build Include="vyuEMSearchEntityBroker.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
