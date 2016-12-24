@@ -4642,6 +4642,8 @@
     <Build Include="dbo\Tables\tblRKVendorPriceFixationLimit.sql" />
     <Build Include="vyuEMSearchEntityBroker.sql" />
     <Build Include="dbo\Functions\fnPATValidateAssociatedTransaction.sql" />
+    <Build Include="dbo\Views\vyuLGLoadStorageCostView.sql" />
+    <Build Include="dbo\Views\vyuLGLoadStorageCostLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
