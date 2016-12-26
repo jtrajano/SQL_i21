@@ -4645,6 +4645,7 @@
     <Build Include="dbo\Views\vyuLGLoadStorageCostView.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostLots.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRouteRemoveIncompleteOrders.sql" />
+    <Build Include="dbo\Views\vyuLGLoadStorageCostForInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

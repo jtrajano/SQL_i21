@@ -1473,3 +1473,113 @@ LEFT OUTER JOIN tblARInvoiceDetail ARID ON ARID.intLoadDetailId = LC.[intLoadDet
 LEFT OUTER JOIN tblSMCurrency SMC ON LC.[intCurrencyId] = SMC.[intCurrencyID] 
 WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 
+UNION
+
+SELECT  [strTransactionType]			= 'Load Schedule'
+	,[strTransactionNumber]				= [strLoadNumber]
+	,[strShippedItemId]					= 'lgis:' + CAST(LC.intLoadDetailId AS NVARCHAR(250))
+	,[intEntityCustomerId]				= [intEntityCustomerId]
+	,[strCustomerName]					= [strCustomerName]
+	,[intCurrencyId]					= [intCurrencyId]
+	,[intSalesOrderId]					= NULL
+	,[intSalesOrderDetailId]			= NULL
+	,[strSalesOrderNumber]				= ''
+	,[dtmProcessDate]					= [dtmProcessDate]
+	,[intInventoryShipmentId]			= NULL
+	,[intInventoryShipmentItemId]		= NULL
+	,[intInventoryShipmentChargeId]		= NULL
+	,[strInventoryShipmentNumber]		= NULL
+	,[intShipmentId]					= NULL
+	,[strShipmentNumber]				= NULL
+	,[intLoadId]						= intLoadId
+	,[intLoadDetailId]					= LC.intLoadDetailId
+	,[strLoadNumber]					= strLoadNumber
+	,[intRecipeItemId]					= NULL
+	,[intContractHeaderId]				= LC.[intContractHeaderId]
+	,[strContractNumber]				= [strContractNumber]
+	,[intContractDetailId]				= LC.[intContractDetailId]
+	,[intContractSeq]					= [intContractSeq]
+	,[intCompanyLocationId]				= [intCompanyLocationId]
+	,[strLocationName]					= [strLocationName]
+	,[intShipToLocationId]				= 0 --ICIS.[intShipToLocationId]
+	,[intFreightTermId]					= NULL
+	,[intItemId]						= LC.[intItemId]
+	,[strItemNo]						= [strItemNo]
+	,[strItemDescription]				= LC.[strItemDescription]
+	,[intItemUOMId]						= NULL
+	,[strUnitMeasure]					= NULL
+	,[intOrderUOMId]					= NULL
+	,[strOrderUnitMeasure]				= NULL
+	,[intShipmentItemUOMId]				= NULL
+	,[strShipmentUnitMeasure]			= NULL
+	,[dblQtyShipped]					= 1
+	,[dblQtyOrdered]					= 1
+	,[dblShipmentQuantity]				= 1 
+	,[dblShipmentQtyShippedTotal]		= 1
+	,[dblQtyRemaining]					= 1
+	,[dblDiscount]						= 0
+	,[dblPrice]							= LC.[dblPrice]
+	,[dblShipmentUnitPrice]				= [dblShipmentUnitPrice]
+	,[strPricing]						= ''
+	,[dblTotalTax]						= 0
+	,[dblTotal]							= LC.[dblTotal]
+	,[intStorageLocationId]				= NULL
+	,[strStorageLocationName]			= NULL
+	,[intTermID]						= NULL
+	,[strTerm]							= ''
+	,[intEntityShipViaId]				= NULL
+	,[strShipVia]						= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
+	,[intTicketId]						= NULL
+	,[intTaxGroupId]					= NULL 
+	,[strTaxGroup]						= NULL 
+	,[dblWeight]						= 1
+	,[intWeightUOMId]					= NULL
+	,[strWeightUnitMeasure]				= NULL
+	,[dblGrossWt]						= 1
+	,[dblTareWt]						= 1
+	,[dblNetWt]							= 1
+	,[strPONumber]						= ''
+	,[strBOLNumber]						= ''
+	,[intSplitId]						= NULL
+	,[intEntitySalespersonId]			= NULL
+	,[strSalespersonName]				= ''
+	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= ARID.[intDestinationGradeId]
+	,[strDestinationGrade]				= CTDG.[strDestinationGrade]
+	,[intDestinationWeightId]			= ARID.[intDestinationWeightId]
+	,[strDestinationWeight]				= CTDW.[strDestinationWeight]
+	,[intSubCurrencyId]					= LC.[intCurrencyId]
+	,[dblSubCurrencyRate]				= CASE WHEN ISNULL(SMC.[intCent], 0) = 0 THEN 1.000000 ELSE CAST(SMC.[intCent] AS NUMERIC(18,6)) END
+	,[strSubCurrency]					= SMC.[strCurrency]
+FROM vyuLGLoadStorageCostForInvoice LC
+LEFT OUTER JOIN tblARInvoiceDetail ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationGrade]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDG
+		ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationWeight]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDW
+		ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
+LEFT OUTER JOIN tblSMCurrency SMC ON LC.[intCurrencyId] = SMC.[intCurrencyID] 
+WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0
