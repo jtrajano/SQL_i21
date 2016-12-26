@@ -4644,6 +4644,7 @@
     <Build Include="dbo\Functions\fnPATValidateAssociatedTransaction.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostView.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRouteRemoveIncompleteOrders.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
