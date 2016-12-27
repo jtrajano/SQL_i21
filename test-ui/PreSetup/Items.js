@@ -74,7 +74,7 @@ StartTest (function (t) {
         //endregion
 
         //region Items for Delete Inventory Receipt
-        .displayText('===== Pre setup: Add New Non Lotted and Lotted Item for Delete Inventory Receipt =====')
+        .displayText('===== Pre setup: Items for Delete Inventory Receipt Script =====')
         .displayText('===== Creating Non Lotted Item =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
@@ -157,6 +157,8 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .displayText('===== Lotted Item Created =====')
         //endregion
+
+
 
         .done();
 
