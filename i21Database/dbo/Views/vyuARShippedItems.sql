@@ -20,7 +20,7 @@ SELECT
 	,[intLoadId]						= NULL
 	,[intLoadDetailId]					= NULL
 	,[strLoadNumber]					= NULL
-	,[intRecipeItemId]					= NULL
+	,[intRecipeItemId]					= SOD.[intRecipeItemId]
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
 	,[strContractNumber]				= ARCR.[strContractNumber]
 	,[intContractDetailId]				= SOD.[intContractDetailId]
@@ -55,7 +55,8 @@ SELECT
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
 	,[strShipVia]						= S.[strShipVia]
-	,[strTicketNumber]					= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
@@ -79,6 +80,10 @@ SELECT
 	,[dblMargin]						= SOD.[dblMargin]
 	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
 	,[intStorageScheduleTypeId]			= SOD.[intStorageScheduleTypeId]
+	,[intDestinationGradeId]			= NULL
+	,[strDestinationGrade]				= ''
+	,[intDestinationWeightId]			= NULL
+	,[strDestinationWeight]				= ''
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -200,7 +205,8 @@ SELECT
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId]
 	,[strShipVia]						= S.[strShipVia]
-	,[strTicketNumber]					= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
@@ -224,6 +230,10 @@ SELECT
 	,[dblMargin]						= SOD.[dblMargin]
 	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
 	,[intStorageScheduleTypeId]			= SOD.[intStorageScheduleTypeId]
+	,[intDestinationGradeId]			= NULL
+	,[strDestinationGrade]				= ''
+	,[intDestinationWeightId]			= NULL
+	,[strDestinationWeight]				= ''
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -343,6 +353,7 @@ SELECT
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= SCT.[strTicketNumber]
+	,[strCustomerReference]				= SCT.[strCustomerReference]
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
@@ -366,6 +377,10 @@ SELECT
 	,[dblMargin]						= SOD.[dblMargin]
 	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
 	,[intStorageScheduleTypeId]			= SOD.[intStorageScheduleTypeId]
+	,[intDestinationGradeId]			= ISNULL(SHP.[intDestinationGradeId], ARCC.[intDestinationGradeId])
+	,[strDestinationGrade]				= ISNULL(SHP.[strDestinationGrade], ARCC.[strDestinationGrade])
+	,[intDestinationWeightId]			= ISNULL(SHP.[intDestinationWeightId], ARCC.[intDestinationWeightId])
+	,[strDestinationWeight]				= ISNULL(SHP.[strDestinationWeight], ARCC.[strDestinationWeight])
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -430,6 +445,10 @@ CROSS APPLY
 		,ISI.[intWeightUOMId]
 		,ISI.intSubLocationId
 		,ISI.intStorageLocationId
+		,ISI.[intDestinationGradeId]
+		,CTDG.[strDestinationGrade]
+		,ISI.[intDestinationWeightId]
+		,CTDW.[strDestinationWeight]
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -447,6 +466,24 @@ CROSS APPLY
 	LEFT OUTER JOIN
 		 tblARInvoiceDetail IND
 			ON ISI.[intInventoryShipmentItemId] = IND.[intInventoryShipmentItemId]
+	LEFT OUTER JOIN
+			(
+				SELECT
+					[intWeightGradeId]		= [intWeightGradeId]
+					,[strDestinationGrade]	= [strWeightGradeDesc]
+				FROM
+					tblCTWeightGrade
+			) CTDG
+				ON ISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+	LEFT OUTER JOIN
+		(
+			SELECT
+				[intWeightGradeId]		= [intWeightGradeId]
+				,[strDestinationWeight]	= [strWeightGradeDesc]
+			FROM
+				tblCTWeightGrade
+		) CTDW
+			ON ISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
@@ -470,6 +507,10 @@ CROSS APPLY
 		,ISI.[intWeightUOMId]
 		,ISI.intSubLocationId
 		,ISI.intStorageLocationId
+		,ISI.[intDestinationGradeId]
+		,CTDG.[strDestinationGrade]
+		,ISI.[intDestinationWeightId]
+		,CTDW.[strDestinationWeight]
 	) SHP
 LEFT OUTER JOIN
 	tblSCTicket SCT
@@ -550,17 +591,17 @@ SELECT
 	,[strOrderUnitMeasure]				= ARCC.[strOrderUnitMeasure]
 	,[intShipmentItemUOMId]				= ICISI.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
-	,[dblQtyShipped]					= ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity]) 	
+	,[dblQtyShipped]					= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) --ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity]) 	
 	,[dblQtyOrdered]					= CASE WHEN ARCC.[intContractDetailId] IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END 
-	,[dblShipmentQuantity]				= ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity])  --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
-	,[dblShipmentQtyShippedTotal]		= ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity]) 
-	,[dblQtyRemaining]					= ISNULL(ARCC.[dblShipQuantity], ICISI.[dblQuantity]) 
+	,[dblShipmentQuantity]				= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) --ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity])
+	,[dblShipmentQtyShippedTotal]		= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) --ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]) 
+	,[dblQtyRemaining]					= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) --ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]) 
 	,[dblDiscount]						= 0 
 	,[dblPrice]							= ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
 	,[dblShipmentUnitPrice]				= ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
 	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
-	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
+	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
 	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
 	,[strStorageLocationName]			= ICSL.[strName]
 	,[intTermID]						= NULL
@@ -568,6 +609,7 @@ SELECT
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
 	,[strTicketNumber]					= SCT.strTicketNumber
+	,[strCustomerReference]				= SCT.strCustomerReference
 	,[intTicketId]						= SCT.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
@@ -591,6 +633,10 @@ SELECT
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= ISNULL(ICISI.[intDestinationGradeId], ARCC.[intDestinationGradeId])
+	,[strDestinationGrade]				= ISNULL(CTDG.[strDestinationGrade], ARCC.[strDestinationGrade])
+	,[intDestinationWeightId]			= ISNULL(ICISI.[intDestinationWeightId], ARCC.[intDestinationWeightId])
+	,[strDestinationWeight]				= ISNULL(CTDW.[strDestinationWeight], ARCC.[strDestinationWeight])
 	,[intSubCurrencyId]					= ARCC.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= ARCC.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -642,7 +688,25 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	vyuARCustomerContract ARCC	
 		ON ICISI.[intLineNo] = ARCC.[intContractDetailId]
-		AND ICIS.[intOrderType] = 1 
+		AND ICIS.[intOrderType] = 1
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationGrade]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDG
+		ON ICISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationWeight]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDW
+		ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 INNER JOIN
 	tblARCustomer ARC
 		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
@@ -746,6 +810,7 @@ SELECT
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
 	,[strTicketNumber]					= SCT.strTicketNumber
+	,[strCustomerReference]				= SCT.strCustomerReference
 	,[intTicketId]						= SCT.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
@@ -769,6 +834,10 @@ SELECT
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= NULL
+	,[strDestinationGrade]				= ''
+	,[intDestinationWeightId]			= NULL
+	,[strDestinationWeight]				= ''
 	,[intSubCurrencyId]					= ICISC.[intCurrencyId]
 	,[dblSubCurrencyRate]				= ICISC.[dblRate] 
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -779,7 +848,7 @@ INNER JOIN
 		ON ICISC.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 		AND ICIS.[ysnPosted] = 1
 		AND ISNULL(ICISC.[ysnPrice],0) = 1
-INNER JOIN	
+LEFT OUTER JOIN	
 		tblICInventoryShipmentItem ICISI 
 			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 LEFT OUTER JOIN 
@@ -812,7 +881,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
     tblSCTicket SCT
         ON ICISI.[intSourceId] = SCT.[intTicketId]
-WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+WHERE ISNULL(ARID.[intInventoryShipmentChargeId],0) = 0
 
 UNION ALL
 
@@ -871,7 +940,8 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL
 	,[strTaxGroup]						= NULL
@@ -895,6 +965,10 @@ SELECT
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= NULL
+	,[strDestinationGrade]				= ''
+	,[intDestinationWeightId]			= NULL
+	,[strDestinationWeight]				= ''
 	,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
 	,[strSubCurrency]					= ARSID.[strSubCurrency]
@@ -999,7 +1073,8 @@ SELECT
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
 	,[strShipVia]						= S.[strShipVia]
-	,[strTicketNumber]					= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL
 	,[strTaxGroup]						= ''
@@ -1015,7 +1090,7 @@ SELECT
 	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= NULL
-	,[intRecipeId]						= NULL
+	,[intRecipeId]						= MFR.intRecipeId
 	,[intSubLocationId]					= NULL
 	,[intCostTypeId]					= NULL
 	,[intMarginById]					= NULL
@@ -1023,6 +1098,10 @@ SELECT
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= NULL
+	,[strDestinationGrade]				= ''
+	,[intDestinationWeightId]			= NULL
+	,[strDestinationWeight]				= ''
 	,[intSubCurrencyId]					= NULL
 	,[dblSubCurrencyRate]				= 1
 	,[strSubCurrency]					= ''
@@ -1060,6 +1139,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblARInvoiceDetail	ARID
 		ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+LEFT OUTER JOIN
+	tblMFRecipeItem MFR
+		ON MFG.intRecipeItemId = MFR.intRecipeItemId
 LEFT OUTER JOIN
 	(SELECT D.[intOrderId] FROM tblICInventoryShipmentItem D INNER JOIN tblICInventoryShipment H ON H.[intInventoryShipmentId] = D.[intInventoryShipmentId] WHERE H.[intOrderType] = 2) ISD
 		ON SO.[intSalesOrderId] = ISD.[intOrderId] 
@@ -1125,7 +1207,8 @@ SELECT DISTINCT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
@@ -1149,6 +1232,10 @@ SELECT DISTINCT
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= ICISI.[intDestinationGradeId]
+	,[strDestinationGrade]				= CTDG.[strDestinationGrade]
+	,[intDestinationWeightId]			= ICISI.[intDestinationWeightId]
+	,[strDestinationWeight]				= CTDW.[strDestinationWeight]
 	,[intSubCurrencyId]					= ICISI.[intCurrencyId]
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL(SMC.[intCent], 0) = 0 THEN 1.000000 ELSE CAST(SMC.[intCent] AS NUMERIC(18,6)) END
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -1160,6 +1247,24 @@ INNER JOIN
 	tblICInventoryShipment ICIS
 		ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 		AND ICIS.[ysnPosted] = 1
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationGrade]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDG
+		ON ICISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationWeight]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDW
+		ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 INNER JOIN
 	tblARCustomer ARC
 		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
@@ -1248,7 +1353,8 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
@@ -1272,6 +1378,10 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= ARCC.[intDestinationGradeId]
+	,[strDestinationGrade]				= ARCC.[strDestinationGrade]
+	,[intDestinationWeightId]			= ARCC.[intDestinationWeightId]
+	,[strDestinationWeight]				= ARCC.[strDestinationWeight]
 	,[intSubCurrencyId]					= ARCC.[intSubCurrencyId] 
 	,[dblSubCurrencyRate]				= ARCC.[dblSubCurrencyRate] 
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -1353,7 +1463,8 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL 
 	,[strTaxGroup]						= NULL 
@@ -1377,11 +1488,33 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= ARID.[intDestinationGradeId]
+	,[strDestinationGrade]				= CTDG.[strDestinationGrade]
+	,[intDestinationWeightId]			= ARID.[intDestinationWeightId]
+	,[strDestinationWeight]				= CTDW.[strDestinationWeight]
 	,[intSubCurrencyId]					= LWS.[intCurrencyId]
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL(SMC.[intCent], 0) = 0 THEN 1.000000 ELSE CAST(SMC.[intCent] AS NUMERIC(18,6)) END
 	,[strSubCurrency]					= SMC.[strCurrency]
 FROM vyuLGLoadWarehouseServicesForInvoice LWS
 LEFT OUTER JOIN tblARInvoiceDetail ARID ON ARID.intLoadDetailId = LWS.[intLoadDetailId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationGrade]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDG
+		ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationWeight]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDW
+		ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 LEFT OUTER JOIN tblSMCurrency SMC ON LWS.[intCurrencyId] = SMC.[intCurrencyID] 
 WHERE LWS.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0 AND ISNULL(LWS.intItemId,0) <> 0
 
@@ -1441,7 +1574,8 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= ''
+	,[strTicketNumber]					= NULL
+	,[strCustomerReference]				= NULL
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL 
 	,[strTaxGroup]						= NULL 
@@ -1465,11 +1599,33 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
 	,[intStorageScheduleTypeId]			= NULL
+	,[intDestinationGradeId]			= ARID.[intDestinationGradeId]
+	,[strDestinationGrade]				= CTDG.[strDestinationGrade]
+	,[intDestinationWeightId]			= ARID.[intDestinationWeightId]
+	,[strDestinationWeight]				= CTDW.[strDestinationWeight]
 	,[intSubCurrencyId]					= LC.[intCurrencyId]
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL(SMC.[intCent], 0) = 0 THEN 1.000000 ELSE CAST(SMC.[intCent] AS NUMERIC(18,6)) END
 	,[strSubCurrency]					= SMC.[strCurrency]
 FROM vyuLGLoadCostForCustomer LC
 LEFT OUTER JOIN tblARInvoiceDetail ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationGrade]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDG
+		ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			[intWeightGradeId]		= [intWeightGradeId]
+			,[strDestinationWeight]	= [strWeightGradeDesc]
+		FROM
+			tblCTWeightGrade
+	) CTDW
+		ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 LEFT OUTER JOIN tblSMCurrency SMC ON LC.[intCurrencyId] = SMC.[intCurrencyID] 
 WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 
