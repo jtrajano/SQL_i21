@@ -509,6 +509,39 @@ GO
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Misc Checks' 
 		END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unlock' AND [strType] = N'Transaction')
+		BEGIN
+			INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
+			SELECT	[strReminder]		=        N'Unlock',
+					[strType]			=        N'Transaction',
+					[strMessage]		=        N'{0} {1} {2} locked.',
+					[strQuery]			=        N'SELECT intTransactionId
+													FROM tblSMTransaction A
+													WHERE	ysnLocked = 1 AND 
+															DATEDIFF(MINUTE, dtmLockedDate, GETUTCDATE()) < 30 AND 
+															(intLockedBy = {0} OR 
+															EXISTS 
+																(SELECT intEntityUserSecurityId 
+																 FROM tblSMUserSecurity 
+																 WHERE intEntityUserSecurityId = {0} AND ysnAdmin = 1))',
+					[strNamespace]		=        N'GlobalComponentEngine.view.LockedRecord',
+					[intSort]			=        1
+		END
+	ELSE
+		BEGIN
+			UPDATE [tblSMReminderList]
+			SET	[strQuery] = N'SELECT intTransactionId
+									FROM tblSMTransaction A
+									WHERE	ysnLocked = 1 AND 
+											DATEDIFF(MINUTE, dtmLockedDate, GETUTCDATE()) < 30 AND 
+											(intLockedBy = {0} OR 
+											EXISTS 
+												(SELECT intEntityUserSecurityId 
+													FROM tblSMUserSecurity 
+													WHERE intEntityUserSecurityId = {0} AND ysnAdmin = 1))'
+			WHERE [strReminder] = N'Unlock' AND [strType] = N'Transaction'
+		END
 GO
 
 --	IF EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
