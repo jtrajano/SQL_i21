@@ -278,7 +278,8 @@ namespace iRely.Inventory.BusinessLayer
                         {
                             lu = GetLookUpId<tblSTSubcategoryRegProd>(
                                 context,
-                                m => m.strRegProdCode == value && m.intStoreId != null && m.intStoreId != 0,
+                                //m => m.strRegProdCode == value && m.intStoreId != null && m.intStoreId != 0,
+                                m => m.strRegProdCode == value && m.intStoreId != 0,
                                 e => (int)e.intRegProdId);
                             if (lu != null)
                                 fc.intProductCodeId = (int)lu;
@@ -328,7 +329,8 @@ namespace iRely.Inventory.BusinessLayer
                         {
                             val = int.Parse(value);
                         }
-                        catch (Exception ex)
+                        //catch (Exception ex)
+                        catch (System.Reflection.AmbiguousMatchException)
                         {
                             dr.Messages.Add(new ImportDataMessage()
                             {
@@ -465,7 +467,8 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 val = int.Parse(value);
                             }
-                            catch (Exception ex)
+                            //catch (Exception ex)
+                            catch (System.Reflection.AmbiguousMatchException)
                             {
                                 dr.Messages.Add(new ImportDataMessage()
                                 {

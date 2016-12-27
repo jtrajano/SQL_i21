@@ -27,8 +27,8 @@ namespace iRely.Inventory.BusinessLayer
                 string value = csv[header];
 
                 string h = header.ToLower().Trim();
-                int? lu = null;
-                bool inserted = false;
+                //int? lu = null;
+                //bool inserted = false;
 
                 switch (h)
                 {

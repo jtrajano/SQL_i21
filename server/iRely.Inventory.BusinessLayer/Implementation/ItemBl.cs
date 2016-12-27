@@ -773,8 +773,8 @@ namespace iRely.Inventory.BusinessLayer
         public SaveResult CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId)
         {
             SaveResult saveResult = new SaveResult();
-            var msg = "";
-
+            //var msg = "";
+           
             //Check if Stock Unit is changed
             var query = _db.GetQuery<tblICItemUOM>()
                 .Where(t => t.intItemId == ItemId && t.ysnStockUnit == ItemStockUnit && t.intItemUOMId == ItemUOMId);
@@ -784,7 +784,7 @@ namespace iRely.Inventory.BusinessLayer
             //No Change
             if (totalItemChange > 0)
             {
-                msg = "success";
+                //msg = "success";
                 saveResult.HasError = false;
             }
 
@@ -800,14 +800,15 @@ namespace iRely.Inventory.BusinessLayer
                 //With Transaction
                 if (totalItemWithTransaction > 0)
                 {
-                    msg = "Item has already a transaction.";
+                    //msg = "Item has already a transaction.";                    
+                    saveResult.Exception = new iRely.Common.ServerException(new Exception("Item has already a transaction."), iRely.Common.Error.OtherException, iRely.Common.Button.Ok); 
                     saveResult.HasError = true;
                 }
 
                 //Without Transaction
                 else
                 {
-                    msg = "success";
+                    //msg = "success";
                     saveResult.HasError = false;
                 }   
             }
@@ -819,7 +820,6 @@ namespace iRely.Inventory.BusinessLayer
         public SaveResult ConvertItemToNewStockUnit(int ItemId, int ItemUOMId)
         {
             SaveResult saveResult = new SaveResult();
-            var msg = "";
 
             using (SqlConnection conn = new SqlConnection(_db.ContextManager.Database.Connection.ConnectionString))
             {
@@ -836,7 +836,6 @@ namespace iRely.Inventory.BusinessLayer
                         command.ExecuteNonQuery();
 
                         saveResult = _db.Save(true);
-                        msg = "success";
                         saveResult.HasError = false; 
                     }
                 }
