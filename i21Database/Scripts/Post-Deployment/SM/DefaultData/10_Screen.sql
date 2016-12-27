@@ -225,6 +225,21 @@ GO
 			WHERE strNamespace = 'Manufacturing.view.WorkOrder'
 		END
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ProcessProductionConsume') 
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnCustomTab], [ysnActivity], [intConcurrencyId]) 
+			VALUES (N'ProcessProductionConsume', N'Process Production Consume', N'Manufacturing.view.ProcessProductionConsume', N'Manufacturing', N'tblMFWorkOrderInputLot', 1, 1, 1, 0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET strTableName = N'tblMFWorkOrderInputLot',
+				ysnApproval = 1, 
+				ysnCustomTab = 1,
+				ysnActivity = 1
+			WHERE strNamespace = 'Manufacturing.view.ProcessProductionConsume'
+		END
+
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO

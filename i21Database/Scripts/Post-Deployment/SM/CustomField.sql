@@ -83,5 +83,19 @@ BEGIN
     print('/*******************  END Creating Work Order Custom Table *******************/')
 END
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('cstMFWorkOrderInputLot'))
+BEGIN
+    print('/*******************  BEGIN Creating Work Order Consume Custom Table *******************/')
+    EXEC('
+        CREATE TABLE [dbo].[cstMFWorkOrderInputLot]
+        (
+            [intId] INT NOT NULL,
+            CONSTRAINT [PK_cstMFWorkOrderInputLot] PRIMARY KEY CLUSTERED ([intId] ASC),
+            CONSTRAINT [FK_cstMFWorkOrderInputLot_tblMFWorkOrderInputLot] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblMFWorkOrderInputLot] ([intWorkOrderInputLotId]) ON DELETE CASCADE
+        );
+    ')
+    print('/*******************  END Creating Work Order Consume Custom Table *******************/')
+END
+
 GO
 print('/*******************  END Creating Custom Field Tables *******************/')
