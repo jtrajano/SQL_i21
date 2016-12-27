@@ -110,7 +110,10 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblMFRecipeItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
-	CONSTRAINT [FK_tblARInvoice_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+	CONSTRAINT [FK_tblARInvoice_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblARInvoice_tblCTWeightGrade_intDestinationGradeId] FOREIGN KEY ([intDestinationGradeId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),
+    CONSTRAINT [FK_tblARInvoice_tblCTWeightGrade_intDestinationWeightId] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId])
+
 );
 
 GO
