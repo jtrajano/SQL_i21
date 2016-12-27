@@ -4,6 +4,7 @@
 	@ysnRecap BIT = NULL,
 	@ysnVoting BIT = NULL,
 	@ysnRetired BIT = NULL,
+	@intCompanyLocationId INT = NULL,
 	@intUserId INT = NULL,
 	@batchIdUsed NVARCHAR(40) = NULL OUTPUT,
 	@error NVARCHAR(200) = NULL OUTPUT,
@@ -26,7 +27,7 @@ DECLARE @GLEntries AS RecapTableType;
 DECLARE @totalRecords INT;
 DECLARE @batchId NVARCHAR(40);
 DECLARE @isGLSucces AS BIT = 0;
-DECLARE @intCreatedBillId INT;
+DECLARE @intCreatedId INT;
 
 CREATE TABLE #tempValidateTable (
 	[strError] [NVARCHAR](MAX),
@@ -64,8 +65,10 @@ SET @batchIdUsed = @batchId;
 IF(ISNULL(@ysnPosted,0) = 0)
 BEGIN
 	-------- VALIDATE IF CAN BE UNPOSTED
+	DECLARE @type AS INT = CASE WHEN @ysnRetired = 0 THEN 1 ELSE 2 END;
+
 	INSERT INTO #tempValidateTable
-	SELECT * FROM fnPATValidateAssociatedTransaction((SELECT intCustomerStockId FROM #tempCustomerStock),2)
+	SELECT * FROM fnPATValidateAssociatedTransaction((SELECT intCustomerStockId FROM #tempCustomerStock), @type)
 
 	SELECT * FROM #tempValidateTable
 	IF EXISTS(SELECT 1 FROM #tempValidateTable)
@@ -235,12 +238,12 @@ BEGIN
 				,@shipTo = NULL
 				,@vendorOrderNumber = @strVenderOrderNumber
 				,@voucherDate = @dateToday
-				,@billId = @intCreatedBillId OUTPUT
+				,@billId = @intCreatedId OUTPUT
 
-			UPDATE tblPATCustomerStock SET intBillId = @intCreatedBillId WHERE intCustomerStockId = @intCustomerStockId
+			UPDATE tblPATCustomerStock SET intBillId = @intCreatedId WHERE intCustomerStockId = @intCustomerStockId
 
 			EXEC [dbo].[uspAPPostBill]
-				@batchId = @intCreatedBillId,
+				@batchId = @intCreatedId,
 				@billBatchId = NULL,
 				@transactionType = NULL,
 				@post = 1,
@@ -248,20 +251,203 @@ BEGIN
 				@isBatch = 0,
 				@param = NULL,
 				@userId = @intUserId,
-				@beginTransaction = @intCreatedBillId,
-				@endTransaction = @intCreatedBillId,
+				@beginTransaction = @intCreatedId,
+				@endTransaction = @intCreatedId,
 				@success = @success OUTPUT
 
 		END
 		ELSE
 		BEGIN
 			DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tempCustomerStock) AND ysnPaid <> 1;
-			UPDATE tblPATCustomerStock SET intBillId = null WHERE intCustomerStockId = @intCustomerStockId
-			EXEC uspPATProcessVoid @intCustomerStockId, @intUserId
+			UPDATE tblPATCustomerStock SET intBillId = null WHERE intCustomerStockId = @intCustomerStockId;
+			EXEC uspPATProcessVoid @intCustomerStockId, @intUserId;
 		END
 
 	END
+	ELSE
+	BEGIN
+		IF(@ysnPosted = 1)
+		BEGIN
+			DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable;
+			DECLARE @TaxDetails AS LineItemTaxDetailStagingTable;
 
+			INSERT INTO @EntriesForInvoice(
+				[strSourceTransaction]
+				,[intSourceId]
+				,[strSourceId]
+				,[intInvoiceId]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intCurrencyId]
+				,[intTermId]
+				,[dtmDate]
+				,[dtmDueDate]
+				,[dtmShipDate]
+				,[intEntitySalespersonId]
+				,[intFreightTermId]
+				,[intShipViaId]
+				,[intPaymentMethodId]
+				,[strInvoiceOriginId]
+				,[strPONumber]
+				,[strBOLNumber]
+				,[strDeliverPickup]
+				,[strComments]
+				,[intShipToLocationId]
+				,[intBillToLocationId]
+				,[ysnTemplate]
+				,[ysnForgiven]
+				,[ysnCalculated]
+				,[ysnSplitted]
+				,[intPaymentId]
+				,[intSplitId]
+				,[intLoadDistributionHeaderId]
+				,[strActualCostId]
+				,[intShipmentId]
+				,[intTransactionId]
+				,[intEntityId]
+				,[ysnResetDetails]
+				,[ysnPost]
+				,[intInvoiceDetailId]
+				,[intItemId]
+				,[ysnInventory]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyOrdered]
+				,[dblQtyShipped]
+				,[dblDiscount]
+				,[dblPrice]
+				,[ysnRefreshPrice]
+				,[strMaintenanceType]
+				,[strFrequency]
+				,[dtmMaintenanceDate]
+				,[dblMaintenanceAmount]
+				,[dblLicenseAmount]
+				,[intTaxGroupId]
+				,[ysnRecomputeTax]
+				,[intSCInvoiceId]
+				,[strSCInvoiceNumber]
+				,[intInventoryShipmentItemId]
+				,[strShipmentNumber]
+				,[intSalesOrderDetailId]
+				,[strSalesOrderNumber]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[intShipmentPurchaseSalesContractId]
+				,[intTicketId]
+				,[intTicketHoursWorkedId]
+				,[intSiteId]
+				,[strBillingBy]
+				,[dblPercentFull]
+				,[dblNewMeterReading]
+				,[dblPreviousMeterReading]
+				,[dblConversionFactor]
+				,[intPerformerId]
+				,[ysnLeaseBilling]
+				,[ysnVirtualMeterReading]
+				,[ysnClearDetailTaxes]					
+				,[intTempDetailIdForTaxes]
+			)
+			SELECT
+				[strSourceTransaction]					= 'Patronage'
+				,[intSourceId]							= CS.intCustomerStockId
+				,[strSourceId]							= CS.strCertificateNo
+				,[intInvoiceId]							= NULL
+				,[intEntityCustomerId]					= CS.intCustomerPatronId
+				,[intCompanyLocationId]					= @intCompanyLocationId
+				,[intCurrencyId]						= ARC.intCurrencyId
+				,[intTermId]							= EML.intTermsId
+				,[dtmDate]								= CS.dtmIssueDate
+				,[dtmDueDate]							= NULL
+				,[dtmShipDate]							= CS.dtmIssueDate
+				,[intEntitySalespersonId]				= NULL
+				,[intFreightTermId]						= NULL 
+				,[intShipViaId]							= NULL 
+				,[intPaymentMethodId]					= NULL
+				,[strInvoiceOriginId]					= ''
+				,[strPONumber]							= ''
+				,[strBOLNumber]							= ''
+				,[strDeliverPickup]						= ''
+				,[strComments]							= ''
+				,[intShipToLocationId]					= NULL
+				,[intBillToLocationId]					= NULL
+				,[ysnTemplate]							= 0
+				,[ysnForgiven]							= 0
+				,[ysnCalculated]						= 0
+				,[ysnSplitted]							= 0
+				,[intPaymentId]							= NULL
+				,[intSplitId]							= NULL
+				,[intLoadDistributionHeaderId]			= NULL
+				,[strActualCostId]						= ''
+				,[intShipmentId]						= NULL
+				,[intTransactionId]						= CS.intCustomerStockId
+				,[intEntityId]							= @intUserId
+				,[ysnResetDetails]						= 0
+				,[ysnPost]								= 1
+				,[intInvoiceDetailId]					= NULL
+				,[intItemId]							= NULL
+				,[ysnInventory]							= 0
+				,[strItemDescription]					= 'Patronage - Issued Stock' 
+				,[intItemUOMId]							= NULL
+				,[dblQtyOrdered]						= 1
+				,[dblQtyShipped]						= 1
+				,[dblDiscount]							= 0
+				,[dblPrice]								= CS.dblFaceValue
+				,[ysnRefreshPrice]						= 0
+				,[strMaintenanceType]					= ''
+				,[strFrequency]							= ''
+				,[dtmMaintenanceDate]					= NULL
+				,[dblMaintenanceAmount]					= NULL
+				,[dblLicenseAmount]						= NULL
+				,[intTaxGroupId]						= EML.intTaxGroupId
+				,[ysnRecomputeTax]						= 1
+				,[intSCInvoiceId]						= NULL
+				,[strSCInvoiceNumber]					= ''
+				,[intInventoryShipmentItemId]			= NULL
+				,[strShipmentNumber]					= ''
+				,[intSalesOrderDetailId]				= NULL
+				,[strSalesOrderNumber]					= ''
+				,[intContractHeaderId]					= NULL 
+				,[intContractDetailId]					= NULL 
+				,[intShipmentPurchaseSalesContractId]	= NULL
+				,[intTicketId]							= NULL
+				,[intTicketHoursWorkedId]				= NULL
+				,[intSiteId]							= NULL
+				,[strBillingBy]							= ''
+				,[dblPercentFull]						= NULL
+				,[dblNewMeterReading]					= NULL
+				,[dblPreviousMeterReading]				= NULL
+				,[dblConversionFactor]					= NULL
+				,[intPerformerId]						= NULL
+				,[ysnLeaseBilling]						= NULL
+				,[ysnVirtualMeterReading]				= NULL
+				,[ysnClearDetailTaxes]					= 1
+				,[intTempDetailIdForTaxes]				= @intCustomerStockId
+
+			FROM tblPATCustomerStock CS
+			INNER JOIN tblARCustomer ARC
+				ON ARC.intEntityCustomerId = CS.intCustomerPatronId
+			INNER JOIN tblEMEntityLocation EML
+				ON EML.intEntityId = CS.intCustomerPatronId
+			WHERE CS.intCustomerStockId = @intCustomerStockId
+
+			EXEC uspARProcessInvoices 
+				@InvoiceEntries = @EntriesForInvoice,
+				@LineItemTaxEntries = @TaxDetails,
+				@UserId = @intUserId,
+				@GroupingOption = 11,
+				@RaiseError		= 1,
+				@ErrorMessage	= @error OUTPUT,
+				@CreatedIvoices	= @intCreatedId OUTPUT
+
+			UPDATE tblPATCustomerStock SET intInvoiceId = @intCreatedId WHERE intCustomerStockId = @intCustomerStockId
+
+		END
+		ELSE
+		BEGIN
+			DELETE FROM tblARInvoice WHERE intInvoiceId IN (SELECT intInvoiceId FROM #tempCustomerStock) AND ysnPaid <> 1;
+			UPDATE tblPATCustomerStock SET intInvoiceId = null WHERE intCustomerStockId = @intCustomerStockId;
+		END
+	END
 END
 
 
