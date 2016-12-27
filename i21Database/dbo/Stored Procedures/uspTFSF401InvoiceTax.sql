@@ -70,9 +70,9 @@ DECLARE @tblTempTransaction TABLE (
 
 	IF @Refresh = 'true'
 		BEGIN
-			DELETE FROM tblTFTransactions --WHERE uniqTransactionGuid = @Guid
+			DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 		END
-		DELETE FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
+		DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 
 	-- ORIGIN/DESTINATION
 	DECLARE @IncludeOriginState NVARCHAR(250)
@@ -241,7 +241,7 @@ DECLARE @tblTempTransaction TABLE (
 
 				IF (@ReportingComponentId <> '')
 					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, 
+						INSERT INTO tblTFTransaction (uniqTransactionGuid, 
 																	   intTaxAuthorityId,
 																	   strTaxAuthority,
 																	   strFormCode,
@@ -342,7 +342,7 @@ DECLARE @tblTempTransaction TABLE (
 					END
 				ELSE
 					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
+						INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
 					END
 
 			SET @CountRC = @CountRC - 1
@@ -352,7 +352,7 @@ DECLARE @tblTempTransaction TABLE (
 		--SELECT TOP 1 @HasResult = intId from @tblTempTransaction
 		--IF(@HasResult IS NULL AND @IsEdi = 'false')
 		--	BEGIN
-		--		INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+		--		INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 		--	END
 
 --===================================================== ORIGIN INVENTORY TRANSFER =====================================================
@@ -376,9 +376,9 @@ DECLARE @TRRCId NVARCHAR(50)
 
 	--IF @Refresh = 'true'
 	--	BEGIN
-	--		TRUNCATE TABLE tblTFTransactions --WHERE uniqTransactionGuid = @Guid
+	--		TRUNCATE TABLE tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 	--	END
-	--	DELETE FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
+	--	DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 
 		SELECT @TRQueryRC = 'SELECT ''' + REPLACE (@ReportingComponentId,',',''' UNION SELECT ''') + ''''
 		INSERT INTO @tblTRTempReportingComponent (intReportingComponentId)
@@ -440,7 +440,7 @@ DECLARE @TRRCId NVARCHAR(50)
 					END
 
 				--INVENTORY TRANSFER
-				SET @TRquery = 'INSERT INTO tblTFTransactions (uniqTransactionGuid, intReportingComponentId, intTaxAuthorityId, strTaxAuthority, strFormCode, strScheduleCode, strType, intProductCodeId, strProductCode, intItemId, dblQtyShipped, dblGross, dblNet,
+				SET @TRquery = 'INSERT INTO tblTFTransaction (uniqTransactionGuid, intReportingComponentId, intTaxAuthorityId, strTaxAuthority, strFormCode, strScheduleCode, strType, intProductCodeId, strProductCode, intItemId, dblQtyShipped, dblGross, dblNet,
 							  dblBillQty, dblTax, dblTaxExempt, strInvoiceNumber, strPONumber, strBOLNumber, dtmDate, strDestinationCity, strDestinationState, strOriginCity, strOriginState, strShipVia, strTransporterLicense,
 							  strTransportationMode, strTransporterName, strTransporterFederalTaxId, strConsignorName, strConsignorFederalTaxId, strTerminalControlNumber, strVendorName, strVendorFederalTaxId,strCustomerName,strCustomerFederalTaxId,
 							  strTaxPayerName, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strTaxPayerIdentificationNumber, strTaxPayerFEIN, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strItemNo,intIntegrationError,leaf)
@@ -512,8 +512,8 @@ DECLARE @TRRCId NVARCHAR(50)
 			END
 	
 		DECLARE @TRHasResult INT
-		SELECT TOP 1 @TRHasResult = intTransactionId FROM tblTFTransactions
+		SELECT TOP 1 @TRHasResult = intTransactionId FROM tblTFTransaction
 		IF(@TRHasResult IS NULL AND @IsEdi = 'false')
 			BEGIN
-				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, 'SF-401', 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+				INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, 'SF-401', 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 			END

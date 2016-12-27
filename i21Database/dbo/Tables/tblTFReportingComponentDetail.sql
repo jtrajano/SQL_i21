@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblTFReportingComponentDetail] (
     [intReportingComponentDetailId] INT           IDENTITY (1, 1) NOT NULL,
     [intReportingComponentId]       INT           NULL,
-    [ysnIncludeSalesFreightOnly]    BIT           NULL,
+    
     [strIncludeTransactionsWithFET] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [strIncludeTransactionsWithSET] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [strIncludeTransactionsWithSST] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,

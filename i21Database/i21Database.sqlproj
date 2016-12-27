@@ -2278,10 +2278,10 @@
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiry.sql" />
     <Build Include="dbo\Functions\fnRKConvertQuantityToTargetUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendProductionAvailableLots.sql" />
-    <Build Include="dbo\Tables\tblTFValidVendor.sql" />
-    <Build Include="dbo\Tables\tblTFValidProductCode.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentVendor.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentProductCode.sql" />
     <Build Include="dbo\Tables\tblTFValidLocalTax.sql" />
-    <Build Include="dbo\Tables\tblTFValidAccountStatusCode.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentAccountStatusCode.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetYield.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRescheduleWorkOrder.sql" />
@@ -2970,7 +2970,7 @@
     <Build Include="dbo\Views\vyuCTContStsInvoiceSummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
-    <Build Include="dbo\Tables\tblTFTransactions.sql" />
+    <Build Include="dbo\Tables\tblTFTransaction.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionDetail.sql" />
@@ -3012,7 +3012,6 @@
     <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <Build Include="dbo\Tables\tblTFTransactions.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_Frequency.sql" />
@@ -3020,7 +3019,6 @@
     <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <Build Include="dbo\Tables\tblTFTransactions.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
@@ -3484,7 +3482,7 @@
     <Build Include="dbo\Tables\tblPRPaycheckTimeOff.sql" />
     <Build Include="dbo\Tables\tblPRForm941.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
-    <Build Include="dbo\Tables\tblTFTaxReportSummary.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionSummary.sql" />
     <Build Include="dbo\Tables\tblTFTaxReportTemplate.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
@@ -3622,7 +3620,7 @@
     <Build Include="dbo\Tables\tblGLTempCOASegment.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReport.sql" />
     <Build Include="dbo\Tables\tblTFOriginDestinationState.sql" />
-    <Build Include="dbo\Tables\tblTFValidDestinationState.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentDestinationState.sql" />
     <Build Include="dbo\Stored Procedures\uspMBDuplicateConsignmentRate.sql" />
     <Build Include="dbo\Tables\tblSMEmail.sql" />
     <Build Include="dbo\Tables\tblSMEmailUpload.sql" />
@@ -3847,8 +3845,7 @@
     <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
     <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
-    <Build Include="dbo\Tables\tblTFValidOriginState.sql" />
-    <Build Include="dbo\Tables\tblTFValidVendor.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentOriginState.sql" />
     <Build Include="dbo\Tables\tblARPrepaidAndCredit.sql" />
     <Build Include="dbo\Views\vyuARPrepaidAndCredit.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaidForInvoice.sql" />
@@ -4655,6 +4652,10 @@
     <Build Include="dbo\Views\vyuLGUnAllocatedContracts.sql" />
     <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentCustomer.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionException.sql" />
+    <Build Include="dbo\Views\vyuTFGetTransactionException.sql" />
+    <Build Include="dbo\Views\vyuTFGetTransaction.sql" />
+    <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

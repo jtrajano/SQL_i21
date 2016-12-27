@@ -5593,4 +5593,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnSend" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="fd6c36b7-a978-4203-b759-7c94d707713f" ChangeDateTime="12/23/2016 10:06:40">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentProductCode].[intProductCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentProductCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intProductCodeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5a6f3d62-c3a1-46d0-b06c-2a4fe108c159" ChangeDateTime="12/23/2016 10:06:48">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentProductCode].[strFilter]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentProductCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a7bdb6d5-6bb6-47d3-8383-d970d96bbf50" ChangeDateTime="12/23/2016 10:07:04">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentOriginState].[strFilter]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentOriginState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="63bb18c1-70ba-4de5-bcb3-c57f8a32d27c" ChangeDateTime="12/23/2016 10:07:18">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentDestinationState].[strStatus]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentDestinationState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strType" />
+  </Operation>
 </Operations>

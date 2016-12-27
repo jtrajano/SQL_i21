@@ -95,9 +95,9 @@ DECLARE @tblTempTransaction TABLE (
 
 	IF @Refresh = 'true'
 		BEGIN
-			DELETE FROM tblTFTransactions --WHERE uniqTransactionGuid = @Guid
+			DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 		END
-		DELETE FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
+		DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 
 	-- ORIGIN/DESTINATION
 	DECLARE @IncludeOriginState NVARCHAR(250)
@@ -419,7 +419,7 @@ DECLARE @tblTempTransaction TABLE (
 
 				IF (@ReportingComponentId <> '')
 					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, 
+						INSERT INTO tblTFTransaction (uniqTransactionGuid, 
 																	   intTaxAuthorityId,
 																	   strTaxAuthority,
 																	   strFormCode,
@@ -520,7 +520,7 @@ DECLARE @tblTempTransaction TABLE (
 					END
 				ELSE
 					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
+						INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
 					END
 
 			SET @CountRC = @CountRC - 1
@@ -530,5 +530,5 @@ DECLARE @tblTempTransaction TABLE (
 		SELECT TOP 1 @HasResult = intId from @tblTempTransaction
 		IF(@HasResult IS NULL AND @IsEdi = 'false')
 			BEGIN
-				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+				INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 			END
