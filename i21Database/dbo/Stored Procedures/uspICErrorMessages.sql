@@ -462,3 +462,11 @@ EXEC sp_addmessage 80095,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80096) EXEC sp_dropmessage 80096, 'us_english'	
 SET @strmessage = 'Check the date on the transaction. As of %s, there is no stock available for %s in %s.'
 EXEC sp_addmessage 80096,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80097) EXEC sp_dropmessage 80097, 'us_english'	
+SET @strmessage = 'Sub Location is invalid for item %s.'
+EXEC sp_addmessage 80097,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80098) EXEC sp_dropmessage 80098, 'us_english'	
+SET @strmessage = 'Storage Location is invalid for item %s.'
+EXEC sp_addmessage 80098,11,@strmessage,'us_english','False'
