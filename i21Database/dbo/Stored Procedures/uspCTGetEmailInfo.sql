@@ -82,7 +82,7 @@ BEGIN
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @loop
 	WHILE ISNULL(@intUniqueId,0) > 0
 	BEGIN
-		SELECT	@Id = id,@strNumber = strNumber FROM @loop WHERE intUniqueId = @intUniqueId
+		SELECT	@Id = Id,@strNumber = strNumber FROM @loop WHERE intUniqueId = @intUniqueId
 		SELECT  @body += '<p><a href="'+@strURL+'#/CT/'+@routeScreen+'?routeId='+LTRIM(@Id)+'">'+@strMailType+' - '+@strNumber+'</a></p>'
 		SELECT	@intUniqueId = MIN(intUniqueId) FROM @loop WHERE intUniqueId > @intUniqueId
 	END
