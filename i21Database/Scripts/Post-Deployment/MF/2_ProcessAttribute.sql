@@ -1820,3 +1820,24 @@ BEGIN
         ,5
 END
 Go
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblMFAttribute
+		WHERE intAttributeId = 86
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 86
+		,'Feed Time Disabled'
+		,5
+		,1
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
