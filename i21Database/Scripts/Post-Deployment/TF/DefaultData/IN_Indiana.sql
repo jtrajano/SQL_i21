@@ -1794,7 +1794,7 @@ UNION ALL SELECT intReportTemplateId = 143, strFormCode = 'EDI', strScheduleCode
 UNION ALL SELECT intReportTemplateId = 144, strFormCode = 'EDI', strScheduleCode = '', strType = 'EDI', strTemplateItemId = 'EDI-FileName2nd', strReportSection = 'EDI', intReportItemSequence = '7', intTemplateItemNumber = '23', strDescription = 'EDI File Name - 2nd part (Tax Payer Code)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = '1', ysnDynamicConfiguration = '0', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '165'
 UNION ALL SELECT intReportTemplateId = 145, strFormCode = 'EDI', strScheduleCode = '', strType = 'EDI', strTemplateItemId = 'EDI-FileName3rd', strReportSection = 'EDI', intReportItemSequence = '7', intTemplateItemNumber = '23', strDescription = 'EDI File Name - 3rd part (Next Sequence Number)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = '1', ysnDynamicConfiguration = '0', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '170'
 
-EXEC uspTFUpgradeReportingComponentConfigurations @ReportingComponentConfigurations = @ReportingComponentConfigurations
+EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
 
 
 -- Reporting Component - Output Designer

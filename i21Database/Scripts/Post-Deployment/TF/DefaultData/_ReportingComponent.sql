@@ -12,7 +12,7 @@ TRUNCATE TABLE tblTFValidOriginState
 TRUNCATE TABLE tblTFValidDestinationState
 TRUNCATE TABLE tblTFValidProductCode
 TRUNCATE TABLE tblTFValidVendor
-TRUNCATE TABLE tblTFTaxReportSummary
+TRUNCATE TABLE tblTFTransactionSummary
 TRUNCATE TABLE tblTFTaxCriteria
 
 TRUNCATE TABLE tblTFOriginDestinationState

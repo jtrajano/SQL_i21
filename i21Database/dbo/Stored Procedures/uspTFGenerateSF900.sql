@@ -46,7 +46,7 @@ DECLARE @tblTempSummaryItem TABLE (
 
 IF @Refresh = 'true'
 		BEGIN
-			DELETE FROM tblTFTaxReportSummary --WHERE strSummaryGuid = @Guid
+			DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
 		END
 	-- ======================== HEADER ==============================
 DECLARE @DatePeriod DATETIME
@@ -66,7 +66,7 @@ SET @LicenseNumber = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE 
 SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 SET @FaxNumber = (SELECT TOP 1 strFax FROM tblSMCompanySetup)
 
-INSERT INTO tblTFTaxReportSummary (strSummaryGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strSegment, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, 
+INSERT INTO tblTFTransactionSummary (strSummaryGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strSegment, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, 
 		 	strFEINSSN, strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName, strLicenseNumber, strFaxNumber)
 
 SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, strCompanyName,
@@ -141,14 +141,14 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-005'
 					BEGIN
 					--5. Billed Taxable Gallons (Line 3 minus Line 4)
-						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				ELSE IF @TemplateItemId = 'SF-900-Summary-006'
 					BEGIN
 					--6. Tax Due (Multiply Line 5 by $0.16)
-						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''' AND strSegment = ''Summary'''  
+						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''' AND strSegment = ''Summary'''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -162,14 +162,14 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-008'
 					BEGIN
 					--8. Adjusted Tax Due (Line 6 minus Line 7)
-						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				ELSE IF @TemplateItemId = 'SF-900-Summary-009'
 					BEGIN
 					--9. Collection Allowance (Multiply Line 8 by .016). If return filed or tax paid after due date enter zero (0)
-						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -187,9 +187,9 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 						DECLARE @value NUMERIC(18, 6)
 						DECLARE @strvalue NVARCHAR(20)
 						--Line 8 minus Line 9 
-						DECLARE @val1 NUMERIC(18, 6) = (SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN ('8','9') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN ('8','9') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam)
+						DECLARE @val1 NUMERIC(18, 6) = (SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN ('8','9') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam) - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN ('8','9') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam)
 						--Get Line 10
-						DECLARE @val2 NUMERIC(18, 6) = (select strColumnValue from tblTFTaxReportSummary where intItemNumber IN ('10') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam)
+						DECLARE @val2 NUMERIC(18, 6) = (select strColumnValue from tblTFTransactionSummary where intItemNumber IN ('10') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam)
 						--plus line 10
 						SET @value = @val1 + @val2
 						SET @strvalue = (CONVERT(NVARCHAR(30), @value))
@@ -200,14 +200,14 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-012'
 					BEGIN
 					--1. Total billed gallons (From Section 2, Line 5)
-						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				ELSE IF @TemplateItemId = 'SF-900-Summary-013'
 					BEGIN
 					--2. Oil inspection fees due (Multiply Line 1 by $0.01)
-						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -222,14 +222,14 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-015'
 					BEGIN
 					--4. Total oil inspection fees due (Line 2 plus or minus Line 3)
-						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				ELSE IF @TemplateItemId = 'SF-900-Summary-016'
 					BEGIN
 					--1. Total amount due (Section 2, Line 11 plus Section 3, Line 4)
-						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -251,7 +251,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-019'
 					BEGIN
 					--4. Net tax due (Line 1 plus Line 2 plus Line 3)
-						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 				END
@@ -266,7 +266,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-021'
 				--6. Balance due (Line 4 minus Line 5)
 					BEGIN
-						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -333,7 +333,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-031'
 					BEGIN
 					--3. Taxable Gallons Sold or Used (Carry forward to Section 2, Line 3 on front
-						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSegment = ''Details'' AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSegment = ''Details'' AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -400,7 +400,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 
 				--IF (@TempComputedValue IS NOT NULL) -- INSERT COMPUTED VALUES FROM TEMP TOTAL TABLE TO SUMMARY TABLE
 				--BEGIN
-					INSERT INTO tblTFTaxReportSummary
+					INSERT INTO tblTFTransactionSummary
 					(
 						 strSummaryGuid,
 						 intTaxAuthorityId,
@@ -459,6 +459,6 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 			SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 			IF(@isTransactionEmpty = 'No record found.')
 				BEGIN
-					UPDATE tblTFTaxReportSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
+					UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
 				END
 END

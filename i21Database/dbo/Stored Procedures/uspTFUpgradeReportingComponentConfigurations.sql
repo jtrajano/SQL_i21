@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFUpgradeReportingComponentConfigurations]
+	@TaxAuthorityCode NVARCHAR(10),
 	@ReportingComponentConfigurations TFReportingComponentConfigurations READONLY
 
 AS
@@ -15,6 +16,13 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
+	DECLARE @TaxAuthorityId INT
+	SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+	IF (ISNULL(@TaxAuthorityId, 0) = 0)
+	BEGIN
+		RAISERROR('Tax Authority code does not exist.', 16, 1)
+	END
+
 	MERGE	
 	INTO	tblTFTaxReportTemplate
 	WITH	(HOLDLOCK) 
@@ -24,6 +32,7 @@ BEGIN TRY
 		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
 			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
 			AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
+			AND RC.intTaxAuthorityId = @TaxAuthorityId
 	) AS SOURCE
 		ON TARGET.strTemplateItemId = SOURCE.strTemplateItemId
 
