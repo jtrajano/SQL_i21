@@ -167,7 +167,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                             }
                         });
                     else
-                        iRely.Functions.showInfoDialog(json.message);
+                        iRely.Functions.showInfoDialog("Inventory Rebuild successful.");
                 }
                 else
                     iRely.Functions.showErrorDialog(json.message);
