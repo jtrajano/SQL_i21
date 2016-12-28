@@ -137,7 +137,7 @@ GO
 		EXEC ('
 			 INSERT INTO tblSMTransaction (
 				intScreenId, 
-				strRecordNo, 
+				intRecordId, 
 				intConcurrencyId
 			 )
 			 SELECT 
@@ -145,7 +145,7 @@ GO
 				intId,
 				0 
 			 FROM ' + @tableName + ' A LEFT OUTER JOIN tblSMTransaction B
-				ON B.intScreenId = '+	@screenId  + ' AND CAST(B.strRecordNo AS INT) = A.intId
+				ON B.intScreenId = '+	@screenId  + ' AND B.intRecordId = A.intId
 			 WHERE ISNULL(intTransactionId, 0) = 0	 
 
 			 INSERT INTO tblSMTabRow (
@@ -160,7 +160,7 @@ GO
 				0,
 				1
 			 FROM ' + @tableName + ' A INNER JOIN tblSMTransaction B
-				ON B.intScreenId = '+	@screenId  + ' AND CAST(B.strRecordNo AS INT) = A.intId	 
+				ON B.intScreenId = '+	@screenId  + ' AND B.intRecordId = A.intId	 
 
 			 DECLARE @columnsOnly AS NVARCHAR(MAX),
 					 @columnsWithCast AS NVARCHAR(MAX),
@@ -211,7 +211,7 @@ GO
 						FOR field IN ('' + @columnsOnly + '')
 					 ) B
 					 INNER JOIN tblSMCustomTabDetail C ON B.field COLLATE SQL_Latin1_General_CP1_CS_AS = C.strFieldName AND C.intCustomTabId = ' + @customTabId + '
-					 INNER JOIN tblSMTransaction D ON B.intId = CAST(D.strRecordNo AS INT) AND D.intScreenId = ' + @screenId + '
+					 INNER JOIN tblSMTransaction D ON B.intId = D.intRecordId AND D.intScreenId = ' + @screenId + '
 					 INNER JOIN tblSMTabRow E ON D.intTransactionId = E.intTransactionId AND E.intCustomTabId = ' + @customTabId + '
 				   ''
 			EXEC sp_executesql @query;
