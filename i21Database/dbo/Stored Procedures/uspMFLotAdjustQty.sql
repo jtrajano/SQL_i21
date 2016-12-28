@@ -30,6 +30,9 @@ BEGIN TRY
 		,@dblLotReservedQty NUMERIC(38, 20)
 		,@dblLotAvailableQty NUMERIC(38, 20)
 
+	IF @strReasonCode = '0'
+		SELECT @strReasonCode = ''
+
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
@@ -142,15 +145,15 @@ BEGIN TRY
 				)
 	END
 
-	IF @strReasonCode IS NULL
-		OR @strReasonCode = ''
-	BEGIN
-		RAISERROR (
-				51191
-				,16
-				,1
-				)
-	END
+	--IF @strReasonCode IS NULL
+	--	OR @strReasonCode = ''
+	--BEGIN
+	--	RAISERROR (
+	--			51191
+	--			,16
+	--			,1
+	--			)
+	--END
 
 	IF EXISTS (
 			SELECT 1

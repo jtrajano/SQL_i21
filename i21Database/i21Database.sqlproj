@@ -4653,6 +4653,7 @@
     <Build Include="dbo\Tables\tblRKM2MVendorExposure.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposure.sql" />
     <Build Include="dbo\Functions\fnGRCalculateDiscountUnit.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFResetDefaultReasonCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
