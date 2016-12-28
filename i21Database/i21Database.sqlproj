@@ -4649,6 +4649,7 @@
     <Build Include="dbo\Views\vyuTFGetTransaction.sql" />
     <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentOriginState.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponent.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentDestinationState.sql" />
   </ItemGroup>
   <ItemGroup>

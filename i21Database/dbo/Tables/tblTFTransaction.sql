@@ -71,7 +71,9 @@
 	[intIntegrationError] INT,
 	[leaf] BIT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblTFTransaction] PRIMARY KEY ([intTransactionId])
+    CONSTRAINT [PK_tblTFTransaction] PRIMARY KEY ([intTransactionId]), 
+    CONSTRAINT [FK_tblTFTransaction_tblTFReportingComponent] FOREIGN KEY ([intReportingComponentId]) REFERENCES [tblTFReportingComponent]([intReportingComponentId]), 
+    CONSTRAINT [FK_tblTFTransaction_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId])
 )
 
 GO

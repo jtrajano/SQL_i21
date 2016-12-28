@@ -7,7 +7,7 @@
 
 AS
 
-DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM tblTFTransaction WHERE strFormCode = @FormCodeParam AND uniqTransactionGuid = @Guid)
+DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM vyuTFGetTransaction WHERE strFormCode = @FormCodeParam AND uniqTransactionGuid = @Guid)
 IF (@FCode IS NOT NULL)
 BEGIN
 
@@ -64,16 +64,21 @@ DECLARE @EIN NVARCHAR(50)
 DECLARE @FaxNumber NVARCHAR(50)
 
 --SET @FormCodeParam = (SELECT TOP 1 strFormCode FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid)
-SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-SET @TACode = (SELECT TOP 1 strTaxAuthority FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-SET @DatePeriod = (SELECT TOP 1 dtmDate FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-SET @DateBegin = (SELECT TOP 1 dtmReportingPeriodBegin FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+SELECT TOP 1 @TA = intTaxAuthorityId
+	, @TACode = strTaxAuthorityCode
+	, @DatePeriod = dtmDate
+	, @DateBegin = dtmReportingPeriodBegin
+	, @DateEnd = dtmReportingPeriodEnd
+FROM vyuTFGetTransaction
+WHERE uniqTransactionGuid = @Guid
+	AND strFormCode = @FormCodeParam
+
 SET @LicenseNumber = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND strTemplateItemId = 'SF-401-LicenseNumber')
 SET @MotorCarrier = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND strTemplateItemId = 'SF-401-MotorCarrier')
-SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
-SET @FaxNumber = (SELECT TOP 1 strFax FROM tblSMCompanySetup)
 
+SELECT TOP 1 @EIN = strEin
+	, @FaxNumber = strFax
+FROM tblSMCompanySetup
 
 	INSERT INTO tblTFTransactionSummary (strSummaryGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strSegment, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, 
 		 		strFEINSSN, strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName, strLicenseNumber, strMotorCarrier, strFaxNumber)
@@ -112,7 +117,7 @@ SET @FaxNumber = (SELECT TOP 1 strFax FROM tblSMCompanySetup)
 									EXEC(@SchedQuery)
 
 									SELECT strSchedule FROM @tblSchedule
-									SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransaction WHERE strScheduleCode IN ('1A','2A','3A')
+									SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN ('1A','2A','3A')
 
 									INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
 									VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 1, 'Summary','Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransaction WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
@@ -132,13 +137,13 @@ SET @FaxNumber = (SELECT TOP 1 strFax FROM tblSMCompanySetup)
 									DECLARE @paramScheduleCode NVARCHAR(MAX)
 									SET @paramScheduleCode = (SELECT strTempScheduleCode FROM @tblTempScheduleCodeParam WHERE strTempScheduleCode = @tplScheduleCode)
 									PRINT @paramScheduleCode
-									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 
 									
-									SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline (Gasoline, Gasohol)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline (Gasoline, Gasohol)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 
 
-									SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Other Products (Jet Fuel, Kerosene)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Other Products (Jet Fuel, Kerosene)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 									
 									-- GAS
 									DECLARE @SmryDetailItemId NVARCHAR(MAX)
@@ -160,7 +165,7 @@ SET @FaxNumber = (SELECT TOP 1 strFax FROM tblSMCompanySetup)
 			END
 			
 			DECLARE @isTransactionEmpty NVARCHAR(20)
-			SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+			SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 			IF(@isTransactionEmpty = 'No record found.')
 				BEGIN
 					UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam

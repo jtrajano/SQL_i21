@@ -7,7 +7,7 @@
 
 AS
 
-DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM tblTFTransaction WHERE strFormCode = @FormCodeParam AND uniqTransactionGuid = @Guid)
+DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM vyuTFGetTransaction WHERE strFormCode = @FormCodeParam AND uniqTransactionGuid = @Guid)
 IF (@FCode IS NOT NULL)
 BEGIN
 
@@ -42,7 +42,7 @@ DECLARE @EIN NVARCHAR(50)
 			@DatePeriod = dtmDate,
 			@DateBegin = dtmReportingPeriodBegin,
 			@DateEnd = dtmReportingPeriodEnd
-		FROM tblTFTransaction 
+		FROM vyuTFGetTransaction 
 		WHERE uniqTransactionGuid = @Guid 
 		AND strFormCode = @FormCodeParam
 
@@ -376,7 +376,7 @@ DECLARE @EIN NVARCHAR(50)
 												SELECT @TotalGallonsSold = ISNULL(SUM(dblQtyShipped), 0),
 														@TotalExemptGallonsSold = ISNULL(SUM(dblTaxExempt), 0),
 														@FormCodeParam = ISNULL(SUM(dblTax), 0)
-													FROM tblTFTransaction 
+													FROM vyuTFGetTransaction 
 													WHERE strScheduleCode = @paramTempScheduleCode 
 													AND uniqTransactionGuid = @Guid 
 													AND strFormCode = @FormCodeParam
@@ -386,7 +386,7 @@ DECLARE @EIN NVARCHAR(50)
 												SELECT @TotalGallonsSold = ISNULL(SUM(dblQtyShipped), 0),
 														@TotalExemptGallonsSold = ISNULL(SUM(dblTaxExempt), 0),
 														@GasolineUseTaxCollected = ISNULL(SUM(dblTax), 0)
-													FROM tblTFTransaction 
+													FROM vyuTFGetTransaction 
 													WHERE strScheduleCode = @paramTempScheduleCode 
 													AND strType = @Type 
 													AND uniqTransactionGuid = @Guid 
@@ -407,7 +407,7 @@ DECLARE @EIN NVARCHAR(50)
 										BEGIN
 											SELECT @ReceiptTotalGallsPurchased = ISNULL(SUM(dblGross), 0),
 													@GasolineUseTaxPaid = ISNULL(SUM(dblTax), 0)
-												FROM tblTFTransaction 
+												FROM vyuTFGetTransaction 
 												WHERE strScheduleCode = @paramTempScheduleCode 
 												AND uniqTransactionGuid = @Guid 
 												AND strFormCode = @FormCodeParam
@@ -416,7 +416,7 @@ DECLARE @EIN NVARCHAR(50)
 										BEGIN
 											SELECT @ReceiptTotalGallsPurchased = ISNULL(SUM(dblGross), 0),
 													@GasolineUseTaxPaid = ISNULL(SUM(dblTax), 0) 
-												FROM tblTFTransaction 
+												FROM vyuTFGetTransaction 
 												WHERE strScheduleCode = @paramTempScheduleCode 
 												AND strType = @Type 
 												AND uniqTransactionGuid = @Guid 
@@ -433,12 +433,13 @@ DECLARE @EIN NVARCHAR(50)
 					END
 
 			DECLARE @isTransactionEmpty NVARCHAR(20)
-			SELECT TOP 1 @isTransactionEmpty = strProductCode 
-				FROM tblTFTransaction 
-				WHERE uniqTransactionGuid = @Guid 
+			SELECT TOP 1 @isTransactionEmpty = strProductCode
+			FROM vyuTFGetTransaction
+			WHERE uniqTransactionGuid = @Guid
 				AND strFormCode = @FormCodeParam
-				IF(@isTransactionEmpty = 'No record found.')
-					BEGIN
-						UPDATE tblTFTaxReportSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
-					END
+
+			IF (@isTransactionEmpty = 'No record found.')
+			BEGIN
+				UPDATE tblTFTaxReportSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
+			END
 END
