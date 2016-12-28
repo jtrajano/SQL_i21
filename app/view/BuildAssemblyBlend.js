@@ -128,7 +128,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                             tabIndex: -1,
                             itemId: 'btnRecap',
                             ui: 'i21-button-toolbar-small',
-                            text: 'Recap'
+                            text: 'Post Preview'
                         },
                         {
                             xtype: 'button',

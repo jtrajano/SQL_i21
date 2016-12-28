@@ -122,7 +122,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                         tabIndex: -1,
                                         itemId: 'btnRecap',
                                         ui: 'i21-button-toolbar-small',
-                                        text: 'Recap'
+                                        text: 'Post Preview'
                                     },
                                     {
                                         xtype: 'button',

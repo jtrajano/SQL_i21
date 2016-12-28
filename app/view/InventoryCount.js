@@ -129,7 +129,7 @@ Ext.define('Inventory.view.InventoryCount', {
                             tabIndex: -1,
                             itemId: 'btnRecap',
                             ui: 'i21-button-toolbar-small',
-                            text: 'Recap'
+                            text: 'Post Preview'
                         },
                         {
                             xtype: 'button',
@@ -165,7 +165,6 @@ Ext.define('Inventory.view.InventoryCount', {
                     items: [
                         {
                             xtype: 'panel',
-                            itemId: 'pgeDetails',
                             bodyPadding: 5,
                             title: 'Details',
                             layout: {
@@ -1001,7 +1000,6 @@ Ext.define('Inventory.view.InventoryCount', {
                         },
                         {
                             xtype: 'panel',
-                            itemId: 'pgeComments',
                             layout: 'fit',
                             title: 'Activities',
                             items: [
