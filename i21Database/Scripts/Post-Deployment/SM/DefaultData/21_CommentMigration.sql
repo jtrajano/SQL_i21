@@ -23,37 +23,36 @@ GO
 		WHERE ISNULL(B.intScreenId, 0) = 0 AND ISNULL(strScreen, '') <> ''
 	) tbl
 
-
 	-- INSERT to tblSMTransaction all comments' unique transaction link that are not existing yet
 	INSERT INTO tblSMTransaction (
 		intScreenId,
-		strRecordNo,
+		intRecordId,
 		intConcurrencyId
 	) 
 	SELECT 
 		DISTINCT
 		B.intScreenId,
-		A.strRecordNo,
+		CONVERT(int, A.strRecordNo),
 		A.intConcurrencyId
 	FROM tblSMComment A 
 		INNER JOIN tblSMScreen B ON A.strScreen = B.strNamespace
-		LEFT OUTER JOIN tblSMTransaction C ON B.intScreenId = C.intScreenId AND C.strRecordNo = A.strRecordNo
+		LEFT OUTER JOIN tblSMTransaction C ON B.intScreenId = C.intScreenId AND C.intRecordId = CONVERT(int, A.strRecordNo)
 	WHERE ISNULL(C.intTransactionId, 0) = 0	
 
 	-- INSERT to tblSMTransaction all comments watcher's unique transaction link that are not existing yet
 	INSERT INTO tblSMTransaction (
 		intScreenId,
-		strRecordNo,
+		intRecordId,
 		intConcurrencyId
 	) 
 	SELECT 
 		DISTINCT
 		B.intScreenId,
-		A.strRecordNo,
+		CONVERT(int, A.strRecordNo),
 		A.intConcurrencyId
 	FROM tblSMCommentWatcher A 
 		INNER JOIN tblSMScreen B ON A.strScreen = B.strNamespace
-		LEFT OUTER JOIN tblSMTransaction C ON C.intScreenId = B.intScreenId AND C.strRecordNo = A.strRecordNo
+		LEFT OUTER JOIN tblSMTransaction C ON C.intScreenId = B.intScreenId AND C.intRecordId = CONVERT(int, A.strRecordNo)
 	WHERE ISNULL(C.intTransactionId, 0) = 0	
 
 	-- UPDATE tblSMComment of the transationId of the previously inserted transaction records
@@ -61,7 +60,7 @@ GO
 	SET tblSMComment.intTransactionId = C.intTransactionId
 	FROM tblSMComment A 
 		INNER JOIN tblSMScreen B ON A.strScreen = B.strNamespace
-		INNER JOIN tblSMTransaction C ON B.intScreenId = C.intScreenId AND C.strRecordNo = A.strRecordNo
+		INNER JOIN tblSMTransaction C ON B.intScreenId = C.intScreenId AND C.intRecordId = CONVERT(int, A.strRecordNo)
 	WHERE ISNULL(A.strScreen, '') <> '' AND ISNULL(A.strRecordNo, '') <> ''
 
 	-- UPDATE tblSMCommentWatcher of the transationId of the previously inserted transaction records
@@ -69,7 +68,7 @@ GO
 	SET tblSMCommentWatcher.intTransactionId = C.intTransactionId
 	FROM tblSMCommentWatcher A 
 		INNER JOIN tblSMScreen B ON A.strScreen = B.strNamespace
-		INNER JOIN tblSMTransaction C ON B.intScreenId = C.intScreenId AND C.strRecordNo = A.strRecordNo
+		INNER JOIN tblSMTransaction C ON B.intScreenId = C.intScreenId AND C.intRecordId = CONVERT(int, A.strRecordNo)
 	WHERE ISNULL(A.strScreen, '') <> '' AND ISNULL(A.strRecordNo, '') <> ''
 
 	DECLARE @activityNo AS INT = 0 
@@ -132,15 +131,15 @@ GO
 	--INSERT to tblSMTransaction from newly inserted activities
 	INSERT INTO tblSMTransaction (
 		intScreenId,
-		strRecordNo,
+		intRecordId,
 		intConcurrencyId
 	) 
 	SELECT 
 		@screenId intScreenId,
-		CAST(A.intActivityId AS NVARCHAR(50)) strRecordNo,
+		A.intActivityId,
 		A.intConcurrencyId
 	FROM tblSMActivity A 
-		LEFT OUTER JOIN tblSMTransaction C ON intScreenId = @screenId AND C.strRecordNo = CAST(A.intActivityId AS NVARCHAR(50))
+		LEFT OUTER JOIN tblSMTransaction C ON intScreenId = @screenId AND C.intRecordId = A.intActivityId
 	WHERE ISNULL(C.intTransactionId, 0) = 0	 
 	
 	--UPDATE tblSMComment intTransactionId to be equal to newly inserted transaction from activities
@@ -152,7 +151,7 @@ GO
 		ysnPublic = 1
 	FROM tblSMComment A 
 		INNER JOIN tblSMActivity B ON A.intTransactionId = B.intTransactionId
-		INNER JOIN tblSMTransaction C ON C.intScreenId = @screenId AND C.strRecordNo = CAST(B.intActivityId AS NVARCHAR(50))
+		INNER JOIN tblSMTransaction C ON C.intScreenId = @screenId AND C.intRecordId = B.intActivityId
 	WHERE ISNULL(A.strScreen, '') <> '' AND ISNULL(A.strRecordNo, '') <> ''
 
 	--UPDATE tblSMCommentWatcher intTransactionId to be equal to newly inserted transaction from activities
@@ -163,7 +162,7 @@ GO
 		strRecordNo = ''
 	FROM tblSMCommentWatcher A 
 		INNER JOIN tblSMActivity B ON A.intTransactionId = B.intTransactionId
-		INNER JOIN tblSMTransaction C ON C.intScreenId = @screenId AND C.strRecordNo = CAST(B.intActivityId AS NVARCHAR(50))
+		INNER JOIN tblSMTransaction C ON C.intScreenId = @screenId AND C.intRecordId = B.intActivityId
 	WHERE ISNULL(A.strScreen, '') <> '' AND ISNULL(A.strRecordNo, '') <> ''
 
 	UPDATE tblSMNotification
