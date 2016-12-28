@@ -9,6 +9,7 @@
 	,@dblNewQty				NUMERIC(38, 20)	        -- New Quantity for the item
 	,@dblCost				NUMERIC(38, 20) = NULL	-- Cost of the item (required if increasing stock; if missing, the system will use the item's last cost to increase the stock)
 	,@intEntityUserId		INT = NULL				-- Entity User Id
+	,@intSourceId			INT						-- Source Transaction Id
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -17,32 +18,67 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+------------------------------  
+-- Declaration of Variables -- 
+------------------------------ 
 DECLARE
 	@intLotId AS INT
 	,@strItemNo AS NVARCHAR(50)
+	,@dblAdjustQtyBy AS NUMERIC(38, 20)
+	,@intItemLocationId AS INT
+	,@tempQty AS NUMERIC(38,20)
+	,@tempPrevQty AS NUMERIC(38,20)
+	,@tempNextQty AS NUMERIC(38,20)
+	,@tempEachLotQty AS NUMERIC(38,20)
+	,@tempAdjustQtyBy AS NUMERIC(38,20)
+	,@intInventoryAdjustmentId AS INT
 
 BEGIN
-	-------------------------------------  
-	-- Validation for Mandatory Fields -- 
-	------------------------------------- 
+
+	---------------- 
+	-- SET Values --
+	----------------
+	-- Set Transaction Date
+	SET @dtmQtyChange = ISNULL(@dtmQtyChange, GETDATE());
+ 	
+	IF @intItemId IS NOT NULL
+		BEGIN
+			-- Set UOM Id
+			SET @intItemUOMId = ISNULL(@intItemUOMId, dbo.fnGetItemStockUOM(@intItemId));
+
+			-- Set value for Item No
+			SELECT @strItemNo = strItemNo
+			FROM tblICItem 
+			WHERE intItemId = @intItemId
+
+			-- Set Item Location Id
+			IF @intLocationId IS NOT NULL
+				BEGIN
+					SELECT @intItemLocationId = intItemLocationId
+					FROM dbo.tblICItemLocation
+					WHERE intLocationId = @intLocationId AND intItemId = @intItemId
+				END
+		END
+
+	---------------------------------------------
+	-- Validate values specified in the fields --
+	---------------------------------------------
+
+	-- Validate Item Id
 	IF @intItemId IS NULL
 		BEGIN 
 			-- Item id is invalid or missing.
 			RAISERROR(80001, 11,1);
 			GOTO _Exit;
 		END
-	------------------------- 
-	-- SET Required Values --
-	-------------------------
-	-- Set Transaction Date
-	SET @dtmQtyChange = ISNULL(@dtmQtyChange, GETDATE());
 
-	-- Set UOM Id
-	SET @intItemUOMId = ISNULL(@intItemUOMId, dbo.fnGetItemStockUOM(@intItemId));
- 
-	---------------------------------------------
-	-- Validate values specified in the fields --
-	---------------------------------------------
+	-- Validate New Quantity
+	IF @dblNewQty IS NULL
+		BEGIN
+			-- New Quantity for item {item} is required.
+			RAISERROR(80099, 11, 1, @strItemNo);
+			GOTO _Exit;
+		END
 
 	-- Validate the date against the FY Periods  
 	IF EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmQtyChange) = 0) 
@@ -60,10 +96,45 @@ BEGIN
 		GOTO _Exit;
 	END
 
+	-- Validate Source Id
+	IF @intSourceId IS NULL
+	BEGIN
+		-- 'Internal Error. The source transaction id is invalid.'
+		RAISERROR(80033, 11, 1)  
+		GOTO _Exit;
+	END
+
+	-- Validate Item Location
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+	BEGIN
+		-- Item Location is invalid or missing for {item}
+		RAISERROR(80002, 11, 1, @strItemNo);
+		GOTO _Exit;
+	END
+
+	-- Validate Sub Location
+	IF NOT EXISTS (SELECT 1 FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId AND intCompanyLocationId = @intLocationId)
+		BEGIN
+			-- Sub Location is invalid or missing for item {item}.
+			RAISERROR(80097, 11, 1, @strItemNo);
+			GOTO _Exit;
+		END
+
+	-- Validate Storage Location if specified
+	IF @intStorageLocationId IS NOT NULL
+		BEGIN
+			IF NOT EXISTS (SELECT 1 FROM tblICStorageLocation WHERE intLocationId = @intLocationId AND intSubLocationId = @intSubLocationId AND intStorageLocationId = @intStorageLocationId)
+				BEGIN
+					-- Storage Location is invalid for item {item}
+					RAISERROR(80098, 11, 1, @strItemNo);
+					GOTO _Exit;
+				END
+		END
+
 	-- Check the lot number if it is lot-tracked. Validate the lot number. 
 	IF dbo.fnGetItemLotType(@intItemId) IN (1, 2)
 	BEGIN
-		IF @strLotNumber IS NOT NULL OR @strLotNumber != '[FIFO]'
+		IF @strLotNumber IS NOT NULL OR @strLotNumber != '[FIFO]' OR @strLotNumber != 'FIFO'
 		BEGIN
 			-- Find the Lot Id
 			BEGIN 
@@ -100,38 +171,134 @@ BEGIN
 		END
 	END
 
-	-- Set value for @strItemNo
-	SELECT @strItemNo = strItemNo
-	FROM tblICItem 
-	WHERE intItemId = @intItemId
+	--------------------------------------
+	-- Transaction: Quantity Adjustment -- 
+	--------------------------------------
+	 
+	-- Get the value to Adjust
+	 SELECT @dblAdjustQtyBy = -(ISNULL(SUM(dblOnHand),0) - @dblNewQty)
+	 FROM dbo.tblICItemStockUOM
+	 WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId AND intSubLocationId = @intSubLocationId AND intItemUOMId = @intItemUOMId
 
-	-- Validate Item Location
-	IF NOT EXISTS (SELECT 1 FROM dbo.tblICItemLocation WHERE intItemLocationId = @intLocationId AND intItemId = @intItemId)
-	BEGIN
-		-- Item Location is invalid or missing for {item}
-		RAISERROR(80002, 11, 1, @strItemNo);
-		GOTO _Exit;
-	END
-
-	-- Validate Sub Location
-	IF @intSubLocationId IS NOT NULL
+	 -- Get Lot Number
+	 IF @strLotNumber IS NULL OR @strLotNumber = '[FIFO]' OR @strLotNumber = 'FIFO'
 		BEGIN
-			IF NOT EXISTS (SELECT 1 FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId AND intCompanyLocationId = @intLocationId)
-			BEGIN
-				-- Sub Location is invalid for item {item}.
-				RAISERROR(80097, 11, 1, @strItemNo);
-				GOTO _Exit;
-			END
-		END
-
-	-- Validate Storage Location if specified
-	IF @intStorageLocationId IS NOT NULL
-		BEGIN
-			IF NOT EXISTS (SELECT 1 FROM tblICStorageLocation WHERE intLocationId = @intLocationId AND intSubLocationId = @intSubLocationId AND intStorageLocationId = @intStorageLocationId)
+			IF @dblAdjustQtyBy > 0
 				BEGIN
-					-- Storage Location is invalid for item {item}
-					RAISERROR(80098, 11, 1, @strItemNo);
-					GOTO _Exit;
+					IF @strLotNumber IS NULL
+						BEGIN
+							SET @strLotNumber =
+							(SELECT TOP 1 strLotNumber
+							 FROM dbo.tblICLot
+							 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId
+							 ORDER BY dtmDateCreated ASC)
+						END
+
+					 IF @intStorageLocationId IS NULL
+					 	BEGIN
+							SET @intStorageLocationId = 
+							(SELECT TOP 1 intStorageLocationId
+							 FROM dbo.tblICLot
+							 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId AND strLotNumber = @strLotNumber
+							 ORDER BY dtmDateCreated ASC)
+						END
+
+					IF @dblCost IS NULL
+						BEGIN
+							SET @dblCost = 
+							(SELECT TOP 1 dblLastCost
+							 FROM dbo.tblICLot
+							 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId AND strLotNumber = @strLotNumber AND intStorageLocationId = @intStorageLocationId
+							 ORDER BY dtmDateCreated ASC)
+						END
+
+					 -- Create Quantity Change Adjustment then post
+					 EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChange
+						-- Parameters for filtering:
+						@intItemId = @intItemId
+						,@dtmDate = @dtmQtyChange
+						,@intLocationId = @intLocationId
+						,@intSubLocationId = @intSubLocationId	
+						,@intStorageLocationId = @intStorageLocationId
+						,@strLotNumber = @strLotNumber	
+						-- Parameters for the new values: 
+						,@dblAdjustByQuantity = @dblAdjustQtyBy
+						,@dblNewUnitCost = @dblCost
+						,@intItemUOMId = @intItemUOMId
+						-- Parameters used for linking or FK (foreign key) relationships
+						,@intSourceId = @intSourceId
+						,@intSourceTransactionTypeId = 41 --SAP stock integration
+						,@intEntityUserSecurityId = @intEntityUserId
+						,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+				END
+
+			 ELSE IF @dblAdjustQtyBy = 0 GOTO _Exit
+
+			 ELSE IF @dblAdjustQtyBy < 0
+				BEGIN
+					SET @tempQty = ABS(@dblAdjustQtyBy)
+
+					WHILE @tempQty > 0
+						BEGIN
+							SELECT TOP 1 @tempEachLotQty = dblQty
+								 FROM dbo.tblICLot
+								 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId
+										AND dblQty > 0
+								 ORDER BY dtmDateCreated ASC
+
+							SET @tempNextQty = @tempQty - @tempEachLotQty
+
+							IF @strLotNumber IS NULL OR 
+							   (@strLotNumber IS NOT NULL AND (SELECT SUM(dblQty) FROM dbo.tblICLot
+							    WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId
+									   AND strLotNumber = @strLotNumber) = 0)
+								BEGIN
+									SELECT TOP 1 @strLotNumber = strLotNumber
+												,@intStorageLocationId = intStorageLocationId
+												,@dblCost = dblLastCost
+									 FROM dbo.tblICLot
+									 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId
+										AND dblQty > 0
+									 ORDER BY dtmDateCreated ASC
+								END
+
+							ELSE
+								
+
+							IF @tempNextQty >= 0 
+								BEGIN
+									SET @tempAdjustQtyBy = -(@tempEachLotQty)
+									SET @tempQty = @tempNextQty
+								END
+							ELSE IF @tempNextQty < 0 
+								BEGIN
+									SET @tempAdjustQtyBy = -(@tempQty)
+									SET @tempQty = 0
+								END
+								
+							IF @tempAdjustQtyBy != 0
+								BEGIN
+									 -- Create Quantity Change Adjustment then post
+									 EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChange
+										-- Parameters for filtering:
+										@intItemId = @intItemId
+										,@dtmDate = @dtmQtyChange
+										,@intLocationId = @intLocationId
+										,@intSubLocationId = @intSubLocationId	
+										,@intStorageLocationId = @intStorageLocationId
+										,@strLotNumber = @strLotNumber	
+										-- Parameters for the new values: 
+										,@dblAdjustByQuantity = @tempAdjustQtyBy
+										,@dblNewUnitCost = @dblCost
+										,@intItemUOMId = @intItemUOMId
+										-- Parameters used for linking or FK (foreign key) relationships
+										,@intSourceId = @intSourceId
+										,@intSourceTransactionTypeId = 41 --SAP stock integration
+										,@intEntityUserSecurityId = @intEntityUserId
+										,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+								END
+
+						END
 				END
 		END
 END
