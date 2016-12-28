@@ -130,6 +130,7 @@ BEGIN TRY
 		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,intItemSort INT NULL
 		,IsProcessed BIT
+		,intTicketDiscountId INT NULL
 	)
 
 	SELECT @UserKey = intCreatedUserId
@@ -396,6 +397,7 @@ BEGIN TRY
 				,strItemNo
 				,intItemSort
 				,IsProcessed
+				,intTicketDiscountId
 			)
 			SELECT 
 				 CS.intCustomerStorageId
@@ -408,6 +410,7 @@ BEGIN TRY
 				,DItem.strItemNo
 				,3
 				,0 AS IsProcessed
+				,QM.intTicketDiscountId
 			FROM tblGRCustomerStorage CS
 			LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId AND QM.strSourceType = 'Storage'
 			JOIN tblGRDiscountScheduleCode a ON a.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
@@ -1071,7 +1074,10 @@ BEGIN TRY
 			,[dblRate]							= ABS(SV.[dblCashPrice])
 			,[intCostUOMId]						= Item.intCostUOMId
 			,[intOtherChargeEntityVendorId]		= NULL
-			,[dblAmount]						= @dblUnits* ABS(SV.[dblCashPrice])
+			,[dblAmount]						= ABS(SV.[dblCashPrice])* CASE 
+																		    WHEN SV.intItemSort = 3 THEN dbo.fnGRCalculateDiscountUnit(@intCustomerStorageId,SV.intTicketDiscountId,@dblUnits)
+																			ELSE @dblUnits 
+																		  END
 			,[strAllocateCostBy]				= 'Unit'
 			,[intContractHeaderId]				= SV.[intContractHeaderId]
 			,[intContractDetailId]				= SV.[intContractDetailId]

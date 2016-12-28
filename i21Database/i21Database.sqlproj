@@ -4658,6 +4658,7 @@
     <Build Include="dbo\Views\vyuLGLoadStorageCostView.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostLots.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostForInvoice.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateDiscountUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
