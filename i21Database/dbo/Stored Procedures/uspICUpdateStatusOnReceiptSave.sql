@@ -11,6 +11,7 @@ BEGIN
 			,@ReceiptTypePurchaseOrder AS NVARCHAR(50) = 'Purchase Order'
 			,@ReceiptTypeTransferOrder AS NVARCHAR(50) = 'Transfer Order'
 			,@ReceiptTypeDirect AS NVARCHAR(50) = 'Direct'
+			,@ReceiptTypeInventoryReturn AS NVARCHAR(50) = 'Inventory Return'
 
 	DECLARE @SourceTypeNone AS INT = 0
 			,@SourceTypeScale AS INT = 1
@@ -42,7 +43,7 @@ BEGIN
 	END
 
 	-- Update the Status of the Scale Ticket
-	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intReceiptNo AND intSourceType = @SourceTypeScale)
+	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intReceiptNo AND intSourceType = @SourceTypeScale AND strReceiptType <> @ReceiptTypeInventoryReturn)
 	BEGIN
 		SELECT	DISTINCT intSourceId 
 		INTO	#tmpScaleTickets 

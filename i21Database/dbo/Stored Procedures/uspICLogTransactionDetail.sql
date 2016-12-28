@@ -20,6 +20,7 @@ BEGIN
 	DECLARE @OrderType_SalesOrder AS INT = 2
 	DECLARE @OrderType_TransferOrder AS INT = 3
 	DECLARE @OrderType_Direct AS INT = 4
+	DECLARE @OrderType_InventoryReturn AS INT = 5
 
 	DECLARE @SourceType_None AS INT = 0
 	DECLARE @SourceType_Scale AS INT = 1
@@ -55,6 +56,7 @@ BEGIN
 						WHEN Receipt.strReceiptType = 'Purchase Order' THEN @OrderType_PurchaseOrder
 						WHEN Receipt.strReceiptType = 'Transfer Order' THEN @OrderType_TransferOrder
 						WHEN Receipt.strReceiptType = 'Direct' THEN @OrderType_Direct
+						WHEN Receipt.strReceiptType = 'Inventory Return' THEN @OrderType_InventoryReturn
 					END), 
 				ReceiptItem.intSourceId,
 				intSourceType = Receipt.intSourceType,

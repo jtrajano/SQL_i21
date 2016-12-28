@@ -4648,6 +4648,7 @@
     <Build Include="dbo\Views\vyuLGLoadStorageCostForInvoice.sql" />
     <Build Include="dbo\Tables\tblGLMulticurrencyAccount.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_Multicurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
