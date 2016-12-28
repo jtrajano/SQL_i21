@@ -3477,7 +3477,6 @@
     <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
     <Build Include="dbo\Tables\tblTFTransactionSummary.sql" />
     <Build Include="dbo\Tables\tblTFTaxReportTemplate.sql" />
-    <Build Include="dbo\Tables\tblTFReportingComponentConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
