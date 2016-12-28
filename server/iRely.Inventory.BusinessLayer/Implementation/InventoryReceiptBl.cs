@@ -794,5 +794,44 @@ namespace iRely.Inventory.BusinessLayer
             newStatus = newStatusResult;
             return saveResult;
         }
+
+        public SaveResult ReturnReceipt(int receiptId, out int? inventoryReturnId)
+        {
+            SaveResult saveResult = new SaveResult();
+            inventoryReturnId = null;
+
+            try
+            {
+                var inventoryReturnIdOutput = new SqlParameter("@intInventoryReturnId", SqlDbType.Int);
+                inventoryReturnIdOutput.Direction = System.Data.ParameterDirection.Output;
+                inventoryReturnIdOutput.DbType = System.Data.DbType.Int32;
+
+                _db.ContextManager.Database.ExecuteSqlCommand(
+                    "uspICReturnReceipt @intReceiptId, @intEntityUserSecurityId, @intInventoryReturnId OUTPUT"
+                    , new SqlParameter("intReceiptId", receiptId)
+                    , new SqlParameter("@intEntityUserSecurityId", iRely.Common.Security.GetEntityId())
+                    , inventoryReturnIdOutput
+                );
+
+                inventoryReturnId = (int)inventoryReturnIdOutput.Value;
+                saveResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                //if (ex.Message.Contains("Please setup default AP Account"))
+                //{
+                //    ex = new Exception("Please setup default AP Account.", ex.InnerException);
+                //}
+                //else if (ex.Message.Contains("All of the item in the receipt was fully billed"))
+                //{
+                //    ex = new Exception("All of the item in the receipt was fully billed.", ex.InnerException);
+                //}
+
+                saveResult.BaseException = ex;
+                saveResult.Exception = new ServerException(ex);
+                saveResult.HasError = true;
+            }
+            return saveResult;
+        }
     }
 }

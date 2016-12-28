@@ -287,6 +287,26 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "icon": null,
+                                "itemId": "btnReturn",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Return",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton71",
+                            "designerId": "ea563788-6e8b-4979-9c71-3fc00729277a"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
                                 "itemId": "btnVendor",
                                 "layout|flex": null,
                                 "tabIndex": -1,

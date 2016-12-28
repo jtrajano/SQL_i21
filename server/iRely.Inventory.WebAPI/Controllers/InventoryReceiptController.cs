@@ -213,5 +213,28 @@ namespace iRely.Inventory.WebApi
                 }
             });
         }
+
+        [HttpGet]
+        [ActionName("ReturnReceipt")]
+        public HttpResponseMessage ReturnReceipt(int id)
+        {
+            int? inventoryReturnId = null;
+            var result = _bl.ReturnReceipt(id, out inventoryReturnId);
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    InventoryReturnId = inventoryReturnId,
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 }

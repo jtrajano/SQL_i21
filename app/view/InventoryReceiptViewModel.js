@@ -59,6 +59,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 },
                 {
                     strDescription: 'Direct'
+                },
+                {
+                    strDescription: 'Inventory Return'
                 }
             ],
             fields: {
@@ -343,6 +346,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 case 3: // Transport Load
                 case 4: // Settle Storage 
                     return true; 
+                    break; 
                 default:  
                     return false;  
             }
@@ -582,7 +586,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         hasStorageLocation: function (get) {
-            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intStorageLocationId'))) {
+            if (get('current.strReceiptType') == 'Inventory Return'){
+                return true;
+            }
+            else if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intStorageLocationId'))) {
                 return false;
             }
             else {
@@ -623,8 +630,17 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             }
         },
-        isReceiptReadonly: function(get) {
+
+        isOriginOrPosted: function(get){
             return  get('current.ysnOrigin') || get('current.ysnPosted');
+        },
+
+        isReceiptReadonly: function(get) {
+            return  get('current.ysnOrigin') || get('current.ysnPosted') || get('current.strReceiptType') === 'Inventory Return';
+        },
+
+        isOriginOrInventoryReturn: function(get){
+            return  get('current.ysnOrigin') || get('current.strReceiptType') === 'Inventory Return';
         },
 
         readOnlyReceiptItemGrid: function (get) {
@@ -644,6 +660,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             switch (receiptType) {
                 case 'Direct' :
                     return false;
+                    break;
+                case 'Inventory Return': 
+                    return true;
                     break;
                 default:
                     if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
@@ -740,19 +759,37 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                         else {
                             return true;
                         }
+                        break; 
+                    case 'Inventory Return': 
+                        return true; 
+                        break;
                     default:
                         return false;
                 }
             }
         },
-        readOnlyNoGrossNetUOM: function (get) {
-            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
+        readOnlyNetUOM: function (get) {
+            if (get('current.strReceiptType') === 'Inventory Return') {
+                return false; 
+            }
+            else if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
                 return true;
             }
             else {
                 return false;
             }
         },
+        readOnlyGrossTareUOM: function (get) {
+            if (get('current.strReceiptType') === 'Inventory Return') {
+                return true; 
+            }
+            else if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },        
         getWeightLossText: function (get) {
             var weight = get('weightLoss');
             if (Ext.isNumeric(weight) && weight !== 0) {
@@ -803,14 +840,39 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                       return false;
                       break;
               }
-	       },
+        },
+    
+        disableQtyInReceiptGrid: function (get){
+            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strItemNo'))) {
+                return true;
+            }
+            else {
+                return false; 
+            }
+            // else {
+            //     switch (get('current.strReceiptType')) {       
+            //         case 'Inventory Return': 
+            //             return false; 
+            //             break;
+            //         default:
+            //             return false;
+            //     }
+            // }
+        },
+
        disableFieldInReceiptGrid: function (get) {
-           if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strItemNo'))) {
-               return true;
-           }
-           else {
-               return false;
-           }
+            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strItemNo'))) {
+                return true;
+            }
+            else {
+                switch (get('current.strReceiptType')) {       
+                    case 'Inventory Return': 
+                        return true; 
+                        break;
+                    default:
+                        return false;
+                }
+            }
        },
        readyOnlyChargeTaxGroup: function(get) {
            if(get('grdCharges.selection.intEntityVendorId') == null || (get('grdCharges.selection.intEntityVendorId') == get('current.intEntityVendorId'))) {
@@ -819,6 +881,18 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
            else {
                 return true;
            }
+       },
+       checkHideReturnButton: function (get){
+           if (get('current.strReceiptType') !== 'Inventory Return' && get('current.ysnPosted')){
+                return false; 
+           }
+           return true; 
+       },
+       changeQtyToReceiveText: function (get){
+            if (get('current.strReceiptType') == 'Inventory Return'){
+                return 'Qty to Return';
+           }
+           return 'Qty to Receive';
        }
     }
 });

@@ -188,13 +188,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 title: 'Inventory Receipt - {receiptTitle}'
             },
             btnSave: {
-                disabled: '{isReceiptReadonly}'
+                disabled: '{isOriginOrPosted}'
             },
             btnDelete: {
-                disabled: '{isReceiptReadonly}'
+                disabled: '{isOriginOrPosted}'
             },
             btnUndo: {
-                disabled: '{isReceiptReadonly}'
+                disabled: '{isOriginOrPosted}'
             },
             btnReceive: {
                 disabled: '{current.ysnOrigin}',
@@ -204,54 +204,57 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnRecap: {
                 disabled: '{current.ysnOrigin}'
             },
+            btnReturn: {
+                hidden: '{checkHideReturnButton}'
+            },
             btnVendor: {
-                disabled: '{current.ysnOrigin}'
+                disabled: '{isOriginOrInventoryReturn}'
             },
             btnAddOrders: {
                 hidden: '{checkHiddenAddOrders}',
-                disabled: '{current.ysnOrigin}'
+                disabled: '{isOriginOrInventoryReturn}'
             },
 
             cboReceiptType: {
                 value: '{current.strReceiptType}',
                 store: '{receiptTypes}',
                 readOnly: '{checkReadOnlyWithOrder}',
-                disabled: '{current.ysnOrigin}'
+                disabled: '{isOriginOrInventoryReturn}'
             },
             cboSourceType: {
                 value: '{current.intSourceType}',
                 store: '{sourceTypes}',
                 readOnly: '{disableSourceType}',
                 defaultFilters: '{filterSourceByType}',
-                disabled: '{current.ysnOrigin}'
+                disabled: '{isOriginOrInventoryReturn}'
             },
             cboVendor: {
                 value: '{current.intEntityVendorId}',
                 store: '{vendor}',
                 readOnly: '{checkReadOnlyWithOrder}',
                 hidden: '{checkHiddenInTransferOrder}',
-                disabled: '{current.ysnOrigin}'
+                disabled: '{isOriginOrInventoryReturn}'
             },
             cboTransferor: {
                 value: '{current.intTransferorId}',
                 store: '{transferor}',
                 hidden: '{checkHiddenIfNotTransferOrder}',
                 readOnly: '{current.ysnOrigin}',
-                disabled: '{current.ysnOrigin}'
+                disabled: '{isOriginOrInventoryReturn}'
             },
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}',
                 readOnly: '{locationCheckReadOnlyWithOrder}',
-                disabled: '{current.ysnOrigin}'
+                disabled: '{isOriginOrInventoryReturn}'
             },
             dtmReceiptDate: {
                 value: '{current.dtmReceiptDate}',
-                readOnly: '{isReceiptReadonly}'
+                readOnly: '{isOriginOrPosted}'
             },
             cboCurrency: {
                 value: '{current.intCurrencyId}',
-                disabled: '{current.ysnOrigin}',
+                disabled: '{isOriginOrInventoryReturn}',
                 store: '{currency}',
                 readOnly: '{isReceiptReadonly}',
                 defaultFilters: [
@@ -340,13 +343,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{isReceiptReadonly}'
             },
             btnRemoveInventoryReceipt: {
-                hidden: '{isReceiptReadonly}'
+                hidden: '{isOriginOrPosted}'
             },
             btnInsertLot: {
                 hidden: '{isReceiptReadonly}'
             },
             btnRemoveLot: {
-                hidden: '{isReceiptReadonly}'
+                hidden: '{isOriginOrPosted}'
             },
             btnReplicateBalanceLots: {
                 hidden: '{isReceiptReadonly}'
@@ -372,7 +375,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             btnQuality: {
                 hidden: '{current.ysnPosted}',
-                disabled: '{current.ysnOrigin}'
+                disabled: '{isOriginOrInventoryReturn}'
             },
             // lblWeightLossMsg: {
             //     text: '{getWeightLossText}'
@@ -515,8 +518,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colQtyToReceive: {
                     dataIndex: 'dblOpenReceive',
+                    text: '{changeQtyToReceiveText}',
                     editor: {
-                        readOnly: '{disableFieldInReceiptGrid}'
+                        readOnly: '{disableQtyInReceiptGrid}'
                     }
                 },
                 colLoadToReceive: {
@@ -600,13 +604,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colGross: {
                     dataIndex: 'dblGross',
                     editor: {
-                        readOnly: '{readOnlyNoGrossNetUOM}'
+                        readOnly: '{readOnlyGrossTareUOM}'
                     }
                 },
                 colNet: {
                     dataIndex: 'dblNet',
                     editor: {
-                        readOnly: '{readOnlyNoGrossNetUOM}'
+                        readOnly: '{readOnlyGrossTareUOM}'
                     }
                 },
                 colLineTotal: 'dblLineTotal',
@@ -626,7 +630,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{hasItemSelection}'
             },*/
             grdLotTracking: {
-                readOnly: '{isReceiptReadonly}',
+                readOnly: '{readOnlyReceiptItemGrid}',
                 colLotId: {
                     dataIndex: 'strLotNumber',
                     editor: {
@@ -634,6 +638,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         origValueField: 'intLotId',
                         origUpdateField: 'intLotId',
                         store: '{lots}',
+                        readOnly: '{readOnlyItemDropdown}',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
@@ -669,13 +674,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLotAlias: {
-                    dataIndex: 'strLotAlias'
-
+                    dataIndex: 'strLotAlias',
+                    editor: {
+                        readOnly: '{readOnlyItemDropdown}'
+                    }
                 },
                 colLotUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{lotUOM}',
+                        readOnly: '{readOnlyReceiptItemGrid}',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
@@ -685,23 +693,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         ]
                     }
                 },
-                colLotQuantity: 'dblQuantity',
+                colLotQuantity: {
+                    dataIndex: 'dblQuantity',
+                    editor: {
+                        readOnly: '{disableQtyInReceiptGrid}'
+                    }
+                },
                 colLotGrossWeight: {
                     dataIndex: 'dblGrossWeight',
                     editor: {
-                        readOnly: '{readOnlyNoGrossNetUOM}'
+                        readOnly: '{readOnlyGrossTareUOM}'
                     }
                 },
                 colLotTareWeight: {
                     dataIndex: 'dblTareWeight',
                     editor: {
-                        readOnly: '{readOnlyNoGrossNetUOM}'
+                        readOnly: '{readOnlyGrossTareUOM}',
                     }
                 },
                 colLotNetWeight: {
                     dataIndex: 'dblNetWeight',
                     editor: {
-                        readOnly: '{readOnlyNoGrossNetUOM}'
+                        readOnly: '{readOnlyNetUOM}'
                     }
                 },
                 colLotExpiryDate: 'dtmExpiryDate',
@@ -736,6 +749,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strParentLotNumber',
                     editor: {
                         store: '{parentLots}',
+                        readOnly: '{readOnlyReceiptItemGrid}',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
@@ -4430,9 +4444,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var UOMType = currentReceiptItem.get('strUnitType');
             var columnId = column.itemId;
 
+            var isReadOnly = vm.data.isReceiptReadonly; 
+
             var cboLotUOM = Ext.widget({
                 xtype: 'gridcombobox',
                 matchFieldWidth: false,
+                readOnly: isReadOnly,
                 columns: [
                     {
                         dataIndex: 'intItemUOMId',
@@ -5889,6 +5906,66 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    processReceiptToReturn: function (receiptId, callback) {
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryReceipt/ReturnReceipt',
+            params:{
+                id: receiptId
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                callback(jsonData);
+            }
+            ,function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                var message = jsonData.message; 
+                iRely.Functions.showErrorDialog(message.statusText);
+            }
+        );          
+    },    
+
+    receiptToReturnClick: function (receipt, button, win) {
+        this.processReceiptToReturn(
+            receipt.get('intInventoryReceiptId'), 
+            function (data) {
+                var buttonAction = function (button) {
+                    if (button === 'yes') {
+                        iRely.Functions.openScreen('Inventory.view.InventoryReceipt', {
+                            filters: [
+                                {
+                                    column: 'intReceiptId',
+                                    value: data.message.InventoryReturnId
+                                }
+                            ],
+                            action: 'view'
+                        });
+                        win.close();
+                    }
+                };
+                iRely.Functions.showCustomDialog('question', 'yesno', 'Inventory Return successfully created. Do you want to view it?', buttonAction);
+            }
+        );
+    },
+
+    onReturnClick: function (button, e, eOpts) {
+        var win = button.up('window'),
+            current = win.viewModel.data.current,
+            me = this;
+
+        if (!current) return; 
+		
+        var buttonAction = function (button) {
+            if (button == 'yes') {
+                me.receiptToReturnClick(current, button, win);	
+            }
+        }
+
+        iRely.Functions.showCustomDialog('question','yesno','Do you want to return this inventory receipt?', buttonAction);         
+    },        
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -5941,6 +6018,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnRecap": {
                 click: this.onRecapClick
+            },
+            "#btnReturn": {
+                click: this.onReturnClick
             },
             "#btnBill": {
                 click: this.onBillClick
