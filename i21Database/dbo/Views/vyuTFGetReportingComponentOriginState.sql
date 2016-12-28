@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuTFGetReportingComponentOriginState]
+﻿CREATE VIEW [dbo].[vyuTFGetReportingComponentProductCode]
 	AS 
 
 SELECT RCOS.intReportingComponentOriginStateId

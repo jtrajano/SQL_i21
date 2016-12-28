@@ -4651,6 +4651,7 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentOriginState.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponent.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentDestinationState.sql" />
+    <Build Include="dbo\Views\vyuTFReportingComponentProductCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
