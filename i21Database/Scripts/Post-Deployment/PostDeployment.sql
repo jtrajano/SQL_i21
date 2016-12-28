@@ -158,6 +158,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1k_AccountCurrency.sql
 :r .\GL\DefaultData\1l_AlterTable.sql
 :r .\GL\DefaultData\1m_UpdateCompany.sql
+:r .\GL\DefaultData\1n_Multicurrency.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
