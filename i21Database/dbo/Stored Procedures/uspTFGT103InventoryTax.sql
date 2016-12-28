@@ -34,76 +34,29 @@ DECLARE @ExcludeDestinationState NVARCHAR(250)
 
 IF @Refresh = 'true'
 	BEGIN
-		DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
+		DELETE FROM tblTFTransactions --WHERE uniqTransactionGuid = @Guid
 	END
-	DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
-	
-DECLARE @tblTempReportingComponent TABLE (
-			intId INT IDENTITY(1,1),
-			intReportingComponentId INT
-		 )
-
-DECLARE @tblTempTaxCategory TABLE (
-			intId INT,
-			intTaxCodeId INT,
-			strCriteria NVARCHAR(50)
-		 )
-DECLARE @tblTempReceiptItem TABLE (
-			intId INT IDENTITY(1,1),
-			intInventoryReceiptItemId INT
-		 )
-DECLARE @tblTempTransaction TABLE (
-			intId INT,
-			intInventoryReceiptItemId INT,
-			intTaxAuthorityId INT,
-			strFormCode NVARCHAR(20),
-			intReportingComponentId INT,
-			strScheduleCode NVARCHAR(20),
-			strType NVARCHAR(150),
-			intProductCode INT,
-            strProductCode NVARCHAR(20),
-			strBillOfLading NVARCHAR(100),
-			dblReceived NUMERIC(18, 2),
-            dblNet NUMERIC(18, 2),
-			dblGross NUMERIC(18, 2),
-			dblBillQty NUMERIC(18, 2),
-			dblTax NUMERIC(18, 2),
-			dtmReceiptDate DATETIME,
-			strShipVia NVARCHAR(100),
-			strTransporterLicense NVARCHAR(50),
-			strTransportationMode NVARCHAR(200),
-			strVendorName NVARCHAR(250),
-			strTransporterName NVARCHAR(250),
-			strVendorFEIN NVARCHAR(50),
-			strTransporterFEIN NVARCHAR(50),
-			strTaxCategory NVARCHAR(200),
-			--HEADER
-			strHeaderCompanyName NVARCHAR(250),
-			strHeaderAddress NVARCHAR(MAX),
-			strHeaderCity NVARCHAR(50),
-			strHeaderState NVARCHAR(50),
-			strHeaderZip NVARCHAR(10),
-			strHeaderPhone NVARCHAR(50),
-			strHeaderStateTaxID NVARCHAR(50),
-			strHeaderFederalTaxID NVARCHAR(50),
-			strOriginState NVARCHAR(250),
-			strDestinationState NVARCHAR(250),
-			strTerminalControlNumber NVARCHAR(30)
-		 )
-
+	DELETE FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 		
 	SELECT @QueryRC = 'SELECT ''' + REPLACE (@ReportingComponentId,',',''' UNION SELECT ''') + ''''
-	INSERT INTO @tblTempReportingComponent (intReportingComponentId)
+	INSERT INTO TFReportingComponent (intReportingComponentId)
 	EXEC(@QueryRC)
 
-	SET @CountRC = (select count(intId) from @tblTempReportingComponent) 
+	SET @CountRC = (select count(intId) from TFReportingComponent) 
 	WHILE(@CountRC > 0)
 	BEGIN
-	SET @RCId = (SELECT intReportingComponentId FROM @tblTempReportingComponent WHERE intId = @CountRC)
+	SET @RCId = (SELECT intReportingComponentId FROM TFReportingComponent WHERE intId = @CountRC)
 
 		-- ORIGIN
 		DECLARE @IncludeValidOriginState NVARCHAR(MAX) = NULL
-		SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + strOriginState FROM tblTFValidOriginState WHERE intReportingComponentId = @RCId AND strFilter = 'Include'
+		SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + states.strOriginDestinationState 
+		FROM tblTFReportingComponentOriginState origin 
+			INNER JOIN tblTFOriginDestinationState states 
+				ON origin.intOriginDestinationStateId = states.intOriginDestinationStateId 
+			WHERE origin.intReportingComponentId = @RCId 
+			AND origin.strType = 'Include'
+		
+		
 		IF(@IncludeValidOriginState IS NOT NULL)
 			BEGIN
 				SET @IncludeValidOriginState = REPLACE(@IncludeValidOriginState,',',''',''')
@@ -115,7 +68,13 @@ DECLARE @tblTempTransaction TABLE (
 			END
 
 		DECLARE @ExcludeValidOriginState NVARCHAR(MAX) = NULL
-		SELECT @ExcludeValidOriginState = COALESCE(@ExcludeValidOriginState + ',', '') + strOriginState FROM tblTFValidOriginState WHERE intReportingComponentId = @RCId AND strFilter = 'Exclude'
+		SELECT @ExcludeValidOriginState = COALESCE(@ExcludeValidOriginState + ',', '') + states.strOriginDestinationState 
+		FROM tblTFReportingComponentOriginState origin 
+			INNER JOIN tblTFOriginDestinationState states 
+				ON origin.intOriginDestinationStateId = states.intOriginDestinationStateId 
+			WHERE origin.intReportingComponentId = @RCId 
+			AND origin.strType = 'Exclude'
+
 		IF(@ExcludeValidOriginState IS NOT NULL)
 			BEGIN
 				SET @ExcludeValidOriginState = REPLACE(@ExcludeValidOriginState,',',''',''')
@@ -128,7 +87,12 @@ DECLARE @tblTempTransaction TABLE (
 
 		-- DESTINATION
 		DECLARE @IncludeValidDestinationState NVARCHAR(MAX) = NULL
-		SELECT @IncludeValidDestinationState = COALESCE(@IncludeValidDestinationState + ',', '') + strDestinationState FROM tblTFValidDestinationState WHERE intReportingComponentId = @RCId AND strStatus = 'Include'
+		SELECT @IncludeValidDestinationState = COALESCE(@IncludeValidDestinationState + ',', '') + states.strOriginDestinationState  
+			FROM tblTFReportingComponentDestinationState destination INNER JOIN tblTFOriginDestinationState states 
+				ON destination.intOriginDestinationStateId = states.intOriginDestinationStateId 
+				WHERE destination.intReportingComponentId = @RCId 
+		AND destination.strType = 'Include'
+		
 		IF(@IncludeValidDestinationState IS NOT NULL)
 			BEGIN
 				SET @IncludeValidDestinationState = REPLACE(@IncludeValidDestinationState,',',''',''')
@@ -140,7 +104,12 @@ DECLARE @tblTempTransaction TABLE (
 			END
 
 		DECLARE @ExcludeValidDestinationState NVARCHAR(MAX) = NULL
-		SELECT @ExcludeValidDestinationState = COALESCE(@ExcludeValidDestinationState + ',', '') + strDestinationState FROM tblTFValidDestinationState WHERE intReportingComponentId = @RCId AND strStatus = 'Exclude'
+		SELECT @ExcludeValidDestinationState = COALESCE(@ExcludeValidDestinationState + ',', '') + states.strOriginDestinationState   
+		FROM tblTFReportingComponentDestinationState destination INNER JOIN tblTFOriginDestinationState states 
+				ON destination.intOriginDestinationStateId = states.intOriginDestinationStateId 
+				WHERE destination.intReportingComponentId = @RCId 
+		AND destination.strType = 'Exclude'
+
 		IF(@ExcludeValidDestinationState IS NOT NULL)
 			BEGIN
 				SET @ExcludeValidDestinationState = REPLACE(@ExcludeValidDestinationState,',',''',''')
@@ -181,29 +150,29 @@ DECLARE @tblTempTransaction TABLE (
 
 			SET @QueryInvReceiptRecord = @QueryInventory1 + @QueryInventory2
 			
-		DELETE FROM @tblTempTransaction
-		INSERT INTO @tblTempTransaction
+		DELETE FROM TFTransaction
+		INSERT INTO TFTransaction
 		EXEC(@QueryInvReceiptRecord)
 
-		-- SET INCREMENT PRIMARY ID FOR TEMP @tblTempTransaction
+		-- SET INCREMENT PRIMARY ID FOR TEMP TFTransaction
 		DECLARE @tblTempTransaction_intId INT
-		SET @tblTempTransaction_intId = 0 UPDATE @tblTempTransaction SET @tblTempTransaction_intId = intId = @tblTempTransaction_intId + 1
+		SET @tblTempTransaction_intId = 0 UPDATE TFTransaction SET @tblTempTransaction_intId = intId = @tblTempTransaction_intId + 1
 
-		SET @Count = (SELECT count(intId) FROM @tblTempTransaction)
+		SET @Count = (SELECT count(intId) FROM TFTransaction)
 				WHILE(@Count > 0) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 					BEGIN
-					SET @InventoryReceiptItemId = (SELECT intInventoryReceiptItemId FROM @tblTempTransaction WHERE intId = @Count)
+					SET @InventoryReceiptItemId = (SELECT intInventoryReceiptItemId FROM TFTransaction WHERE intId = @Count)
 					SET @TaxAmount = (SELECT tblICInventoryReceiptItemTax.dblTax
 						FROM tblICInventoryReceiptItemTax INNER JOIN tblSMTaxCode ON tblICInventoryReceiptItemTax.intTaxCodeId = tblSMTaxCode.intTaxCodeId INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 						WHERE (tblICInventoryReceiptItemTax.intInventoryReceiptItemId IN(@InventoryReceiptItemId)) AND (tblTFTaxCategory.strTaxCategory = @TaxCategory))
-						UPDATE @tblTempTransaction SET dblTax = ISNULL(@TaxAmount, 0), strTaxCategory = @TaxCategory WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
+						UPDATE TFTransaction SET dblTax = ISNULL(@TaxAmount, 0), strTaxCategory = @TaxCategory WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
 			
 						SET @Count = @Count - 1
 				END
 
 				IF (@ReportingComponentId <> '')
 					BEGIN
-						INSERT INTO tblTFTransaction (uniqTransactionGuid, 
+						INSERT INTO tblTFTransactions (uniqTransactionGuid, 
 																	   intItemId, 
 																	   strBillOfLading,
 																	   intTaxAuthorityId,
@@ -237,7 +206,7 @@ DECLARE @tblTempTransaction TABLE (
 																	   intInventoryReceiptItemId, 
 																	   strBillOfLading,
 																	   intTaxAuthorityId,
-																	   (SELECT strTaxAuthorityCode FROM tblTFTaxAuthority WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM @tblTempTransaction)),
+																	   (SELECT strTaxAuthorityCode FROM tblTFTaxAuthority WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM TFTransaction)),
 																	   strFormCode, 
 																	   intReportingComponentId, 
 																	   strScheduleCode,
@@ -263,20 +232,20 @@ DECLARE @tblTempTransaction TABLE (
 																		strOriginState, 
 																		strDestinationState,
 																		1
-																		FROM @tblTempTransaction
+																		FROM TFTransaction
 						
 					END
 				ELSE
 					BEGIN
-						INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
+						INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
 					END
 			SET @CountRC = @CountRC - 1
 		END
 
 		DECLARE @HasResult INT
-		SELECT TOP 1 @HasResult = intId from @tblTempTransaction
+		SELECT TOP 1 @HasResult = intId from TFTransaction
 		IF(@HasResult IS NULL AND @IsEdi = 'false')
 			BEGIN
-				INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)
+				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)
 				VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 			END
