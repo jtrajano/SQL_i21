@@ -12,10 +12,6 @@ StartTest (function (t) {
         .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
         .verifyData('Combo Box','SourceType','None')
         .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
-        //.waitUntilLoaded()
-        //.verifyMessageBox('iRely i21','Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?','yesno','question')
-        //.clickMessageBoxButton('yes')
-        //.waitUntilLoaded('')
         .enterData('Text Field','Description','Test Transfer')
 
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','001 - CNLTI','strItemNo')

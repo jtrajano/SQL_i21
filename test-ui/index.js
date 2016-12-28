@@ -309,6 +309,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'InventoryTransfer/DeleteInventoryTransfer.js?v='+version,
+                title: 'DeleteInventoryTransfer',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
