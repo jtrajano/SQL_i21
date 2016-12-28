@@ -112,3 +112,7 @@ EXEC sp_addmessage 90023,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90024) EXEC sp_dropmessage 90024, 'us_english'	
 SET @strmessage = 'Line sample is not being taken for the line %s. Please take a line sample and create a pallet.'
 EXEC sp_addmessage 90024,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90025) EXEC sp_dropmessage 90025, 'us_english'	
+SET @strmessage = 'Sample is %s by different %s. You do not have permission to %s it.'
+EXEC sp_addmessage 90025,11,@strmessage,'us_english','False'

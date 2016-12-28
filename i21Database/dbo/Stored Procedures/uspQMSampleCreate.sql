@@ -226,7 +226,7 @@ BEGIN TRY
 		,strSampleNote
 		,dtmSampleReceivedDate
 		,dtmTestedOn
-		,intTestedById
+		--,intTestedById
 		,dblSampleQty
 		,intSampleUOMId
 		,dblRepresentingQty
@@ -280,7 +280,7 @@ BEGIN TRY
 		,strSampleNote
 		,dtmSampleReceivedDate
 		,dtmTestedOn
-		,intTestedById
+		--,intTestedById
 		,dblSampleQty
 		,intSampleUOMId
 		,dblRepresentingQty
@@ -331,7 +331,7 @@ BEGIN TRY
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
 			,dtmTestedOn DATETIME
-			,intTestedById INT
+			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
 			,dblRepresentingQty NUMERIC(18, 6)

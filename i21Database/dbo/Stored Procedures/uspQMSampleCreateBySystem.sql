@@ -239,7 +239,7 @@ BEGIN TRY
 		,strSampleNote
 		,dtmSampleReceivedDate
 		,dtmTestedOn
-		,intTestedById
+		--,intTestedById
 		,dblRepresentingQty
 		,intRepresentingUOMId
 		,dtmTestingStartDate
@@ -266,7 +266,7 @@ BEGIN TRY
 		,'Auto populated by the system'
 		,@dtmCurrentDate
 		,@dtmCurrentDateTime
-		,@intUserId
+		--,@intUserId
 		,@dblWeight
 		,@intUnitMeasureId
 		,@dtmCurrentDate
