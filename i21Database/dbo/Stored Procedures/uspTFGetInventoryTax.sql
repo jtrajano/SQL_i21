@@ -61,11 +61,10 @@ IF @Refresh = 'true'
 
 		-- ORIGIN
 			DECLARE @IncludeValidOriginState NVARCHAR(MAX) = NULL
-			SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + states.strOriginDestinationState  
-				FROM tblTFReportingComponentOriginState origin 
-				INNER JOIN tblTFOriginDestinationState states 
-					ON origin.intOriginDestinationStateId = states.intOriginDestinationStateId 
-				WHERE origin.intReportingComponentId = @RCId 
+
+			SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + strOriginDestinationState
+			FROM vyuTFGetReportingComponentOriginState
+			WHERE intReportingComponentId = @RCId 
 				AND strType = 'Include'
 
 			IF(@IncludeValidOriginState IS NOT NULL)

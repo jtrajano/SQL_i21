@@ -2979,7 +2979,6 @@
     <Build Include="dbo\Tables\tblTRLoadReceipt.sql" />
     <Build Include="dbo\Views\vyuTRLoadHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiry.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Query to debug Stock UOM Quantities.sql" />
@@ -3012,9 +3011,7 @@
     <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_Frequency.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
@@ -3028,10 +3025,6 @@
     <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ConfigurationTemplate.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ConfigurationType.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ProductCode.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCriteria.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
@@ -4656,6 +4649,7 @@
     <Build Include="dbo\Views\vyuTFGetTransactionException.sql" />
     <Build Include="dbo\Views\vyuTFGetTransaction.sql" />
     <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentOriginState.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4762,9 +4756,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql" />
     <None Include="Scripts\Post-Deployment\EM\030-FixSalesperson.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateOldCost.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ScheduleFieldTemplate.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCategory.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
     <None Include="Scripts\Post-Deployment\EM\024_CleanOrphanCustomerGroup.sql" />
     <None Include="Scripts\Post-Deployment\HD\CustomField.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\2_Screen.sql" />
