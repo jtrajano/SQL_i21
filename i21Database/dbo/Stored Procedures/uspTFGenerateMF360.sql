@@ -23,7 +23,7 @@ BEGIN TRY
 	WHERE strFormCode = @FormCodeParam
 		AND uniqTransactionGuid = @Guid
 
-	IF (@FCode IS NOT NULL)
+	IF (ISNULL(@FCode, '') = '')
 	BEGIN
 
 		DECLARE @TA INT
@@ -59,7 +59,7 @@ BEGIN TRY
 		DECLARE @tblSchedule TABLE (intId INT IDENTITY(1,1)
 			,strSchedule NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
 
-		IF @Refresh = 'true'
+		IF (@Refresh = 'true')
 		BEGIN
 			DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
 		END
@@ -148,9 +148,8 @@ BEGIN TRY
 			WHERE intReportTemplateId = @ParamId
 				AND strFormCode = @FormCodeParam
 
-			IF (@ScheduleCode IS NOT NULL)
+			IF (ISNULL(@ScheduleCode, '') = '')
 			BEGIN
-
 				SELECT @TemplateDescription = strDescription
 					, @ReportItemSequence = intTemplateItemNumber
 					, @TemplateItemNumber = strReportSection
@@ -312,33 +311,32 @@ BEGIN TRY
 
 				SET @TempComputedValue = (SELECT ISNULL(dbLColumnValue, 0) FROM @tblTempSummaryTotal)
 
-				INSERT INTO tblTFTransactionSummary(
-						strSummaryGuid,
-						intTaxAuthorityId,
-						strTaxAuthority,
-						strFormCode,
-						strScheduleCode,
-						strSegment,
-						strProductCode,
-						strDescription,
-						strColumnValue,
-						intItemNumber,
-						intItemSequenceNumber,
-						strSection,
-						dtmDateRun)		
-				VALUES (@Guid,
-						@TA,
-						@TACode,
-						@FormCodeParam,
-						@ScheduleCode,
-						'Summary',
-						'',
-						@TemplateDescription,
-						@TempComputedValue,
-						@TemplateItemNumber,
-						@ReportItemSequence,
-						@ReportSection,
-						CAST(GETDATE() AS DATE))
+				INSERT INTO tblTFTransactionSummary(strSummaryGuid
+					, intTaxAuthorityId
+					, strTaxAuthority
+					, strFormCode
+					, strScheduleCode
+					, strSegment
+					, strProductCode
+					, strDescription
+					, strColumnValue
+					, intItemNumber
+					, intItemSequenceNumber
+					, strSection
+					, dtmDateRun)		
+				VALUES (@Guid
+					, @TA
+					, @TACode
+					, @FormCodeParam
+					, @ScheduleCode
+					, 'Summary'
+					, ''
+					, @TemplateDescription
+					, @TempComputedValue
+					, @TemplateItemNumber
+					, @ReportItemSequence
+					, @ReportSection
+					, CAST(GETDATE() AS DATE))
 			END
 
 			DELETE FROM @tblTempSummaryTotal
@@ -347,10 +345,10 @@ BEGIN TRY
 		
 		-- ======================== DETAIL ==============================
 		DECLARE @ItemTotal NVARCHAR(MAX)
-		DECLARE @itemQuery NVARCHAR(MAX)
-		DECLARE @CountItems INT
+			, @itemQuery NVARCHAR(MAX)
+			, @CountItems INT
+			, @ItemDescription NVARCHAR(MAX)
 
-		DECLARE @ItemDescription NVARCHAR(MAX)
 		SELECT @QueryScheduleCodeParam = 'SELECT ''' + REPLACE (@ScheduleCodeParam,',',''' UNION SELECT ''') + ''''
 		INSERT INTO @tblTempScheduleCodeParam (strTempScheduleCode)
 		EXEC(@QueryScheduleCodeParam)
