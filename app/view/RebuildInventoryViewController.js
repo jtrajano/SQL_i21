@@ -80,7 +80,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         iRely.Functions.showCustomDialog('question', 'yesno', vm.data.prompt, callback);
     },
 
-    verifyValuation: function(date) {
+    verifyValuation: function (date) {
         return ic.utils.ajax({
             timeout: 120000,
             url: '../Inventory/api/InventoryValuation/CompareRebuiltValuationSnapshot',
@@ -94,7 +94,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         });
     },
 
-    rebuild: function(data) {
+    rebuild: function (data) {
         return ic.utils.ajax({
             timeout: 120000,
             url: '../Inventory/api/InventoryValuation/RebuildInventory',
@@ -107,33 +107,78 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         });
     },
 
+    downloadDiscrepancies: function (columns, data) {
+        var alias = [
+            { field: 'strAccountId', column: "Account Id" },
+            { field: 'strDescription', column: "Description" },
+            { field: 'strRebuildDate', column: "Rebuild Date" },
+            { field: 'dblDebit_Snapshot', column: "Rebuild Debit" },
+            { field: "dblDebit_ActualGLDetail", column: "Actual Debit" },
+            { field: "DebitDiff", column: "Debit Diff" },
+            { field: "dblCredit_Snapshot", column: "Rebuild Credit" },
+            { field: "dblCredit_ActualGLDetail", column: "Actual Credit" },
+            { field: "CreditDiff", column: "Credit Diff" }
+        ];
+        ic.utils.writeCSV(columns, data, alias, "disrepancies.csv");
+    },
+
     repost: function (data) {
         var me = this;
         iRely.Msg.showWait('Rebuilding inventory...');
         var rebuildObs = me.rebuild(data);
         var verifyObs = me.verifyValuation(data.dtmStartDate);
         rebuildObs
-        .flatMap(verifyObs)
-        .finally(function() { iRely.Msg.close(); })
-        .subscribe(
-            function(data) {
-                var json = JSON.parse(data.responseText);
+            .flatMap(verifyObs)
+            .finally(function () { iRely.Msg.close(); })
+            .subscribe(
+            function (res) {
+                var json = JSON.parse(res.responseText);
                 if (json.success) {
-                    if(data.status === 202)
-                        iRely.Functions.showInfoDialog("Rebuild completed with warnings. " + json.message);
+                    if (res.status === 202)
+                        iRely.Functions.showCustomDialog('warning', 'yesno', "Rebuild inventory completed but discrepancies were found. Do you want to download the logs to check discrepancies manually?", function (button) {
+                            if (button === 'yes') {
+                                ic.utils.ajax({
+                                    url: '../Inventory/api/InventoryValuation/GetDiscrepancies',
+                                    params: {
+                                        dtmDate: data.dtmStartDate
+                                    }
+                                })
+                                .map(function (x) {
+                                    var json = JSON.parse(x.responseText);
+                                    return {
+                                        csv: ic.utils.jsonArrayToCSVMapping(json.data),
+                                        success: true,
+                                        message: 'Success'
+                                    };
+                                })
+                                .subscribe(
+                                    function (res) {
+                                        if (res.success) {
+                                            me.downloadDiscrepancies(res.csv.columns, res.csv.data);
+                                        } else {
+                                            iRely.Functions.showErrorDialog("Error downloading." + res.message);
+                                        }
+                                    },
+                                    function (error) {
+                                        var json = JSON.parse(error.responseText);
+                                        iRely.Functions.showErrorDialog(json.message);
+                                    }
+                                );
+                            }
+                        });
                     else
                         iRely.Functions.showInfoDialog(json.message);
                 }
                 else
                     iRely.Functions.showErrorDialog(json.message);
-            }, 
-            function(error) {
-                if(error.timedout)
+            },
+            function (error) {
+                if (error.timedout)
                     iRely.Functions.showErrorDialog("Looks like the server is taking to long to respond, this can be caused by either poor connectivity or an error with our servers. Please try again in a while.");
                 else
                     iRely.Functions.showErrorDialog(JSON.parse(error.responseText).message);
             }
-        );
+            );
     },
 
     init: function (cfg) {

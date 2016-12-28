@@ -10,6 +10,7 @@ using System.Web.Http;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Data.SqlClient;
 
 namespace iRely.Inventory.WebApi.Controllers
 {
@@ -120,6 +121,60 @@ namespace iRely.Inventory.WebApi.Controllers
             catch (Exception ex)
             {
                 msg = "Error fetching fiscal months. " + ex.Message;
+            }
+
+            var response = new
+            {
+                data = data,
+                success = success,
+                message = msg
+            };
+            return Request.CreateResponse(response.success ? HttpStatusCode.OK : HttpStatusCode.InternalServerError, response);
+        }
+
+        class Discrepancy
+        {
+            public int? intAccountId { get; set; }
+            public string strAccountId { get; set; }
+            public string strDescription { get; set; }
+            public DateTime? dtmRebuildDate { get; set; }
+            public string strRebuildDate { get; set; }
+            public int? intYear { get; set; }
+            public int? intMonth { get; set; }
+            public decimal? dblDebit_Snapshot { get; set; }
+            public decimal? dblCredit_Snapshot { get; set; }
+            public decimal? dblDebit_ActualGLDetail { get; set; }
+            public decimal? dblCredit_ActualGLDetail { get; set; }
+            public decimal? DebitDiff { get; set; }
+            public decimal? CreditDiff { get; set; }
+        }
+
+        [HttpGet]
+        [ActionName("GetDiscrepancies")]
+        public async Task<HttpResponseMessage> GetDiscrepancies(DateTime? dtmDate)
+        {
+            var db = new InventoryEntities();
+            var success = false;
+            var data = new List<Discrepancy>();
+            var msg = "An unknown error occurred.";
+            try
+            {
+                var param = new SqlParameter("@dtmDate", dtmDate);
+                param.Value = dtmDate;
+                param.DbType = System.Data.DbType.DateTime;
+                var query = db.Database.SqlQuery<Discrepancy>(
+                    @"SELECT intAccountId, strAccountId, strDescription, CONVERT(VARCHAR(50), dtmRebuildDate, 1) strRebuildDate, dtmRebuildDate, intYear, intMonth, dblDebit_Snapshot, 
+                        dblCredit_Snapshot, dblDebit_ActualGLDetail, dblCredit_ActualGLDetail, [Debit Diff] AS DebitDiff, [Credit Diff] AS CreditDiff 
+                    FROM vyuICCompareRebuildValuationSnapshot
+                    WHERE CAST(CONVERT(VARCHAR(50), dtmRebuildDate, 1)AS DATETIME) >= @dtmDate"
+                , param);
+                data = await query.ToListAsync();
+                success = true;
+                msg = "Success.";
+            }
+            catch (Exception ex)
+            {
+                msg = "Error fetching discrepancies. " + ex.Message;
             }
 
             var response = new
