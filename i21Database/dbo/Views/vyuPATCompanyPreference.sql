@@ -3,11 +3,6 @@
 SELECT   CP.intCompanyPreferenceId,
 		 ComLoc.intCompanyLocationId,
 		 ComLoc.dblWithholdPercent,
-         CP.intGrainDiscountId, 
-         CP.intGrainStorageId, 
-         CP.intServiceChargeId, 
-         CP.intDebitMemoId, 
-         CP.intDiscountGivenId, 
          CP.strRefund, 
          CP.dblMinimumRefund, 
          CP.dblServiceFee, 
@@ -23,16 +18,11 @@ SELECT   CP.intCompanyPreferenceId,
          CP.intNonVotingStockId, 
          CP.intFractionalShareId, 
          CP.intServiceFeeIncomeId, 
-         CP.intFWTLiabilityAccountId, 
          CP.intDividendsGLAccount,
 		 strDividendsGLAccount = DA.strAccountId, 
-         CP.intTreasuryGLAccount, 
-		 strTreasuryGLAccount = TA.strAccountId,
          CP.intAPClearingGLAccount,
 		 CP.intConcurrencyId
 FROM tblPATCompanyPreference CP
 LEFT JOIN tblGLAccount DA
 	ON DA.intAccountId = CP.intDividendsGLAccount
-LEFT JOIN tblGLAccount TA
-	ON TA.intAccountId = CP.intTreasuryGLAccount
 CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) ComLoc
