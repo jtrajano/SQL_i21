@@ -16,6 +16,7 @@ DECLARE	-- Receipt Types
 		,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
 		,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
 		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
+		,@RECEIPT_TYPE_INVENTORY_RETURN AS NVARCHAR(50) = 'Inventory Return'
 		-- Source Types
 		,@SOURCE_TYPE_NONE AS INT = 0
 		,@SOURCE_TYPE_SCALE AS INT = 1
@@ -64,6 +65,13 @@ BEGIN
 	EXEC dbo.uspICGetItemsFromItemReceipt
 		@intReceiptId = @intTransactionId		
 
+	-- Negate if processing Inventory Return
+	UPDATE	@ItemsFromInventoryReceipt
+	SET		dblQty = CASE WHEN @ysnPost = 1 THEN dblQty ELSE -dblQty END 
+			,intLoadReceive = CASE WHEN @ysnPost = 1 THEN intLoadReceive ELSE -intLoadReceive END 
+	FROM	@ItemsFromInventoryReceipt
+	WHERE	strReceiptType = @RECEIPT_TYPE_INVENTORY_RETURN
+
 	UPDATE	@ItemsFromInventoryReceipt
 	SET		dblQty = CASE WHEN @ysnPost = 1 THEN dblQty ELSE -dblQty END 
 			,intLoadReceive = CASE WHEN @ysnPost = 1 THEN intLoadReceive ELSE -intLoadReceive END 
@@ -82,10 +90,20 @@ END
 
 -- Call the integration scripts based on Receipt type
 BEGIN 
-	-- Update the received quantities back to the Contract Management
+	-- Update the received quantities back to the Contract Management (Purchase Contract)
 	IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
 	BEGIN 
 		EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+	END
+
+	-- Update the received quantities back to the Contract Management (Inventory Return)
+	IF	@ReceiptType = @RECEIPT_TYPE_INVENTORY_RETURN 
+	BEGIN 
+		-- Check if the source IR is a purchase contract 
+		IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt r WHERE r.intInventoryReceiptId = @intTransactionId AND r.strReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT)
+		BEGIN 
+			EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+		END 		
 	END
 
 	-- Update the received quantities back to the Purchasing
@@ -164,6 +182,7 @@ BEGIN
 END 
 
 -- Call the integration scripts based on Source type
+IF ISNULL(@ReceiptType, @RECEIPT_TYPE_DIRECT) <> @RECEIPT_TYPE_INVENTORY_RETURN 
 BEGIN 
 	-- Update the received quantities back to Inbound Shipment 
 	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT

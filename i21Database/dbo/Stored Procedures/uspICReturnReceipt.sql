@@ -100,7 +100,8 @@ BEGIN
 			,strActualCostId
 			,strReceiptOriginId
 			,strWarehouseRefNo
-			,ysnOrigin	
+			,ysnOrigin
+			,intSourceInventoryReceiptId 
 	)
 	SELECT	strReceiptType = @strReceiptType
 			,intSourceType
@@ -142,6 +143,7 @@ BEGIN
 			,strReceiptOriginId
 			,strWarehouseRefNo
 			,ysnOrigin
+			,intSourceInventoryReceiptId = r.intInventoryReceiptId 
 	FROM	tblICInventoryReceipt r 
 	WHERE	r.intInventoryReceiptId = @intReceiptId
 
