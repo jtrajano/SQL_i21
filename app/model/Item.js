@@ -173,7 +173,8 @@ Ext.define('Inventory.model.Item', {
         { name: 'strInvoiceComments', type: 'string' },
         { name: 'strPickListComments', type: 'string' },
         { name: 'intLotStatusId', type: 'int', allowNull: true },
-        { name: 'strRequired', type: 'string' }
+        { name: 'strRequired', type: 'string' },
+        { name: 'ysnBasisContract', type: 'boolean' }
     ],
 
     validators: [

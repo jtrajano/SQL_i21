@@ -152,6 +152,7 @@ namespace iRely.Inventory.Model
         public string strPickListComments { get; set; }
         public int? intLotStatusId { get; set; }
         public string strRequired { get; set; }
+        public bool? ysnBasisContract { get; set; }
 
         private string _manufacturer;
         [NotMapped]
@@ -281,6 +282,7 @@ namespace iRely.Inventory.Model
         public string strCostType { get; set; }
         public string strShortName { get; set; }
         public string strRequired { get; set; }
+        public bool? ysnBasisContract { get; set; }
 
     }
 
@@ -337,6 +339,7 @@ namespace iRely.Inventory.Model
         public string strCostType { get; set; }
         public int? intOnCostTypeId { get; set; }
         public string strOnCostType { get; set; }
+        public bool? ysnBasisContract { get; set; }
     }
 
     public class vyuICGetItemStock

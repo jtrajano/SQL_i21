@@ -37,6 +37,7 @@ Ext.define('Inventory.model.CompactItem', {
         { name: 'intCostUOMId', type: 'int', allowNull: true },
         { name: 'strCostUOM', type: 'string' },
         { name: 'strCostType', type: 'string' },
-        { name: 'strShortName', type: 'string' }
+        { name: 'strShortName', type: 'string' },
+        { name: 'ysnBasisContract', type: 'boolean' }
     ]
 });
