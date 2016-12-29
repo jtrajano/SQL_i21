@@ -16,6 +16,7 @@ SELECT Item.intItemId
 	, Item.strCostType
 	, Item.intOnCostTypeId
 	, strOnCostType = OnCostType.strItemNo
+	, Item.ysnBasisContract
 FROM tblICItem Item
 	LEFT JOIN tblICItem OnCostType ON OnCostType.intItemId = Item.intOnCostTypeId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = Item.intCostUOMId
