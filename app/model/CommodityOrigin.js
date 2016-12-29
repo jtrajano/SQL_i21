@@ -29,7 +29,10 @@ Ext.define('Inventory.model.CommodityOrigin', {
             }
         },
         { name: 'strDescription', type: 'string'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+        { name: 'intDefaultPackingUOMId', type: 'int' },
+        { name: 'strDefaultPackingUOM', type: 'string' },
+        { name: 'intCountryID', type: 'int' }
     ],
 
     validators: [

@@ -251,7 +251,7 @@
                                 "itemId": "btnRecap",
                                 "layout|flex": null,
                                 "tabIndex": -1,
-                                "text": "Recap",
+                                "text": "Post Preview",
                                 "ui": "i21-button-toolbar-small"
                             },
                             "name": "MyButton30",

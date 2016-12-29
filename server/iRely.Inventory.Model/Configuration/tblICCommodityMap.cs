@@ -133,6 +133,11 @@ namespace iRely.Inventory.Model
         public tblICCommodityOriginMap()
         {
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.intDefaultPackingUOMId).HasColumnName("intDefaultPackingUOMId");
+            this.Property(t => t.intCountryID).HasColumnName("intCountryID");
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICCommodityOrigins)
+                .HasForeignKey(p => p.intDefaultPackingUOMId);
         }
     }
 

@@ -685,11 +685,61 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colOrigin',
+                                                                width: 100,
                                                                 dataIndex: 'string',
                                                                 text: 'Origin',
+                                                                editor: {
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intCountryID',
+                                                                            dataType: 'numeric',
+                                                                            text: 'Country ID',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strCountry',
+                                                                            dataType: 'string',
+                                                                            text: 'Country',
+                                                                            flex: 1
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboOrigin',
+                                                                    displayField: 'strCountry',
+                                                                    valueField: 'strCountry'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colDefaultPackingUOM',
+                                                                dataIndex: 'string',
+                                                                text: 'Default Packing UOM',
                                                                 flex: 1,
                                                                 editor: {
-                                                                    xtype: 'textfield'
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intUnitMeasureId',
+                                                                            dataType: 'numeric',
+                                                                            text: 'Unit Of Measure ID',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strUnitMeasure',
+                                                                            dataType: 'string',
+                                                                            text: 'Unit Measure',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strUnitType',
+                                                                            dataType: 'string',
+                                                                            text: 'Unit Type',
+                                                                            flex: 1
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboDefaultPackingUOM',
+                                                                    displayField: 'strUnitMeasure',
+                                                                    valueField: 'strUnitMeasure'
                                                                 }
                                                             }
                                                         ],
