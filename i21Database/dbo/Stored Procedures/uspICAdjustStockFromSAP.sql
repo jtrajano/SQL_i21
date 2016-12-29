@@ -27,7 +27,6 @@ DECLARE
 	,@dblAdjustQtyBy AS NUMERIC(38, 20)
 	,@intItemLocationId AS INT
 	,@tempQty AS NUMERIC(38,20)
-	,@tempPrevQty AS NUMERIC(38,20)
 	,@tempNextQty AS NUMERIC(38,20)
 	,@tempEachLotQty AS NUMERIC(38,20)
 	,@tempAdjustQtyBy AS NUMERIC(38,20)
@@ -183,6 +182,7 @@ BEGIN
 	 -- Get Lot Number
 	 IF @strLotNumber IS NULL OR @strLotNumber = '[FIFO]' OR @strLotNumber = 'FIFO'
 		BEGIN
+			-- If New Quantity is greater than the existing, add quantity to the lot specified or the first lot in FIFO order if Lot Number is not specified
 			IF @dblAdjustQtyBy > 0
 				BEGIN
 					IF @strLotNumber IS NULL
@@ -232,8 +232,10 @@ BEGIN
 						,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 				END
 
+			 -- If New Quantity is equal to the existing, do nothing
 			 ELSE IF @dblAdjustQtyBy = 0 GOTO _Exit
 
+			 -- If New Quantity is less than the existing, subtract quantity from the lot specified and lot in FIFO order if quantity on lot specified is not enough; If lot number is not specified, subtract from lots in FIFO order
 			 ELSE IF @dblAdjustQtyBy < 0
 				BEGIN
 					SET @tempQty = ABS(@dblAdjustQtyBy)
