@@ -17,26 +17,27 @@ BEGIN
 
 	MERGE dbo.tblGLCrossReferenceMapping as map
 	USING dbo.tblGLCOACrossReference AS coa
-	ON map.inti21AccountId = coa.inti21Id
+	ON map.intAccountId = coa.inti21Id
 	WHEN MATCHED THEN
 	UPDATE SET
-	intOldAccountId = coa.intLegacyReferenceId,
+	--intOldAccountId = coa.intLegacyReferenceId,
 	strOldAccountId = coa.strOldId
 	WHEN NOT MATCHED THEN
 
 	INSERT (
-	[intOldAccountId],
+	--[intOldAccountId],
 	[strOldAccountId],
-	[inti21AccountId],
-	[stri21AccountId], 
+	[intAccountId],
+	--[stri21AccountId], 
 	[intAccountSystemId],
 	[intConcurrencyId]
 	)
 	VALUES 
-	(intLegacyReferenceId,
+	(
+	--intLegacyReferenceId,
 	strOldId,
 	inti21Id,
-	stri21Id,
+	--stri21Id,
 	1,
 	1);
 	
