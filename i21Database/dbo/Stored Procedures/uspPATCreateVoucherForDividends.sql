@@ -85,8 +85,11 @@ BEGIN TRY
 			@endTransaction = @intCreatedBillId,
 			@success = @bitSuccess OUTPUT
 
+		UPDATE tblPATDividendsCustomer SET intBillId = @intCreatedBillId WHERE intDividendCustomerId = @intDivCustId;
+
 		DELETE FROM @dividendCustomerIds WHERE intId = @intDivCustId;
 		DELETE FROM @voucherDetailNonInventory;
+		SET @intCreatedBillId = NULL;
 
 		SET @totalRecords = @totalRecords + 1;
 	END
