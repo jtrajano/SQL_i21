@@ -247,13 +247,18 @@ BEGIN TRY
 			,@intUserId
 			,0
 
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
+		IF EXISTS(SELECT *FROM @GLEntries)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+		END
 
 		DELETE
-		FROM tblMFWorkOrderConsumedLot
+		FROM dbo.tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
+
+		DELETE FROM dbo.tblMFWorkOrderProducedLotTransaction WHERE intWorkOrderId=@intWorkOrderId
 	END
 
 	IF @intTransactionCount = 0

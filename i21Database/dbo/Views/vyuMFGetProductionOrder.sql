@@ -53,7 +53,7 @@ LEFT JOIN dbo.tblMFScheduleWorkOrder SW1 ON SW1.intScheduleWorkOrderId = SWD.int
 LEFT JOIN dbo.tblMFSchedule S1 ON S1.intScheduleId = SW1.intScheduleId
 	AND S1.ysnStandard = 1
 LEFT JOIN tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
-LEFT JOIN dbo.tblMFShift S ON S.intShiftId = SWD.intPlannedShiftId
+LEFT JOIN dbo.tblMFShift S ON S.intShiftId = IsNULL(SWD.intPlannedShiftId,W.intPlannedShiftId)
 LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 	AND SW.dtmPlannedDate = ISNULL(CD.dtmCalendarDate, W.dtmExpectedDate)
 	AND CASE 

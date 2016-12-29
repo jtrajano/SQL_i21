@@ -81,6 +81,7 @@ BEGIN TRY
 		,@intInputItemUOMId INT
 		,@strCreateMultipleLots NVARCHAR(50)
 		,@intBusinessShiftId INT
+		,@ysnFillPartialPallet bit
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -138,6 +139,7 @@ BEGIN TRY
 		,@strComment = strComment
 		,@strParentLotNumber = strParentLotNumber
 		,@ysnIgnoreTolerance = ysnIgnoreTolerance
+		,@ysnFillPartialPallet=ysnFillPartialPallet
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -178,6 +180,7 @@ BEGIN TRY
 			,strComment NVARCHAR(MAX)
 			,strParentLotNumber NVARCHAR(50)
 			,ysnIgnoreTolerance BIT
+			,ysnFillPartialPallet bit
 			)
 
 	IF @ysnIgnoreTolerance IS NULL
@@ -675,6 +678,7 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@dblUnitQty = @dblUnitQty
 				,@ysnProducedQtyByWeight = 1
+				,@ysnFillPartialPallet=@ysnFillPartialPallet
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblProduceQty
@@ -694,6 +698,7 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@dblUnitQty = @dblUnitQty
 				,@ysnProducedQtyByWeight = 0
+				,@ysnFillPartialPallet=@ysnFillPartialPallet
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblPhysicalCount
@@ -703,6 +708,7 @@ BEGIN TRY
 				,@strRetBatchId = @strRetBatchId OUTPUT
 				,@intBatchId = @intBatchId
 				,@ysnPostConsumption = @ysnPostConsumption
+				
 		END
 
 		EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
@@ -797,6 +803,7 @@ BEGIN TRY
 					,@strParentLotNumber = @strParentLotNumber
 					,@intInputLotId = @intInputLotId
 					,@intInputStorageLocationId = @intInputLotStorageLocationId
+					,@ysnFillPartialPallet=@ysnFillPartialPallet
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -871,6 +878,7 @@ BEGIN TRY
 				,@strParentLotNumber = @strParentLotNumber
 				,@intInputLotId = @intInputLotId
 				,@intInputStorageLocationId = @intInputLotStorageLocationId
+				,@ysnFillPartialPallet=@ysnFillPartialPallet
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (

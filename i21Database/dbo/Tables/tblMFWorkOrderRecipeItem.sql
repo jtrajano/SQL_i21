@@ -33,6 +33,7 @@
 	[intMarginById] [int] NULL,
 	[dblMargin] NUMERIC(18,6) NULL,
 	[ysnCostAppliedAtInvoice] BIT,
+	ysnPartialFillConsumption BIT NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_ysnPartialFillConsumption] DEFAULT 1,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,

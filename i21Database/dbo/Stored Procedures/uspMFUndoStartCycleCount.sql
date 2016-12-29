@@ -25,6 +25,17 @@ BEGIN TRY
 		,dtmLastModified = GetDate()
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	UPDATE tblMFProductionSummary
+	SET dblOpeningQuantity = 0
+		,dblOpeningOutputQuantity = 0
+		,dblOpeningConversionQuantity = 0
+		,dblConsumedQuantity = 0
+		,dblCountQuantity = 0
+		,dblCountOutputQuantity = 0
+		,dblCountConversionQuantity = 0
+		,dblYieldQuantity=0
+	WHERE intWorkOrderId = @intWorkOrderId
+
 	COMMIT TRAN
 END TRY
 

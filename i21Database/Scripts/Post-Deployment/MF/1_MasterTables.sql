@@ -2388,3 +2388,11 @@ BEGIN
 	VALUES(41,'Inventory Adjustment - Ownership Change','Inventory Adjustment')
 END
 GO
+UPDATE tblMFWorkOrderRecipeItem
+SET ysnPartialFillConsumption = 1
+WHERE ysnPartialFillConsumption IS NULL
+GO
+UPDATE tblMFRecipeItem
+SET ysnPartialFillConsumption = 1
+WHERE ysnPartialFillConsumption IS NULL
+GO
