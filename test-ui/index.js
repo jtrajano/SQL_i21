@@ -328,6 +328,13 @@ Harness.start(
                 preload: [
                     functionalTest
                 ]
+            },
+            {
+                url: 'InventoryAdjustment/DeleteInventoryAdjustment.js?v='+version,
+                title: 'DeleteInventoryAdjustment',
+                preload: [
+                    functionalTest
+                ]
             }
         ]
     },
