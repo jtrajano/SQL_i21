@@ -19,12 +19,16 @@
 	,strNote NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strReason NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
 	,intInventoryAdjustmentId int
+	,intOldItemOwnerId INT
+	,intNewItemOwnerId INT
 	,CONSTRAINT PK_tblMFInventoryAdjustment PRIMARY KEY (intAdjustmentId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intOldItemId FOREIGN KEY (intOldItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItemUOM_intItemUOMId FOREIGN KEY (intItemUOMId) REFERENCES tblICItemUOM(intItemUOMId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICLotStatus_intOldLotStatusId FOREIGN KEY (intOldLotStatusId) REFERENCES tblICLotStatus(intLotStatusId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICLotStatus_intNewLotStatusId FOREIGN KEY (intNewLotStatusId) REFERENCES tblICLotStatus(intLotStatusId)
+	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItemOwner_intOldItemOwnerId FOREIGN KEY (intOldItemOwnerId) REFERENCES tblICItemOwner(intItemOwnerId)
+	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItemOwner_intNewItemOwnerId FOREIGN KEY (intNewItemOwnerId) REFERENCES tblICItemOwner(intItemOwnerId)
 	)
 
 

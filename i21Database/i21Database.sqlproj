@@ -4656,6 +4656,9 @@
     <Build Include="dbo\Stored Procedures\uspMFResetDefaultReasonCode.sql" />
     <Build Include="dbo\Tables\tblSMPurchasingGroup.sql" />
 	<Build Include="dbo\Stored Procedures\uspICAdjustStockFromSAP.sql" />
+    <Build Include="dbo\Tables\tblMFLotInventory.sql" />
+    <Build Include="dbo\Views\vyuMFItemOwner.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotOwnerUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
