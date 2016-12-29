@@ -3536,6 +3536,12 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 105
                                                                     },
                                                                     {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkBasisContract',
+                                                                        fieldLabel: 'Basis Contract',
+                                                                        labelWidth: 105
+                                                                    },
+                                                                    {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {

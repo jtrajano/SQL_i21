@@ -152,6 +152,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strInvoiceComments).HasColumnName("strInvoiceComments");
             this.Property(t => t.strPickListComments).HasColumnName("strPickListComments");
             this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
+            this.Property(t => t.ysnBasisContract).HasColumnName("ysnBasisContract");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)
@@ -280,6 +281,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strOriginName).HasColumnName("strOriginName");
             this.Property(t => t.strCostType).HasColumnName("strCostType");
             this.Property(t => t.strShortName).HasColumnName("strShortName");
+            this.Property(t => t.ysnBasisContract).HasColumnName("ysnBasisContract");
         }
     }
 
@@ -351,6 +353,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCostType).HasColumnName("strCostType");
             this.Property(t => t.intOnCostTypeId).HasColumnName("intOnCostTypeId");
             this.Property(t => t.strOnCostType).HasColumnName("strOnCostType");
+            this.Property(t => t.ysnBasisContract).HasColumnName("ysnBasisContract");
         }
     }
 

@@ -715,6 +715,7 @@ Ext.define('Inventory.view.ItemViewController', {
             chkAccrue: '{current.ysnAccrue}',
             chkMTM: '{current.ysnMTM}',
             chkPrice: '{current.ysnPrice}',
+            chkBasisContract: '{current.ysnBasisContract}',
             cboCostMethod: {
                 readOnly: '{readOnlyCostMethod}',
                 value: '{current.strCostMethod}',
