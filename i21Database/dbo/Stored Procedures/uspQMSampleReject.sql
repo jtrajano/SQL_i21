@@ -29,7 +29,10 @@ BEGIN TRY
 	DECLARE @intLotId INT
 	DECLARE @intContractDetailId INT
 	DECLARE @intLoadDetailContainerLinkId INT
+	DECLARE @intSampleStatusId INT
 	DECLARE @ysnRejectLGContainer BIT
+	DECLARE @intUserSampleApproval INT
+	DECLARE @intApproveRejectUserId INT
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -50,7 +53,59 @@ BEGIN TRY
 
 	SELECT @intContractDetailId = intContractDetailId
 		,@intLoadDetailContainerLinkId = intLoadDetailContainerLinkId
+		,@intSampleStatusId = intSampleStatusId
+		,@intApproveRejectUserId = intTestedById
 	FROM tblQMSample
+	WHERE intSampleId = @intSampleId
+
+	SELECT TOP 1 @intUserSampleApproval = ISNULL(intUserSampleApproval, 0)
+	FROM tblQMCompanyPreference
+
+	IF @intUserSampleApproval <> 0 -- No Check
+	BEGIN
+		IF @intSampleStatusId = 3 -- Only for Approved to Rejected
+		BEGIN
+			IF @intApproveRejectUserId <> @intLastModifiedUserId
+			BEGIN
+				IF @intUserSampleApproval = 1 -- User Check
+				BEGIN
+					RAISERROR (
+						90025
+						,11
+						,1
+						,'approved'
+						,'user'
+						,'reject'
+						)
+				END
+				ELSE IF @intUserSampleApproval = 2 -- User Role Check
+				BEGIN
+					DECLARE @intApproveRejectUserRoleID INT
+					DECLARE @intUserRoleID INT
+
+					SELECT @intApproveRejectUserRoleID = intUserRoleID
+					FROM tblSMUserSecurity
+					WHERE intEntityUserSecurityId = @intApproveRejectUserId
+
+					SELECT @intUserRoleID = intUserRoleID
+					FROM tblSMUserSecurity
+					WHERE intEntityUserSecurityId = @intLastModifiedUserId
+
+					IF @intApproveRejectUserRoleID <> @intUserRoleID
+					BEGIN
+						RAISERROR (
+							90025
+							,11
+							,1
+							,'approved'
+							,'user role'
+							,'reject'
+							)
+					END
+				END
+			END
+		END
+	END
 
 	SELECT TOP 1 @ysnRejectLGContainer = ISNULL(ysnRejectLGContainer, 0)
 	FROM tblQMCompanyPreference

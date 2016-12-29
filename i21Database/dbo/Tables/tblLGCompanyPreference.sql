@@ -19,6 +19,12 @@
 [intDefaultShipmentType] INT NULL,
 [strShippingInstructionText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [intCompanyLocationId] INT NULL,
+[intShippingInstructionReportFormat] INT NULL,
+[intDeliveryOrderReportFormat] INT NULL,
+[intInStoreLetterReportFormat] INT NULL,
+[intShippingAdviceReportFormat] INT NULL,
+[intInsuranceLetterReportFormat] INT NULL,
+[intCarrierShipmentOrderReportFormat] INT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

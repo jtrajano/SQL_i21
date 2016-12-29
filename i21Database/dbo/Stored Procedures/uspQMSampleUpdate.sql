@@ -97,7 +97,7 @@ BEGIN TRY
 		,strSampleNote = x.strSampleNote
 		,dtmSampleReceivedDate = x.dtmSampleReceivedDate
 		,dtmTestedOn = x.dtmTestedOn
-		,intTestedById = x.intTestedById
+		--,intTestedById = x.intTestedById
 		,dblSampleQty = x.dblSampleQty
 		,intSampleUOMId = x.intSampleUOMId
 		,dblRepresentingQty = x.dblRepresentingQty
@@ -142,7 +142,7 @@ BEGIN TRY
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
 			,dtmTestedOn DATETIME
-			,intTestedById INT
+			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
 			,dblRepresentingQty NUMERIC(18, 6)

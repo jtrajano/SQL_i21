@@ -7,6 +7,7 @@ SELECT RC.intReasonCodeId
 	,RC.ysnExplanationrequired
 	,RC.ysnDefault
 	,RT.strReasonName
+	,ITT.intTransactionTypeId
 	,ISNULL(ITT.strName,'') AS strName
 FROM dbo.tblMFReasonCode RC
 JOIN dbo.tblMFReasonType RT ON RT.intReasonTypeId = RC.intReasonTypeId

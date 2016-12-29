@@ -638,6 +638,12 @@ WHERE ysnRejectLGContainer IS NULL
 GO
 
 GO
+UPDATE tblQMCompanyPreference
+SET intUserSampleApproval = 0 -- 0 - No Check, 1 - Same User, 2 - Same User Role
+WHERE intUserSampleApproval IS NULL
+GO
+
+GO
 UPDATE tblQMReportProperty SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
 

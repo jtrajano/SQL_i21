@@ -5,7 +5,7 @@
 	@intUserId INT,
 	@batchId NVARCHAR(40)
 )
-RETURNS @returntable TABLE
+RETURNS @returnTable TABLE
 (
 	[dtmDate]                   DATETIME         NOT NULL,
 	[strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
@@ -55,7 +55,7 @@ BEGIN
 
 	IF (@votingStock = 1) --POST VOTING STOCKS
 	BEGIN
-		INSERT INTO @returntable
+		INSERT INTO @returnTable
 		--VOTING STOCK ISSUED
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
@@ -77,7 +77,7 @@ BEGIN
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	'PIS-' + CONVERT(NVARCHAR(50),A.intCustomerStockId), 
+			[strTransactionId]				=	A.intCustomerStockId, 
 			[intTransactionId]				=	A.intCustomerStockId, 
 			[strTransactionType]			=	'Voting Stock',
 			[strTransactionForm]			=	@SCREEN_NAME,
@@ -93,28 +93,28 @@ BEGIN
 				CROSS JOIN tblPATCompanyPreference ComPref
 		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 		UNION ALL
-		--TREASURY GL
+		--AR Account
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
 			[strBatchID]					=	@batchId,
-			[intAccountId]					=	B.intTreasuryGLAccount, 
+			[intAccountId]					=	ComPref.intARAccountId, 
 			[dblDebit]						=	A.dblFaceValue,
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Posted Treasury GL from Voting Stock',
+			[strDescription]				=	'Posted AR Account from Voting Stock',
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strCertificateNo,
 			[intCurrencyId]					=	0,
 			[dblExchangeRate]				=	1,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Posted Treasury GL from Voting Stock',
+			[strJournalLineDescription]		=	'Posted AR Account from Voting Stock',
 			[intJournalLineNo]				=	1,
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	'PIS-' + CONVERT(NVARCHAR(50),A.intCustomerStockId), 
+			[strTransactionId]				=	A.intCustomerStockId, 
 			[intTransactionId]				=	A.intCustomerStockId, 
 			[strTransactionType]			=	'Voting Stock',
 			[strTransactionForm]			=	@SCREEN_NAME,
@@ -127,13 +127,12 @@ BEGIN
 			[dblForeignRate]				=	0,
 			[intConcurrencyId]				=	1
 		FROM	[dbo].[tblPATCustomerStock] A
-				INNER JOIN tblPATStockClassification B
-					ON B.intStockId = A.intStockId
+		CROSS APPLY tblARCompanyPreference ComPref
 		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 	END
 	ELSE --POST NON-VOTING/OTHER STOCKS
 	BEGIN
-		INSERT INTO @returntable
+		INSERT INTO @returnTable
 		--NON-VOTING/OTHER STOCK ISSUED
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
@@ -155,7 +154,7 @@ BEGIN
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	'PIS-' + CONVERT(NVARCHAR(50),A.intCustomerStockId), 
+			[strTransactionId]				=	A.intCustomerStockId, 
 			[intTransactionId]				=	A.intCustomerStockId, 
 			[strTransactionType]			=	'Non-Voting/Other Stock',
 			[strTransactionForm]			=	@SCREEN_NAME,
@@ -171,28 +170,28 @@ BEGIN
 				CROSS JOIN tblPATCompanyPreference ComPref
 		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 		UNION ALL
-		--TREASURY GL
+		--AR Account
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
 			[strBatchID]					=	@batchId,
-			[intAccountId]					=	B.intDividendsGLAccount, 
+			[intAccountId]					=	ComPref.intARAccountId, 
 			[dblDebit]						=	A.dblFaceValue,
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Posted Treasury GL from Non-Voting Stock',
+			[strDescription]				=	'Posted AR Account from Non-Voting Stock',
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strCertificateNo,
 			[intCurrencyId]					=	0,
 			[dblExchangeRate]				=	1,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Posted Treasury GL from Non-Voting Stock',
+			[strJournalLineDescription]		=	'Posted AR Account from Non-Voting Stock',
 			[intJournalLineNo]				=	1,
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	'PIS-' + CONVERT(NVARCHAR(50),A.intCustomerStockId), 
+			[strTransactionId]				=	A.intCustomerStockId, 
 			[intTransactionId]				=	A.intCustomerStockId, 
 			[strTransactionType]			=	'Non-Voting/Other Stock',
 			[strTransactionForm]			=	@SCREEN_NAME,
@@ -205,8 +204,7 @@ BEGIN
 			[dblForeignRate]				=	0,
 			[intConcurrencyId]				=	1
 		FROM	[dbo].[tblPATCustomerStock] A
-				INNER JOIN tblPATStockClassification B
-					ON B.intStockId = A.intStockId
+		CROSS APPLY tblARCompanyPreference ComPref
 		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 	END
 	RETURN
