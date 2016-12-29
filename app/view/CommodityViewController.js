@@ -130,7 +130,28 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
 
             grdOrigin: {
-                colOrigin: 'strDescription'
+                //colOrigin: 'strDescription' // Have to get origin from Country maintenance
+                colOrigin: {
+                    dataIndex: 'strDescription',
+                    editor: {
+                        store: '{origins}',
+                        origValueField: 'intCountryID',
+                        origUpdateField: 'intCountryID'
+                    }
+                },
+                colDefaultPackingUOM: {
+                    dataIndex: 'strDefaultPackingUOM',
+                    editor: {
+                        store: '{packinguoms}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: 'Packed',
+                            conjunction: 'and'
+                        }],
+                        origValueField: 'intUnitMeasureId',
+                        origUpdateField: 'intDefaultPackingUOMId',
+                    }
+                }
             },
 
             grdProductType: {
@@ -175,6 +196,7 @@ Ext.define('Inventory.view.CommodityViewController', {
                 'tblICCommodityClassVariants, ' +
                 'tblICCommodityGrades, ' +
                 'tblICCommodityOrigins, ' +
+                'tblICCommodityOrigins.tblICUnitMeasure, ' +
                 'tblICCommodityProductLines, ' +
                 'tblICCommodityProductTypes, ' +
                 'tblICCommodityRegions, ' +

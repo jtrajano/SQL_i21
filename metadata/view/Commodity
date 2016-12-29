@@ -1397,22 +1397,117 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "dataIndex": "string",
-                                                        "flex": 1,
+                                                        "flex": null,
                                                         "itemId": "colOrigin",
-                                                        "text": "Origin"
+                                                        "text": "Origin",
+                                                        "width": 100
                                                     },
                                                     "name": "MyColumn72",
                                                     "designerId": "61661144-d429-47f3-a7a7-d2c52638c640",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.form.field.ComboBox",
                                                             "reference": {
                                                                 "name": "editor",
                                                                 "type": "object"
                                                             },
                                                             "codeClass": null,
-                                                            "name": "MyTextField10",
-                                                            "designerId": "27708727-a6b3-4f97-8ac4-f8da80fccb89"
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[{",
+                                                                    "    dataIndex: 'intCountryID',",
+                                                                    "    dataType: 'numeric',",
+                                                                    "    text: 'Country ID',",
+                                                                    "    hidden: true",
+                                                                    "},",
+                                                                    "{",
+                                                                    "    dataIndex: 'strCountry',",
+                                                                    "    dataType: 'string',",
+                                                                    "    text: 'Country',",
+                                                                    "    flex: 1",
+                                                                    "}]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strCountry",
+                                                                "itemId": "cboOrigin",
+                                                                "valueField": "strCountry"
+                                                            },
+                                                            "name": "MyComboBox8",
+                                                            "configAlternates": {
+                                                                "columns": "object"
+                                                            },
+                                                            "designerId": "2c092d96-0adb-4d11-b177-ab72487f3912",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Column",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "dataIndex": "string",
+                                                        "flex": 1,
+                                                        "itemId": "colDefaultPackingUOM",
+                                                        "text": "Default Packing UOM"
+                                                    },
+                                                    "name": "MyColumn1",
+                                                    "designerId": "01f238d4-359a-4661-8cd0-2fd0b8612e80",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[{",
+                                                                    "    dataIndex: 'intUnitMeasureId',",
+                                                                    "    dataType: 'numeric',",
+                                                                    "    text: 'Unit Of Measure ID',",
+                                                                    "    hidden: true",
+                                                                    "},",
+                                                                    "{",
+                                                                    "    dataIndex: 'strUnitMeasure',",
+                                                                    "    dataType: 'string',",
+                                                                    "    text: 'Unit Measure',",
+                                                                    "    flex: 1",
+                                                                    "},",
+                                                                    "{",
+                                                                    "    dataIndex: 'strUnitType',",
+                                                                    "    dataType: 'string',",
+                                                                    "    text: 'Unit Type',",
+                                                                    "    flex: 1",
+                                                                    "}]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strUnitMeasure",
+                                                                "itemId": "cboDefaultPackingUOM",
+                                                                "valueField": "strUnitMeasure"
+                                                            },
+                                                            "name": "MyComboBox10",
+                                                            "configAlternates": {
+                                                                "columns": "object"
+                                                            },
+                                                            "designerId": "f16bd900-be9e-40c0-950a-9d30223b2be7",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },

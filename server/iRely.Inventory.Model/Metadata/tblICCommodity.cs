@@ -178,6 +178,28 @@ namespace iRely.Inventory.Model
     {
         public int intCommodityId { get; set; }
         public tblICCommodity tblICCommodity { get; set; }
+        public int? intCountryID { get; set; }
+        public int? intDefaultPackingUOMId { get; set; }
+        private string _strDefaultPackingUOM;
+        [NotMapped]
+        public string strDefaultPackingUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strDefaultPackingUOM))
+                {
+                    if (tblICUnitMeasure != null)
+                        return tblICUnitMeasure.strUnitMeasure;
+                    return null;
+                }
+                return _strDefaultPackingUOM;
+            }
+            set
+            {
+                _strDefaultPackingUOM = value;
+            }
+        }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
     }
 
     public class tblICCommodityProductType : tblICCommodityAttribute
