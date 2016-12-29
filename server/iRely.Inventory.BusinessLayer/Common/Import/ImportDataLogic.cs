@@ -297,50 +297,50 @@ namespace iRely.Inventory.BusinessLayer
         /// <param name="newObject">The entity to be inserted when the ID does not exists.</param>
         /// <param name="inserted">Outputs true when a new record is inserted.</param>
         /// <returns></returns>
-        protected static int? InsertAndOrGetLookupId<T>(InventoryRepository context, Expression<Func<T, bool>> predicate, Expression<Func<T, int>> idProperty, T newObject, out bool inserted) where T : class
+        protected static int? InsertAndOrGetLookupId<J>(InventoryRepository context, Expression<Func<J, bool>> predicate, Expression<Func<J, int>> idProperty, J newObject, out bool inserted) where J : class
         {
-            if (context.GetQuery<T>().Any<T>(predicate))
+            if (context.GetQuery<J>().Any<J>(predicate))
             {
                 inserted = false;
-                var entry = context.ContextManager.Entry<T>(context.GetQuery<T>().First<T>(predicate));
+                var entry = context.ContextManager.Entry<J>(context.GetQuery<J>().First<J>(predicate));
                 return entry.Property(idProperty).CurrentValue;
             }
             else
             {
                 // Insert new record when cannot not found.
-                context.AddNew<T>(newObject);
+                context.AddNew<J>(newObject);
                 inserted = true;
-                var entry = context.ContextManager.Entry<T>(newObject);
+                var entry = context.ContextManager.Entry<J>(newObject);
                 context.Save();
                 return entry.Property(idProperty).CurrentValue;
             }
         }
 
-        protected static int? GetLookUpId<T>(InventoryRepository context, Expression<Func<T, bool>> predicate, Expression<Func<T, int>> idProperty) where T : class
+        protected static int? GetLookUpId<J>(InventoryRepository context, Expression<Func<J, bool>> predicate, Expression<Func<J, int>> idProperty) where J : class
         {
-            if (context.GetQuery<T>().Any<T>(predicate))
+            if (context.GetQuery<J>().Any<J>(predicate))
             {
-                var entry = context.ContextManager.Entry<T>(context.GetQuery<T>().First<T>(predicate));
+                var entry = context.ContextManager.Entry<J>(context.GetQuery<J>().First<J>(predicate));
                 return entry.Property(idProperty).CurrentValue;
             }
             return null;
         }
 
-        protected static T GetLookUpObject<T>(InventoryRepository context, Expression<Func<T, bool>> predicate) where T : class
+        protected static J GetLookUpObject<J>(InventoryRepository context, Expression<Func<J, bool>> predicate) where J : class
         {
-            if (context.GetQuery<T>().Any<T>(predicate))
+            if (context.GetQuery<J>().Any<J>(predicate))
             {
-                var entry = context.ContextManager.Entry<T>(context.GetQuery<T>().First<T>(predicate));
+                var entry = context.ContextManager.Entry<J>(context.GetQuery<J>().First<J>(predicate));
                 return entry.Entity;
             }
             return null;
         }
 
-        protected static List<T> GetLookUps<T>(InventoryRepository context, Expression<Func<T, bool>> predicate) where T : class
+        protected static List<J> GetLookUps<J>(InventoryRepository context, Expression<Func<J, bool>> predicate) where J : class
         {
-            if (context.GetQuery<T>().Any<T>(predicate))
+            if (context.GetQuery<J>().Any<J>(predicate))
             {
-                return context.GetQuery<T>().Where<T>(predicate).ToList<T>();
+                return context.GetQuery<J>().Where<J>(predicate).ToList<J>();
             }
             return null;
         }
