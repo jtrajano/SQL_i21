@@ -5,7 +5,7 @@
 	@intUserId INT,
 	@batchId NVARCHAR(40)
 )
-RETURNS @returntable TABLE
+RETURNS @returnTable TABLE
 (
 	[dtmDate]                   DATETIME         NOT NULL,
 	[strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
@@ -42,8 +42,9 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage'
-	DECLARE @MODULE_CODE NVARCHAR(5)  = 'PAT'
+	DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage';
+	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Retire Stock';
+	DECLARE @MODULE_CODE NVARCHAR(5)  = 'PAT';
 
 	DECLARE @tmpTransacions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
@@ -54,7 +55,7 @@ BEGIN
 	
 	IF(@voidRetire = 0)
 		BEGIN
-		INSERT INTO @returntable
+		INSERT INTO @returnTable
 		--AP CLEARING
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
@@ -64,22 +65,22 @@ BEGIN
 			[dblCredit]						=	A.dblFaceValue,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Retire Stock',
+			[strDescription]				=	'Posted AP Clearing for Retire Stock',
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strCertificateNo,
 			[intCurrencyId]					=	0,
 			[dblExchangeRate]				=	1,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Retire Stock',
+			[strJournalLineDescription]		=	'Posted AP Clearing for Retire Stock',
 			[intJournalLineNo]				=	1,
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	'PRS-' + CONVERT(NVARCHAR(50),A.intCustomerStockId), 
+			[strTransactionId]				=	A.intCustomerStockId, 
 			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'AP Clearing',
-			[strTransactionForm]			=	'Retire Stock',
+			[strTransactionType]			=	'Retire Stock',
+			[strTransactionForm]			=	@SCREEN_NAME,
 			[strModuleName]					=	@MODULE_NAME,
 			[dblDebitForeign]				=	0,      
 			[dblDebitReport]				=	0,
@@ -92,31 +93,31 @@ BEGIN
 				CROSS JOIN tblPATCompanyPreference ComPref
 		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 		UNION ALL
-		--TREASURY GL
+		--AR Account
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
 			[strBatchID]					=	@batchId,
-			[intAccountId]					=	B.intTreasuryGLAccount, 
+			[intAccountId]					=	ComPref.intARAccountId, 
 			[dblDebit]						=	A.dblFaceValue,
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Retire Stock',
+			[strDescription]				=	'Posted AR Account for Retire Stock',
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strCertificateNo,
 			[intCurrencyId]					=	0,
 			[dblExchangeRate]				=	1,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Retire Stock',
+			[strJournalLineDescription]		=	'Posted AR Account for Retire Stock',
 			[intJournalLineNo]				=	1,
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	'PRS-' + CONVERT(NVARCHAR(50),A.intCustomerStockId), 
+			[strTransactionId]				=	A.intCustomerStockId, 
 			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'Treasury GL',
-			[strTransactionForm]			=	'Retire Stock',
+			[strTransactionType]			=	'Retire Stock',
+			[strTransactionForm]			=	@SCREEN_NAME,
 			[strModuleName]					=	@MODULE_NAME,
 			[dblDebitForeign]				=	0,      
 			[dblDebitReport]				=	0,
@@ -126,13 +127,12 @@ BEGIN
 			[dblForeignRate]				=	0,
 			[intConcurrencyId]				=	1
 		FROM	[dbo].[tblPATCustomerStock] A
-				INNER JOIN tblPATStockClassification B
-					ON B.intStockId = A.intStockId
+		CROSS APPLY tblARCompanyPreference ComPref
 		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 		END
 	ELSE
 		BEGIN
-		INSERT INTO @returntable
+		INSERT INTO @returnTable
 		--AP CLEARING
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
@@ -142,22 +142,22 @@ BEGIN
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Void Retire Stock',
+			[strDescription]				=	'Posted AP Clearing for Void Retire Stock',
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strCertificateNo,
 			[intCurrencyId]					=	0,
 			[dblExchangeRate]				=	1,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Void Retire Stock',
+			[strJournalLineDescription]		=	'Posted AP Clearing for Void Retire Stock',
 			[intJournalLineNo]				=	1,
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	'PVRS-' + CONVERT(NVARCHAR(50),A.intCustomerStockId), 
+			[strTransactionId]				=	A.intCustomerStockId, 
 			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'AP Clearing',
-			[strTransactionForm]			=	'Void Retire Stock',
+			[strTransactionType]			=	'Void Retire Stock',
+			[strTransactionForm]			=	@SCREEN_NAME,
 			[strModuleName]					=	@MODULE_NAME,
 			[dblDebitForeign]				=	0,      
 			[dblDebitReport]				=	0,
@@ -170,31 +170,31 @@ BEGIN
 				CROSS JOIN tblPATCompanyPreference ComPref
 		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 		UNION ALL
-		--TREASURY GL
+		--AR Account
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
 			[strBatchID]					=	@batchId,
-			[intAccountId]					=	B.intTreasuryGLAccount, 
+			[intAccountId]					=	ComPref.intARAccountId, 
 			[dblDebit]						=	0,
 			[dblCredit]						=	A.dblFaceValue,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Void Retire Stock',
+			[strDescription]				=	'Posted AR Account for Void Retire Stock',
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strCertificateNo,
 			[intCurrencyId]					=	0,
 			[dblExchangeRate]				=	1,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Void Retire Stock',
+			[strJournalLineDescription]		=	'Posted AR Account for Void Retire Stock',
 			[intJournalLineNo]				=	1,
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	'PVRS-' + CONVERT(NVARCHAR(50),A.intCustomerStockId), 
+			[strTransactionId]				=	A.intCustomerStockId, 
 			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'Treasury GL',
-			[strTransactionForm]			=	'Void Retire Stock',
+			[strTransactionType]			=	'Void Retire Stock',
+			[strTransactionForm]			=	@SCREEN_NAME,
 			[strModuleName]					=	@MODULE_NAME,
 			[dblDebitForeign]				=	0,      
 			[dblDebitReport]				=	0,
@@ -204,8 +204,7 @@ BEGIN
 			[dblForeignRate]				=	0,
 			[intConcurrencyId]				=	1
 		FROM	[dbo].[tblPATCustomerStock] A
-				INNER JOIN tblPATStockClassification B
-					ON B.intStockId = A.intStockId
+		CROSS JOIN tblARCompanyPreference ComPref
 		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 		END
 	RETURN
