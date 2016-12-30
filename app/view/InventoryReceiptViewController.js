@@ -208,7 +208,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{checkHideReturnButton}'
             },
             btnVendor: {
-                disabled: '{isOriginOrInventoryReturn}'
+                disabled: '{current.ysnOrigin}'
             },
             btnAddOrders: {
                 hidden: '{checkHiddenAddOrders}',
@@ -232,20 +232,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 store: '{vendor}',
                 readOnly: '{checkReadOnlyWithOrder}',
                 hidden: '{checkHiddenInTransferOrder}',
-                disabled: '{isOriginOrInventoryReturn}'
+                disabled: '{current.ysnOrigin}'
             },
             cboTransferor: {
                 value: '{current.intTransferorId}',
                 store: '{transferor}',
                 hidden: '{checkHiddenIfNotTransferOrder}',
-                readOnly: '{current.ysnOrigin}',
-                disabled: '{isOriginOrInventoryReturn}'
+                readOnly: '{isOriginOrInventoryReturn}',
+                disabled: '{current.ysnOrigin}'
             },
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}',
                 readOnly: '{locationCheckReadOnlyWithOrder}',
-                disabled: '{isOriginOrInventoryReturn}'
+                disabled: '{current.ysnOrigin}'
             },
             dtmReceiptDate: {
                 value: '{current.dtmReceiptDate}',
@@ -253,7 +253,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             cboCurrency: {
                 value: '{current.intCurrencyId}',
-                disabled: '{isOriginOrInventoryReturn}',
+                disabled: '{current.ysnOrigin}',
                 store: '{currency}',
                 readOnly: '{isReceiptReadonly}',
                 defaultFilters: [

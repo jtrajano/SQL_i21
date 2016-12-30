@@ -430,10 +430,13 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         locationCheckReadOnlyWithOrder: function (get) {
             if (get('current.ysnPosted') === true) {
-                return true
+                return true;
             }
             else {
-                if (get('current.strReceiptType') !== 'Direct' && get('current.strReceiptType') !== 'Transfer Order') {
+                if (get('current.strReceiptType') === 'Inventory Return') {
+                    return true; 
+                }
+                else if (get('current.strReceiptType') !== 'Direct' && get('current.strReceiptType') !== 'Transfer Order') {
                     if (get('current.tblICInventoryReceiptItems').data.items.length > 0) {
                         var current = get('current.tblICInventoryReceiptItems').data.items[0];
                         if (current.get('intOrderId') !== null) {
@@ -454,10 +457,13 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         checkReadOnlyWithOrder: function (get) {
             if (get('current.ysnPosted') === true) {
-                return true
+                return true;
             }
             else {
-                if (get('current.strReceiptType') !== 'Direct') {
+                if (get('current.strReceiptType') === 'Inventory Return') {
+                    return true; 
+                }
+                else if (get('current.strReceiptType') !== 'Direct') {
                     if (get('current.tblICInventoryReceiptItems').data.items.length > 0) {
                         var current = get('current.tblICInventoryReceiptItems').data.items[0];
                         if (current.get('intOrderId') !== null) {
