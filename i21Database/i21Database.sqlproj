@@ -4656,6 +4656,7 @@
     <Build Include="dbo\Functions\fnGRCalculateDiscountUnit.sql" />
     <Build Include="dbo\Stored Procedures\uspMFResetDefaultReasonCode.sql" />
     <Build Include="dbo\Tables\tblSMPurchasingGroup.sql" />
+    <Build Include="dbo\Functions\fnGetCostFromCostBucket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

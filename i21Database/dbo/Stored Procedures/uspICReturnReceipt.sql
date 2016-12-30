@@ -205,7 +205,19 @@ BEGIN
 			,ri.intUnitMeasureId
 			,ri.intWeightUOMId
 			,ri.intCostUOMId
-			,ri.dblUnitCost
+			,dblUnitCost = ISNULL(
+				dbo.fnGetCostFromCostBucket(
+					ri.intItemId
+					,il.intItemLocationId
+					,ISNULL(ri.intCostUOMId, ri.intUnitMeasureId)
+					,NULL	-- If @intLotId is null, it will get the cost from the first lot record received for the line item. 
+					,r.strReceiptNumber
+					,r.intInventoryReceiptId
+					,ri.intInventoryReceiptItemId
+					,r.strActualCostId
+				)
+				, ri.dblUnitCost
+			)
 			,ri.dblUnitRetail
 			,ri.ysnSubCurrency
 			,ri.dblLineTotal
@@ -223,6 +235,9 @@ BEGIN
 			,intSourceInventoryReceiptItemId = ri.intInventoryReceiptItemId 
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			LEFT JOIN tblICItemLocation il
+				ON il.intItemId = ri.intItemId
+				AND il.intLocationId = r.intLocationId
 	WHERE	r.intInventoryReceiptId = @intReceiptId
 END 
 
