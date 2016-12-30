@@ -4662,6 +4662,15 @@
     <Build Include="dbo\Stored Procedures\uspMFLotOwnerUpdate.sql" />
     <Build Include="dbo\Functions\fnGetCostFromCostBucket.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReturn.sql" />
+    <Build Include="dbo\Tables\tblIPItemStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemArchive.sql" />
+    <Build Include="dbo\Tables\tblIPItemError.sql" />
+    <Build Include="dbo\Tables\tblIPItemUOMStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemUOMArchive.sql" />
+    <Build Include="dbo\Tables\tblIPItemUOMError.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPItems.sql" />
+    <Build Include="dbo\Tables\tblIPSAPUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
