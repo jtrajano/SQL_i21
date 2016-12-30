@@ -199,7 +199,7 @@ BEGIN
 			,ri.intOwnershipType
 			,ri.dblOrderQty
 			,ri.dblBillQty
-			,ri.dblOpenReceive
+			,dblOpenReceive = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
 			,ri.intLoadReceive
 			,ri.dblReceived
 			,ri.intUnitMeasureId
@@ -223,7 +223,7 @@ BEGIN
 			,ri.dblLineTotal
 			,ri.intGradeId
 			,ri.dblGross
-			,ri.dblNet
+			,dblNet = ri.dblNet - ISNULL(ri.dblNetReturned, 0) 
 			,ri.dblTax
 			,ri.intDiscountSchedule
 			,ri.ysnExported

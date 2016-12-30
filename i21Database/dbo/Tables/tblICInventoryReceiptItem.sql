@@ -46,6 +46,8 @@ Type the overview for the table here.
 		[strComments] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intTaxGroupId] INT NULL,
 		[intSourceInventoryReceiptItemId] INT NULL,
+		[dblQtyReturned] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblNetReturned] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

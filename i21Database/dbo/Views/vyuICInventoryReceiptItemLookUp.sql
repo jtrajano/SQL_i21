@@ -138,6 +138,8 @@ SELECT	ReceiptItem.intInventoryReceiptId
 							0.00
 						WHEN Receipt.strReceiptType = 'Direct' THEN 
 							0.00
+						WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+							rtn.dblQtyReturned -- Show how much was received less the returns. 
 						ELSE 
 							0.00
 				END
@@ -241,3 +243,13 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		LEFT JOIN vyuTRGetLoadReceipt LoadReceipt
 			ON LoadReceipt.intLoadReceiptId = ReceiptItem.intSourceId
 			AND Receipt.intSourceType = 3
+
+		-- 7. Inventory Return
+		OUTER APPLY (
+			SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
+			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+						ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
+			WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId
+					AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
+					AND Receipt.strReceiptType = 'Inventory Return'
+		) rtn

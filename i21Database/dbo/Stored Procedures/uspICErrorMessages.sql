@@ -466,3 +466,13 @@ EXEC sp_addmessage 80096,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80097) EXEC sp_dropmessage 80097, 'us_english'	
 SET @strmessage = 'Cannot return the inventory receipt. %s must be posted before it can be returned.'
 EXEC sp_addmessage 80097,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80098) EXEC sp_dropmessage 80098, 'us_english'	
+SET @strmessage = 'Unable to unpost. The inventory return has a voucher in %s.'
+EXEC sp_addmessage 80098,11,@strmessage,'us_english','False'
+
+-- was 51174 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80099) EXEC sp_dropmessage 80099, 'us_english'	
+SET @strmessage = 'Unable to unpost. Charge %s has a voucher in %s.'
+EXEC sp_addmessage 80099,11,@strmessage,'us_english','False'
+

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICPostInventoryReceipt  
+﻿CREATE PROCEDURE uspICPostInventoryReturn  
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
@@ -15,10 +15,10 @@ SET ANSI_WARNINGS OFF
 -- Initialize   
 --------------------------------------------------------------------------------------------    
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Receipt Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Return Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
-DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
+DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 41
 		,@STARTING_NUMBER_BATCH AS INT = 3  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
 		,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
@@ -33,6 +33,7 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
 		,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
 		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
+		,@RECEIPT_TYPE_INVENTORY_RETURN AS NVARCHAR(50) = 'Inventory Return'
 
 -- Posting variables
 DECLARE @strBatchId AS NVARCHAR(40) 
@@ -82,8 +83,7 @@ BEGIN
 	DECLARE @strBillNumber AS NVARCHAR(50)
 	DECLARE @strChargeItem AS NVARCHAR(50)
 
-
-	-- Validate if the Inventory Receipt exists   
+	-- Validate if the Inventory Return exists   
 	IF @intTransactionId IS NULL  
 	BEGIN   
 		-- Cannot find the transaction.  
@@ -134,7 +134,7 @@ BEGIN
 		END  
 	END   
 
-	-- Do not allow unpost if Bill has been created for the inventory receipt
+	-- Do not allow unpost if Bill has been created for the inventory return
 	IF @ysnPost = 0 AND @ysnRecap = 0 
 	BEGIN 
 
@@ -151,8 +151,8 @@ BEGIN
 
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
-			-- 'Unable to Unreceive. The inventory receipt is already billed in {Bill Id}.'
-			RAISERROR(80056, 11, 1, @strBillNumber)  
+			-- 'Unable to unpost. The inventory return has a voucher in {Voucher id}.'
+			RAISERROR(80098, 11, 1, @strBillNumber)  
 			GOTO Post_Exit    
 		END 
 
@@ -182,7 +182,6 @@ BEGIN
 			RAISERROR(80099, 11, 1, @strChargeItem, @strBillNumber)  
 			GOTO Post_Exit    
 		END 
-
 	END 
 
 	-- Do not allow post if there is Gross/Net UOM and net qty is zero. 
@@ -254,23 +253,23 @@ END
 BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
 
--- Create and validate the lot numbers
-IF @ysnPost = 1
-BEGIN 	
-	DECLARE @intCreateUpdateLotError AS INT 
+---- Create and validate the lot numbers
+--IF @ysnPost = 1
+--BEGIN 	
+--	DECLARE @intCreateUpdateLotError AS INT 
 
-	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryReceipt 
-			@strTransactionId
-			,@intEntityUserSecurityId
-			,@ysnPost
+--	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryReceipt 
+--			@strTransactionId
+--			,@intEntityUserSecurityId
+--			,@ysnPost
 
-	IF @intCreateUpdateLotError <> 0
-	BEGIN 
-		ROLLBACK TRAN @TransactionName
-		COMMIT TRAN @TransactionName
-		GOTO Post_Exit;
-	END
-END
+--	IF @intCreateUpdateLotError <> 0
+--	BEGIN 
+--		ROLLBACK TRAN @TransactionName
+--		COMMIT TRAN @TransactionName
+--		GOTO Post_Exit;
+--	END
+--END
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  

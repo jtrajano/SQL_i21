@@ -128,29 +128,35 @@ SELECT
 		),
 	dblReceived = 
 		(
-			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
-				THEN (
-					CASE WHEN Receipt.intSourceType = 0 -- None
-						THEN (
-							CASE WHEN (ContractView.ysnLoad = 1) THEN ISNULL(ContractView.intLoadReceived, 0)
-								ELSE ISNULL(ContractView.dblDetailQuantity, 0) - ISNULL(ContractView.dblBalance, 0) END
-						)
-					WHEN Receipt.intSourceType = 1 -- Scale
-						THEN 0
-					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
-						THEN ISNULL(LogisticsView.dblDeliveredQuantity, 0)
-					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN ISNULL(LoadReceipt.dblReceivedQuantity, 0) 
-					ELSE NULL
-					END
-				)
-			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN ISNULL(POView.dblQtyReceived, 0.00)
-			WHEN Receipt.strReceiptType = 'Transfer Order'
-				THEN 0.00
-			WHEN Receipt.strReceiptType = 'Direct'
-				THEN 0.00
-			ELSE 0.00
+			CASE 
+				WHEN Receipt.strReceiptType = 'Purchase Contract'
+					THEN (
+						CASE 
+							WHEN Receipt.intSourceType = 0 THEN -- None
+								CASE	
+									WHEN (ContractView.ysnLoad = 1) THEN 
+										ISNULL(ContractView.intLoadReceived, 0)
+									ELSE 
+										ISNULL(ContractView.dblDetailQuantity, 0) - ISNULL(ContractView.dblBalance, 0) 
+								END
+							WHEN Receipt.intSourceType = 1 -- Scale
+								THEN 0
+							WHEN Receipt.intSourceType = 2 -- Inbound Shipment
+								THEN ISNULL(LogisticsView.dblDeliveredQuantity, 0)
+							WHEN Receipt.intSourceType = 3 -- Transport
+								THEN ISNULL(LoadReceipt.dblReceivedQuantity, 0) 
+							ELSE NULL
+						END
+					)
+				WHEN Receipt.strReceiptType = 'Purchase Order'
+					THEN ISNULL(POView.dblQtyReceived, 0.00)
+				WHEN Receipt.strReceiptType = 'Transfer Order'
+					THEN 0.00
+				WHEN Receipt.strReceiptType = 'Direct'
+					THEN 0.00
+				WHEN Receipt.strReceiptType = 'Inventory Return' 
+					THEN rtn.dblQtyReturned -- Show how much was received less the returns. 
+				ELSE 0.00
 			END
 		),
 	strContainer = 
@@ -195,24 +201,32 @@ SELECT
 			END
 		)
 FROM tblICInventoryReceiptItem ReceiptItem
-LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+LEFT JOIN tblICInventoryReceipt Receipt 
+	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+LEFT JOIN vyuICGetItemUOM ItemUOM 
+	ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 LEFT JOIN vyuCTContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
-		AND strReceiptType = 'Purchase Contract'
+	AND strReceiptType = 'Purchase Contract'
 LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
 	ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
-		AND intLoadContainerId = ReceiptItem.intContainerId
-		AND strReceiptType = 'Purchase Contract'
-		AND Receipt.intSourceType = 2
-
+	AND intLoadContainerId = ReceiptItem.intContainerId
+	AND strReceiptType = 'Purchase Contract'
+	AND Receipt.intSourceType = 2
 LEFT JOIN vyuTRGetLoadReceipt LoadReceipt
 	ON LoadReceipt.intLoadReceiptId = ReceiptItem.intSourceId
-		AND Receipt.intSourceType = 3
-
+	AND Receipt.intSourceType = 3
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo
-		AND strReceiptType = 'Purchase Order'
+	AND Receipt.strReceiptType = 'Purchase Order'
 LEFT JOIN vyuICGetInventoryTransferDetail TransferView
 	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
-		AND strReceiptType = 'Transfer Order'
+	AND Receipt.strReceiptType = 'Transfer Order'
+OUTER APPLY (
+	SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
+	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
+	WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId
+			AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
+			AND Receipt.strReceiptType = 'Inventory Return'
+) rtn
