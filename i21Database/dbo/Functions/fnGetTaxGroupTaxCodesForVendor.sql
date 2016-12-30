@@ -6,6 +6,7 @@
 	,@ItemId				INT
 	,@ShipFromLocationId	INT
 	,@IncludeExemptedCodes	BIT
+	,@CompanyLocationId		INT
 )
 RETURNS @returntable TABLE
 (
@@ -31,11 +32,13 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @ZeroDecimal NUMERIC(18, 6)
-			,@ItemCategoryId INT
+	DECLARE @ZeroDecimal		NUMERIC(18, 6)
+			,@ItemCategoryId	INT
+			,@ProfitCenterId	INT
 
 	SET @ZeroDecimal = 0.000000
-	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
+	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId
+	SELECT @ProfitCenterId = [intProfitCenter] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId
 	
 	INSERT INTO @returntable
 	SELECT
@@ -49,7 +52,7 @@ BEGIN
 		,[dblRate]						= R.[dblRate]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
-		,[intTaxAccountId]				= TC.[intPurchaseTaxAccountId]
+		,[intTaxAccountId]				= ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](TC.[intPurchaseTaxAccountId], @ProfitCenterId), TC.[intPurchaseTaxAccountId])
 		,[ysnSeparateOnInvoice]			= 0
 		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
 		,[strTaxCode]					= TC.[strTaxCode]

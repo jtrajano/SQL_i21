@@ -10,6 +10,7 @@
 	,@CardId					INT
 	,@VehicleId					INT
 	,@DisregardExemptionSetup	BIT
+	,@CompanyLocationId			INT
 )
 RETURNS @returntable TABLE
 (
@@ -36,11 +37,13 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @ZeroDecimal NUMERIC(18, 6)
-			,@ItemCategoryId INT
+	DECLARE @ZeroDecimal		NUMERIC(18, 6)
+			,@ItemCategoryId	INT
+			,@ProfitCenterId	INT
 
 	SET @ZeroDecimal = 0.000000
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
+	SELECT @ProfitCenterId = [intProfitCenter] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId
 	
 	INSERT INTO @returntable
 		([intTransactionDetailTaxId]
@@ -75,7 +78,7 @@ BEGIN
 		,[dblExemptionPercent]			= E.[dblExemptionPercent]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
-		,[intTaxAccountId]				= TC.[intSalesTaxAccountId]
+		,[intTaxAccountId]				= ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](TC.[intSalesTaxAccountId], @ProfitCenterId), TC.[intSalesTaxAccountId])
 		,[ysnSeparateOnInvoice]			= 0
 		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
 		,[strTaxCode]					= TC.[strTaxCode]
