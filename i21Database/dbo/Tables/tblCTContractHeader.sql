@@ -96,3 +96,11 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblCTContractHeader_intContractHeaderId] ON [dbo].[tblCTContractHeader]([intContractHeaderId] ASC);
 GO
 
+CREATE STATISTICS [_dta_stat_34411492_4_3] ON [dbo].[tblCTContractHeader]([intEntityId], [intContractTypeId])
+GO
+
+CREATE STATISTICS [_dta_stat_34411492_3_1] ON [dbo].[tblCTContractHeader]([intContractTypeId], [intContractHeaderId])
+GO
+
+CREATE STATISTICS [_dta_stat_34411492_1_4_3] ON [dbo].[tblCTContractHeader]([intContractHeaderId], [intEntityId], [intContractTypeId])
+GO
