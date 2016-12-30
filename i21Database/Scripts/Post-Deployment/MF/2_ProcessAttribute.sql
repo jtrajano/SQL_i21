@@ -1710,8 +1710,12 @@ BEGIN
         ,5
         ,1
         ,1
-        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation Order by strName'
+        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation UNION Select NULL as ValueMember, NULL as DisplayMember  Order by strName'
 END
+Else
+Begin
+	Update tblMFAttribute Set strSQL='Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation UNION Select NULL as ValueMember, NULL as DisplayMember   Order by strName' Where intAttributeId = 80
+End
 GO
 IF NOT EXISTS (
         SELECT *
@@ -1732,8 +1736,12 @@ BEGIN
         ,5
         ,1
         ,1
-        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation Order by strName'
+        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation UNION Select NULL as ValueMember, NULL as DisplayMember Order by strName'
 END
+Else
+Begin
+	Update tblMFAttribute Set strSQL='Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation UNION Select NULL as ValueMember, NULL as DisplayMember   Order by strName' Where intAttributeId = 81
+End
 GO
 IF NOT EXISTS (
         SELECT *

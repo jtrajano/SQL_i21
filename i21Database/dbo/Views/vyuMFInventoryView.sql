@@ -89,6 +89,7 @@ SELECT l.intLotId
 			)) dblAvailableNoOfPacks
 	,um1.strUnitMeasure AS strReservedQtyUOM
 	,CA.strDescription as strGrade
+	,LI.intItemOwnerId
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -108,3 +109,4 @@ LEFT JOIN tblEMEntity e1 ON e1.intEntityId = c1.intEntityCustomerId
 LEFT JOIN tblEMEntity e ON e.intEntityId = l.intEntityVendorId
 LEFT JOIN vyuMFStockReservation S ON S.intLotId = l.intLotId
 Left JOIN dbo.tblICCommodityAttribute CA on CA.intCommodityAttributeId =l.intGradeId 
+LEFT JOIN tblMFLotInventory LI ON LI.intLotId = l.intLotId

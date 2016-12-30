@@ -7,6 +7,7 @@
 	,@ysnExcessConsumptionAllowed BIT = 0
 	,@dblUnitQty NUMERIC(38, 20)
 	,@ysnProducedQtyByWeight BIT = 1
+	,@ysnFillPartialPallet BIT = 0
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -178,130 +179,6 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderRecipe a
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	--INSERT INTO dbo.tblMFWorkOrderConsumedLot (
-	--	intWorkOrderId
-	--	,intItemId
-	--	,intLotId
-	--	,dblQuantity
-	--	,intItemUOMId
-	--	,dblIssuedQuantity
-	--	,intItemIssuedUOMId
-	--	,intBatchId
-	--	,intSequenceNo
-	--	,dtmCreated
-	--	,intCreatedUserId
-	--	,dtmLastModified
-	--	,intLastModifiedUserId
-	--	,intShiftId
-	--	,dtmActualInputDateTime
-	--	,intStorageLocationId
-	--	)
-	--SELECT WI.intWorkOrderId
-	--	,WI.intItemId
-	--	,WI.intLotId
-	--	,CASE 
-	--		WHEN (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) > WI.dblQuantity
-	--			THEN WI.dblQuantity
-	--		ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
-	--		END
-	--	,WI.intItemUOMId
-	--	,(
-	--		CASE 
-	--			WHEN (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) > WI.dblQuantity
-	--				THEN WI.dblQuantity
-	--			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
-	--			END
-	--		) / (
-	--		CASE 
-	--			WHEN L.intWeightUOMId IS NULL
-	--				OR L.dblWeightPerQty = 0
-	--				THEN 1
-	--			ELSE L.dblWeightPerQty
-	--			END
-	--		)
-	--	,WI.intItemIssuedUOMId
-	--	,@intBatchId
-	--	,WI.intSequenceNo
-	--	,WI.dtmCreated
-	--	,WI.intCreatedUserId
-	--	,WI.dtmLastModified
-	--	,WI.intLastModifiedUserId
-	--	,WI.intShiftId
-	--	,WI.dtmProductionDate
-	--	,WI.intStorageLocationId
-	--FROM dbo.tblMFWorkOrderInputLot WI
-	--JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = WI.intItemId
-	--JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
-	--	AND r.intWorkOrderId = ri.intWorkOrderId
-	--JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
-	--WHERE ri.intWorkOrderId = @intWorkOrderId
-	--	AND ri.intRecipeItemTypeId = 1
-	--	AND (
-	--		(
-	--			ri.ysnYearValidationRequired = 1
-	--			AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
-	--				AND ri.dtmValidTo
-	--			)
-	--		OR (
-	--			ri.ysnYearValidationRequired = 0
-	--			AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-	--				AND DATEPART(dy, ri.dtmValidTo)
-	--			)
-	--		)
-	--	AND ri.intConsumptionMethodId = 1
-	--	AND WI.intWorkOrderId = @intWorkOrderId
-	--	AND WI.ysnConsumptionReversed = 0
-	--MERGE tblMFProductionSummary AS target
-	--USING (
-	--	SELECT intWorkOrderId
-	--		,intItemId
-	--		,SUM(dblQuantity)
-	--	FROM tblMFWorkOrderConsumedLot
-	--	WHERE intWorkOrderId = @intWorkOrderId
-	--		AND intBatchId = @intBatchId
-	--	GROUP BY intWorkOrderId
-	--		,intItemId
-	--	) AS source(intWorkOrderId, intItemId, dblQuantity)
-	--	ON (
-	--			target.intWorkOrderId = source.intWorkOrderId
-	--			AND target.intItemId = source.intItemId
-	--			)
-	--WHEN MATCHED
-	--	THEN
-	--		UPDATE
-	--		SET dblConsumedQuantity = dblConsumedQuantity + source.dblQuantity
-	--WHEN NOT MATCHED
-	--	THEN
-	--		INSERT (
-	--			intWorkOrderId
-	--			,intItemId
-	--			,dblOpeningQuantity
-	--			,dblOpeningOutputQuantity
-	--			,dblOpeningConversionQuantity
-	--			,dblInputQuantity
-	--			,dblConsumedQuantity
-	--			,dblOutputQuantity
-	--			,dblOutputConversionQuantity
-	--			,dblCountQuantity
-	--			,dblCountOutputQuantity
-	--			,dblCountConversionQuantity
-	--			,dblCalculatedQuantity
-	--			)
-	--		VALUES (
-	--			source.intWorkOrderId
-	--			,source.intItemId
-	--			,0
-	--			,0
-	--			,0
-	--			,0
-	--			,source.dblQuantity
-	--			,0
-	--			,0
-	--			,0
-	--			,0
-	--			,0
-	--			,0
-	--			);
 	DELETE
 	FROM tblICStockReservation
 	WHERE intTransactionId = @intWorkOrderId
@@ -380,6 +257,13 @@ BEGIN TRY
 				)
 			)
 		AND ri.intConsumptionMethodId <> 4
+		AND ri.ysnPartialFillConsumption = (
+			CASE 
+				WHEN @ysnFillPartialPallet = 1
+					THEN 1
+				ELSE ri.ysnPartialFillConsumption
+				END
+			)
 		AND NOT EXISTS (
 			SELECT 1
 			FROM dbo.tblMFWorkOrderConsumedLot WC
@@ -474,6 +358,13 @@ BEGIN TRY
 				)
 			)
 		AND ri.intConsumptionMethodId <> 4
+		AND ri.ysnPartialFillConsumption = (
+			CASE 
+				WHEN @ysnFillPartialPallet = 1
+					THEN 1
+				ELSE ri.ysnPartialFillConsumption
+				END
+			)
 		AND (
 			CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
@@ -512,6 +403,13 @@ BEGIN TRY
 					)
 				)
 			AND ri.intConsumptionMethodId <> 4
+			AND ri.ysnPartialFillConsumption = (
+				CASE 
+					WHEN @ysnFillPartialPallet = 1
+						THEN 1
+					ELSE ri.ysnPartialFillConsumption
+					END
+				)
 	END
 
 	SELECT @intItemRecordId = Min(intItemRecordId)
@@ -1589,6 +1487,13 @@ BEGIN TRY
 						)
 					)
 				AND ri.intConsumptionMethodId <> 4
+				AND ri.ysnPartialFillConsumption = (
+					CASE 
+						WHEN @ysnFillPartialPallet = 1
+							THEN 1
+						ELSE ri.ysnPartialFillConsumption
+						END
+					)
 				AND NOT EXISTS (
 					SELECT *
 					FROM tblMFWorkOrderConsumedLot WC

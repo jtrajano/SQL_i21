@@ -2379,3 +2379,20 @@ UPDATE tblMFCompanyPreference
 SET ysnDisplayRecipeTitleByItem = 0
 WHERE ysnDisplayRecipeTitleByItem IS NULL
 GO
+
+-- Need to remove this block once Inventory team added the transaction type. This is temporary
+GO
+IF NOT EXISTS(SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = 41)
+BEGIN 
+	INSERT INTO tblICInventoryTransactionType(intTransactionTypeId,strName,strTransactionForm)
+	VALUES(41,'Inventory Adjustment - Ownership Change','Inventory Adjustment')
+END
+GO
+UPDATE tblMFWorkOrderRecipeItem
+SET ysnPartialFillConsumption = 1
+WHERE ysnPartialFillConsumption IS NULL
+GO
+UPDATE tblMFRecipeItem
+SET ysnPartialFillConsumption = 1
+WHERE ysnPartialFillConsumption IS NULL
+GO

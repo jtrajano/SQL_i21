@@ -16,6 +16,8 @@
 	,@strReason NVARCHAR(MAX)
 	,@intLocationId INT
 	,@intInventoryAdjustmentId INT
+	,@intOldItemOwnerId INT = NULL
+	,@intNewItemOwnerId INT = NULL
 	)
 AS
 BEGIN TRY
@@ -51,6 +53,8 @@ BEGIN TRY
 		,dtmBusinessDate
 		,intBusinessShiftId
 		,intInventoryAdjustmentId
+		,intOldItemOwnerId
+		,intNewItemOwnerId
 		)
 	SELECT @dtmDate
 		,@intTransactionTypeId
@@ -71,6 +75,8 @@ BEGIN TRY
 		,@dtmBusinessDate
 		,@intBusinessShiftId
 		,@intInventoryAdjustmentId
+		,@intOldItemOwnerId
+		,@intNewItemOwnerId
 END TRY
 
 BEGIN CATCH

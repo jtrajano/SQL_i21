@@ -44,7 +44,7 @@ END
 IF ISNULL(@ysnPosted, 0) = 0 
 BEGIN 
 	-- Cannot return the inventory receipt. {Receipt Id} must be posted before it can be returned.
-	RAISERROR(80097, 11, 1, @strReceiptNumber)  
+	RAISERROR(80100, 11, 1, @strReceiptNumber)  
 	GOTO ReturnReceipt_Exit  
 END 
 

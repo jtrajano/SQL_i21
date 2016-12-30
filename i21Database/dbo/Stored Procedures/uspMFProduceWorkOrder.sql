@@ -28,6 +28,7 @@
 	,@strParentLotNumber NVARCHAR(50) = NULL
 	,@intInputLotId INT = NULL
 	,@intInputStorageLocationId INT = NULL
+	,@ysnFillPartialPallet BIT = 0
 	)
 AS
 BEGIN
@@ -35,6 +36,7 @@ BEGIN
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
 		,@intWorkOrderProducedLotId INT
+		,@intItemOwnerId INT
 
 	SELECT @dtmCreated = Getdate()
 
@@ -95,6 +97,7 @@ BEGIN
 		,strParentLotNumber
 		,intInputLotId
 		,intInputStorageLocationId
+		,ysnFillPartialPallet
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -135,8 +138,11 @@ BEGIN
 		,@strParentLotNumber
 		,@intInputLotId
 		,@intInputStorageLocationId
+		,@ysnFillPartialPallet
 
 	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
+
+	
 
 	UPDATE tblMFWorkOrder
 	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) + (
@@ -205,15 +211,19 @@ BEGIN
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intItemId
 	END
-	Declare @intAttributeTypeId int, @intManufacturingProcessId int
 
-	Select @intManufacturingProcessId=intManufacturingProcessId from tblMFWorkOrder Where intWorkOrderId =@intWorkOrderId 
+	DECLARE @intAttributeTypeId INT
+		,@intManufacturingProcessId INT
 
-	Select @intAttributeTypeId=intAttributeTypeId
-	from dbo.tblMFManufacturingProcess 
-	Where intManufacturingProcessId=@intManufacturingProcessId
+	SELECT @intManufacturingProcessId = intManufacturingProcessId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
-	IF @intAttributeTypeId=2
+	SELECT @intAttributeTypeId = intAttributeTypeId
+	FROM dbo.tblMFManufacturingProcess
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+
+	IF @intAttributeTypeId = 2
 		OR @ysnPostProduction = 1
 	BEGIN
 		EXEC uspMFPostProduction 1
@@ -260,7 +270,50 @@ BEGIN
 			,@intTransactionDetailId = @intWorkOrderProducedLotId
 	END
 
+	IF @strParentLotNumber IS NULL
+		OR @strParentLotNumber = ''
+	BEGIN
+		DECLARE @intParentLotId INT
+
+		SELECT @intParentLotId = intParentLotId
+		FROM tblICLot
+		WHERE intLotId = @intLotId
+
+		SELECT @strParentLotNumber = strParentLotNumber
+		FROM tblICParentLot
+		WHERE intParentLotId = @intParentLotId
+	END
+
+	SELECT @intItemOwnerId = intItemOwnerId
+	FROM tblICItemOwner
+	WHERE intItemId = @intItemId
+		AND ysnActive = 1
+
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblMFLotInventory
+			WHERE intLotId = @intLotId
+			)
+	BEGIN
+		INSERT INTO tblMFLotInventory (
+			intConcurrencyId
+			,intLotId
+			,intItemOwnerId
+			)
+		SELECT 1
+			,@intLotId
+			,@intItemOwnerId
+	END
+	ELSE
+	BEGIN
+		UPDATE tblMFLotInventory
+		SET intItemOwnerId = @intItemOwnerId
+			,intConcurrencyId = (intConcurrencyId + 1)
+		WHERE intLotId = @intLotId
+	END
+
 	UPDATE tblMFWorkOrderProducedLot
 	SET intLotId = @intLotId
+		,strParentLotNumber = @strParentLotNumber
 	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 END

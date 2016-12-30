@@ -152,7 +152,7 @@ BEGIN
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
 			-- 'Unable to unpost. The inventory return has a voucher in {Voucher id}.'
-			RAISERROR(80098, 11, 1, @strBillNumber)  
+			RAISERROR(80101, 11, 1, @strBillNumber)  
 			GOTO Post_Exit    
 		END 
 
@@ -179,7 +179,7 @@ BEGIN
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
 			-- 'Unable to unpost. Charge {Other Charge Id} has a voucher in {Voucher Id}.'
-			RAISERROR(80099, 11, 1, @strChargeItem, @strBillNumber)  
+			RAISERROR(80102, 11, 1, @strChargeItem, @strBillNumber)  
 			GOTO Post_Exit    
 		END 
 	END 

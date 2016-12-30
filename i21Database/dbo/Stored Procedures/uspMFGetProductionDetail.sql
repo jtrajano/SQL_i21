@@ -25,6 +25,7 @@ BEGIN
 		,W.intBatchId 
 		,L.intParentLotId 
 		,W.strBatchId 
+		,W.ysnFillPartialPallet 
 	FROM dbo.tblMFWorkOrderProducedLot W
 	Left JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId

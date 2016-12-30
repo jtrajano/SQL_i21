@@ -175,6 +175,11 @@ USING	(
 				,name = 'Inventory Return'
 				,form = NULL 
 
+		UNION ALL 
+		SELECT	id = 41
+				,name = 'SAP stock integration'
+				,form = 'Inventory Adjustment - SAP' 
+
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
 

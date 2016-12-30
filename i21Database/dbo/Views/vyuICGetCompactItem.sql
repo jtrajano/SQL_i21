@@ -31,6 +31,7 @@ SELECT Item.intItemId
 , Item.strCostType
 , Item.strShortName
 , Item.strRequired
+, Item.ysnBasisContract
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

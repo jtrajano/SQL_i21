@@ -32,6 +32,13 @@ USING	(
 				,dbo.tblICInventoryTransactionType LinkedTransaction
 		WHERE	HostTransaction.strName like 'Inventory Adjustment%'
 				AND LinkedTransaction.strName = 'iProcess'
+		UNION ALL 
+		SELECT	intTransactionTypeId = HostTransaction.intTransactionTypeId
+				,intLinkAllowedTransactionTypeId = LinkedTransaction.intTransactionTypeId
+		FROM	dbo.tblICInventoryTransactionType HostTransaction
+				,dbo.tblICInventoryTransactionType LinkedTransaction
+		WHERE	HostTransaction.strName like 'Inventory Adjustment%'
+				AND LinkedTransaction.strName = 'SAP stock integration'
 
 ) AS B
 	ON  A.intTransactionTypeId = B.intTransactionTypeId
