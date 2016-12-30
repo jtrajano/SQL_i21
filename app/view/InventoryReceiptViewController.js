@@ -214,7 +214,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{checkHiddenAddOrders}',
                 disabled: '{isOriginOrInventoryReturn}'
             },
-
             cboReceiptType: {
                 value: '{current.strReceiptType}',
                 store: '{receiptTypes}',

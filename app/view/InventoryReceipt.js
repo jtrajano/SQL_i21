@@ -213,7 +213,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strDescription',
-                                                        valueField: 'strDescription'
+                                                        valueField: 'strDescription',
+                                                        forceSelection: false
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',

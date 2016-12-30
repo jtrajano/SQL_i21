@@ -59,10 +59,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 },
                 {
                     strDescription: 'Direct'
-                },
-                {
-                    strDescription: 'Inventory Return'
-                }
+                } // Note: cboReceiptType is set to forceSelection: false. This means 'Inventory Return' will show in the combo box despite not included as an inline data. 
             ],
             fields: {
                 name: 'strDescription'

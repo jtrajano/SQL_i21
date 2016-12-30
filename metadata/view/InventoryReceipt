@@ -431,6 +431,7 @@
                                                 "margin": "0 5 0 0",
                                                 "name": null,
                                                 "valueField": "strDescription",
+                                                "forceSelection": false,
                                                 "width": null
                                             },
                                             "name": "MyComboBox8",
