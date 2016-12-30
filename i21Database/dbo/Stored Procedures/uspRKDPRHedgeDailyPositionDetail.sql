@@ -471,7 +471,7 @@ BEGIN
 			,'SPT' strDistributionOption
 			,dblOrderQty*dblUnitCost AS dblUnitCost
 			,dblUnitCost dblUnitCost1
-			,isnull((Select (bd.dblQtyReceived*bd.dblCost)-isnull(b.dblAmountDue,0) FROM tblAPBillDetail bd 
+			,isnull((Select SUM((bd.dblQtyReceived*bd.dblCost)-isnull(b.dblAmountDue,0)) FROM tblAPBillDetail bd 
 				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
 				WHERE bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1),0) AS dblQtyReceived
 			,st.intCommodityId
@@ -598,7 +598,7 @@ UNION
 			,dblOrderQty*dblUnitCost AS dblUnitCost
 			,dblUnitCost dblUnitCost1
 			,dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,
-			isnull((Select (bd.dblQtyReceived*bd.dblCost)-isnull(b.dblAmountDue,0) FROM tblAPBillDetail bd 
+			isnull((Select sum((bd.dblQtyReceived*bd.dblCost)-isnull(b.dblAmountDue,0)) FROM tblAPBillDetail bd 
 				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
 				WHERE bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1),0)) AS dblQtyReceived
 			,st.intCommodityId
