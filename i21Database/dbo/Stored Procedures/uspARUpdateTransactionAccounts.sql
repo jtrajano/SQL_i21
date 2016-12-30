@@ -24,6 +24,7 @@ DECLARE @LineItemAccounts AS TABLE(
 	,[intMaintenanceAccountId]		INT
 )
 
+
 IF ISNULL(@TransactionType, 0) = 1	--Invoice
 	BEGIN
 	
@@ -167,7 +168,7 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 
 		UPDATE LIA
 		SET
-			 LIA.[intAccountId]	= ISNULL(ARID.[intServiceChargeAccountId], ISNULL(ARID.[intConversionAccountId], ISNULL(ARID.intSalesAccountId, IST.[intSalesAccountId])))
+			 LIA.[intAccountId]	= ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ISNULL(ARID.[intServiceChargeAccountId], ISNULL(ARID.[intConversionAccountId], ISNULL(ARID.intSalesAccountId, IST.[intSalesAccountId]))), SMCL.[intProfitCenter]), ISNULL(ARID.[intServiceChargeAccountId], ISNULL(ARID.[intConversionAccountId], ISNULL(ARID.intSalesAccountId, IST.[intSalesAccountId]))))
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
@@ -182,13 +183,17 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON ARID.[intItemId] = IST.[intItemId]
-				AND ARI.[intCompanyLocationId] = IST.[intLocationId]							
+				AND ARI.[intCompanyLocationId] = IST.[intLocationId]
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]						
 		WHERE
 			ISNULL(LIA.[intAccountId], 0) = 0
+
 			
 		UPDATE LIA
 		SET
-			 LIA.[intSalesAccountId] = ISNULL(ARID.intSalesAccountId, IST.[intSalesAccountId])
+			 LIA.[intSalesAccountId] = ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ISNULL(ARID.intSalesAccountId, IST.[intSalesAccountId]), SMCL.[intProfitCenter]), ISNULL(ARID.intSalesAccountId, IST.[intSalesAccountId]))
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
@@ -203,7 +208,10 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON ARID.[intItemId] = IST.[intItemId]
-				AND ARI.[intCompanyLocationId] = IST.[intLocationId]					
+				AND ARI.[intCompanyLocationId] = IST.[intLocationId]
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]				
 		WHERE
 			ISNULL(LIA.[intSalesAccountId], 0) = 0			
 			
@@ -214,14 +222,39 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 			,ARID.[intCOGSAccountId]			= LIA.[intCOGSAccountId]
 			,ARID.[intSalesAccountId]			= LIA.[intSalesAccountId]
 			,ARID.[intInventoryAccountId]		= LIA.[intInventoryAccountId]
-			,ARID.[intServiceChargeAccountId]	= ISNULL(ARID.[intServiceChargeAccountId] ,LIA.[intServiceChargeAccountId])
+			,ARID.[intServiceChargeAccountId]	= ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ISNULL(ARID.[intServiceChargeAccountId] ,LIA.[intServiceChargeAccountId]), SMCL.[intProfitCenter]), ISNULL(ARID.[intServiceChargeAccountId] ,LIA.[intServiceChargeAccountId]))
 			,ARID.[intLicenseAccountId]			= LIA.[intLicenseAccountId]
 			,ARID.[intMaintenanceAccountId]		= LIA.[intMaintenanceAccountId]
 		FROM 
 			tblARInvoiceDetail ARID
 		INNER JOIN
 			@LineItemAccounts LIA
-				ON ARID.[intInvoiceDetailId] = LIA.[intDetailId] 
+				ON ARID.[intInvoiceDetailId] = LIA.[intDetailId]
+		INNER JOIN
+			tblARInvoice ARI
+				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]	
+
+		UPDATE ARITD
+		SET
+			ARITD.[intSalesTaxAccountId] = ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ARITD.[intSalesTaxAccountId], SMCL.[intProfitCenter]), ARITD.[intSalesTaxAccountId])
+		FROM
+			tblARInvoiceDetailTax ARITD
+		INNER JOIN
+			tblARInvoiceDetail ARID
+				ON ARITD.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+		INNER JOIN
+			tblARInvoice ARI
+				ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+		INNER JOIN
+			@Ids IDS
+				ON ARI.[intInvoiceId] = IDS.[intId]
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
+		
 					
 	END
 ELSE
@@ -364,7 +397,7 @@ ELSE
 
 		UPDATE LIA
 		SET
-			 LIA.[intAccountId]	= ISNULL(SOSOD.[intSalesAccountId], IST.[intSalesAccountId])
+			 LIA.[intAccountId]	= ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ISNULL(SOSOD.[intSalesAccountId], IST.[intSalesAccountId]), SMCL.[intProfitCenter]), ISNULL(SOSOD.[intSalesAccountId], IST.[intSalesAccountId]))
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
@@ -379,14 +412,17 @@ ELSE
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON SOSOD.[intItemId] = IST.[intItemId] 
-				AND SO.[intCompanyLocationId] = IST.[intLocationId]					
+				AND SO.[intCompanyLocationId] = IST.[intLocationId]
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON SO.[intCompanyLocationId] = SMCL.[intCompanyLocationId]				
 		WHERE
 			ISNULL(LIA.[intAccountId], 0) = 0
 
 			
 		UPDATE LIA
 		SET
-			 LIA.[intSalesAccountId] = ISNULL(SOSOD.[intSalesAccountId], IST.[intSalesAccountId])
+			 LIA.[intSalesAccountId] = ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ISNULL(SOSOD.[intSalesAccountId], IST.[intSalesAccountId]), SMCL.[intProfitCenter]), ISNULL(SOSOD.[intSalesAccountId], IST.[intSalesAccountId]))
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
@@ -401,7 +437,10 @@ ELSE
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON SOSOD.[intItemId] = IST.[intItemId] 
-				AND SO.[intCompanyLocationId] = IST.[intLocationId]							
+				AND SO.[intCompanyLocationId] = IST.[intLocationId]
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON SO.[intCompanyLocationId] = SMCL.[intCompanyLocationId]										
 		WHERE
 			ISNULL(LIA.[intSalesAccountId], 0) = 0			
 			
@@ -419,6 +458,26 @@ ELSE
 		INNER JOIN
 			@LineItemAccounts LIA
 				ON SOSOD.[intSalesOrderDetailId] = LIA.[intDetailId] 	
+
+
+
+		UPDATE SOSODT
+		SET
+			SOSODT.[intSalesTaxAccountId] = ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](SOSODT.[intSalesTaxAccountId], SMCL.[intProfitCenter]), SOSODT.[intSalesTaxAccountId])
+		FROM
+			tblSOSalesOrderDetailTax SOSODT
+		INNER JOIN
+			tblSOSalesOrderDetail SOSOD
+				ON SOSODT.[intSalesOrderDetailId] = SOSOD.[intSalesOrderDetailId]
+		INNER JOIN
+			tblSOSalesOrder SO
+				ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]
+		INNER JOIN
+			@Ids IDS
+				ON SO.[intSalesOrderId] = IDS.[intId]
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON SO.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 	
 	END
 	 
