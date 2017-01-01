@@ -12,8 +12,10 @@ BEGIN
 			@strState					NVARCHAR(50),
 			@strZip						NVARCHAR(12),
 			@strCountry					NVARCHAR(25),
-			@strPhone					NVARCHAR(50)
-						
+			@strPhone					NVARCHAR(50),
+			@strFullName				NVARCHAR(100),
+			@strUserName				NVARCHAR(100)
+
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
       
@@ -48,6 +50,10 @@ BEGIN
 	SELECT	@intLoadId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intLoadId' 
+    
+	SELECT	@strUserName = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strUserName' 
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
 			,@strCompanyAddress = strAddress
@@ -59,6 +65,8 @@ BEGIN
 			,@strCountry = strCountry
 			,@strPhone = strPhone
 	FROM tblSMCompanySetup
+	
+	SELECT @strFullName = strFullName FROM tblSMUserSecurity WHERE strUserName = @strUserName
 
 SELECT TOP 1 L.intLoadId
 	,L.dtmScheduledDate
@@ -66,7 +74,9 @@ SELECT TOP 1 L.intLoadId
 	,L.dtmBLDate
 	,L.dtmDeliveredDate
 	,Vendor.strName AS strVendor
+	,VETC.strName AS strVendorContact
 	,Customer.strName AS strCustomer
+	,CETC.strName AS strCustomerContact
 	,L.strOriginPort
 	,L.strDestinationPort
 	,SLEntity.strName AS strShippingLine
@@ -362,13 +372,18 @@ SELECT TOP 1 L.intLoadId
 	,@strCountry AS strCompanyCountry 
 	,@strPhone AS strCompanyPhone 
 	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+	,@strFullName AS strUserFullName
 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadContainer LC ON L.intLoadId = LC.intLoadId
 LEFT JOIN tblLGLoadNotifyParties LNP ON LNP.intLoadId = L.intLoadId
 LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
+LEFT JOIN tblEMEntityToContact VEC ON VEC.intEntityId = Vendor.intEntityId
+LEFT JOIN tblEMEntity VETC ON VETC.intEntityId = VEC.intEntityContactId
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+LEFT JOIN tblEMEntityToContact CEC ON CEC.intEntityId = Customer.intEntityId
+LEFT JOIN tblEMEntity CETC ON CETC.intEntityId = CEC.intEntityContactId
 LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblEMEntity ForAgent ON ForAgent.intEntityId = L.intForwardingAgentEntityId
