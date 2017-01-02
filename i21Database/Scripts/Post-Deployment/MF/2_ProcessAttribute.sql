@@ -1827,7 +1827,6 @@ BEGIN
         ,2
         ,5
 END
-Go
 GO
 IF NOT EXISTS (
 		SELECT 1
@@ -1847,5 +1846,45 @@ BEGIN
 		,5
 		,1
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 87
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+		,strSQL
+        )
+    SELECT 87
+        ,'3rd Party Pallets (e.g. iGPS) - Mandatory'
+		,5
+		,1
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblMFAttribute
+		WHERE intAttributeId = 88
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 88
+		,'3rd Party Pallets (e.g. iGPS) Item Id'
+		,5
+		,1
+		,'Select CONVERT(nvarchar,intItemId) as ValueMember,strItemNo as DisplayMember from tblICItem I JOIN tblICCategory C on C.intCategoryId=I.intCategoryId Where C.strCategoryCode =''PM'''
 END
 GO

@@ -24,6 +24,8 @@ BEGIN TRY
 		,@intCategoryId INT
 		,@dblPhysicalCount DECIMAL(38, 24)
 		,@intPhysicalItemUOMId INT
+		,@str3rdPartyPalletsMandatory NVARCHAR(50)
+		,@str3rdPartyPalletsItemId NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -82,6 +84,18 @@ BEGIN TRY
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 			AND intLocationId = @intLocationId
 			AND intAttributeId = @intAttributeId
+
+		SELECT @str3rdPartyPalletsMandatory = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 87--3rd Party Pallets (e.g. iGPS) - Mandatory
+
+		SELECT @str3rdPartyPalletsItemId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 88--3rd Party Pallets (e.g. iGPS) Item Id
 
 		IF @strInstantConsumption = 'False'
 		BEGIN
@@ -306,6 +320,29 @@ BEGIN TRY
 			END
 
 			EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
+
+			If @str3rdPartyPalletsMandatory='False' and @str3rdPartyPalletsItemId<>''
+			Begin
+				Declare @int3rdPartyPalletsItemId int,@intRecordId int,@intLotId int
+				Select @int3rdPartyPalletsItemId=intItemId from tblICItem Where strItemNo=@str3rdPartyPalletsItemId
+
+				Declare @tblMFWorkOrderConsumedLot table(intRecordId int,intLotId int)
+
+				Insert into @tblMFWorkOrderConsumedLot(intLotId)
+				Select intLotId from tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId and intItemId=@int3rdPartyPalletsItemId
+
+				Select @intRecordId=Min(intRecordId) from @tblMFWorkOrderConsumedLot
+				While @intRecordId is not null
+				Begin
+					Select @intLotId=intLotId from @tblMFWorkOrderConsumedLot Where intRecordId =@intRecordId
+
+					Update tblMFWorkOrderProducedLot 
+					Set intSpecialPalletLotId=@intLotId
+					Where intWorkOrderId=@intWorkOrderId and intSpecialPalletLotId is null
+
+					Select @intRecordId=Min(intRecordId) from @tblMFWorkOrderConsumedLot Where intRecordId >@intRecordId
+				end
+			End
 		END
 	END
 
