@@ -325,7 +325,13 @@ BEGIN
 			,@INVENTORY_RECEIPT_TYPE
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
-			
+
+		---- Negate the GL entries from the other charges. 
+		--UPDATE @GLEntries
+		--SET dblDebit = -dblDebit
+		--	,dblCredit = -dblCredit
+		--	,dblDebitUnit = -dblDebitUnit
+		--	,dblCreditUnit = -dblCreditUnit			
 	END 
 
 	-- Get company owned items to post. 
@@ -542,52 +548,7 @@ BEGIN
 					,intInTransitSourceLocationId
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
-
-			-- Gather the item returns
-			INSERT INTO @ReturnItemsForPost (
-					intItemId  
-					,intItemLocationId 
-					,intItemUOMId  
-					,dtmDate  
-					,dblQty  
-					,dblUOMQty  
-					,dblCost  
-					,dblSalesPrice  
-					,intCurrencyId  
-					,dblExchangeRate  
-					,intTransactionId  
-					,intTransactionDetailId   
-					,strTransactionId  
-					,intTransactionTypeId  
-					,intLotId 
-					,intSubLocationId
-					,intStorageLocationId
-					,strActualCostId
-					,intInTransitSourceLocationId	
-			)
-			SELECT 
-					intItemId  
-					,intItemLocationId 
-					,intItemUOMId  
-					,dtmDate  
-					,dblQty  
-					,dblUOMQty  
-					,dblCost  
-					,dblSalesPrice  
-					,intCurrencyId  
-					,dblExchangeRate  
-					,intTransactionId  
-					,intTransactionDetailId   
-					,strTransactionId  
-					,intTransactionTypeId  
-					,intLotId 
-					,intSubLocationId
-					,intStorageLocationId
-					,strActualCostId
-					,intInTransitSourceLocationId
-			FROM	@ItemsForPost
-			WHERE	dblQty < 0 
-			
+		
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
@@ -596,51 +557,10 @@ BEGIN
 					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				END
 
-				INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm]
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]	
-						,[dblDebitReport]	
-						,[dblCreditForeign]	
-						,[dblCreditReport]	
-						,[dblReportingRate]	
-						,[dblForeignRate]
-				)
-				EXEC	@intReturnValue = dbo.uspICPostCosting  
-						@CompanyOwnedItemsForPost  
-						,@strBatchId  
-						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-						,@intEntityUserSecurityId
+				-- Negate the qty 
+				UPDATE @CompanyOwnedItemsForPost
+				SET		dblQty = -dblQty 
 
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
-			END
-		
-			-- Call the post routine for posting the return items 
-			IF EXISTS (SELECT TOP 1 1 FROM @ReturnItemsForPost)
-			BEGIN 			
 				INSERT INTO @GLEntries (
 						[dtmDate] 
 						,[strBatchId]
@@ -675,7 +595,7 @@ BEGIN
 						,[dblForeignRate]
 				)
 				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
-						@ReturnItemsForPost  
+						@CompanyOwnedItemsForPost  
 						,@strBatchId  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@intEntityUserSecurityId
@@ -846,6 +766,10 @@ BEGIN
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
   
+		-- Negate the qty 
+		UPDATE @StorageItemsForPost
+		SET		dblQty = -dblQty 
+
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 
@@ -897,9 +821,21 @@ BEGIN
 			@intTransactionId
 			,@strBatchId
 			,@intEntityUserSecurityId
-			,@INVENTORY_RECEIPT_TYPE
-			
+			,@INVENTORY_RECEIPT_TYPE			
 	END 
+
+	-- Decrease the Gross weight for the lots when posting the inventory return. 
+	UPDATE dbo.tblICLot
+	SET		dblGrossWeight = Lot.dblGrossWeight - ItemLot.dblGrossWeight
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot
+				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+			INNER JOIN dbo.tblICLot Lot 
+				ON Lot.intLotId = ItemLot.intLotId
+	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+			AND Receipt.strReceiptNumber = @strTransactionId			
+
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -1050,9 +986,9 @@ BEGIN
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 
-		-- Reduce the Gross weight for the lots when unposting the receipt. 
+		-- Increase the Gross weight for the lots when unposting the inventory return. 
 		UPDATE dbo.tblICLot
-		SET		dblGrossWeight = Lot.dblGrossWeight - ItemLot.dblGrossWeight
+		SET		dblGrossWeight = Lot.dblGrossWeight + ItemLot.dblGrossWeight
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot
@@ -1061,111 +997,8 @@ BEGIN
 					ON Lot.intLotId = ItemLot.intLotId
 		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
 				AND Receipt.strReceiptNumber = @strTransactionId				
-	END 
+	END
 END   
-
--- Update the In-Transit Outbound for Transfer Order
-IF @ysnRecap = 0
-BEGIN 
-	DECLARE		@InTransit_Outbound AS InTransitTableType
-
-	INSERT INTO @InTransit_Outbound (
-		[intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[dblQty]
-		,[intTransactionId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-	)
-	SELECT	[intItemId]				= ri.intItemId
-			,[intItemLocationId]	= il.intItemLocationId
-			,[intItemUOMId]			= 
-						-- New Hierarchy:
-						-- 1. Use the Gross/Net UOM (intWeightUOMId) 
-						-- 2. If there is no Gross/Net UOM, then check the lot. 
-							-- 2.1. If it is a Lot, use the Lot UOM. 
-							-- 2.2. If it is not a Lot, use the Item UOM. 
-						ISNULL( 
-							ri.intWeightUOMId, 
-							CASE	WHEN ISNULL(ril.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(ri.intItemId) <> 0 THEN 
-										ril.intItemUnitMeasureId
-									ELSE 
-										ri.intUnitMeasureId
-							END 
-						)
-			,[intLotId]				= ril.intLotId
-			,[intSubLocationId]		= ri.intSubLocationId
-			,[intStorageLocationId]	= ri.intStorageLocationId
-			,[dblQty]				= 
-						-- New Hierarchy:
-						-- 1. If there is a Gross/Net UOM, use the Net Qty. 
-							-- 2.1. If it is not a Lot, use the item's Net Qty. 
-							-- 2.2. If it is a Lot, use the Lot's Net Qty. 
-						-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
-							-- 2.1. If it is not a Lot, use the item Qty. 
-							-- 2.2. If it is a Lot, use the lot qty. 
-						CASE		-- Use the Gross/Net Qty if there is a Gross/Net UOM. 
-									WHEN ri.intWeightUOMId IS NOT NULL THEN 									
-										CASE	-- When item is NOT a Lot, receive it by the item's net qty. 
-												WHEN ISNULL(ril.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ri.intItemId) = 0 THEN 
-													ISNULL(ri.dblNet, 0)
-													
-												-- When item is a LOT, get the net qty from the Lot record. 
-												-- 1. If Net Qty is not provided, convert the Lot Qty into Gross/Net UOM. 
-												-- 2. Else, get the Net Qty by using this formula: Gross Weight - Tare Weight. 
-												ELSE 
-															-- When Net Qty is missing, then convert the Lot Qty to Gross/Net UOM. 
-													CASE	WHEN  ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0) = 0 THEN 
-																dbo.fnCalculateQtyBetweenUOM(ril.intItemUnitMeasureId, ri.intWeightUOMId, ril.dblQuantity)
-															-- Calculate the Net Qty
-															ELSE 
-																ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0)
-													END 
-										END 
-
-								-- If Gross/Net UOM is missing, then get the item/lot qty. 
-								ELSE 
-									CASE	-- When item is NOT a Lot, receive it by the item qty.
-											WHEN ISNULL(ril.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ri.intItemId) = 0 THEN 
-												ri.dblOpenReceive
-												
-											-- When item is a LOT, receive it by the Lot Qty. 
-											ELSE 
-												ISNULL(ril.dblQuantity, 0)
-									END 								
-
-						END 
-			,[intTransactionId]		= r.intInventoryReceiptId
-			,[strTransactionId]		= r.strReceiptNumber
-			,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
-	FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
-				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			INNER JOIN dbo.tblICItemLocation il 
-				ON il.intItemId = ri.intItemId
-				AND il.intLocationId = r.intTransferorId
-			LEFT JOIN dbo.tblICInventoryReceiptItemLot ril
-				ON ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId				
-	WHERE	r.intInventoryReceiptId = @intTransactionId	
-			AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-
-	UPDATE @InTransit_Outbound
-	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
-	
-	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
-END
-
-IF @ysnPost = 1
-BEGIN
-	EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 3 -- Set status of the transfer order to 'Closed'
-END
-ELSE
-BEGIN
-	EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 1 -- Set status of the transfer order to 'Open'
-END
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
@@ -1214,7 +1047,8 @@ BEGIN
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strReceiptNumber = @strTransactionId  
 	
-	EXEC dbo.uspICPostInventoryReceiptIntegrations
+	-- Reuse this sp for Inventory Return 
+	EXEC dbo.uspICPostInventoryReceiptIntegrations 
 		@ysnPost
 		,@intTransactionId
 		,@intEntityUserSecurityId

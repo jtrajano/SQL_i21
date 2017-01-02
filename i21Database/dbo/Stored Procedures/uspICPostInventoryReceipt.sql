@@ -544,50 +544,50 @@ BEGIN
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 
-			-- Gather the item returns
-			INSERT INTO @ReturnItemsForPost (
-					intItemId  
-					,intItemLocationId 
-					,intItemUOMId  
-					,dtmDate  
-					,dblQty  
-					,dblUOMQty  
-					,dblCost  
-					,dblSalesPrice  
-					,intCurrencyId  
-					,dblExchangeRate  
-					,intTransactionId  
-					,intTransactionDetailId   
-					,strTransactionId  
-					,intTransactionTypeId  
-					,intLotId 
-					,intSubLocationId
-					,intStorageLocationId
-					,strActualCostId
-					,intInTransitSourceLocationId	
-			)
-			SELECT 
-					intItemId  
-					,intItemLocationId 
-					,intItemUOMId  
-					,dtmDate  
-					,dblQty  
-					,dblUOMQty  
-					,dblCost  
-					,dblSalesPrice  
-					,intCurrencyId  
-					,dblExchangeRate  
-					,intTransactionId  
-					,intTransactionDetailId   
-					,strTransactionId  
-					,intTransactionTypeId  
-					,intLotId 
-					,intSubLocationId
-					,intStorageLocationId
-					,strActualCostId
-					,intInTransitSourceLocationId
-			FROM	@ItemsForPost
-			WHERE	dblQty < 0 
+			---- Gather the item returns
+			--INSERT INTO @ReturnItemsForPost (
+			--		intItemId  
+			--		,intItemLocationId 
+			--		,intItemUOMId  
+			--		,dtmDate  
+			--		,dblQty  
+			--		,dblUOMQty  
+			--		,dblCost  
+			--		,dblSalesPrice  
+			--		,intCurrencyId  
+			--		,dblExchangeRate  
+			--		,intTransactionId  
+			--		,intTransactionDetailId   
+			--		,strTransactionId  
+			--		,intTransactionTypeId  
+			--		,intLotId 
+			--		,intSubLocationId
+			--		,intStorageLocationId
+			--		,strActualCostId
+			--		,intInTransitSourceLocationId	
+			--)
+			--SELECT 
+			--		intItemId  
+			--		,intItemLocationId 
+			--		,intItemUOMId  
+			--		,dtmDate  
+			--		,dblQty  
+			--		,dblUOMQty  
+			--		,dblCost  
+			--		,dblSalesPrice  
+			--		,intCurrencyId  
+			--		,dblExchangeRate  
+			--		,intTransactionId  
+			--		,intTransactionDetailId   
+			--		,strTransactionId  
+			--		,intTransactionTypeId  
+			--		,intLotId 
+			--		,intSubLocationId
+			--		,intStorageLocationId
+			--		,strActualCostId
+			--		,intInTransitSourceLocationId
+			--FROM	@ItemsForPost
+			--WHERE	dblQty < 0 
 			
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
@@ -639,50 +639,50 @@ BEGIN
 				IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			END
 		
-			-- Call the post routine for posting the return items 
-			IF EXISTS (SELECT TOP 1 1 FROM @ReturnItemsForPost)
-			BEGIN 			
-				INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm]
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]	
-						,[dblDebitReport]	
-						,[dblCreditForeign]	
-						,[dblCreditReport]	
-						,[dblReportingRate]	
-						,[dblForeignRate]
-				)
-				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
-						@ReturnItemsForPost  
-						,@strBatchId  
-						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-						,@intEntityUserSecurityId
+			---- Call the post routine for posting the return items 
+			--IF EXISTS (SELECT TOP 1 1 FROM @ReturnItemsForPost)
+			--BEGIN 			
+			--	INSERT INTO @GLEntries (
+			--			[dtmDate] 
+			--			,[strBatchId]
+			--			,[intAccountId]
+			--			,[dblDebit]
+			--			,[dblCredit]
+			--			,[dblDebitUnit]
+			--			,[dblCreditUnit]
+			--			,[strDescription]
+			--			,[strCode]
+			--			,[strReference]
+			--			,[intCurrencyId]
+			--			,[dblExchangeRate]
+			--			,[dtmDateEntered]
+			--			,[dtmTransactionDate]
+			--			,[strJournalLineDescription]
+			--			,[intJournalLineNo]
+			--			,[ysnIsUnposted]
+			--			,[intUserId]
+			--			,[intEntityId]
+			--			,[strTransactionId]
+			--			,[intTransactionId]
+			--			,[strTransactionType]
+			--			,[strTransactionForm]
+			--			,[strModuleName]
+			--			,[intConcurrencyId]
+			--			,[dblDebitForeign]	
+			--			,[dblDebitReport]	
+			--			,[dblCreditForeign]	
+			--			,[dblCreditReport]	
+			--			,[dblReportingRate]	
+			--			,[dblForeignRate]
+			--	)
+			--	EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
+			--			@ReturnItemsForPost  
+			--			,@strBatchId  
+			--			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			--			,@intEntityUserSecurityId
 
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
-			END
+			--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			--END
 		END
 	END 
 
@@ -901,6 +901,8 @@ BEGIN
 			,@INVENTORY_RECEIPT_TYPE
 			
 	END 
+
+	
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -1062,7 +1064,7 @@ BEGIN
 					ON Lot.intLotId = ItemLot.intLotId
 		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
 				AND Receipt.strReceiptNumber = @strTransactionId				
-	END 
+	END 	
 END   
 
 -- Update the In-Transit Outbound for Transfer Order
@@ -1157,15 +1159,11 @@ BEGIN
 	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
 	
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
-END
 
-IF @ysnPost = 1
-BEGIN
-	EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 3 -- Set status of the transfer order to 'Closed'
-END
-ELSE
-BEGIN
-	EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 1 -- Set status of the transfer order to 'Open'
+	IF @ysnPost = 1 
+		EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 3 -- Set status of the transfer order to 'Closed'
+	ELSE 
+		EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 1 -- Set status of the transfer order to 'Open'
 END
 
 --------------------------------------------------------------------------------------------  

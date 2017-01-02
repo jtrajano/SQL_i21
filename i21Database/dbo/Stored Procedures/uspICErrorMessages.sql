@@ -487,3 +487,7 @@ EXEC sp_addmessage 80101,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80102) EXEC sp_dropmessage 80102, 'us_english'	
 SET @strmessage = 'Unable to unpost. Charge %s has a voucher in %s.'
 EXEC sp_addmessage 80102,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80103) EXEC sp_dropmessage 80103, 'us_english'	
+SET @strmessage = 'Cannot return %s because it is a Transfer Order.'
+EXEC sp_addmessage 80103,11,@strmessage,'us_english','False'

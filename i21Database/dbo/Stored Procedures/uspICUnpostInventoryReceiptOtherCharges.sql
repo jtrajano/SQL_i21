@@ -260,7 +260,13 @@ BEGIN
 				,intChargeItemLocation = ChargeItemLocation.intItemLocationId
 				,intTransactionId = Receipt.intInventoryReceiptId
 				,strTransactionId = Receipt.strReceiptNumber
-				,dblCost = AllocatedOtherCharges.dblAmount
+				,dblCost = 
+					CASE 
+						WHEN Receipt.strReceiptType = 'Inventory Return' 
+							THEN -AllocatedOtherCharges.dblAmount 
+						ELSE 
+							AllocatedOtherCharges.dblAmount 
+					END 
 				,intTransactionTypeId  = @intTransactionTypeId
 				,Receipt.intCurrencyId
 				,dblExchangeRate = 1
