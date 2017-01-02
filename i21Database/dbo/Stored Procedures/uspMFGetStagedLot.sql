@@ -1,33 +1,30 @@
 ﻿CREATE PROCEDURE [dbo].uspMFGetStagedLot (@intLocationId INT)
 AS
 BEGIN
-	DECLARE @intStagingLocationId INT
-		,@intProductionStageLocationId INT
-
-		SELECT @intStagingLocationId=strAttributeValue
-			FROM tblMFManufacturingProcessAttribute
-			WHERE intLocationId = @intLocationId
-				AND intAttributeId IN (
-					SELECT intAttributeId
-					FROM tblMFAttribute
-					WHERE strAttributeName IN (
-							'Staging Location'
-							)
-						AND strAttributeValue <> ''
-					)
-
-			SELECT @intProductionStageLocationId=strAttributeValue
-			FROM tblMFManufacturingProcessAttribute
-			WHERE intLocationId = @intLocationId
-				AND intAttributeId IN (
-					SELECT intAttributeId
-					FROM tblMFAttribute
-					WHERE strAttributeName IN (
-							'Production Staging Location'
-							)
-						AND strAttributeValue <> ''
-					)
-
+	--DECLARE @intStagingLocationId INT
+	--	,@intProductionStageLocationId INT
+	--	SELECT @intStagingLocationId=strAttributeValue
+	--		FROM tblMFManufacturingProcessAttribute
+	--		WHERE intLocationId = @intLocationId
+	--			AND intAttributeId IN (
+	--				SELECT intAttributeId
+	--				FROM tblMFAttribute
+	--				WHERE strAttributeName IN (
+	--						'Staging Location'
+	--						)
+	--					AND strAttributeValue <> ''
+	--				)
+	--		SELECT @intProductionStageLocationId=strAttributeValue
+	--		FROM tblMFManufacturingProcessAttribute
+	--		WHERE intLocationId = @intLocationId
+	--			AND intAttributeId IN (
+	--				SELECT intAttributeId
+	--				FROM tblMFAttribute
+	--				WHERE strAttributeName IN (
+	--						'Production Staging Location'
+	--						)
+	--					AND strAttributeValue <> ''
+	--				)
 	SELECT L.intLotId
 		,L.strLotNumber
 		,L.strLotAlias
@@ -69,9 +66,13 @@ BEGIN
 	JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 	JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-		AND SL.intStorageLocationId IN (@intStagingLocationId 
-		,@intProductionStageLocationId 
-			
+	--AND SL.intStorageLocationId IN (@intStagingLocationId 
+	--,@intProductionStageLocationId 
+	--	)
+	JOIN dbo.tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+		AND UT.strInternalCode IN (
+			'STAGING'
+			,'PROD_STAGING'
 			)
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
