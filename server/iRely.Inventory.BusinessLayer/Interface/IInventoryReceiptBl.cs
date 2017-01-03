@@ -13,7 +13,8 @@ namespace iRely.Inventory.BusinessLayer
     {
         SaveResult ProcessBill(int receiptId, out int? newBill);
         SaveResult CalculateCharges(int receiptId);
-        SaveResult PostTransaction(Common.Posting_RequestModel receipt, bool isRecap);
+        SaveResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap);
+        SaveResult PostReturn(Common.Posting_RequestModel receipt, bool isRecap);
         void SetUser(int UserId);
         Task<SearchResult> SearchReceiptItems(GetParameter param);
         Task<SearchResult> SearchReceiptItemView(GetParameter param);

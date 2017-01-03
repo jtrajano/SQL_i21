@@ -44,7 +44,26 @@ namespace iRely.Inventory.WebApi
         [ActionName("Receive")]
         public HttpResponseMessage Receive(BusinessLayer.Common.Posting_RequestModel receipt)
         {
-            var result = _bl.PostTransaction(receipt, receipt.isRecap);
+            var result = _bl.PostReceive(receipt, receipt.isRecap);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                data = receipt,
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+        [HttpPost]
+        [ActionName("Return")]
+        public HttpResponseMessage Return(BusinessLayer.Common.Posting_RequestModel receipt)
+        {
+            var result = _bl.PostReturn(receipt, receipt.isRecap);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {

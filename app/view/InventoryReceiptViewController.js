@@ -2951,7 +2951,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var btnReceive = win.down('#btnReceive');
         var pnlLotTracking = win.down('#pnlLotTracking');
         var grdInventoryReceipt = win.down('#grdInventoryReceipt');
-
+        
         //Hide Lot Grid
         pnlLotTracking.setVisible(false);
         //Deselect all rows in Item Grid
@@ -2961,9 +2961,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var doPost = function () {
                 var strReceiptNumber = current.get('strReceiptNumber');
                 var posted = current.get('ysnPosted');
-
                 var options = {
-                    postURL: '../Inventory/api/InventoryReceipt/Receive',
+                    postURL: (current.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
                     strTransactionId: strReceiptNumber,
                     isPost: !posted,
                     isRecap: false,
@@ -3095,7 +3094,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/InventoryReceipt/Receive',
+                postURL: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
                 strTransactionId: currentRecord.get('strReceiptNumber'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,

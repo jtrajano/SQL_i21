@@ -377,7 +377,7 @@ namespace iRely.Inventory.BusinessLayer
             return saveResult;
         }
 
-        public SaveResult PostTransaction(Common.Posting_RequestModel receipt, bool isRecap)
+        public SaveResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap)
         {
             // Save the record first 
             var result = _db.Save(false);
@@ -399,6 +399,40 @@ namespace iRely.Inventory.BusinessLayer
                 else
                 {
                     db.UnpostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
+                }
+                postResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                postResult.BaseException = ex;
+                postResult.HasError = true;
+                postResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return postResult;
+        }
+
+        public SaveResult PostReturn(Common.Posting_RequestModel receipt, bool isRecap)
+        {
+            // Save the record first 
+            var result = _db.Save(false);
+
+            if (result.HasError)
+            {
+                return result;
+            }
+
+            // Post the receipt transaction 
+            var postResult = new SaveResult();
+            try
+            {
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                if (receipt.isPost)
+                {
+                    db.PostInventoryReturn(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
+                }
+                else
+                {
+                    db.UnpostInventoryReturn(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 postResult.HasError = false;
             }
