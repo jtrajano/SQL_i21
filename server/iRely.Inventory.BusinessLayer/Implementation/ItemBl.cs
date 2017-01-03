@@ -745,7 +745,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="intItemId">Specify the Item Id of the Item to duplicate</param>
         /// <returns>Returns the Item Id of the newly duplicated Item</returns>
-        public int? DuplicateItem(int intItemId)
+        /*public int? DuplicateItem(int intItemId)
         {
             int? newItemId = null;
 
@@ -768,6 +768,41 @@ namespace iRely.Inventory.BusinessLayer
             }
 
             return newItemId;
+        }*/
+        public SaveResult DuplicateItem(int intItemId, out int? itemId)
+        {
+            SaveResult saveResult = new SaveResult();
+            int? newItemId = null;
+
+            using (SqlConnection conn = new SqlConnection(_db.ContextManager.Database.Connection.ConnectionString))
+            {
+                conn.Open();
+                try
+                {
+                    using (SqlCommand command = new SqlCommand("uspICDuplicateItem", conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@ItemId", intItemId));
+                        var outParam = new SqlParameter("@NewItemId", newItemId);
+                        outParam.Direction = System.Data.ParameterDirection.Output;
+                        outParam.DbType = System.Data.DbType.Int32;
+                        outParam.SqlDbType = System.Data.SqlDbType.Int;
+                        command.Parameters.Add(outParam);
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        command.ExecuteNonQuery();
+                        newItemId = (int)outParam.Value;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                }
+                
+                conn.Close();
+            }
+            itemId = newItemId;
+            return saveResult;
         }
 
         public SaveResult CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId)

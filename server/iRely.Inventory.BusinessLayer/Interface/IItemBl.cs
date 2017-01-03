@@ -26,7 +26,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> GetStockTrackingItems(GetParameter param);
         SaveResult CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId);
         SaveResult ConvertItemToNewStockUnit(int ItemId, int ItemUOMId);
-        int? DuplicateItem(int intItemId);
+        SaveResult DuplicateItem(int intItemId, out int? itemId);
         Task<object> GetItemUOMsByType(int? intItemId, string strUnitType);
     }
 }

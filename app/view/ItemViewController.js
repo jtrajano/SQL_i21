@@ -2438,7 +2438,7 @@ Ext.define('Inventory.view.ItemViewController', {
             })
         .subscribe(
                 function (successResponse) {
-                    var json = JSON.parse(response.responseText);
+                    var json = JSON.parse(successResponse.responseText);
                     var copyLocation = json.data[0];
                     Ext.Array.each(selection, function (location) {
                         if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
@@ -2506,7 +2506,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     win.context.data.saveRecord();
 				},
 				function (failureResponse) {
-                    //TO DO
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
 				}
         );
         // var filter = [
@@ -3468,11 +3469,12 @@ Ext.define('Inventory.view.ItemViewController', {
             .subscribe(
                 function (successResponse) {
 				    var jsonData = Ext.decode(successResponse.responseText);
-                    context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
+                    context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.message.id }]);
                     context.configuration.paging.moveFirst();
 				},
 				function (failureResponse) {
-                    //TO DO
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
 				}
             );
             // Ext.Ajax.request({
