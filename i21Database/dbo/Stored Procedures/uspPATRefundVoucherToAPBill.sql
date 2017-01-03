@@ -70,7 +70,8 @@ BEGIN TRY
 		,@voucherDate = @dtmDate
 		,@billId = @intCreatedBillId OUTPUT
 
-	UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category = 1 WHERE intBillId = @intCreatedBillId
+	UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 0 WHERE intBillId = @intCreatedBillId;
+	UPDATE tblPATRefundCustomer SET intBillId = @intCreatedBillId WHERE intRefundCustomerId = @intRefundCustomerId;
 
 	EXEC [dbo].[uspAPPostBill]
 		@batchId = @intCreatedBillId,
