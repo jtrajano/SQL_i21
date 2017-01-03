@@ -96,6 +96,7 @@ AS
    SELECT @sqlRetain = QueryString, @dtmFromDateRetain = DateTo, @multiFiscal = MultiFiscal FROM dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,@dtmDateTo,'cteRetain2',@Where1)
    IF @multiFiscal <> 0 SELECT @sqlCte += @sqlRetain
    SELECT TOP 1  @intRetainAccount  = CONVERT(NVARCHAR(10), ISNULL(intRetainAccount,'')) ,@strRetainAccount = act.strAccountId FROM dbo.tblGLFiscalYear tgy JOIN tblGLAccount act ON tgy.intRetainAccount = act.intAccountId
+   SELECT @intRetainAccount = ISNULL(@intRetainAccount,0)
    DECLARE @WhereExcludeRetain NVARCHAR(MAX) = @Where
    SELECT @WhereExcludeRetain += CASE WHEN @WhereExcludeRetain <>  'Where' THEN ' AND ' ELSE ' ' END
    SELECT @WhereExcludeRetain += 'intAccountId <>'
