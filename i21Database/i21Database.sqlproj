@@ -4659,6 +4659,8 @@
     <Build Include="dbo\Views\vyuLGLoadStorageCostForInvoice.sql" />
     <Build Include="dbo\Functions\fnGRCalculateDiscountUnit.sql" />
     <Build Include="dbo\Views\vyuSCTicketFormatView.sql" />
+    <Build Include="dbo\Functions\fnTMGetItemTotalTaxForCustomer.sql" />
+    <Build Include="dbo\Functions\fnTMGetItemPricingDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

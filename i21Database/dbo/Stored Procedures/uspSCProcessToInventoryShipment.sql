@@ -7,6 +7,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	,@intEntityId AS INT
 	,@intContractId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
+	,@intStorageScheduleId AS INT = NULL
 	,@InventoryShipmentId AS INT OUTPUT 
 AS
 
@@ -327,7 +328,7 @@ BEGIN TRY
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 				,ysnIsStorage 
 			)
-			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
+			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
 			SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
 			SET @dblRemainingUnits = (@dblRemainingUnits + ISNULL(@dblRemainingUnitStorage, 0)) * -1
 			IF (@dblRemainingUnits > 0)

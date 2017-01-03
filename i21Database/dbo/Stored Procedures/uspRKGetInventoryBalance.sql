@@ -23,7 +23,7 @@ SELECT  sum(dblQty) BalanceForward
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4,5,10)
 join tblICInventoryTransactionType tr on it.intTransactionTypeId=tr.intTransactionTypeId
-JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and il.strDescription <> 'In-Transit' 
+JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
 WHERE intCommodityId=@intCommodityId and dtmDate < @dtmFromTransactionDate  
 and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 
@@ -40,7 +40,7 @@ SELECT *,isnull(tranShipQty,0)+isnull(tranRecQty,0)+isnull(dblAdjustmentQty,0) B
 		 WHERE ia.strAdjustmentNo=it.strTransactionId ) dblAdjustmentQty
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4,5,10)
-JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and il.strDescription <> 'In-Transit' 
+JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
 WHERE intCommodityId=@intCommodityId AND dtmDate BETWEEN @dtmFromTransactionDate and @dtmToTransactionDate
 and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end )t
 
