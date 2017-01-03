@@ -348,6 +348,14 @@ Harness.start(
                     functionalTest,
                     'CommonIC.js'
                 ]
+            },
+            {
+                url: 'InventoryCount/DeleteInventoryCount.js?v='+version,
+                title: 'DeleteInventoryCount',
+                preload: [
+                    functionalTest,
+                    'CommonIC.js'
+                ]
             }
         ]
     },
