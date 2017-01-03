@@ -4656,12 +4656,16 @@
     <Build Include="dbo\Functions\fnGRCalculateDiscountUnit.sql" />
     <Build Include="dbo\Stored Procedures\uspMFResetDefaultReasonCode.sql" />
     <Build Include="dbo\Tables\tblSMPurchasingGroup.sql" />
-	<Build Include="dbo\Stored Procedures\uspICAdjustStockFromSAP.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustStockFromSAP.sql" />
     <Build Include="dbo\Tables\tblMFLotInventory.sql" />
     <Build Include="dbo\Views\vyuMFItemOwner.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotOwnerUpdate.sql" />
     <Build Include="dbo\Functions\fnGetCostFromCostBucket.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReturn.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReturned.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostReturnCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReversalReturnGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

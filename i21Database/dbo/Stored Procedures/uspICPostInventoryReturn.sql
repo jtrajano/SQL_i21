@@ -18,7 +18,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Return Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
-DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 42
+DECLARE @INVENTORY_RETURN_TYPE AS INT = 42
 		,@STARTING_NUMBER_BATCH AS INT = 3  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
 		,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
@@ -322,7 +322,7 @@ BEGIN
 			@intTransactionId
 			,@strBatchId
 			,@intEntityUserSecurityId
-			,@INVENTORY_RECEIPT_TYPE
+			,@INVENTORY_RETURN_TYPE
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
@@ -473,7 +473,7 @@ BEGIN
 				,intTransactionId = Header.intInventoryReceiptId  
 				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 				,strTransactionId = Header.strReceiptNumber  
-				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
+				,intTransactionTypeId = @INVENTORY_RETURN_TYPE  
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
@@ -742,7 +742,7 @@ BEGIN
 				,intTransactionId = Header.intInventoryReceiptId  
 				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 				,strTransactionId = Header.strReceiptNumber  
-				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
+				,intTransactionTypeId = @INVENTORY_RETURN_TYPE  
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
@@ -821,7 +821,7 @@ BEGIN
 			@intTransactionId
 			,@strBatchId
 			,@intEntityUserSecurityId
-			,@INVENTORY_RECEIPT_TYPE			
+			,@INVENTORY_RETURN_TYPE			
 	END 
 
 	-- Decrease the Gross weight for the lots when posting the inventory return. 
@@ -879,7 +879,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 		)
-		EXEC	@intReturnValue = dbo.uspICUnpostCosting
+		EXEC	@intReturnValue = dbo.uspICUnpostReturnCosting
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
@@ -937,7 +937,7 @@ BEGIN
 				@intTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
-				,@INVENTORY_RECEIPT_TYPE	
+				,@INVENTORY_RETURN_TYPE	
 				
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
@@ -981,7 +981,7 @@ BEGIN
 				@intTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
-				,@INVENTORY_RECEIPT_TYPE	
+				,@INVENTORY_RETURN_TYPE	
 						
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END

@@ -554,10 +554,12 @@ END
 -----------------------------------------
 IF @strAccountToCounterInventory IS NOT NULL 
 BEGIN 
-	EXEC dbo.uspICCreateGLEntries 
+	EXEC dbo.uspICCreateReturnGLEntries 
 		@strBatchId
 		,@strAccountToCounterInventory
 		,@intEntityUserSecurityId
 		,@strGLDescription
+	;
 END 
+
 

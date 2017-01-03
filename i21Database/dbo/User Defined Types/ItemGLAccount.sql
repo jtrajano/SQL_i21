@@ -22,5 +22,6 @@ CREATE TYPE [dbo].[ItemGLAccount] AS TABLE
 	--,intRevalueAdjLotMerge INT
 	--,intRevalueAdjLotMove INT 
 	,intTransactionTypeId INT 
+	,intCOGSId INT
 	,PRIMARY KEY CLUSTERED (intItemId, intItemLocationId, intTransactionTypeId) 
 )
