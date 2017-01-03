@@ -4652,6 +4652,12 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponent.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentDestinationState.sql" />
     <Build Include="dbo\Views\vyuTFReportingComponentProductCode.sql" />
+    <Build Include="dbo\User Defined Types\TFReceiptTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFTaxCategory.sql" />
+    <Build Include="dbo\User Defined Types\TFTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFScheduleCodeParam.sql" />
+    <Build Include="dbo\User Defined Types\TFReceiptItem.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4784,6 +4790,9 @@
       <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
     </Build>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\00_Cleanup.sql" />
+    <Build Include="dbo\User Defined Types\TFTransactionSummaryItem.sq.sql" />
+    <Build Include="dbo\User Defined Types\TFTransactionSummaryTotal.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
