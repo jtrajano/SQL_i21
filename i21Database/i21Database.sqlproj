@@ -2251,7 +2251,6 @@
     <Build Include="dbo\Tables\tblTFFrequency.sql" />
     <Build Include="dbo\Tables\tblTFProductCode.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponent.sql" />
-    <Build Include="dbo\Tables\tblTFReportingComponentDetail.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityConfiguration.sql" />
     <Build Include="dbo\Tables\tblTFTerminalControlNumber.sql" />
@@ -2969,7 +2968,7 @@
     <Build Include="dbo\Views\vyuCTContStsAllocationSummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsInvoiceSummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentField.sql" />
     <Build Include="dbo\Tables\tblTFTransaction.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
@@ -4658,6 +4657,7 @@
     <Build Include="dbo\User Defined Types\TFScheduleCodeParam.sql" />
     <Build Include="dbo\User Defined Types\TFReceiptItem.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetail.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCriteria.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

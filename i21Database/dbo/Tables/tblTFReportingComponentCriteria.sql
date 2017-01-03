@@ -1,12 +1,10 @@
 ﻿CREATE TABLE [dbo].[tblTFReportingComponentCriteria]
 (
-	[intReportingComponentCriteriaId] INT IDENTITY (1,1) NOT NULL,
-    [intTaxCategoryId] INT NOT NULL, 
-    [intReportingComponentId] INT NOT NULL, 
-    [strState] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strTaxCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strCriteria] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intConcurrencyId] INT NULL, 
+	[intReportingComponentCriteriaId] [int] IDENTITY(1,1) NOT NULL,
+	[intTaxCategoryId] [int] NOT NULL,
+	[intReportingComponentId] [int] NOT NULL,
+	[strCriteria] [nvarchar](10) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblTFTaxCriteria] PRIMARY KEY CLUSTERED 
 (
 	[intReportingComponentCriteriaId] ASC
@@ -26,4 +24,3 @@ GO
 
 ALTER TABLE [dbo].[tblTFReportingComponentCriteria] ADD  CONSTRAINT [DF_tblTFReportingComponentCriteria_intConcurrencyId]  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
-
