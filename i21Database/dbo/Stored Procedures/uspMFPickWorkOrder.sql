@@ -1362,7 +1362,9 @@ BEGIN TRY
 				IF @ysnSubstituteItem = 1
 					AND @dblMaxSubstituteRatio <> 100
 				BEGIN
-					SET @dblReqQty = (@dblReqQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio) * (100 - @dblMaxSubstituteRatio) / 100
+					SELECT @dblReqQty = (@dblReqQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio) * (100 - @dblMaxSubstituteRatio) / 100
+
+					SELECT @dblLowerToleranceReqQty = (@dblLowerToleranceReqQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio) * (100 - @dblMaxSubstituteRatio) / 100
 				END
 				ELSE
 				BEGIN
@@ -1467,11 +1469,15 @@ BEGIN TRY
 
 				IF @ysnSubstituteItem = 1
 				BEGIN
-					SET @dblReqQty = (@dblReqQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio) - (@dblQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio)
+					SELECT @dblReqQty = (@dblReqQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio) - (@dblQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio)
+
+					SELECT @dblLowerToleranceReqQty = (@dblLowerToleranceReqQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio) - (@dblQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio)
 				END
 				ELSE
 				BEGIN
-					SET @dblReqQty = @dblReqQty - [dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId, @intRecipeItemUOMId, @dblQty)
+					SELECT @dblReqQty = @dblReqQty - [dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId, @intRecipeItemUOMId, @dblQty)
+
+					SELECT @dblLowerToleranceReqQty = @dblLowerToleranceReqQty - [dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId, @intRecipeItemUOMId, @dblQty)
 				END
 			END
 
