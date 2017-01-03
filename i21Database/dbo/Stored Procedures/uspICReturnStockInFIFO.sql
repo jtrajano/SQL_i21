@@ -90,6 +90,7 @@ DECLARE @cbOutOutId AS INT
 		,@cbId AS INT
 		,@cbOutInventoryTransactionId AS INT
 		,@cost AS NUMERIC(38, 20)
+		,@intTransactionTypeId AS INT 
 
 -- Check if there is available stocks to return from the Inventory Adjustment - Quantity Change. 
 BEGIN 
@@ -98,11 +99,13 @@ BEGIN
 			,@cbOutOutId = cbOut.intId
 			,@cbOutInventoryTransactionId = cbOut.intInventoryTransactionId
 			,@cost = cb.dblCost
+			,@intTransactionTypeId = cbOut.intTransactionTypeId
 	FROM	tblICInventoryFIFO cb 
 			OUTER APPLY (
 				SELECT  TOP 1 
 						cbOut.intId
 						,cbOut.intInventoryTransactionId							
+						,t.intTransactionTypeId
 				FROM	tblICInventoryFIFOOut cbOut INNER JOIN tblICInventoryTransaction t
 							ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
 						INNER JOIN tblICInventoryTransactionType ty
@@ -135,9 +138,9 @@ BEGIN
 				,@CostUsed = NULL 
 
 				-- retrieve the	qty reduced from a fifo bucket 
-				,@QtyOffset = 
-							CASE	WHEN (cbOut.dblQty - cbOut.dblQtyReturned) >= @dblQty THEN @dblQty
-									ELSE (cbOut.dblQty - cbOut.dblQtyReturned) 
+				,@QtyOffset = 							
+							CASE	WHEN (cbOut.dblQty - cbOut.dblQtyReturned) >= @dblQty THEN -@dblQty
+									ELSE -(cbOut.dblQty - cbOut.dblQtyReturned) 
 							END
 
 				-- retrieve the id of the matching fifo bucket 
@@ -149,22 +152,24 @@ BEGIN
 		INSERT INTO tblICInventoryReturned (
 			intInventoryFIFOId
 			,intInventoryTransactionId
-			,intInventoryFIFOOutId
+			,intOutId
 			,dblQtyReturned
 			,dblCost
 			,intTransactionId
 			,strTransactionId
 			,strBatchId
+			,intTransactionTypeId 
 		)
 		SELECT 
 			intInventoryFIFOId			= @cbId
 			,intInventoryTransactionId	= @cbOutInventoryTransactionId
-			,intInventoryFIFOOutId		= @cbOutOutId
+			,intOutId					= @cbOutOutId
 			,dblQtyReturned				= @QtyOffset
 			,dblCost					= @cost
 			,intTransactionId			= @intTransactionId 
 			,strTransactionId			= @strTransactionId
 			,strBatchId					= @strBatchId
+			,intTransactionTypeId		= @intTransactionTypeId
 	END 
 END 
 
@@ -194,10 +199,11 @@ BEGIN
 	-- Update an existing cost bucket
 	WHEN MATCHED THEN 
 		UPDATE 
-		SET	fifo_bucket.dblStockOut = ISNULL(fifo_bucket.dblStockOut, 0) 
-						+ CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
-								ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
-						END 
+		SET	fifo_bucket.dblStockOut = 
+				ISNULL(fifo_bucket.dblStockOut, 0) 
+				+ CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
+						ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
+				END 
 
 			,fifo_bucket.intConcurrencyId = ISNULL(fifo_bucket.intConcurrencyId, 0) + 1
 
@@ -212,8 +218,8 @@ BEGIN
 
 			-- retrieve the	qty reduced from a fifo bucket 
 			,@QtyOffset = 
-						CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
-								ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
+						CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN -@dblQty
+								ELSE -(fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
 						END
 
 			-- retrieve the id of the matching fifo bucket 

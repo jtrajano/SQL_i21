@@ -86,6 +86,7 @@ DECLARE @UpdatedFifoId AS INT
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
 DECLARE @dblValue AS NUMERIC(38,20)
+DECLARE @intInventoryFIFOOutId AS INT 
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -145,20 +146,45 @@ BEGIN
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@intCostingMethod = @AVERAGECOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
-			END 
 
-			-- Insert the record to the fifo-out table
-			INSERT INTO dbo.tblICInventoryFIFOOut (
-					intInventoryTransactionId
-					,intInventoryFIFOId
-					,dblQty
-			)
-			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-					,intInventoryFIFOId = @UpdatedFifoId
-					,dblQty = @QtyOffset
-			WHERE	@InventoryTransactionIdentityId IS NOT NULL
-					AND @UpdatedFifoId IS NOT NULL 
-					AND @QtyOffset IS NOT NULL 
+				-- Insert the record to the fifo-out table
+				INSERT INTO dbo.tblICInventoryFIFOOut (
+						intInventoryTransactionId
+						,intInventoryFIFOId
+						,dblQty
+				)
+				SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
+						,intInventoryFIFOId = @UpdatedFifoId
+						,dblQty = @QtyOffset
+				WHERE	@InventoryTransactionIdentityId IS NOT NULL
+						AND @UpdatedFifoId IS NOT NULL 
+						AND @QtyOffset IS NOT NULL 
+
+				SET @intInventoryFIFOOutId = SCOPE_IDENTITY();
+
+				-- Create a log of the return transaction. 
+				INSERT INTO tblICInventoryReturned (
+					intInventoryFIFOId
+					,intInventoryTransactionId
+					,intOutId
+					,dblQtyReturned
+					,dblCost
+					,intTransactionId
+					,strTransactionId
+					,strBatchId
+					,intTransactionTypeId 
+				)
+				SELECT 
+					intInventoryFIFOId			= @UpdatedFifoId
+					,intInventoryTransactionId	= @InventoryTransactionIdentityId 
+					,intOutId					= @intInventoryFIFOOutId 
+					,dblQtyReturned				= @QtyOffset
+					,dblCost					= @CostUsed
+					,intTransactionId			= @intTransactionId 
+					,strTransactionId			= @strTransactionId
+					,strBatchId					= @strBatchId
+					,intTransactionTypeId		= @intTransactionTypeId
+			END 
 
 			-- Reduce the remaining qty
 			SET @dblReduceQty = @RemainingQty;

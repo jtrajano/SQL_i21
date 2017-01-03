@@ -26,8 +26,9 @@ DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
 DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
 DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 DECLARE @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock AS INT = 35;
+DECLARE @InventoryTransactionTypeId_InventoryAdjustmentQtyChange AS INT = 10;
 
-DECLARE @strTransactionForm NVARCHAR(255)
+DECLARE @strTransactionForm NVARCHAR(255) = 'Inventory Receipt'
 
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
@@ -56,14 +57,14 @@ FROM	(
 					, t.intItemLocationId
 					, t.intTransactionTypeId
 			FROM (
-				-- regular inventory transactions 
-				SELECT	intItemId, intItemLocationId, intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t 
-				WHERE	t.strBatchId = @strBatchId
-						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-				-- inventory-adj-qty-change transactions involved in the item return. 
-				UNION ALL 
-				SELECT	t.intItemId, t.intItemLocationId, t.intTransactionTypeId
+				---- regular inventory transactions 
+				--SELECT	intItemId, intItemLocationId, intTransactionTypeId
+				--FROM	dbo.tblICInventoryTransaction t 
+				--WHERE	t.strBatchId = @strBatchId
+				--		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+				---- inventory-adj-qty-change transactions involved in the item return. 
+				--UNION ALL 
+				SELECT	DISTINCT t.intItemId, t.intItemLocationId, t.intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryReturned rtn 
 							ON t.intInventoryTransactionId = rtn.intInventoryTransactionId
 				WHERE	rtn.strBatchId = @strBatchId
@@ -197,16 +198,8 @@ FROM	@GLAccounts
 -- Get the default transaction form name
 SELECT TOP 1 
 		@strTransactionForm = TransType.strTransactionForm
-FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-			ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-		INNER JOIN @GLAccounts GLAccounts
-			ON TRANS.intItemId = GLAccounts.intItemId
-			AND TRANS.intItemLocationId = GLAccounts.intItemLocationId
-			AND TRANS.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-WHERE	TRANS.strBatchId = @strBatchId
-		AND TRANS.intItemId = ISNULL(@intRebuildItemId, TRANS.intItemId) 
+FROM	dbo.tblICInventoryTransactionType TransType		
+WHERE	TransType.strName = 'Inventory Receipt'
 ;
 
 -- Generate the G/L Entries for Inventory Transactions 
@@ -245,7 +238,7 @@ AS
 			,TRANS.dblExchangeRate
 			,TRANS.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
-			,TRANS.strTransactionForm 
+			,strTransactionForm = @strTransactionForm
 			,TRANS.strDescription
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
@@ -285,6 +278,7 @@ AS
 
 	WHERE	rtn.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+			AND rtn.intTransactionTypeId = @InventoryTransactionTypeId_InventoryAdjustmentQtyChange
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 

@@ -557,9 +557,9 @@ BEGIN
 					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				END
 
-				-- Negate the qty 
-				UPDATE @CompanyOwnedItemsForPost
-				SET		dblQty = -dblQty 
+				---- Negate the qty 
+				--UPDATE @CompanyOwnedItemsForPost
+				--SET		dblQty = -dblQty 
 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
