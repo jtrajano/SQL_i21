@@ -287,7 +287,7 @@ BEGIN TRY
 			, @CountItems INT
 			, @ItemDescription NVARCHAR(MAX)
 
-		INSERT INTO @tblTempScheduleCodeParam (strTempScheducleCode)
+		INSERT INTO @tblTempScheduleCodeParam (strTempScheduleCode)
 		SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitStringWithTrim(@ScheduleCodeParam, ',')
 
 		SET @CountItems = (SELECT COUNT(strFormCode) FROM tblTFTaxReportTemplate WHERE strSegment = 'Details' AND strFormCode = @FormCodeParam)

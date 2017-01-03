@@ -253,9 +253,9 @@ select 'UNION ALL SELECT intReportingComponentId = ' + CAST(intReportingComponen
 from tblTFReportingComponent
 where intTaxAuthorityId = 
 */
-DECLARE @ReportingComponents AS TFReportingComponents
+DECLARE @ReportingComponent AS TFReportingComponent
 
-INSERT INTO @ReportingComponents(
+INSERT INTO @ReportingComponent(
 	intReportingComponentId
 	, strFormCode
 	, strFormName
@@ -355,7 +355,7 @@ UNION ALL SELECT intReportingComponentId = 86, strFormCode = 'SF-900', strFormNa
 UNION ALL SELECT intReportingComponentId = 87, strFormCode = 'SF-900', strFormName = 'Consolidated Special Fuel Monthly Tax Return', strScheduleCode = '7BMI', strScheduleName = 'Special Fuel Sold to Licensed Exporters for Export to State of MI', strType = '', strNote = '', strTransactionType = 'Invoice', intPositionId = 640, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateSF900'
 UNION ALL SELECT intReportingComponentId = 88, strFormCode = 'SF-900', strFormName = 'Consolidated Special Fuel Monthly Tax Return', strScheduleCode = '7BOH', strScheduleName = 'Special Fuel Sold to Licensed Exporters for Export to State of OH', strType = '', strNote = '', strTransactionType = 'Invoice', intPositionId = 641, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateSF900'
 
-EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponents = @ReportingComponents
+EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
 
 -- Tax Criteria
