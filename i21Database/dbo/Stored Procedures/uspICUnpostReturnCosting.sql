@@ -151,10 +151,10 @@ END
 -- Call the FIFO unpost stored procedures. This is also used in Average Costing.
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICUnpostFIFOIn 
-		@strTransactionId
-		,@intTransactionId
-		,@ysnRecap
+	--EXEC dbo.uspICUnpostFIFOIn 
+	--	@strTransactionId
+	--	,@intTransactionId
+	--	,@ysnRecap
 
 	EXEC dbo.uspICUnpostFIFOOut
 		@strTransactionId
@@ -166,10 +166,10 @@ END
 -- Call the LIFO unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICUnpostLIFOIn 
-		@strTransactionId
-		,@intTransactionId
-		,@ysnRecap
+	--EXEC dbo.uspICUnpostLIFOIn 
+	--	@strTransactionId
+	--	,@intTransactionId
+	--	,@ysnRecap
 
 	EXEC dbo.uspICUnpostLIFOOut
 		@strTransactionId
@@ -182,10 +182,10 @@ END
 -- Call the LOT unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICUnpostLotIn 
-		@strTransactionId
-		,@intTransactionId
-		,@ysnRecap
+	--EXEC dbo.uspICUnpostLotIn 
+	--	@strTransactionId
+	--	,@intTransactionId
+	--	,@ysnRecap
 
 	EXEC dbo.uspICUnpostLotOut
 		@strTransactionId
@@ -197,10 +197,10 @@ END
 -- Call the Actual Costing unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICUnpostActualCostIn
-		@strTransactionId
-		,@intTransactionId
-		,@ysnRecap
+	--EXEC dbo.uspICUnpostActualCostIn
+	--	@strTransactionId
+	--	,@intTransactionId
+	--	,@ysnRecap
 
 	EXEC dbo.uspICUnpostActualCostOut
 		@strTransactionId
@@ -443,7 +443,7 @@ BEGIN
 				WHERE	ItemPricing.intItemId = @intItemId
 						AND ItemPricing.intItemLocationId = @intItemLocationId
 						AND ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) <> @ACTUALCOST
-						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+						--AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
 				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
 				IF ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
@@ -626,5 +626,14 @@ BEGIN
 		,@intTransactionId
 		,@strTransactionId
 		,@intEntityUserSecurityId
+	;
+END 
+
+BEGIN 
+	-- Delete the return records
+	DELETE	rtn 
+	FROM	tblICInventoryReturned rtn
+	WHERE	rtn.intTransactionId = @intTransactionId
+			AND rtn.strTransactionId = @strTransactionId
 	;
 END 

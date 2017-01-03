@@ -93,11 +93,26 @@ WHERE	EXISTS (
 UPDATE	fifoBucket
 SET		fifoBucket.dblStockOut = ISNULL(fifoBucket.dblStockOut, 0) - FIFOOutGrouped.dblQty
 FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
-			SELECT	FIFOOut.intInventoryFIFOId, dblQty = SUM(FIFOOut.dblQty)
+			SELECT	FIFOOut.intInventoryFIFOId
+					, dblQty = SUM(FIFOOut.dblQty)
 			FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
 						ON FIFOOut.intInventoryTransactionId = InventoryToReverse.intInventoryTransactionId	
 			GROUP BY FIFOOut.intInventoryFIFOId
 		) AS FIFOOutGrouped
 			ON FIFOOutGrouped.intInventoryFIFOId = fifoBucket.intInventoryFIFOId
 WHERE	ISNULL(fifoBucket.ysnIsUnposted, 0) = 0
+;
+
+-- Update fifo out. Update dblQtyReturned. 
+UPDATE	cbOut
+SET		cbOut.dblQtyReturned = cbOut.dblQtyReturned - rtn.dblQtyReturned
+FROM	tblICInventoryFIFOOut cbOut CROSS APPLY (
+			SELECT	rtn.intInventoryFIFOId
+					,rtn.intOutId
+					,dblQtyReturned = SUM(rtn.dblQtyReturned) 
+			FROM	tblICInventoryReturned rtn 
+			WHERE	rtn.intTransactionId = @intTransactionId
+					AND rtn.strTransactionId = @strTransactionId
+			GROUP BY rtn.intInventoryFIFOId, rtn.intOutId
+		) rtn
 ;

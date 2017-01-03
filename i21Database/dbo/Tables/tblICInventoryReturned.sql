@@ -32,5 +32,18 @@ When stock is returned, this table will log the transactions that returned the s
 		INCLUDE(intInventoryFIFOId);
 	GO
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReturned_intInventoryFIFOOutId]
-		ON [dbo].[tblICInventoryReturned]([intInventoryFIFOOutId] ASC)
+		ON [dbo].[tblICInventoryReturned]([intInventoryFIFOId] ASC)
+		INCLUDE([intOutId]);
+	GO
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReturned_intInventoryLIFOId]
+		ON [dbo].[tblICInventoryReturned]([intInventoryLIFOId] ASC)
+		INCLUDE([intOutId]);
+	GO
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReturned_intInventoryLotId]
+		ON [dbo].[tblICInventoryReturned]([intInventoryLotId] ASC)
+		INCLUDE([intOutId]);
+	GO
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReturned_intInventoryActualCostId]
+		ON [dbo].[tblICInventoryReturned]([intInventoryActualCostId] ASC)
+		INCLUDE([intOutId]);
 	GO

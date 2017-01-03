@@ -98,14 +98,20 @@ BEGIN
 			@cbId = cb.intInventoryFIFOId
 			,@cbOutOutId = cbOut.intId
 			,@cbOutInventoryTransactionId = cbOut.intInventoryTransactionId
-			,@cost = cb.dblCost
+			,@cost = cb.dblCost --cbOut.dblCost
 			,@intTransactionTypeId = cbOut.intTransactionTypeId
-	FROM	tblICInventoryFIFO cb 
+	FROM	tblICInventoryFIFO cb INNER JOIN (
+				tblICInventoryReceipt rSource INNER JOIN tblICInventoryReceipt r
+					ON rSource.intInventoryReceiptId = r.intSourceInventoryReceiptId
+			)
+				ON cb.intTransactionId = rSource.intInventoryReceiptId
+				AND cb.strTransactionId = rSource.strReceiptNumber
 			OUTER APPLY (
 				SELECT  TOP 1 
 						cbOut.intId
 						,cbOut.intInventoryTransactionId							
 						,t.intTransactionTypeId
+						,t.dblCost
 				FROM	tblICInventoryFIFOOut cbOut INNER JOIN tblICInventoryTransaction t
 							ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
 						INNER JOIN tblICInventoryTransactionType ty
@@ -114,8 +120,8 @@ BEGIN
 						AND ty.strName = 'Inventory Adjustment - Quantity Change'
 						AND  (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0 
 			) cbOut
-	WHERE	cb.intTransactionId = @intTransactionId
-			AND cb.strTransactionId = @strTransactionId
+	WHERE	r.intInventoryReceiptId = @intTransactionId
+			AND r.strReceiptNumber = @strTransactionId
 			AND cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
 			AND cb.intItemUOMId = @intItemUOMId
@@ -126,21 +132,21 @@ BEGIN
 		SET		-- Increase the return qty 
 				dblQtyReturned = 
 					ISNULL(cbOut.dblQtyReturned, 0) 
-					+ CASE	WHEN (cbOut.dblQty - cbOut.dblQtyReturned) >= @dblQty THEN @dblQty
-							ELSE (cbOut.dblQty - cbOut.dblQtyReturned) 
+					+ CASE	WHEN (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) >= @dblQty THEN @dblQty
+							ELSE (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) 
 					END 
 				-- update the remaining qty
 				,@RemainingQty = 
-						CASE	WHEN (cbOut.dblQty - cbOut.dblQtyReturned) >= @dblQty THEN 0
-								ELSE (cbOut.dblQty - cbOut.dblQtyReturned) - @dblQty
+						CASE	WHEN (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) >= @dblQty THEN 0
+								ELSE (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) - @dblQty
 						END
 				-- retrieve the cost from the fifo bucket. 
 				,@CostUsed = NULL 
 
 				-- retrieve the	qty reduced from a fifo bucket 
 				,@QtyOffset = 							
-							CASE	WHEN (cbOut.dblQty - cbOut.dblQtyReturned) >= @dblQty THEN -@dblQty
-									ELSE -(cbOut.dblQty - cbOut.dblQtyReturned) 
+							CASE	WHEN (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) >= @dblQty THEN -@dblQty
+									ELSE -(cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) 
 							END
 
 				-- retrieve the id of the matching fifo bucket 
@@ -164,7 +170,7 @@ BEGIN
 			intInventoryFIFOId			= @cbId
 			,intInventoryTransactionId	= @cbOutInventoryTransactionId
 			,intOutId					= @cbOutOutId
-			,dblQtyReturned				= @QtyOffset
+			,dblQtyReturned				= -@QtyOffset
 			,dblCost					= @cost
 			,intTransactionId			= @intTransactionId 
 			,strTransactionId			= @strTransactionId
@@ -184,8 +190,12 @@ BEGIN
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,intItemUOMId = @intItemUOMId
-				,intTransactionId = @intTransactionId
-				,strTransactionId = @strTransactionId
+				,intTransactionId = r.intInventoryReceiptId
+				,strTransactionId = r.strReceiptNumber
+		FROM	tblICInventoryReceipt rSource INNER JOIN tblICInventoryReceipt r
+					ON rSource.intInventoryReceiptId = r.intSourceInventoryReceiptId
+		WHERE	r.intInventoryReceiptId = @intTransactionId
+				AND r.strReceiptNumber = @strTransactionId
 	) AS Source_Query  
 		ON fifo_bucket.intItemId = Source_Query.intItemId
 		AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
@@ -193,8 +203,8 @@ BEGIN
 		AND (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) > 0 
 		AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
 		--AND fifo_bucket.dblCost = @dblCost 
-		AND fifo_bucket.intTransactionId = fifo_bucket.intTransactionId
-		AND fifo_bucket.strTransactionId = fifo_bucket.strTransactionId 
+		AND fifo_bucket.intTransactionId = Source_Query.intTransactionId
+		AND fifo_bucket.strTransactionId = Source_Query.strTransactionId 
 
 	-- Update an existing cost bucket
 	WHEN MATCHED THEN 

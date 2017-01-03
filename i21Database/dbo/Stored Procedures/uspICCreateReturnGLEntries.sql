@@ -47,9 +47,9 @@ INSERT INTO @GLAccounts (
 SELECT	Query.intItemId
 		,Query.intItemLocationId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
-		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
-		,intCOGSId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_Cost_of_Goods) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 		
 		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
+		,intCOGSId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Cost_of_Goods) 
 		,intTransactionTypeId
 FROM	(
 			SELECT  DISTINCT 
@@ -251,18 +251,18 @@ AS
 			,t.intItemLocationId
 			,intTransactionId = r.intInventoryReceiptId
 			,strTransactionId = r.strReceiptNumber
-			,rtn.dblQtyReturned
+			,-rtn.dblQtyReturned
 			,dblUOMQty = NULL 
 			,rtn.dblCost
 			,dblValue = 0 
-			,ty.intTransactionTypeId
+			,rtn.intTransactionTypeId
 			,intCurrencyId = @DefaultCurrencyId
 			,dblExchangeRate = 1
-			,intInventoryTransactionId = NULL 
+			,intInventoryTransactionId = t.intInventoryTransactionId 
 			,ty.strTransactionType
 			,ty.strTransactionForm 
-			,strDescription = NULL 
-	FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryReturned rtn
+			,strDescription = NULL  
+	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryReturned rtn
 				ON rtn.intInventoryTransactionId = t.intInventoryTransactionId
 			INNER JOIN tblICInventoryReceipt r
 				ON r.intInventoryReceiptId = rtn.intTransactionId 
@@ -275,7 +275,6 @@ AS
 				FROM	dbo.tblICInventoryTransactionType ty
 				WHERE	ty.strName = 'Inventory Return'
 			) ty
-
 	WHERE	rtn.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			AND rtn.intTransactionTypeId = @InventoryTransactionTypeId_InventoryAdjustmentQtyChange
@@ -323,7 +322,7 @@ FROM	ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount 
 			ON tblGLAccount.intAccountId = 
 				CASE 
-					WHEN ForGLEntries_CTE.intInventoryTransactionId IS NULL 
+					WHEN ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_InventoryAdjustmentQtyChange
 						THEN GLAccounts.intCOGSId
 					ELSE 
 						GLAccounts.intInventoryId
@@ -444,6 +443,7 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -491,6 +491,7 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto-Variance 

@@ -30,11 +30,13 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
 		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 
+		,@INV_TRANS_TYPE_Inventory_Adjustment_Qty_Change AS INT = 10
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
 		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
+		
 
 -- Get the GL Account ids to use
 BEGIN 
@@ -129,18 +131,63 @@ BEGIN
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
-				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
-				--AND GLEntries.strTransactionId = Reversal.strTransactionId
-				AND (
-						(
-							GLEntries.intTransactionId = Reversal.intTransactionId
-							AND GLEntries.strTransactionId = Reversal.strTransactionId
-						)
-				)
+				ON GLEntries.intJournalLineNo = Reversal.intInventoryTransactionId
+				AND GLEntries.intTransactionId = Reversal.intTransactionId
+				AND GLEntries.strTransactionId = Reversal.strTransactionId
 	WHERE	Reversal.strBatchId = @strBatchId
 			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
 			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoVariance
 			
+	-------------------------------------------------------------------------------------------
+	-- Reverse the G/L entries INVENTORY RETURN related to Inventory Adjustment - Qty Change
+	-------------------------------------------------------------------------------------------
+	UNION ALL 
+	SELECT	
+			dtmDate						= GLEntries.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLEntries.intAccountId
+			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
+			,dblCredit					= GLEntries.dblDebit	-- Reverse the Credit with Debit 
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= GLEntries.strDescription
+			,strCode					= GLEntries.strCode
+			,strReference				= GLEntries.strReference
+			,intCurrencyId				= GLEntries.intCurrencyId
+			,dblExchangeRate			= GLEntries.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= GLEntries.dtmDate
+			,strJournalLineDescription	= GLEntries.strJournalLineDescription
+			,intJournalLineNo			= Reversal.intInventoryTransactionId
+			,ysnIsUnposted				= 1
+			,intUserId					= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
+			,strTransactionId			= GLEntries.strTransactionId
+			,intTransactionId			= GLEntries.intTransactionId
+			,strTransactionType			= GLEntries.strTransactionType
+			,strTransactionForm			= GLEntries.strTransactionForm
+			,strModuleName				= GLEntries.strModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= GLEntries.dblDebitForeign 
+			,dblDebitReport				= GLEntries.dblDebitReport
+			,dblCreditForeign			= GLEntries.dblCreditForeign
+			,dblCreditReport			= GLEntries.dblCreditReport
+			,dblReportingRate			= GLEntries.dblReportingRate
+			,dblForeignRate				= GLEntries.dblForeignRate
+	FROM	tblGLDetail GLEntries INNER JOIN (	
+				tblICInventoryTransaction Reversal INNER JOIN tblICInventoryReturned rtn
+					ON Reversal.intInventoryTransactionId = rtn.intInventoryTransactionId
+					AND rtn.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Adjustment_Qty_Change
+			)
+				ON GLEntries.intJournalLineNo = Reversal.intInventoryTransactionId
+				AND GLEntries.intTransactionId = rtn.intTransactionId
+				AND GLEntries.strTransactionId = rtn.strTransactionId
+
+	WHERE	rtn.intTransactionId = @intTransactionId
+			AND rtn.strTransactionId = @strTransactionId
+			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
+			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoVariance
+
 	-----------------------------------------------------------------------------------
 	-- Create the Auto-Negative G/L Entries
 	-----------------------------------------------------------------------------------

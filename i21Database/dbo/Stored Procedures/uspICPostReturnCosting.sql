@@ -316,19 +316,6 @@ BEGIN
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId
 				AND @strActualCostId IS NULL 
-
-		------------------------------------------------------------
-		-- Update the Stock Quantity
-		------------------------------------------------------------
-		EXEC [dbo].[uspICPostStockQuantity]
-			@intItemId
-			,@intItemLocationId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@intItemUOMId
-			,@dblQty
-			,@dblUOMQty
-			,@intLotId
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
@@ -360,137 +347,137 @@ END;
 CLOSE loopItems;
 DEALLOCATE loopItems;
 
----------------------------------------------------------------------------------------
--- Create the AUTO-Negative if costing method is average costing
----------------------------------------------------------------------------------------
-BEGIN 
-	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
-			,@intInventoryTransactionId AS INT 
+-----------------------------------------------------------------------------------------
+---- Create the AUTO-Negative if costing method is average costing
+-----------------------------------------------------------------------------------------
+--BEGIN 
+--	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
+--			,@intInventoryTransactionId AS INT 
 
-	-- Get the qualified items for auto-negative. 
-	INSERT INTO @ItemsForAutoNegative (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intLotId
-			,dblQty
-			,intSubLocationId
-			,intStorageLocationId
-			,dtmDate
-			,intTransactionId
-			,strTransactionId
-			,intTransactionTypeId
-	)
-	SELECT 
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intLotId
-			,dblQty
-			,intSubLocationId
-			,intStorageLocationId
-			,dtmDate
-			,intTransactionId
-			,strTransactionId
-			,intTransactionTypeId
-	FROM	@ItemsToReturn
-	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
-			AND dblQty > 0 
-			AND strActualCostId IS NULL 
+--	-- Get the qualified items for auto-negative. 
+--	INSERT INTO @ItemsForAutoNegative (
+--			intItemId
+--			,intItemLocationId
+--			,intItemUOMId
+--			,intLotId
+--			,dblQty
+--			,intSubLocationId
+--			,intStorageLocationId
+--			,dtmDate
+--			,intTransactionId
+--			,strTransactionId
+--			,intTransactionTypeId
+--	)
+--	SELECT 
+--			intItemId
+--			,intItemLocationId
+--			,intItemUOMId
+--			,intLotId
+--			,dblQty
+--			,intSubLocationId
+--			,intStorageLocationId
+--			,dtmDate
+--			,intTransactionId
+--			,strTransactionId
+--			,intTransactionTypeId
+--	FROM	@ItemsToReturn
+--	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
+--			AND dblQty > 0 
+--			AND strActualCostId IS NULL 
 
-	SET @intInventoryTransactionId = NULL 
+--	SET @intInventoryTransactionId = NULL 
 
-	SELECT	TOP 1 
-			@intInventoryTransactionId	= intInventoryTransactionId
-			,@intCurrencyId				= intCurrencyId
-			,@dtmDate					= dtmDate
-			,@dblExchangeRate			= dblExchangeRate
-			,@intTransactionId			= intTransactionId
-			,@strTransactionId			= strTransactionId
-			,@strTransactionForm		= strTransactionForm
-	FROM	dbo.tblICInventoryTransaction
-	WHERE	strBatchId = @strBatchId
-			AND ISNULL(ysnIsUnposted, 0) = 0 
+--	SELECT	TOP 1 
+--			@intInventoryTransactionId	= intInventoryTransactionId
+--			,@intCurrencyId				= intCurrencyId
+--			,@dtmDate					= dtmDate
+--			,@dblExchangeRate			= dblExchangeRate
+--			,@intTransactionId			= intTransactionId
+--			,@strTransactionId			= strTransactionId
+--			,@strTransactionForm		= strTransactionForm
+--	FROM	dbo.tblICInventoryTransaction
+--	WHERE	strBatchId = @strBatchId
+--			AND ISNULL(ysnIsUnposted, 0) = 0 
 
-	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsForAutoNegative)
-	BEGIN 
-		SELECT TOP 1 
-				@intItemId				= intItemId 
-				,@intItemLocationId		= intItemLocationId
-				,@intItemUOMId			= intItemUOMId
-				,@intSubLocationId		= intSubLocationId
-				,@intStorageLocationId	= intStorageLocationId
-				,@intLotId				= intLotId
-		FROM	@ItemsForAutoNegative
+--	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsForAutoNegative)
+--	BEGIN 
+--		SELECT TOP 1 
+--				@intItemId				= intItemId 
+--				,@intItemLocationId		= intItemLocationId
+--				,@intItemUOMId			= intItemUOMId
+--				,@intSubLocationId		= intSubLocationId
+--				,@intStorageLocationId	= intStorageLocationId
+--				,@intLotId				= intLotId
+--		FROM	@ItemsForAutoNegative
 
-		INSERT INTO dbo.tblICInventoryTransaction (
-					[intItemId]
-					,[intItemLocationId]
-					,[intItemUOMId]
-					,[intSubLocationId]
-					,[intStorageLocationId]
-					,[dtmDate]
-					,[dblQty]
-					,[dblUOMQty]
-					,[dblCost]
-					,[dblValue]
-					,[dblSalesPrice]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[intTransactionId]
-					,[strTransactionId]
-					,[strBatchId]
-					,[intTransactionTypeId]
-					,[intLotId]
-					,[ysnIsUnposted]
-					,[intRelatedInventoryTransactionId]
-					,[intRelatedTransactionId]
-					,[strRelatedTransactionId]
-					,[strTransactionForm]
-					,[dtmCreated]
-					,[intCreatedEntityId]
-					,[intConcurrencyId]
-			)			
-		SELECT	
-				[intItemId]								= @intItemId
-				,[intItemLocationId]					= @intItemLocationId
-				,[intItemUOMId]							= NULL 
-				,[intSubLocationId]						= NULL 
-				,[intStorageLocationId]					= NULL 
-				,[dtmDate]								= @dtmDate
-				,[dblQty]								= 0
-				,[dblUOMQty]							= 0
-				,[dblCost]								= 0
-				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
-				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= @intCurrencyId
-				,[dblExchangeRate]						= @dblExchangeRate
-				,[intTransactionId]						= @intTransactionId
-				,[strTransactionId]						= @strTransactionId
-				,[strBatchId]							= @strBatchId
-				,[intTransactionTypeId]					= @AUTO_NEGATIVE
-				,[intLotId]								= NULL 
-				,[ysnIsUnposted]						= 0
-				,[intRelatedInventoryTransactionId]		= NULL 
-				,[intRelatedTransactionId]				= NULL 
-				,[strRelatedTransactionId]				= NULL 
-				,[strTransactionForm]					= @strTransactionForm
-				,[dtmCreated]							= GETDATE()
-				,[intCreatedEntityId]					= @intEntityUserSecurityId
-				,[intConcurrencyId]						= 1
-		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
-					ON ItemPricing.intItemId = Stock.intItemId
-					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
-		WHERE	ItemPricing.intItemId = @intItemId
-				AND ItemPricing.intItemLocationId = @intItemLocationId			
-				AND dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
+--		INSERT INTO dbo.tblICInventoryTransaction (
+--					[intItemId]
+--					,[intItemLocationId]
+--					,[intItemUOMId]
+--					,[intSubLocationId]
+--					,[intStorageLocationId]
+--					,[dtmDate]
+--					,[dblQty]
+--					,[dblUOMQty]
+--					,[dblCost]
+--					,[dblValue]
+--					,[dblSalesPrice]
+--					,[intCurrencyId]
+--					,[dblExchangeRate]
+--					,[intTransactionId]
+--					,[strTransactionId]
+--					,[strBatchId]
+--					,[intTransactionTypeId]
+--					,[intLotId]
+--					,[ysnIsUnposted]
+--					,[intRelatedInventoryTransactionId]
+--					,[intRelatedTransactionId]
+--					,[strRelatedTransactionId]
+--					,[strTransactionForm]
+--					,[dtmCreated]
+--					,[intCreatedEntityId]
+--					,[intConcurrencyId]
+--			)			
+--		SELECT	
+--				[intItemId]								= @intItemId
+--				,[intItemLocationId]					= @intItemLocationId
+--				,[intItemUOMId]							= NULL 
+--				,[intSubLocationId]						= NULL 
+--				,[intStorageLocationId]					= NULL 
+--				,[dtmDate]								= @dtmDate
+--				,[dblQty]								= 0
+--				,[dblUOMQty]							= 0
+--				,[dblCost]								= 0
+--				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+--				,[dblSalesPrice]						= 0
+--				,[intCurrencyId]						= @intCurrencyId
+--				,[dblExchangeRate]						= @dblExchangeRate
+--				,[intTransactionId]						= @intTransactionId
+--				,[strTransactionId]						= @strTransactionId
+--				,[strBatchId]							= @strBatchId
+--				,[intTransactionTypeId]					= @AUTO_NEGATIVE
+--				,[intLotId]								= NULL 
+--				,[ysnIsUnposted]						= 0
+--				,[intRelatedInventoryTransactionId]		= NULL 
+--				,[intRelatedTransactionId]				= NULL 
+--				,[strRelatedTransactionId]				= NULL 
+--				,[strTransactionForm]					= @strTransactionForm
+--				,[dtmCreated]							= GETDATE()
+--				,[intCreatedEntityId]					= @intEntityUserSecurityId
+--				,[intConcurrencyId]						= 1
+--		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
+--					ON ItemPricing.intItemId = Stock.intItemId
+--					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
+--		WHERE	ItemPricing.intItemId = @intItemId
+--				AND ItemPricing.intItemLocationId = @intItemLocationId			
+--				AND dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
 
-		-- Delete the item and item-location from the table variable. 
-		DELETE FROM	@ItemsForAutoNegative
-		WHERE	intItemId = @intItemId 
-				AND intItemLocationId = @intItemLocationId
-	END 
-END
+--		-- Delete the item and item-location from the table variable. 
+--		DELETE FROM	@ItemsForAutoNegative
+--		WHERE	intItemId = @intItemId 
+--				AND intItemLocationId = @intItemLocationId
+--	END 
+--END
 
 -----------------------------------------
 -- Generate the g/l entries

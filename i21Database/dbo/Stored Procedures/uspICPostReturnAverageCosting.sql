@@ -119,6 +119,9 @@ BEGIN
 
 			IF @UpdatedFifoId IS NOT NULL 
 			BEGIN 
+				------------------------------------------------------------
+				-- Create the Inventory Transaction 
+				------------------------------------------------------------
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
@@ -147,6 +150,20 @@ BEGIN
 						,@intCostingMethod = @AVERAGECOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 
+				------------------------------------------------------------
+				-- Update the Stock Quantity
+				------------------------------------------------------------
+				EXEC [dbo].[uspICPostStockQuantity]
+					@intItemId
+					,@intItemLocationId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@intItemUOMId
+					,@QtyOffset
+					,@dblUOMQty
+					,NULL --,@intLotId
+
+				SET @QtyOffset = -@QtyOffset
 				-- Insert the record to the fifo-out table
 				INSERT INTO dbo.tblICInventoryFIFOOut (
 						intInventoryTransactionId
