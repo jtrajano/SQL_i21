@@ -10,6 +10,15 @@ DECLARE @strLetterName			NVARCHAR(MAX),
 		@strCompanyPhone		NVARCHAR(50)
 
 SET NOCOUNT ON;
+SELECT 
+	@strLetterName = strName 
+FROM 
+	tblSMLetter 
+WHERE 
+	intLetterId = CAST(@intLetterId AS NVARCHAR(10))
+SET NOCOUNT OFF;
+
+SET NOCOUNT ON;
 SELECT TOP 1 
 	@intCompanyLocationId	= intCompanySetupID,
 	@strCompanyName			= strCompanyName,
@@ -255,14 +264,7 @@ FROM
 GROUP BY 
 	intEntityCustomerId
 
-SET NOCOUNT ON;
-SELECT 
-	@strLetterName = strName 
-FROM 
-	tblSMLetter 
-WHERE 
-	intLetterId = CAST(@intLetterId AS NVARCHAR(10))
-SET NOCOUNT OFF;
+
 
 IF @strLetterName = 'Recent Overdue Collection Letter'
 BEGIN
@@ -361,7 +363,7 @@ BEGIN
 	SET NOCOUNT OFF;
 END
 
-IF @strLetterName = '30 Day Overdue Collection Letter'
+ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
 	(
@@ -457,7 +459,7 @@ BEGIN
 	SET NOCOUNT OFF;
 END
 
-IF @strLetterName = '60 Day Overdue Collection Letter'
+ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
 	(
@@ -553,7 +555,7 @@ BEGIN
 	SET NOCOUNT OFF;
 END
 
-IF @strLetterName = '90 Day Overdue Collection Letter'
+ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
 	(
@@ -649,7 +651,7 @@ BEGIN
 	SET NOCOUNT OFF;
 END
 
-IF @strLetterName = 'Final Overdue Collection Letter'
+ELSE IF @strLetterName = 'Final Overdue Collection Letter'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
 	(
@@ -745,7 +747,7 @@ BEGIN
 	SET NOCOUNT OFF;
 END
 
-IF @strLetterName = 'Credit Suspension'
+ELSE IF @strLetterName = 'Credit Suspension'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
 	(
@@ -821,8 +823,9 @@ BEGIN
 	SET NOCOUNT OFF;
 END
 
-IF @strLetterName = 'Expired Credit Card'
+ELSE IF @strLetterName = 'Expired Credit Card'  
 BEGIN
+	GetActiveCustomers:
 	INSERT INTO @temp_availablecustomer_table
 	(
 		intEntityCustomerId
@@ -895,7 +898,7 @@ BEGIN
 	SET NOCOUNT OFF;
 END
 
-IF @strLetterName = 'Credit Review'
+ELSE IF @strLetterName = 'Credit Review'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
 	(
@@ -970,4 +973,8 @@ BEGIN
 	ORDER BY 
 		strCustomerName
 	SET NOCOUNT OFF;
+END
+ELSE
+BEGIN
+	GOTO GetActiveCustomers
 END
