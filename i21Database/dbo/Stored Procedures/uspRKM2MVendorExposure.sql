@@ -64,19 +64,34 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
                   @intLocationId = @intLocationId,
                   @intMarketZoneId = @intMarketZoneId
 
-SELECT convert(int,row_number() OVER(ORDER BY strEntityName)) intRowNum,strEntityName strVendorName,20.1 dblRating,dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue
-		 ,convert(numeric(16,6),((isnull(dblTotalCommittedValue,0)/SUM(dblTotalCommittedValue) OVER ())*100),4) as dblTotalSpend
-		 , convert(numeric(16,6),((isnull(dblTotalCommittedVolume,0)/ 20 /*hardcoad */ )*100),4) as dblShareWithSupplier
-		 ,dblResult as dblMToM, 0.0 as dblPotentialAdditionalVolume,0 as intConcurrencyId
+SELECT convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum,strVendorName,strRating,
+		dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue,
+		CONVERT(NUMERIC(16,6),dblTotalSpend) as dblTotalSpend ,
+		CONVERT(NUMERIC(16,6),dblShareWithSupplier) as dblShareWithSupplier ,dblMToM,
+CASE WHEN 
+	(dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend,0) = 0 then 1 else dblTotalSpend end) * dblCompanyExposurePercentage <=
+	(dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier,0) = 0 then 1 else dblShareWithSupplier end) *dblSupplierSalesPercentage 
+THEN (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend,0) = 0 then 1 else dblTotalSpend end) * dblCompanyExposurePercentage 
+ELSE
+	(dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier,0) = 0 then 1 else dblShareWithSupplier end) *dblSupplierSalesPercentage 
+end dblPotentialAdditionalVolume,
+0 as intConcurrencyId
+FROM(
+SELECT strEntityName strVendorName,strRiskIndicator strRating,
+			dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue
+		 ,(isnull(dblTotalCommittedValue,0)/ SUM(CASE WHEN ISNULL(dblTotalCommittedValue,0)=0 then 1 else dblTotalCommittedValue end) OVER ())*100 as dblTotalSpend
+		 , (isnull(dblTotalCommittedVolume,0)/ CASE WHEN ISNULL(dblRiskTotalBusinessVolume,0) =0 then 1 else dblRiskTotalBusinessVolume end)*100 as dblShareWithSupplier
+		 ,dblResult as dblMToM,dblCompanyExposurePercentage,dblSupplierSalesPercentage
 FROM (
-SELECT strEntityName,convert(numeric(16,6),dblFixedPurchaseVolume) as dblFixedPurchaseVolume,
-					 convert(numeric(16,6),dblUnfixedPurchaseVolume) as dblUnfixedPurchaseVolume,
-					 convert(numeric(16,6),(dblFixedPurchaseVolume + dblUnfixedPurchaseVolume)) as dblTotalCommittedVolume,
-					 convert(numeric(16,6),dblFixedPurchaseValue) dblFixedPurchaseValue,
-					 convert(numeric(16,6),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue,
-					 convert(numeric(16,6),(dblFixedPurchaseValue + dblUnfixedPurchaseValue)) as dblTotalCommittedValue,
-					 convert(numeric(16,6),(dblResult)) as dblResult
-					 
+SELECT strEntityName,CONVERT(NUMERIC(16,6),dblFixedPurchaseVolume) as dblFixedPurchaseVolume,
+					 CONVERT(NUMERIC(16,6),dblUnfixedPurchaseVolume) as dblUnfixedPurchaseVolume,
+					 CONVERT(NUMERIC(16,6),(dblFixedPurchaseVolume + dblUnfixedPurchaseVolume)) as dblTotalCommittedVolume,
+					 CONVERT(NUMERIC(16,6),dblFixedPurchaseValue) dblFixedPurchaseValue,
+					 CONVERT(NUMERIC(16,6),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue,
+					 CONVERT(NUMERIC(16,6),(dblFixedPurchaseValue + dblUnfixedPurchaseValue)) as dblTotalCommittedValue,
+					 CONVERT(NUMERIC(16,6),(dblResult)) as dblResult
+					 ,strRiskIndicator,intRiskUnitOfMeasureId,dblRiskTotalBusinessVolume,dblCompanyExposurePercentage,dblSupplierSalesPercentage				 
+					 			 
 FROM (
 		SELECT strEntityName,
 		SUM(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblOpenQty else 0 end) dblFixedPurchaseVolume,
@@ -84,15 +99,22 @@ FROM (
 		SUM(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblQtyPrice else 0 end) dblFixedPurchaseValue,
 		SUM(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblQtyUnFixedPrice else 0 end) dblUnfixedPurchaseValue,
 		sum(dblResult) as dblResult
+		,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage
 		FROM (
-				SELECT strEntityName,sum(dblOpenQty) as dblOpenQty,sum(dblQtyPrice) dblQtyPrice,sum(dblQtyUnFixedPrice) dblQtyUnFixedPrice,strPriOrNotPriOrParPriced,sum(dblResult) dblResult from(
+				SELECT strEntityName,sum(dblOpenQty) as dblOpenQty,sum(dblQtyPrice) dblQtyPrice,sum(dblQtyUnFixedPrice) dblQtyUnFixedPrice,strPriOrNotPriOrParPriced,
+				sum(dblResult) dblResult,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage from(
 				SELECT strEntityName,dblOpenQty as dblOpenQty,
 						dblOpenQty*(isnull(dblContractBasis,0)+isnull(dblFutures,0)) dblQtyPrice,
 						dblOpenQty*(isnull(dblContractBasis,0)+ isnull(dblMarketBasis,0) + isnull(dblFuturePrice,0) ) dblQtyUnFixedPrice,
 						CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced' 
 						WHEN  ISNULL(strPriOrNotPriOrParPriced,'') = '' THEN 'Priced' ELSE strPriOrNotPriOrParPriced END strPriOrNotPriOrParPriced
-						,isnull(dblResult,0) dblResult
+						,isnull(dblResult,0) dblResult,
+						strRiskIndicator,isnull(dblRiskTotalBusinessVolume,0) as dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,
+						isnull(dblCompanyExposurePercentage,0) as dblCompanyExposurePercentage ,isnull(dblSupplierSalesPercentage,0) as dblSupplierSalesPercentage
 				FROM @tblFinalDetail  fd
+				LEFT JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
+				LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
 				WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)') )t
-GROUP BY strEntityName,strPriOrNotPriOrParPriced)t1
-GROUP BY strEntityName)t2)t2 
+GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
+GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
+)t3
