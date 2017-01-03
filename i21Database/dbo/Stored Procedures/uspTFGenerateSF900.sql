@@ -7,7 +7,7 @@
 
 AS
 
-DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM vyuTFGetTransaction WHERE strFormCode = @FormCodeParam)
+DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM tblTFTransaction WHERE strFormCode = @FormCodeParam)
 IF (@FCode IS NOT NULL)
 BEGIN
 
@@ -71,7 +71,7 @@ DECLARE @EIN NVARCHAR(50)
 		@TPStateTaxID = strTaxPayerIdentificationNumber,
 		@TPFEIN = strTaxPayerFEIN,
 		@TPDBA = strTaxPayerDBA
-		FROM vyuTFGetTransaction
+		FROM tblTFTransaction
 		WHERE uniqTransactionGuid = @Guid 
 		AND strFormCode = @FormCodeParam
 	 
@@ -497,7 +497,7 @@ DECLARE @EIN NVARCHAR(50)
 				SET @SummaryItemCount = @SummaryItemCount - 1
 			END
 			DECLARE @isTransactionEmpty NVARCHAR(20)
-				SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+				SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 				IF(@isTransactionEmpty = 'No record found.')
 					BEGIN
 						UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam

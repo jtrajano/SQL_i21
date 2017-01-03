@@ -64,12 +64,10 @@ DECLARE @tblTempInvoiceDetail TABLE (
 	SET @RCId = (SELECT intReportingComponentId FROM TFReportingComponent WHERE intId = @CountRC)
 
 		DECLARE @IncludeValidOriginState NVARCHAR(MAX) = NULL
-		SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + states.strOriginDestinationState 
-		FROM tblTFReportingComponentOriginState origin 
-		INNER JOIN tblTFOriginDestinationState states 
-			ON origin.intOriginDestinationStateId = states.intOriginDestinationStateId 
-		WHERE origin.intReportingComponentId = @RCId 
-		AND origin.strType = 'Include'
+		SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + strOriginDestinationState 
+		FROM vyuTFGetReportingComponentOriginState
+		WHERE intReportingComponentId = @RCId 
+		AND strType = 'Include'
 
 		IF(@IncludeValidOriginState IS NOT NULL)
 			BEGIN
@@ -82,12 +80,10 @@ DECLARE @tblTempInvoiceDetail TABLE (
 			END
 
 		DECLARE @ExcludeValidOriginState NVARCHAR(MAX) = NULL
-		SELECT @ExcludeValidOriginState = COALESCE(@ExcludeValidOriginState + ',', '') + states.strOriginDestinationState 
-		FROM tblTFReportingComponentOriginState origin 
-		INNER JOIN tblTFOriginDestinationState states 
-			ON origin.intOriginDestinationStateId = states.intOriginDestinationStateId 
-		WHERE origin.intReportingComponentId = @RCId 
-		AND origin.strType = 'Exclude'
+		SELECT @ExcludeValidOriginState = COALESCE(@ExcludeValidOriginState + ',', '') + strOriginDestinationState 
+		FROM vyuTFGetReportingComponentOriginState
+		WHERE intReportingComponentId = @RCId 
+		AND strType = 'Exclude'
 
 		IF(@ExcludeValidOriginState IS NOT NULL)
 			BEGIN
@@ -101,12 +97,10 @@ DECLARE @tblTempInvoiceDetail TABLE (
 
 		-- DESTINATION NON PICKUP
 		DECLARE @IncludeValidDestinationState NVARCHAR(MAX) = NULL
-		SELECT @IncludeValidDestinationState = COALESCE(@IncludeValidDestinationState + ',', '') + states.strOriginDestinationState  
-		FROM tblTFReportingComponentDestinationState destination 
-		INNER JOIN tblTFOriginDestinationState states 
-			ON destination.intOriginDestinationStateId = states.intOriginDestinationStateId 
-		WHERE destination.intReportingComponentId = @RCId 
-		AND destination.strType = 'Include'
+		SELECT @IncludeValidDestinationState = COALESCE(@IncludeValidDestinationState + ',', '') + strOriginDestinationState  
+		FROM vyuTFGetReportingComponentDestinationState 
+		WHERE intReportingComponentId = @RCId 
+		AND strType = 'Include'
 
 		IF(@IncludeValidDestinationState IS NOT NULL)
 			BEGIN
@@ -119,12 +113,10 @@ DECLARE @tblTempInvoiceDetail TABLE (
 			END
 
 		DECLARE @ExcludeValidDestinationState NVARCHAR(MAX) = NULL
-		SELECT @ExcludeValidDestinationState = COALESCE(@ExcludeValidDestinationState + ',', '') + states.strOriginDestinationState   
-		FROM tblTFReportingComponentDestinationState destination 
-		INNER JOIN tblTFOriginDestinationState states 
-			ON destination.intOriginDestinationStateId = states.intOriginDestinationStateId 
-		WHERE destination.intReportingComponentId = @RCId 
-		AND destination.strType = 'Exclude'
+		SELECT @ExcludeValidDestinationState = COALESCE(@ExcludeValidDestinationState + ',', '') + strOriginDestinationState   
+		FROM vyuTFGetReportingComponentDestinationState
+		WHERE intReportingComponentId = @RCId 
+		AND strType = 'Exclude'
 
 		IF(@ExcludeValidDestinationState IS NOT NULL)
 			BEGIN
