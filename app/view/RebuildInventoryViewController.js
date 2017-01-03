@@ -212,7 +212,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
     },
 
     createRecord: function (config, action) {
-        var record = Ext.create('Inventory.model.RepostInventory');
+        var record = Ext.create('Inventory.model.RebuildInventory');
         var d = new Date();
         record.set('intMonth', d.getMonth() + 1);
         record.set('strMonth', months[d.getMonth()].strMonth);

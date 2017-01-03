@@ -12,14 +12,13 @@ Ext.define('Inventory.Utils', {
             }
             /* Defaults method to 'GET' when method is not defined. */
             if (!options.method)
-                options.method = "GET";
+                options.method = "get";
             /* Inserts or overrides the Authorization header key-value pair when method is 'POST'. */
-            if (options.method.toUpperCase() === "POST") {
+            if (options.method.toLowerCase() === "post") {
                 if (!options.headers)
                     options.headers = {};
                 options.headers.Authorization = iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId);
             }
-            options.method = options.method.toUpperCase();
             var o = Rx.Observable.defer(function () { return Ext.Ajax.request(options); });
             return o;
         },
