@@ -818,11 +818,17 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
         var doLock = function () {
             if (current) {
-                Ext.Ajax.request({
+                Inventory.Utils.ajax({
                     timeout: 120000,
-                    url: '../Inventory/api/InventoryCount/LockInventory?inventoryCountId=' + current.get('intInventoryCountId') + '&ysnLock=' + isLock,
-                    method: 'post',
-                    success: function (response) {
+                    url: '../Inventory/api/InventoryCount/LockInventory?inventoryCountId',
+                    method: 'POST',
+                    params: {
+                        intInventoryCountId: current.get('intInventoryCountId'),
+                        ysnLock: isLock
+                    }
+                })
+                .subscribe(
+                    function(response) {
                         var jsonData = Ext.decode(response.responseText);
                         if (!jsonData.success) {
                             iRely.Functions.showErrorDialog(jsonData.message.statusText);
@@ -831,11 +837,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                             context.configuration.paging.store.load();
                         }
                     },
-                    failure: function (response) {
+                    function(response) {
                         var jsonData = Ext.decode(response.responseText);
                         iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                     }
-                });
+                );
             }
         };
 

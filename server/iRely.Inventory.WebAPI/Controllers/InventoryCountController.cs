@@ -28,15 +28,21 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetCountSheets(param, CountId));
         }
 
+        public struct LockInventoryCount
+        {
+            public int intInventoryCountId { get; set; }
+            public bool ysnLock { get; set; }
+        }
+
         [HttpPost]
         [ActionName("LockInventory")]
-        public HttpResponseMessage LockInventory(int inventoryCountId, bool ysnLock)
+        public HttpResponseMessage LockInventory([FromBody]LockInventoryCount lockIC)
         {
-            var result = _bl.LockInventory(inventoryCountId, ysnLock);
+            var result = _bl.LockInventory(lockIC.intInventoryCountId, lockIC.ysnLock);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = inventoryCountId,
+                data = lockIC,
                 success = !result.HasError,
                 message = new
                 {
