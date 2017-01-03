@@ -58,12 +58,17 @@ namespace iRely.Inventory.WebApi
             });
         }
 
+        public struct ShipmentParam
+        {
+            public int id { get; set; }
+        }
+
         [HttpPost]
         [ActionName("ProcessInvoice")]
-        public HttpResponseMessage ProcessInvoice(int id)
+        public HttpResponseMessage ProcessInvoice(ShipmentParam p)
         {
             int? newInvoice = null;
-            var result = _bl.ProcessInvoice(id, out newInvoice);
+            var result = _bl.ProcessInvoice(p.id, out newInvoice);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
@@ -101,9 +106,9 @@ namespace iRely.Inventory.WebApi
 
         [HttpPost]
         [ActionName("CalculateCharges")]
-        public HttpResponseMessage CalculateCharges(int id)
+        public HttpResponseMessage CalculateCharges(ShipmentParam p)
         {
-            var result = _bl.CalculateCharges(id);
+            var result = _bl.CalculateCharges(p.id);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {

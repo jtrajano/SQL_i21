@@ -850,18 +850,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     statics: {
         getCustomerCurrency: function(customerId, action) {
             if(customerId) {
-                Ext.Ajax.request({
+                ic.utils.ajax({
                     timeout: 120000,
-                    url: '../Inventory/api/InventoryShipment/GetCustomerCurrency?customerId=' + customerId,
+                    url: '../Inventory/api/InventoryShipment/GetCustomerCurrency',
                     method: 'GET',
-                    success: function(res) {
-                        var json = Ext.decode(res.responseText);
-                        action(true, json);
-                    },
-                    failure: function(err) {
-                        action(false, err);
+                    params: {
+                        customerId: customerId
                     }
-                });
+                })
+                    .subscribe(
+                        function(response) {
+                            var json = Ext.decode(response.responseText);
+                            action(true, json);
+                        },
+                        function(response) {
+                            action(false, response);
+                        }
+                    );
             }
         }
     },
@@ -1411,11 +1416,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            Ext.Ajax.request({
+            ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/InventoryShipment/ProcessInvoice?id=' + current.get('intInventoryShipmentId'),
-                method: 'post',
-                success: function(response){
+                url: '../Inventory/api/InventoryShipment/ProcessInvoice',
+                params: {
+                    id: current.get('intInventoryShipmentId')
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(response){
                     var jsonData = Ext.decode(response.responseText);
                     if (jsonData.success) {
                         var buttonAction = function(button) {
@@ -1444,7 +1454,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         iRely.Functions.showErrorDialog(msg);
                     }
                 },
-                failure: function(response) {
+                function(response) {
                     var jsonData = Ext.decode(response.responseText);
                     var msg = jsonData.ExceptionMessage;
                     if(!jsonData.success) {
@@ -1453,7 +1463,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                     iRely.Functions.showErrorDialog(msg);
                 }
-            });
+            );
         }
     },
 
@@ -2649,11 +2659,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var doPost = function () {
             if (current) {
-                Ext.Ajax.request({
+                ic.utils.ajax({
                     timeout: 120000,
-                    url: '../Inventory/api/InventoryShipment/CalculateCharges?id=' + current.get('intInventoryShipmentId'),
-                    method: 'post',
-                    success: function (response) {
+                    url: '../Inventory/api/InventoryShipment/CalculateCharges',
+                    params: {
+                        id: current.get('intInventoryShipmentId')
+                    },
+                method: 'POST'})
+                .subscribe(
+                    function (response) {
                         var jsonData = Ext.decode(response.responseText);
                         if (!jsonData.success) {
                             iRely.Functions.showErrorDialog(jsonData.message.statusText);
@@ -2662,11 +2676,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             context.configuration.paging.store.load();
                         }
                     },
-                    failure: function (response) {
+                    function (response) {
                         var jsonData = Ext.decode(response.responseText);
                         iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                     }
-                });
+                );
             }
         };
 
