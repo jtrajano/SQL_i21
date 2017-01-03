@@ -150,7 +150,7 @@ SET @batchIdUsed = @batchId;
 				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity + TD.dblQuantityTransferred ELSE CE.dblEquity - TD.dblQuantityTransferred END
 			WHEN NOT MATCHED BY TARGET
 				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, ysnEquityPaid, intConcurrencyId)
-				VALUES (TD.intTransferorId, TD.intFiscalYearId, 'Reserve', 0, TD.dblQuantityTransferred, 0, 1);
+				VALUES (TD.intTransferorId, TD.intFiscalYearId, 'Reserve', TD.intRefundTypeId, TD.dblQuantityTransferred, 0, 1);
 
 		UPDATE CE
 		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
