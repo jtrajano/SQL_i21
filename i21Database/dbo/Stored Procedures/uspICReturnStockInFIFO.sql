@@ -190,8 +190,8 @@ BEGIN
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,intItemUOMId = @intItemUOMId
-				,intTransactionId = r.intInventoryReceiptId
-				,strTransactionId = r.strReceiptNumber
+				,intTransactionId = rSource.intInventoryReceiptId
+				,strTransactionId = rSource.strReceiptNumber
 		FROM	tblICInventoryReceipt rSource INNER JOIN tblICInventoryReceipt r
 					ON rSource.intInventoryReceiptId = r.intSourceInventoryReceiptId
 		WHERE	r.intInventoryReceiptId = @intTransactionId

@@ -131,7 +131,7 @@ BEGIN
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
-				ON GLEntries.intJournalLineNo = Reversal.intInventoryTransactionId
+				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				AND GLEntries.intTransactionId = Reversal.intTransactionId
 				AND GLEntries.strTransactionId = Reversal.strTransactionId
 	WHERE	Reversal.strBatchId = @strBatchId

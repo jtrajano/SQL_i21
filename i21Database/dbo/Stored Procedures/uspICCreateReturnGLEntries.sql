@@ -57,13 +57,13 @@ FROM	(
 					, t.intItemLocationId
 					, t.intTransactionTypeId
 			FROM (
-				---- regular inventory transactions 
-				--SELECT	intItemId, intItemLocationId, intTransactionTypeId
-				--FROM	dbo.tblICInventoryTransaction t 
-				--WHERE	t.strBatchId = @strBatchId
-				--		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-				---- inventory-adj-qty-change transactions involved in the item return. 
-				--UNION ALL 
+				-- regular inventory transactions 
+				SELECT	intItemId, intItemLocationId, intTransactionTypeId
+				FROM	dbo.tblICInventoryTransaction t 
+				WHERE	t.strBatchId = @strBatchId
+						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+				-- inventory-adj-qty-change transactions involved in the item return. 
+				UNION ALL 
 				SELECT	DISTINCT t.intItemId, t.intItemLocationId, t.intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryReturned rtn 
 							ON t.intInventoryTransactionId = rtn.intInventoryTransactionId
