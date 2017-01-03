@@ -317,7 +317,7 @@ SELECT
 	,[intLoadId]						= NULL
 	,[strLoadNumber]					= NULL
 	,[intLoadDetailId]					= NULL
-	,[intRecipeItemId]					= NULL
+	,[intRecipeItemId]					= SOD.[intRecipeItemId]
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
 	,[strContractNumber]				= ARCC.[strContractNumber]
 	,[intContractDetailId]				= SOD.[intContractDetailId]
@@ -1224,7 +1224,7 @@ SELECT DISTINCT
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
 	,[ysnBlended]						= NULL
-	,[intRecipeId]						= NULL
+	,[intRecipeId]						= MFI.intRecipeId
 	,[intSubLocationId]					= NULL
 	,[intCostTypeId]					= NULL
 	,[intMarginById]					= NULL
@@ -1289,7 +1289,10 @@ LEFT OUTER JOIN
 		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
 LEFT OUTER JOIN
 	tblSMCurrency SMC
-		ON ICISI.[intCurrencyId] = SMC.[intCurrencyID] 
+		ON ICISI.[intCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN
+	tblMFRecipeItem MFI
+		ON MFG.intRecipeItemId = MFI.intRecipeItemId
 WHERE ISNULL(ARID.[intRecipeItemId],0) = 0
 
 UNION ALL 
