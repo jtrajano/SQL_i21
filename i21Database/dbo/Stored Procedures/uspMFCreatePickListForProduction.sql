@@ -396,6 +396,10 @@ BEGIN
 			,L.dtmDateCreated
 		FROM tblICLot L
 		JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
+		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+					AND SL.ysnAllowConsume = 1
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+					AND R.strInternalCode = 'STOCK'
 		WHERE L.intItemId = @intItemId
 			AND L.intLocationId = @intLocationId
 			AND LS.strPrimaryStatus IN ('Active')
