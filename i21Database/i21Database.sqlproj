@@ -4690,6 +4690,7 @@
     <Build Include="dbo\Views\vyuGRSettleStorageNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRSettleContractNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRGetSettleStorageTicket.sql" />
+    <Build Include="dbo\Views\vyuHDJiraRollUp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
