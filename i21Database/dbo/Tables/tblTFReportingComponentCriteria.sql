@@ -1,12 +1,25 @@
-﻿CREATE TABLE [dbo].[tblTFReportingComponentCriteria]
+﻿CREATE TABLE [dbo].[tblTFReportingComponentCriteria](
+	[intReportingComponentCriteriaId] [int] IDENTITY(1,1) NOT NULL,
+	[intTaxCategoryId] [int] NOT NULL,
+	[intReportingComponentId] [int] NOT NULL,
+	[strCriteria] [nvarchar](10) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intConcurrencyId] [int] NULL,
+ CONSTRAINT [PK_tblTFTaxCriteria] PRIMARY KEY CLUSTERED 
 (
-	[intReportingComponentCriteriaId] INT IDENTITY NOT NULL,
-	[intTaxCategoryId] INT NOT NULL,
-	[intReportingComponentId] INT NOT NULL,
-	[strCriteria] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL, 
-	[intConcurrencyId] INT DEFAULT((1)) NULL,
-    CONSTRAINT [PK_tblTFReportingComponentCriteria] PRIMARY KEY (intReportingComponentCriteriaId),
-	CONSTRAINT [FK_tblTFReportingComponentCriteria_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId]) ON UPDATE CASCADE ON DELETE CASCADE
-)
+	[intReportingComponentCriteriaId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
 
+GO
+
+ALTER TABLE [dbo].[tblTFReportingComponentCriteria] ADD  CONSTRAINT [DF_tblTFTaxCriteria_intConcurrencyId]  DEFAULT ((1)) FOR [intConcurrencyId]
+GO
+
+ALTER TABLE [dbo].[tblTFReportingComponentCriteria]  WITH CHECK ADD  CONSTRAINT [FK_tblTFTaxCriteria_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId])
+REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[tblTFReportingComponentCriteria] CHECK CONSTRAINT [FK_tblTFTaxCriteria_tblTFReportingComponent]
 GO
