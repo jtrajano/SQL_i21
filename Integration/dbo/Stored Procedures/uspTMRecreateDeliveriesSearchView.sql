@@ -103,7 +103,7 @@ BEGIN
 					,F.dtmInvoiceDate
 					,F.strBulkPlantNumber
 					,strProductDelivered = F.strProductDelivered
-					,F.strSalesPersonID
+					,strSalesPersonID = H.strEntityNo
 					,C.dblTotalCapacity
 					,F.dblQuantityDelivered
 					,F.dblCalculatedBurnRate
@@ -125,6 +125,10 @@ BEGIN
 					ON C.intSiteID = F.intSiteID
 				INNER JOIN tblICItem I
 					ON C.intProduct = I.intItemId
+				LEFT JOIN tblARInvoice G
+					ON F.intInvoiceId = G.intInvoiceId
+				LEFT JOIN tblEMEntity H
+					ON G.intEntitySalespersonId = H.intEntityId
 		')
 	END
 END
