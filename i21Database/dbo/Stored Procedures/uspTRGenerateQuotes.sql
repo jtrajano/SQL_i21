@@ -196,7 +196,7 @@ BEGIN TRY
 					, @ZipCode = strZipCode
 				FROM #tmpQuoteDetail
 				
-				SELECT @RackPrice = ISNULL(tblPatch.dblRackPrice, tblTRQuoteDetail.dblRackPrice)
+				SELECT @RackPrice = ISNULL(tblPatch.dblRackPrice, ISNULL(tblTRQuoteDetail.dblRackPrice, 0.000000))
 					, @DeviationAmount = ISNULL(tblPatch.dblDeviation, 0.000000)
 				FROM tblTRQuoteDetail
 				LEFT JOIN (
@@ -210,7 +210,28 @@ BEGIN TRY
 					LEFT JOIN vyuTRSupplyPointView FixedRack ON FixedRack.intEntityVendorId = SP.intRackVendorId
 						AND FixedRack.intEntityLocationId = SP.intRackLocationId
 				) tblPatch ON tblPatch.intSpecialPriceId = tblTRQuoteDetail.intSpecialPriceId
-					AND tblTRQuoteDetail.intQuoteDetailId = @QuoteDetailId
+				WHERE tblTRQuoteDetail.intQuoteDetailId = @QuoteDetailId
+
+				EXEC uspTRGetCustomerFreight @intEntityCustomerId = @CustomerId,
+					 @intItemId = @ItemId,
+					 @strZipCode = @ZipCode,
+					 @intShipViaId = @ShipViaId,
+					 @intShipToId = @ShipToLocationId,
+					 @dblReceiptGallons = @QtyOrdered,
+					 @dblInvoiceGallons = @QtyOrdered,
+					 @dtmReceiptDate = @dtmEffectiveDate,
+					 @dtmInvoiceDate = @dtmEffectiveDate,
+					 @ysnToBulkPlant = 0,
+					 @dblInvoiceFreightRate = @FreightRate OUTPUT,
+					 @dblReceiptFreightRate = NULL,
+					 @dblReceiptSurchargeRate = NULL,
+					 @dblInvoiceSurchargeRate = @SurchargeRate OUTPUT,
+					 @ysnFreightInPrice = NULL,
+					 @ysnFreightOnly = NULL
+
+				SET @QuotePrice = @RackPrice + @DeviationAmount + @FreightRate
+				SET @Margin = @QuotePrice - @RackPrice
+				SET @ExtProfit = @QtyOrdered * @Margin
 
 				SELECT *
 				INTO #tmpTaxes
@@ -232,31 +253,45 @@ BEGIN TRY
 					, NULL
 					, NULL
 					, 0
+					, 0
 				)
+
+				INSERT INTO tblTRQuoteDetailTax(
+					intQuoteDetailId
+					, intTaxGroupId
+					, intTaxCodeId
+					, intTaxClassId
+					, strTaxableByOtherTaxes
+					, strCalculationMethod
+					, dblRate
+					, dblTax
+					, dblAdjustedTax
+					, intTaxAccountId
+					, ysnTaxAdjusted
+					, ysnSeparateOnInvoice
+					, ysnCheckoffTax
+					, strTaxCode
+				)
+				SELECT 
+					@QuoteDetailId
+					, intTaxGroupId
+					, intTaxCodeId
+					, intTaxClassId
+					, strTaxableByOtherTaxes
+					, strCalculationMethod
+					, dblRate
+					, dblTax
+					, dblAdjustedTax
+					, intTaxAccountId
+					, 0
+					, 0
+					, ysnCheckoffTax
+					, strTaxCode
+				FROM #tmpTaxes
+				WHERE ISNULL(dblAdjustedTax, 0) <> 0
 
 				SELECT @Tax = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
 				FROM #tmpTaxes
-				SELECT * FROM vyuTRSupplyPointView
-				EXEC uspTRGetCustomerFreight @intEntityCustomerId = @CustomerId,
-					 @intItemId = @ItemId,
-					 @strZipCode = @ZipCode,
-					 @intShipViaId = @ShipViaId,
-					 @intShipToId = @ShipToLocationId,
-					 @dblReceiptGallons = @QtyOrdered,
-					 @dblInvoiceGallons = @QtyOrdered,
-					 @dtmReceiptDate = @dtmEffectiveDate,
-					 @dtmInvoiceDate = @dtmEffectiveDate,
-					 @ysnToBulkPlant = 0,
-					 @dblInvoiceFreightRate = @FreightRate OUTPUT,
-					 @dblReceiptFreightRate = NULL,
-					 @dblReceiptSurchargeRate = NULL,
-					 @dblInvoiceSurchargeRate = @SurchargeRate OUTPUT,
-					 @ysnFreightInPrice = NULL,
-					 @ysnFreightOnly = NULL
-
-				SET @QuotePrice = @RackPrice + @DeviationAmount + @FreightRate
-				SET @Margin = @QuotePrice - @RackPrice
-				SET @ExtProfit = @QtyOrdered * @Margin
 
 				UPDATE tblTRQuoteDetail
 				SET dblRackPrice = @RackPrice 

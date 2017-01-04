@@ -1019,16 +1019,6 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Shipping Instruction')
 
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 106
-			,[strTransactionType]	= N'Process Refund'
-			,[strPrefix]			= N'PR-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Patronage'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Process Refund')
-
-	UNION ALL
 	SELECT	[intStartingNumberId]	= 107
 			,[strTransactionType]	= N'Inventory Return'
 			,[strPrefix]			= N'RTN-'
@@ -1037,6 +1027,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inventory Return')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 108
+			,[strTransactionType]	= N'Process Refund'
+			,[strPrefix]			= N'PR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Process Refund')
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF

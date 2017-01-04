@@ -68,6 +68,7 @@ BEGIN
 		SET @strTransactionId = NULL
 		SELECT	@strTransactionId = MAX(CAST(REPLACE(strBillId, @strPrefix, '') AS INT))			
 		FROM	dbo.tblAPBill
+		WHERE intTransactionType = 1
 		
 		IF (@strTransactionId IS NOT NULL)	
 		BEGIN 	

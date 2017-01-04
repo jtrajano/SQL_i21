@@ -60,6 +60,7 @@ BEGIN
 			, NULL
 			, NULL
 			, 0
+			, 0
 		)
 
 		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
