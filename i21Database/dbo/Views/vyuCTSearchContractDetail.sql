@@ -50,7 +50,10 @@ AS
 			CL.strLocationName,				
 			FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,				
 			CU.strCurrency,					
-			
+			LP.strCity						AS	strLoadingPoint,
+			DP.strCity						AS	strDestinationPoint,
+			OG.strCountry					AS	strOrigin,
+			CA.strDescription				AS	strProductType,
 			--Required by other modules
 		
 			IM.strLotTracking,				
@@ -97,6 +100,11 @@ AS
 	JOIN	tblICItemLocation				IL	ON	IL.intItemId				=	IM.intItemId				AND
 													IL.intLocationId			=	CD.intCompanyLocationId		LEFT
 	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
+	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
+	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intLoadingPortId			LEFT
+	JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	IM.intOriginId				LEFT
+	JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
+												AND	CA.strType					=	'ProductType'				LEFT
 	JOIN	(
 				SELECT		intContractDetailId,ISNULL(SUM(dblReservedQuantity),0) AS dblReservedQuantity 
 				FROM		tblLGReservation 
