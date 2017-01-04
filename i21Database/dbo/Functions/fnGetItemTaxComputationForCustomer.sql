@@ -15,6 +15,7 @@
 	,@CardId					INT
 	,@VehicleId					INT
 	,@DisregardExemptionSetup	BIT
+	,@ExcludeCheckOff			BIT
 )
 RETURNS @returntable TABLE
 (
@@ -237,11 +238,11 @@ BEGIN
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.000000 ELSE (@ItemPrice * @QtyShipped) * (@TaxRate/100.000000) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@ItemPrice * @QtyShipped) * (@TaxRate/100.000000) END))
 									END
 								ELSE
 									BEGIN
-										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.000000 ELSE (@QtyShipped * @TaxRate) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@QtyShipped * @TaxRate) END))
 									END
 							END
 					END 
@@ -266,6 +267,9 @@ BEGIN
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
+
+			IF(@ExcludeCheckOff = 1 AND @CheckoffTax = 1)
+				SET @ItemTaxAmount = @ZeroDecimal;
 			
 			UPDATE
 				@ItemTaxes

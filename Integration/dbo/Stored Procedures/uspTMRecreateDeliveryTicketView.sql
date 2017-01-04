@@ -149,6 +149,7 @@ BEGIN
 																	,NULL
 																	,NULL
 																	,0
+																	,0
 																)
 				,intSiteId = A.intSiteID
 				,M.strDeliveryTicketFormat
