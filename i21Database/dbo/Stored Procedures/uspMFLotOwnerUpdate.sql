@@ -10,6 +10,7 @@ BEGIN TRY
 		,@TransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intOldItemOwnerId INT
+		,@intOwnerId INT
 
 	SELECT @strLotNumber = strLotNumber
 		,@intItemId = intItemId
@@ -21,6 +22,10 @@ BEGIN TRY
 	SELECT @intOldItemOwnerId = intItemOwnerId
 	FROM tblMFLotInventory
 	WHERE intLotId = @intLotId
+
+	SELECT @intOwnerId = intOwnerId
+	FROM tblICItemOwner
+	WHERE intItemOwnerId=@intNewItemOwnerId
 
 	IF ISNULL(@strLotNumber, '') = ''
 	BEGIN
@@ -45,6 +50,22 @@ BEGIN TRY
 		SELECT 1
 			,@intLotId
 			,@intNewItemOwnerId
+
+		UPDATE tblMFItemOwnerDetail
+		SET dtmToDate = @dtmDate
+		WHERE intLotId = @intLotId
+			AND dtmToDate IS NULL
+
+		INSERT INTO tblMFItemOwnerDetail (
+			intLotId
+			,intItemId
+			,intOwnerId
+			,dtmFromDate
+			)
+		SELECT @intLotId
+			,@intItemId
+			,@intOwnerId
+			,@dtmDate
 
 		EXEC uspMFAdjustInventory @dtmDate = @dtmDate
 			,@intTransactionTypeId = 41
@@ -74,6 +95,22 @@ BEGIN TRY
 			SET intItemOwnerId = @intNewItemOwnerId
 				,intConcurrencyId = (intConcurrencyId + 1)
 			WHERE intLotId = @intLotId
+
+			UPDATE tblMFItemOwnerDetail
+			SET dtmToDate = @dtmDate
+			WHERE intLotId = @intLotId
+				AND dtmToDate IS NULL
+
+			INSERT INTO tblMFItemOwnerDetail (
+				intLotId
+				,intItemId
+				,intOwnerId
+				,dtmFromDate
+				)
+			SELECT @intLotId
+				,@intItemId
+				,@intOwnerId
+				,@dtmDate
 
 			EXEC uspMFAdjustInventory @dtmDate = @dtmDate
 				,@intTransactionTypeId = 41

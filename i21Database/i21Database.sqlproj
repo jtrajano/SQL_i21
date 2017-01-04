@@ -4697,6 +4697,7 @@
     <Build Include="dbo\Views\vyuHDJiraRollUp.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetSampleLotStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReport.sql" />
+    <Build Include="dbo\Tables\tblMFItemOwnerDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
