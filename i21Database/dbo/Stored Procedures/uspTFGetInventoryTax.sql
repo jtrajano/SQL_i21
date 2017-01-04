@@ -1,401 +1,390 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFGetInventoryTax]
-
-@Guid NVARCHAR(50),
-@ReportingComponentId NVARCHAR(MAX),
-@DateFrom NVARCHAR(50),
-@DateTo NVARCHAR(50),
-@IsEdi NVARCHAR(50),
-@Refresh NVARCHAR(5)
+	@Guid NVARCHAR(50)
+	, @ReportingComponentId NVARCHAR(MAX)
+	, @DateFrom DATETIME
+	, @DateTo DATETIME
+	, @IsEdi BIT
+	, @Refresh BIT
 
 AS
 
-DECLARE @Count INT
-DECLARE @CountRC INT
-DECLARE @InventoryReceiptItemId NVARCHAR(50)
-DECLARE @QueryInvReceiptRecord NVARCHAR(MAX)
-DECLARE @QueryInvReceiptItemId NVARCHAR(MAX)
-DECLARE @QueryTaxCategory NVARCHAR(MAX)
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
-DECLARE @TaxCodeId NVARCHAR(50)
-DECLARE @TaxCategoryCount INT
-DECLARE @TaxCriteria NVARCHAR(10)
-DECLARE @TaxCategory NVARCHAR(MAX)
-DECLARE @IsValidCategory INT
-DECLARE @QueryrReceiptItem NVARCHAR(MAX)
-DECLARE @QueryRC NVARCHAR(MAX)
-DECLARE @RCId NVARCHAR(50)
+DECLARE @ErrorMessage NVARCHAR(4000)
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
 
--- ORIGIN/DESTINATION
-DECLARE @IncludeOriginState NVARCHAR(250)
-DECLARE @ExcludeOriginState NVARCHAR(250)
-DECLARE @IncludeDestinationState NVARCHAR(250)
-DECLARE @ExcludeDestinationState NVARCHAR(250)
--- USER DEFINED TABLES
-DECLARE @TFReportingComponent TFReportingComponent
-DECLARE @TFReceiptTransaction TFReceiptTransaction
-DECLARE @TFTaxCategory TFTaxCategory
-DECLARE @TFReceiptItem TFReceiptItem
-DECLARE @TFTransaction TFTransaction
---
-DECLARE @tblTempReceiptItem2 TABLE (
-			intId INT IDENTITY(1,1),
-			intInventoryReceiptItemId INT
-		 )
+BEGIN TRY
 
-IF @Refresh = 'true'
+	DECLARE @InventoryReceiptItemId NVARCHAR(50)
+	DECLARE @TaxCodeId NVARCHAR(50)
+	DECLARE @TaxCriteria NVARCHAR(10)
+	DECLARE @TaxCategory NVARCHAR(MAX)
+	DECLARE @QueryrReceiptItem NVARCHAR(MAX)
+	DECLARE @QueryRC NVARCHAR(MAX)
+	DECLARE @RCId NVARCHAR(50)
+
+	-- ORIGIN/DESTINATION
+	DECLARE @IncludeOriginState NVARCHAR(250)
+	DECLARE @ExcludeOriginState NVARCHAR(250)
+	DECLARE @IncludeDestinationState NVARCHAR(250)
+	DECLARE @ExcludeDestinationState NVARCHAR(250)
+	-- USER DEFINED TABLES
+	DECLARE @TFReceiptTransaction TFReceiptTransaction
+	DECLARE @TFTaxCategory TFTaxCategory
+	DECLARE @TFReceiptItem TFReceiptItem
+	DECLARE @TFTransaction TFTransaction
+	--
+	DECLARE @tblTempReceiptItem2 TABLE (
+		intId INT IDENTITY(1,1),
+		intInventoryReceiptItemId INT)
+
+	IF @Refresh = 1
 	BEGIN
-		DELETE FROM tblTFTransactions
+		DELETE FROM tblTFTransaction
 	END
-	DELETE FROM tblTFTransactions 
-		WHERE uniqTransactionGuid = @Guid 
-		AND strProductCode = 'No record found.'
 
-		SELECT @QueryRC = 'SELECT ''' + REPLACE (@ReportingComponentId,',',''' UNION SELECT ''') + ''''
-		INSERT INTO @TFReportingComponent (intReportingComponentId)
-		EXEC(@QueryRC)
-
-		SET @CountRC = (select count(intId) from @TFReportingComponent) 
-		WHILE(@CountRC > 0)
-		BEGIN
-		SET @RCId = (SELECT intReportingComponentId FROM @TFReportingComponent WHERE intId = @CountRC)
-
-		-- ORIGIN
-			DECLARE @IncludeValidOriginState NVARCHAR(MAX) = NULL
-			SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + strOriginDestinationState
-				FROM vyuTFGetReportingComponentOriginState
-				WHERE intReportingComponentId = @RCId
-				AND strType = 'Include'
-						
-
-			IF(@IncludeValidOriginState IS NOT NULL)
-				BEGIN
-					SET @IncludeValidOriginState = REPLACE(@IncludeValidOriginState,',',''',''')
-					SET @IncludeOriginState = ' AND tblEMEntityLocation.strState IN (''' + @IncludeValidOriginState + ''')'
-				END
-			ELSE
-				BEGIN
-					SET @IncludeOriginState = ''
-				END
-
-			DECLARE @ExcludeValidOriginState NVARCHAR(MAX) = NULL
-			SELECT @ExcludeValidOriginState = COALESCE(@ExcludeValidOriginState + ',', '') + strOriginDestinationState  
-			FROM vyuTFGetReportingComponentOriginState
-			WHERE intReportingComponentId = @RCId
-			AND strType = 'Exclude'
-			
-			IF(@ExcludeValidOriginState IS NOT NULL)
-				BEGIN
-					SET @ExcludeValidOriginState = REPLACE(@ExcludeValidOriginState,',',''',''')
-					SET @ExcludeOriginState = ' AND tblEMEntityLocation.strState NOT IN (''' + @ExcludeValidOriginState + ''')'
-				END
-			ELSE
-				BEGIN
-					SET @ExcludeOriginState = ''
-				END
-
-			-- DESTINATION
-			DECLARE @IncludeValidDestinationState NVARCHAR(MAX) = NULL
-			SELECT @IncludeValidDestinationState = COALESCE(@IncludeValidDestinationState + ',', '') + strOriginDestinationState
-			FROM vyuTFGetReportingComponentDestinationState
-				WHERE intReportingComponentId = @RCId 
-				AND strType = 'Include'
-
-			IF(@IncludeValidDestinationState IS NOT NULL)
-				BEGIN
-					SET @IncludeValidDestinationState = REPLACE(@IncludeValidDestinationState,',',''',''')
-					SET @IncludeDestinationState = ' AND tblSMCompanyLocation.strStateProvince IN (''' + @IncludeValidDestinationState + ''')'
-				END
-			ELSE
-				BEGIN
-					SET @IncludeDestinationState = ''
-				END
-
-			DECLARE @ExcludeValidDestinationState NVARCHAR(MAX) = NULL
-			SELECT @ExcludeValidDestinationState = COALESCE(@ExcludeValidDestinationState + ',', '') + strOriginDestinationState  
-			FROM vyuTFGetReportingComponentDestinationState
-				WHERE intReportingComponentId = @RCId 
-			AND strType = 'Exclude'
-			
-			
-			IF(@ExcludeValidDestinationState IS NOT NULL)
-				BEGIN
-					SET @ExcludeValidDestinationState = REPLACE(@ExcludeValidDestinationState,',',''',''')
-					SET @ExcludeDestinationState = ' AND tblSMCompanyLocation.strStateProvince NOT IN (''' + @ExcludeValidDestinationState + ''')'
-				END
-			ELSE
-				BEGIN
-					SET @ExcludeDestinationState = ''
-				END
-
-		 -- GET INVENTORY RECEIPT/S
-		 SET @QueryInvReceiptItemId = 'SELECT DISTINCT 0, tblICInventoryReceiptItem.intInventoryReceiptItemId, tblICInventoryReceipt.strBillOfLading
-									FROM tblEMEntityLocation INNER JOIN tblICInventoryReceiptItem INNER JOIN
-										 tblICInventoryReceipt ON tblICInventoryReceiptItem.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId INNER JOIN
-										 tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId INNER JOIN
-										 tblICItemMotorFuelTax INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCode ON 
-										 tblICInventoryReceiptItem.intItemId = tblICItemMotorFuelTax.intItemId INNER JOIN
-										 tblEMEntity ON tblICInventoryReceipt.intEntityVendorId = tblEMEntity.intEntityId ON tblEMEntityLocation.intEntityLocationId = tblICInventoryReceipt.intShipFromId INNER JOIN
-										 tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
-										WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
-										AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''' 
-										' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-										' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND tblICInventoryReceipt.ysnPosted = 1'
-		
-	     DECLARE @HasCriteria INT = (SELECT TOP 1 tblTFTaxCriteria.intTaxCategoryId 
-			FROM tblTFTaxCriteria INNER JOIN tblTFReportingComponent 
-				ON tblTFTaxCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId 
-				WHERE (tblTFTaxCriteria.intReportingComponentId = @RCId))
-
-				 IF(@HasCriteria IS NOT NULL)
-					BEGIN
-					DECLARE @QueryInventoryWCriteria1 NVARCHAR(MAX)
-					DECLARE @QueryInventoryWCriteria2 NVARCHAR(MAX)
-					SET @QueryInventoryWCriteria1 = 'SELECT DISTINCT 
-								 tblICInventoryReceiptItem.intInventoryReceiptItemId, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode, tblTFReportingComponent.intReportingComponentId, 
-								 tblTFReportingComponent.strScheduleCode, tblTFReportingComponent.strType, tblTFReportingComponentProductCode.strProductCode, tblICInventoryReceipt.strBillOfLading, tblICInventoryReceiptItem.dblReceived, 
-								 tblICInventoryReceiptItem.dblGross, tblICInventoryReceiptItem.dblNet, tblICInventoryReceiptItem.dblBillQty, tblICInventoryReceipt.dtmReceiptDate, tblSMShipVia.strShipVia, tblSMShipVia.strTransporterLicense, 
-								 tblSMShipVia.strTransportationMode, tblEMEntity.strName AS strVendorName, tblEMEntity_Transporter.strName AS strTransporterName, tblEMEntity.strFederalTaxId AS strVendorFEIN, 
-								 tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN, tblSMCompanySetup.strCompanyName, tblSMCompanySetup.strAddress, tblSMCompanySetup.strCity, tblSMCompanySetup.strState, 
-								 tblSMCompanySetup.strZip, tblSMCompanySetup.strPhone, tblSMCompanySetup.strStateTaxID, tblSMCompanySetup.strFederalTaxID, tblEMEntityLocation.strState AS strOriginState, 
-								 tblSMCompanyLocation.strStateProvince, tblTFTerminalControlNumber.strTerminalControlNumber
-							FROM tblTRSupplyPoint INNER JOIN
-								 tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId FULL OUTER JOIN
-								 tblEMEntityLocation INNER JOIN
-								 tblICInventoryReceiptItem INNER JOIN
-								 tblICInventoryReceipt ON tblICInventoryReceiptItem.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId INNER JOIN
-								 tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId INNER JOIN
-								 tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId INNER JOIN
-								 tblICItemMotorFuelTax INNER JOIN
-								 tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCode INNER JOIN
-								 tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
-								 tblICInventoryReceiptItem.intItemId = tblICItemMotorFuelTax.intItemId INNER JOIN
-								 tblTFTaxCriteria ON tblTFTaxCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId INNER JOIN
-								 tblTFTaxCategory ON tblTFTaxCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId INNER JOIN
-								 tblEMEntity ON tblICInventoryReceipt.intEntityVendorId = tblEMEntity.intEntityId ON tblEMEntityLocation.intEntityLocationId = tblICInventoryReceipt.intShipFromId LEFT OUTER JOIN
-								 tblSMTaxCode ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId AND tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId ON 
-								 tblTRSupplyPoint.intEntityVendorId = tblICInventoryReceipt.intShipFromId FULL OUTER JOIN
-								 tblSMShipVia FULL OUTER JOIN
-								 tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId = tblEMEntity_Transporter.intEntityId ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityShipViaId CROSS JOIN
-								 tblSMCompanySetup '
-						SET @QueryInventoryWCriteria2 = 'WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
-									 AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
-									 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-									 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND tblICInventoryReceipt.ysnPosted = 1'
-
-						SET @QueryInvReceiptRecord = @QueryInventoryWCriteria1 + @QueryInventoryWCriteria2
-					END
-				ELSE
-					BEGIN
-					DECLARE @QueryInventory1 NVARCHAR(MAX)
-					DECLARE @QueryInventory2 NVARCHAR(MAX)
-
-						SET @QueryInventory1 = 'SELECT DISTINCT 
-								 tblICInventoryReceiptItem.intInventoryReceiptItemId, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode, tblTFReportingComponent.intReportingComponentId, 
-								 tblTFReportingComponent.strScheduleCode, tblTFReportingComponent.strType, tblTFReportingComponentProductCode.strProductCode, tblICInventoryReceipt.strBillOfLading, tblICInventoryReceiptItem.dblReceived, 
-								 tblICInventoryReceiptItem.dblGross, tblICInventoryReceiptItem.dblNet, tblICInventoryReceiptItem.dblBillQty, tblICInventoryReceipt.dtmReceiptDate, tblSMShipVia.strShipVia, tblSMShipVia.strTransporterLicense, 
-								 tblSMShipVia.strTransportationMode, tblEMEntity.strName AS strVendorName, tblEMEntity_Transporter.strName AS strTransporterName, tblEMEntity.strFederalTaxId AS strVendorFEIN, 
-								 tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN, tblSMCompanySetup.strCompanyName, tblSMCompanySetup.strAddress, tblSMCompanySetup.strCity, tblSMCompanySetup.strState, 
-								 tblSMCompanySetup.strZip, tblSMCompanySetup.strPhone, tblSMCompanySetup.strStateTaxID, tblSMCompanySetup.strFederalTaxID, tblEMEntityLocation.strState AS strOriginState, 
-								 tblSMCompanyLocation.strStateProvince, tblTFTerminalControlNumber.strTerminalControlNumber
-							FROM tblTRSupplyPoint INNER JOIN
-								 tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId RIGHT OUTER JOIN
-								 tblSMTaxCode INNER JOIN
-								 tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId INNER JOIN
-								 tblICInventoryReceiptItem INNER JOIN
-								 tblICInventoryReceipt ON tblICInventoryReceiptItem.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId INNER JOIN
-								 tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId INNER JOIN
-								 tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId INNER JOIN
-								 tblICItemMotorFuelTax INNER JOIN
-								 tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCode INNER JOIN
-								 tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON tblICInventoryReceiptItem.intItemId = tblICItemMotorFuelTax.intItemId ON 
-								 tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId INNER JOIN
-								 tblEMEntityLocation ON tblICInventoryReceipt.intShipFromId = tblEMEntityLocation.intEntityLocationId INNER JOIN
-								 tblEMEntity ON tblICInventoryReceipt.intEntityVendorId = tblEMEntity.intEntityId ON tblTRSupplyPoint.intEntityLocationId = tblICInventoryReceipt.intShipFromId FULL OUTER JOIN
-								 tblSMShipVia FULL OUTER JOIN
-								 tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId = tblEMEntity_Transporter.intEntityId ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityShipViaId CROSS JOIN
-								 tblSMCompanySetup '
-						SET @QueryInventory2 = 'WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
-									 AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
-									 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-									 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND tblICInventoryReceipt.ysnPosted = 1'
-
-						SET @QueryInvReceiptRecord = @QueryInventory1 + @QueryInventory2
-					END
-			
-		DELETE FROM @TFTransaction
-		INSERT INTO @TFTransaction
-		EXEC(@QueryInvReceiptRecord)
-
-		DELETE FROM @TFReceiptTransaction
-		INSERT INTO @TFReceiptTransaction
-		EXEC(@QueryInvReceiptItemId)
-
-		-- SET INCREMENT ID TEMP TRANSACTION
-		DECLARE @tblTempReceiptTransation_intId INT
-		SET @tblTempReceiptTransation_intId = 0 UPDATE @TFReceiptTransaction SET @tblTempReceiptTransation_intId = intId = @tblTempReceiptTransation_intId + 1
-
-		-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
-		SET @QueryTaxCategory = 'SELECT 0, tblSMTaxCode.intTaxCodeId, tblTFTaxCriteria.strCriteria
-								 FROM   tblSMTaxCode INNER JOIN
-										tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId INNER JOIN
-										tblTFTaxCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFTaxCriteria.intTaxCategoryId
-								 WHERE  (tblTFTaxCriteria.intReportingComponentId IN(' + @RCId + '))'
-						
-		DELETE FROM @TFTaxCategory			 
-		INSERT INTO @TFTaxCategory
-		EXEC(@QueryTaxCategory)
-
-		-- SET INCREMENT ID TEMP CATEGORY
-		DECLARE @tblTempTaxCategory_intId int
-		SET @tblTempTaxCategory_intId = 0 UPDATE @TFTaxCategory SET @tblTempTaxCategory_intId = intId = @tblTempTaxCategory_intId + 1
-
-		SET @Count = (select count(intId) from @TFReceiptTransaction) 				
-				WHILE(@Count > 0) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
-					BEGIN
-						SET @InventoryReceiptItemId = (SELECT intInventoryReceiptItemId FROM @TFReceiptTransaction WHERE intId = @Count)
-						 SET @TaxCategoryCount = (select count(intId) from @TFTaxCategory)
-								 WHILE(@TaxCategoryCount > 0) -- LOOP ON TAX CATEGORY
-								 BEGIN
-									
-									SET @TaxCodeId = (SELECT intTaxCodeId FROM @TFTaxCategory WHERE intId = @TaxCategoryCount)
-									SET @TaxCriteria = (SELECT strCriteria FROM @TFTaxCategory WHERE intId = @TaxCategoryCount)
-									SET @QueryrReceiptItem = 'SELECT  DISTINCT tblICInventoryReceiptItemTax.intInventoryReceiptItemId FROM
-																	 tblICInventoryReceiptItem INNER JOIN
-																	 tblICInventoryReceiptItemTax 
-																	 ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId 
-															  WHERE  (tblICInventoryReceiptItem.intInventoryReceiptItemId IN(''' + @InventoryReceiptItemId + '''))
-																	 AND (tblICInventoryReceiptItemTax.intTaxCodeId = ''' + @TaxCodeId + ''')
-																	 AND (tblICInventoryReceiptItemTax.dblTax ' + @TaxCriteria + ')'
-									DELETE FROM @TFReceiptItem
-									INSERT INTO @TFReceiptItem
-									EXEC(@QueryrReceiptItem)
+	DELETE FROM tblTFTransaction
+	WHERE uniqTransactionGuid = @Guid 
+		AND strProductCode = 'No record found.'	
 	
-									SET @IsValidCategory = (SELECT intInventoryReceiptItemId FROM @TFReceiptItem)
-											 IF (@IsValidCategory IS NULL) -- IF CATEGORY DOES NOT EXIST, EXIT LOOP
-												 BEGIN
-												 DECLARE @QueryReceiptItemId NVARCHAR(MAX)
-															SET @QueryReceiptItemId = 'SELECT  DISTINCT tblICInventoryReceiptItemTax.intInventoryReceiptItemId FROM
-																	 tblICInventoryReceiptItem INNER JOIN tblICInventoryReceiptItemTax 
-																	 ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId 
-															  WHERE  (tblICInventoryReceiptItem.intInventoryReceiptItemId IN(''' + @InventoryReceiptItemId + '''))
-																	 AND (tblICInventoryReceiptItemTax.intTaxCodeId = ''' + @TaxCodeId + ''')'
-																
-															DELETE FROM @tblTempReceiptItem2
-															INSERT INTO @tblTempReceiptItem2
-															EXEC(@QueryReceiptItemId)
-															
-															DECLARE @CountReceiptItemId INT
-															SET @CountReceiptItemId = (SELECT COUNT(intInventoryReceiptItemId) FROM @tblTempReceiptItem2)
-														IF (@CountReceiptItemId > 0)
-															BEGIN
-																DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
-																BREAK
-															END
-														ELSE
-															BEGIN
-																IF(@TaxCriteria = '<> 0')
-																	BEGIN
-																		DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
-																		BREAK
-																	END
-															END
-												 END
-									SET @TaxCategoryCount = @TaxCategoryCount - 1
-								 END
-						SET @Count = @Count - 1
-				END
-			
-				IF (@ReportingComponentId <> '')
-					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, 
-																	   intItemId, 
-																	   intTaxAuthorityId, 
-																	   strTaxAuthority,
-																	   strFormCode, 
-																	   intReportingComponentId, 
-																	   strScheduleCode,
-																	   strType,
-																	   --intProductCodeId, 
-																	   strProductCode, 
-																	   strBillOfLading, 
-																	   dblReceived, 
-																	   dblGross, 
-																	   dblNet, 
-																	   dblBillQty, 
-																	   dtmDate, 
-																	   strShipVia, 
-																	   strTransporterLicense, 
-																	   strTransportationMode, 
-																	   strVendorName, 
-																	   strTransporterName, 
-																	   strVendorFederalTaxId, 
-																	   strTransporterFederalTaxId, 
-																	   strTerminalControlNumber,
-																	   dtmReportingPeriodBegin,
-																	   dtmReportingPeriodEnd,
-																	   strTaxPayerName,
-																	   strTaxPayerAddress,
-																	   strCity,
-																	   strState,
-																	   strZipCode,
-																	   strTelephoneNumber,
-																	   strTaxPayerIdentificationNumber,
-																	   strTaxPayerFEIN,
-																	   strOriginState, 
-																	   strDestinationState,
-																	   leaf)
+	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
+	INTO #tmpRC
+	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
 
-																	   SELECT DISTINCT @Guid, 
-																	   intInventoryReceiptItemId, 
-																	   intTaxAuthorityId, 
-																	   (SELECT strTaxAuthorityCode FROM tblTFTaxAuthority WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM @TFTransaction)),
-																	   strFormCode, 
-																	   intReportingComponentId, 
-																	   strScheduleCode,
-																	   strType,
-																	   --intProductCode,
-																	   strProductCode, 
-																	   strBillOfLading, 
-																	   dblReceived, 
-																	   dblGross, 
-																		dblNet, 
-																		dblBillQty, 
-																		dtmReceiptDate, 
-																		strShipVia, 
-																		strTransporterLicense, 
-																		strTransportationMode, 
-																		strVendorName, 
-																		strTransporterName, 
-																		strVendorFEIN, 
-																		strTransporterFEIN,
-																		strTerminalControlNumber,
-																		@DateFrom,
-																		@DateTo,
-																		--HEADER
-																		strHeaderCompanyName,
-																		strHeaderAddress,
-																		strHeaderCity,
-																		strHeaderState,
-																		strHeaderZip,
-																		strHeaderPhone,
-																		strHeaderStateTaxID,
-																		strHeaderFederalTaxID,
-																		strOriginState, 
-																		strDestinationState,
-																		1
-																		FROM @TFTransaction
-					END
-				ELSE
-					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
-					END
-			SET @CountRC = @CountRC - 1
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
+	BEGIN
+		SELECT TOP 1 @RCId = intReportingComponentId FROM #tmpRC
+
+		-- GET INVENTORY RECEIPT/S
+		
+		SELECT ROW_NUMBER() OVER(ORDER BY RC.intReportingComponentId, ReceiptItem.intInventoryReceiptItemId DESC) AS intId
+			, ReceiptItem.intInventoryReceiptItemId
+			, Receipt.strBillOfLading
+		INTO #tmpReceiptTransaction
+		FROM tblICInventoryReceiptItem ReceiptItem
+		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
+		INNER JOIN tblTFReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
+		INNER JOIN tblTFReportingComponent RC ON RCPC.intReportingComponentId = RC.intReportingComponentId
+		INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
+		INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
+		INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
+		WHERE Receipt.ysnPosted = 1
+			AND RC.intReportingComponentId = @RCId
+			AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(CAST(@DateFrom AS DATE) AS FLOAT))AS DATETIME)
+			AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(CAST(@DateTo AS DATE) AS FLOAT))AS DATETIME)
+			AND Origin.strState IN (SELECT strState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+			AND Origin.strState NOT IN (SELECT strState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+			AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+			AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxCriteria WHERE intReportingComponentId = @RCId)
+		BEGIN
+			SELECT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intReportingComponentId, intInventoryReceiptItemId DESC) AS intId, * 
+			INTO #tmpTransaction
+				FROM (
+				SELECT DISTINCT ReceiptItem.intInventoryReceiptItemId
+					, RCPC.intTaxAuthorityId
+					, RCPC.strFormCode
+					, RCPC.intReportingComponentId
+					, RCPC.strScheduleCode
+					, strType = RCPC.strReportingComponentType
+					, RCPC.strProductCode
+					, Receipt.strBillOfLading
+					, ReceiptItem.dblReceived
+					, ReceiptItem.dblGross
+					, ReceiptItem.dblNet
+					, ReceiptItem.dblBillQty
+					, Receipt.dtmReceiptDate
+					, ShipVia.strShipVia
+					, ShipVia.strTransporterLicense
+					, ShipVia.strTransportationMode
+					, Vendor.strName AS strVendorName
+					, Transporter.strName AS strTransporterName
+					, Vendor.strFederalTaxId AS strVendorFEIN
+					, Transporter.strFederalTaxId AS strTransporterFEIN
+					, CompanySetup.strCompanyName
+					, CompanySetup.strAddress
+					, CompanySetup.strCity
+					, CompanySetup.strState
+					, CompanySetup.strZip
+					, CompanySetup.strPhone
+					, CompanySetup.strStateTaxID
+					, CompanySetup.strFederalTaxID
+					, Origin.strState AS strOriginState
+					, Destination.strStateProvince
+					, TCN.strTerminalControlNumber
+				FROM tblICInventoryReceiptItem ReceiptItem
+				INNER JOIN tblICInventoryReceipt Receipt ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+				INNER JOIN tblICInventoryReceiptItemTax ReceiptItemTax ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
+				INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
+				INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
+				INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
+				INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
+				INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
+				INNER JOIN tblSMShipVia ShipVia ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
+				INNER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId 
+				INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND SupplyPoint.intEntityLocationId = Receipt.intShipFromId
+				INNER JOIN tblTFTerminalControlNumber TCN ON SupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
+				CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
+				WHERE Receipt.ysnPosted = 1
+					AND RCPC.intReportingComponentId = @RCId
+					AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(CAST(@DateFrom AS DATE) AS FLOAT))AS DATETIME)
+					AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(CAST(@DateTo AS DATE) AS FLOAT))AS DATETIME)
+					AND Origin.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+					AND Origin.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+					AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+					AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+				)tblTransactions
 		END
+		ELSE
+		BEGIN
+			SELECT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intReportingComponentId, intInventoryReceiptItemId DESC) AS intId, * 
+			INTO #tmpTransaction
+				FROM (
+				SELECT DISTINCT ReceiptItem.intInventoryReceiptItemId
+					, RCPC.intTaxAuthorityId
+					, RCPC.strFormCode
+					, RCPC.intReportingComponentId
+					, RCPC.strScheduleCode
+					, strType = RCPC.strReportingComponentType
+					, RCPC.strProductCode
+					, Receipt.strBillOfLading
+					, ReceiptItem.dblReceived
+					, ReceiptItem.dblGross
+					, ReceiptItem.dblNet
+					, ReceiptItem.dblBillQty
+					, Receipt.dtmReceiptDate
+					, ShipVia.strShipVia
+					, ShipVia.strTransporterLicense
+					, ShipVia.strTransportationMode
+					, Vendor.strName AS strVendorName
+					, Transporter.strName AS strTransporterName
+					, Vendor.strFederalTaxId AS strVendorFEIN
+					, Transporter.strFederalTaxId AS strTransporterFEIN
+					, CompanySetup.strCompanyName
+					, CompanySetup.strAddress
+					, CompanySetup.strCity
+					, CompanySetup.strState
+					, CompanySetup.strZip
+					, CompanySetup.strPhone
+					, CompanySetup.strStateTaxID
+					, CompanySetup.strFederalTaxID
+					, Origin.strState AS strOriginState
+					, Destination.strStateProvince
+					, TCN.strTerminalControlNumber
+				FROM tblICInventoryReceiptItem ReceiptItem
+				INNER JOIN tblICInventoryReceipt Receipt ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+				INNER JOIN tblICInventoryReceiptItemTax ReceiptItemTax ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
+				INNER JOIN tblSMTaxCode TaxCode ON ReceiptItemTax.intTaxCodeId = TaxCode.intTaxCodeId
+				INNER JOIN tblTFTaxCategory TaxCategory ON TaxCategory.intTaxCategoryId = TaxCode.intTaxCategoryId
+				INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
+				INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
+				INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
+				INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
+				INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
+				INNER JOIN tblSMShipVia ShipVia ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
+				INNER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId 
+				INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND SupplyPoint.intEntityLocationId = Receipt.intShipFromId
+				INNER JOIN tblTFTerminalControlNumber TCN ON SupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
+				CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
+				WHERE Receipt.ysnPosted = 1
+					AND RCPC.intReportingComponentId = @RCId
+					AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(CAST(@DateFrom AS DATE) AS FLOAT))AS DATETIME)
+					AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(CAST(@DateTo AS DATE) AS FLOAT))AS DATETIME)
+					AND Origin.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+					AND Origin.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+					AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+					AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+				)tblTransactions
+		END
+		
+		-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
+		SELECT ROW_NUMBER() OVER(ORDER BY tblSMTaxCode.intTaxCodeId, tblTFTaxCriteria.strCriteria DESC) AS intId
+			, tblSMTaxCode.intTaxCodeId
+			, tblTFTaxCriteria.strCriteria
+		INTO #tmpTaxCategory
+		FROM tblSMTaxCode
+		INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+		INNER JOIN tblTFTaxCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFTaxCriteria.intTaxCategoryId
+		WHERE tblTFTaxCriteria.intReportingComponentId = @RCId
+		
 
-		DECLARE @HasResult INT
-		SELECT TOP 1 @HasResult = intId from @TFTransaction
-		IF(@HasResult IS NULL AND @IsEdi = 'false')
+		DECLARE @intReceiptTransactionId INT
+			, @intTaxCategoryId INT
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpReceiptTransaction) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
+		BEGIN
+			SELECT TOP 1 @intReceiptTransactionId = intId, @InventoryReceiptItemId = intInventoryReceiptItemId FROM #tmpReceiptTransaction
+
+			WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTaxCategory) -- LOOP ON TAX CATEGORY
 			BEGIN
-				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)
-				VALUES(@Guid, 0, (SELECT TOP 1 strFormCode FROM tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+				SELECT TOP 1 @intTaxCategoryId = intId, @TaxCodeId = intTaxCodeId, @TaxCriteria = strCriteria FROM #tmpTaxCategory
+
+				SET @QueryrReceiptItem = 'SELECT  DISTINCT tblICInventoryReceiptItemTax.intInventoryReceiptItemId FROM
+												tblICInventoryReceiptItem INNER JOIN
+												tblICInventoryReceiptItemTax 
+												ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId 
+										WHERE  (tblICInventoryReceiptItem.intInventoryReceiptItemId IN(''' + @InventoryReceiptItemId + '''))
+												AND (tblICInventoryReceiptItemTax.intTaxCodeId = ''' + @TaxCodeId + ''')
+												AND (tblICInventoryReceiptItemTax.dblTax ' + @TaxCriteria + ')'
+				DELETE FROM @TFReceiptItem
+				INSERT INTO @TFReceiptItem
+				EXEC(@QueryrReceiptItem)
+	
+				IF NOT EXISTS(SELECT TOP 1 1 FROM @TFReceiptItem) -- IF CATEGORY DOES NOT EXIST, EXIT LOOP
+				BEGIN
+					SELECT DISTINCT tblICInventoryReceiptItemTax.intInventoryReceiptItemId
+					INTO #tmpReceiptItem
+					FROM tblICInventoryReceiptItem
+					INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId
+					WHERE tblICInventoryReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
+						AND tblICInventoryReceiptItemTax.intTaxCodeId = @TaxCodeId
+																
+					IF EXISTS(SELECT TOP 1 1  FROM #tmpReceiptItem)
+					BEGIN
+						DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
+						BREAK
+					END
+					ELSE
+					BEGIN
+						IF(@TaxCriteria = '<> 0')
+						BEGIN
+							DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
+							BREAK
+						END
+					END
+				END
+				DELETE FROM #tmpTaxCategory WHERE intId = @intTaxCategoryId
 			END
+			
+			DELETE FROM #tmpReceiptTransaction WHERE intId = @intReceiptTransactionId
+		END
+			
+		IF (@ReportingComponentId <> '')
+		BEGIN
+			INSERT INTO tblTFTransactions (uniqTransactionGuid
+				, intItemId
+				, intTaxAuthorityId
+				, strTaxAuthority
+				, strFormCode
+				, intReportingComponentId
+				, strScheduleCode
+				, strType
+				, strProductCode
+				, strBillOfLading
+				, dblReceived
+				, dblGross
+				, dblNet
+				, dblBillQty
+				, dtmDate
+				, strShipVia
+				, strTransporterLicense
+				, strTransportationMode
+				, strVendorName
+				, strTransporterName
+				, strVendorFederalTaxId
+				, strTransporterFederalTaxId
+				, strTerminalControlNumber
+				, dtmReportingPeriodBegin
+				, dtmReportingPeriodEnd
+				, strTaxPayerName
+				, strTaxPayerAddress
+				, strCity
+				, strState
+				, strZipCode
+				, strTelephoneNumber
+				, strTaxPayerIdentificationNumber
+				, strTaxPayerFEIN
+				, strOriginState
+				, strDestinationState
+				, leaf)
+			SELECT DISTINCT @Guid
+				, intInventoryReceiptItemId
+				, intTaxAuthorityId
+				, (SELECT strTaxAuthorityCode FROM tblTFTaxAuthority WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM @TFTransaction))
+				, strFormCode
+				, intReportingComponentId
+				, strScheduleCode
+				, strType
+				, strProductCode
+				, strBillOfLading
+				, dblReceived
+				, dblGross
+				, dblNet
+				, dblBillQty
+				, dtmReceiptDate
+				, strShipVia
+				, strTransporterLicense
+				, strTransportationMode
+				, strVendorName
+				, strTransporterName
+				, strVendorFEIN
+				, strTransporterFEIN
+				, strTerminalControlNumber
+				, @DateFrom
+				, @DateTo
+				--HEADER
+				, strHeaderCompanyName
+				, strHeaderAddress
+				, strHeaderCity
+				, strHeaderState
+				, strHeaderZip
+				, strHeaderPhone
+				, strHeaderStateTaxID
+				, strHeaderFederalTaxID
+				, strOriginState
+				, strDestinationState
+				, 1
+			FROM @TFTransaction
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
+		END
+	
+		DELETE FROM #tmpRC WHERE @RCId = intReportingComponentId
+	END
+	
+	IF (EXISTS(SELECT TOP 1 1 FROM @TFTransaction) AND @IsEdi = 0)
+	BEGIN
+		INSERT INTO tblTFTransactions (uniqTransactionGuid
+			, intTaxAuthorityId
+			, strFormCode
+			, intProductCodeId
+			, strProductCode
+			, dtmDate
+			, dtmReportingPeriodBegin
+			, dtmReportingPeriodEnd
+			, leaf)
+		VALUES(@Guid
+			, 0
+			, (SELECT TOP 1 strFormCode FROM tblTFReportingComponent WHERE intReportingComponentId = @RCId)
+			, 0
+			, 'No record found.'
+			, GETDATE()
+			, @DateFrom
+			, @DateTo
+			, 1)
+	END
+END TRY
+BEGIN CATCH
+	SELECT 
+		@ErrorMessage = ERROR_MESSAGE(),
+		@ErrorSeverity = ERROR_SEVERITY(),
+		@ErrorState = ERROR_STATE();
+
+	-- Use RAISERROR inside the CATCH block to return error
+	-- information about the original error that caused
+	-- execution to jump to the CATCH block.
+	RAISERROR (
+		@ErrorMessage, -- Message text.
+		@ErrorSeverity, -- Severity.
+		@ErrorState -- State.
+	);
+END CATCH

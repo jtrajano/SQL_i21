@@ -4646,7 +4646,7 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentOriginState.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponent.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentDestinationState.sql" />
-    <Build Include="dbo\Views\vyuTFReportingComponentProductCode.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentProductCode.sql" />
     <Build Include="dbo\User Defined Types\TFReceiptTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFTaxCategory.sql" />
     <Build Include="dbo\User Defined Types\TFTransaction.sql" />
