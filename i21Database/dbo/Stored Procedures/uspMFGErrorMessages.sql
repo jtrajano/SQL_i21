@@ -118,5 +118,5 @@ SET @strmessage = 'Sample is %s by different %s. You do not have permission to %
 EXEC sp_addmessage 90025,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90026) EXEC sp_dropmessage 90026, 'us_english'	
-SET @strmessage = 'Available qty for item %s is %s which is less than the required qty %s. Only %s can be produced with the available inputs. Please change the work order quantity and try again.'
+SET @strmessage = 'Available qty for item %s is %s which is less than the required qty %s. %s can be produced with the available inputs. Please change the work order quantity and try again.'
 EXEC sp_addmessage 90026,11,@strmessage,'us_english','False'
