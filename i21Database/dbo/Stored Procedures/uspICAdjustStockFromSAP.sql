@@ -26,11 +26,11 @@ DECLARE
 	,@strItemNo AS NVARCHAR(50)
 	,@dblAdjustQtyBy AS NUMERIC(38, 20)
 	,@intItemLocationId AS INT
-	,@tempQty AS NUMERIC(38,20)
-	,@tempNextQty AS NUMERIC(38,20)
 	,@tempEachLotQty AS NUMERIC(38,20)
 	,@tempAdjustQtyBy AS NUMERIC(38,20)
+	,@temp_RemainingQty AS NUMERIC(38,20)
 	,@intInventoryAdjustmentId AS INT
+	,@intInventoryLotId AS INT
 
 BEGIN
 
@@ -173,174 +173,196 @@ BEGIN
 	--------------------------------------
 	-- Transaction: Quantity Adjustment -- 
 	--------------------------------------
-	 
-	-- Get the value to Adjust
-	 SELECT @dblAdjustQtyBy = -(ISNULL(SUM(dblOnHand),0) - @dblNewQty)
-	 FROM dbo.tblICItemStockUOM
-	 WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId AND intSubLocationId = @intSubLocationId AND intItemUOMId = @intItemUOMId
 
 	 -- Check if item is Lot-Tracked or not
 	 IF EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intItemId AND strLotTracking='No')
+		-- Process Non-Lot-tracked items
 		BEGIN
-			-- Process Non-Lot-tracked items
-			IF @dblAdjustQtyBy = 0 GOTO _Exit
+			-- Get the value to Adjust
+			SELECT @dblAdjustQtyBy = -(ISNULL(SUM(ICLot.dblOnHand),0) - @dblNewQty)
+			FROM dbo.tblICItemStockUOM ICLot
+			WHERE ICLot.intItemId = @intItemId AND ICLot.intSubLocationId = @intSubLocationId AND ICLot.intItemLocationId = @intItemLocationId AND ICLot.intItemUOMId = @intItemUOMId
+
+			IF @dblAdjustQtyBy = 0 
+				GOTO _Exit
 
 			ELSE 
 				BEGIN
-				 IF @intStorageLocationId IS NULL
-					 BEGIN
-						SET @intStorageLocationId = 
-						(SELECT TOP 1 intStorageLocationId
-						 FROM dbo.tblICItemLocation
-						 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId
-						)
-					END
+					IF @intStorageLocationId IS NULL
+						BEGIN
+							SET @intStorageLocationId = 
+							(SELECT TOP 1 intStorageLocationId
+							 FROM dbo.tblICItemStockUOM
+						     WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId
+							)
+						END
 					-- Create Quantity Change Adjustment then post
-					EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChange
-					-- Parameters for filtering:
-					@intItemId = @intItemId
-					,@dtmDate = @dtmQtyChange
-					,@intLocationId = @intLocationId
-					,@intSubLocationId = @intSubLocationId	
-					,@intStorageLocationId = @intStorageLocationId
-					,@strLotNumber = @strLotNumber	
-					-- Parameters for the new values: 
-					,@dblAdjustByQuantity = @dblAdjustQtyBy
-					,@dblNewUnitCost = @dblCost
-					,@intItemUOMId = @intItemUOMId
-					-- Parameters used for linking or FK (foreign key) relationships
-					,@intSourceId = @intSourceId
-					,@intSourceTransactionTypeId = 41 --SAP stock integration
-					,@intEntityUserSecurityId = @intEntityUserId
-					,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+					GOTO _AdjustQuantity
 				END
 		END
 
 	ELSE
 		BEGIN
-			-- Process Lot-tracked items
-			-- Get Lot Number
-			IF @strLotNumber IS NULL OR @strLotNumber = '[FIFO]' OR @strLotNumber = 'FIFO'
+			-- Process Item with Lot Number Provided
+			IF @strLotNumber IS NOT NULL OR @strLotNumber != '[FIFO]' OR @strLotNumber != 'FIFO'
 				BEGIN
-					IF @dblAdjustQtyBy > 0
-						BEGIN
-							IF @strLotNumber IS NULL
-								BEGIN
-									SET @strLotNumber =
-									(SELECT TOP 1 strLotNumber
-									 FROM dbo.tblICLot
-									 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId
-									 ORDER BY dtmDateCreated DESC)
-								END
+					-- Get the value to Adjust
+					SELECT @dblAdjustQtyBy = -(ISNULL(SUM(Lot.dblQty),0) - @dblNewQty)
+					FROM dbo.tblICLot Lot
+					WHERE Lot.intItemId = @intItemId AND Lot.strLotNumber = @strLotNumber
 
-							 IF @intStorageLocationId IS NULL
+					IF @intStorageLocationId IS NULL
+						BEGIN
+							SET @intStorageLocationId = 
+							(SELECT TOP 1 ICLot.intStorageLocationId
+							 FROM dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot ON Lot.intLotId = ICLot.intLotId
+							 WHERE ICLot.intItemId = @intItemId AND ICLot.intSubLocationId = @intSubLocationId AND ICLot.intItemLocationId = @intItemLocationId AND ICLot.intItemUOMId = @intItemUOMId AND Lot.strLotNumber = @strLotNumber 
+							)
+						END
+
+					IF @dblAdjustQtyBy = 0 
+						GOTO _Exit
+
+					GOTO _AdjustQuantity
+				END
+
+			-- Process Item with No Lot Number Provided
+			ELSE
+				BEGIN
+					-- Get the value to Adjust
+					SELECT @dblAdjustQtyBy = -(ISNULL(SUM(ICLot.dblOnHand),0) - @dblNewQty)
+					FROM dbo.tblICItemStockUOM ICLot
+					WHERE ICLot.intItemId = @intItemId AND ICLot.intSubLocationId = @intSubLocationId AND ICLot.intItemLocationId = @intItemLocationId AND ICLot.intItemUOMId = @intItemUOMId
+
+					IF @dblAdjustQtyBy = 0 
+						GOTO _Exit
+
+					ELSE IF @dblAdjustQtyBy > 0
+						BEGIN
+							SELECT TOP 1 @strLotNumber = Lot.strLotNumber 
+										 ,@intInventoryLotId = ICLot.intInventoryLotId
+							FROM dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot ON Lot.intLotId = ICLot.intLotId
+							WHERE ICLot.intItemId = @intItemId AND ICLot.intSubLocationId = @intSubLocationId AND ICLot.intItemLocationId = @intItemLocationId AND ICLot.intItemUOMId = @intItemUOMId
+							ORDER BY ICLot.dtmCreated DESC
+
+							IF @intStorageLocationId IS NULL
 					 			BEGIN
-									SET @intStorageLocationId = 
-									(SELECT TOP 1 intStorageLocationId
-									 FROM dbo.tblICLot
-									 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId AND strLotNumber = @strLotNumber
-									 ORDER BY dtmDateCreated DESC)
+									SELECT @intStorageLocationId = intStorageLocationId 
+									FROM dbo.tblICInventoryLot 
+									WHERE intInventoryLotId = @intInventoryLotId
 								END
 
 							IF @dblCost IS NULL
 								BEGIN
-									SET @dblCost = 
-									(SELECT TOP 1 dblLastCost
-									 FROM dbo.tblICLot
-									 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId AND strLotNumber = @strLotNumber AND intStorageLocationId = @intStorageLocationId
-									 ORDER BY dtmDateCreated DESC)
+									SELECT @dblCost = dblLastCost 
+									FROM dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot ON Lot.intLotId = ICLot.intLotId
+									WHERE intInventoryLotId = @intInventoryLotId
 								END
 
-							 -- Create Quantity Change Adjustment then post
-							 EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChange
-								-- Parameters for filtering:
-								@intItemId = @intItemId
-								,@dtmDate = @dtmQtyChange
-								,@intLocationId = @intLocationId
-								,@intSubLocationId = @intSubLocationId	
-								,@intStorageLocationId = @intStorageLocationId
-								,@strLotNumber = @strLotNumber	
-								-- Parameters for the new values: 
-								,@dblAdjustByQuantity = @dblAdjustQtyBy
-								,@dblNewUnitCost = @dblCost
-								,@intItemUOMId = @intItemUOMId
-								-- Parameters used for linking or FK (foreign key) relationships
-								,@intSourceId = @intSourceId
-								,@intSourceTransactionTypeId = 41 --SAP stock integration
-								,@intEntityUserSecurityId = @intEntityUserId
-								,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+							GOTO _AdjustQuantity
 						END
 
-					 ELSE IF @dblAdjustQtyBy = 0 GOTO _Exit
-
-					 ELSE IF @dblAdjustQtyBy < 0
+					ELSE IF @dblAdjustQtyBy < 0
 						BEGIN
-							SET @tempQty = ABS(@dblAdjustQtyBy)
+							SET @temp_RemainingQty = ABS(@dblAdjustQtyBy)
 
-							WHILE @tempQty > 0
+							WHILE @temp_RemainingQty > 0
 								BEGIN
-									SELECT TOP 1 @tempEachLotQty = dblQty
-										 FROM dbo.tblICLot
-										 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId
-												AND dblQty > 0
-										 ORDER BY dtmDateCreated ASC
+									SELECT TOP 1 @strLotNumber = Lot.strLotNumber 
+												 ,@intInventoryLotId = ICLot.intInventoryLotId
+												 ,@tempEachLotQty = Lot.dblQty
+									FROM dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot ON Lot.intLotId = ICLot.intLotId
+									WHERE ICLot.intItemId = @intItemId AND ICLot.intSubLocationId = @intSubLocationId AND ICLot.intItemLocationId = @intItemLocationId AND ICLot.intItemUOMId = @intItemUOMId AND Lot.dblQty > 0
+									ORDER BY ICLot.dtmCreated ASC
 
-									SET @tempNextQty = @tempQty - @tempEachLotQty
+									IF @intStorageLocationId IS NULL
+					 					BEGIN
+											SELECT @intStorageLocationId = intStorageLocationId 
+											FROM dbo.tblICInventoryLot 
+											WHERE intInventoryLotId = @intInventoryLotId
+										END
 
-									IF @strLotNumber IS NULL OR 
-									   (@strLotNumber IS NOT NULL AND (SELECT SUM(dblQty) FROM dbo.tblICLot
-										WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId
-											   AND strLotNumber = @strLotNumber) = 0)
+									IF @dblCost IS NULL
 										BEGIN
-											SELECT TOP 1 @strLotNumber = strLotNumber
-														,@intStorageLocationId = intStorageLocationId
-														,@dblCost = dblLastCost
-											 FROM dbo.tblICLot
-											 WHERE intItemId = @intItemId AND intSubLocationId = @intSubLocationId AND intItemLocationId = @intItemLocationId AND intItemUOMId = @intItemUOMId
-												AND dblQty > 0
-											 ORDER BY dtmDateCreated ASC
+											SELECT @dblCost = dblLastCost 
+											FROM dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot ON Lot.intLotId = ICLot.intLotId
+											WHERE intInventoryLotId = @intInventoryLotId
+										END
+
+									IF @temp_RemainingQty > @tempEachLotQty
+										BEGIN
+											SET @tempAdjustQtyBy = -(@tempEachLotQty)
+											
+											EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChange
+											-- Parameters for filtering:
+											@intItemId = @intItemId
+											,@dtmDate = @dtmQtyChange
+											,@intLocationId = @intLocationId
+											,@intSubLocationId = @intSubLocationId	
+											,@intStorageLocationId = @intStorageLocationId
+											,@strLotNumber = @strLotNumber	
+											-- Parameters for the new values: 
+											,@dblAdjustByQuantity = @tempAdjustQtyBy
+											,@dblNewUnitCost = @dblCost
+											,@intItemUOMId = @intItemUOMId
+											-- Parameters used for linking or FK (foreign key) relationships
+											,@intSourceId = @intSourceId
+											,@intSourceTransactionTypeId = 41 --SAP stock integration
+											,@intEntityUserSecurityId = @intEntityUserId
+											,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+											SET @temp_RemainingQty = @temp_RemainingQty - @tempEachLotQty
 										END
 
 									ELSE
-								
+										BEGIN
+											SET @tempAdjustQtyBy = -(@temp_RemainingQty)
 
-									IF @tempNextQty >= 0 
-										BEGIN
-											SET @tempAdjustQtyBy = -(@tempEachLotQty)
-											SET @tempQty = @tempNextQty
-										END
-									ELSE IF @tempNextQty < 0 
-										BEGIN
-											SET @tempAdjustQtyBy = -(@tempQty)
-											SET @tempQty = 0
-										END
-								
-									IF @tempAdjustQtyBy != 0
-										BEGIN
-											 -- Create Quantity Change Adjustment then post
-											 EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChange
-												-- Parameters for filtering:
-												@intItemId = @intItemId
-												,@dtmDate = @dtmQtyChange
-												,@intLocationId = @intLocationId
-												,@intSubLocationId = @intSubLocationId	
-												,@intStorageLocationId = @intStorageLocationId
-												,@strLotNumber = @strLotNumber	
-												-- Parameters for the new values: 
-												,@dblAdjustByQuantity = @tempAdjustQtyBy
-												,@dblNewUnitCost = @dblCost
-												,@intItemUOMId = @intItemUOMId
-												-- Parameters used for linking or FK (foreign key) relationships
-												,@intSourceId = @intSourceId
-												,@intSourceTransactionTypeId = 41 --SAP stock integration
-												,@intEntityUserSecurityId = @intEntityUserId
-												,@intInventoryAdjustmentId = @intInventoryAdjustmentId
-										END
+											EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChange
+											-- Parameters for filtering:
+											@intItemId = @intItemId
+											,@dtmDate = @dtmQtyChange
+											,@intLocationId = @intLocationId
+											,@intSubLocationId = @intSubLocationId	
+											,@intStorageLocationId = @intStorageLocationId
+											,@strLotNumber = @strLotNumber	
+											-- Parameters for the new values: 
+											,@dblAdjustByQuantity = @tempAdjustQtyBy
+											,@dblNewUnitCost = @dblCost
+											,@intItemUOMId = @intItemUOMId
+											-- Parameters used for linking or FK (foreign key) relationships
+											,@intSourceId = @intSourceId
+											,@intSourceTransactionTypeId = 41 --SAP stock integration
+											,@intEntityUserSecurityId = @intEntityUserId
+											,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
+											GOTO _Exit
+										END
 								END
 						END
 				END
 		END	 
 END
-
+	
+-- Create Quantity Change Adjustment then post
+_AdjustQuantity:
+	BEGIN
+		EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChange
+		-- Parameters for filtering:
+		@intItemId = @intItemId
+		,@dtmDate = @dtmQtyChange
+		,@intLocationId = @intLocationId
+		,@intSubLocationId = @intSubLocationId	
+		,@intStorageLocationId = @intStorageLocationId
+		,@strLotNumber = @strLotNumber	
+		-- Parameters for the new values: 
+		,@dblAdjustByQuantity = @dblAdjustQtyBy
+		,@dblNewUnitCost = @dblCost
+		,@intItemUOMId = @intItemUOMId
+		-- Parameters used for linking or FK (foreign key) relationships
+		,@intSourceId = @intSourceId
+		,@intSourceTransactionTypeId = 41 --SAP stock integration
+		,@intEntityUserSecurityId = @intEntityUserId
+		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+	END
 _Exit:
