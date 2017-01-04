@@ -46,6 +46,8 @@ BEGIN TRY
 		,@strUnitMeasure NVARCHAR(50)
 		,@strMinQtyCanBeProduced NVARCHAR(50)
 		,@intProductId INT
+		,@intSubstituteItemId int
+		,@intSubstituteItemUOMId int
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -373,7 +375,7 @@ BEGIN TRY
 			,strLineItemNote
 		FROM @OrderDetail
 
-		Select @dblMinQtyCanBeProduced=-1
+		SELECT @dblMinQtyCanBeProduced = - 1
 
 		SELECT @intLineNo = MIn(intLineNo)
 		FROM @OrderDetail
@@ -392,7 +394,7 @@ BEGIN TRY
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
-			SELECT @dblAvailableQty = SUM(L.dblQty) - SUM(T.dblQty)
+			SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId,@intItemUOMId, L.dblQty)) - IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM( L.intItemUOMId,@intItemUOMId, T.dblQty)), 0)
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
@@ -449,20 +451,30 @@ BEGIN TRY
 
 				WHILE @intItemRecordId IS NOT NULL
 				BEGIN
+					SELECT @dblSubstituteRatio = NULL
+						,@dblMaxSubstituteRatio = NULL
+						,@intSubstituteItemId=NULL
+
 					SELECT @dblSubstituteRatio = dblSubstituteRatio
 						,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
+						,@intSubstituteItemId=intSubstituteItemId
 					FROM @tblSubstituteItem
 					WHERE intItemRecordId = @intItemRecordId
 
+					Select @intUnitMeasureId =intUnitMeasureId from dbo.tblICItemUOM Where intItemUOMId=@intItemUOMId
+
+					Select @intSubstituteItemUOMId=intItemUOMId
+					from tblICItemUOM Where intItemId=@intSubstituteItemId AND intUnitMeasureId =@intUnitMeasureId
+
 					SELECT @dblAvailableQty = 0
 
-					SELECT @dblAvailableQty = SUM(L.dblQty) - SUM(T.dblQty)
+					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId,@intItemUOMId, L.dblQty)) - IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM( L.intItemUOMId,@intItemUOMId, T.dblQty)), 0)
 					FROM dbo.tblICLot L
 					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 						AND R.strInternalCode = 'STOCK'
 					LEFT JOIN dbo.tblMFTask T ON T.intLotId = L.intLotId
-					WHERE L.intItemId = @intItemId
+					WHERE L.intItemId = @intSubstituteItemId
 						AND L.intLocationId = @intLocationId
 						AND L.intLotStatusId = 1
 						AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
@@ -475,6 +487,8 @@ BEGIN TRY
 					END
 
 					SELECT @dblQty = @dblQty * (@dblMaxSubstituteRatio / 100) * @dblSubstituteRatio
+
+					
 
 					IF @dblAvailableQty - @dblQty >= 0
 					BEGIN
@@ -496,9 +510,9 @@ BEGIN TRY
 						SELECT @intOrderHeaderId
 							,intItemId
 							,@dblQty
-							,@intItemUOMId
+							,@intSubstituteItemUOMId
 							,@dblQty
-							,@intItemUOMId
+							,@intSubstituteItemUOMId
 							,1
 							,ISNULL(NULL, intUnitPerLayer)
 							,ISNULL(NULL, intLayerPerPallet)
@@ -513,7 +527,7 @@ BEGIN TRY
 							,NULL
 							,''
 						FROM tblICItem
-						WHERE intItemId = @intItemId
+						WHERE intItemId = @intSubstituteItemId
 
 						SELECT @dblQty = 0
 
@@ -539,9 +553,9 @@ BEGIN TRY
 						SELECT @intOrderHeaderId
 							,intItemId
 							,@dblAvailableQty
-							,@intItemUOMId
+							,@intSubstituteItemUOMId
 							,@dblAvailableQty
-							,@intItemUOMId
+							,@intSubstituteItemUOMId
 							,1
 							,ISNULL(NULL, intUnitPerLayer)
 							,ISNULL(NULL, intLayerPerPallet)
@@ -556,7 +570,7 @@ BEGIN TRY
 							,NULL
 							,''
 						FROM tblICItem
-						WHERE intItemId = @intItemId
+						WHERE intItemId = @intSubstituteItemId
 
 						SELECT @dblQty = @dblQty - @dblAvailableQty
 					END
@@ -572,7 +586,9 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblQtyCanBeProduced = (@dblRequiredQty - @dblQty) * @dblPlannedQty / @dblRequiredQty
 
-					IF @dblQtyCanBeProduced < @dblMinQtyCanBeProduced or @dblQtyCanBeProduced=0
+					IF @dblQtyCanBeProduced < @dblMinQtyCanBeProduced
+						OR @dblQtyCanBeProduced = 0
+						OR @dblMinQtyCanBeProduced = - 1
 					BEGIN
 						SELECT @dblMinQtyCanBeProduced = @dblQtyCanBeProduced
 
@@ -607,7 +623,7 @@ BEGIN TRY
 		END
 	END
 
-	IF @dblMinQtyCanBeProduced > -1
+	IF @dblMinQtyCanBeProduced > - 1
 	BEGIN
 		SELECT @intItemUOMId = intItemUOMId
 		FROM tblMFWorkOrder
