@@ -27,6 +27,8 @@ SELECT
 	,L.strName AS strContactName
 	,L.strEmail AS strContactEmail
 	,M.strBillOfLading
+	,ISNULL(N2.strCountry,O.strCountry) AS strCountryOrigin
+	,P.strSubLocationName strLPlant
 FROM tblAPBill A
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId) ON A.intEntityVendorId = B.intEntityVendorId
 INNER JOIN tblAPBillDetail C2 ON A.intBillId = C2.intBillId
@@ -36,10 +38,14 @@ LEFT JOIN tblICInventoryReceipt M INNER JOIN tblICInventoryReceiptItem M2 ON M.i
 	ON C2.intInventoryReceiptItemId = M2.intInventoryReceiptItemId
 LEFT JOIN tblCTContractHeader D INNER JOIN tblCTContractDetail D2 ON D.intContractHeaderId = D2.intContractHeaderId
 	ON C2.intContractHeaderId = D.intContractHeaderId AND C2.intContractDetailId = D2.intContractDetailId
+LEFT JOIN tblICItemContract N INNER JOIN tblSMCountry N2 ON N.intCountryId = N2.intCountryID
+	ON D2.intItemContractId = N.intItemContractId
 LEFT JOIN (tblICItemUOM F INNER JOIN tblICUnitMeasure F2 ON F.intUnitMeasureId = F2.intUnitMeasureId) ON C2.intUnitOfMeasureId = F.intItemUOMId
 LEFT JOIN (tblICItemUOM G INNER JOIN tblICUnitMeasure G2 ON G.intUnitMeasureId = G2.intUnitMeasureId) ON C2.intCostUOMId = G.intItemUOMId
 LEFT JOIN (tblICItemUOM K INNER JOIN tblICUnitMeasure K2 ON K.intUnitMeasureId = K2.intUnitMeasureId) ON C2.intWeightUOMId = K.intItemUOMId
 LEFT JOIN tblSMCurrency J ON A.intCurrencyId = J.intCurrencyID
 LEFT JOIN tblSMCurrency I ON I.intMainCurrencyId = A.intCurrencyId AND I.ysnSubCurrency = 1
 LEFT JOIN tblEMEntity L ON A.intContactId = L.intEntityId
+LEFT JOIN tblSMCountry O ON H.intOriginId = O.intCountryID
+LEFT JOIN tblSMCompanyLocationSubLocation P ON D2.intSubLocationId = P.intCompanyLocationSubLocationId
 WHERE A.intTransactionType = 3

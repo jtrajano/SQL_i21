@@ -77,6 +77,7 @@ FROM
 	
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[ysnReturn]								=	CAST(0 AS BIT)
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -262,6 +263,7 @@ FROM
 	,[intLocationId]			=	A.intShipToId
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
+	,[ysnReturn]								=	0
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
@@ -365,6 +367,7 @@ FROM
 	,[intLocationId]			=	A.intLocationId
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
+	,[ysnReturn]								=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -406,7 +409,7 @@ FROM
 						THEN 1
 						ELSE 0 END)
 	) Loads
-	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
+	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
@@ -490,6 +493,7 @@ FROM
 		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[ysnReturn]								=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END
 	FROM [vyuICChargesForBilling] A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
 																																						   THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
@@ -583,6 +587,7 @@ FROM
 		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[ysnReturn]								=	0
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -672,6 +677,7 @@ FROM
 		,[intLocationId]							=	NULL --Contract doesn't have location
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[ysnReturn]								=	0
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
@@ -758,6 +764,7 @@ FROM
 		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[ysnReturn]								=	0
 	FROM vyuLGLoadPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -844,6 +851,7 @@ FROM
 		,[intLocationId]							=	A.intLocationId
 		,[intInventoryShipmentItemId]				=	A.intInventoryShipmentItemId
 		,[intInventoryShipmentChargeId]				=	A.intInventoryShipmentChargeId
+		,[ysnReturn]								=	0
 	FROM vyuICShipmentChargesForBilling A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
 																																						   THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))

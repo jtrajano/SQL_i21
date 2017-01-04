@@ -96,6 +96,7 @@ SELECT
 	,[intScaleTicketId]							= ScaleTicket.intScaleTicketId
 	,[strScaleTicketNumber]						= ScaleTicket.strScaleTicketNumber
 	,[intLocationId]							= Receipt.intLocationId
+	,[strReceiptType]							= Receipt.strReceiptType
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt
@@ -260,6 +261,7 @@ SELECT
 	,[intScaleTicketId]							= ScaleTicket.intScaleTicketId
 	,[strScaleTicketNumber]						= ScaleTicket.strScaleTicketNumber
 	,[intLocationId]							= Receipt.intLocationId
+	,[strReceiptType]							= Receipt.strReceiptType
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt

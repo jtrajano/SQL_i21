@@ -48,6 +48,8 @@ BEGIN
 		'' AS strContactEmail,
 		'' AS strBillOfLading,
 		'' AS strItemNo,
+		'' AS strLPlant,
+		'' AS strCountryOfOrigin,
 		0 AS intBillId,
 		0 AS intContractSeq,
 		0 AS intUnitOfMeasureId,
