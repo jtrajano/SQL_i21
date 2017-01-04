@@ -44,7 +44,14 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb.dbo.##LineProperty') IS NOT NULL
 		DROP TABLE ##LineProperty
 
-	SELECT @SQL = 'CREATE TABLE ##LineProperty (intSampleId INT,intItemId INT,intWorkOrderId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strWorkOrderNo INT,strWorkOrderStatus INT,strSampleNumber INT,strSampleStatus INT,strSampleTypeName INT,dtmSampleReceivedDate INT,strComment INT,' + @str + ')'
+	IF ISNULL(@str, '') <> ''
+	BEGIN
+		SELECT @SQL = 'CREATE TABLE ##LineProperty (intSampleId INT,intItemId INT,intWorkOrderId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strWorkOrderNo INT,strWorkOrderStatus INT,strSampleNumber INT,strSampleStatus INT,strSampleTypeName INT,dtmSampleReceivedDate INT,strComment INT,' + @str + ')'
+	END
+	ELSE
+	BEGIN
+		SELECT @SQL = 'CREATE TABLE ##LineProperty (intSampleId INT,intItemId INT,intWorkOrderId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strWorkOrderNo INT,strWorkOrderStatus INT,strSampleNumber INT,strSampleStatus INT,strSampleTypeName INT,dtmSampleReceivedDate INT,strComment INT)'
+	END
 
 	EXEC sp_executesql @SQL
 
