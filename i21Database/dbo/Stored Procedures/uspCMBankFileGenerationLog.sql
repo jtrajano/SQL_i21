@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMBankFileGenerationLog]
 	@intBankAccountId INT = NULL,
 	@strTransactionIds NVARCHAR(MAX) = NULL,
-	@strFileName NVARCHAR(50) = NULL,
+	@strFileName NVARCHAR(100) = NULL,
 	@strProcessType NVARCHAR(50) = NULL,
 	@intBankFileFormatId INT = NULL,
 	@intEntityId INT = NULL

@@ -75,6 +75,7 @@ BEGIN
 			,[intEntityId]
 			,[ysnResetDetails]
 			,[ysnPost]
+			,[ysnRecap]
 			,[intInvoiceDetailId]
 			,[intItemId]
 			,[ysnInventory]
@@ -153,6 +154,7 @@ BEGIN
 			,[intEntityId]							= @UserEntityId
 			,[ysnResetDetails]						= 0
 			,[ysnPost]								= @Post
+			,[ysnRecap]								= @Recap
 	
 			,[intInvoiceDetailId]					= NULL
 			,[intItemId]							= MRDetail.intItemId
@@ -227,7 +229,9 @@ BEGIN
 		,@CreatedIvoices			= @CreatedInvoices OUTPUT
 		,@UpdatedIvoices			= @UpdatedInvoices OUTPUT
 		,@BatchIdForNewPost			= @BatchId OUTPUT
+		,@BatchIdForExistingPost	= @BatchId OUTPUT
 		,@BatchIdForNewPostRecap	= @BatchId OUTPUT
+		,@BatchIdForExistingRecap	= @BatchId OUTPUT
 
 	DECLARE @InvoiceId INT
 	

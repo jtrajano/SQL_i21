@@ -37,10 +37,18 @@ DECLARE @totalRecords INT = 0
 DECLARE @totalInvalid INT = 0
  
 DECLARE @PostInvoiceData TABLE  (
-	intInvoiceId int PRIMARY KEY,
-	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	UNIQUE (intInvoiceId)
+	 [intInvoiceId]			INT PRIMARY KEY
+	,[intCompanyLocationId]	INT
+	,[strTransactionId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,[strTransactionType]	NVARCHAR(25) COLLATE Latin1_General_CI_AS
+	,[intEntityId]			INT
+	,[intPeriodsToAccrue]	INT
+	,UNIQUE (intInvoiceId)
 );
+
+
+ 
+
 
 DECLARE @InvalidInvoiceData TABLE  (
 	strError NVARCHAR(max),
@@ -67,10 +75,12 @@ DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @UserEntityID				INT
 		,@DiscountAccountId			INT
 		,@DeferredRevenueAccountId	INT
+		,@AllowOtherUserToPost		BIT
 
 SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
 SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intDiscountAccountId],0) <> 0)
 SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intDeferredRevenueAccountId],0) <> 0)
+SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserEntityID)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 
@@ -103,18 +113,18 @@ IF (@param IS NOT NULL)
 	BEGIN
 		IF(@param = 'all')
 		BEGIN
-			INSERT INTO @PostInvoiceData SELECT [intInvoiceId], [strInvoiceNumber] FROM dbo.tblARInvoice WHERE [ysnPosted] = 0 AND ([strTransactionType] = @transType OR @transType = 'all')
+			INSERT INTO @PostInvoiceData SELECT [intInvoiceId], [intCompanyLocationId], [strInvoiceNumber], [strTransactionType], [intEntityId], [intPeriodsToAccrue] FROM dbo.tblARInvoice WHERE [ysnPosted] = 0 AND ([strTransactionType] = @transType OR @transType = 'all')
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @PostInvoiceData SELECT ARI.[intInvoiceId], ARI.[strInvoiceNumber] FROM dbo.tblARInvoice ARI WHERE EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@param) DV WHERE DV.[intID] = ARI.[intInvoiceId])
+			INSERT INTO @PostInvoiceData SELECT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], [intPeriodsToAccrue] FROM dbo.tblARInvoice ARI WHERE EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@param) DV WHERE DV.[intID] = ARI.[intInvoiceId])
 		END
 	END
 
 IF(@beginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
-		SELECT intInvoiceId, strInvoiceNumber FROM dbo.tblARInvoice
+		SELECT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue] FROM dbo.tblARInvoice
 		WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @beginDate AND @endDate
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
@@ -122,7 +132,7 @@ IF(@beginDate IS NOT NULL)
 IF(@beginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
-		SELECT intInvoiceId, strInvoiceNumber FROM dbo.tblARInvoice
+		SELECT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue] FROM dbo.tblARInvoice
 		WHERE intInvoiceId BETWEEN @beginTransaction AND @endTransaction
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
@@ -179,7 +189,9 @@ BEGIN TRY
 				IF (ISNULL(@invoicesToAdd, '') <> '')
 					BEGIN
 						INSERT INTO @PostInvoiceData 
-						SELECT ARI.[intInvoiceId], ARI.[strInvoiceNumber] 
+
+						
+						SELECT ARI.[intInvoiceId], ARI.intCompanyLocationId, ARI.[strInvoiceNumber], ARI.strTransactionType, ARI.[intEntityId], ARI.[intPeriodsToAccrue]
 						FROM dbo.tblARInvoice ARI
 						WHERE ARI.[ysnPosted] = 0 
 							AND intInvoiceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd))
@@ -414,30 +426,30 @@ BEGIN TRY
 					IF @post = 1
 						BEGIN
 							
-							DECLARE @StorageTicketInfoByFIFO AS TABLE(
-								 [intId]					INT IDENTITY (1, 1)
-								,[intCustomerStorageId]		INT
-								,[strStorageTicketNumber]	NVARCHAR(40) COLLATE Latin1_General_CI_AS
-								,[dblOpenBalance]			NUMERIC(18, 6)
-								,[intUnitMeasureId]			INT
-								,[strUnitMeasure]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
-								,[strItemType]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
-								,[intItemId]				INT
-								,[strItem]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
-								,[dblCharge]				DECIMAL(24, 10)						
-							)
+							--DECLARE @StorageTicketInfoByFIFO AS TABLE(
+							--	 [intId]					INT IDENTITY (1, 1)
+							--	,[intCustomerStorageId]		INT
+							--	,[strStorageTicketNumber]	NVARCHAR(40) COLLATE Latin1_General_CI_AS
+							--	,[dblOpenBalance]			NUMERIC(18, 6)
+							--	,[intUnitMeasureId]			INT
+							--	,[strUnitMeasure]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							--	,[strItemType]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							--	,[intItemId]				INT
+							--	,[strItem]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+							--	,[dblCharge]				DECIMAL(24, 10)						
+							--)
 
-							INSERT INTO @StorageTicketInfoByFIFO(
-								 [intCustomerStorageId]
-								,[strStorageTicketNumber]
-								,[dblOpenBalance]
-								,[intUnitMeasureId]
-								,[strUnitMeasure]
-								,[strItemType]
-								,[intItemId]
-								,[strItem]
-								,[dblCharge]						
-							)				
+							--INSERT INTO @StorageTicketInfoByFIFO(
+							--	 [intCustomerStorageId]
+							--	,[strStorageTicketNumber]
+							--	,[dblOpenBalance]
+							--	,[intUnitMeasureId]
+							--	,[strUnitMeasure]
+							--	,[strItemType]
+							--	,[intItemId]
+							--	,[strItem]
+							--	,[dblCharge]						
+							--)				
 							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
 								 @strOptionType		= 'Update'
 								,@strSourceType		= 'Invoice'
@@ -448,74 +460,74 @@ BEGIN TRY
 								,@IntSourceKey		= @InvoiceId
 								,@intUserId			= @UserEntityID							
 
-							WHILE EXISTS (SELECT NULL FROM @StorageTicketInfoByFIFO)
-								BEGIN
-									DECLARE 
-										 @GrainId				INT
-										,@GrainItemId			INT										
-										,@GrainItemUOMId		INT
-										,@dblCharge				NUMERIC (18,6)
-										,@NewDetailId			INT		
-										,@ErrorMessage			NVARCHAR(250)				
-										,@CurrentErrorMessage	NVARCHAR(250)
-										,@ItemDesc				NVARCHAR(250)				
+							--WHILE EXISTS (SELECT NULL FROM @StorageTicketInfoByFIFO)
+							--	BEGIN
+							--		DECLARE 
+							--			 @GrainId				INT
+							--			,@GrainItemId			INT										
+							--			,@GrainItemUOMId		INT
+							--			,@dblCharge				NUMERIC (18,6)
+							--			,@NewDetailId			INT		
+							--			,@ErrorMessage			NVARCHAR(250)				
+							--			,@CurrentErrorMessage	NVARCHAR(250)
+							--			,@ItemDesc				NVARCHAR(250)				
 
-									SELECT TOP 1 
-										 @GrainId			= STI.intId 
-										,@CustomerStorageId	= STI.intCustomerStorageId
-										,@GrainItemUOMId	= ICIU.[intItemUOMId]
-										,@GrainItemId		= STI.[intItemId]
-										,@dblCharge			= STI.[dblCharge]
-										,@ItemDesc			= ICI.strDescription
-									FROM 
-										@StorageTicketInfoByFIFO STI
-									INNER JOIN 
-										tblICItemUOM ICIU
-											ON STI.intItemId = ICIU.intItemId
-											AND STI.intUnitMeasureId = ICIU.intUnitMeasureId
-									INNER JOIN
-										tblICItem ICI
-											ON STI.intItemId = ICI.intItemId  
+							--		SELECT TOP 1 
+							--			 @GrainId			= STI.intId 
+							--			,@CustomerStorageId	= STI.intCustomerStorageId
+							--			,@GrainItemUOMId	= ICIU.[intItemUOMId]
+							--			,@GrainItemId		= STI.[intItemId]
+							--			,@dblCharge			= STI.[dblCharge]
+							--			,@ItemDesc			= ICI.strDescription
+							--		FROM 
+							--			@StorageTicketInfoByFIFO STI
+							--		INNER JOIN 
+							--			tblICItemUOM ICIU
+							--				ON STI.intItemId = ICIU.intItemId
+							--				AND STI.intUnitMeasureId = ICIU.intUnitMeasureId
+							--		INNER JOIN
+							--			tblICItem ICI
+							--				ON STI.intItemId = ICI.intItemId  
 										
 									
-									BEGIN TRY					
-										EXEC [dbo].[uspARAddItemToInvoice]
-											@InvoiceId						= @InvoiceId	
-											,@ItemId						= @GrainItemId										
-											,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
-											,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
-											,@RaiseError					= @raiseError							 
-											,@ItemCustomerStorageId			= @CustomerStorageId				
-											,@RecomputeTax					= 0
-											,@ItemUOMId						= @GrainItemUOMId
-											,@ItemQtyShipped				= 1
-											,@ItemPrice						= @dblCharge
-											,@ItemDescription				= @ItemDesc
+							--		BEGIN TRY					
+							--			EXEC [dbo].[uspARAddItemToInvoice]
+							--				@InvoiceId						= @InvoiceId	
+							--				,@ItemId						= @GrainItemId										
+							--				,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
+							--				,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
+							--				,@RaiseError					= @raiseError							 
+							--				,@ItemCustomerStorageId			= @CustomerStorageId				
+							--				,@RecomputeTax					= 0
+							--				,@ItemUOMId						= @GrainItemUOMId
+							--				,@ItemQtyShipped				= 1
+							--				,@ItemPrice						= @dblCharge
+							--				,@ItemDescription				= @ItemDesc
 					
 
-										IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
-											BEGIN
-												IF ISNULL(@raiseError,0) = 0
-													ROLLBACK TRANSACTION
-												SET @ErrorMessage = @CurrentErrorMessage;
-												IF ISNULL(@raiseError,0) = 1
-													RAISERROR(@ErrorMessage, 16, 1);
-												RETURN 0;
-											END
-									END TRY
-									BEGIN CATCH
-										IF ISNULL(@raiseError,0) = 0
-											ROLLBACK TRANSACTION
-										SET @ErrorMessage = ERROR_MESSAGE();
-										IF ISNULL(@raiseError,0) = 1
-											RAISERROR(@ErrorMessage, 16, 1);
-										RETURN 0;
-									END CATCH			
+							--			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+							--				BEGIN
+							--					IF ISNULL(@raiseError,0) = 0
+							--						ROLLBACK TRANSACTION
+							--					SET @ErrorMessage = @CurrentErrorMessage;
+							--					IF ISNULL(@raiseError,0) = 1
+							--						RAISERROR(@ErrorMessage, 16, 1);
+							--					RETURN 0;
+							--				END
+							--		END TRY
+							--		BEGIN CATCH
+							--			IF ISNULL(@raiseError,0) = 0
+							--				ROLLBACK TRANSACTION
+							--			SET @ErrorMessage = ERROR_MESSAGE();
+							--			IF ISNULL(@raiseError,0) = 1
+							--				RAISERROR(@ErrorMessage, 16, 1);
+							--			RETURN 0;
+							--		END CATCH			
 
-									UPDATE tblARInvoiceDetail SET intCustomerStorageId = @CustomerStorageId WHERE intInvoiceDetailId = @NewDetailId
-									DELETE FROM @StorageTicketInfoByFIFO  WHERE intId  = @GrainId
-								END
-								DELETE FROM @StorageTicketInfoByFIFO WHERE intItemId = @ItemId
+							--		UPDATE tblARInvoiceDetail SET intCustomerStorageId = @CustomerStorageId WHERE intInvoiceDetailId = @NewDetailId
+							--		DELETE FROM @StorageTicketInfoByFIFO  WHERE intId  = @GrainId
+							--	END
+								--DELETE FROM @StorageTicketInfoByFIFO WHERE intItemId = @ItemId
 							END
 					ELSE
 						BEGIN
@@ -525,7 +537,7 @@ BEGIN TRY
 									@intUserId		= @UserEntityID
 
 							UPDATE tblARInvoiceDetail SET intCustomerStorageId = NULL WHERE intInvoiceDetailId = @InvoiceDetailId
-							DELETE FROM tblARInvoiceDetail WHERE intCustomerStorageId IS NOT NULL AND intInvoiceId = @InvoiceId
+							--DELETE FROM tblARInvoiceDetail WHERE intCustomerStorageId IS NOT NULL AND intInvoiceId = @InvoiceId
 						END						
 					END TRY
 					BEGIN CATCH
@@ -1547,6 +1559,25 @@ END CATCH
 					ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.dtmPostDate, ARI.dtmDate)), 0) = 0
 
 
+				--If ysnAllowUserSelfPost is True in User Role
+				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
+				BEGIN
+					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT 
+						'You cannot Post/Unpost transactions you did not create.',
+						ARI.strTransactionType,
+						ARI.strInvoiceNumber,
+						@batchId,
+						ARI.intInvoiceId
+					FROM 
+						@PostInvoiceData PID
+					INNER JOIN 
+						tblARInvoice ARI
+							ON PID.intInvoiceId = ARI.intInvoiceId
+					WHERE  
+						PID.intEntityId <> @UserEntityID
+				END	
+
 				--Invalid Consumption Site
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
@@ -1786,6 +1817,25 @@ END CATCH
 						ARI.ysnPosted = 1
 				END
 
+				--If ysnAllowUserSelfPost is True in User Role
+				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
+				BEGIN
+					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT 
+						'You cannot Post/Unpost transactions you did not create.',
+						ARI.strTransactionType,
+						ARI.strInvoiceNumber,
+						@batchId,
+						ARI.intInvoiceId
+					FROM 
+						@PostInvoiceData PID
+					INNER JOIN 
+						tblARInvoice ARI
+							ON PID.intInvoiceId = ARI.intInvoiceId
+					WHERE  
+						PID.intEntityId <> @UserEntityID
+				END	
+
 			END			
 		
 		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
@@ -1975,20 +2025,37 @@ BEGIN CATCH
 END CATCH
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
---------------------------------------------------------------------------------------------  
+--------------------------------------------------------------------------------------------
+
 IF @post = 1  
-	BEGIN  
+	BEGIN 
+
+		
+		BEGIN TRY 
+			DECLARE @Ids AS Id
+			INSERT INTO @Ids(intId)
+			SELECT IP.intInvoiceId 
+			FROM 
+				@PostInvoiceData IP 
+
+			EXEC	dbo.[uspARUpdateTransactionAccounts]  
+						 @Ids				= @Ids
+						,@TransactionType	= 1
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH
+
+		
 		-- Accruals
 		BEGIN TRY 
 			DECLARE @Accruals AS Id
 			INSERT INTO @Accruals(intId)
-			SELECT I.intInvoiceId 
+			SELECT IP.intInvoiceId 
 			FROM 
-				tblARInvoice I 
-			INNER JOIN 
 				@PostInvoiceData IP 
-					ON I.intInvoiceId = IP.intInvoiceId 
-			WHERE ISNULL(I.intPeriodsToAccrue,0) > 1
+			WHERE ISNULL(IP.intPeriodsToAccrue,0) > 1
 
 			INSERT INTO @GLEntries 
 			EXEC	dbo.uspARGenerateEntriesForAccrual  
@@ -2042,8 +2109,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblInvoiceTotal ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblInvoiceTotal END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
 																								(
 																								SELECT
@@ -2123,6 +2190,76 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId
 			INNER JOIN 
 				@PostInvoiceData	P
+					ON A.intInvoiceId = P.intInvoiceId	
+			LEFT OUTER JOIN
+				(
+				--Credit Memo Prepaids
+				SELECT
+					 [dblAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
+					,[intInvoiceId]			= A.[intInvoiceId] 
+				FROM
+					tblARPrepaidAndCredit ARPAC
+				INNER JOIN
+					tblARInvoice A
+						ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
+						AND ISNULL(ARPAC.[ysnApplied],0) = 1
+						AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+				INNER JOIN
+					tblARInvoice ARI1
+						ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
+						AND ARI1.strTransactionType = 'Credit Memo'
+				GROUP BY
+					A.[intInvoiceId]
+				) CM
+					ON A.[intInvoiceId] = CM.[intInvoiceId] 		
+			WHERE
+				ISNULL(A.intPeriodsToAccrue,0) <= 1
+
+
+			UNION ALL
+			--DEBIT Prepaids
+			SELECT
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				,strBatchID					= @batchId
+				,intAccountId				= ARI1.intAccountId
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,dblDebitUnit				= @ZeroDecimal 
+				,dblCreditUnit				= @ZeroDecimal
+				,strDescription				= A.strComments
+				,strCode					= @CODE
+				,strReference				= C.strCustomerNumber
+				,intCurrencyId				= A.intCurrencyId 
+				,dblExchangeRate			= 1
+				,dtmDateEntered				= @PostDate
+				,dtmTransactionDate			= A.dtmDate
+				,strJournalLineDescription	= 'Applied Prepaid - ' + ARI1.[strInvoiceNumber] 
+				,intJournalLineNo			= ARPAC.[intPrepaidAndCreditId]
+				,ysnIsUnposted				= 0
+				,intUserId					= @userId
+				,intEntityId				= @UserEntityID				
+				,strTransactionId			= A.strInvoiceNumber
+				,intTransactionId			= A.intInvoiceId
+				,strTransactionType			= A.strTransactionType
+				,strTransactionForm			= @SCREEN_NAME
+				,strModuleName				= @MODULE_NAME
+				,intConcurrencyId			= 1				 
+			FROM
+				tblARPrepaidAndCredit ARPAC
+			INNER JOIN
+				tblARInvoice A
+					ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
+					AND ISNULL(ARPAC.[ysnApplied],0) = 1
+					AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+			INNER JOIN
+				tblARInvoice ARI1
+					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
+					AND ARI1.strTransactionType = 'Credit Memo' 
+			LEFT JOIN 
+				tblARCustomer C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+			INNER JOIN 
+				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
@@ -2135,8 +2272,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= SMCL.intUndepositedFundsId 
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
 				,dblDebitUnit				= @ZeroDecimal
 				,dblCreditUnit				= @ZeroDecimal		
 				,strDescription				= A.strComments
@@ -2168,9 +2305,30 @@ IF @post = 1
 			INNER JOIN
 				tblSMCompanyLocation SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
+			LEFT OUTER JOIN
+				(
+				--Credit Memo Prepaids
+				SELECT
+					 [dblAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
+					,[intInvoiceId]			= A.[intInvoiceId] 
+				FROM
+					tblARPrepaidAndCredit ARPAC
+				INNER JOIN
+					tblARInvoice A
+						ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
+						AND ISNULL(ARPAC.[ysnApplied],0) = 1
+						AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+				INNER JOIN
+					tblARInvoice ARI1
+						ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
+						AND ARI1.strTransactionType = 'Credit Memo'
+				GROUP BY
+					A.[intInvoiceId]
+				) CM
+					ON A.[intInvoiceId] = CM.[intInvoiceId] 
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
-				AND A.dblPayment <> @ZeroDecimal
+				AND (A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal)) <> @ZeroDecimal
 			
 			UNION ALL
 			--Credit Prepaids
@@ -2209,7 +2367,8 @@ IF @post = 1
 					AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
 			INNER JOIN
 				tblARInvoice ARI1
-					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] 
+					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
+					AND ARI1.strTransactionType <> 'Credit Memo' 
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId
@@ -2224,17 +2383,9 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
-													THEN
-														IST.intGeneralAccountId													
-													WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Other Charge')) 
-													THEN
-														IST.intOtherChargeIncomeAccountId
-													ELSE
-														ISNULL(B.intConversionAccountId,(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE B.intSalesAccountId END))
-												END)
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
+				,intAccountId				= B.intAccountId
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
 				,strDescription				= A.strComments
@@ -2265,18 +2416,11 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
 				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId
-			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON B.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId
-			LEFT OUTER JOIN
+					ON A.intInvoiceId = P.intInvoiceId 	
+			LEFT OUTER JOIN 
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId
-			LEFT OUTER JOIN
-				tblSMCompanyLocation SMCL
-					ON A.intCompanyLocationId = SMCL.intCompanyLocationId 						
+					AND A.intCompanyLocationId = ICIS.intLocationId 				
 			WHERE
 				B.dblTotal <> @ZeroDecimal 
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)
@@ -2290,29 +2434,29 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= IST.intGeneralAccountId
+				,intAccountId				= B.intLicenseAccountId 
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															ROUND(B.dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE ROUND((ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(100.000000 - ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
-																															ROUND((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																										 END)
 											  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															ROUND(B.dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE ROUND((ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(100.000000 - ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
-																															ROUND((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																													
 																										 END)
@@ -2350,11 +2494,7 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
 				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId
-			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON B.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId
+					ON A.intInvoiceId = P.intInvoiceId 
 			LEFT OUTER JOIN 
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
@@ -2371,29 +2511,29 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= IST.intGeneralAccountId
+				,intAccountId				= @DeferredRevenueAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															ROUND(B.dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE ROUND((ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(100.000000 - ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
-																															ROUND((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																										 END)
 											  ELSE 0  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															ROUND(B.dblTotal * (ROUND(100.000000 - ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE ROUND((ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(100.000000 - ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
-																															ROUND((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																										 END)
 											  END
@@ -2453,26 +2593,26 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= IST.intMaintenanceSalesAccountId
+				,intAccountId				= B.intMaintenanceAccountId 
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
-																													ISNULL(B.dblTotal, @ZeroDecimal) + ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															ROUND(B.dblTotal * (ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + ROUND((ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
 																														ELSE
-																															ROUND((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																												END)
 												END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
-																													ISNULL(B.dblTotal, @ZeroDecimal) + ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															ROUND(B.dblTotal * (ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + ROUND((ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * (ROUND(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
 																														ELSE
-																															ROUND((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																												END) 
 											  ELSE 0  END
@@ -2511,10 +2651,6 @@ IF @post = 1
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON B.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId
-			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
 					AND A.intCompanyLocationId = ICIS.intLocationId 						
@@ -2530,9 +2666,9 @@ IF @post = 1
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= IST.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
+				,intAccountId				= B.intSalesAccountId
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
 				,strDescription				= A.strComments
@@ -2568,10 +2704,6 @@ IF @post = 1
 				tblICItem I
 					ON B.intItemId = I.intItemId
 			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON B.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 
-			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
 					AND A.intCompanyLocationId = ICIS.intLocationId 
@@ -2588,8 +2720,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + ROUND(((B.dblDiscount/100.00) * ROUND((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
 				,strDescription				= A.strComments
@@ -2738,8 +2870,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ROUND(((D.dblDiscount/100.00) * ROUND((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ROUND(((D.dblDiscount/100.00) * ROUND((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -2785,9 +2917,9 @@ IF @post = 1
 			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 			--	,strBatchID					= @batchId
 			--	,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
-			--	,dblDebit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ROUND(((D.dblDiscount/100.00) * ROUND((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+			--	,dblDebit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 			--									ELSE 0 END
-			--	,dblCredit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ROUND(((D.dblDiscount/100.00) * ROUND((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
+			--	,dblCredit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
 			--									ELSE 0 END
 			--	,dblDebitUnit				= 0
 			--	,dblCreditUnit				= 0				
@@ -3317,6 +3449,17 @@ IF @post = 1
 						,@batchId  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@UserEntityID
+
+				DELETE FROM ICIT
+				FROM
+					tblICInventoryTransaction ICIT
+				INNER JOIN
+					@ItemsForPost SIFP
+						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
+						AND ICIT.[strTransactionId] = SIFP.[strTransactionId] 
+						AND ICIT.[ysnIsUnposted] <> 1
+						AND @recap = 1
+						AND @post = 1
 					
 			END TRY
 			BEGIN CATCH
@@ -3432,6 +3575,18 @@ IF @post = 1
 						,@batchId  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@UserEntityID
+
+				DELETE FROM ICIT
+				FROM
+					tblICInventoryTransaction ICIT
+				INNER JOIN
+					@InTransitItems SIFP
+						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
+						AND ICIT.[strTransactionId] = SIFP.[strTransactionId]
+						AND ICIT.[ysnIsUnposted] <> 1
+						AND @recap  = 1
+						AND @post = 1
+
 			END
 		END TRY 
 		BEGIN CATCH
@@ -3587,6 +3742,17 @@ IF @post = 1
 						@StorageItemsForPost  
 						,@batchId  		
 						,@UserEntityID
+
+				DELETE FROM ICIT
+				FROM
+					tblICInventoryTransaction ICIT
+				INNER JOIN
+					@StorageItemsForPost SIFP
+						ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
+						AND ICIT.[strTransactionId] = SIFP.[strTransactionId]
+						AND ICIT.[ysnIsUnposted] <> 1
+						AND @recap  = 1
+						AND @post = 1
 					
 			END TRY
 			BEGIN CATCH
@@ -3595,13 +3761,16 @@ IF @post = 1
 			END CATCH
 		END
 
-		BEGIN TRY 
-			EXEC dbo.uspGLBookEntries @GLEntries, @post
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
+		IF @recap = 0
+		BEGIN
+			BEGIN TRY 
+				EXEC dbo.uspGLBookEntries @GLEntries, @post
+			END TRY
+			BEGIN CATCH
+				SELECT @ErrorMerssage = ERROR_MESSAGE()										
+				GOTO Do_Rollback
+			END CATCH
+		END		
 
 	END   
 
@@ -3711,7 +3880,7 @@ IF @post = 0
 					EXEC	dbo.uspGLInsertReverseGLEntry
 								@strTransactionId	= @strTransactionId
 								,@intEntityId		= @UserEntityID
-								,@dtmDateReverse	= @PostDate
+								,@dtmDateReverse	= NULL
 										
 					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												

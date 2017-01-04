@@ -1,4 +1,4 @@
-﻿CREATE VIEW dbo.vyuCFInvoice
+﻿CREATE VIEW [dbo].[vyuCFInvoice]
 AS
 SELECT        INV.intEntityCustomerId, INV.intEntityId, C.strCustomerNumber, dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, 
                          INV.strShipToZipCode, INV.strShipToCountry, NULL, 0) AS strShipTo, dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, 

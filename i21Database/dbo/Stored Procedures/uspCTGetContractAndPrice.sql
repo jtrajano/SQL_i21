@@ -4,7 +4,7 @@
 	@intLocationId		INT,
 	@intItemId			INT,
 	@dtmTransactionDate	DATETIME,
-	@dblQuantity		NUMERIC(18,4)
+	@dblQuantity		NUMERIC(18, 6)
 AS
 BEGIN
 

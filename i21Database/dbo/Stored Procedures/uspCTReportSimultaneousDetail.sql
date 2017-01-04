@@ -26,11 +26,11 @@ BEGIN TRY
 			CH.strContractNumber + '-' + LTRIM(CD.intContractSeq) strOurRef,
 			ISNULL(IM.strDescription,IM.strItemNo)			AS	strItem,
 			LTRIM(CD.dblQuantity) + ' ' + UM.strUnitMeasure AS	strQunatity,
-			CAST(SF.dblOriginalBasis AS NUMERIC(18,4))		AS	dblOriginalBasis,
-			CAST(SF.dblFutures AS NUMERIC(18,4))			AS	dblFutures,
-			CAST(SF.dblRollArb AS NUMERIC(18,4))			AS	dblRollArb,
-			CAST(SF.dblAdditionalCost AS NUMERIC(18,4))		AS	dblAdditionalCost,
-			CAST(SF.dblFinalPrice AS NUMERIC(18,4))			AS	dblFinalPrice,
+			CAST(SF.dblOriginalBasis AS NUMERIC(18, 6))		AS	dblOriginalBasis,
+			CAST(SF.dblFutures AS NUMERIC(18, 6))			AS	dblFutures,
+			CAST(SF.dblRollArb AS NUMERIC(18, 6))			AS	dblRollArb,
+			CAST(SF.dblAdditionalCost AS NUMERIC(18, 6))		AS	dblAdditionalCost,
+			CAST(SF.dblFinalPrice AS NUMERIC(18, 6))			AS	dblFinalPrice,
 			CY.strCurrency + ' per ' + CM.strUnitMeasure	AS	strPricePerUOM
 	
 	FROM	tblCTPriceFixation			PF

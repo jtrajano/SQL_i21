@@ -39,6 +39,16 @@ DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
+DECLARE @intInventoryReceiptItemId AS INT
+		,@intOrderId INT
+		,@intOwnershipType INT
+		,@intPricingTypeId INT
+		,@intBillId AS INT
+		,@successfulCount AS INT
+		,@invalidCount AS INT
+		,@success AS INT
+		,@batchIdUsed AS INT
+		,@recapId AS INT;
 
 BEGIN
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
@@ -160,12 +170,8 @@ OPEN intListCursor;
 							IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 							BEGIN
 								IF	ISNULL(@intLoopContractId,0) != 0
-								UPDATE tblSCTicket SET intContractId = @intLoopContractId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
-								UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-								, intContractSequence = CT.intContractSeq
-								, strContractLocation = CT.strLocationName
-								FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
 							END
 						INSERT INTO @ItemsForItemReceipt (
 								intItemId
@@ -294,11 +300,6 @@ OPEN intListCursor;
 						-- uses a PRINT statement as that action (not a very good
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
-							UPDATE tblSCTicket SET intContractId = @intDPContractId WHERE intTicketId = @intTicketId
-							UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-							, intContractSequence = CT.intContractSeq
-							, strContractLocation = CT.strLocationName
-							FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 							INSERT INTO @ItemsForItemReceipt (
 							intItemId
 							,intItemLocationId
@@ -321,6 +322,7 @@ OPEN intListCursor;
 							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
 					END;
@@ -378,6 +380,46 @@ END
 	IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+			
+			--VOUCHER intergration
+			CREATE TABLE #tmpItemReceiptIds (
+				[intInventoryReceiptItemId] [INT] PRIMARY KEY,
+				[intOrderId] [INT],
+				[intOwnershipType] [INT],
+				UNIQUE ([intInventoryReceiptItemId])
+			);
+			INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId,intOwnershipType) SELECT intInventoryReceiptItemId,intOrderId,intOwnershipType FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
+
+			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+			FOR
+			SELECT TOP 1 intInventoryReceiptItemId, intOrderId, intOwnershipType
+			FROM #tmpItemReceiptIds WHERE intOwnershipType = 1;
+
+			OPEN intListCursor;
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId , @intOwnershipType;
+
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
+				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
+				BEGIN
+					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
+					SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+					IF ISNULL(@intBillId , 0) != 0
+					BEGIN
+						EXEC [dbo].[uspAPPostBill]
+						@post = 1
+						,@recap = 0
+						,@isBatch = 0
+						,@param = @intBillId
+						,@userId = @intUserId
+						,@success = @success OUTPUT
+					END
+				END
+				FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId, @intOwnershipType;
+			END
 		END
 _Exit:
 	

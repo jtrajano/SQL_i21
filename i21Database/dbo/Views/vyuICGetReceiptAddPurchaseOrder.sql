@@ -5,7 +5,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 , * 
 FROM (
 	SELECT 	
-		POView.intLocationId
+		intLocationId
 		, intEntityVendorId
 		, strVendorId
 		, strVendorName = strName
@@ -20,7 +20,7 @@ FROM (
 		, strSourceNumber = NULL
 		, POView.intItemId
 		, strItemNo
-		, strItemDescription = POView.strDescription
+		, strItemDescription = strDescription
 		, dblQtyToReceive = dblQtyOrdered - dblQtyReceived
 		, intLoadToReceive = NULL
 		, dblUnitCost = dblCost
@@ -30,9 +30,9 @@ FROM (
 		, intCommodityId
 		, intContainerId = NULL
 		, strContainer = NULL
-		, POView.intSubLocationId
+		, intSubLocationId
 		, strSubLocationName
-		, POView.intStorageLocationId
+		, intStorageLocationId
 		, strStorageLocationName = strStorageName
 		, intOrderUOMId = intUnitOfMeasureId
 		, strOrderUOM = ItemUnitMeasure.strUnitMeasure
@@ -75,8 +75,6 @@ FROM (
                 ON GrossNetUOM.intItemUOMId = DefaultGrossNetUOM.intGrossNetUOMId
             LEFT JOIN dbo.tblICUnitMeasure GrossNetName 
                 ON GrossNetName.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
-			LEFT JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intItemId = POView.intItemId AND ItemLocation.intLocationId = POView.intLocationId
 	WHERE ysnCompleted = 0
 		
 ) tblAddOrders

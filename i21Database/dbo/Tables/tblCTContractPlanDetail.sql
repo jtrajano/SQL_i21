@@ -4,8 +4,8 @@
     [intContractPlanId] INT NOT NULL, 
     [intConcurrencyId] INT NOT NULL, 
     [intAccountStatusId] INT NOT NULL, 
-    [dblAdjust] NUMERIC(5, 2) NOT NULL, 
-    [dblQuantity] NUMERIC(12, 4) NOT NULL,
+    [dblAdjust] NUMERIC(18, 6) NOT NULL, 
+    [dblQuantity] NUMERIC(18, 6) NOT NULL,
 
 	CONSTRAINT [PK_tblCTContractPlanDetail_intContractPlanDetailId] PRIMARY KEY CLUSTERED ([intContractPlanDetailId] ASC),
 	CONSTRAINT [FK_tblCTContractPlanDetail_tblCTContractPlan_intContractPlanId] FOREIGN KEY ([intContractPlanId]) REFERENCES [tblCTContractPlan]([intContractPlanId]) ON DELETE CASCADE,

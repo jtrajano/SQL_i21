@@ -17,6 +17,8 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@dtmDateFrom				AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
+		,@strCustomerName           AS NVARCHAR(100)
+		,@strStatementFormat        AS NVARCHAR(50)
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)
 		,@filter					AS NVARCHAR(MAX) = ''
@@ -52,28 +54,6 @@ DECLARE @temp_SOA_table TABLE(
 	,[dtmDateTo]			 DATETIME
 )
 
-DECLARE @temp_aging_table TABLE(
-     [strCustomerName]          NVARCHAR(100)
-    ,[strEntityNo]              NVARCHAR(100)
-    ,[intEntityCustomerId]      INT
-    ,[dblCreditLimit]           NUMERIC(18,6)
-    ,[dblTotalAR]               NUMERIC(18,6)
-    ,[dblFuture]                NUMERIC(18,6)
-    ,[dbl0Days]                 NUMERIC(18,6)
-    ,[dbl10Days]                NUMERIC(18,6)
-    ,[dbl30Days]                NUMERIC(18,6)
-    ,[dbl60Days]                NUMERIC(18,6)
-    ,[dbl90Days]                NUMERIC(18,6)
-    ,[dbl91Days]                NUMERIC(18,6)
-    ,[dblTotalDue]              NUMERIC(18,6)
-    ,[dblAmountPaid]            NUMERIC(18,6)
-    ,[dblCredits]               NUMERIC(18,6)
-	,[dblPrepayments]			NUMERIC(18,6)
-    ,[dblPrepaids]              NUMERIC(18,6)
-    ,[dtmAsOfDate]              DATETIME
-    ,[strSalespersonName]       NVARCHAR(100)
-)
-
 -- Prepare the XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
 
@@ -99,6 +79,14 @@ SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 
+SELECT @strCustomerName = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strCustomerName'
+
+SELECT @strStatementFormat = CASE WHEN ISNULL([from], '') = '' THEN 'Open Item' ELSE [from] END
+FROM @temp_xml_table
+WHERE [fieldname] = 'strStatementFormat'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -113,44 +101,10 @@ ELSE
 SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmAsOfDate'
-
-WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
-BEGIN
-	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
-	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
-	
-	DELETE FROM @temp_xml_table WHERE id = @id
-
-	IF EXISTS(SELECT 1 FROM @temp_xml_table)
-	BEGIN
-		SET @filter = @filter + ' AND '
-	END
-END
-
-INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo
-
-SET @query = 'SELECT * FROM
-(SELECT C.intEntityCustomerId
-      , C.strCustomerNumber
-      , strCustomerName		= E.strName
-	  , C.strStatementFormat	  
-      , dtmDateFrom			= ' + @strDateFrom + '
-	  , dtmDateTo			= ' + @strDateTo + '
-FROM tblARCustomer C INNER JOIN
-       tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
-) MainQuery'
-
-IF ISNULL(@filter,'') != ''
-BEGIN
-	SET @query = @query + ' WHERE ' + @filter
-END
+IF CHARINDEX('''', @strCustomerName) > 0 
+	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 
 INSERT INTO @temp_SOA_table
-EXEC sp_executesql @query
+SELECT NULL, NULL, @strCustomerName, ISNULL(@strStatementFormat, 'Open Item'), @dtmDateFrom, @dtmDateTo
 
-SELECT * FROM @temp_SOA_table STATEMENTREPORT
-LEFT JOIN @temp_aging_table AGINGREPORT
-ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-WHERE ISNULL(AGINGREPORT.dblTotalAR, 0) <> 0
+SELECT * FROM @temp_SOA_table

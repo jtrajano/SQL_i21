@@ -19,7 +19,7 @@ AS
 				FROM	tblCTContractDetail CD LEFT
 				JOIN	(
 							SELECT		RV.intContractDetailId,
-										CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intUnitMeasureId,LP.intWeightUOMId,dblReservedQuantity)),0) AS NUMERIC(18,2)) AS dblReservedQuantity 
+										CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intUnitMeasureId,LP.intWeightUOMId,dblReservedQuantity)),0) AS NUMERIC(18, 6)) AS dblReservedQuantity 
 							FROM		tblLGReservation		RV		
 							JOIN		tblCTContractDetail		CD	ON	CD.intContractDetailId = RV.intContractDetailId	 CROSS	
 							APPLY		tblLGCompanyPreference	LP
@@ -27,7 +27,7 @@ AS
 						)	RV	  ON	RV.intContractDetailId		=	CD.intContractDetailId		LEFT	
 				JOIN	(
 							SELECT		RV.intPContractDetailId,
-										CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intPUnitMeasureId,LP.intWeightUOMId,dblPAllocatedQty)),0) AS NUMERIC(18,2))  AS dblAllocatedQty
+										CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intPUnitMeasureId,LP.intWeightUOMId,dblPAllocatedQty)),0) AS NUMERIC(18, 6))  AS dblAllocatedQty
 							FROM		tblLGAllocationDetail	RV		
 							JOIN		tblCTContractDetail		CD	ON	CD.intContractDetailId = RV.intPContractDetailId	 CROSS	
 							APPLY		tblLGCompanyPreference	LP
@@ -35,14 +35,14 @@ AS
 						)	PA	  ON	PA.intPContractDetailId		=	CD.intContractDetailId		LEFT	
 				JOIN	(
 							SELECT		intSContractDetailId,
-										CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intSUnitMeasureId,LP.intWeightUOMId,dblSAllocatedQty)),0) AS NUMERIC(18,2))  AS dblAllocatedQty
+										CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intSUnitMeasureId,LP.intWeightUOMId,dblSAllocatedQty)),0) AS NUMERIC(18, 6))  AS dblAllocatedQty
 							FROM		tblLGAllocationDetail	RV		
 							JOIN		tblCTContractDetail		CD	ON	CD.intContractDetailId = RV.intPContractDetailId	 CROSS	
 							APPLY		tblLGCompanyPreference	LP 
 							Group By	intSContractDetailId,CD.intItemId,RV.intSUnitMeasureId,LP.intWeightUOMId
 						)	SA	  ON	SA.intSContractDetailId		=	CD.intContractDetailId		LEFT
 				JOIN	(
-							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblPickedQty),0) AS NUMERIC(18,2))  AS dblPickedQty
+							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblPickedQty),0) AS NUMERIC(18, 6))  AS dblPickedQty
 							FROM		vyuCTContStsPickedLot 
 							Group By	intContractDetailId
 						)	PL	  ON	PL.intContractDetailId		=	CD.intContractDetailId	CROSS	

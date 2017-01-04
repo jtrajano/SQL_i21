@@ -48,7 +48,7 @@ FROM
 		 , dblTotal					= NULL
 	FROM tblARInvoiceDetail
 		WHERE ISNULL(intRecipeId, 0) <> 0 
-		  AND intCommentTypeId <> 2) AS RECIPEITEMS
+		  AND ISNULL(intCommentTypeId, 0) <> 2) AS RECIPEITEMS
 INNER JOIN 
 	tblMFRecipe R 
 		ON RECIPEITEMS.intRecipeId = R.intRecipeId

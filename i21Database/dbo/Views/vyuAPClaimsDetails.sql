@@ -38,10 +38,10 @@ AS
 			,M2.str1099Form
 			,M2.str1099Type
 			,G.strDescription
-			,ISNULL(H1.intCent,1) AS intCent
-			,ISNULL(E.intCurrencyId,ISNULL(H1.intMainCurrencyId,A.intCurrencyId)) AS intCurrencyId
-			,ISNULL(H1.strCurrency,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)) AS strCostCurrency
-			,ISNULL(H1.ysnSubCurrency,0) AS ysnSubCurrency
+			,ISNULL(A.intSubCurrencyCents,1) AS intCent
+			,ISNULL(A.intCurrencyId,H1.intMainCurrencyId) AS intCurrencyId
+			,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)AS strCostCurrency
+			,ISNULL(B.ysnSubCurrency,0) AS ysnSubCurrency
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN (tblICItemUOM B2 INNER JOIN tblICUnitMeasure B3 ON B2.intUnitMeasureId = B3.intUnitMeasureId) ON (CASE WHEN B.dblNetWeight > 0 THEN B.intWeightUOMId WHEN B.intCostUOMId > 0 THEN B.intCostUOMId ELSE B.intUnitOfMeasureId END) =		B2.intItemUOMId
@@ -121,10 +121,11 @@ AS
 				 ,M2.str1099Form
 				 ,M2.str1099Type
 				 ,G.strDescription
-				 ,H1.intCent
+				 ,A.intSubCurrencyCents
 				 ,E.intCurrencyId
 				 ,H1.intMainCurrencyId
 				 ,A.intCurrencyId
 				 ,H1.strCurrency
 			     ,H1.ysnSubCurrency
+				 ,B.ysnSubCurrency
 GO

@@ -53,6 +53,7 @@
     [ysnPostedCSV]            BIT             NULL,
     [strForeignCardId]        NVARCHAR (MAX)  NULL,
     [ysnDuplicate]            BIT             NULL,
+    [dtmInvoiceDate] DATETIME NULL, 
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),

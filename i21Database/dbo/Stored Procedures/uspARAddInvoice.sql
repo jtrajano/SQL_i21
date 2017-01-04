@@ -608,7 +608,7 @@ DECLARE @InvoiceId as int;
 WHILE EXISTS(SELECT NULL FROM @Invoices)
 BEGIN
 	SELECT TOP 1 @InvoiceId = [intInvoiceID] FROM @Invoices
-	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId
+	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
 
     SELECT TOP 1
 		@intNewInvoiceId = I.intInvoiceId 

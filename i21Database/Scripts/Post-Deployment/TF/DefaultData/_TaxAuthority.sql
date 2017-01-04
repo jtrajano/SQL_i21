@@ -141,7 +141,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('IL','Illinois', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('IL','Illinois', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
@@ -152,7 +152,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('IN','Indiana', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('IN','Indiana', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
@@ -163,7 +163,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('IA','Iowa', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('IA','Iowa', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
@@ -174,7 +174,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('KS','Kansas', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('KS','Kansas', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN
@@ -185,7 +185,7 @@ DECLARE @strTaxAuthority NVARCHAR(5)
 		IF @strTaxAuthority IS NULL
 			BEGIN
 				INSERT INTO [tblTFTaxAuthority]([strTaxAuthorityCode],[strDescription],[ysnPaperVersionAvailable],[ysnElectronicVersionAvailable],[ysnFilingForThisTA])
-				VALUES('KY','Kentucky', 'TRUE', 'TRUE', 'TRUE')
+				VALUES('KY','Kentucky', 'TRUE', 'TRUE', 'FALSE')
 			END
 		ELSE
 		BEGIN

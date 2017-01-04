@@ -150,7 +150,7 @@ BEGIN TRY
 			ON D.intContractDetailId = CD.intContractDetailId
 	WHERE
 		D.intContractDetailId IS NOT NULL
-		AND D.intContractDetailId <> TD.intContractDetailId		
+		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
@@ -185,7 +185,7 @@ BEGIN TRY
 			ON TD.intContractDetailId = CD.intContractDetailId
 	WHERE
 		D.intContractDetailId IS NOT NULL
-		AND D.intContractDetailId <> TD.intContractDetailId		
+		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 

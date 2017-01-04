@@ -153,7 +153,7 @@ FROM
 		(SELECT intYear, 
 				intQuarter, 
 				intDay, 
-				dblTotal = (dblLiabilitySS + dblTaxTotalSS) + (dblLiabilityMed + dblTaxTotalMed) + dblFIT
+				dblTotal = dblDayTotal
 			FROM vyuPRDailyTaxTotal
 			WHERE intMonth IN (1, 4, 7, 10)
 		) AS Month1
@@ -170,7 +170,7 @@ FROM
 		(SELECT intYear, 
 				intQuarter, 
 				intDay, 
-				dblTotal = (dblLiabilitySS + dblTaxTotalSS) + (dblLiabilityMed + dblTaxTotalMed) + dblFIT
+				dblTotal = dblDayTotal
 			FROM vyuPRDailyTaxTotal
 			WHERE intMonth IN (2, 5, 8, 11)
 		) AS Month2
@@ -187,7 +187,7 @@ FROM
 		(SELECT intYear, 
 				intQuarter, 
 				intDay, 
-				dblTotal = (dblLiabilitySS + dblTaxTotalSS) + (dblLiabilityMed + dblTaxTotalMed) + dblFIT
+				dblTotal = dblDayTotal
 			FROM vyuPRDailyTaxTotal
 			WHERE intMonth IN (3, 6, 9, 12)
 		) AS Month3

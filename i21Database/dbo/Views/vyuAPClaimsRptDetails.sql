@@ -41,10 +41,10 @@ AS
 			,M2.strName
 			,M2.str1099Form
 			,M2.str1099Type
-			,ISNULL(H1.intCent,1) AS intCent
-			,ISNULL(E.intCurrencyId,ISNULL(H1.intMainCurrencyId,A.intCurrencyId)) AS intCurrencyId
-			,ISNULL(H1.strCurrency,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)) AS strCostCurrency
-			,ISNULL(H1.ysnSubCurrency,0) AS ysnSubCurrency
+			,ISNULL(A.intSubCurrencyCents,1) AS intCent
+			,ISNULL(A.intCurrencyId,H1.intMainCurrencyId) AS intCurrencyId
+			,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)AS strCostCurrency
+			,ISNULL(B.ysnSubCurrency,0) AS ysnSubCurrency
 			,ContainerDetails.strContainerNumber
 			,D.strBillOfLading
 			,Claim.strBillId
@@ -175,7 +175,7 @@ AS
 				 ,M2.str1099Form
 				 ,M2.str1099Type
 				 ,Item.strDescription
-				 ,H1.intCent
+				 ,A.intSubCurrencyCents
 				 ,E.intCurrencyId
 				 ,H1.intMainCurrencyId
 				 ,A.intCurrencyId
@@ -190,4 +190,5 @@ AS
 				 ,I.strWeightGradeDesc
 				 ,N.strCurrency
 				 ,ContainerDetails.strContainerNumber
+				 ,B.ysnSubCurrency
 

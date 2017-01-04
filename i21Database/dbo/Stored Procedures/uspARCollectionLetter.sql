@@ -6,7 +6,7 @@ BEGIN
 			, @strCustomerIds			NVARCHAR(MAX)		
 			, @intLetterId				INT
 			, @strLetterId				NVARCHAR(10)  
-			 ,@LetterName				NVARCHAR(MAX)				
+			 ,@strLetterName				NVARCHAR(MAX)				
 			, @query					NVARCHAR(MAX)
 			, @intEntityCustomerId		INT
 			, @blb						VARBINARY(MAX)
@@ -45,12 +45,25 @@ BEGIN
 	WHERE 
 		[fieldname] = 'intEntityCustomerId' 
 
+	SELECT 
+		@intLetterId = [from]
+	FROM 
+		@temp_params 
+	WHERE [fieldname] = 'intLetterId'
+		
+	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
+
+	SELECT @strLetterName = strName FROM tblSMLetter WHERE intLetterId = @intLetterId
+
 	IF (@strCustomerIds IS NULL OR @strCustomerIds = '')
 	BEGIN
+ 
 		SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
 		FROM (
-			SELECT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
-			FROM vyuARCustomer
+			SELECT 
+				CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
+			FROM 
+				tblARCollectionOverdue
 			FOR XML PATH ('')
 		) c (intEntityCustomerId)
 	END
@@ -62,16 +75,6 @@ BEGIN
 		msgAsHTML VARCHAR(max)
 	);
 	 
-	SELECT 
-		@intLetterId = [from]
-	FROM 
-		@temp_params 
-	WHERE [fieldname] = 'intLetterId'
-		
-	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
-
-	SELECT @LetterName = strName FROM tblSMLetter WHERE intLetterId = @intLetterId	
-
 	DECLARE @strMessage VARCHAR(MAX)
 	SELECT
 		@strMessage = CONVERT(VARCHAR(MAX), blbMessage)
@@ -103,7 +106,8 @@ BEGIN
 	)
 
 	IF OBJECT_ID('tempdb..#TransactionLetterDetail') IS NOT NULL DROP TABLE #TransactionLetterDetail	
-	CREATE TABLE #TransactionLetterDetail (
+	CREATE TABLE #TransactionLetterDetail (	
+		intEntityCustomerId	INT NOT NULL,
 		strInvoiceNumber	VARCHAR(MAX)	COLLATE Latin1_General_CI_AS, 
 		dtmDate				DATETIME, 
 		dbl10Days			NUMERIC(18,6), 
@@ -171,12 +175,14 @@ BEGIN
 		ORDER BY 
 			intEntityCustomerId
 
-	IF @LetterName = 'Recent Overdue Collection Letter'
+	IF @strLetterName = 'Recent Overdue Collection Letter'
 	BEGIN		
-		UPDATE tblARCollectionOverdue SET dbl10DaysSum = (dbl10DaysSum + dbl30DaysSum + dbl60DaysSum + dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId 
+		
+
 		INSERT INTO #TransactionLetterDetail
-		(
-			strInvoiceNumber	 
+		(	
+			intEntityCustomerId		
+			,strInvoiceNumber	 
 			,dtmDate				 
 			,dbl10Days			 
 			,dbl30Days			 
@@ -185,7 +191,9 @@ BEGIN
 			,dbl120Days			 
 			,dbl121Days			 
 		)
-		SELECT strInvoiceNumber
+		SELECT 
+			intEntityCustomerId 
+			, strInvoiceNumber
 			, dtmDate
 			, dbl10Days
 			, dbl30Days
@@ -195,37 +203,45 @@ BEGIN
 			, dbl121Days
 		FROM
 		( 
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl10Days <> 0
 			UNION ALL 
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl30Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl60Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl90Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl120Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
+
+		UPDATE 
+			tblARCollectionOverdue SET dbl10DaysSum = ABC.dblTotalDueSum
+		FROM 
+			(SELECT dblTotalDueSum = (SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
+ 		WHERE 
+			intEntityCustomerId = @CustomerId 
+
 	END
-	ELSE IF @LetterName = '30 Day Overdue Collection Letter'					
-	BEGIN		
-		UPDATE tblARCollectionOverdue SET dbl30DaysSum =  (dbl60DaysSum + dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+	ELSE IF @strLetterName = '30 Day Overdue Collection Letter'					
+	BEGIN				
 		INSERT INTO #TransactionLetterDetail
 		(
-			strInvoiceNumber	 
+			intEntityCustomerId 
+			,strInvoiceNumber	 
 			,dtmDate				 
 			,dbl10Days			 
 			,dbl30Days			 
@@ -234,7 +250,8 @@ BEGIN
 			,dbl120Days			 
 			,dbl121Days			 
 		)
-		SELECT strInvoiceNumber
+		SELECT intEntityCustomerId 
+			, strInvoiceNumber
 			, dtmDate
 			, dbl10Days
 			, dbl30Days
@@ -244,29 +261,37 @@ BEGIN
 			, dbl121Days
 		FROM
 		( 
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl60Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl90Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId,strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl120Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
+
+		UPDATE 
+			tblARCollectionOverdue SET dbl30DaysSum = ABC.dblTotalDueSum
+		FROM 
+			(SELECT dblTotalDueSum = (SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
+ 		WHERE 
+			intEntityCustomerId = @CustomerId 
+
 	END
-	ELSE IF @LetterName = '60 Day Overdue Collection Letter'					
+	ELSE IF @strLetterName = '60 Day Overdue Collection Letter'					
 	BEGIN		
-		UPDATE tblARCollectionOverdue SET dbl60DaysSum =  (dbl90DaysSum + dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
 		INSERT INTO #TransactionLetterDetail
 		(
-			strInvoiceNumber	 
+			intEntityCustomerId
+			,strInvoiceNumber	 
 			,dtmDate				 
 			,dbl10Days			 
 			,dbl30Days			 
@@ -275,7 +300,8 @@ BEGIN
 			,dbl120Days			 
 			,dbl121Days			 
 		)
-		SELECT strInvoiceNumber
+		SELECT intEntityCustomerId
+			, strInvoiceNumber
 			, dtmDate
 			, dbl10Days
 			, dbl30Days
@@ -285,25 +311,32 @@ BEGIN
 			, dbl121Days
 		FROM
 		( 
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl90Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl120Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
+
+		UPDATE 
+			tblARCollectionOverdue SET dbl60DaysSum = ABC.dblTotalDueSum
+		FROM 
+			(SELECT dblTotalDueSum = (SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
+ 		WHERE 
+			intEntityCustomerId = @CustomerId 
 	END
-	ELSE IF @LetterName = '90 Day Overdue Collection Letter'					
-	BEGIN		
-		UPDATE tblARCollectionOverdue SET dbl90DaysSum =  (dbl120DaysSum + dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
+	ELSE IF @strLetterName = '90 Day Overdue Collection Letter'					
+	BEGIN				
 		INSERT INTO #TransactionLetterDetail
 		(
-			strInvoiceNumber	 
+			intEntityCustomerId
+			,strInvoiceNumber	 
 			,dtmDate				 
 			,dbl10Days			 
 			,dbl30Days			 
@@ -312,7 +345,8 @@ BEGIN
 			,dbl120Days			 
 			,dbl121Days			 
 		)
-		SELECT strInvoiceNumber
+		SELECT intEntityCustomerId
+			, strInvoiceNumber
 			, dtmDate
 			, dbl10Days
 			, dbl30Days
@@ -322,21 +356,28 @@ BEGIN
 			, dbl121Days
 		FROM
 		( 
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl120Days  <> 0
 			UNION ALL
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
+
+		UPDATE 
+			tblARCollectionOverdue SET dbl90DaysSum = ABC.dblTotalDueSum
+		FROM 
+			(SELECT dblTotalDueSum = (SUM(dbl120Days) + SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
+ 		WHERE 
+			intEntityCustomerId = @CustomerId 
 	END
-	ELSE IF @LetterName = 'Final Overdue Collection Letter'					
+	ELSE IF @strLetterName = 'Final Overdue Collection Letter'					
 	BEGIN		
-		UPDATE tblARCollectionOverdue SET dbl121DaysSum =  (dbl121DaysSum) WHERE intEntityCustomerId = @CustomerId
 		INSERT INTO #TransactionLetterDetail
 		(
-			strInvoiceNumber	 
+			intEntityCustomerId
+			,strInvoiceNumber	 
 			,dtmDate				 
 			,dbl10Days			 
 			,dbl30Days			 
@@ -345,7 +386,8 @@ BEGIN
 			,dbl120Days			 
 			,dbl121Days			 
 		)
-		SELECT strInvoiceNumber
+		SELECT intEntityCustomerId
+			, strInvoiceNumber
 			, dtmDate
 			, dbl10Days
 			, dbl30Days
@@ -355,10 +397,17 @@ BEGIN
 			, dbl121Days
 		FROM
 		( 
-			SELECT strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
+
+		UPDATE 
+			tblARCollectionOverdue SET dbl121DaysSum = ABC.dblTotalDueSum
+		FROM 
+			(SELECT dblTotalDueSum = (SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
+ 		WHERE 
+			intEntityCustomerId = @CustomerId 
 	END
 								
 		WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
@@ -796,7 +845,17 @@ BEGIN
 			CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
 	END
 	
-	DECLARE @PlaceHolderTable AS PlaceHolderTable
+	DECLARE @PlaceHolderTable AS PlaceHolderTable,
+		@strCompanyName			NVARCHAR(100),
+		@strCompanyAddress		NVARCHAR(100),
+		@strCompanyPhone		NVARCHAR(50)
+
+	SELECT TOP 1 
+		@strCompanyName		= @strCompanyName, 
+		@strCompanyAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL),
+		@strCompanyPhone	= strPhone
+	FROM 
+		tblSMCompanySetup
 
 	INSERT INTO @PlaceHolderTable(
 		intPlaceHolderId
@@ -822,16 +881,85 @@ BEGIN
 	SELECT
 		SC.*
 		, blbMessage			= dbo.[fnARConvertLetterMessage](@strMessage, SC.intEntityCustomerId , @PlaceHolderTable)
-		, strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-		, strCompanyAddress		= (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
-		, strCompanyPhone		= (SELECT TOP 1 strPhone FROM tblSMCompanySetup)
+		, strCompanyName		= @strCompanyName
+		, strCompanyAddress		= @strCompanyAddress
+		, strCompanyPhone		= @strCompanyPhone
 		, strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
+								  + CHAR(13) + (SELECT ISNULL(strAccountNumber,'') FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
 		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
 	FROM
 		@SelectedCustomer SC
 	INNER JOIN 
-		(SELECT 
-			intEntityCustomerId, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId, strName
-		FROM 
-			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
+		(
+			SELECT 
+				intEntityCustomerId, 
+				strBillToAddress, 
+				strBillToCity, 
+				strBillToCountry, 
+				strBillToLocationName, 
+				strBillToState, 
+				strBillToZipCode, 
+				intTermsId, 
+				strName
+			FROM 
+			(
+			SELECT 
+				ARC.intEntityCustomerId
+				, strCustomerNumber					= ISNULL(ARC.strCustomerNumber, EME.strEntityNo)
+				, EME.strName
+				, BillToLoc.strBillToAddress
+				, BillToLoc.strBillToCity
+				, BillToLoc.strBillToCountry
+				, BillToLoc.strBillToLocationName
+				, BillToLoc.strBillToState
+				, BillToLoc.strBillToZipCode
+				, EMEL.intTermsId
+				, EMEL.strTerm
+			FROM 
+				(SELECT 
+					intEntityCustomerId, 
+					strCustomerNumber, 
+					intBillToId					
+				FROM 
+					tblARCustomer) ARC
+				INNER JOIN (
+							SELECT 
+								intEntityId, 
+								strEntityNo, 
+								strName								 
+							FROM 
+								tblEMEntity
+							) EME ON ARC.intEntityCustomerId = EME.intEntityId
+				LEFT JOIN (
+							SELECT 
+								Loc.intEntityId, 
+								Loc.intEntityLocationId,
+								Loc.intTermsId,
+								SMT.strTerm																
+							FROM 
+								tblEMEntityLocation Loc
+							INNER JOIN (
+										SELECT 
+											intTermID,
+											strTerm 
+										FROM 
+											tblSMTerm) SMT ON Loc.intTermsId = SMT.intTermID
+							WHERE Loc.ysnDefaultLocation = 1
+							) EMEL ON ARC.intEntityCustomerId = EMEL.intEntityId
+				LEFT JOIN (
+							SELECT 
+								intEntityId, 
+								intEntityLocationId,
+								strBillToAddress		= strAddress,
+								strBillToCity			= strCity,
+								strBillToLocationName	= strLocationName,
+								strBillToCountry		= strCountry,
+								strBillToState			= strState,
+								strBillToZipCode		= strZipCode
+							FROM 
+								tblEMEntityLocation
+							) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
+			) Cus
+		) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
+
 END

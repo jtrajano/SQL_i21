@@ -26,15 +26,15 @@ SELECT strCompanyName		= (CASE WHEN CL.strUseLocationAddress = 'Letterhead'
   , I.intEntityCustomerId
   , C.strCustomerNumber
   , E.strName
-  , strCustomerAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, I.strBillToLocationName, I.strBillToAddress, I.strBillToCity, I.strBillToState, I.strBillToZipCode, I.strBillToCountry, E.strName, C.ysnIncludeEntityName)
+  , strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, I.strBillToLocationName, I.strBillToAddress, I.strBillToCity, I.strBillToState, I.strBillToZipCode, I.strBillToCountry, E.strName, C.ysnIncludeEntityName)
   , I.dtmDate
   , I.intInvoiceId
   , I.strInvoiceNumber
-  , ID.dblQtyShipped
+  , dblQtyShipped		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Cash Refund', 'Overpayment', 'Customer Prepayment') THEN ID.dblQtyShipped * -1 ELSE ID.dblQtyShipped END
   , ID.intItemUOMId
   , UOM.strUnitMeasure
-  , ID.dblPrice
-  , ID.dblTotal
+  , dblPrice			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Cash Refund', 'Overpayment', 'Customer Prepayment') THEN ID.dblPrice * -1 ELSE ID.dblPrice END 
+  , dblTotal			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Cash Refund', 'Overpayment', 'Customer Prepayment') THEN ID.dblTotal * -1 ELSE ID.dblTotal END
 FROM tblARInvoice I
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 	INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId

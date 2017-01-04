@@ -1,17 +1,23 @@
 ﻿CREATE TABLE [dbo].[tblHDTempEmail]
 (
 	[intTempEmailId] [int] IDENTITY(1,1) NOT NULL,
-	[strSMTPServer] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
-	[intSMTPPort] [int] NULL,
-	[strUserName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strPassword] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strSMTPServer] [nvarchar](150) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intSMTPPort] [int] NOT NULL,
+	[strUserName] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strPassword] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnRequiresAuthentication] [bit] NULL,
-	[strFromEmail] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strEmail] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strSubject] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strFromEmail] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strFromDisplayName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strEmailTo] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strEmailBcc] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strSubject] [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strBodyMessage] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strBodyMessageType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[intTicketId] [int] NULL,	
+	[ysnSend] BIT NOT NULL DEFAULT 0,	
+	[intAttemp] [int] NOT NULL default 0,
+	[dtmCreated] [datetime] NOT NULL,
+	[dtmSent] [datetime] NULL,
+	[strSendingStatus] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'ready',
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblHDTempEmail] PRIMARY KEY CLUSTERED 
 (
@@ -90,7 +96,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblHDTempEmail',
     @level2type = N'COLUMN',
-    @level2name = N'strEmail'
+    @level2name = 'strEmailTo'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Subject',
@@ -120,13 +126,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strBodyMessageType'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Ticket Id',
+    @value = N'Send',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblHDTempEmail',
     @level2type = N'COLUMN',
-    @level2name = N'intTicketId'
+    @level2name = 'ysnSend'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Check',

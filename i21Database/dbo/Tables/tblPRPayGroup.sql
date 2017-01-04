@@ -4,7 +4,7 @@
     [strPayGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strPayPeriod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[intBankAccountId] INT NULL, 
+	[intBankAccountId] INT NOT NULL, 
 	[dtmBeginDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
 	[dtmPayDate] [datetime] NULL,

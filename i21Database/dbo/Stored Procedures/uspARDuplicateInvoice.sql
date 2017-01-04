@@ -283,7 +283,7 @@ BEGIN TRY
 		,@ItemSubCurrencyId						= @ItemSubCurrencyId
 		,@ItemSubCurrencyRate					= @ItemSubCurrencyRate
 		,@EntityContactId						= @EntityContactId
-		,@StorageScheduleTypeId					= @StorageScheduleTypeId
+		,@ItemStorageScheduleTypeId					= @StorageScheduleTypeId
 
 END TRY
 BEGIN CATCH
@@ -362,7 +362,10 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]
 		,[intConcurrencyId]
 		,[dblOriginalItemWeight]
-		,[intStorageScheduleTypeId])
+		,[intStorageScheduleTypeId]
+		,[intPrepayTypeId]
+		,[intStorageLocationId]
+		,[intCompanyLocationSubLocationId])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= ''
@@ -432,6 +435,9 @@ BEGIN TRY
 		,[intConcurrencyId]				= 1
 		,[dblOriginalItemWeight]		= ARID.dblOriginalItemWeight
 		,[intStorageScheduleTypeId]		= ARID.intStorageScheduleTypeId
+		,[intPrepayTypeId]				= ARID.intPrepayTypeId
+		,[intStorageLocationId]			= ARID.intStorageLocationId
+		,[intCompanyLocationSubLocationId] = ARID.intCompanyLocationSubLocationId
 	FROM
 		tblARInvoiceDetail ARID
 	LEFT OUTER JOIN

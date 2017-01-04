@@ -160,7 +160,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			V.intEntityCustomerId = @EntityCustomerId
 			AND ISNULL(V.intCompanyLocationId,@CompanyLocationId) = @ComLocationId
 		
-		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId
 		
 		INSERT INTO @NewlyCreatedInvoices
 		SELECT @NewInvoiceId

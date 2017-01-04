@@ -68,7 +68,7 @@ BEGIN
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
 		AND A.dblTotal = 0
 
-		--No Terms specified
+		--No Terms specifiedvouch
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
 			'No terms has been specified.',
@@ -120,8 +120,10 @@ BEGIN
 			A.strBillId,
 			A.intBillId
 		FROM tblAPBill A 
-		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
-			A.ysnForApproval = 1
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) 
+		AND EXISTS (
+			SELECT 1 FROM vyuAPForApprovalTransaction B WHERE A.intBillId = B.intTransactionId AND B.strScreenName = 'Voucher'
+		)
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
@@ -157,6 +159,7 @@ BEGIN
 				WHERE E.dblOpenReceive = E.dblBillQty
 			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
 			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+			AND A.intTransactionType = 1
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT

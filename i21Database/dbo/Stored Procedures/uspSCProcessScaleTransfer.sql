@@ -51,6 +51,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
                 ,[intToSubLocationId]
                 ,[intFromStorageLocationId]
                 ,[intToStorageLocationId]
+				,[ysnWeights]
                 -- Integration Field
 				,[intInventoryTransferId]
                 ,[intSourceId]   
@@ -84,6 +85,10 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
                 ,[intToSubLocationId]       = NULL
                 ,[intFromStorageLocationId] = NULL
                 ,[intToStorageLocationId]   = NULL
+				,[ysnWeights]				= CASE
+												WHEN SC.intWeightId > 0 THEN 1
+												ELSE 0
+											END
                 -- Integration Field
 				,[intInventoryTransferId]   = NULL
                 ,[intSourceId]              = SC.intTicketId

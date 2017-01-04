@@ -54,7 +54,6 @@
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL	
 	,@ItemCustomerStorageId			INT				= NULL		
-	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
@@ -70,7 +69,10 @@
 	,@EntitySalespersonId			INT				= NULL
 	,@ItemSubCurrencyId				INT				= NULL
 	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
-	,@ItemIsBlended					BIT				= 0	
+	,@ItemIsBlended					BIT				= 0
+	,@ItemStorageScheduleTypeId		INT				= NULL
+	,@ItemDestinationGradeId		INT				= NULL
+	,@ItemDestinationWeightId		INT				= NULL
 AS
 
 BEGIN
@@ -273,6 +275,8 @@ BEGIN TRY
 				,[ysnVirtualMeterReading]
 				,[intEntitySalespersonId]
 				,[intStorageScheduleTypeId]				
+				,[intDestinationGradeId]
+				,[intDestinationWeightId]
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -349,6 +353,8 @@ BEGIN TRY
 				,[ysnVirtualMeterReading]			= @ItemVirtualMeterReading
 				,[intEntitySalespersonId]			= @EntitySalespersonId
 				,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
+				,[intDestinationGradeId]			= @ItemDestinationGradeId
+				,[intDestinationWeightId]			= @ItemDestinationWeightId
 				,[intConcurrencyId]					= 0
 			FROM
 				tblICItem IC
@@ -379,7 +385,7 @@ SET @NewId = SCOPE_IDENTITY()
 		
 BEGIN TRY
 	IF @RecomputeTax = 1
-		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
+		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId  
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0	

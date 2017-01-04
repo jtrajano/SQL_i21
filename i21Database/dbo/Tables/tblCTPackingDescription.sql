@@ -3,7 +3,7 @@
 	[strPackingDescription] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strShortName] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnWeightDefinition] [bit] NULL,
-	[dblWeightPerUnit] [numeric](18, 4) NULL,
+	[dblWeightPerUnit] [numeric](18, 6) NULL,
 	[intWeightPerUnitUOMId] [INT] NULL,
 	[intPhysicalCountUOMId] [INT] NULL,
 	[intConcurrencyId] INT NOT NULL, 

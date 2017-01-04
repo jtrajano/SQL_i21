@@ -155,7 +155,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-007'
 					BEGIN
 					--7. Amount of Tax Uncollectible from Eligible Purchasers - Complete Schedule 10E
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-007''' 
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-007''' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -176,7 +176,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-010'
 					BEGIN
 					--10. Adjustment - Complete Schedule E-1 (Dollar amount only)
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-010''' 
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-010''' 
 						INSERT INTO @tblTempSummaryTotal
 					
 						EXEC(@Query)
@@ -215,7 +215,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-014'
 					BEGIN
 					--3. Adjustments (Schedule E-1 must be attached and is subject to Department approval)
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-014''' 
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-014''' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -236,7 +236,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-017'
 					BEGIN
 					--2. Penalty
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-017''' 
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-017''' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -244,7 +244,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-018'
 					BEGIN
 					--3. Interest
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-018'''    
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-018'''    
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -258,7 +258,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-020'
 					BEGIN
 					--5. Payment(s)
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-020''' 
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-020''' 
 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)

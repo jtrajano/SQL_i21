@@ -368,5 +368,7 @@
     <Build Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
     <None Include="dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportPaymentFromImportedPostedVoucher.sql" />
   </ItemGroup>
 </Project>

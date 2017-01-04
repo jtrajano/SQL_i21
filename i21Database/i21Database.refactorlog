@@ -5572,4 +5572,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[PK_intLoadStorageCostId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2bb3112e-4f77-4bfb-8652-540a03257d1d" ChangeDateTime="11/21/2016 05:14:30">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketContractUsed].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketContractUsed]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketContractUsed" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9943e6a2-c1c7-4b68-990d-7be7fa487770" ChangeDateTime="12/20/2016 02:32:30">
+    <Property Name="ElementName" Value="[dbo].[tblHDTempEmail].[strEmail]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDTempEmail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strEmailTo" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b32139a8-f1d1-4884-bfb5-c639390ec056" ChangeDateTime="12/20/2016 02:33:20">
+    <Property Name="ElementName" Value="[dbo].[tblHDTempEmail].[intTicketId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDTempEmail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnSend" />
+  </Operation>
 </Operations>

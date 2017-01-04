@@ -32,10 +32,13 @@ DECLARE @intContractDetailId AS INT,
 		@intHaulerId AS INT,
 		@ysnAccrue AS BIT,
 		@ysnPrice AS BIT,
-		@intFutureMarketId AS INT;
+		@intFutureMarketId AS INT,
+		@batchId AS NVARCHAR(40),
+		@ticketBatchId AS NVARCHAR(40),
+		@splitDistribution AS NVARCHAR(40);
 
 BEGIN 
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId
+	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId, @splitDistribution = SC.strDistributionOption
 	FROM	dbo.tblSCTicket SC 
 	LEFT JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
 	LEFT JOIN dbo.tblICCommodity IC On SC.intCommodityId = IC.intCommodityId
@@ -61,6 +64,12 @@ BEGIN
 		,intInventoryReceiptId INT
 	)
 END 
+
+--IF(@batchId IS NULL)
+--	EXEC uspSMGetStartingNumber 105, @batchId OUT
+
+--SET @ticketBatchId = @batchId
+
 -- Insert Entries to Stagging table that needs to processed to Transport Load
 INSERT into @ReceiptStagingTable(
 		-- Header
@@ -72,6 +81,7 @@ INSERT into @ReceiptStagingTable(
 		,intShipFromId
 		,intShipViaId
 		,intDiscountSchedule
+		,strVendorRefNo
 				
 		-- Detail				
 		,intItemId
@@ -90,8 +100,6 @@ INSERT into @ReceiptStagingTable(
 		,intStorageLocationId
 		,ysnIsStorage
 		,dblFreightRate
-		--,dblGross
-		--,dblNet
 		,intSourceId
 		,intSourceType	
 		,strSourceScreenName
@@ -111,6 +119,7 @@ SELECT
 		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityVendorId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
+		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
 
 		--Detail
 		,intItemId					= SC.intItemId
@@ -142,15 +151,6 @@ SELECT
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
-		--,dblGross					= CASE 
-		--								WHEN SC.strDistributionOption = 'SPL' THEN @dblTicketGross
-		--								ELSE SC.dblGrossWeight - SC.dblTareWeight
-		--							END
-		--,dblNet						= dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
-		--,dblNet						= CASE 
-		--								WHEN SC.strDistributionOption = 'SPL' THEN dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
-		--								ELSE SC.dblGrossWeight - SC.dblTareWeight
-		--							END
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
@@ -200,6 +200,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[ysnPrice]
 		)
 		SELECT	
+		DISTINCT
 		[intEntityVendorId]					= RE.intEntityVendorId
 		,[strBillOfLadding]					= RE.strBillOfLadding
 		,[strReceiptType]					= RE.strReceiptType
@@ -214,8 +215,16 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[dblRate]							= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 
 												CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-													WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+													WHEN QM.dblDiscountAmount < 0 THEN 
+													CASE
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod) * -1)
+														ELSE (QM.dblDiscountAmount * -1)
+													END 
+													WHEN QM.dblDiscountAmount > 0 THEN 
+													CASE
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod)
+														ELSE QM.dblDiscountAmount
+													END 
 												END
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
@@ -224,9 +233,17 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN 
-												CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId) * -1)
-													WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId)
+												CASE
+													WHEN QM.dblDiscountAmount < 0 THEN 
+													CASE
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod) * -1)
+														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId) * -1)
+													END 
+													WHEN QM.dblDiscountAmount > 0 THEN 
+													CASE
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod)
+														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId)
+													END 
 												END
 											END
 		,[strAllocateCostBy]				= NULL

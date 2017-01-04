@@ -11,6 +11,7 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	CREATE TABLE #tmpSC(intTicketId INT)
+	DECLARE @intContractDetailId INT;
 
 	IF @status IS NOT NULL
 	BEGIN
@@ -20,6 +21,15 @@ BEGIN
 		END
 		FROM tblSCTicket A
 		WHERE A.intTicketId = @scId
+
+		SELECT @intContractDetailId = intContractId FROM tblSCTicket where intTicketId = @scId
+
+		UPDATE vyuCTContractDetailView set dblScheduleQty = (CT.dblScheduleQty - SC.dblScheduleQty)
+		FROM vyuCTContractDetailView CT 
+		LEFT JOIN tblSCTicketContractUsed SC ON SC.intContractDetailId = CT.intContractDetailId
+		WHERE SC.intTicketId = @scId AND SC.intContractDetailId != ISNULL(@intContractDetailId,0)
+
+		DELETE FROM tblSCTicketContractUsed WHERE intTicketId = @scId
 	END
 	ELSE
 	BEGIN

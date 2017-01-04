@@ -194,6 +194,8 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
 	,[intStorageScheduleTypeId]
+	,[intDestinationGradeId]
+	,[intDestinationWeightId]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
 	)
@@ -299,8 +301,10 @@ SELECT
 	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
 	,[ysnBlended]							= ARSI.[ysnBlended]
 	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
-	,[intSubCurrencyId]						= NULL
-	,[dblSubCurrencyRate]					= 1
+	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
+	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
+	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
+	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 FROM
 	vyuARShippedItems ARSI
 WHERE
@@ -411,6 +415,8 @@ SELECT
 	,[intTempDetailIdForTaxes]				= SOD.intSalesOrderDetailId
 	,[ysnBlended]							= 0
 	,[intStorageScheduleTypeId]				= SOD.intStorageScheduleTypeId
+	,[intDestinationGradeId]				= NULL
+	,[intDestinationWeightId]				= NULL
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
 FROM 
@@ -525,7 +531,11 @@ INSERT INTO @EntriesForInvoice
 	,[ysnClearDetailTaxes]
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
-	,[intStorageScheduleTypeId])
+	,[intStorageScheduleTypeId]
+	,[intDestinationGradeId]
+	,[intDestinationWeightId]
+	,[intSubCurrencyId] 
+	,[dblSubCurrencyRate])
 SELECT 
 	 [strSourceTransaction]
 	,[intSourceId]
@@ -628,6 +638,10 @@ SELECT
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
 	,@StorageScheduleTypeId
+	,[intDestinationGradeId]
+	,[intDestinationWeightId]
+	,[intSubCurrencyId] 
+	,[dblSubCurrencyRate]
  FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId ASC, ysnInventory DESC
 	
 IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)

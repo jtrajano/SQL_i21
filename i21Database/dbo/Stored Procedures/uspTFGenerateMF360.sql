@@ -11,6 +11,7 @@ DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM tblTFTransactions WH
 IF (@FCode IS NOT NULL)
 BEGIN
 
+
 DECLARE @TA INT
 DECLARE @TACode NVARCHAR(5)
 --SUMMARY VARIABLES
@@ -106,7 +107,6 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 
 				IF @TemplateItemId = 'MF-360-Summary-001'
 					BEGIN
-					--PRINT @SmryReportingComponentId
 						SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @ScheduleCode + ''') AND strType = ''Gasoline / Aviation Gasoline / Gasohol'' AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
@@ -153,7 +153,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-008'
 					BEGIN
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-008'''  
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-008'''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -199,7 +199,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-015'
 					BEGIN
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-015'''  
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-015'''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -218,13 +218,13 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 
 				ELSE IF @TemplateItemId = 'MF-360-Summary-018'
 					BEGIN
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-018'''    
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-018'''    
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-019'
 					BEGIN
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-019'''    
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-019'''    
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 				END
@@ -237,7 +237,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-021'
 					BEGIN
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-021''' 
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-021''' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -249,14 +249,14 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-023'
 					BEGIN
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-023'''  
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-023'''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				--DETAILS
 				ELSE IF @TemplateItemId = 'MF-360-Summary-024'
 					BEGIN
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-023'''  
+						SET @Query = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''MF-360-Summary-023'''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -439,5 +439,4 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				BEGIN
 					UPDATE tblTFTaxReportSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
 				END
-
 END

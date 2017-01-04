@@ -29,7 +29,6 @@ SET @Payment = ROUND(@Payment, [dbo].[fnARGetDefaultDecimal]())
 SET @Discount = ROUND(@Discount, [dbo].[fnARGetDefaultDecimal]())
 SET @Interest = ROUND(@Interest, [dbo].[fnARGetDefaultDecimal]())
 
-
 IF NOT EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
@@ -65,16 +64,16 @@ IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [y
 		RETURN 0;
 	END
 
-DECLARE @InvoiceTotal	NUMERIC(18, 6)
-	,@InvoiceAmountDue	NUMERIC(18, 6)
-	,@TermDiscount		NUMERIC(18, 6)
-	,@InvoiceNumber		NVARCHAR(50)
-	,@TransactionType	NVARCHAR(25)
-	,@AmountPaid		NUMERIC(18, 6)
-	,@PaymentTotal		NUMERIC(18, 6)
-	,@PaymentDate		DATETIME
-
-
+DECLARE @InvoiceTotal		NUMERIC(18, 6)
+	,@InvoiceAmountDue		NUMERIC(18, 6)
+	,@TermDiscount			NUMERIC(18, 6)
+	,@InvoiceNumber			NVARCHAR(50)
+	,@TransactionType		NVARCHAR(25)
+	,@AmountPaid			NUMERIC(18, 6)
+	,@PaymentTotal			NUMERIC(18, 6)
+	,@PaymentDate			DATETIME
+	,@InvoiceReportNumber	NVARCHAR(MAX)
+ 
 SELECT
 	 @PaymentDate	= [dtmDatePaid]
 	,@AmountPaid	= [dblAmountPaid]
@@ -82,7 +81,6 @@ FROM
 	tblARPayment
 WHERE
 	[intPaymentId] = @PaymentId
-
 
 SELECT
 	 @InvoiceTotal		= [dblInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
@@ -95,6 +93,12 @@ FROM
 WHERE
 	[intInvoiceId] = @InvoiceId
 
+SELECT 	
+	@InvoiceReportNumber	= [strInvoiceReportNumber]
+FROM 
+	tblCFTransaction
+WHERE 
+	intInvoiceId = @InvoiceId
 
 IF (@InvoiceAmountDue + @Interest) < (@Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END))
 	BEGIN		
@@ -105,14 +109,12 @@ IF (@InvoiceAmountDue + @Interest) < (@Payment + (CASE WHEN @ApplyTermDiscount =
 
 SET @PaymentTotal = ROUND(ISNULL((SELECT SUM(ISNULL(dblPayment, @ZeroDecimal)) FROM tblARPaymentDetail WHERE [intPaymentId] = @PaymentId), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 
-
 IF (@PaymentTotal + @Payment) > @AmountPaid
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120059, 16, 1, @Payment);
 		RETURN 0;
 	END
-
 
 IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) < @AmountPaid
 	BEGIN		
@@ -133,10 +135,7 @@ IF @TransactionType IN ('Credit Memo','Overpayment','Customer Prepayment')
 		SET @Discount = @ZeroDecimal 
 		SET @Interest = @ZeroDecimal
 	END
-
-
-
-	
+		
 IF ISNULL(@RaiseError,0) = 0	
 	BEGIN TRANSACTION
 
@@ -155,8 +154,11 @@ BEGIN TRY
 		,[dblDiscountAvailable]
 		,[dblInterest]
 		,[dblAmountDue]
-		,[dblPayment]
-		,[intConcurrencyId])
+		,[dblPayment]		
+		,[strInvoiceReportNumber]
+		,[intConcurrencyId]
+
+		)
 	SELECT
 		 [intPaymentId]				= @PaymentId
 		,[intInvoiceId]				= ARI.[intInvoiceId] 
@@ -167,7 +169,8 @@ BEGIN TRY
 		,[dblDiscountAvailable]		= @TermDiscount
 		,[dblInterest]				= @Interest
 		,[dblAmountDue]				= (@InvoiceAmountDue + @Interest) - (@Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END))
-		,[dblPayment]				= @Payment
+		,[dblPayment]				= @Payment		
+		,[strInvoiceReportNumber]	= @InvoiceReportNumber
 		,[intConcurrencyId]			= 0
 	FROM	
 		tblARInvoice ARI	
@@ -175,8 +178,7 @@ BEGIN TRY
 		ARI.[intInvoiceId] = @InvoiceId
 	
 	SET @NewId = SCOPE_IDENTITY()
-
-
+	
 	UPDATE tblARPayment
 	SET
 		[dblUnappliedAmount] = @AmountPaid - (@PaymentTotal + @Payment)
@@ -192,7 +194,6 @@ BEGIN CATCH
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
-
 
 SET @NewPaymentDetailId = @NewId
 

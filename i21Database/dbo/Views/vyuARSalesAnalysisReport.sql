@@ -14,37 +14,38 @@ SELECT
 	  , intCommodityId			= IC.intCommodityId
 	  , intCategoryId			= IC.intCategoryId
 	  , intEntitySalespersonId	= SAR.intEntitySalespersonId
+	  , intTicketId				= SAR.intTicketId
 	  , strTransactionType		= SAR.strTransactionType
 	  , strType					= SAR.strType
-	  , dblQtyOrdered			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyOrdered, 0) ELSE ISNULL(SAR.dblQtyOrdered, 0) END
-	  , dblQtyShipped			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
+	  , dblQtyOrdered			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyOrdered, 0) ELSE ISNULL(SAR.dblQtyOrdered, 0) END
+	  , dblQtyShipped			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 	  , dblUnitCost				= ISNULL(SAR.dblStandardCost, 0)
 	  , dblTotalCost			= ISNULL(SAR.dblStandardCost, 0) *
-									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
-										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
+									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
+										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
 									END
 	 , dblMargin				= (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
-									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
-										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
+									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
+										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
 									END
 	 , dblMarginPercentage		= CASE WHEN (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
-											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
+											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN ISNULL(SAR.dblQtyShipped, 0)
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
 											END > 0 AND ISNULL(SAR.dblLineTotal, 0) > 0
 									THEN ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
-											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
-												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
+											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
+												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
 											END / ISNULL(SAR.dblLineTotal, 0)) * 100 
 									ELSE 0 
 								  END
 	 , dblPrice					= ISNULL(SAR.dblPrice, 0)
-	 , dblTax					= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblTax, 0) ELSE ISNULL(SAR.dblTax, 0) END
-	 , dblLineTotal				= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblLineTotal, 0) ELSE ISNULL(SAR.dblLineTotal, 0) END
-	 , dblTotal					= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -ISNULL(SAR.dblTotal, 0) ELSE ISNULL(SAR.dblTotal, 0) END
+	 , dblTax					= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblTax, 0) ELSE ISNULL(SAR.dblTax, 0) END
+	 , dblLineTotal				= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblLineTotal, 0) ELSE ISNULL(SAR.dblLineTotal, 0) END
+	 , dblTotal					= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblTotal, 0) ELSE ISNULL(SAR.dblTotal, 0) END
 	 , strCustomerNumber		= C.strCustomerNumber
 	 , intItemAccountId			= SAR.intItemAccountId
 	 , strAccountId				= GA.strAccountId
@@ -64,6 +65,8 @@ SELECT
 	 , strShipTo				= RTRIM(SAR.strShipToLocationName)
 	 , strSiteNumber			= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0')
 	 , strSiteDescription		= TMS.strDescription
+	 , strTicketNumber			= SCT.strTicketNumber
+	 , strCustomerReference		= SCT.strCustomerReference
 FROM
 (
 --NON SOftware
@@ -79,7 +82,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARGIA.intAccountId 
+	  , intItemAccountId			= ARID.intAccountId 
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -88,7 +91,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 												THEN NONLOTTED.dblCost
 											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 												THEN LOTTED.dblCost
-											ELSE 0.000000
+											ELSE ISNULL(NONSO.dblCost, 0)
 										END)
 	  , dblPrice					= ARID.dblPrice
 	  ,	dblTax						= ARID.dblTotalTax
@@ -97,6 +100,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strBillToLocationName		= ARI.strBillToLocationName
 	  , strShipToLocationName		= ARI.strShipToLocationName
 	  , intSiteId					= ARID.intSiteId
+	  , intTicketId					= ARID.intTicketId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -105,8 +109,8 @@ FROM
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
-		CROSS APPLY
-			dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, NULL) ARGIA
+		--CROSS APPLY
+		--	dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, NULL) ARGIA
 		LEFT OUTER JOIN (
 			SELECT intTransactionId
 				 , strTransactionId
@@ -177,8 +181,8 @@ FROM
 					AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 					AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 		WHERE ARI.ysnPosted = 1 
-		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo')
-		  AND ICI.strType <> 'Software'
+		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
+		  AND ISNULL(ICI.strType, '') <> 'Software'
 
 UNION ALL
 
@@ -194,7 +198,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= ARGIA.intAccountId 
+	 , intItemAccountId				= ISNULL(INV.intAccountId, SOD.intAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -212,6 +216,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strBillToLocationName		= SO.strBillToLocationName
 	 , strShipToLocationName		= SO.strShipToLocationName
 	 , intSiteId					= NULL
+	 , intTicketId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	INNER JOIN 
@@ -235,6 +240,7 @@ FROM
 			 , ID.intItemId
 			 , ID.intOrderUOMId
 			 , ICIT.dblCost
+			 , ID.intAccountId
 		FROM 
 			tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
@@ -305,8 +311,8 @@ FROM
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo
-	CROSS APPLY
-		dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, NULL) ARGIA
+	--CROSS APPLY
+	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, NULL) ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
 		AND ICI.strType <> 'Software'
@@ -325,7 +331,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARGIA.intAccountId 
+	  , intItemAccountId			= ARID.intLicenseAccountId 
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -343,6 +349,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strBillToLocationName		= ARI.strBillToLocationName
 	  , strShipToLocationName		= ARI.strShipToLocationName
 	  , intSiteId					= ARID.intSiteId
+	  , intTicketId					= ARID.intTicketId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -351,8 +358,8 @@ FROM
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
-		CROSS APPLY
-			dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, 'License') ARGIA
+		--CROSS APPLY
+		--	dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, 'License') ARGIA
 		LEFT OUTER JOIN (
 			SELECT intTransactionId
 				 , strTransactionId
@@ -423,7 +430,7 @@ FROM
 					AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 					AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 		WHERE ARI.ysnPosted = 1 
-		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo')
+		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 		  AND ICI.strType = 'Software'
 		  AND ARID.strMaintenanceType IN ('License/Maintenance', 'License Only')
 
@@ -441,7 +448,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= ARGIA.intAccountId 
+	 , intItemAccountId				= ISNULL(INV.intLicenseAccountId, SOD.intLicenseAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -459,6 +466,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strBillToLocationName		= SO.strBillToLocationName
 	 , strShipToLocationName		= SO.strShipToLocationName
 	 , intSiteId					= NULL
+	 , intTicketId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	INNER JOIN 
@@ -482,6 +490,7 @@ FROM
 			 , ID.intItemId
 			 , ID.intOrderUOMId
 			 , ICIT.dblCost
+			 , ID.intLicenseAccountId
 		FROM 
 			tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
@@ -552,8 +561,8 @@ FROM
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo
-	CROSS APPLY
-		dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'License') ARGIA
+	--CROSS APPLY
+	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'License') ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
 		AND ICI.strType = 'Software'
@@ -573,7 +582,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARGIA.intAccountId 
+	  , intItemAccountId			= ARID.intMaintenanceAccountId
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -591,6 +600,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strBillToLocationName		= ARI.strBillToLocationName
 	  , strShipToLocationName		= ARI.strShipToLocationName
 	  , intSiteId					= ARID.intSiteId
+	  , intTicketId					= ARID.intTicketId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -599,8 +609,8 @@ FROM
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
-		CROSS APPLY
-			dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, 'Maintenance') ARGIA
+		--CROSS APPLY
+		--	dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, 'Maintenance') ARGIA
 		LEFT OUTER JOIN (
 			SELECT intTransactionId
 				 , strTransactionId
@@ -671,7 +681,7 @@ FROM
 					AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 					AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 		WHERE ARI.ysnPosted = 1 
-		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo')
+		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 		  AND ICI.strType = 'Software'
 		  AND ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 
@@ -689,7 +699,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= ARGIA.intAccountId 
+	 , intItemAccountId				= ISNULL(INV.intMaintenanceAccountId, SOD.intMaintenanceAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -707,6 +717,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strBillToLocationName		= SO.strBillToLocationName
 	 , strShipToLocationName		= SO.strShipToLocationName
 	 , intSiteId					= NULL
+	 , intTicketId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	INNER JOIN 
@@ -730,6 +741,7 @@ FROM
 			 , ID.intItemId
 			 , ID.intOrderUOMId
 			 , ICIT.dblCost
+			 , ID.intMaintenanceAccountId
 		FROM 
 			tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
@@ -753,7 +765,7 @@ FROM
 			 , ICISI.intLineNo
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
-			 , ICIT.dblCost		 
+			 , ICIT.dblCost	 
 		FROM
 			tblICInventoryShipmentItem ICISI	
 		INNER JOIN tblICInventoryShipment ICIS
@@ -800,8 +812,8 @@ FROM
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo
-	CROSS APPLY
-		dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'Maintenance') ARGIA
+	--CROSS APPLY
+	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'Maintenance') ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
 		AND ICI.strType = 'Software'
@@ -849,3 +861,5 @@ LEFT JOIN
 		ON SAR.intItemUOMId = UOM.intItemUOMId		
 LEFT JOIN 
 	tblTMSite TMS ON SAR.intSiteId = TMS.intSiteID
+LEFT JOIN
+	tblSCTicket SCT ON SAR.intTicketId = SCT.intTicketId

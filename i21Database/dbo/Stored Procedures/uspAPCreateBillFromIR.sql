@@ -21,7 +21,10 @@ DECLARE @receiptLocation INT;
 DECLARE @userLocation INT;
 DECLARE @location INT;
 DECLARE @cashPrice DECIMAL;
-DECLARE @receiptAmount DECIMAL(18,6)
+DECLARE @receiptAmount DECIMAL(18,6);
+DECLARE @totalReceiptAmount DECIMAL(18,6);
+DECLARE @totalLineItem DECIMAL(18,6);
+DECLARE @totalCharges DECIMAL(18,6);
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -95,8 +98,18 @@ BEGIN
 		RAISERROR('Please setup default AP Account.', 16, 1);
 		--GOTO DONE
 	END
-		
+	
+	----GET THE TOTAL IR AMOUNT
 	SELECT @receiptAmount = SUM(A.dblLineTotal) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
+	
+	SELECT @totalCharges = ISNULL((SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00)),0.00)
+	FROM vyuICChargesForBilling WHERE intInventoryReceiptId = @receiptId
+	
+	SELECT @totalLineItem =  SUM(A.dblLineTotal)
+	FROM tblICInventoryReceiptItem A 
+	WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
+	
+	SET @totalReceiptAmount = @totalLineItem + @totalCharges;
 
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -148,16 +161,16 @@ BEGIN
 		[intShipViaId]			=	A.intShipViaId,
 		[intShipFromId]			=	NULLIF(A.intShipFromId,0),
 		[intShipToId]			=	A.intLocationId,
-		[dtmDate] 				=	GETDATE(),
+		[dtmDate] 				=	(SELECT DATEADD(DD, 0, DATEDIFF(DD,0, GETDATE()))),
 		[dtmDateCreated] 		=	GETDATE(),
-		[dtmBillDate] 			=	GETDATE(),
-		[dtmDueDate] 			=	GETDATE(),
+		[dtmBillDate] 			=	(SELECT DATEADD(DD, 0, DATEDIFF(DD,0, GETDATE()))),
+		[dtmDueDate] 			=	(SELECT DATEADD(DD, 0, DATEDIFF(DD,0, GETDATE()))),
 		[intCurrencyId]			=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT)),
 		[intAccountId] 			=	@APAccount,
 		[strBillId]				=	@generatedBillRecordId,
 		[strReference] 			=	A.strBillOfLading,
-		[dblTotal] 				=	A.dblInvoiceAmount,
-		[dblAmountDue]			=	A.dblInvoiceAmount,
+		[dblTotal] 				=	@totalReceiptAmount,
+		[dblAmountDue]			=	@totalReceiptAmount,
 		[intEntityId]			=	@userId,
 		[ysnPosted]				=	0,
 		[ysnPaid]				=	0,
@@ -228,27 +241,37 @@ BEGIN
 		[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
-		[dblTotal]					=	ABS(CASE WHEN B.ysnSubCurrency > 0 --SubCur True
-											 THEN (CASE WHEN B.intWeightUOMId > 0 
-														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
-														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)) *  (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2))  --Calculate Sub-Cur 
-												   END) 
-											 ELSE (CASE WHEN B.intWeightUOMId > 0 --SubCur False
-														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2))--Base Gross/Net UOM 
-														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Orig Calculation
-												   END)
-										END),
-		[dblCost]					=	ABS(CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
+		[dblTotal]					=	ISNULL((CASE WHEN B.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
+										 THEN (CASE WHEN B.intWeightUOMId > 0 
+													THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) 
+																   THEN E1.dblCashPrice 
+																   ELSE B.dblUnitCost 
+															  END / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+													WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
+													THEN CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)) *  (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+													ELSE CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
+											   END) 
+										 ELSE (CASE WHEN B.intWeightUOMId > 0
+													THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) 
+																   THEN E1.dblCashPrice 
+																   ELSE B.dblUnitCost 
+															  END * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+													WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
+													THEN CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+													ELSE CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END  AS DECIMAL(18,2))  --Orig Calculation
+											   END)
+										 END),0),
+		[dblCost]					=	CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
 											 THEN (CASE WHEN E1.dblCashPrice IS NOT NULL THEN E1.dblCashPrice ELSE B.dblUnitCost END)
 											 ELSE B.dblUnitCost
-										END),
+										END,
 		[dblOldCost]				=	NULL,
-		[dblClaimAmount]			=	CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
+		[dblClaimAmount]			=	ISNULL(CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
 										(
 										 (ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
 										 (CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) 
 											   WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * ( CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) ELSE B.dblUnitCost END) / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END
-										) ELSE 0.00 END,
+										) ELSE 0.00 END,0),
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0),
 		[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
@@ -332,8 +355,8 @@ BEGIN
 		[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	A.intAccountId,
-		[dblTotal]					=	ABS(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
-		[dblCost]					=	ABS(A.dblUnitCost),
+		[dblTotal]					=	CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END,
+		[dblCost]					=	A.dblUnitCost,
 		[dblOldCost]				=	NULL,
 		[dblClaimAmount]			=	0,
 		[dblNetWeight]				=	0,

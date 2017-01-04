@@ -19,6 +19,8 @@
 			,intEntityId = a.intEntityId
 			,intEntityContactId = a.intEntityContactId
 			,a.intAssignedTo
+			,a.ysnPrivate
+			,a.intCreatedBy
 		from tblSMActivity a
 			left join tblEMEntity b on b.intEntityId = a.intEntityId
 			left join tblEMEntity c on c.intEntityId = a.intEntityContactId

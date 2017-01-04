@@ -2255,6 +2255,7 @@
     <Build Include="dbo\Tables\tblTFTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityConfiguration.sql" />
     <Build Include="dbo\Tables\tblTFTerminalControlNumber.sql" />
+    <Build Include="dbo\Tables\tblTFDeploymentNote.sql" />
     <Build Include="dbo\Tables\tblCTSpreadArbitrage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStartBlendSheet.sql" />
@@ -3029,6 +3030,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ConfigurationType.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ProductCode.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCriteria.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
@@ -3924,7 +3926,6 @@
     <Build Include="dbo\Views\vyuLGLoadWarehouseView.sql" />
     <Build Include="dbo\Views\vyuLGLoadCostView.sql" />
     <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
-    <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction_1.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportPricingBySiteGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspCFFeeProfile.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInsertModule.sql" />
@@ -4682,6 +4683,62 @@
     <Build Include="dbo\Tables\tblCRMJiraIssue.sql" />
     <Build Include="dbo\Functions\fnTMGetItemTotalTaxForCustomer.sql" />
     <Build Include="dbo\Functions\fnTMGetItemPricingDetails.sql" />
+    <Build Include="dbo\Tables\tblSCTicketContractUsed.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketContractUsed.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickOrderForInventoryShipment.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryShipmentView.sql" />
+    <Build Include="dbo\Views\vyuRKFutOptTranForNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKCollateralNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKBasisDetailNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKM2MInquiryTranNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKM2MInquiryBasisNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKM2MInquiryNotMapping.sql" />
+    <Build Include="dbo\Functions\fnAPGetBillDetailReceiptTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGatherVolumeForPatronage.sql" />
+    <Build Include="dbo\Functions\fnRoundBanker.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\25_UpdateTransactionAccountIds.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetItemAccount.sql" />
+    <Build Include="dbo\User Defined Types\TFProductCodes.sql" />
+    <Build Include="dbo\User Defined Types\TFTerminalControlNumbers.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponents.sql" />
+    <Build Include="dbo\User Defined Types\TFFilingPackets.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeProductCodes.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeTerminalControlNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeReportingComponents.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeFilingPackets.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\01_TaxAuthority.sql" />
+    <Build Include="dbo\User Defined Types\TFTaxCategories.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeTaxCategories.sql" />
+    <Build Include="dbo\User Defined Types\TFOriginDestinationStates.sql" />
+    <Build Include="dbo\User Defined Types\TFTaxCriteria.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeTaxCriteria.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeOriginDestinationState.sql" />
+    <Build Include="dbo\User Defined Types\TFValidProductCodes.sql" />
+    <Build Include="dbo\User Defined Types\TFValidOriginStates.sql" />
+    <Build Include="dbo\User Defined Types\TFValidDestinationStates.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeValidProductCodes.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeValidDestinationStates.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeValidOriginStates.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponentOutputDesigners.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeReportingComponentConfigurations.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeReportingComponentOutputDesigners.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateReservedStock.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityLob.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateContainerLinkInSample.sql" />
+    <Build Include="dbo\Views\vyuLGOpenPickLots.sql" />
+    <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromInvoice.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerReferencesFromInvoice.sql" />
+    <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromPayment.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerReferencesFromPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertDiscountScheduleRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertPriceProfileRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRPaycheckMiddleReport.sql" />
+    <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCustomer.sql" />
+    <Build Include="dbo\Views\vyuLGLoadStorageCostView.sql" />
+    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4811,6 +4868,12 @@
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
     <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\IN_Indiana.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponentConfigurations.sql">
+      <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
+    </Build>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\00_Cleanup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -4857,5 +4920,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\Reports\5_DeleteInvalidReports.sql" />
   </ItemGroup>
 </Project>

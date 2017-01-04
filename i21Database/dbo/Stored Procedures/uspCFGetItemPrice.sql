@@ -698,15 +698,13 @@ BEGIN
 
 
 
-DECLARE @ValidSiteItem INT
+--DECLARE @ValidSiteItem INT
 
-SET @ValidSiteItem = (SELECT TOP 1 intARItemId FROM @cfSiteItem)
+--SET @ValidSiteItem = (SELECT TOP 1 intARItemId FROM @cfSiteItem)
 
+--IF(@ValidSiteItem IS NOT NULL) 
 
-
-IF(@ValidSiteItem IS NOT NULL) 
-
-BEGIN
+--BEGIN
 
 	DECLARE @Rate NUMERIC(18,6)
 	DECLARE @SiteGroupId INT
@@ -1317,9 +1315,6 @@ BEGIN
 					
 				SET @CFPricingOut = 'Price Profile' 
 			END
-		
-	END
-	
 END
 
 ---***PRICE PROFILE***---

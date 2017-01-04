@@ -123,7 +123,7 @@ BEGIN
 					, strProductDescription = G.vwitm_desc COLLATE Latin1_General_CI_AS
 					, O.strRouteId
 					, P.strFillMethod
-					, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
+					, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN GC.strDescription
 											ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 										END)  		
 					, strLocation =  vwloc_loc_no
@@ -167,6 +167,8 @@ BEGIN
 					ON B.vwcus_terms_cd = R.vwtrm_key_n
 				LEFT JOIN vwtrmmst S
 					ON  C.intDeliveryTermID = S.A4GLIdentity
+				LEFT JOIN tblTMGlobalJulianCalendar GC
+					ON C.intGlobalJulianCalendarId = GC.intGlobalJulianCalendarId
 				,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany)Q
 				,(SELECT TOP 1 intFillMethodId FROM tblTMFillMethod WHERE strFillMethod = ''Julian Calendar'') U
 				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
@@ -275,7 +277,7 @@ BEGIN
 				, strProductDescription = G.strDescription
 				, O.strRouteId
 				, P.strFillMethod
-				, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
+				, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN R.strDescription
 										ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 									END)  
 				, strLocation = CL.strLocationName
@@ -341,6 +343,8 @@ BEGIN
 				ON C.intRouteId = O.intRouteId
 			LEFT JOIN tblTMFillMethod P
 				ON C.intFillMethodId = P.intFillMethodId
+			LEFT JOIN tblTMGlobalJulianCalendar R
+				ON C.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 			,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) Q
 			,(SELECT TOP 1 intFillMethodId FROM tblTMFillMethod WHERE strFillMethod = ''Julian Calendar'') U
 			,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z

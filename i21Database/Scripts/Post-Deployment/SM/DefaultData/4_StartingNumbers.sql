@@ -997,9 +997,19 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Truck Billing')
+
+	UNION ALL
+    SELECT  [intStartingNumberId]   = 105
+            ,[strTransactionType]   = N'Ticket Management'
+            ,[strPrefix]			= N'TKT-'
+            ,[intNumber]            = 1
+            ,[strModule]			= 'Grain'
+            ,[ysnEnable]			= 1
+            ,[intConcurrencyId]		= 1
+    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Ticket Management')
 	
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 105
+	SELECT	[intStartingNumberId]	= 106
 			,[strTransactionType]	= N'Load Shipping Instruction'
 			,[strPrefix]			= N'LSI-'
 			,[intNumber]			= 1

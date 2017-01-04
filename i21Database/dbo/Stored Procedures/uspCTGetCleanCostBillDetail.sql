@@ -52,7 +52,7 @@ BEGIN TRY
 	FROM	(
 				SELECT	BD.intItemId,
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
-								ELSE CAST(NULL AS NUMERIC(18,0)) 
+								ELSE CAST(NULL AS NUMERIC(18, 6)) 
 						END		AS dblValueInCCCurrency,
 						CASE	WHEN BD.intWeightUOMId IS NOT NULL
 								THEN dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, BD.dblNetWeight) 
@@ -61,13 +61,13 @@ BEGIN TRY
 						dblQuantity,
 						BD.intWeightUOMId AS intQuantityUOMId ,
 						@intCleanCostCurrencyId intCCCurrencyId,
-						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18, 6))
 								ELSE	BD.dblTotal 
 						END		AS		dblValueInOtherCurrency,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
 								ELSE	BL.intCurrencyId 
 						END		AS		intOtherCurrencyId,
-						CAST(NULL AS NUMERIC(18,0))  AS dblFX,
+						CAST(NULL AS NUMERIC(18, 6))  AS dblFX,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
 								ELSE	CAST(1 AS BIT)
 						END		AS		ysnValueEnable,
@@ -92,18 +92,18 @@ BEGIN TRY
 				
 				SELECT	BD.intItemId,
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
-								ELSE CAST(NULL AS NUMERIC(18,0)) 
+								ELSE CAST(NULL AS NUMERIC(18, 6)) 
 						END		AS dblValueInCCCurrency,
 						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,BU.intUnitMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) AS dblQuantity,
 						NUll AS intQuantityUOMId ,
 						@intCleanCostCurrencyId intCCCurrencyId,
-						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18, 6))
 								ELSE	BD.dblTotal 
 						END		AS		dblValueInOtherCurrency,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
 								ELSE	BL.intCurrencyId 
 						END		AS		intOtherCurrencyId,
-						CAST(NULL AS NUMERIC(18,0))  AS dblFX,
+						CAST(NULL AS NUMERIC(18, 6))  AS dblFX,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
 								ELSE	CAST(1 AS BIT)
 						END		AS		ysnValueEnable,

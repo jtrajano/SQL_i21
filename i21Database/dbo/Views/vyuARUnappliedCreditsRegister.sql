@@ -12,7 +12,7 @@ SELECT DISTINCT
 	, L.strLocationName
 	, dtmDate
 	, dblAmount				= ISNULL(dblInvoiceTotal, 0) * -1
-	, dblUsed				= ISNULL(PD.dblPayment, 0) * -1
+	, dblUsed				= ISNULL(PD.dblPayment, 0)
 	, dblRemaining			= (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)) * -1
 	, strContact			= [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)	
     , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)

@@ -77,6 +77,8 @@ BEGIN
 				,A.intCustomerID
 				,intSitePriceLevel = CAST(NULL AS INT)
 				,strSiteDescription = ISNULL(A.strDescription,'''')
+				,dtmLastDelivery = A.dtmLastDeliveryDate
+				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -96,6 +98,17 @@ BEGIN
 				ON A.intProduct = F.A4GLIdentity
 			LEFT JOIN tblTMDispatch G
 				ON A.intSiteID = G.intSiteID
+			LEFT JOIN (
+						SELECT intSiteId = intSiteID
+							,intOpenCount = COUNT(intSiteID)
+						FROM tblTMWorkOrder 
+						WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
+													 FROM tblTMWorkStatusType 
+													 WHERE strWorkStatus = ''Open'' 
+														AND ysnDefault = 1)
+						GROUP BY intSiteID
+					) M
+				ON A.intSiteID = M.intSiteId
 			WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0
 			')	
 		END	
@@ -151,6 +164,8 @@ BEGIN
 				,intClockLocation = A.intClockID
 				,intSitePriceLevel = A.intCompanyLocationPricingLevelId
 				,strSiteDescription = ISNULL(A.strDescription,'''')
+				,dtmLastDelivery = A.dtmLastDeliveryDate
+				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -187,6 +202,17 @@ BEGIN
 				LEFT JOIN [vyuARCustomerInquiryReport] CI
 					ON Ent.intEntityId = CI.intEntityCustomerId) I
 				ON B.intCustomerNumber = I.intEntityId
+			LEFT JOIN (
+						SELECT intSiteId = intSiteID
+							,intOpenCount = COUNT(intSiteID)
+						FROM tblTMWorkOrder 
+						WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
+													 FROM tblTMWorkStatusType 
+													 WHERE strWorkStatus = ''Open'' 
+														AND ysnDefault = 1)
+						GROUP BY intSiteID
+					) M
+				ON A.intSiteID = M.intSiteId
 			WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0
 			
 		')

@@ -263,6 +263,7 @@ BEGIN
 				ON B.intInvoiceId = D.intInvoiceId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 			AND ((B.intBillId > 0 AND C.ysnPaid = 1) OR (B.intInvoiceId IS NOT NULL AND D.ysnPaid = 1))
+			AND B.dblPayment > 0 --Validate all those selected transaction	
 				
 		--MAKE SURE YOU WILL NOT PAY OVER ON THE AMOUNT DUE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

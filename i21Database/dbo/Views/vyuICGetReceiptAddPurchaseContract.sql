@@ -32,7 +32,7 @@ FROM (
 		, strContainer				= CAST(NULL AS NVARCHAR(50)) 
 		, intSubLocationId			= intCompanyLocationSubLocationId
 		, strSubLocationName		= strSubLocationName
-		, intStorageLocationId		= ContractView.intStorageLocationId
+		, intStorageLocationId		= intStorageLocationId
 		, strStorageLocationName	= strStorageLocationName
 		, intOrderUOMId				= ItemUOM.intItemUOMId
 		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
@@ -75,8 +75,6 @@ FROM (
 				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, intPriceItemUOMId)
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-			INNER JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intItemId = ContractView.intItemId AND ItemLocation.intLocationId = ContractView.intCompanyLocationId
 	WHERE	ysnAllowedToShow = 1
 			AND strContractType = 'Purchase'
 	

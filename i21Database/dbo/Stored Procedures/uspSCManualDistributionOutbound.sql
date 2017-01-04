@@ -40,6 +40,15 @@ DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
+DECLARE @intInventoryShipmentItemId AS INT
+		,@intInvoiceId AS INT
+		,@intOwnershipType AS INT
+		,@intPricingTypeId INT
+		,@successfulCount AS INT
+		,@invalidCount AS INT
+		,@success AS INT
+		,@batchIdUsed AS INT
+		,@recapId AS INT;
 
 BEGIN
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
@@ -163,6 +172,7 @@ OPEN intListCursor;
 								IF	ISNULL(@intLoopContractId,0) != 0
 								--EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
 							END
 						INSERT INTO @ItemsForItemShipment (
 								intItemId
@@ -291,11 +301,6 @@ OPEN intListCursor;
 						-- uses a PRINT statement as that action (not a very good
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
-							UPDATE tblSCTicket SET intContractId = @intDPContractId WHERE intTicketId = @intTicketId
-							UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-							, intContractSequence = CT.intContractSeq
-							, strContractLocation = CT.strLocationName
-							FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId
 							INSERT INTO @ItemsForItemShipment (
 							intItemId
 							,intItemLocationId
@@ -317,7 +322,8 @@ OPEN intListCursor;
 							,ysnIsStorage
 							,strSourceTransactionId  
 							)
-							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblDPContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblDPContractUnits;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
 					END;
@@ -327,6 +333,7 @@ OPEN intListCursor;
 				END
 				ELSE
 					BEGIN
+					SET @dblLoopContractUnits = @dblLoopContractUnits * -1
 					INSERT INTO @ItemsForItemShipment (
 							intItemId
 							,intItemLocationId
@@ -346,7 +353,6 @@ OPEN intListCursor;
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 							,ysnIsStorage
-							,strSourceTransactionId
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
 					END
@@ -382,6 +388,58 @@ BEGIN
 	--IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+
+			--INVOICE intergration
+			CREATE TABLE #tmpItemShipmentIds (
+				[intInventoryShipmentItemId] [INT] PRIMARY KEY,
+				[intOrderId] [INT],
+				[intOwnershipType] [INT],
+				UNIQUE ([intInventoryShipmentItemId])
+			);
+			INSERT INTO #tmpItemShipmentIds(intInventoryShipmentItemId,intOrderId,intOwnershipType) SELECT intInventoryShipmentItemId,intOrderId,intOwnershipType FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId
+
+			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+			FOR
+			SELECT TOP 1 intInventoryShipmentItemId, intOrderId, intOwnershipType
+			FROM #tmpItemShipmentIds WHERE intOwnershipType = 1;
+
+			OPEN intListCursor;
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM intListCursor INTO @intInventoryShipmentItemId, @intOrderId , @intOwnershipType;
+
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
+				IF ISNULL(@intInventoryShipmentItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
+				BEGIN
+					EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+					SELECT @intInvoiceId = intInvoiceId FROM tblARInvoice WHERE intShipmentId = @InventoryShipmentId
+					IF ISNULL(@intInvoiceId , 0) != 0
+					BEGIN
+						EXEC dbo.uspARPostInvoice
+						@batchId			= NULL,
+						@post				= 1,
+						@recap				= 0,
+						@param				= @intInvoiceId,
+						@userId				= @intUserId,
+						@beginDate			= NULL,
+						@endDate			= NULL,
+						@beginTransaction	= NULL,
+						@endTransaction		= NULL,
+						@exclude			= NULL,
+						@successfulCount	= @successfulCount OUTPUT,
+						@invalidCount		= @invalidCount OUTPUT,
+						@success			= @success OUTPUT,
+						@batchIdUsed		= @batchIdUsed OUTPUT,
+						@recapId			= @recapId OUTPUT,
+						@transType			= N'all',
+						@accrueLicense		= 0,
+						@raiseError			= 1
+					END
+				END
+				FETCH NEXT FROM intListCursor INTO @intInventoryShipmentItemId, @intOrderId, @intOwnershipType;
+			END
 		END
 _Exit:
 	

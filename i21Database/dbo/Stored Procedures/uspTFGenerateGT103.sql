@@ -68,6 +68,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 
 	SET @TemplateItemCount = (SELECT COUNT(*) FROM @tblTempSummaryItem)
 
+	
 	WHILE(@TemplateItemCount > 0) -- LOOP ON SUMMARY ITEMS AND INSERT INTO SUMMARY TABLE
 		BEGIN
 			-- GET SCHEDULE CODE PARAMETERS FOR FILTERING
@@ -82,7 +83,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				SET @ReportItemSequence = (SELECT intReportItemSequence FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
 				SET @TemplateItemNumber = (SELECT intTemplateItemNumber FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
 				SET @ReportSection = (SELECT strReportSection FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
-				SET @TemplateConfiguration = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
+				SET @TemplateConfiguration = (SELECT (CASE WHEN strConfiguration = '' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
 				-- INSERT COMPUTED VALUES ON TEMPORARY TOTAL TABLE
 
 				IF @TemplateItemId = 'GT-103-Summary-001'
@@ -119,7 +120,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 0.73%
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -151,7 +152,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--7. Penalty Due. If late, the penalty is 10% of the tax due on Line 6 or $5, whichever is greater.
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -167,7 +168,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--8. Interest Due. If late, multiply Line 6 by the interest rate (see Departmental Notice #3)
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -183,7 +184,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--9. Electronic Funds Transfer Credit
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -200,7 +201,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				--10. Adjustments. If negative entry, use a negative sign. (You must provide an explanation and
 						IF(@ScheduleCodeParam <> '')
 							BEGIN
-								SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+								SET @QueryTransaction = 'SELECT (CASE WHEN strConfiguration = '''' THEN NULL ELSE strConfiguration END) FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@QueryTransaction)
 							END

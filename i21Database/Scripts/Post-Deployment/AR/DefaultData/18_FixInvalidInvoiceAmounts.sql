@@ -16,7 +16,7 @@ WHILE EXISTS (SELECT NULL FROM @tblInvoices)
 
 		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @tblInvoices
 
-		EXEC dbo.uspARReComputeInvoiceTaxes @intInvoiceId
+		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @intInvoiceId
 
 		DELETE FROM @tblInvoices WHERE intInvoiceId = @intInvoiceId
 	END
