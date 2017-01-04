@@ -231,6 +231,7 @@
     <Build Include="dbo\Tables\tblFRSegmentFilterGroup.sql" />
     <Build Include="dbo\Tables\tblFRSegmentFilterGroupDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccount.sql" />
+    <Build Include="dbo\Tables\tblGLMulticurrencySetting.sql" />
     <Build Include="dbo\Tables\tblGLAccountAllocationDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountDefault.sql" />
     <Build Include="dbo\Tables\tblGLAccountDefaultDetail.sql" />
