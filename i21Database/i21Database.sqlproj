@@ -4646,7 +4646,6 @@
     <Build Include="dbo\Views\vyuLGLoadStorageCostLots.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRouteRemoveIncompleteOrders.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostForInvoice.sql" />
-    <Build Include="dbo\Tables\tblGLMulticurrencySetting.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_Multicurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspICReturnReceipt.sql" />
     <Build Include="dbo\Views\vyuAPRptDebitMemo.sql" />
@@ -4682,6 +4681,7 @@
     <Build Include="dbo\Tables\tblCRMJiraIssue.sql" />
     <Build Include="dbo\Functions\fnTMGetItemTotalTaxForCustomer.sql" />
     <Build Include="dbo\Functions\fnTMGetItemPricingDetails.sql" />
+    <Build Include="dbo\Tables\tblGLMulticurrencySetting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
