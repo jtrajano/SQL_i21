@@ -1,39 +1,47 @@
 ﻿CREATE PROCEDURE [dbo].uspGLImportOriginHistoricalJournalCLOSED
-@intEntityId INT,
-@result NVARCHAR(MAX)  OUTPUT
+	@intEntityId INT,
+	@result NVARCHAR(MAX)  OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glarcmst]') AND type IN (N'U'))
-	BEGIN
-	DECLARE @sql NVARCHAR(MAX)
-	DECLARE @ParmDefinition NVARCHAR(100)
+BEGIN
+DECLARE @sql NVARCHAR(MAX)
+DECLARE @ParmDefinition NVARCHAR(100)
 	SET @ParmDefinition = N'@intEntityId INT, @resultOut NVARCHAR(MAX) OUTPUT';  
 	SET @sql ='
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM glarcmst)
+BEGIN
+	SET @resultOut = ''SUCCESS ''
+    RETURN -1
+END
+
+
 DELETE h FROM glhstmst h
-		INNER JOIN (SELECT MAX(glarc_period) AS period FROM glarcmst GROUP BY SUBSTRING( CONVERT(VARCHAR(10), glarc_period),1,4)) g
+INNER JOIN (SELECT MAX(glarc_period) AS period FROM glarcmst GROUP BY SUBSTRING( CONVERT(VARCHAR(10), glarc_period),1,4)) g
 ON h.glhst_period = g.period
 WHERE glhst_src_id = ''BBF''
 
 
-		--+++++++++++++++++++++++++++++++++
-		-- VALIDATIONS
-		--+++++++++++++++++++++++++++++++++
-		DECLARE @inti21Id int
+--+++++++++++++++++++++++++++++++++
+-- VALIDATIONS
+--+++++++++++++++++++++++++++++++++
+DECLARE @inti21Id int
 SELECT @inti21Id = 1 FROM glarcmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16 WHERE inti21Id IS NULL
-		IF (SELECT isnull(@inti21Id, 0)) > 0
+IF (SELECT isnull(@inti21Id, 0)) > 0
 BEGIN
-		 SET @resultOut = ''There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.''
+ SET @resultOut = ''There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.''
 END
 ELSE IF (EXISTS(SELECT TOP 1 1 FROM (SELECT SUBSTRING(dtmDate,5,2)+''/01/''+SUBSTRING(dtmDate,1,4) as dtmDate FROM (SELECT CONVERT(VARCHAR(3),glarc_src_id) + CONVERT(VARCHAR(5),glarc_src_seq) + CONVERT(VARCHAR(6),MAX(glarc_period)) AS strJournalId, CONVERT(VARCHAR(12),MAX(glarc_period)) AS dtmDate FROM glarcmst GROUP BY glarc_period, glarc_src_id, glarc_src_seq) tblA) tblB where ISDATE(dtmDate) = 0))
 BEGIN
-		 SET @resultOut = ''There are invalid dates on Historical Transactions. <br/> Kindly verify at Origin.''
+ SET @resultOut = ''There are invalid dates on Historical Transactions. <br/> Kindly verify at Origin.''
 END
 ELSE IF (EXISTS(SELECT TOP 1 1 FROM glarcmst where LEN(glarc_trans_dt) <> 8))
 BEGIN
-		 SET @resultOut = ''There are invalid dates on Historical Transaction Details. <br/> Kindly verify at Origin.''
+ SET @resultOut = ''There are invalid dates on Historical Transaction Details. <br/> Kindly verify at Origin.''
 END
 ELSE
 BEGIN
@@ -47,30 +55,30 @@ BEGIN
  --+++++++++++++++++++++++++++++++++
  -- TEMP HEADER JOURNAL
  --+++++++++++++++++++++++++++++++++
-		DECLARE @intCurrencyId NVARCHAR(100) = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = ''defaultCurrency'') > 0
-																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = ''defaultCurrency'')
-																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'') END))
-				SELECT
-				CONVERT(VARCHAR(3),glarc_src_id) + CONVERT(VARCHAR(5),glarc_src_seq) + CONVERT(VARCHAR(6),MAX(glarc_period)) AS strJournalId,
+DECLARE @intCurrencyId NVARCHAR(100) = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = ''defaultCurrency'') > 0
+ THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = ''defaultCurrency'')
+ ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'') END))
+SELECT
+ CONVERT(VARCHAR(3),glarc_src_id) + CONVERT(VARCHAR(5),glarc_src_seq) + CONVERT(VARCHAR(6),MAX(glarc_period)) AS strJournalId,
  CONVERT(VARCHAR(12),MAX(glarc_period)) AS dtmDate, -- took the max period for the unique transaction - glarc_period controls posting period.
  MAX(glarc_ref) AS strDescription, -- strDescription
  ''General Journal'' AS strTransactionType, -- Hard coded the transaction type
  ''Origin Journal'' AS strJournalType, -- Hard coded transaction type.
-				glarc_src_seq AS strSourceId,
-				glarc_src_id AS strSourceType,
+ glarc_src_seq AS strSourceId,
+ glarc_src_id AS strSourceType,
  @intCurrencyId AS intCurrencyId, -- intCurrencyId
  0 AS ysnPosted, -- ysnPosted
  @intEntityId AS intEntityId, -- intEntityId
  1 AS intConcurrencyId, -- intConcurrencyId
-				NULL AS strReverseLink,
-				NULL AS strRecurringStatus,
+ NULL AS strReverseLink,
+ NULL AS strRecurringStatus,
  GETDATE() AS dtmDateEntered, -- dtmJournalDate/dtmDateEntered
  NULL AS dtmReverseDate, -- We should not import reversing transactions
  NULL AS dblExchangeRate, -- exchange rate
  NULL AS dtmPosted -- date posted--convert(varchar,(12),MAX(glarc_period)) removed per liz
  INTO #iRelyImptblGLJournal
-				FROM glarcmst
-				GROUP BY glarc_period, glarc_src_id, glarc_src_seq	
+ FROM glarcmst
+ GROUP BY glarc_period, glarc_src_id, glarc_src_seq
 IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 --+++++++++++++++++++++++++++++++++
  -- INSERT IMPORT LOGS
@@ -82,7 +90,7 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 
  INSERT INTO tblGLCOAImportLogDetail (intImportLogId,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalId,intConcurrencyId)
  SELECT @intImportLogId,strDescription,dtmDate,strSourceId,strSourceType,strJournalId,1 FROM #iRelyImptblGLJournal
-		
+
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 --+++++++++++++++++++++++++++++++++
  -- UPDATE POSTING DATE
@@ -97,32 +105,32 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
  INSERT tblGLJournal (intCompanyId, dtmReverseDate,strJournalId,strTransactionType, dtmDate,strReverseLink,intCurrencyId,dblExchangeRate,dtmPosted,strDescription,
  ysnPosted,intConcurrencyId,dtmDateEntered,intEntityId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
  SELECT @intCompanyId, dtmReverseDate,
-			strJournalId,
-			strTransactionType, 
-			CAST((dbo.[fnGeti21PeriodFromOriginPeriod](SUBSTRING(dtmDate,1,4), SUBSTRING(dtmDate,5,2))) as DATETIME) as dtmDate,
-			strReverseLink,
-			intCurrencyId,
-			dblExchangeRate,
-			dtmPosted,
-			strDescription,
-			ysnPosted,
-			intConcurrencyId,
-			dtmDateEntered,
-			intEntityId,
-			strSourceId,
-			strJournalType,
-			strRecurringStatus,
-			strSourceType
+ strJournalId,
+ strTransactionType,
+ CAST((dbo.[fnGeti21PeriodFromOriginPeriod](SUBSTRING(dtmDate,1,4), SUBSTRING(dtmDate,5,2))) as DATETIME) as dtmDate,
+ strReverseLink,
+ intCurrencyId,
+ dblExchangeRate,
+ dtmPosted,
+ strDescription,
+ ysnPosted,
+ intConcurrencyId,
+ dtmDateEntered,
+ intEntityId,
+ strSourceId,
+ strJournalType,
+ strRecurringStatus,
+ strSourceType
  FROM #iRelyImptblGLJournal
 IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 --+++++++++++++++++++++++++++++++++
  -- TEMP DETAIL JOURNAL
  --+++++++++++++++++++++++++++++++++
-		SELECT  
-			CONVERT(int,glarc_line_no) AS intLineNo,
+SELECT
+ CONVERT(int,glarc_line_no) AS intLineNo,
  CONVERT(int,1) AS intJournalId,
  glarc_trans_dt,
-			tblGLAccount.intAccountId,
+ tblGLAccount.intAccountId,
  CASE WHEN glarc_amt >= 0 THEN CASE WHEN glarc_dr_cr_ind = ''D'' THEN glarc_amt ELSE 0 END
  ELSE CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN (glarc_amt * -1) ELSE 0 END END AS Debit,
  0 AS DebitRate, -- debit rate
@@ -131,34 +139,34 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
  0 AS CreditRate, -- credit rate
  glarc_units AS DebitUnits,
  glarc_units AS CreditUnits,
-			glarc_ref AS strDescription,
-			NULL AS intCurrencyId,
-			0 AS dblUnitsInlbs,
-			glarc_doc AS strDocument,
-			glarc_comments AS strComments,
-			glarc_ref AS strReference,
-			0 AS DebitUnitsInlbs,
-			''N'' AS strCorrecting,
+ glarc_ref AS strDescription,
+ NULL AS intCurrencyId,
+ 0 AS dblUnitsInlbs,
+ glarc_doc AS strDocument,
+ glarc_comments AS strComments,
+ glarc_ref AS strReference,
+ 0 AS DebitUnitsInlbs,
+ ''N'' AS strCorrecting,
  glarc_source_pgm AS strSourcePgm, -- aptrxu
  '''' AS strCheckbookNo, -- 01
-			'''' AS strWorkArea,
-			glarc_period,
+ '''' AS strWorkArea,
+ glarc_period,
  CONVERT(VARCHAR(3),glarc_src_id) + CONVERT(VARCHAR(5),glarc_src_seq) + CONVERT(VARCHAR(6),(glarc_period)) AS glarc_jrnl_no,
-			glarc_src_id,
-			glarc_src_seq,    
+ glarc_src_id,
+ glarc_src_seq,
  GETDATE() as gooddate,
  A4GLIdentity,
  NULL AS NegativeCreditUnits ,
  NULL AS NegativeDebitUnits
  INTO #iRelyImptblGLJournalDetail
  FROM glarcmst
-			INNER JOIN tblGLCOACrossReference ON 
-			SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16 
-			INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
+ INNER JOIN tblGLCOACrossReference ON
+ SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16
+ INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
 
 --RESET DebitUnits/CreditUnits
 UPDATE #iRelyImptblGLJournalDetail SET DebitUnits = 0 ,CreditUnits = 0
-		
+
 UPDATE
 A SET DebitUnits =
 case
@@ -166,7 +174,7 @@ case
 	ELSE B.glarc_units END,
 	NegativeDebitUnits =
 			CASE WHEN B.glarc_units < 0	THEN 1 ELSE 0 END
-		 
+
 FROM
 #iRelyImptblGLJournalDetail A
 JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
@@ -190,9 +198,9 @@ IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUn
 		insert INTO #iRelyImptblGLJournalDetail
 		(intJournalId,glarc_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glarc_period,glarc_jrnl_no,glarc_src_id,glarc_src_seq,gooddate,A4GLIdentity)
 		SELECT
-			intJournalId,
+		intJournalId,
 		A.glarc_trans_dt,
-			intAccountId,
+		intAccountId,
 		0 AS Debit,
 		0 AS Credit,
 		CreditUnits = CASE WHEN B.glarc_units < 0 THEN glarc_units * -1 ELSE glarc_units END,
@@ -204,9 +212,9 @@ IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUn
 		'''' AS strCheckbookNo,
 		'''' AS strWorkArea,
 		''Negative Units for amount '' + CAST(ISNULL(glarc_amt,0) AS NVARCHAR(50)) AS strDescription,
-			strDocument,
-			strComments,
-			strReference,
+		strDocument,
+		strComments,
+		strReference,
 		''N'' AS strCorrecting,
 		strSourcePgm,																	-- aptrxu
 		A.glarc_period,
@@ -225,9 +233,9 @@ IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUn
 		INSERT INTO #iRelyImptblGLJournalDetail
 		(intJournalId,glarc_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glarc_period,glarc_jrnl_no,glarc_src_id,glarc_src_seq,gooddate,A4GLIdentity)
 		SELECT 
-			intJournalId,
+		intJournalId,
 		A.glarc_trans_dt,
-			intAccountId,
+		intAccountId,
 		0 AS Debit,
 		0 AS Credit,
 		0 AS CreditUnits,
@@ -239,9 +247,9 @@ IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUn
 		'''' AS strCheckbookNo,
 		'''' AS strWorkArea,
 		''Negative Units for amount '' + CAST(ISNULL(glarc_amt,0) AS NVARCHAR(50)) AS strDescription,
-			strDocument,
-			strComments,
-			strReference,
+		strDocument,
+		strComments,
+		strReference,
 		''N'' AS strCorrecting,
 		strSourcePgm,																	-- aptrxu
 		A.glarc_period,
@@ -345,7 +353,7 @@ INSERT tblGLJournalDetail (intCompanyId, intLineNo,intJournalId,dtmDate,intAccou
  --+++++++++++++++++++++++++++++++++++++
 
  UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +''/01/''+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail
-		WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
+ WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
  WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
 
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
@@ -367,7 +375,7 @@ ROLLBACK_INSERT:
 IMPORT_EXIT:
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail'
-	EXEC sp_executesql @sql, @ParmDefinition,@intEntityId = @intEntityId, @resultOut = @result OUTPUT
+ EXEC sp_executesql @sql, @ParmDefinition,@intEntityId = @intEntityId, @resultOut = @result OUTPUT
 END
 ELSE
 	SELECT @result = 'SUCCESS '

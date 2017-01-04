@@ -3,16 +3,29 @@
 AS
 SET ANSI_WARNINGS OFF
 SET NOCOUNT ON
-		DECLARE @result NVARCHAR(MAX)
+DECLARE @result NVARCHAR(MAX)
 DECLARE @invalidDatesUpdated VARCHAR(1)
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption A join tblGLAccount B on A.OriginConversion_OffsetAccountId = B.intAccountId)
+BEGIN
+	SELECT 'Origin Offset Account is required in GL Company Configuration.'
+	RETURN -1
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM glhstmst)
+BEGIN
+	SELECT 'Origin table is empty.'
+	RETURN -1
+END
+
+
 BEGIN TRANSACTION
-		EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
+EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
 
 	IF @@ERROR <> 0	OR CHARINDEX('SUCCESS', @result,1)= 0
 			GOTO ROLLBACK_INSERT
 
-		SELECT @result = REPLACE(@result , 'SUCCESS ','')
+SELECT @result = REPLACE(@result , 'SUCCESS ','')
 
 	--+++++++++++++++++++++++++++++++++
 	--		CLEAN-UP TEMP TABLES
@@ -26,34 +39,34 @@ BEGIN TRANSACTION
 	--		 TEMP HEADER JOURNAL
 	--+++++++++++++++++++++++++++++++++
 
-		DECLARE @intCurrencyId NVARCHAR(100) = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0
+	DECLARE @intCurrencyId NVARCHAR(100) = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
 																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
-	
-				SELECT
-				CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId,
+
+	SELECT
+		CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId,
 		CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate,																					-- took the max period for the unique transaction - glhst_period controls posting period.
-				MAX(glhst_ref) AS strDescription,																									-- strDescription
-				'General Journal' AS strTransactionType,																							-- Hard coded the transaction type
-				'Origin Journal' AS strJournalType,																						-- Hard coded transaction type.	
-				glhst_src_seq AS strSourceId,
-				glhst_src_id AS strSourceType,
-				@intCurrencyId AS intCurrencyId,																									-- intCurrencyId
-				0 AS ysnPosted,																														-- ysnPosted	
-				@intEntityId AS intEntityId,																											-- intEntityId
-				1 AS intConcurrencyId,																											-- intConcurrencyId
-				NULL AS strReverseLink,
-				NULL AS strRecurringStatus,
-				GETDATE() AS dtmDateEntered,																												-- dtmJournalDate/dtmDateEntered
-				NULL AS dtmReverseDate,																												-- We should not import reversing transactions	
-				NULL AS dblExchangeRate,																											-- exchange rate
+		MAX(glhst_ref) AS strDescription,																									-- strDescription
+		'General Journal' AS strTransactionType,																							-- Hard coded the transaction type
+		'Origin Journal' AS strJournalType,																						-- Hard coded transaction type.
+		glhst_src_seq AS strSourceId,
+		glhst_src_id AS strSourceType,
+		@intCurrencyId AS intCurrencyId,																									-- intCurrencyId
+		0 AS ysnPosted,																														-- ysnPosted
+		@intEntityId AS intEntityId,																											-- intEntityId
+		1 AS intConcurrencyId,																											-- intConcurrencyId
+		NULL AS strReverseLink,
+		NULL AS strRecurringStatus,
+		GETDATE() AS dtmDateEntered,																												-- dtmJournalDate/dtmDateEntered
+		NULL AS dtmReverseDate,																												-- We should not import reversing transactions
+		NULL AS dblExchangeRate,																											-- exchange rate
 		NULL AS dtmPosted																												-- date posted--convert(varchar,(12),MAX(glhst_period)) removed per liz
 	INTO #iRelyImptblGLJournal
-				FROM glhstmst
-				GROUP BY glhst_period, glhst_src_id, glhst_src_seq	
-			
+	FROM glhstmst
+	GROUP BY glhst_period, glhst_src_id, glhst_src_seq
+
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
-		
+
 	--+++++++++++++++++++++++++++++++++
 	--	   INSERT IMPORT LOGS
 	--+++++++++++++++++++++++++++++++++
@@ -109,51 +122,51 @@ BEGIN TRANSACTION
 	--		 TEMP DETAIL JOURNAL
 	--+++++++++++++++++++++++++++++++++
 
-			SELECT 
-			CONVERT(int,glhst_line_no) AS intLineNo,
+	SELECT
+		CONVERT(int,glhst_line_no) AS intLineNo,
 		CONVERT(int,1) AS intJournalId,
 		glhst_trans_dt,
-			tblGLAccount.intAccountId,
+		tblGLAccount.intAccountId,
 		CASE WHEN glhst_amt >= 0 THEN
 			CASE WHEN glhst_dr_cr_ind = 'D' THEN glhst_amt ELSE 0 END
 			ELSE CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN (glhst_amt * -1) ELSE 0 END
 			END AS Debit,
-			0 AS DebitRate,																						-- debit rate		
+		0 AS DebitRate,																						-- debit rate
 		CASE WHEN glhst_amt >= 0 THEN
 			CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_amt ELSE 0 END
 			ELSE CASE WHEN glhst_dr_cr_ind = 'D' THEN (glhst_amt * -1) ELSE 0 END
 			END AS Credit,
-			0 AS CreditRate,		
+		0 AS CreditRate,
 		glhst_units AS DebitUnits,
 		glhst_units AS CreditUnits, -- credit unit rate
-			glhst_ref AS strDescription,
-			NULL AS intCurrencyId,
-			0 AS dblUnitsInlbs,
-			glhst_doc AS strDocument,
-			glhst_comments AS strComments,
-			glhst_ref AS strReference,
-			0 AS DebitUnitsInlbs,
-			'N' AS strCorrecting,
-			glhst_source_pgm AS strSourcePgm,																	-- aptrxu
-			'' AS strCheckbookNo,																				-- 01
-			'' AS strWorkArea,
-			glhst_period,
+		glhst_ref AS strDescription,
+		NULL AS intCurrencyId,
+		0 AS dblUnitsInlbs,
+		glhst_doc AS strDocument,
+		glhst_comments AS strComments,
+		glhst_ref AS strReference,
+		0 AS DebitUnitsInlbs,
+		'N' AS strCorrecting,
+		glhst_source_pgm AS strSourcePgm,																	-- aptrxu
+		'' AS strCheckbookNo,																				-- 01
+		'' AS strWorkArea,
+		glhst_period,
 		CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),(glhst_period)) AS glhst_jrnl_no,
-			glhst_src_id,
-			glhst_src_seq,    
+		glhst_src_id,
+		glhst_src_seq,
 		GETDATE() as gooddate,
 		A4GLIdentity,
 		NULL AS NegativeCreditUnits,
 		NULL AS NegativeDebitUnits
 	 INTO #iRelyImptblGLJournalDetail
-			FROM  glhstmst 
-			INNER JOIN tblGLCOACrossReference ON 
-			SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16 
+	 FROM  glhstmst
+	 INNER JOIN tblGLCOACrossReference ON
+		SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
-		
+
 	 --RESET DebitUnits/CreditUnits
 	 UPDATE #iRelyImptblGLJournalDetail SET DebitUnits = 0 ,CreditUnits = 0
-		
+
 	 UPDATE
 	A SET DebitUnits =
 	case
@@ -161,7 +174,7 @@ BEGIN TRANSACTION
 		ELSE B.glhst_units END,
 		NegativeDebitUnits =
 			CASE WHEN B.glhst_units < 0	THEN 1 ELSE 0 END
-		                     
+
 	FROM
 	#iRelyImptblGLJournalDetail A
 	JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
@@ -185,9 +198,9 @@ BEGIN TRANSACTION
 		insert INTO #iRelyImptblGLJournalDetail
 		(intJournalId,glhst_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glhst_period,glhst_jrnl_no,glhst_src_id,glhst_src_seq,gooddate,A4GLIdentity)
 		SELECT
-			intJournalId,
+		intJournalId,
 		A.glhst_trans_dt,
-			intAccountId,
+		intAccountId,
 		0 AS Debit,
 		0 AS Credit,
 		CreditUnits = CASE WHEN B.glhst_units < 0 THEN glhst_units * -1 ELSE glhst_units END,
@@ -199,9 +212,9 @@ BEGIN TRANSACTION
 		'' AS strCheckbookNo,
 		'' AS strWorkArea,
 		'Negative Units for amount ' + CAST(ISNULL(glhst_amt,0) AS NVARCHAR(50)) AS strDescription,
-			strDocument,
-			strComments,
-			strReference,
+		strDocument,
+		strComments,
+		strReference,
 		'N' AS strCorrecting,
 		strSourcePgm,																	-- aptrxu
 		A.glhst_period,
@@ -220,9 +233,9 @@ BEGIN TRANSACTION
 		INSERT INTO #iRelyImptblGLJournalDetail
 		(intJournalId,glhst_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glhst_period,glhst_jrnl_no,glhst_src_id,glhst_src_seq,gooddate,A4GLIdentity)
 		SELECT 
-			intJournalId,
+		intJournalId,
 		A.glhst_trans_dt,
-			intAccountId,
+		intAccountId,
 		0 AS Debit,
 		0 AS Credit,
 		0 AS CreditUnits,
@@ -234,9 +247,9 @@ BEGIN TRANSACTION
 		'' AS strCheckbookNo,
 		'' AS strWorkArea,
 		'Negative Units for amount ' + CAST(ISNULL(glhst_amt,0) AS NVARCHAR(50)) AS strDescription,
-			strDocument,
-			strComments,
-			strReference,
+		strDocument,
+		strComments,
+		strReference,
 		'N' AS strCorrecting,
 		strSourcePgm,																	-- aptrxu
 		A.glhst_period,
@@ -362,8 +375,8 @@ BEGIN TRANSACTION
 	--+++++++++++++++++++++++++++++++++++++
 
 	UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail
-        WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
-		WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
+                                        WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
+										WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
 
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
@@ -373,21 +386,22 @@ BEGIN TRANSACTION
 		SET @result = CAST(@intImportLogId AS NVARCHAR(40))
 
 	--SET @result = 'SUCCESS ' + @result
-		UPDATE tblSMPreferences set strValue = 'true' where strPreference = 'isHistoricalJournalImported'
-		SELECT 'SUCCESS:'+  @result +':' + @invalidDatesUpdated 
+	UPDATE tblSMPreferences set strValue = 'true' where strPreference = 'isHistoricalJournalImported'
+	SELECT 'SUCCESS:'+  @result +':' + @invalidDatesUpdated
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
+	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+
 COMMIT_INSERT:
 	COMMIT TRANSACTION
-	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans
 	GOTO IMPORT_EXIT
 ROLLBACK_INSERT:
 	ROLLBACK TRANSACTION
-		SELECT 'Importing Historical Journal error :' + ERROR_MESSAGE()
+	SELECT 'Importing Historical Journal error :' + ERROR_MESSAGE()
 	GOTO IMPORT_EXIT
-	
+
 IMPORT_EXIT:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
-
