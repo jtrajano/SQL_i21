@@ -692,15 +692,50 @@ BEGIN TRY
 			AND ri.intRecipeItemTypeId = 2
 	END
 
-	SELECT @intProductionStagingId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Production Staging Location'
+	DECLARE @tblMFMachine TABLE (intMachineId INT)
 
-	SELECT @intProductionStageLocationId = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND intAttributeId = @intProductionStagingId
+	INSERT INTO @tblMFMachine (intMachineId)
+	SELECT intMachineId
+	FROM tblMFWorkOrderProducedLot
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND ysnProductionReversed = 0
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM @tblMFMachine
+			)
+	BEGIN
+		INSERT INTO @tblMFMachine (intMachineId)
+		SELECT intMachineId
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnConsumptionReversed = 0
+	END
+
+	IF @intProductionStageLocationId IS NULL
+	BEGIN
+		SELECT @intProductionStageLocationId = intProductionStagingLocationId
+		FROM tblMFManufacturingProcessMachine
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intMachineId IN (
+				SELECT intMachineId
+				FROM @tblMFMachine
+				)
+			AND intProductionStagingLocationId IS NOT NULL
+	END
+
+	IF @intProductionStageLocationId IS NULL
+	BEGIN
+		SELECT @intProductionStagingId = intAttributeId
+		FROM tblMFAttribute
+		WHERE strAttributeName = 'Production Staging Location'
+
+		SELECT @intProductionStageLocationId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = @intProductionStagingId
+	END
 
 	DECLARE @tblMFQtyInProductionStagingLocation TABLE (
 		intItemId INT
@@ -831,10 +866,9 @@ BEGIN TRY
 	FROM dbo.tblMFManufacturingProcessMachine MP
 	CROSS JOIN @tblICFinalItem I
 	WHERE MP.intManufacturingProcessId = @intManufacturingProcessId
-		AND intMachineId IN (
-			SELECT TOP 1 intMachineId
-			FROM tblMFManufacturingProcessMachine MP1
-			WHERE MP1.intManufacturingProcessId = @intManufacturingProcessId
+		AND MP.intMachineId IN (
+			SELECT M.intMachineId
+			FROM @tblMFMachine M
 			)
 
 	UPDATE dbo.tblMFWorkOrder

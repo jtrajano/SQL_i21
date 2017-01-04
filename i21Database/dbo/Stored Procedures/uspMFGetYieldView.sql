@@ -54,7 +54,7 @@ BEGIN TRY
 		,intItemId INT
 		)
 
-	SELECT @dblDecimal = 2
+	SELECT @dblDecimal = 4
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -386,7 +386,7 @@ BEGIN TRY
 				,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-				,ROUND(AVG(dblActualYield), 2) dblActualYield
+				,ROUND(AVG(dblActualYield), @dblDecimal) dblActualYield
 				--,CONVERT(INT, 1) AS intConcurrencyId
 				,intWorkOrderId
 			FROM ##tblMFYield
@@ -412,9 +412,9 @@ BEGIN TRY
 			,ROUND(Y.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(0.0, @dblDecimal) dblRequiredQty
 			,U.strUnitMeasure
-			,ROUND(Y.dblActualYield, 2) dblActualYield
-			,ROUND(Y.dblStandardYield, 2) dblStandardYield
-			,ROUND(Y.dblActualYield - Y.dblStandardYield, 2) dblVariance
+			,ROUND(Y.dblActualYield, @dblDecimal) dblActualYield
+			,ROUND(Y.dblStandardYield, @dblDecimal) dblStandardYield
+			,ROUND(Y.dblActualYield - Y.dblStandardYield, @dblDecimal) dblVariance
 			,'Output' AS strTransaction
 		FROM ##tblMFYield Y
 		JOIN dbo.tblICItem I ON I.intItemId = Y.intItemId
@@ -778,7 +778,7 @@ BEGIN TRY
 				,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-				,ROUND(AVG(dblActualYield), 2) dblActualYield
+				,ROUND(AVG(dblActualYield), @dblDecimal) dblActualYield
 				--,CONVERT(INT, 1) AS intConcurrencyId
 				,intWorkOrderId
 			FROM ##tblMFFinalInputItemYield
@@ -833,9 +833,9 @@ BEGIN TRY
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
 			,U.strUnitMeasure
-			,ROUND(IY.dblActualYield, 2) dblActualYield
-			,ROUND(IY.dblStandardYield, 2) dblStandardYield
-			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
+			,ROUND(IY.dblActualYield, @dblDecimal) dblActualYield
+			,ROUND(IY.dblStandardYield, @dblDecimal) dblStandardYield
+			,ROUND(IY.dblActualYield - dblStandardYield, @dblDecimal) dblVariance
 			,CASE 
 				WHEN I.strItemNo = II.strItemNo
 					THEN 'Output'
@@ -1065,7 +1065,7 @@ BEGIN TRY
 				,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-				,ROUND(AVG(dblActualYield), 2) dblActualYield
+				,ROUND(AVG(dblActualYield), @dblDecimal) dblActualYield
 				--,CONVERT(INT, 1) AS intConcurrencyId
 				,dtmDate
 				,intShiftId
@@ -1098,9 +1098,9 @@ BEGIN TRY
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(0.0, @dblDecimal) dblRequiredQty
 			,U.strUnitMeasure
-			,ROUND(IY.dblActualYield, 2) dblActualYield
-			,ROUND(IY.dblStandardYield, 2) dblStandardYield
-			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
+			,ROUND(IY.dblActualYield, @dblDecimal) dblActualYield
+			,ROUND(IY.dblStandardYield, @dblDecimal) dblStandardYield
+			,ROUND(IY.dblActualYield - dblStandardYield, @dblDecimal) dblVariance
 			,'Output' AS strTransaction
 		FROM ##tblMFYieldByDate IY
 		JOIN dbo.tblICItem I ON I.intItemId = IY.intItemId
@@ -1505,7 +1505,7 @@ BEGIN TRY
 				,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-				,ROUND(AVG(dblActualYield), 2) dblActualYield
+				,ROUND(AVG(dblActualYield),@dblDecimal) dblActualYield
 				--,CONVERT(INT, 1) AS intConcurrencyId
 				,dtmDate
 				,intShiftId
@@ -1552,9 +1552,9 @@ BEGIN TRY
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
 			,U.strUnitMeasure
-			,ROUND(IY.dblActualYield, 2) dblActualYield
-			,ROUND(IY.dblStandardYield, 2) dblStandardYield
-			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
+			,ROUND(IY.dblActualYield, @dblDecimal) dblActualYield
+			,ROUND(IY.dblStandardYield, @dblDecimal) dblStandardYield
+			,ROUND(IY.dblActualYield - dblStandardYield, @dblDecimal) dblVariance
 			,CASE 
 				WHEN I.strItemNo = II.strItemNo
 					THEN 'Output'

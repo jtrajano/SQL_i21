@@ -26,7 +26,7 @@ DECLARE @join NVARCHAR(10)
 DECLARE @begingroup NVARCHAR(50)
 DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
-
+DECLARE @billId INT;
 	-- Sanitize the @xmlParam 
 IF ISNULL(@xmlParam,'') = '' 
 BEGIN
@@ -43,6 +43,11 @@ BEGIN
 		'' AS strMiscDescription,
 		'' AS strUnitMeasure,
 		'' AS strCostUOM,
+		'' AS strCurrency,
+		'' AS strContactName,
+		'' AS strContactEmail,
+		'' AS strBillOfLading,
+		'' AS strItemNo,
 		0 AS intBillId,
 		0 AS intContractSeq,
 		0 AS intUnitOfMeasureId,
@@ -88,23 +93,35 @@ SET @query =
 			*
 		FROM dbo.vyuAPRptDebitMemo'
 
-WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
+--WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
+--BEGIN
+--	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
+--	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
+--	DELETE FROM @temp_xml_table WHERE id = @id
+--	IF EXISTS(SELECT 1 FROM @temp_xml_table)
+--	BEGIN
+--		SET @filter = @filter + ' AND '
+--	END
+--END
+
+IF EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
-	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
-	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
-	DELETE FROM @temp_xml_table WHERE id = @id
-	IF EXISTS(SELECT 1 FROM @temp_xml_table)
-	BEGIN
-		SET @filter = @filter + ' AND '
-	END
+	SELECT 
+		@billId = CASE WHEN ISNULL([from],'') = '' THEN NULL ELSE [from] END
+	FROM @temp_xml_table WHERE [fieldname] = 'intBillId'
 END
 
-IF ISNULL(@filter,'') != ''
-BEGIN
-	SET @query = @query + ' WHERE ' + @filter
-END
+SELECT 
+*
+FROM dbo.vyuAPRptDebitMemo
+WHERE intBillId = (CASE WHEN @billId IS NOT NULL THEN @billId ELSE 0 END)
 
---PRINT @filter
---PRINT @query
+--IF ISNULL(@filter,'') != ''
+--BEGIN
+--	SET @query = @query + ' WHERE ' + @filter
+--END
 
-EXEC sp_executesql @query
+----PRINT @filter
+----PRINT @query
+
+--EXEC sp_executesql @query

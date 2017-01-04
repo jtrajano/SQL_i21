@@ -12,7 +12,11 @@ BEGIN
 			@strState					NVARCHAR(50),
 			@strZip						NVARCHAR(12),
 			@strCountry					NVARCHAR(25),
-			@strPhone					NVARCHAR(50)
+			@strPhone					NVARCHAR(50),
+			@strInventoryShipmentNo		NVARCHAR(100),
+			@intInventoryShipmentId		INT,
+			@strShipmentPickListNotes	NVARCHAR(MAX) = '',
+			@intCustomerEntityId		INT
 						
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -48,6 +52,22 @@ BEGIN
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intOrderHeaderId'
 	
+	SELECT @strInventoryShipmentNo = strReferenceNo
+	FROM tblMFOrderHeader
+	WHERE intOrderHeaderId = @intOrderHeaderId
+
+	SELECT @intInventoryShipmentId = intInventoryShipmentId,
+		   @intCustomerEntityId = intEntityCustomerId
+	FROM tblICInventoryShipment
+	WHERE strShipmentNumber = @strInventoryShipmentNo
+
+	IF ISNULL(@intCustomerEntityId,0) <> 0 
+	BEGIN
+		SELECT TOP 1 @strShipmentPickListNotes = DMM.strMessage FROM tblSMDocumentMaintenance DM
+		JOIN tblSMDocumentMaintenanceMessage DMM ON DM.intDocumentMaintenanceId = DMM.intDocumentMaintenanceId
+		WHERE intEntityCustomerId = @intCustomerEntityId
+	END
+
 	SELECT TOP 1 @strCompanyName = strCompanyName
 			,@strCompanyAddress = strAddress
 			,@strContactName = strContactName
@@ -74,7 +94,7 @@ BEGIN
 		,FSL.strName AS strFromStorageLocation
 		,T.intToStorageLocationId
 		,TSL.strName AS strToStorageLocation
-		,OH.strOrderNo
+		,CASE WHEN OH.intOrderTypeId = 5 THEN OH.strReferenceNo ELSE OH.strOrderNo END strOrderNo
 		,@strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress
 		,@strContactName AS strCompanyContactName
@@ -86,6 +106,7 @@ BEGIN
 		,@strPhone AS strCompanyPhone
 		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
 		,US.strUserName AS strAssignedTo
+		,@strShipmentPickListNotes AS strShipmentPickListNotes
 	FROM tblMFOrderHeader OH
 	JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
 	JOIN tblMFTaskType TT ON TT.intTaskTypeId = T.intTaskTypeId

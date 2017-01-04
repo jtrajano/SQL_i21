@@ -4646,7 +4646,6 @@
     <Build Include="dbo\Views\vyuLGLoadStorageCostLots.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRouteRemoveIncompleteOrders.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostForInvoice.sql" />
-    <Build Include="dbo\Tables\tblGLMulticurrencyAccount.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_Multicurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspICReturnReceipt.sql" />
     <Build Include="dbo\Views\vyuAPRptDebitMemo.sql" />
@@ -4666,6 +4665,36 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostReturnCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReversalReturnGLEntries.sql" />
+    <Build Include="dbo\Tables\tblIPItemStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemArchive.sql" />
+    <Build Include="dbo\Tables\tblIPItemError.sql" />
+    <Build Include="dbo\Tables\tblIPItemUOMStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemUOMArchive.sql" />
+    <Build Include="dbo\Tables\tblIPItemUOMError.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPItems.sql" />
+    <Build Include="dbo\Tables\tblIPSAPUOM.sql" />
+    <Build Include="dbo\Tables\tblIPEntityArchive.sql" />
+    <Build Include="dbo\Tables\tblIPEntityError.sql" />
+    <Build Include="dbo\Tables\tblIPEntityContactArchive.sql" />
+    <Build Include="dbo\Tables\tblIPEntityContactError.sql" />
+    <Build Include="dbo\Tables\tblIPEntityStage.sql" />
+    <Build Include="dbo\Tables\tblIPEntityContactStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPVendors.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPVendors.sql" />
+    <Build Include="dbo\Tables\tblCRMJiraIssue.sql" />
+    <Build Include="dbo\Functions\fnTMGetItemTotalTaxForCustomer.sql" />
+    <Build Include="dbo\Functions\fnTMGetItemPricingDetails.sql" />
+    <Build Include="dbo\Tables\tblGLMulticurrencySetting.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorage.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorageTicket.sql" />
+    <Build Include="dbo\Tables\tblGRSettleContract.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleStorage.sql" />
+    <Build Include="dbo\Views\vyuGRSettleStorageTicketNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRSettleStorageNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRSettleContractNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleStorageTicket.sql" />
+    <Build Include="dbo\Views\vyuHDJiraRollUp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

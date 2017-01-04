@@ -29,6 +29,7 @@
 	,@intInputLotId INT = NULL
 	,@intInputStorageLocationId INT = NULL
 	,@ysnFillPartialPallet BIT = 0
+	,@intSpecialPalletLotId int=NULL
 	)
 AS
 BEGIN
@@ -98,6 +99,7 @@ BEGIN
 		,intInputLotId
 		,intInputStorageLocationId
 		,ysnFillPartialPallet
+		,intSpecialPalletLotId
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -139,6 +141,7 @@ BEGIN
 		,@intInputLotId
 		,@intInputStorageLocationId
 		,@ysnFillPartialPallet
+		,@intSpecialPalletLotId
 
 	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
 

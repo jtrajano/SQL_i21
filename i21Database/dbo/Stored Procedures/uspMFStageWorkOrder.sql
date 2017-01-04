@@ -197,15 +197,23 @@ BEGIN TRY
 		END
 	END
 
-	SELECT @intProductionStagingId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Production Staging Location'
-
-	SELECT @intProductionStageLocationId = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
+	SELECT @intProductionStageLocationId = intProductionStagingLocationId
+	FROM tblMFManufacturingProcessMachine
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND intAttributeId = @intProductionStagingId
+		AND intMachineId = @intMachineId
+
+	IF @intProductionStageLocationId IS NULL
+	BEGIN
+		SELECT @intProductionStagingId = intAttributeId
+		FROM tblMFAttribute
+		WHERE strAttributeName = 'Production Staging Location'
+
+		SELECT @intProductionStageLocationId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = @intProductionStagingId
+	END
 
 	SELECT @intConsumptionMethodId = RI.intConsumptionMethodId
 		,@intConsumptionStorageLocationId = CASE 

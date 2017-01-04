@@ -354,19 +354,19 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\9_Checkout_Radiant_MSM.sql
 
 -- Motor Fuel Tax
-:r .\TF\DefaultData\_TaxAuthority.sql
-:r .\TF\DefaultData\_Frequency.sql
-:r .\TF\DefaultData\_ReportingComponent.sql
-:r .\TF\DefaultData\_ProductCode.sql
-:r .\TF\DefaultData\_ConfigurationType.sql
-:r .\TF\DefaultData\_ConfigurationTemplate.sql
-:r .\TF\DefaultData\_OriginDestinationState.sql
-:r .\TF\DefaultData\_TaxCategory.sql
-:r .\TF\DefaultData\_ScheduleFieldTemplate.sql
-:r .\TF\DefaultData\_TaxReportSProc.sql
-:r .\TF\DefaultData\_TaxReportTemplate.sql
-:r .\TF\DefaultData\_TerminalControlNumber.sql
-:r .\TF\DefaultData\_IntegrationSystem.sql
+--:r .\TF\DefaultData\_TaxAuthority.sql
+--:r .\TF\DefaultData\_Frequency.sql
+--:r .\TF\DefaultData\_ReportingComponent.sql
+--:r .\TF\DefaultData\_ProductCode.sql
+--:r .\TF\DefaultData\_ConfigurationType.sql
+--:r .\TF\DefaultData\_ConfigurationTemplate.sql
+--:r .\TF\DefaultData\_OriginDestinationState.sql
+--:r .\TF\DefaultData\_TaxCategory.sql
+--:r .\TF\DefaultData\_ScheduleFieldTemplate.sql
+--:r .\TF\DefaultData\_TaxReportSProc.sql
+--:r .\TF\DefaultData\_TaxReportTemplate.sql
+--:r .\TF\DefaultData\_TerminalControlNumber.sql
+--:r .\TF\DefaultData\_IntegrationSystem.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql

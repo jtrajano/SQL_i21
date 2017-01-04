@@ -82,6 +82,7 @@ BEGIN TRY
 		,@strCreateMultipleLots NVARCHAR(50)
 		,@intBusinessShiftId INT
 		,@ysnFillPartialPallet bit
+		,@intSpecialPalletLotId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -140,6 +141,7 @@ BEGIN TRY
 		,@strParentLotNumber = strParentLotNumber
 		,@ysnIgnoreTolerance = ysnIgnoreTolerance
 		,@ysnFillPartialPallet=ysnFillPartialPallet
+		,@intSpecialPalletLotId=intSpecialPalletLotId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -181,6 +183,7 @@ BEGIN TRY
 			,strParentLotNumber NVARCHAR(50)
 			,ysnIgnoreTolerance BIT
 			,ysnFillPartialPallet bit
+			,intSpecialPalletLotId int
 			)
 
 	IF @ysnIgnoreTolerance IS NULL
@@ -804,6 +807,7 @@ BEGIN TRY
 					,@intInputLotId = @intInputLotId
 					,@intInputStorageLocationId = @intInputLotStorageLocationId
 					,@ysnFillPartialPallet=@ysnFillPartialPallet
+					,@intSpecialPalletLotId=@intSpecialPalletLotId
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -879,6 +883,7 @@ BEGIN TRY
 				,@intInputLotId = @intInputLotId
 				,@intInputStorageLocationId = @intInputLotStorageLocationId
 				,@ysnFillPartialPallet=@ysnFillPartialPallet
+				,@intSpecialPalletLotId=@intSpecialPalletLotId
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (

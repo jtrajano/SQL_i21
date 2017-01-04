@@ -276,6 +276,12 @@ BEGIN
 		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @intUserId, @post = 0
 	END
 
+	--REMOVE OVERPAYMENT CREATED
+	DELETE A
+	FROM tblAPBill A INNER JOIN tblAPPayment B ON A.strReference = B.strPaymentRecordNum
+	WHERE B.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+	AND A.intTransactionType = 8
+
 	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 
 	IF @transCount = 0 COMMIT TRANSACTION

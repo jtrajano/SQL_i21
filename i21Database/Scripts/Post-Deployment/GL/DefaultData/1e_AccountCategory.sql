@@ -108,7 +108,8 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 58,name = 'Deferred Revenue' UNION ALL
 			SELECT id = 59,name = 'Realized Gain or Loss Foreign Currency' UNION ALL
 			SELECT id = 60,name = 'Unrealized Gain or Loss Foreign Currency'UNION ALL
-			SELECT id = 61,name = 'Deferred Payable'
+			SELECT id = 61,name = 'Deferred Payable'UNION ALL
+			SELECT id = 62,name = 'Gain or loss commodity' --GL-1667
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id

@@ -159,3 +159,43 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCTContractDetail_intContractDetailId] ON [dbo].[tblCTContractDetail]([intContractDetailId] ASC);
 GO
+
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblCTContractDetail_11] ON [dbo].[tblCTContractDetail]
+(
+	[intContractHeaderId] ASC,
+	[intContractDetailId] ASC,
+	[intCompanyLocationId] ASC,
+	[intItemId] ASC,
+	[intItemUOMId] ASC,
+	[intLoadingPortId] ASC,
+	[intDestinationPortId] ASC,
+	[intDestinationCityId] ASC
+)
+INCLUDE ( 	[intContractStatusId],
+	[intContractSeq],
+	[dtmStartDate],
+	[dtmEndDate],
+	[dblQuantity],
+	[dblBalance],
+	[intUnitMeasureId],
+	[intNoOfLoad],
+	[dblQuantityPerLoad],
+	[intShippingLineId],
+	[strVessel],
+	[intContainerTypeId],
+	[intNumberOfContainers],
+	[strPackingDescription]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE STATISTICS [_dta_stat_2133894969_13_1] ON [dbo].[tblCTContractDetail]([intItemId], [intContractDetailId])
+GO
+
+CREATE STATISTICS [_dta_stat_2133894969_7_1_13_4] ON [dbo].[tblCTContractDetail]([intCompanyLocationId], [intContractDetailId], [intItemId], [intContractHeaderId])
+GO
+
+CREATE STATISTICS [_dta_stat_2133894969_55_57_61_1_7_13_4] ON [dbo].[tblCTContractDetail]([intLoadingPortId], [intDestinationPortId], [intDestinationCityId], [intContractDetailId], [intCompanyLocationId], [intItemId], [intContractHeaderId])
+GO
+
+CREATE STATISTICS [_dta_stat_2133894969_16_1_7_13_4_55_57_61] ON [dbo].[tblCTContractDetail]([intItemUOMId], [intContractDetailId], [intCompanyLocationId], [intItemId], [intContractHeaderId], [intLoadingPortId], [intDestinationPortId], [intDestinationCityId])
+GO

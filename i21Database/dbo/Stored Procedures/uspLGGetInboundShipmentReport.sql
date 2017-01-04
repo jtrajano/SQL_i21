@@ -14,7 +14,9 @@ BEGIN
 			@strState					NVARCHAR(50),
 			@strZip						NVARCHAR(12),
 			@strCountry					NVARCHAR(25),
-			@strPhone					NVARCHAR(50)
+			@strPhone					NVARCHAR(50),
+			@strFullName				NVARCHAR(100),
+			@strUserName				NVARCHAR(100)
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -59,6 +61,10 @@ BEGIN
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intLoadWarehouseId' 
 
+	SELECT	@strUserName = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strUserName' 
+
 	SELECT TOP 1 @strCompanyName = strCompanyName
 				,@strCompanyAddress = strAddress
 				,@strContactName = strContactName
@@ -69,6 +75,8 @@ BEGIN
 				,@strCountry = strCountry
 				,@strPhone = strPhone
 	FROM tblSMCompanySetup
+
+	SELECT @strFullName = strFullName FROM tblSMUserSecurity WHERE strUserName = @strUserName
 
 IF ISNULL(@intLoadWarehouseId,0) = 0 
 	BEGIN
@@ -186,7 +194,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strZip AS strCompanyZip ,
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
-				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
+				@strFullName AS strUserFullName
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -326,7 +335,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strZip AS strCompanyZip ,
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
-				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
+				@strFullName AS strUserFullName
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -344,6 +354,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN	tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN	tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+		--LEFT JOIN   tblEMEntityToContact VEC ON VEC.intEntityId = Vendor.intEntityId
 		LEFT JOIN	tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId

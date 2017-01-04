@@ -38,11 +38,11 @@ BEGIN TRY
 	DECLARE @dblTotalTaskWeight NUMERIC(18, 6)
 	DECLARE @dblLineItemWeight NUMERIC(18, 6)
 	DECLARE @tblTaskGenerated TABLE (
-			 intTaskRecordId INT Identity(1, 1)
-			,intItemId INT
-			,dblTotalTaskWeight NUMERIC(18, 6)
-			,dblLineItemWeight NUMERIC(18, 6)
-			)
+		intTaskRecordId INT Identity(1, 1)
+		,intItemId INT
+		,dblTotalTaskWeight NUMERIC(18, 6)
+		,dblLineItemWeight NUMERIC(18, 6)
+		)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -300,7 +300,12 @@ BEGIN TRY
 			ORDER BY CASE 
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
-					ELSE CONVERT(INT, Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+					ELSE '1900-01-01'
+					END ASC
+				,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+					ELSE '1'
 					END ASC
 				,ABS((
 						(
@@ -421,7 +426,12 @@ BEGIN TRY
 			ORDER BY CASE 
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
-					ELSE Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+					ELSE '1900-01-01'
+					END ASC
+				,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+					ELSE '1'
 					END ASC
 				,ABS((
 						(
@@ -622,33 +632,36 @@ BEGIN TRY
 		,OD.dblWeight
 	FROM tblMFOrderDetail OD
 	LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
+		AND OD.intOrderHeaderId = T.intOrderHeaderId
 	WHERE OD.intOrderHeaderId = @intOrderHeaderId
 	GROUP BY OD.intItemId
 		,OD.dblWeight
 
-	SELECT @intTaskRecordId = MIN(intTaskRecordId) FROM @tblTaskGenerated
+	SELECT @intTaskRecordId = MIN(intTaskRecordId)
+	FROM @tblTaskGenerated
 
-	WHILE (ISNULL(@intTaskRecordId,0)<>0)
+	WHILE (ISNULL(@intTaskRecordId, 0) <> 0)
 	BEGIN
 		SET @dblTotalTaskWeight = NULL
 		SET @dblLineItemWeight = NULL
-		SET @ysnAllTasksNotGenerated = 0 
-		SELECT @dblTotalTaskWeight = dblTotalTaskWeight,
-			   @dblLineItemWeight = dblLineItemWeight 
-		FROM  @tblTaskGenerated 
+		SET @ysnAllTasksNotGenerated = 0
+
+		SELECT @dblTotalTaskWeight = dblTotalTaskWeight
+			,@dblLineItemWeight = dblLineItemWeight
+		FROM @tblTaskGenerated
 		WHERE intTaskRecordId = @intTaskRecordId
 
-		IF(@dblTotalTaskWeight <> @dblLineItemWeight)
+		IF (@dblTotalTaskWeight <> @dblLineItemWeight)
 		BEGIN
 			SET @ysnAllTasksNotGenerated = 1
+
 			BREAK;
 		END
 
-		SELECT @intTaskRecordId = MIN(intTaskRecordId) 
-		FROM @tblTaskGenerated 
+		SELECT @intTaskRecordId = MIN(intTaskRecordId)
+		FROM @tblTaskGenerated
 		WHERE intTaskRecordId > @intTaskRecordId
 	END
-
 END TRY
 
 BEGIN CATCH

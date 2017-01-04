@@ -21,19 +21,39 @@ BEGIN TRY
 		,@strPackagingCategory NVARCHAR(50)
 		,@intManufacturingProcessId INT
 		,@intDayOfYear INT
-		,@intStageLocationTypeId int
-		,@strStageLocationType nvarchar(50)
-		,@intProductionStagingId int
-		,@intProductionStageLocationId int
-		,@intStagingId int
-		,@intStageLocationId int
-
+		,@intStageLocationTypeId INT
+		,@strStageLocationType NVARCHAR(50)
+		,@intProductionStagingId INT
+		,@intProductionStageLocationId INT
+		,@intStagingId INT
+		,@intStageLocationId INT
+		,@intItemId INT
+		,@dblQty NUMERIC(18, 6)
+		,@intItemUOMId INT
+		,@intLineNo INT
+		,@dblAvailableQty NUMERIC(18, 6)
+		,@dblRequiredQty NUMERIC(18, 6)
+		,@dblSubstituteRatio NUMERIC(18, 6)
+		,@dblMaxSubstituteRatio NUMERIC(18, 6)
+		,@dblPlannedQty NUMERIC(18, 6)
+		,@intWorkOrderId INT
+		,@intItemRecordId INT
+		,@dblQtyCanBeProduced NUMERIC(18, 6)
+		,@dblMinQtyCanBeProduced NUMERIC(18, 6)
+		,@strRequiredQty NVARCHAR(50)
+		,@strAvailableQty NVARCHAR(50)
+		,@intUnitMeasureId INT
+		,@strUnitMeasure NVARCHAR(50)
+		,@strMinQtyCanBeProduced NVARCHAR(50)
+		,@intProductId INT
 
 	SELECT @dtmCurrentDate = GetDate()
 
 	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDate)
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
+
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = x.intLocationId
 		,@intUserId = intUserId
@@ -166,19 +186,24 @@ BEGIN TRY
 		,2
 		,@strBOLNo
 		,''
-		,Case When @strStageLocationType='Alternate Staging Location' Then NULL
-				When @strStageLocationType='Production Staging Location' Then @intProductionStageLocationId
-				Else @intStageLocationId End
+		,CASE 
+			WHEN @strStageLocationType = 'Alternate Staging Location'
+				THEN NULL
+			WHEN @strStageLocationType = 'Production Staging Location'
+				THEN @intProductionStageLocationId
+			ELSE @intStageLocationId
+			END
 		,''
 		,@dtmCurrentDate
 		,@strUserName
-		
+
 	INSERT INTO @tblMFOrderHeader
 	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM @tblMFOrderHeader
 
+	DECLARE @OrderDetail AS OrderDetailInformation
 	DECLARE @OrderDetailInformation AS OrderDetailInformation
 
 	IF EXISTS (
@@ -248,7 +273,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @OrderDetailInformation (
+		INSERT INTO @OrderDetail (
 			intOrderHeaderId
 			,intItemId
 			,dblQty
@@ -290,7 +315,9 @@ BEGIN TRY
 			,NULL
 			,''
 		FROM dbo.tblMFRecipeItem ri
-		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId and r.ysnActive =1 and r.intLocationId =@intLocationId
+		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			AND r.ysnActive = 1
+			AND r.intLocationId = @intLocationId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ri.intItemUOMId
 		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
@@ -309,10 +336,307 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			And ri.intConsumptionMethodId =1
+			AND ri.intConsumptionMethodId = 1
+
+		SELECT @intWorkOrderId = intWorkOrderId
+			,@intProductId = intItemId
+			,@dblPlannedQty = dblPlannedQty
+		FROM @tblMFWorkOrder
+
+		INSERT INTO @OrderDetailInformation (
+			intOrderHeaderId
+			,intItemId
+			,dblQty
+			,intItemUOMId
+			,dblWeight
+			,intWeightUOMId
+			,dblWeightPerUnit
+			,intUnitsPerLayer
+			,intLayersPerPallet
+			,intPreferenceId
+			,intLineNo
+			,intSanitizationOrderDetailsId
+			,strLineItemNote
+			)
+		SELECT intOrderHeaderId
+			,intItemId
+			,dblQty
+			,intItemUOMId
+			,dblWeight
+			,intWeightUOMId
+			,dblWeightPerUnit
+			,intUnitsPerLayer
+			,intLayersPerPallet
+			,intPreferenceId
+			,intLineNo
+			,intSanitizationOrderDetailsId
+			,strLineItemNote
+		FROM @OrderDetail
+
+		Select @dblMinQtyCanBeProduced=-1
+
+		SELECT @intLineNo = MIn(intLineNo)
+		FROM @OrderDetail
+
+		WHILE @intLineNo IS NOT NULL
+		BEGIN
+			SELECT @intItemId = NULL
+				,@dblQty = NULL
+				,@dblRequiredQty = NULL
+				,@intItemUOMId = NULL
+
+			SELECT @intItemId = intItemId
+				,@dblQty = dblQty
+				,@dblRequiredQty = dblQty
+				,@intItemUOMId = intItemUOMId
+			FROM @OrderDetailInformation
+			WHERE intLineNo = @intLineNo
+
+			SELECT @dblAvailableQty = SUM(L.dblQty) - SUM(T.dblQty)
+			FROM dbo.tblICLot L
+			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				AND R.strInternalCode = 'STOCK'
+			LEFT JOIN dbo.tblMFTask T ON T.intLotId = L.intLotId
+			WHERE L.intItemId = @intItemId
+				AND L.intLocationId = @intLocationId
+				AND L.intLotStatusId = 1
+				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+
+			IF @dblAvailableQty IS NULL
+			BEGIN
+				SELECT @dblAvailableQty = 0
+
+				DELETE
+				FROM @OrderDetailInformation
+				WHERE intLineNo = @intLineNo
+			END
+
+			IF @dblQty - @dblAvailableQty > 0
+			BEGIN
+				SELECT @dblQty = @dblQty - @dblAvailableQty
+
+				UPDATE @OrderDetailInformation
+				SET dblQty = @dblAvailableQty
+					,dblWeight = @dblAvailableQty
+				WHERE intLineNo = @intLineNo
+
+				DECLARE @tblSubstituteItem TABLE (
+					intItemRecordId INT Identity(1, 1)
+					,intSubstituteItemId INT
+					,dblSubstituteRatio NUMERIC(18, 6)
+					,dblMaxSubstituteRatio NUMERIC(18, 6)
+					)
+
+				INSERT INTO @tblSubstituteItem (
+					intSubstituteItemId
+					,dblSubstituteRatio
+					,dblMaxSubstituteRatio
+					)
+				SELECT rs.intSubstituteItemId
+					,dblSubstituteRatio
+					,dblMaxSubstituteRatio
+				FROM dbo.tblMFRecipe r
+				JOIN dbo.tblMFRecipeItem ri ON r.intRecipeId = ri.intRecipeId
+				JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+				WHERE r.intItemId = @intProductId
+					AND r.intLocationId = @intLocationId
+					AND r.ysnActive = 1
+					AND ri.intItemId = @intItemId
+
+				SELECT @intItemRecordId = MIN(intItemRecordId)
+				FROM @tblSubstituteItem
+
+				WHILE @intItemRecordId IS NOT NULL
+				BEGIN
+					SELECT @dblSubstituteRatio = dblSubstituteRatio
+						,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
+					FROM @tblSubstituteItem
+					WHERE intItemRecordId = @intItemRecordId
+
+					SELECT @dblAvailableQty = 0
+
+					SELECT @dblAvailableQty = SUM(L.dblQty) - SUM(T.dblQty)
+					FROM dbo.tblICLot L
+					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+					JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+						AND R.strInternalCode = 'STOCK'
+					LEFT JOIN dbo.tblMFTask T ON T.intLotId = L.intLotId
+					WHERE L.intItemId = @intItemId
+						AND L.intLocationId = @intLocationId
+						AND L.intLotStatusId = 1
+						AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+
+					IF @dblAvailableQty IS NULL
+					BEGIN
+						SELECT @dblAvailableQty = 0
+
+						GOTO x
+					END
+
+					SELECT @dblQty = @dblQty * (@dblMaxSubstituteRatio / 100) * @dblSubstituteRatio
+
+					IF @dblAvailableQty - @dblQty >= 0
+					BEGIN
+						INSERT INTO @OrderDetailInformation (
+							intOrderHeaderId
+							,intItemId
+							,dblQty
+							,intItemUOMId
+							,dblWeight
+							,intWeightUOMId
+							,dblWeightPerUnit
+							,intUnitsPerLayer
+							,intLayersPerPallet
+							,intPreferenceId
+							,intLineNo
+							,intSanitizationOrderDetailsId
+							,strLineItemNote
+							)
+						SELECT @intOrderHeaderId
+							,intItemId
+							,@dblQty
+							,@intItemUOMId
+							,@dblQty
+							,@intItemUOMId
+							,1
+							,ISNULL(NULL, intUnitPerLayer)
+							,ISNULL(NULL, intLayerPerPallet)
+							,(
+								SELECT TOP 1 intPickListPreferenceId
+								FROM tblMFPickListPreference
+								)
+							,(
+								SELECT MAX(intLineNo) + 1
+								FROM @OrderDetailInformation
+								)
+							,NULL
+							,''
+						FROM tblICItem
+						WHERE intItemId = @intItemId
+
+						SELECT @dblQty = 0
+
+						BREAK
+					END
+					ELSE
+					BEGIN
+						INSERT INTO @OrderDetailInformation (
+							intOrderHeaderId
+							,intItemId
+							,dblQty
+							,intItemUOMId
+							,dblWeight
+							,intWeightUOMId
+							,dblWeightPerUnit
+							,intUnitsPerLayer
+							,intLayersPerPallet
+							,intPreferenceId
+							,intLineNo
+							,intSanitizationOrderDetailsId
+							,strLineItemNote
+							)
+						SELECT @intOrderHeaderId
+							,intItemId
+							,@dblAvailableQty
+							,@intItemUOMId
+							,@dblAvailableQty
+							,@intItemUOMId
+							,1
+							,ISNULL(NULL, intUnitPerLayer)
+							,ISNULL(NULL, intLayerPerPallet)
+							,(
+								SELECT TOP 1 intPickListPreferenceId
+								FROM tblMFPickListPreference
+								)
+							,(
+								SELECT MAX(intLineNo) + 1
+								FROM @OrderDetailInformation
+								)
+							,NULL
+							,''
+						FROM tblICItem
+						WHERE intItemId = @intItemId
+
+						SELECT @dblQty = @dblQty - @dblAvailableQty
+					END
+
+					x:
+
+					SELECT @intItemRecordId = MIN(intItemRecordId)
+					FROM @tblSubstituteItem
+					WHERE intItemRecordId > @intItemRecordId
+				END
+
+				IF @dblQty > 0
+				BEGIN
+					SELECT @dblQtyCanBeProduced = (@dblRequiredQty - @dblQty) * @dblPlannedQty / @dblRequiredQty
+
+					IF @dblQtyCanBeProduced < @dblMinQtyCanBeProduced or @dblQtyCanBeProduced=0
+					BEGIN
+						SELECT @dblMinQtyCanBeProduced = @dblQtyCanBeProduced
+
+						SELECT @strItemNo = strItemNo
+						FROM tblICItem
+						WHERE intItemId = @intItemId
+
+						SELECT @intUnitMeasureId = intUnitMeasureId
+						FROM tblICItemUOM
+						WHERE intItemUOMId = @intItemUOMId
+
+						SELECT @strUnitMeasure = strUnitMeasure
+						FROM tblICUnitMeasure
+						WHERE intUnitMeasureId = @intUnitMeasureId
+
+						SELECT @strRequiredQty = Ltrim(@dblRequiredQty) + ' ' + @strUnitMeasure
+
+						SELECT @strAvailableQty = Ltrim(@dblRequiredQty - @dblQty) + ' ' + @strUnitMeasure
+
+						SELECT @strMinQtyCanBeProduced = Ltrim(@dblMinQtyCanBeProduced)
+					END
+				END
+
+				SELECT @intLineNo = MIn(intLineNo)
+				FROM @OrderDetailInformation
+				WHERE @intLineNo > intLineNo
+			END
+
+			SELECT @intLineNo = MIn(intLineNo)
+			FROM @OrderDetail
+			WHERE intLineNo > @intLineNo
+		END
 	END
 
-	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation =@OrderDetailInformation
+	IF @dblMinQtyCanBeProduced > -1
+	BEGIN
+		SELECT @intItemUOMId = intItemUOMId
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intItemUOMId
+
+		SELECT @strUnitMeasure = strUnitMeasure
+		FROM tblICUnitMeasure
+		WHERE intUnitMeasureId = @intUnitMeasureId
+
+		SELECT @strMinQtyCanBeProduced = @strMinQtyCanBeProduced + ' ' + @strUnitMeasure
+
+		RAISERROR (
+				90026
+				,11
+				,1
+				,@strItemNo
+				,@strAvailableQty
+				,@strRequiredQty
+				,@strMinQtyCanBeProduced
+				)
+
+		RETURN
+	END
+
+	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 
 	INSERT INTO tblMFStageWorkOrder (
 		intWorkOrderId
@@ -337,6 +661,7 @@ BEGIN TRY
 	FROM @tblMFWorkOrder
 
 	COMMIT TRANSACTION
+
 	EXEC sp_xml_removedocument @idoc
 END TRY
 
@@ -346,7 +671,7 @@ BEGIN CATCH
 	IF XACT_STATE() != 0
 		ROLLBACK TRANSACTION
 
-		IF @idoc <> 0
+	IF @idoc <> 0
 		EXEC sp_xml_removedocument @idoc
 
 	RAISERROR (
@@ -356,6 +681,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-GO
-
-

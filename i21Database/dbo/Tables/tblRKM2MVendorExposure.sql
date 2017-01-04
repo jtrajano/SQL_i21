@@ -4,7 +4,7 @@
 	[intM2MInquiryId] INT NOT NULL, 
     [intConcurrencyId] INT NOT NULL, 
     [intVendorId] INT  NULL, 
-    [dblRating] NUMERIC(18, 6) NULL,
+    [strRating] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
     [dblFixedPurchaseVolume] NUMERIC(18, 6) NULL,     
 	[dblUnfixedPurchaseVolume] NUMERIC(18, 6) NULL,  
 	[dblTotalCommittedVolume] NUMERIC(18, 6) NULL,  
