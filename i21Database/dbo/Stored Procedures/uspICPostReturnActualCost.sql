@@ -137,13 +137,13 @@ BEGIN
 
 				SET @QtyOffset = -@QtyOffset
 				-- Insert the record to the fifo-out table
-				INSERT INTO dbo.tblICInventoryLIFOOut (
+				INSERT INTO dbo.tblICInventoryActualCostOOut (
 						intInventoryTransactionId
-						,intInventoryLIFOId
+						,intInventoryActualCostId 
 						,dblQty
 				)
 				SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-						,intInventoryLIFOId = @UpdatedActualCostId
+						,intInventoryActualCostId = @UpdatedActualCostId
 						,dblQty = @QtyOffset
 				WHERE	@InventoryTransactionIdentityId IS NOT NULL
 						AND @UpdatedActualCostId IS NOT NULL 

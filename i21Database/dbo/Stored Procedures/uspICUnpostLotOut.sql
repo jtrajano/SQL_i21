@@ -127,3 +127,17 @@ FROM	dbo.tblICInventoryLot LotBucket INNER JOIN (
 			ON LotOutGrouped.intInventoryLotId = LotBucket.intInventoryLotId
 WHERE	ISNULL(LotBucket.ysnIsUnposted, 0) = 0
 ;
+
+-- Update lot out. Update dblQtyReturned. 
+UPDATE	cbOut
+SET		cbOut.dblQtyReturned = cbOut.dblQtyReturned - rtn.dblQtyReturned
+FROM	tblICInventoryLotOut cbOut CROSS APPLY (
+			SELECT	rtn.intInventoryLotId
+					,rtn.intOutId
+					,dblQtyReturned = SUM(rtn.dblQtyReturned) 
+			FROM	tblICInventoryReturned rtn 
+			WHERE	rtn.intTransactionId = @intTransactionId
+					AND rtn.strTransactionId = @strTransactionId
+			GROUP BY rtn.intInventoryLotId, rtn.intOutId
+		) rtn
+;

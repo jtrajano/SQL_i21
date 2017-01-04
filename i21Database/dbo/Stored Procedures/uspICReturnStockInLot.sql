@@ -123,13 +123,17 @@ BEGIN
 							ON ty.intTransactionTypeId = t.intTransactionTypeId
 				WHERE	cbOut.intInventoryLotId = cb.intInventoryLotId 
 						AND ty.strName = 'Inventory Adjustment - Quantity Change'
-						AND  (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0 
+						AND (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0
+						AND ISNULL(t.ysnIsUnposted, 0) = 0  
 			) cbOut
 	WHERE	r.intInventoryReceiptId = @intTransactionId
 			AND r.strReceiptNumber = @strTransactionId
 			AND cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
 			AND cb.intItemUOMId = @intItemUOMId
+			AND cb.intLotId = @intLotId
+			AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+			AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
 	IF @cbOutOutId IS NOT NULL 
 	BEGIN 
@@ -237,8 +241,8 @@ BEGIN
 
 			-- retrieve the	qty reduced from a Lot bucket 
 			,@QtyOffset = 
-						CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN @dblQty
-								ELSE (cb.dblStockIn - cb.dblStockOut) 
+						CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN -@dblQty
+								ELSE -(cb.dblStockIn - cb.dblStockOut) 
 						END
 
 			-- retrieve the id of the matching Lot bucket 

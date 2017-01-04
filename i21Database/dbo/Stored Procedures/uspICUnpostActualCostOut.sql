@@ -94,3 +94,17 @@ FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN (
 			ON ActualCostOutGrouped.intInventoryActualCostId = ActualCostBucket.intInventoryActualCostId
 WHERE	ISNULL(ActualCostBucket.ysnIsUnposted, 0) = 0
 ;
+
+-- Update actual cost out. Update dblQtyReturned. 
+UPDATE	cbOut
+SET		cbOut.dblQtyReturned = cbOut.dblQtyReturned - rtn.dblQtyReturned
+FROM	tblICInventoryActualCostOut cbOut CROSS APPLY (
+			SELECT	rtn.intInventoryActualCostId
+					,rtn.intOutId
+					,dblQtyReturned = SUM(rtn.dblQtyReturned) 
+			FROM	tblICInventoryReturned rtn 
+			WHERE	rtn.intTransactionId = @intTransactionId
+					AND rtn.strTransactionId = @strTransactionId
+			GROUP BY rtn.intInventoryActualCostId, rtn.intOutId
+		) rtn
+;

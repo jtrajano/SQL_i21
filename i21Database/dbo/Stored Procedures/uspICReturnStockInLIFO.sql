@@ -118,7 +118,8 @@ BEGIN
 							ON ty.intTransactionTypeId = t.intTransactionTypeId
 				WHERE	cbOut.intInventoryLIFOId = cb.intInventoryLIFOId 
 						AND ty.strName = 'Inventory Adjustment - Quantity Change'
-						AND  (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0 
+						AND (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0 
+						AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			) cbOut
 	WHERE	r.intInventoryReceiptId = @intTransactionId
 			AND r.strReceiptNumber = @strTransactionId
@@ -226,8 +227,8 @@ BEGIN
 
 			-- retrieve the	qty reduced from a LIFO bucket 
 			,@QtyOffset = 
-						CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN @dblQty
-								ELSE (cb.dblStockIn - cb.dblStockOut) 
+						CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN -@dblQty
+								ELSE -(cb.dblStockIn - cb.dblStockOut) 
 						END
 
 			-- retrieve the id of the matching LIFO bucket 

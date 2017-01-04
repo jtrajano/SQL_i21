@@ -118,7 +118,8 @@ BEGIN
 							ON ty.intTransactionTypeId = t.intTransactionTypeId
 				WHERE	cbOut.intInventoryFIFOId = cb.intInventoryFIFOId 
 						AND ty.strName = 'Inventory Adjustment - Quantity Change'
-						AND  (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0 
+						AND (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0 
+						AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			) cbOut
 	WHERE	r.intInventoryReceiptId = @intTransactionId
 			AND r.strReceiptNumber = @strTransactionId
