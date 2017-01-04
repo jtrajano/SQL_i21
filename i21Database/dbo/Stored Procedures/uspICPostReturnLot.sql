@@ -178,6 +178,18 @@ BEGIN
 					,@dblUOMQty
 					,@intLotId
 
+				--------------------------------------
+				-- Update the Lot's Qty and Weights. 
+				--------------------------------------
+				BEGIN 
+					UPDATE	Lot 
+					SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
+							,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
+					FROM	dbo.tblICLot Lot
+					WHERE	Lot.intItemLocationId = @intItemLocationId
+							AND Lot.intLotId = @intLotId
+				END 
+
 				SET @QtyOffset = -@QtyOffset
 				-- Insert the record to the fifo-out table
 				INSERT INTO dbo.tblICInventoryLotOut (

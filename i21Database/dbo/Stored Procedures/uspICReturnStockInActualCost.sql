@@ -37,57 +37,6 @@ SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @ActualCostId = NULL;
 
--- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
-BEGIN 
-	DECLARE @ALLOW_NEGATIVE_NO AS INT = 3
-
-	DECLARE @strItemNo AS NVARCHAR(50) 
-			,@strLocationName AS NVARCHAR(MAX) 
-			,@CostBucketId AS INT 
-			,@AllowNegativeInventory AS INT 
-			,@UnitsOnHand AS NUMERIC(38, 20)
-
-	-- Get the on-hand qty 
-	SELECT	@UnitsOnHand = s.dblUnitOnHand
-	FROM	tblICItemStock s
-	WHERE	s.intItemId = @intItemId
-			AND s.intItemLocationId = @intItemLocationId
-
-	SELECT	@strItemNo = i.strItemNo
-			,@CostBucketId = cb.intInventoryActualCostId
-			,@AllowNegativeInventory = il.intAllowNegativeInventory
-			,@strLocationName = cl.strLocationName
-	FROM	tblICItem i INNER JOIN tblICItemLocation il
-				ON i.intItemId = il.intItemId
-				AND il.intItemLocationId = @intItemLocationId
-			INNER JOIN tblSMCompanyLocation cl
-				ON cl.intCompanyLocationId = il.intLocationId
-			OUTER APPLY (
-				SELECT	TOP 1 *
-				FROM	tblICInventoryActualCost cb
-				WHERE	cb.strActualCostId = @strActualCostId 
-						AND cb.intItemId = @intItemId
-						AND cb.intItemLocationId = @intItemLocationId
-						AND cb.intItemUOMId = @intItemUOMId
-						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
-						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
-			) cb 
-
-	IF @CostBucketId IS NULL AND @AllowNegativeInventory = @ALLOW_NEGATIVE_NO
-	BEGIN 
-		IF @UnitsOnHand > 0 
-		BEGIN 
-			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
-			RAISERROR(80096, 11, 1, @strDate, @strItemNo, @strLocationName)
-		END 
-		ELSE 
-		BEGIN 
-			RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
-		END 
-		RETURN -1
-	END 
-END
-
 DECLARE @cbOutOutId AS INT 
 		,@cbId AS INT
 		,@cbOutInventoryTransactionId AS INT
@@ -181,6 +130,58 @@ BEGIN
 			,intTransactionTypeId		= @intTransactionTypeId
 	END 
 END 
+
+-- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
+IF @cbOutOutId IS NULL 
+BEGIN 
+	DECLARE @ALLOW_NEGATIVE_NO AS INT = 3
+
+	DECLARE @strItemNo AS NVARCHAR(50) 
+			,@strLocationName AS NVARCHAR(MAX) 
+			,@CostBucketId AS INT 
+			,@AllowNegativeInventory AS INT 
+			,@UnitsOnHand AS NUMERIC(38, 20)
+
+	-- Get the on-hand qty 
+	SELECT	@UnitsOnHand = s.dblUnitOnHand
+	FROM	tblICItemStock s
+	WHERE	s.intItemId = @intItemId
+			AND s.intItemLocationId = @intItemLocationId
+
+	SELECT	@strItemNo = i.strItemNo
+			,@CostBucketId = cb.intInventoryActualCostId
+			,@AllowNegativeInventory = il.intAllowNegativeInventory
+			,@strLocationName = cl.strLocationName
+	FROM	tblICItem i INNER JOIN tblICItemLocation il
+				ON i.intItemId = il.intItemId
+				AND il.intItemLocationId = @intItemLocationId
+			INNER JOIN tblSMCompanyLocation cl
+				ON cl.intCompanyLocationId = il.intLocationId
+			OUTER APPLY (
+				SELECT	TOP 1 cb.*
+				FROM	tblICInventoryActualCost cb
+				WHERE	cb.strActualCostId = @strActualCostId 
+						AND cb.intItemId = @intItemId
+						AND cb.intItemLocationId = @intItemLocationId
+						AND cb.intItemUOMId = @intItemUOMId
+						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
+						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+			) cb 
+
+	IF @CostBucketId IS NULL AND @AllowNegativeInventory = @ALLOW_NEGATIVE_NO
+	BEGIN 
+		IF @UnitsOnHand > 0 
+		BEGIN 
+			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
+			RAISERROR(80096, 11, 1, @strDate, @strItemNo, @strLocationName)
+		END 
+		ELSE 
+		BEGIN 
+			RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
+		END 
+		RETURN -1
+	END 
+END
 
 -- Upsert (update or insert) a record in the cost bucket.
 IF @cbOutOutId IS NULL 

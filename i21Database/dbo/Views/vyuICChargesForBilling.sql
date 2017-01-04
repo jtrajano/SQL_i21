@@ -11,23 +11,23 @@ SELECT
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
 	,[dblOrderQty]								=	CASE 
-														WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
-															THEN -1 
+														--WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
+														--	THEN -1 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
 															THEN -1
 														ELSE 1 
 													END 
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	CASE 
-														WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
-															THEN -1 
+														--WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
+														--	THEN -1 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
 															THEN -1
 														ELSE 1 
 													END 
 	,[dblQuantityToBill]						=	CASE 
-														WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
-															THEN -1 
+														--WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
+														--	THEN -1 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
 															THEN -1
 														ELSE 1 
@@ -37,13 +37,13 @@ SELECT
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN (ABS(ReceiptCharge.dblAmount) * 100) ELSE ABS(ReceiptCharge.dblAmount) END
-	,[dblTax]									=	
-													CASE 
-														WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the tax if it is an Inventory Return. 
-															THEN -ISNULL(ReceiptCharge.dblTax,0)
-														ELSE 
-															ISNULL(ReceiptCharge.dblTax,0) 
-													END 
+	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0) 
+													--CASE 
+													--	WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the tax if it is an Inventory Return. 
+													--		THEN -ISNULL(ReceiptCharge.dblTax,0)
+													--	ELSE 
+													--		ISNULL(ReceiptCharge.dblTax,0) 
+													--END 
 
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
@@ -156,10 +156,10 @@ SELECT
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
 	,[dblOrderQty]								=	CASE 
-														WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
-															THEN 1
-														WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
-															THEN -1
+														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
+														--	THEN 1
+														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
+														--	THEN -1
 														WHEN ReceiptCharge.dblAmount > 0 
 															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
 														ELSE 
@@ -167,20 +167,20 @@ SELECT
 													END  
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	CASE 
-														WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
-															THEN 1
-														WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
-															THEN -1
+														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
+														--	THEN 1
+														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
+														--	THEN -1
 														WHEN ReceiptCharge.dblAmount > 0 
 															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
 														ELSE 
 															1 
 													END 
 	,[dblQuantityToBill]						=	CASE 
-														WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
-															THEN 1
-														WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
-															THEN -1
+														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
+														--	THEN 1
+														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
+														--	THEN -1
 														WHEN ReceiptCharge.dblAmount > 0 
 															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
 														ELSE 
@@ -199,10 +199,10 @@ SELECT
 													END 
 	,[dblTax]									=	
 													CASE 
-														WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
-															THEN ISNULL(ReceiptCharge.dblTax,0)
-														WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
-															THEN -ISNULL(ReceiptCharge.dblTax,0)
+														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
+														--	THEN ISNULL(ReceiptCharge.dblTax,0)
+														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
+														--	THEN -ISNULL(ReceiptCharge.dblTax,0)
 														WHEN ReceiptCharge.dblAmount > 0 
 															THEN -ISNULL(ReceiptCharge.dblTax,0) --Negate tax if amount is positive for Price Down charges; 
 														ELSE 

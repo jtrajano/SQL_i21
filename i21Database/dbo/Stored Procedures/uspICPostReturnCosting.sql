@@ -290,18 +290,6 @@ BEGIN
 			;
 	END
 
-	--------------------------------------
-	-- Update the Lot's Qty and Weights. 
-	--------------------------------------
-	BEGIN 
-		UPDATE	Lot 
-		SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-				,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-		FROM	dbo.tblICLot Lot
-		WHERE	Lot.intItemLocationId = @intItemLocationId
-				AND Lot.intLotId = @intLotId
-	END 
-
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
