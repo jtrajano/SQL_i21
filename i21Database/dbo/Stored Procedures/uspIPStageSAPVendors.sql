@@ -20,6 +20,7 @@ BEGIN TRY
 	DECLARE @tblVendor TABLE (
 		strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		strAddress NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+		strAddress1 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 		strCity NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 		strCountry NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 		strZipCode NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -34,14 +35,15 @@ BEGIN TRY
 	)
 
 	DECLARE @tblVendorContact TABLE (
-		[strName] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		[strFirstName] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+		[strLastName] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		[strPhone] NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	 )
 
 	INSERT INTO @tblVendor (
 		strName
 		,strAddress
+		,strAddress1
 		,strCity
 		,strCountry
 		,strZipCode
@@ -54,6 +56,7 @@ BEGIN TRY
 		)
 	SELECT NAME1
 		,STRAS
+		,PFACH
 		,ORT01
 		,LAND1
 		,PSTL2
@@ -66,6 +69,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'CREMAS06/IDOC/E1LFA1M', 2) WITH (
 			 NAME1 NVARCHAR(100)
 			,STRAS NVARCHAR(MAX)
+			,PFACH NVARCHAR(MAX)
 			,ORT01 NVARCHAR(MAX)
 			,LAND1 NVARCHAR(MAX)
 			,PSTL2 NVARCHAR(MAX)
@@ -82,7 +86,7 @@ BEGIN TRY
 			 ZTERM NVARCHAR(100)
 			,WAERS NVARCHAR(50)) x
 
-	Insert Into @tblVendorContact(strName,strFirstName,strPhone)
+	Insert Into @tblVendorContact(strFirstName,strLastName,strPhone)
 		SELECT NAMEV
 		,NAME1
 		,TELF1
@@ -97,14 +101,14 @@ BEGIN TRY
 	Begin Tran
 
 	--Add to Staging tables
-	Insert into tblIPEntityStage(strName,strAddress,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,strEntityType,strCurrency,strTerm)
-	Select strName,strAddress,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,'Vendor',strCurrency,strTerm
+	Insert into tblIPEntityStage(strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,strEntityType,strCurrency,strTerm)
+	Select strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,'Vendor',strCurrency,strTerm
 	From @tblVendor
 
 	Select @intStageEntityId=SCOPE_IDENTITY()
 
-	Insert Into tblIPEntityContactStage(intStageEntityId,strEntityName,strName,strFirstName,strPhone)
-	Select @intStageEntityId,@strEntityName,strName,strFirstName,strPhone
+	Insert Into tblIPEntityContactStage(intStageEntityId,strEntityName,strFirstName,strLastName,strPhone)
+	Select @intStageEntityId,@strEntityName,strFirstName,strLastName,strPhone
 	From @tblVendorContact
 
 	Commit Tran

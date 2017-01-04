@@ -123,9 +123,11 @@ BEGIN CATCH
 		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 
+	SET @ErrMsg = ERROR_MESSAGE()
+
 	--Move to Error
-	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strShortName
+	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strErrorMessage,strImportStatus)
+	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strShortName,@ErrMsg,'Failed'
 	From tblIPItemStage Where intStageItemId=@intStageItemId
 
 	Select @intNewStageItemId=SCOPE_IDENTITY()
@@ -136,8 +138,6 @@ BEGIN CATCH
 
 	Delete From tblIPItemStage Where intStageItemId=@intStageItemId
 	Delete From tblIPItemUOMStage Where intStageItemId=@intStageItemId
-
-	SET @ErrMsg = ERROR_MESSAGE()
 
 	RAISERROR (
 			@ErrMsg
