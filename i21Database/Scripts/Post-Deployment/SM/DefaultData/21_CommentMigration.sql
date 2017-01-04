@@ -133,10 +133,10 @@ GO
 		intScreenId,
 		intRecordId,
 		intConcurrencyId
-	) 
+	)
 	SELECT 
 		@screenId intScreenId,
-		A.intActivityId,
+		A.intActivityId intRecordId,
 		A.intConcurrencyId
 	FROM tblSMActivity A 
 		LEFT OUTER JOIN tblSMTransaction C ON intScreenId = @screenId AND C.intRecordId = A.intActivityId
