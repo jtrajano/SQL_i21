@@ -4682,6 +4682,14 @@
     <Build Include="dbo\Functions\fnTMGetItemTotalTaxForCustomer.sql" />
     <Build Include="dbo\Functions\fnTMGetItemPricingDetails.sql" />
     <Build Include="dbo\Tables\tblGLMulticurrencySetting.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorage.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorageTicket.sql" />
+    <Build Include="dbo\Tables\tblGRSettleContract.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleStorage.sql" />
+    <Build Include="dbo\Views\vyuGRSettleStorageTicketNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRSettleStorageNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRSettleContractNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleStorageTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
