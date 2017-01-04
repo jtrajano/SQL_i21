@@ -394,7 +394,7 @@
                                                         "boxLabel": null,
                                                         "fieldLabel": "Global Certification",
                                                         "itemId": "chkGlobalCertification",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 115,
                                                         "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox",
@@ -429,7 +429,7 @@
                                                         "displayField": "strCountry",
                                                         "fieldLabel": "Specific Country",
                                                         "itemId": "cboSpecificCountry",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 115,
                                                         "layout|flex": 1,
                                                         "valueField": "intCountryID"
                                                     },
@@ -445,6 +445,22 @@
                                                             "type": "string"
                                                         }
                                                     ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Certification Code",
+                                                        "itemId": "txtCertificationCode",
+                                                        "labelWidth": 115,
+                                                        "layout|flex": 1
+                                                    },
+                                                    "name": "MyTextField4",
+                                                    "designerId": "ab1ee41d-732b-4edb-a517-309ce5387d8a"
                                                 }
                                             ]
                                         }
@@ -510,7 +526,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter123",
                                                     "designerId": "264fa430-47fb-419b-9c59-83d13bd35b5f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -828,7 +844,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging11",
                     "designerId": "24cec6a2-4a25-4a94-b646-9410f4905c67",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

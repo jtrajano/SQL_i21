@@ -17,6 +17,7 @@ namespace iRely.Inventory.Model
         public bool ysnGlobalCertification { get; set; }
         public int? intCountryId { get; set; }
         public string strCertificationIdName { get; set; }
+        public string strCertificationCode { get; set; }
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
         public ICollection<tblICItemCertification> tblICItemCertifications { get; set; }

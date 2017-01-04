@@ -42,6 +42,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
                 value: '{current.intCountryId}',
                 store: '{country}'
             },
+            txtCertificationCode: '{current.strCertificationCode}',
 
             grdCertificationProgram: {
                 colCommodity: {
