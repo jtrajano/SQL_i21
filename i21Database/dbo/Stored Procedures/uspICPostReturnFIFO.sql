@@ -11,7 +11,7 @@ CREATE PROCEDURE [dbo].[uspICPostReturnFIFO]
 	,@dtmDate AS DATETIME
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
-	,@dblCost AS NUMERIC(38, 20)
+	,@dblCost AS NUMERIC(38,20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	,@dblExchangeRate AS NUMERIC(38,20)
@@ -57,13 +57,7 @@ DECLARE @UpdatedFifoId AS INT
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
 DECLARE @dblValue AS NUMERIC(38,20)
-
--- Initialize the transaction name. Use this as the transaction form name
---DECLARE @TransactionTypeName AS NVARCHAR(200) 
---SELECT	TOP 1 
---		@TransactionTypeName = strName
---FROM	dbo.tblICInventoryTransactionType
---WHERE	intTransactionTypeId = @intTransactionTypeId
+DECLARE @intInventoryFIFOOutId AS INT 
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -81,6 +75,7 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
+				,@strBatchId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -92,52 +87,92 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
 
-			-- Insert the inventory transaction record
-			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
-			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			IF @UpdatedFifoId IS NOT NULL 
+			BEGIN 
+				------------------------------------------------------------
+				-- Create the Inventory Transaction 
+				------------------------------------------------------------
+				EXEC [dbo].[uspICPostInventoryTransaction]
+						@intItemId = @intItemId
+						,@intItemLocationId = @intItemLocationId
+						,@intItemUOMId = @intItemUOMId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@dtmDate = @dtmDate
+						,@dblQty  = @QtyOffset --@dblQty
+						,@dblUOMQty = @dblUOMQty
+						,@dblCost = @CostUsed -- @dblCost
+						,@dblValue = NULL
+						,@dblSalesPrice = @dblSalesPrice
+						,@intCurrencyId = @intCurrencyId
+						,@dblExchangeRate = @dblExchangeRate
+						,@intTransactionId = @intTransactionId
+						,@intTransactionDetailId = @intTransactionDetailId
+						,@strTransactionId = @strTransactionId
+						,@strBatchId = @strBatchId
+						,@intTransactionTypeId = @intTransactionTypeId
+						,@intLotId = NULL 
+						,@intRelatedInventoryTransactionId = NULL 
+						,@intRelatedTransactionId = NULL 
+						,@strRelatedTransactionId = NULL 
+						,@strTransactionForm = @strTransactionForm
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
+						,@intCostingMethod = @AVERAGECOST
+						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 
-			EXEC [dbo].[uspICPostInventoryTransaction]
-					@intItemId = @intItemId
-					,@intItemLocationId = @intItemLocationId
-					,@intItemUOMId = @intItemUOMId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId					 
-					,@dtmDate = @dtmDate
-					,@dblQty = @dblComputedQty
-					,@dblUOMQty = @dblUOMQty
-					,@dblCost = @dblCostToUse
-					,@dblValue = NULL
-					,@dblSalesPrice = @dblSalesPrice
-					,@intCurrencyId = @intCurrencyId
-					,@dblExchangeRate = @dblExchangeRate
-					,@intTransactionId = @intTransactionId
-					,@intTransactionDetailId = @intTransactionDetailId
-					,@strTransactionId = @strTransactionId
-					,@strBatchId = @strBatchId
-					,@intTransactionTypeId = @intTransactionTypeId
-					,@intLotId = NULL 
-					,@intRelatedInventoryTransactionId = NULL 
-					,@intRelatedTransactionId = NULL 
-					,@strRelatedTransactionId = NULL 
-					,@strTransactionForm = @strTransactionForm
-					,@intEntityUserSecurityId = @intEntityUserSecurityId
-					,@intCostingMethod = @FIFO
-					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+				------------------------------------------------------------
+				-- Update the Stock Quantity
+				------------------------------------------------------------
+				EXEC [dbo].[uspICPostStockQuantity]
+					@intItemId
+					,@intItemLocationId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@intItemUOMId
+					,@QtyOffset
+					,@dblUOMQty
+					,NULL --,@intLotId
 
-			
-			-- Insert the record the the fifo-out table
-			INSERT INTO dbo.tblICInventoryFIFOOut (
-					intInventoryTransactionId
-					,intInventoryFIFOId
-					,dblQty
-			)
-			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-					,intInventoryFIFOId = @UpdatedFifoId
-					,dblQty = @QtyOffset
-			WHERE	@InventoryTransactionIdentityId IS NOT NULL
-					AND @UpdatedFifoId IS NOT NULL 
-					AND @QtyOffset IS NOT NULL 
-			
+				SET @QtyOffset = -@QtyOffset
+				-- Insert the record to the fifo-out table
+				INSERT INTO dbo.tblICInventoryFIFOOut (
+						intInventoryTransactionId
+						,intInventoryFIFOId
+						,dblQty
+				)
+				SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
+						,intInventoryFIFOId = @UpdatedFifoId
+						,dblQty = @QtyOffset
+				WHERE	@InventoryTransactionIdentityId IS NOT NULL
+						AND @UpdatedFifoId IS NOT NULL 
+						AND @QtyOffset IS NOT NULL 
+
+				SET @intInventoryFIFOOutId = SCOPE_IDENTITY();
+
+				-- Create a log of the return transaction. 
+				INSERT INTO tblICInventoryReturned (
+					intInventoryFIFOId
+					,intInventoryTransactionId
+					,intOutId
+					,dblQtyReturned
+					,dblCost
+					,intTransactionId
+					,strTransactionId
+					,strBatchId
+					,intTransactionTypeId 
+				)
+				SELECT 
+					intInventoryFIFOId			= @UpdatedFifoId
+					,intInventoryTransactionId	= @InventoryTransactionIdentityId 
+					,intOutId					= @intInventoryFIFOOutId 
+					,dblQtyReturned				= @QtyOffset
+					,dblCost					= @CostUsed
+					,intTransactionId			= @intTransactionId 
+					,strTransactionId			= @strTransactionId
+					,strBatchId					= @strBatchId
+					,intTransactionTypeId		= @intTransactionTypeId
+			END 
+
 			-- Reduce the remaining qty
 			SET @dblReduceQty = @RemainingQty;
 		END 

@@ -8,6 +8,7 @@ CREATE PROCEDURE [dbo].[uspICReturnStockInLIFO]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT
+	,@strBatchId AS NVARCHAR(20)
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(38, 20)
@@ -35,79 +36,232 @@ SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @LIFOId = NULL;
 
--- Upsert (update or insert) a record in the cost bucket.
-MERGE	TOP(1)
-INTO	dbo.tblICInventoryLIFO 
-WITH	(HOLDLOCK) 
-AS		lifo_bucket	
-USING (
-	SELECT	intItemId = @intItemId
-			,intItemLocationId = @intItemLocationId
-			,intItemUOMId = @intItemUOMId
-) AS Source_Query  
-	ON lifo_bucket.intItemId = Source_Query.intItemId
-	AND lifo_bucket.intItemLocationId = Source_Query.intItemLocationId
-	AND lifo_bucket.intItemUOMId = Source_Query.intItemUOMId
-	AND (lifo_bucket.dblStockIn - lifo_bucket.dblStockOut) > 0 
-	AND dbo.fnDateGreaterThanEquals(@dtmDate, lifo_bucket.dtmDate) = 1
-	AND lifo_bucket.dblCost = @dblCost
+-- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
+BEGIN 
+	DECLARE @ALLOW_NEGATIVE_NO AS INT = 3
 
--- Update an existing cost bucket
-WHEN MATCHED THEN 
-	UPDATE 
-	SET	lifo_bucket.dblStockOut = ISNULL(lifo_bucket.dblStockOut, 0) 
-					+ CASE	WHEN (lifo_bucket.dblStockIn - lifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
-							ELSE (lifo_bucket.dblStockIn - lifo_bucket.dblStockOut) 
+	DECLARE @strItemNo AS NVARCHAR(50) 
+			,@strLocationName AS NVARCHAR(MAX) 
+			,@CostBucketId AS INT 
+			,@AllowNegativeInventory AS INT 
+			,@UnitsOnHand AS NUMERIC(38, 20)
+
+	-- Get the on-hand qty 
+	SELECT	@UnitsOnHand = s.dblUnitOnHand
+	FROM	tblICItemStock s
+	WHERE	s.intItemId = @intItemId
+			AND s.intItemLocationId = @intItemLocationId
+
+	SELECT	@strItemNo = i.strItemNo
+			,@CostBucketId = cb.intInventoryLIFOId
+			,@AllowNegativeInventory = il.intAllowNegativeInventory
+			,@strLocationName = cl.strLocationName
+	FROM	tblICItem i INNER JOIN tblICItemLocation il
+				ON i.intItemId = il.intItemId
+				AND il.intItemLocationId = @intItemLocationId
+			INNER JOIN tblSMCompanyLocation cl
+				ON cl.intCompanyLocationId = il.intLocationId
+			OUTER APPLY (
+				SELECT	TOP 1 *
+				FROM	tblICInventoryLIFO cb
+				WHERE	cb.intItemId = @intItemId
+						AND cb.intItemLocationId = @intItemLocationId
+						AND cb.intItemUOMId = @intItemUOMId
+						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
+						AND dbo.fnDateGreaterThanEquals(cb.dtmDate, @dtmDate) = 1
+			) cb 
+
+	IF @CostBucketId IS NULL AND @AllowNegativeInventory = @ALLOW_NEGATIVE_NO
+	BEGIN 
+		IF @UnitsOnHand > 0 
+		BEGIN 
+			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
+			RAISERROR(80096, 11, 1, @strDate, @strItemNo, @strLocationName)
+		END 
+		ELSE 
+		BEGIN 
+			RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
+		END 
+		RETURN -1
+	END 
+END 
+
+DECLARE @cbOutOutId AS INT 
+		,@cbId AS INT
+		,@cbOutInventoryTransactionId AS INT
+		,@cost AS NUMERIC(38, 20)
+		,@intTransactionTypeId AS INT 
+
+-- Check if there is available stocks to return from the Inventory Adjustment - Quantity Change. 
+BEGIN 
+	SELECT	TOP 1 
+			@cbId = cb.intInventoryLIFOId
+			,@cbOutOutId = cbOut.intId
+			,@cbOutInventoryTransactionId = cbOut.intInventoryTransactionId
+			,@cost = cb.dblCost --cbOut.dblCost
+			,@intTransactionTypeId = cbOut.intTransactionTypeId
+	FROM	tblICInventoryLIFO cb INNER JOIN (
+				tblICInventoryReceipt rSource INNER JOIN tblICInventoryReceipt r
+					ON rSource.intInventoryReceiptId = r.intSourceInventoryReceiptId
+			)
+				ON cb.intTransactionId = rSource.intInventoryReceiptId
+				AND cb.strTransactionId = rSource.strReceiptNumber
+			OUTER APPLY (
+				SELECT  TOP 1 
+						cbOut.intId
+						,cbOut.intInventoryTransactionId							
+						,t.intTransactionTypeId
+						,t.dblCost
+				FROM	tblICInventoryLIFOOut cbOut INNER JOIN tblICInventoryTransaction t
+							ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+						INNER JOIN tblICInventoryTransactionType ty
+							ON ty.intTransactionTypeId = t.intTransactionTypeId
+				WHERE	cbOut.intInventoryLIFOId = cb.intInventoryLIFOId 
+						AND ty.strName = 'Inventory Adjustment - Quantity Change'
+						AND  (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0 
+			) cbOut
+	WHERE	r.intInventoryReceiptId = @intTransactionId
+			AND r.strReceiptNumber = @strTransactionId
+			AND cb.intItemId = @intItemId
+			AND cb.intItemLocationId = @intItemLocationId
+			AND cb.intItemUOMId = @intItemUOMId
+
+	IF @cbOutOutId IS NOT NULL 
+	BEGIN 
+		UPDATE	cbOut 
+		SET		-- Increase the return qty 
+				dblQtyReturned = 
+					ISNULL(cbOut.dblQtyReturned, 0) 
+					+ CASE	WHEN (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) >= @dblQty THEN @dblQty
+							ELSE (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) 
 					END 
+				-- update the remaining qty
+				,@RemainingQty = 
+						CASE	WHEN (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) >= @dblQty THEN 0
+								ELSE (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) - @dblQty
+						END
+				-- retrieve the cost from the fifo bucket. 
+				,@CostUsed = NULL 
 
-		,lifo_bucket.intConcurrencyId = ISNULL(lifo_bucket.intConcurrencyId, 0) + 1
+				-- retrieve the	qty reduced from a fifo bucket 
+				,@QtyOffset = 							
+							CASE	WHEN (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) >= @dblQty THEN -@dblQty
+									ELSE -(cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) 
+							END
 
-		-- update the remaining qty
-		,@RemainingQty = 
-					CASE	WHEN (lifo_bucket.dblStockIn - lifo_bucket.dblStockOut) >= @dblQty THEN 0
-							ELSE (lifo_bucket.dblStockIn - lifo_bucket.dblStockOut) - @dblQty
-					END
+				-- retrieve the id of the matching fifo bucket 
+				,@LIFOId = NULL 
+		FROM	tblICInventoryLIFOOut cbOut
+		WHERE	cbOut.intId = @cbOutOutId 
 
-		-- retrieve the cost from the LIFO bucket. 
-		,@CostUsed = lifo_bucket.dblCost
+		-- Create a log of the return transaction. 
+		INSERT INTO tblICInventoryReturned (
+			intInventoryLIFOId
+			,intInventoryTransactionId
+			,intOutId
+			,dblQtyReturned
+			,dblCost
+			,intTransactionId
+			,strTransactionId
+			,strBatchId
+			,intTransactionTypeId 
+		)
+		SELECT 
+			intInventoryLIFOId			= @cbId
+			,intInventoryTransactionId	= @cbOutInventoryTransactionId
+			,intOutId					= @cbOutOutId
+			,dblQtyReturned				= -@QtyOffset
+			,dblCost					= @cost
+			,intTransactionId			= @intTransactionId 
+			,strTransactionId			= @strTransactionId
+			,strBatchId					= @strBatchId
+			,intTransactionTypeId		= @intTransactionTypeId
+	END 
+END 
 
-		-- retrieve the	qty reduced from a LIFO bucket 
-		,@QtyOffset = 
-					CASE	WHEN (lifo_bucket.dblStockIn - lifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
-							ELSE (lifo_bucket.dblStockIn - lifo_bucket.dblStockOut) 
-					END
+-- Upsert (update or insert) a record in the cost bucket.
+IF @cbOutOutId IS NULL 
+BEGIN
+	MERGE	TOP(1)
+	INTO	dbo.tblICInventoryLIFO 
+	WITH	(HOLDLOCK) 
+	AS		cb	
+	USING (
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,intItemUOMId = @intItemUOMId
+				,intTransactionId = rSource.intInventoryReceiptId
+				,strTransactionId = rSource.strReceiptNumber
+		FROM	tblICInventoryReceipt rSource INNER JOIN tblICInventoryReceipt r
+					ON rSource.intInventoryReceiptId = r.intSourceInventoryReceiptId
+		WHERE	r.intInventoryReceiptId = @intTransactionId
+				AND r.strReceiptNumber = @strTransactionId
+	) AS Source_Query 
+		ON cb.intItemId = Source_Query.intItemId
+		AND cb.intItemLocationId = Source_Query.intItemLocationId
+		AND cb.intItemUOMId = Source_Query.intItemUOMId
+		AND (cb.dblStockIn - cb.dblStockOut) > 0 
+		AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+		AND cb.intTransactionId = Source_Query.intTransactionId
+		AND cb.strTransactionId = Source_Query.strTransactionId 
 
-		-- retrieve the id of the matching LIFO bucket 
-		,@LIFOId = lifo_bucket.intInventoryLIFOId
+	-- Update an existing cost bucket
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET	cb.dblStockOut = ISNULL(cb.dblStockOut, 0) 
+						+ CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN @dblQty
+								ELSE (cb.dblStockIn - cb.dblStockOut) 
+						END 
 
--- Insert a new LIFO bucket
-WHEN NOT MATCHED THEN 
-	INSERT (
-		[intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,[dblStockIn]
-		,[dblStockOut]
-		,[dblCost]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[dtmCreated]
-		,[intCreatedEntityId]
-		,[intConcurrencyId]
-	)
-	VALUES (
-		@intItemId
-		,@intItemLocationId
-		,@intItemUOMId
-		,@dtmDate
-		,0
-		,@dblQty
-		,@dblCost
-		,@strTransactionId
-		,@intTransactionId
-		,GETDATE()
-		,@intEntityUserSecurityId
-		,1	
-	)
-;
+			,cb.intConcurrencyId = ISNULL(cb.intConcurrencyId, 0) + 1
+
+			-- update the remaining qty
+			,@RemainingQty = 
+						CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN 0
+								ELSE (cb.dblStockIn - cb.dblStockOut) - @dblQty
+						END
+
+			-- retrieve the cost from the LIFO bucket. 
+			,@CostUsed = cb.dblCost
+
+			-- retrieve the	qty reduced from a LIFO bucket 
+			,@QtyOffset = 
+						CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN @dblQty
+								ELSE (cb.dblStockIn - cb.dblStockOut) 
+						END
+
+			-- retrieve the id of the matching LIFO bucket 
+			,@LIFOId = cb.intInventoryLIFOId
+
+	-- Insert a new LIFO bucket
+	WHEN NOT MATCHED THEN 
+		INSERT (
+			[intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblStockIn]
+			,[dblStockOut]
+			,[dblCost]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[dtmCreated]
+			,[intCreatedEntityId]
+			,[intConcurrencyId]
+		)
+		VALUES (
+			@intItemId
+			,@intItemLocationId
+			,@intItemUOMId
+			,@dtmDate
+			,0
+			,@dblQty
+			,@dblCost
+			,@strTransactionId
+			,@intTransactionId
+			,GETDATE()
+			,@intEntityUserSecurityId
+			,1	
+		)
+	;
+END 

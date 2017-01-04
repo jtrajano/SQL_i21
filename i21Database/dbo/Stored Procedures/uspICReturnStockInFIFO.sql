@@ -185,7 +185,7 @@ BEGIN
 	MERGE	TOP(1)
 	INTO	dbo.tblICInventoryFIFO 
 	WITH	(HOLDLOCK) 
-	AS		fifo_bucket	
+	AS		cb	
 	USING (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
@@ -197,43 +197,42 @@ BEGIN
 		WHERE	r.intInventoryReceiptId = @intTransactionId
 				AND r.strReceiptNumber = @strTransactionId
 	) AS Source_Query  
-		ON fifo_bucket.intItemId = Source_Query.intItemId
-		AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
-		AND fifo_bucket.intItemUOMId = Source_Query.intItemUOMId
-		AND (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) > 0 
-		AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
-		--AND fifo_bucket.dblCost = @dblCost 
-		AND fifo_bucket.intTransactionId = Source_Query.intTransactionId
-		AND fifo_bucket.strTransactionId = Source_Query.strTransactionId 
+		ON cb.intItemId = Source_Query.intItemId
+		AND cb.intItemLocationId = Source_Query.intItemLocationId
+		AND cb.intItemUOMId = Source_Query.intItemUOMId
+		AND (cb.dblStockIn - cb.dblStockOut) > 0 
+		AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+		AND cb.intTransactionId = Source_Query.intTransactionId
+		AND cb.strTransactionId = Source_Query.strTransactionId 
 
 	-- Update an existing cost bucket
 	WHEN MATCHED THEN 
 		UPDATE 
-		SET	fifo_bucket.dblStockOut = 
-				ISNULL(fifo_bucket.dblStockOut, 0) 
-				+ CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
-						ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
+		SET	cb.dblStockOut = 
+				ISNULL(cb.dblStockOut, 0) 
+				+ CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN @dblQty
+						ELSE (cb.dblStockIn - cb.dblStockOut) 
 				END 
 
-			,fifo_bucket.intConcurrencyId = ISNULL(fifo_bucket.intConcurrencyId, 0) + 1
+			,cb.intConcurrencyId = ISNULL(cb.intConcurrencyId, 0) + 1
 
 			-- update the remaining qty
 			,@RemainingQty = 
-						CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN 0
-								ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) - @dblQty
+						CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN 0
+								ELSE (cb.dblStockIn - cb.dblStockOut) - @dblQty
 						END
 
 			-- retrieve the cost from the fifo bucket. 
-			,@CostUsed = fifo_bucket.dblCost
+			,@CostUsed = cb.dblCost
 
 			-- retrieve the	qty reduced from a fifo bucket 
 			,@QtyOffset = 
-						CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN -@dblQty
-								ELSE -(fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
+						CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN -@dblQty
+								ELSE -(cb.dblStockIn - cb.dblStockOut) 
 						END
 
 			-- retrieve the id of the matching fifo bucket 
-			,@FifoId = fifo_bucket.intInventoryFIFOId
+			,@FifoId = cb.intInventoryFIFOId
 
 	-- Insert a new fifo bucket
 	WHEN NOT MATCHED THEN
