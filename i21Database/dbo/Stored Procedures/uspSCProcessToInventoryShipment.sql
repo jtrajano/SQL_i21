@@ -46,7 +46,19 @@ DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @totalShipment AS INT
 DECLARE @totalContract AS INT
-
+DECLARE @intInventoryShipmentItemId AS INT
+		,@intInvoiceId AS INT
+		,@intOwnershipType AS INT
+		,@intDestinationGradeId AS INT
+		,@intDestinationWeightId AS INT
+		,@intPricingTypeId AS INT
+		,@intShipmentOrderId AS INT
+		,@successfulCount AS INT
+		,@invalidCount AS INT
+		,@success AS INT
+		,@batchIdUsed AS NVARCHAR(100)
+		,@recapId AS INT
+		,@dblQtyShipped AS DECIMAL (18,6);
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
@@ -138,8 +150,8 @@ BEGIN TRY
 				   -- uses a PRINT statement as that action (not a very good
 				   -- example).
 				   IF	ISNULL(@intLoopContractId,0) != 0
-				   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
 				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+				   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
@@ -350,9 +362,8 @@ BEGIN TRY
 					   -- uses a PRINT statement as that action (not a very good
 					   -- example).
 					   IF	ISNULL(@intLoopContractId,0) != 0
-					   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
 					   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-					   
+					   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, 1;
 					   SET @dblRemainingUnits -=@dblLoopContractUnits;
 					   -- Attempt to fetch next row from cursor
 					   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
@@ -447,6 +458,40 @@ BEGIN TRY
 	--IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+			
+			--INVOICE intergration
+			SELECT @intDestinationWeightId = intDestinationWeightId, @intShipmentOrderId = intOrderId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ISNULL(intDestinationWeightId, 0) != 0
+
+			SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intShipmentOrderId; 
+			IF ISNULL(@InventoryShipmentId, 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1
+			BEGIN
+				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+
+				SELECT @dblQtyShipped = dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
+				
+				IF ISNULL(@intInvoiceId , 0) != 0 AND ISNULL(@intDestinationWeightId,0) = 0 AND @dblQtyShipped > 0
+				BEGIN
+					EXEC dbo.uspARPostInvoice
+					@batchId			= NULL,
+					@post				= 1,
+					@recap				= 0,
+					@param				= @intInvoiceId,
+					@userId				= @intUserId,
+					@beginDate			= NULL,
+					@endDate			= NULL,
+					@beginTransaction	= NULL,
+					@endTransaction		= NULL,
+					@exclude			= NULL,
+					@successfulCount	= @successfulCount OUTPUT,
+					@invalidCount		= @invalidCount OUTPUT,
+					@success			= @success OUTPUT,
+					@batchIdUsed		= @batchIdUsed OUTPUT,
+					@recapId			= @recapId OUTPUT,
+					@transType			= N'all',
+					@accrueLicense		= 0,
+					@raiseError			= 1
+				END
+			END
 		END
 	_Exit:
 
