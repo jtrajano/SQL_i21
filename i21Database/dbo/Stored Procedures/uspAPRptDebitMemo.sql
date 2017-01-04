@@ -46,6 +46,8 @@ BEGIN
 		'' AS strCurrency,
 		'' AS strContactName,
 		'' AS strContactEmail,
+		'' AS strBillOfLading,
+		'' AS strItemNo,
 		0 AS intBillId,
 		0 AS intContractSeq,
 		0 AS intUnitOfMeasureId,
