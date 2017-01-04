@@ -143,11 +143,18 @@ namespace iRely.Inventory.WebApi
             });
         }
 
+        public struct ItemParam
+        {
+            public int ItemId { get; set; }
+            public bool ItemStockUnit { get; set; }
+            public int ItemUOMId { get; set; }
+        }
+
         [HttpPost]
         [ActionName("CheckStockUnit")]
-        public HttpResponseMessage CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId)
+        public HttpResponseMessage CheckStockUnit(ItemParam param)
         {
-            var result = _bl.CheckStockUnit(ItemId, ItemStockUnit, ItemUOMId);
+            var result = _bl.CheckStockUnit(param.ItemId, param.ItemStockUnit, param.ItemUOMId);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
@@ -164,9 +171,9 @@ namespace iRely.Inventory.WebApi
 
         [HttpPost]
         [ActionName("ConvertItemToNewStockUnit")]
-        public HttpResponseMessage ConvertItemToNewStockUnit(int ItemId, int ItemUOMId)
+        public HttpResponseMessage ConvertItemToNewStockUnit(ItemParam param)
         {
-            var result = _bl.ConvertItemToNewStockUnit(ItemId, ItemUOMId);
+            var result = _bl.ConvertItemToNewStockUnit(param.ItemId, param.ItemUOMId);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {

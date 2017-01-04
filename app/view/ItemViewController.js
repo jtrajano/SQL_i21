@@ -1980,12 +1980,17 @@ Ext.define('Inventory.view.ItemViewController', {
             var win = obj.up('window');
             var current = grid.view.getRecord(rowIndex);
             var uomConversion = win.viewModel.storeInfo.uomConversion;
-            var me = this;
-            Ext.Ajax.request({
-            url: '../Inventory/api/Item/CheckStockUnit?ItemId=' + current.get('intItemId') +
-            '&ItemStockUnit=' + current.get('ysnStockUnit') + '&ItemUOMId=' + current.get('intItemUOMId'),
-            method: 'post',
-            success: function (response) {
+            ic.utils.ajax({
+                url: '../Inventory/api/Item/CheckStockUnit',
+                method: 'POST',
+                params: {
+                    ItemId: current.get('intItemId'),
+                    ItemStockUnit: current.get('ysnStockUnit'),
+                    ItemUOMId: current.get('intItemUOMId')
+                }
+            })
+            .subscribe(
+                function(response) {
                     var jsonData = Ext.decode(response.responseText);
                     if (!jsonData.success)
                     {
@@ -2017,13 +2022,17 @@ Ext.define('Inventory.view.ItemViewController', {
                                         current.set('dblUnitQty', 1);
                                     }
                                 }
-
-                                Ext.Ajax.request({
-                                 url: '../Inventory/api/Item/ConvertItemToNewStockUnit?ItemId=' + current.get('intItemId') +
-                                '&ItemUOMId=' + current.get('intItemUOMId'),
-                                method: 'post',
-                                success: function (response) {
-                                    var jsonData = Ext.decode(response.responseText);
+                                ic.utils.ajax({
+                                    url: '../Inventory/api/Item/ConvertItemToNewStockUnit',
+                                    method: 'POST',
+                                    params: {
+                                        ItemId: current.get('intItemId'),
+                                        ItemUOMId: current.get('intItemUOMId')
+                                    }
+                                })
+                                .subscribe(
+                                    function(response) {
+                                        var jsonData = Ext.decode(response.responseText);
                                         if (!jsonData.success)
                                             {
                                                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
@@ -2037,13 +2046,13 @@ Ext.define('Inventory.view.ItemViewController', {
                                                 vm.data.current.dirty = false;
                                                 context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
                                             }
-                                },
-                                failure: function(response)
-                                    {
-                                        var jsonData = Ext.decode(response.responseText);
+                                    },
+                                    function(response) {
+                                         var jsonData = Ext.decode(response.responseText);
                                         iRely.Functions.showErrorDialog('Connection Failed!');
                                     }
-                                });
+                                );
+
                             }
 
                              else
@@ -2096,13 +2105,11 @@ Ext.define('Inventory.view.ItemViewController', {
                         }
                     }
                 },
-            failure: function(response)
-            {
-                var jsonData = Ext.decode(response.responseText);
-                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-            }
-
-          });
+                function(response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                }
+            );
         }
     },
 
