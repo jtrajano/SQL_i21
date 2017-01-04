@@ -1990,8 +1990,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             })
             .subscribe(
-                function(response) {
-                    var jsonData = Ext.decode(response.responseText);
+                function(successResponse) {
+                    var jsonData = Ext.decode(successResponse.responseText);
                     if (!jsonData.success)
                     {
                        //iRely.Functions.showErrorDialog(jsonData.message.statusText);
@@ -2031,8 +2031,8 @@ Ext.define('Inventory.view.ItemViewController', {
                                     }
                                 })
                                 .subscribe(
-                                    function(response) {
-                                        var jsonData = Ext.decode(response.responseText);
+                                    function(successResponse) {
+                                        var jsonData = Ext.decode(successResponse.responseText);
                                         if (!jsonData.success)
                                             {
                                                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
@@ -2047,8 +2047,8 @@ Ext.define('Inventory.view.ItemViewController', {
                                                 context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
                                             }
                                     },
-                                    function(response) {
-                                         var jsonData = Ext.decode(response.responseText);
+                                    function(failureResponse) {
+                                         var jsonData = Ext.decode(failureResponse.responseText);
                                         iRely.Functions.showErrorDialog('Connection Failed!');
                                     }
                                 );
@@ -2105,8 +2105,8 @@ Ext.define('Inventory.view.ItemViewController', {
                         }
                     }
                 },
-                function(response) {
-                    var jsonData = Ext.decode(response.responseText);
+                function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
                     iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                 }
             );
