@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets3b247b59173f1c042e4dfedc9edf56d5e06f778096639f2ae5cb1107f26b7d58))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets08702f051be2ddc99972ac48038c7f64d3b13763e445a88bb437cea46bfe3cd4))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets3b247b59173f1c042e4dfedc9edf56d5e06f778096639f2ae5cb1107f26b7d58 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets08702f051be2ddc99972ac48038c7f64d3b13763e445a88bb437cea46bfe3cd4 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "3b247b59173f1c042e4dfedc9edf56d5e06f778096639f2ae5cb1107f26b7d58"; }
+            get { return "08702f051be2ddc99972ac48038c7f64d3b13763e445a88bb437cea46bfe3cd4"; }
         }
 
         /// <summary>
@@ -2417,7 +2417,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCertification
-        [CodeFirstDatabaseSchema.tblICCertification](T1.tblICCertification_intCertificationId, T1.tblICCertification_strCertificationName, T1.tblICCertification_strIssuingOrganization, T1.tblICCertification_ysnGlobalCertification, T1.tblICCertification_intCountryId, T1.tblICCertification_strCertificationIdName, T1.tblICCertification_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICCertification](T1.tblICCertification_intCertificationId, T1.tblICCertification_strCertificationName, T1.tblICCertification_strIssuingOrganization, T1.tblICCertification_ysnGlobalCertification, T1.tblICCertification_intCountryId, T1.tblICCertification_strCertificationIdName, T1.tblICCertification_strCertificationCode, T1.tblICCertification_intConcurrencyId)
     FROM (
         SELECT 
             T.intCertificationId AS tblICCertification_intCertificationId, 
@@ -2426,6 +2426,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnGlobalCertification AS tblICCertification_ysnGlobalCertification, 
             T.intCountryId AS tblICCertification_intCountryId, 
             T.strCertificationIdName AS tblICCertification_strCertificationIdName, 
+            T.strCertificationCode AS tblICCertification_strCertificationCode, 
             T.intConcurrencyId AS tblICCertification_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICCertifications AS T
@@ -5722,7 +5723,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCertifications
-        [iRely.Inventory.Model.tblICCertification](T1.tblICCertification_intCertificationId, T1.tblICCertification_strCertificationName, T1.tblICCertification_strIssuingOrganization, T1.tblICCertification_ysnGlobalCertification, T1.tblICCertification_intCountryId, T1.tblICCertification_strCertificationIdName, T1.tblICCertification_intConcurrencyId)
+        [iRely.Inventory.Model.tblICCertification](T1.tblICCertification_intCertificationId, T1.tblICCertification_strCertificationName, T1.tblICCertification_strIssuingOrganization, T1.tblICCertification_ysnGlobalCertification, T1.tblICCertification_intCountryId, T1.tblICCertification_strCertificationIdName, T1.tblICCertification_strCertificationCode, T1.tblICCertification_intConcurrencyId)
     FROM (
         SELECT 
             T.intCertificationId AS tblICCertification_intCertificationId, 
@@ -5731,6 +5732,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnGlobalCertification AS tblICCertification_ysnGlobalCertification, 
             T.intCountryId AS tblICCertification_intCountryId, 
             T.strCertificationIdName AS tblICCertification_strCertificationIdName, 
+            T.strCertificationCode AS tblICCertification_strCertificationCode, 
             T.intConcurrencyId AS tblICCertification_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICCertification AS T

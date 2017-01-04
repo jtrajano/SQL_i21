@@ -18,6 +18,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCertificationName).HasColumnName("strCertificationName");
             this.Property(t => t.strIssuingOrganization).HasColumnName("strIssuingOrganization");
             this.Property(t => t.ysnGlobalCertification).HasColumnName("ysnGlobalCertification");
+            this.Property(t => t.strCertificationCode).HasColumnName("strCertificationCode");
 
             this.HasMany(p => p.tblICCertificationCommodities)
                 .WithRequired(p => p.tblICCertification)
