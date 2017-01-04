@@ -76,8 +76,8 @@ BEGIN TRY
 		INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
 		WHERE Receipt.ysnPosted = 1
 			AND RC.intReportingComponentId = @RCId
-			AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(CAST(@DateFrom AS DATE) AS FLOAT))AS DATETIME)
-			AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(CAST(@DateTo AS DATE) AS FLOAT))AS DATETIME)
+			AND CAST(FLOOR(CAST(Receipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
+			AND CAST(FLOOR(CAST(Receipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 			AND Origin.strState IN (SELECT strState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')
 			AND Origin.strState NOT IN (SELECT strState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
 			AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
@@ -85,123 +85,177 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxCriteria WHERE intReportingComponentId = @RCId)
 		BEGIN
-			SELECT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intReportingComponentId, intInventoryReceiptItemId DESC) AS intId, * 
-			INTO #tmpTransaction
-				FROM (
-				SELECT DISTINCT ReceiptItem.intInventoryReceiptItemId
-					, RCPC.intTaxAuthorityId
-					, RCPC.strFormCode
-					, RCPC.intReportingComponentId
-					, RCPC.strScheduleCode
-					, strType = RCPC.strReportingComponentType
-					, RCPC.strProductCode
-					, Receipt.strBillOfLading
-					, ReceiptItem.dblReceived
-					, ReceiptItem.dblGross
-					, ReceiptItem.dblNet
-					, ReceiptItem.dblBillQty
-					, Receipt.dtmReceiptDate
-					, ShipVia.strShipVia
-					, ShipVia.strTransporterLicense
-					, ShipVia.strTransportationMode
-					, Vendor.strName AS strVendorName
-					, Transporter.strName AS strTransporterName
-					, Vendor.strFederalTaxId AS strVendorFEIN
-					, Transporter.strFederalTaxId AS strTransporterFEIN
-					, CompanySetup.strCompanyName
-					, CompanySetup.strAddress
-					, CompanySetup.strCity
-					, CompanySetup.strState
-					, CompanySetup.strZip
-					, CompanySetup.strPhone
-					, CompanySetup.strStateTaxID
-					, CompanySetup.strFederalTaxID
-					, Origin.strState AS strOriginState
-					, Destination.strStateProvince
-					, TCN.strTerminalControlNumber
-				FROM tblICInventoryReceiptItem ReceiptItem
-				INNER JOIN tblICInventoryReceipt Receipt ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-				INNER JOIN tblICInventoryReceiptItemTax ReceiptItemTax ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
-				INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
-				INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
-				INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
-				INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
-				INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
-				INNER JOIN tblSMShipVia ShipVia ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
-				INNER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId 
-				INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND SupplyPoint.intEntityLocationId = Receipt.intShipFromId
-				INNER JOIN tblTFTerminalControlNumber TCN ON SupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
-				CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
-				WHERE Receipt.ysnPosted = 1
-					AND RCPC.intReportingComponentId = @RCId
-					AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(CAST(@DateFrom AS DATE) AS FLOAT))AS DATETIME)
-					AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(CAST(@DateTo AS DATE) AS FLOAT))AS DATETIME)
-					AND Origin.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-					AND Origin.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
-					AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-					AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
-				)tblTransactions
+			INSERT INTO @TFTransaction(intInventoryReceiptItemId
+				, intTaxAuthorityId
+				, strFormCode
+				, intReportingComponentId
+				, strScheduleCode
+				, strType
+				, strProductCode
+				, strBillOfLading
+				, dblReceived
+				, dblGross
+				, dblNet
+				, dblBillQty
+				, dtmReceiptDate
+				, strShipVia
+				, strTransporterLicense
+				, strTransportationMode
+				, strVendorName
+				, strTransporterName
+				, strVendorFEIN
+				, strTransporterFEIN
+				, strHeaderCompanyName
+				, strHeaderAddress
+				, strHeaderCity
+				, strHeaderState
+				, strHeaderZip
+				, strHeaderPhone
+				, strHeaderStateTaxID
+				, strHeaderFederalTaxID
+				, strOriginState
+				, strDestinationState
+				, strTerminalControlNumber)
+			SELECT DISTINCT ReceiptItem.intInventoryReceiptItemId
+				, RCPC.intTaxAuthorityId
+				, RCPC.strFormCode
+				, RCPC.intReportingComponentId
+				, RCPC.strScheduleCode
+				, strType = RCPC.strReportingComponentType
+				, RCPC.strProductCode
+				, Receipt.strBillOfLading
+				, ReceiptItem.dblReceived
+				, ReceiptItem.dblGross
+				, ReceiptItem.dblNet
+				, ReceiptItem.dblBillQty
+				, Receipt.dtmReceiptDate
+				, ShipVia.strShipVia
+				, ShipVia.strTransporterLicense
+				, ShipVia.strTransportationMode
+				, Vendor.strName AS strVendorName
+				, Transporter.strName AS strTransporterName
+				, Vendor.strFederalTaxId AS strVendorFEIN
+				, Transporter.strFederalTaxId AS strTransporterFEIN
+				, CompanySetup.strCompanyName
+				, CompanySetup.strAddress
+				, CompanySetup.strCity
+				, CompanySetup.strState
+				, CompanySetup.strZip
+				, CompanySetup.strPhone
+				, CompanySetup.strStateTaxID
+				, CompanySetup.strFederalTaxID
+				, Origin.strState AS strOriginState
+				, Destination.strStateProvince
+				, TCN.strTerminalControlNumber
+			FROM tblICInventoryReceiptItem ReceiptItem
+			INNER JOIN tblICInventoryReceipt Receipt ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+			INNER JOIN tblICInventoryReceiptItemTax ReceiptItemTax ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
+			INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
+			INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
+			INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
+			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
+			INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
+			INNER JOIN tblSMShipVia ShipVia ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
+			INNER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId 
+			INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND SupplyPoint.intEntityLocationId = Receipt.intShipFromId
+			INNER JOIN tblTFTerminalControlNumber TCN ON SupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
+			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
+			WHERE Receipt.ysnPosted = 1
+				AND RCPC.intReportingComponentId = @RCId
+				AND CAST(FLOOR(CAST(Receipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
+				AND CAST(FLOOR(CAST(Receipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
+				AND Origin.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+				AND Origin.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+				AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+				AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
 		END
 		ELSE
 		BEGIN
-			SELECT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intReportingComponentId, intInventoryReceiptItemId DESC) AS intId, * 
-			INTO #tmpTransaction
-				FROM (
-				SELECT DISTINCT ReceiptItem.intInventoryReceiptItemId
-					, RCPC.intTaxAuthorityId
-					, RCPC.strFormCode
-					, RCPC.intReportingComponentId
-					, RCPC.strScheduleCode
-					, strType = RCPC.strReportingComponentType
-					, RCPC.strProductCode
-					, Receipt.strBillOfLading
-					, ReceiptItem.dblReceived
-					, ReceiptItem.dblGross
-					, ReceiptItem.dblNet
-					, ReceiptItem.dblBillQty
-					, Receipt.dtmReceiptDate
-					, ShipVia.strShipVia
-					, ShipVia.strTransporterLicense
-					, ShipVia.strTransportationMode
-					, Vendor.strName AS strVendorName
-					, Transporter.strName AS strTransporterName
-					, Vendor.strFederalTaxId AS strVendorFEIN
-					, Transporter.strFederalTaxId AS strTransporterFEIN
-					, CompanySetup.strCompanyName
-					, CompanySetup.strAddress
-					, CompanySetup.strCity
-					, CompanySetup.strState
-					, CompanySetup.strZip
-					, CompanySetup.strPhone
-					, CompanySetup.strStateTaxID
-					, CompanySetup.strFederalTaxID
-					, Origin.strState AS strOriginState
-					, Destination.strStateProvince
-					, TCN.strTerminalControlNumber
-				FROM tblICInventoryReceiptItem ReceiptItem
-				INNER JOIN tblICInventoryReceipt Receipt ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-				INNER JOIN tblICInventoryReceiptItemTax ReceiptItemTax ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
-				INNER JOIN tblSMTaxCode TaxCode ON ReceiptItemTax.intTaxCodeId = TaxCode.intTaxCodeId
-				INNER JOIN tblTFTaxCategory TaxCategory ON TaxCategory.intTaxCategoryId = TaxCode.intTaxCategoryId
-				INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
-				INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
-				INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
-				INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
-				INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
-				INNER JOIN tblSMShipVia ShipVia ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
-				INNER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId 
-				INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND SupplyPoint.intEntityLocationId = Receipt.intShipFromId
-				INNER JOIN tblTFTerminalControlNumber TCN ON SupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
-				CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
-				WHERE Receipt.ysnPosted = 1
-					AND RCPC.intReportingComponentId = @RCId
-					AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(CAST(@DateFrom AS DATE) AS FLOAT))AS DATETIME)
-					AND CAST(FLOOR(CAST(CAST(Receipt.dtmReceiptDate AS DATE) AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(CAST(@DateTo AS DATE) AS FLOAT))AS DATETIME)
-					AND Origin.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-					AND Origin.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
-					AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-					AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
-				)tblTransactions
+			INSERT INTO @TFTransaction(intInventoryReceiptItemId
+				, intTaxAuthorityId
+				, strFormCode
+				, intReportingComponentId
+				, strScheduleCode
+				, strType
+				, strProductCode
+				, strBillOfLading
+				, dblReceived
+				, dblGross
+				, dblNet
+				, dblBillQty
+				, dtmReceiptDate
+				, strShipVia
+				, strTransporterLicense
+				, strTransportationMode
+				, strVendorName
+				, strTransporterName
+				, strVendorFEIN
+				, strTransporterFEIN
+				, strHeaderCompanyName
+				, strHeaderAddress
+				, strHeaderCity
+				, strHeaderState
+				, strHeaderZip
+				, strHeaderPhone
+				, strHeaderStateTaxID
+				, strHeaderFederalTaxID
+				, strOriginState
+				, strDestinationState
+				, strTerminalControlNumber)
+			SELECT DISTINCT ReceiptItem.intInventoryReceiptItemId
+				, RCPC.intTaxAuthorityId
+				, RCPC.strFormCode
+				, RCPC.intReportingComponentId
+				, RCPC.strScheduleCode
+				, strType = RCPC.strReportingComponentType
+				, RCPC.strProductCode
+				, Receipt.strBillOfLading
+				, ReceiptItem.dblReceived
+				, ReceiptItem.dblGross
+				, ReceiptItem.dblNet
+				, ReceiptItem.dblBillQty
+				, Receipt.dtmReceiptDate
+				, ShipVia.strShipVia
+				, ShipVia.strTransporterLicense
+				, ShipVia.strTransportationMode
+				, Vendor.strName AS strVendorName
+				, Transporter.strName AS strTransporterName
+				, Vendor.strFederalTaxId AS strVendorFEIN
+				, Transporter.strFederalTaxId AS strTransporterFEIN
+				, CompanySetup.strCompanyName
+				, CompanySetup.strAddress
+				, CompanySetup.strCity
+				, CompanySetup.strState
+				, CompanySetup.strZip
+				, CompanySetup.strPhone
+				, CompanySetup.strStateTaxID
+				, CompanySetup.strFederalTaxID
+				, Origin.strState AS strOriginState
+				, Destination.strStateProvince
+				, TCN.strTerminalControlNumber
+			FROM tblICInventoryReceiptItem ReceiptItem
+			INNER JOIN tblICInventoryReceipt Receipt ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+			INNER JOIN tblICInventoryReceiptItemTax ReceiptItemTax ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
+			INNER JOIN tblSMTaxCode TaxCode ON ReceiptItemTax.intTaxCodeId = TaxCode.intTaxCodeId
+			INNER JOIN tblTFTaxCategory TaxCategory ON TaxCategory.intTaxCategoryId = TaxCode.intTaxCategoryId
+			INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
+			INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
+			INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
+			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
+			INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
+			INNER JOIN tblSMShipVia ShipVia ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
+			INNER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId 
+			INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND SupplyPoint.intEntityLocationId = Receipt.intShipFromId
+			INNER JOIN tblTFTerminalControlNumber TCN ON SupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
+			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
+			WHERE Receipt.ysnPosted = 1
+				AND RCPC.intReportingComponentId = @RCId
+				AND CAST(FLOOR(CAST(Receipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
+				AND CAST(FLOOR(CAST(Receipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
+				AND Origin.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+				AND Origin.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+				AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+				AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
 		END
 		
 		-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
