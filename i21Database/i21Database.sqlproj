@@ -4695,6 +4695,7 @@
     <Build Include="dbo\Views\vyuGRSettleContractNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRGetSettleStorageTicket.sql" />
     <Build Include="dbo\Views\vyuHDJiraRollUp.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSetSampleLotStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
