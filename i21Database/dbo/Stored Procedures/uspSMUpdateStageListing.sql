@@ -43,6 +43,7 @@ BEGIN TRANSACTION
 	FROM tblSMScreen A 
 		LEFT OUTER JOIN tblSMScreenStage B ON A.strNamespace = B.strNamespace
 	WHERE ISNULL(B.strScreenName, '') = '' 
+	AND A.strModule <> 'i21'
 
 	-- Set change to Added to all new control(s)
 	UPDATE A
