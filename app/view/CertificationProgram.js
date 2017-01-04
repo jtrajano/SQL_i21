@@ -187,7 +187,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                                                     xtype: 'checkboxfield',
                                                     itemId: 'chkGlobalCertification',
                                                     fieldLabel: 'Global Certification',
-                                                    labelWidth: 110
+                                                    labelWidth: 115
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -208,9 +208,16 @@ Ext.define('Inventory.view.CertificationProgram', {
                                                     flex: 1,
                                                     itemId: 'cboSpecificCountry',
                                                     fieldLabel: 'Specific Country',
-                                                    labelWidth: 110,
+                                                    labelWidth: 115,
                                                     displayField: 'strCountry',
                                                     valueField: 'intCountryID'
+                                                },
+                                                {
+                                                    xtype: 'textfield',
+                                                    flex: 1,
+                                                    itemId: 'txtCertificationCode',
+                                                    fieldLabel: 'Certification Code',
+                                                    labelWidth: 115
                                                 }
                                             ]
                                         }

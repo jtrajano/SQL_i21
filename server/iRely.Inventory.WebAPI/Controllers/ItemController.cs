@@ -124,18 +124,37 @@ namespace iRely.Inventory.WebApi
         [ActionName("DuplicateItem")]
         public HttpResponseMessage DuplicateItem(int ItemId)
         {
-            var NewItemId = _bl.DuplicateItem(ItemId);
-            return Request.CreateResponse(HttpStatusCode.OK, new
+            int? newItemId = null;
+            var result = _bl.DuplicateItem(ItemId, out newItemId);
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
             {
-                id = NewItemId
+                success = !result.HasError,
+                message = new
+                {
+                    id = newItemId,
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
             });
+        }
+
+        public struct ItemParam
+        {
+            public int ItemId { get; set; }
+            public bool ItemStockUnit { get; set; }
+            public int ItemUOMId { get; set; }
         }
 
         [HttpPost]
         [ActionName("CheckStockUnit")]
-        public HttpResponseMessage CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId)
+        public HttpResponseMessage CheckStockUnit(ItemParam param)
         {
-            var result = _bl.CheckStockUnit(ItemId, ItemStockUnit, ItemUOMId);
+            var result = _bl.CheckStockUnit(param.ItemId, param.ItemStockUnit, param.ItemUOMId);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
@@ -152,9 +171,9 @@ namespace iRely.Inventory.WebApi
 
         [HttpPost]
         [ActionName("ConvertItemToNewStockUnit")]
-        public HttpResponseMessage ConvertItemToNewStockUnit(int ItemId, int ItemUOMId)
+        public HttpResponseMessage ConvertItemToNewStockUnit(ItemParam param)
         {
-            var result = _bl.ConvertItemToNewStockUnit(ItemId, ItemUOMId);
+            var result = _bl.ConvertItemToNewStockUnit(param.ItemId, param.ItemUOMId);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {

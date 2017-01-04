@@ -422,27 +422,31 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
         
-        
-        Ext.Ajax.request({
-        url: '../Inventory/api/ItemLocation/CheckCostingMethod?ItemId=' + current.get('intItemId') + 
-            '&ItemLocationId=' + current.get('intItemLocationId') +
-            '&CostingMethod=' + current.get('intCostingMethod'),
-        method: 'post',
-        success: function (response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    if (!jsonData.success) 
-                    {
-                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                    }
-                },
-        failure: function(response)
-            {
-                var jsonData = Ext.decode(response.responseText);
-                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+        ic.utils.ajax({
+            url: '../Inventory/api/ItemLocation/CheckCostingMethod',
+            method: 'POST',
+            params: {
+                ItemId: current.get('intItemId'),
+                ItemLocationId: current.get('intItemLocationId'),
+                CostingMethod: current.get('intCostingMethod')
             }
-        
-        }); 
-
+        })
+        .subscribe(
+            function(response) {
+                var jsonData = Ext.decode(response.responseText);
+                if (!jsonData.success) 
+                {
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                }
+            },
+            function(response) {
+                var jsonData = Ext.decode(response.responseText);
+                if(response.status === 404)
+                    iRely.Functions.showErrorDialog(jsonData.Message);
+                else    
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+            }
+        );
     },
 
     init: function(application) {

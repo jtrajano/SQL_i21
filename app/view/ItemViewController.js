@@ -1909,12 +1909,13 @@ Ext.define('Inventory.view.ItemViewController', {
 
     getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
         iRely.Msg.showWait('Converting units...');
-        Ext.Ajax.request({
-            timeout: 120000,
+        ic.utils.ajax({
             url: '../Inventory/api/UnitMeasure/Search',
-            method: 'get',
-            success: function (response) {
-                var jsonData = Ext.decode(response.responseText);
+            method: 'Get'  
+        })
+        .subscribe(
+            function (successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
                 var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: stockUnitMeasureId });
                 if (stockUnitConversions) {
                     var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
@@ -1926,12 +1927,36 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
                 iRely.Msg.close();
             },
-            failure: function (response) {
-                var jsonData = Ext.decode(response.responseText);
-                iRely.Msg.close();
-                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+
+            function (failureResponse) {
+                 var jsonData = Ext.decode(failureResponse.responseText);
+                 iRely.Msg.close();
+                 iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
             }
-        });
+        );
+        // Ext.Ajax.request({
+        //     timeout: 120000,
+        //     url: '../Inventory/api/UnitMeasure/Search',
+        //     method: 'get',
+        //     success: function (response) {
+        //         var jsonData = Ext.decode(response.responseText);
+        //         var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: stockUnitMeasureId });
+        //         if (stockUnitConversions) {
+        //             var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
+        //                 { intUnitMeasureId: unitMeasureId, intStockUnitMeasureId: stockUnitMeasureId });
+        //             if (stockConversion) {
+        //                 var dblConversionToStock = stockConversion.dblConversionToStock;
+        //                 callback(dblConversionToStock);
+        //             }
+        //         }
+        //         iRely.Msg.close();
+        //     },
+        //     failure: function (response) {
+        //         var jsonData = Ext.decode(response.responseText);
+        //         iRely.Msg.close();
+        //         iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+        //     }
+        // });
     },
 
     beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
@@ -1955,13 +1980,18 @@ Ext.define('Inventory.view.ItemViewController', {
             var win = obj.up('window');
             var current = grid.view.getRecord(rowIndex);
             var uomConversion = win.viewModel.storeInfo.uomConversion;
-            var me = this;
-            Ext.Ajax.request({
-            url: '../Inventory/api/Item/CheckStockUnit?ItemId=' + current.get('intItemId') +
-            '&ItemStockUnit=' + current.get('ysnStockUnit') + '&ItemUOMId=' + current.get('intItemUOMId'),
-            method: 'post',
-            success: function (response) {
-                    var jsonData = Ext.decode(response.responseText);
+            ic.utils.ajax({
+                url: '../Inventory/api/Item/CheckStockUnit',
+                method: 'POST',
+                params: {
+                    ItemId: current.get('intItemId'),
+                    ItemStockUnit: current.get('ysnStockUnit'),
+                    ItemUOMId: current.get('intItemUOMId')
+                }
+            })
+            .subscribe(
+                function(successResponse) {
+                    var jsonData = Ext.decode(successResponse.responseText);
                     if (!jsonData.success)
                     {
                        //iRely.Functions.showErrorDialog(jsonData.message.statusText);
@@ -1992,13 +2022,17 @@ Ext.define('Inventory.view.ItemViewController', {
                                         current.set('dblUnitQty', 1);
                                     }
                                 }
-
-                                Ext.Ajax.request({
-                                 url: '../Inventory/api/Item/ConvertItemToNewStockUnit?ItemId=' + current.get('intItemId') +
-                                '&ItemUOMId=' + current.get('intItemUOMId'),
-                                method: 'post',
-                                success: function (response) {
-                                    var jsonData = Ext.decode(response.responseText);
+                                ic.utils.ajax({
+                                    url: '../Inventory/api/Item/ConvertItemToNewStockUnit',
+                                    method: 'POST',
+                                    params: {
+                                        ItemId: current.get('intItemId'),
+                                        ItemUOMId: current.get('intItemUOMId')
+                                    }
+                                })
+                                .subscribe(
+                                    function(successResponse) {
+                                        var jsonData = Ext.decode(successResponse.responseText);
                                         if (!jsonData.success)
                                             {
                                                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
@@ -2012,13 +2046,13 @@ Ext.define('Inventory.view.ItemViewController', {
                                                 vm.data.current.dirty = false;
                                                 context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
                                             }
-                                },
-                                failure: function(response)
-                                    {
-                                        var jsonData = Ext.decode(response.responseText);
+                                    },
+                                    function(failureResponse) {
+                                         var jsonData = Ext.decode(failureResponse.responseText);
                                         iRely.Functions.showErrorDialog('Connection Failed!');
                                     }
-                                });
+                                );
+
                             }
 
                              else
@@ -2071,13 +2105,11 @@ Ext.define('Inventory.view.ItemViewController', {
                         }
                     }
                 },
-            failure: function(response)
-            {
-                var jsonData = Ext.decode(response.responseText);
-                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-            }
-
-          });
+                function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                }
+            );
         }
     },
 
@@ -2403,88 +2435,170 @@ Ext.define('Inventory.view.ItemViewController', {
         var selection = grid.getSelectionModel().getSelection();
         var current = win.viewModel.data.current;
         
-        var filter = [
-            {
-                c: 'intItemLocationId',
-                v: records[0].data.intItemLocationId,
-                cj: 'and',
-                g: 'g0'
-            }
-        ];
-        Ext.Ajax.request({
-            timeout: 120000,
-            url: '../Inventory/api/ItemLocation/Search?page=1&start=0&limit=50&sort=[]&filter=' +
-                JSON.stringify(filter),
-            method: 'GET',
-            success: function(response) {
-                var json = JSON.parse(response.responseText);
-                var copyLocation = json.data[0];
-                Ext.Array.each(selection, function (location) {
-                    if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
-                        location.set('intVendorId', copyLocation.intVendorId);
-                        location.set('strDescription', copyLocation.strDescription);
-                        location.set('intCostingMethod', copyLocation.intCostingMethod);
-                        location.set('strCostingMethod', copyLocation.strCostingMethod);
-                        location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
-                        //location.set('intSubLocationId', copyLocation.intSubLocationId);
-                        //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
-                        location.set('intIssueUOMId', copyLocation.intIssueUOMId);
-                        location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
-                        location.set('intFamilyId', copyLocation.intFamilyId);
-                        location.set('intClassId', copyLocation.intClassId);
-                        location.set('intProductCodeId', copyLocation.intProductCodeId);
-                        location.set('intFuelTankId', copyLocation.intFuelTankId);
-                        location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
-                        location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
-                        location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
-                        location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
-                        location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
-                        location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
-                        location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
-                        location.set('intMixMatchId', copyLocation.intMixMatchId);
-                        location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
-                        location.set('intDepositPLUId', copyLocation.intDepositPLUId);
-                        location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
-                        location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
-                        location.set('ysnScaleItem', copyLocation.ysnScaleItem);
-                        location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
-                        location.set('ysnReturnable', copyLocation.ysnReturnable);
-                        location.set('ysnPrePriced', copyLocation.ysnPrePriced);
-                        location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
-                        location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
-                        location.set('strVendorCategory', copyLocation.strVendorCategory);
-                        location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
-                        location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
-                        location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
-                        location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
-                        location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
-                        location.set('intMinimumAge', copyLocation.intMinimumAge);
-                        location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
-                        location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
-                        location.set('ysnCarWash', copyLocation.ysnCarWash);
-                        location.set('intItemTypeCode', copyLocation.intItemTypeCode);
-                        location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
-                        location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
-                        location.set('intFreightMethodId', copyLocation.intFreightMethodId);
-                        location.set('dblFreightRate', copyLocation.dblFreightRate);
-                        location.set('intShipViaId', copyLocation.intShipViaId);
-                        location.set('intNegativeInventory', copyLocation.intNegativeInventory);
-                        location.set('dblReorderPoint', copyLocation.dblReorderPoint);
-                        location.set('dblMinOrder', copyLocation.dblMinOrder);
-                        location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
-                        location.set('dblLeadTime', copyLocation.dblLeadTime);
-                        location.set('strCounted', copyLocation.strCounted);
-                        location.set('intCountGroupId', copyLocation.intCountGroupId);
-                        location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
-                        location.set('strVendorId', copyLocation.strVendorId);
-                        location.set('strCategory', copyLocation.strCategory);
-                        location.set('strUnitMeasure', copyLocation.strUnitMeasure);
-                    }
-                });
+        ic.utils.ajax({
+                timeout: 120000,
+                url: '../Inventory/api/ItemLocation/Search',
+                params: {
+                    intItemLocationId: records[0].data.intItemLocationId
+                },
+                method: 'Get'  
+            })
+        .subscribe(
+                function (successResponse) {
+                    var json = JSON.parse(successResponse.responseText);
+                    var copyLocation = json.data[0];
+                    Ext.Array.each(selection, function (location) {
+                        if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
+                            location.set('intVendorId', copyLocation.intVendorId);
+                            location.set('strDescription', copyLocation.strDescription);
+                            location.set('intCostingMethod', copyLocation.intCostingMethod);
+                            location.set('strCostingMethod', copyLocation.strCostingMethod);
+                            location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
+                            //location.set('intSubLocationId', copyLocation.intSubLocationId);
+                            //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
+                            location.set('intIssueUOMId', copyLocation.intIssueUOMId);
+                            location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
+                            location.set('intFamilyId', copyLocation.intFamilyId);
+                            location.set('intClassId', copyLocation.intClassId);
+                            location.set('intProductCodeId', copyLocation.intProductCodeId);
+                            location.set('intFuelTankId', copyLocation.intFuelTankId);
+                            location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
+                            location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
+                            location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
+                            location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
+                            location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
+                            location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
+                            location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
+                            location.set('intMixMatchId', copyLocation.intMixMatchId);
+                            location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
+                            location.set('intDepositPLUId', copyLocation.intDepositPLUId);
+                            location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
+                            location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
+                            location.set('ysnScaleItem', copyLocation.ysnScaleItem);
+                            location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
+                            location.set('ysnReturnable', copyLocation.ysnReturnable);
+                            location.set('ysnPrePriced', copyLocation.ysnPrePriced);
+                            location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
+                            location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
+                            location.set('strVendorCategory', copyLocation.strVendorCategory);
+                            location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
+                            location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
+                            location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
+                            location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
+                            location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
+                            location.set('intMinimumAge', copyLocation.intMinimumAge);
+                            location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
+                            location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
+                            location.set('ysnCarWash', copyLocation.ysnCarWash);
+                            location.set('intItemTypeCode', copyLocation.intItemTypeCode);
+                            location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
+                            location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
+                            location.set('intFreightMethodId', copyLocation.intFreightMethodId);
+                            location.set('dblFreightRate', copyLocation.dblFreightRate);
+                            location.set('intShipViaId', copyLocation.intShipViaId);
+                            location.set('intNegativeInventory', copyLocation.intNegativeInventory);
+                            location.set('dblReorderPoint', copyLocation.dblReorderPoint);
+                            location.set('dblMinOrder', copyLocation.dblMinOrder);
+                            location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
+                            location.set('dblLeadTime', copyLocation.dblLeadTime);
+                            location.set('strCounted', copyLocation.strCounted);
+                            location.set('intCountGroupId', copyLocation.intCountGroupId);
+                            location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
+                            location.set('strVendorId', copyLocation.strVendorId);
+                            location.set('strCategory', copyLocation.strCategory);
+                            location.set('strUnitMeasure', copyLocation.strUnitMeasure);
+                        }
+                    });
 
-                win.context.data.saveRecord();
-            }
-        });
+                    win.context.data.saveRecord();
+				},
+				function (failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+				}
+        );
+        // var filter = [
+        //     {
+        //         c: 'intItemLocationId',
+        //         v: records[0].data.intItemLocationId,
+        //         cj: 'and',
+        //         g: 'g0'
+        //     }
+        // ];
+        // Ext.Ajax.request({
+        //     timeout: 120000,
+        //     url: '../Inventory/api/ItemLocation/Search?page=1&start=0&limit=50&sort=[]&filter=' +
+        //         JSON.stringify(filter),
+        //     method: 'GET',
+        //     success: function(response) {
+        //         var json = JSON.parse(response.responseText);
+        //         var copyLocation = json.data[0];
+        //         Ext.Array.each(selection, function (location) {
+        //             if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
+        //                 location.set('intVendorId', copyLocation.intVendorId);
+        //                 location.set('strDescription', copyLocation.strDescription);
+        //                 location.set('intCostingMethod', copyLocation.intCostingMethod);
+        //                 location.set('strCostingMethod', copyLocation.strCostingMethod);
+        //                 location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
+        //                 //location.set('intSubLocationId', copyLocation.intSubLocationId);
+        //                 //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
+        //                 location.set('intIssueUOMId', copyLocation.intIssueUOMId);
+        //                 location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
+        //                 location.set('intFamilyId', copyLocation.intFamilyId);
+        //                 location.set('intClassId', copyLocation.intClassId);
+        //                 location.set('intProductCodeId', copyLocation.intProductCodeId);
+        //                 location.set('intFuelTankId', copyLocation.intFuelTankId);
+        //                 location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
+        //                 location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
+        //                 location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
+        //                 location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
+        //                 location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
+        //                 location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
+        //                 location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
+        //                 location.set('intMixMatchId', copyLocation.intMixMatchId);
+        //                 location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
+        //                 location.set('intDepositPLUId', copyLocation.intDepositPLUId);
+        //                 location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
+        //                 location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
+        //                 location.set('ysnScaleItem', copyLocation.ysnScaleItem);
+        //                 location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
+        //                 location.set('ysnReturnable', copyLocation.ysnReturnable);
+        //                 location.set('ysnPrePriced', copyLocation.ysnPrePriced);
+        //                 location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
+        //                 location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
+        //                 location.set('strVendorCategory', copyLocation.strVendorCategory);
+        //                 location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
+        //                 location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
+        //                 location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
+        //                 location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
+        //                 location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
+        //                 location.set('intMinimumAge', copyLocation.intMinimumAge);
+        //                 location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
+        //                 location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
+        //                 location.set('ysnCarWash', copyLocation.ysnCarWash);
+        //                 location.set('intItemTypeCode', copyLocation.intItemTypeCode);
+        //                 location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
+        //                 location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
+        //                 location.set('intFreightMethodId', copyLocation.intFreightMethodId);
+        //                 location.set('dblFreightRate', copyLocation.dblFreightRate);
+        //                 location.set('intShipViaId', copyLocation.intShipViaId);
+        //                 location.set('intNegativeInventory', copyLocation.intNegativeInventory);
+        //                 location.set('dblReorderPoint', copyLocation.dblReorderPoint);
+        //                 location.set('dblMinOrder', copyLocation.dblMinOrder);
+        //                 location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
+        //                 location.set('dblLeadTime', copyLocation.dblLeadTime);
+        //                 location.set('strCounted', copyLocation.strCounted);
+        //                 location.set('intCountGroupId', copyLocation.intCountGroupId);
+        //                 location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
+        //                 location.set('strVendorId', copyLocation.strVendorId);
+        //                 location.set('strCategory', copyLocation.strCategory);
+        //                 location.set('strUnitMeasure', copyLocation.strUnitMeasure);
+        //             }
+        //         });
+
+        //         win.context.data.saveRecord();
+        //     }
+        // });
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
@@ -3351,16 +3465,35 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            Ext.Ajax.request({
+            ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/Item/DuplicateItem?ItemId=' + current.get('intItemId'),
-                method: 'GET',
-                success: function(response){
-                    var jsonData = Ext.decode(response.responseText);
-                    context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
+                url: '../Inventory/api/Item/DuplicateItem',
+                params: {
+                    ItemId: current.get('intItemId')
+                },
+                method: 'Get'  
+            })
+            .subscribe(
+                function (successResponse) {
+				    var jsonData = Ext.decode(successResponse.responseText);
+                    context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.message.id }]);
                     context.configuration.paging.moveFirst();
-                }
-            });
+				},
+				function (failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+				}
+            );
+            // Ext.Ajax.request({
+            //     timeout: 120000,
+            //     url: '../Inventory/api/Item/DuplicateItem?ItemId=' + current.get('intItemId'),
+            //     method: 'GET',
+            //     success: function(response){
+            //         var jsonData = Ext.decode(response.responseText);
+            //         context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
+            //         context.configuration.paging.moveFirst();
+            //     }
+            // });
         }
     },
 

@@ -29,11 +29,18 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemLocationViews(param));
         }
 
+        public struct ItemLocationParam
+        {
+            public int ItemId { get; set; }
+            public int ItemLocationId { get; set; }
+            public int CostingMethod { get; set; }
+        }
+
         [HttpPost]
         [ActionName("CheckCostingMethod")]
-        public HttpResponseMessage CheckCostingMethod(int ItemId, int ItemLocationId, int CostingMethod)
+        public HttpResponseMessage CheckCostingMethod(ItemLocationParam param)
         {
-            var result = _bl.CheckCostingMethod(ItemId, ItemLocationId, CostingMethod);
+            var result = _bl.CheckCostingMethod(param.ItemId, param.ItemLocationId, param.CostingMethod);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {

@@ -17,7 +17,8 @@ Ext.define('Inventory.model.Certification', {
         { name: 'strIssuingOrganization', type: 'string'},
         { name: 'ysnGlobalCertification', type: 'boolean'},
         { name: 'intCountryId', type: 'int', allowNull: true},
-        { name: 'strCertificationIdName', type: 'string'}
+        { name: 'strCertificationIdName', type: 'string'},
+        { name: 'strCertificationCode', type: 'string'}
     ],
 
     validators: [
