@@ -30,7 +30,7 @@ LEFT OUTER JOIN
 		ON A.intPaymentMethodId = SMPM.intPaymentMethodID
 WHERE
 	A.ysnPosted = 1
-	AND A.ysnImportedFromOrigin <> 'Y'
+	AND A.ysnImportedFromOrigin <> 1
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
 	
@@ -68,5 +68,4 @@ WHERE
 	A.ysnPosted = 1
 	AND A.[strTransactionType] IN ('Cash', 'Cash Refund')
 	AND CM.intSourceTransactionId IS NULL
-	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')	
-			
+	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')

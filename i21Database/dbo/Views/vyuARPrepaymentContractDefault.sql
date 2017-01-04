@@ -2,63 +2,68 @@
 AS
 
 SELECT 
-	 CustCon.[intContractHeaderId]	
-	,CustCon.[intContractDetailId]	
-	,CustCon.[strContractNumber]	
-	,CustCon.[intContractSeq]		
-	,CustCon.[strContractType]		
-	,CustCon.[dtmStartDate]			
-	,CustCon.[dtmEndDate]			
-	,CustCon.[strContractStatus]	
-	,CustCon.[intEntityCustomerId]	
-	,CustCon.[intCurrencyId]		
-	,CustCon.[intCompanyLocationId]	
-	,CustCon.[intItemId]			
-	,CustCon.[strItemNo]			
-	,CustCon.[strItemDescription]	
-	,CustCon.[intOrderUOMId]		
-	,CustCon.[strOrderUnitMeasure]	
-	,CustCon.[intItemUOMId]			
-	,CustCon.[strUnitMeasure]		
-	,CustCon.[intPricingTypeId]		
-	,CustCon.[strPricingType]		
-	,CustCon.[dblOrderPrice]		
-	,CustCon.[dblCashPrice]			
-	,CustCon.[intSubCurrencyId]		
-	,CustCon.[dblSubCurrencyRate]	
-	,CustCon.[strSubCurrency]		
-	,CustCon.[intPriceItemUOMId]	
-	,CustCon.[dblBalance]			
-	,CustCon.[dblScheduleQty]		
-	,CustCon.[dblAvailableQty]		
-	,CustCon.[dblDetailQuantity]	
-	,CustCon.[dblOrderQuantity]		
-	,CustCon.[dblShipQuantity]		
-	,CustCon.[ysnUnlimitedQuantity]	
-	,CustCon.[ysnLoad]				
-	,CustCon.[ysnAllowedToShow]		
-	,CustCon.[intFreightTermId]		
-	,CustCon.[intTermId]			
-	,CustCon.[intShipViaId]			
-	,ARC.intBillToId
-	,ARC.intShipToId
-	,ARC.intEntityContactId
-	,ARC.strShipToLocationName
-    ,ARC.strShipToAddress
-    ,ARC.strShipToCity
-    ,ARC.strShipToState
-    ,ARC.strShipToZipCode
-    ,ARC.strShipToCountry
-    ,ARC.strBillToLocationName
-    ,ARC.strBillToAddress
-    ,ARC.strBillToCity
-    ,ARC.strBillToState
-    ,ARC.strBillToZipCode
-    ,ARC.strBillToCountry
+	 [intContractHeaderId]		= CustCon.[intContractHeaderId]
+	,[intContractDetailId]		= CustCon.[intContractDetailId]	
+	,[strContractNumber]		= CustCon.[strContractNumber]
+	,[intContractSeq]			= CustCon.[intContractSeq]
+	,[strContractType]			= CustCon.[strContractType]
+	,[dtmStartDate]				= CustCon.[dtmStartDate]
+	,[dtmEndDate]				= CustCon.[dtmEndDate]
+	,[strContractStatus]		= CustCon.[strContractStatus]
+	,[intEntityCustomerId]		= CustCon.[intEntityCustomerId]
+	,[intCurrencyId]			= CustCon.[intCurrencyId]
+	,[strCurrency]				= CustCon.[strSubCurrency]
+	,[intCompanyLocationId]		= CustCon.[intCompanyLocationId]
+	,[intItemId]				= CustCon.[intItemId]
+	,[strItemNo]				= CustCon.[strItemNo]
+	,[strItemDescription]		= CustCon.[strItemDescription]
+	,[intOrderUOMId]			= CustCon.[intOrderUOMId]
+	,[strOrderUnitMeasure]		= CustCon.[strOrderUnitMeasure]
+	,[intItemUOMId]				= CustCon.[intItemUOMId]
+	,[strUnitMeasure]			= CustCon.[strUnitMeasure]
+	,[intPricingTypeId]			= CustCon.[intPricingTypeId]
+	,[strPricingType]			= CustCon.[strPricingType]	
+	,[dblOrderPrice]			= CustCon.[dblOrderPrice]	
+	,[dblCashPrice]				= CustCon.[dblCashPrice]
+	,[intSubCurrencyId]			= CustCon.[intSubCurrencyId]
+	,[dblSubCurrencyRate]		= CustCon.[dblSubCurrencyRate]
+	,[strSubCurrency]			= CustCon.[strSubCurrency]
+	,[intPriceItemUOMId]		= CustCon.[intPriceItemUOMId]
+	,[dblBalance]				= CustCon.[dblBalance]
+	,[dblScheduleQty]			= ISNULL(CustCon.[dblScheduleQty], 0.000000)
+	,[dblAvailableQty]			= CustCon.[dblAvailableQty]
+	,[dblDetailQuantity]		= CustCon.[dblDetailQuantity]
+	,[dblOrderQuantity]			= CustCon.[dblOrderQuantity]
+	,[dblShipQuantity]			= CustCon.[dblShipQuantity]	
+	,[ysnUnlimitedQuantity]		= CustCon.[ysnUnlimitedQuantity]
+	,[ysnLoad]					= CustCon.[ysnLoad]
+	,[ysnAllowedToShow]			= CustCon.[ysnAllowedToShow]
+	,[intFreightTermId]			= CustCon.[intFreightTermId]
+	,[intTermId]				= CustCon.[intTermId]
+	,[intShipViaId]				= CustCon.[intShipViaId]
+	,[intBillToId]				= ARC.[intBillToId]
+	,[intShipToId]				= ARC.[intShipToId]
+	,[intEntityContactId]		= ARC.[intEntityContactId]
+	,[strShipToLocationName]	= ARC.[strShipToLocationName]
+    ,[strShipToAddress]			= ARC.[strShipToAddress]
+    ,[strShipToCity]			= ARC.[strShipToCity]
+    ,[strShipToState]			= ARC.[strShipToState]
+    ,[strShipToZipCode]			= ARC.[strShipToZipCode]
+    ,[strShipToCountry]			= ARC.[strShipToCountry]
+    ,[strBillToLocationName]	= ARC.[strBillToLocationName]
+    ,[strBillToAddress]			= ARC.[strBillToAddress]
+    ,[strBillToCity]			= ARC.[strBillToCity]
+    ,[strBillToState]			= ARC.[strBillToState]
+    ,[strBillToZipCode]			= ARC.[strBillToZipCode]
+    ,[strBillToCountry]			= ARC.[strBillToCountry]
+	,[intDestinationGradeId]	= CustCon.[intDestinationGradeId]
+	,[strDestinationGrade]		= CustCon.[strDestinationGrade]
+	,[intDestinationWeightId]	= CustCon.[intDestinationWeightId]
+	,[strDestinationWeight]		= CustCon.[strDestinationWeight]
 
 FROM [vyuARCustomerContract] CustCon
 INNER JOIN [vyuARCustomerSearch] ARC ON CustCon.intEntityCustomerId = ARC.intEntityCustomerId
-WHERE CustCon.intCurrencyId = (SELECT TOP 1 intCurrencyId 
+WHERE CustCon.intCurrencyId = (SELECT TOP 1 ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID) [intCurrencyID]
 								FROM tblCTContractDetail CTD 
 									INNER JOIN tblSMCurrency SMC
 								ON CTD.intCurrencyId IN (SMC.intCurrencyID, SMC.intMainCurrencyId )

@@ -47,40 +47,114 @@ SELECT
 	,dblTermAPR						= SMT.dblAPR	
 	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = ARI.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + ARI.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	,dblTotalTermDiscount			= ARI.dblTotalTermDiscount
+	,strTicketNumbers				= dbo.fnARGetScaleTicketNumbersFromInvoice(ARI.intInvoiceId)
+	,strCustomerReferences			= dbo.fnARGetCustomerReferencesFromInvoice(ARI.intInvoiceId)
 	,ysnExcludeForPayment			= CASE WHEN ARI.strTransactionType = 'Customer Prepayment' 
 										AND (EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intInvoiceId = ARI.intInvoiceId AND (ISNULL(ysnRestricted, 0) = 1 OR ISNULL(intContractDetailId, 0) <> 0)) 
 										--OR NOT EXISTS(SELECT NULL FROM tblARInvoice ARI1 INNER JOIN tblARPayment ARP ON ARI1.intPaymentId  = ARP.intPaymentId AND ARI1.intInvoiceId = ARI.intInvoiceId  AND ARP.ysnPosted = 1 AND ARI1.strTransactionType = 'Customer Prepayment'
 										--INNER JOIN
 										--	tblARPaymentDetail ARPD
 										--		ON ARI1.intInvoiceId = ARPD.intInvoiceId)
-										) THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+										) THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END 	
+	,strInvoiceReportNumber			= CFT.strInvoiceReportNumber
 FROM         
-	dbo.tblARInvoice AS ARI 
+	(SELECT 
+		intInvoiceId,
+		strInvoiceNumber,
+		strTransactionType,
+		strType,
+		dtmDate,
+		dtmDueDate, 
+		dtmPostDate, 
+		dtmShipDate, 
+		ysnPosted, 
+		ysnPaid, 
+		ysnProcessed, 
+		ysnForgiven, 
+		ysnCalculated, 
+		dblInvoiceTotal, 
+		dblDiscount, 
+		dblDiscountAvailable, 
+		dblInterest, 
+		dblAmountDue, 
+		dblPayment, 
+		dblInvoiceSubtotal, 
+		dblShipping, 
+		dblTax, 
+		intAccountId, 
+		intCompanyLocationId, 
+		intPaymentMethodId, 
+		intCurrencyId, 
+		intTermId,
+		intEntityCustomerId,
+		dblTotalTermDiscount
+	 FROM 
+		dbo.tblARInvoice) AS ARI 
 INNER JOIN
-	dbo.tblARCustomer AS ARC 
-		ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
+	(SELECT 
+		strCustomerNumber,
+		intEntityCustomerId
+	 FROM 
+		dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
 LEFT OUTER JOIN
-	dbo.[tblEMEntityToContact] AS EC ON ARC.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
+	(SELECT
+		intEntityId,
+		intEntityContactId,
+		ysnDefaultContact
+	FROM 
+		dbo.[tblEMEntityToContact]) AS EC ON ARC.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
 LEFT OUTER JOIN
-	dbo.tblEMEntity AS E ON EC.intEntityContactId = E.intEntityId
+	(SELECT 
+		intEntityId,
+		strEmail
+	 FROM
+	dbo.tblEMEntity) AS E ON EC.intEntityContactId = E.intEntityId
 INNER JOIN
-	dbo.tblEMEntity AS CE 
-		ON ARC.[intEntityCustomerId] = CE.intEntityId 
+	(SELECT	
+		intEntityId,
+		strName
+	 FROM
+		dbo.tblEMEntity) AS CE ON ARC.[intEntityCustomerId] = CE.intEntityId 
 LEFT OUTER JOIN
-	dbo.tblSMTerm AS SMT 
-		ON ARI.intTermId = SMT.intTermID 
+	(SELECT 
+		intTermID,
+		strTerm,
+		strType,
+		intDiscountDay,
+		dtmDiscountDate, 
+		dblDiscountEP, 
+		intBalanceDue, 
+		dtmDueDate, 
+		dblAPR
+	FROM
+		dbo.tblSMTerm) AS SMT ON ARI.intTermId = SMT.intTermID 
 LEFT OUTER JOIN
-	dbo.tblSMCompanyLocation AS SML 
-		ON ARI.intCompanyLocationId  = SML.intCompanyLocationId 
+	(SELECT 
+		intCompanyLocationId,
+		strLocationName
+	 FROM 
+		dbo.tblSMCompanyLocation) AS SML ON ARI.intCompanyLocationId  = SML.intCompanyLocationId 
 LEFT OUTER JOIN
-	dbo.tblSMPaymentMethod AS SMP 
-		ON ARI.intPaymentMethodId = SMP.intPaymentMethodID
+	(SELECT 
+		intPaymentMethodID
+	 FROM
+		dbo.tblSMPaymentMethod) AS SMP ON ARI.intPaymentMethodId = SMP.intPaymentMethodID
 LEFT OUTER JOIN
-	dbo.tblSMCurrency SMC
-		ON ARI.intCurrencyId = SMC.intCurrencyID
+	(SELECT 
+		intCurrencyID,
+		strCurrency
+	 FROM 
+		dbo.tblSMCurrency) SMC ON ARI.intCurrencyId = SMC.intCurrencyID
 LEFT OUTER JOIN
-	dbo.tblGLAccount GLA
-		ON ARI.intAccountId = GLA.intAccountId
+	(SELECT
+		intAccountId,
+		strAccountId
+	 FROM
+		dbo.tblGLAccount) GLA ON ARI.intAccountId = GLA.intAccountId
+LEFT OUTER JOIN 
+	(SELECT
+		intInvoiceId		
+		, strInvoiceReportNumber
+	 FROM
+		dbo.tblCFTransaction) CFT ON ARI.intInvoiceId = CFT.intInvoiceId
 GO
-
-

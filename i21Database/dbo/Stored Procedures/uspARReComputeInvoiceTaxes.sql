@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceTaxes]
-	  @InvoiceId		AS INT
+	 @InvoiceId	INT
+	,@DetailId	INT	= NULL
 AS
 
 BEGIN
@@ -56,6 +57,11 @@ FROM
 	tblARInvoiceDetail
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
+	AND (
+		ISNULL(@DetailId,0) = 0
+			OR
+		[intInvoiceDetailId] = @DetailId
+		)
 ORDER BY
 	[intInvoiceDetailId]
 	
@@ -142,7 +148,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[strNotes] 
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0)
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1)
 		
 		SELECT @TotalItemTax = SUM([dblAdjustedTax]), @TaxGroupId = MAX([intTaxGroupId]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
 
