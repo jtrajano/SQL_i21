@@ -17,11 +17,13 @@ DECLARE  @ZeroDecimal		DECIMAL(18,6)
 		,@ShipmentNumber	NVARCHAR(100)
 		,@InvoiceId			INT
 		,@InvoiceNumber		NVARCHAR(25) 
+		,@strReferenceNumber NVARCHAR(100)
 
 SELECT
 	 @ZeroDecimal	= 0.000000	
 	,@DateOnly		= CAST(GETDATE() AS DATE)
 
+SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
 
 DECLARE
 	 @TransactionType			NVARCHAR(25)
@@ -77,7 +79,7 @@ INNER JOIN
 		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
-		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
+		ON SO.strSalesOrderNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
 
 
@@ -194,6 +196,8 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intTempDetailIdForTaxes]
 	,[ysnBlended]
 	,[intStorageScheduleTypeId]
+	,[intDestinationGradeId]
+	,[intDestinationWeightId]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
 	)
@@ -299,6 +303,8 @@ SELECT
 	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
 	,[ysnBlended]							= ARSI.[ysnBlended]
 	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
+	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
+	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 FROM
@@ -411,12 +417,14 @@ SELECT
 	,[intTempDetailIdForTaxes]				= SOD.intSalesOrderDetailId
 	,[ysnBlended]							= 0
 	,[intStorageScheduleTypeId]				= SOD.intStorageScheduleTypeId
+	,[intDestinationGradeId]				= NULL
+	,[intDestinationWeightId]				= NULL
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
 FROM 
 	tblICInventoryShipment ICIS
 	INNER JOIN tblSOSalesOrder SO 
-		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
+		ON SO.strSalesOrderNumber = @strReferenceNumber
 	INNER JOIN tblSOSalesOrderDetail SOD 
 		ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		AND SOD.intCommentTypeId IN (0,1,3)
@@ -424,215 +432,68 @@ FROM
 WHERE 
 	ICIS.intInventoryShipmentId = @ShipmentId
 
-INSERT INTO @EntriesForInvoice
-([strSourceTransaction]
-	,[intSourceId]
-	,[strSourceId]
-	,[intInvoiceId]
-	,[intEntityCustomerId]
-	,[intCompanyLocationId]
-	,[intCurrencyId]
-	,[intTermId]
-	,[intPeriodsToAccrue]
-	,[dtmDate]
-	,[dtmDueDate]
-	,[dtmShipDate]
-	,[intEntitySalespersonId]
-	,[intFreightTermId]
-	,[intShipViaId]
-	,[intPaymentMethodId]
-	,[strInvoiceOriginId]
-	,[strPONumber]
-	,[strBOLNumber]
-	,[strDeliverPickup]
-	,[strComments]
-	,[intShipToLocationId]
-	,[intBillToLocationId]
-	,[ysnTemplate]
-	,[ysnForgiven]
-	,[ysnCalculated]
-	,[ysnSplitted]
-	,[intPaymentId]
-	,[intSplitId]
-	,[intLoadDistributionHeaderId]
-	,[strActualCostId]
-	,[intShipmentId]
-	,[intTransactionId]
-	,[intOriginalInvoiceId]
-	,[intEntityId]
-	,[ysnResetDetails]
-	,[ysnRecap]
-	,[ysnPost]
-																																																		
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[ysnInventory]
-	,[strDocumentNumber]
-	,[strItemDescription]
-	,[intOrderUOMId]
-	,[dblQtyOrdered]
-	,[intItemUOMId]
-	,[dblQtyShipped]
-	,[dblDiscount]
-	,[dblItemWeight]
-	,[intItemWeightUOMId]
-	,[dblPrice]
-	,[strPricing]
-	,[ysnRefreshPrice]
-	,[strMaintenanceType]
-	,[strFrequency]
-	,[dtmMaintenanceDate]
-	,[dblMaintenanceAmount]
-	,[dblLicenseAmount]
-	,[intTaxGroupId]
-	,[intStorageLocationId]
-	,[ysnRecomputeTax]
-	,[intSCInvoiceId]
-	,[strSCInvoiceNumber]
-	,[intSCBudgetId]
-	,[strSCBudgetDescription]
-	,[intInventoryShipmentItemId]
-	,[intInventoryShipmentChargeId]
-	,[strShipmentNumber]
-	,[intRecipeItemId]
-	,[intRecipeId]		
-	,[intSubLocationId]	
-	,[intCostTypeId]	
-	,[intMarginById]	
-	,[intCommentTypeId]	
-	,[dblMargin]		
-	,[dblRecipeQuantity] 
-	,[intSalesOrderDetailId]
-	,[strSalesOrderNumber]
-	,[intContractHeaderId]
-	,[intContractDetailId]
-	,[intShipmentPurchaseSalesContractId]
-	,[dblShipmentGrossWt]
-	,[dblShipmentTareWt]
-	,[dblShipmentNetWt]
-	,[intTicketId]
-	,[intTicketHoursWorkedId]
-	,[intOriginalInvoiceDetailId]
-	,[intSiteId]
-	,[strBillingBy]
-	,[dblPercentFull]
-	,[dblNewMeterReading]
-	,[dblPreviousMeterReading]
-	,[dblConversionFactor]
-	,[intPerformerId]
-	,[ysnLeaseBilling]
-	,[ysnVirtualMeterReading]
-	,[ysnClearDetailTaxes]
-	,[intTempDetailIdForTaxes]
-	,[ysnBlended]
-	,[intStorageScheduleTypeId]
-	,[intSubCurrencyId] 
-	,[dblSubCurrencyRate])
-SELECT 
-	 [strSourceTransaction]
-	,[intSourceId]
-	,[strSourceId]
-	,[intInvoiceId]
-	,[intEntityCustomerId]
-	,[intCompanyLocationId]
-	,[intCurrencyId]
-	,[intTermId]
-	,[intPeriodsToAccrue]
-	,[dtmDate]
-	,[dtmDueDate]
-	,[dtmShipDate]
-	,[intEntitySalespersonId]
-	,[intFreightTermId]
-	,[intShipViaId]
-	,[intPaymentMethodId]
-	,[strInvoiceOriginId]
-	,[strPONumber]
-	,[strBOLNumber]
-	,[strDeliverPickup]
-	,[strComments]
-	,[intShipToLocationId]
-	,[intBillToLocationId]
-	,[ysnTemplate]
-	,[ysnForgiven]
-	,[ysnCalculated]
-	,[ysnSplitted]
-	,[intPaymentId]
-	,[intSplitId]
-	,[intLoadDistributionHeaderId]
-	,[strActualCostId]
-	,[intShipmentId]
-	,[intTransactionId]
-	,[intOriginalInvoiceId]
-	,[intEntityId]
-	,[ysnResetDetails]
-	,[ysnRecap]
-	,[ysnPost]
-																																																		
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[ysnInventory]
-	,[strDocumentNumber]
-	,[strItemDescription]
-	,[intOrderUOMId]
-	,[dblQtyOrdered]
-	,[intItemUOMId]
-	,[dblQtyShipped]
-	,[dblDiscount]
-	,[dblItemWeight]
-	,[intItemWeightUOMId]
-	,[dblPrice]
-	,[strPricing]
-	,[ysnRefreshPrice]
-	,[strMaintenanceType]
-	,[strFrequency]
-	,[dtmMaintenanceDate]
-	,[dblMaintenanceAmount]
-	,[dblLicenseAmount]
-	,[intTaxGroupId]
-	,[intStorageLocationId]
-	,[ysnRecomputeTax]
-	,[intSCInvoiceId]
-	,[strSCInvoiceNumber]
-	,[intSCBudgetId]
-	,[strSCBudgetDescription]
-	,[intInventoryShipmentItemId]
-	,[intInventoryShipmentChargeId]
-	,[strShipmentNumber]
-	,[intRecipeItemId]
-	,[intRecipeId]		
-	,[intSubLocationId]	
-	,[intCostTypeId]	
-	,[intMarginById]	
-	,[intCommentTypeId]	
-	,[dblMargin]		
-	,[dblRecipeQuantity] 
-	,[intSalesOrderDetailId]
-	,[strSalesOrderNumber]
-	,[intContractHeaderId]
-	,[intContractDetailId]
-	,[intShipmentPurchaseSalesContractId]
-	,[dblShipmentGrossWt]
-	,[dblShipmentTareWt]
-	,[dblShipmentNetWt]
-	,[intTicketId]
-	,[intTicketHoursWorkedId]
-	,[intOriginalInvoiceDetailId]
-	,[intSiteId]
-	,[strBillingBy]
-	,[dblPercentFull]
-	,[dblNewMeterReading]
-	,[dblPreviousMeterReading]
-	,[dblConversionFactor]
-	,[intPerformerId]
-	,[ysnLeaseBilling]
-	,[ysnVirtualMeterReading]
-	,[ysnClearDetailTaxes]
-	,[intTempDetailIdForTaxes]
-	,[ysnBlended]
-	,@StorageScheduleTypeId
-	,[intSubCurrencyId] 
-	,[dblSubCurrencyRate]
- FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId ASC, ysnInventory DESC
+SELECT * INTO #TempTable
+FROM @UnsortedEntriesForInvoice
+
+ALTER TABLE #TempTable
+DROP COLUMN intId
+
+SELECT * FROM #TempTable
+
+IF EXISTS (SELECT NULL FROM #TempTable WHERE ISNULL(intRecipeId, 0) > 0)
+	BEGIN
+		DECLARE @tblItemsWithRecipe TABLE(intSalesOrderDetailId INT, intRecipeId INT)
+		DECLARE @intCurrentSalesOrderDetailId INT
+		      , @intCurrentRecipeId INT
+			  , @intMinSalesOrderDetailId INT
+
+		INSERT INTO @tblItemsWithRecipe
+		SELECT DISTINCT MIN(intSalesOrderDetailId), intRecipeId FROM #TempTable WHERE intRecipeId > 0 GROUP BY intRecipeId
+
+		WHILE EXISTS (SELECT NULL FROM @tblItemsWithRecipe)
+			BEGIN
+				SELECT TOP 1 @intMinSalesOrderDetailId = MIN(intSalesOrderDetailId) FROM @tblItemsWithRecipe
+				SELECT TOP 1 @intCurrentRecipeId = intRecipeId FROM @tblItemsWithRecipe WHERE intSalesOrderDetailId = @intMinSalesOrderDetailId
+
+				WHILE EXISTS (SELECT NULL FROM #TempTable)
+					BEGIN
+						SELECT TOP 1 @intCurrentSalesOrderDetailId = MIN(intSalesOrderDetailId) FROM #TempTable WHERE intRecipeId IS NULL
+
+						IF @intMinSalesOrderDetailId > @intCurrentSalesOrderDetailId
+							BEGIN
+								INSERT INTO @EntriesForInvoice
+								SELECT * FROM #TempTable WHERE intSalesOrderDetailId = @intCurrentSalesOrderDetailId
+
+								DELETE FROM #TempTable WHERE intSalesOrderDetailId = @intCurrentSalesOrderDetailId
+								CONTINUE
+							END
+						ELSE
+							BEGIN
+								INSERT INTO @EntriesForInvoice
+								SELECT * FROM #TempTable WHERE intRecipeId = @intCurrentRecipeId ORDER BY intRecipeItemId
+
+								DELETE FROM #TempTable WHERE intRecipeId = @intCurrentRecipeId
+
+								SET @intMinSalesOrderDetailId = 0
+								BREAK
+							END
+
+						SET @intCurrentSalesOrderDetailId = 0						
+					END
+
+				DELETE FROM @tblItemsWithRecipe WHERE intRecipeId = @intCurrentRecipeId
+			END
+
+		INSERT INTO @EntriesForInvoice
+		SELECT * FROM #TempTable ORDER BY intSalesOrderDetailId
+	END
+ELSE
+	BEGIN
+		INSERT INTO @EntriesForInvoice
+		SELECT * FROM #TempTable ORDER BY intSalesOrderDetailId
+	END
+
+DROP TABLE #TempTable
 	
 IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)
 BEGIN
@@ -661,9 +522,6 @@ BEGIN
 	RETURN 0;
 END	
 	
-
-
-
 DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable
 		,@CurrentErrorMessage NVARCHAR(250)
 		,@CreatedIvoices NVARCHAR(MAX)

@@ -20,9 +20,9 @@ BEGIN
 	While @Decimal > @Precision
 	BEGIN
 		SET @Decimal = @Decimal - 1 
-		IF	5 = (ROUND(@RoundedAmt * POWER(@Ten, @Decimal + 1), 0,1) - (ROUND(@RoundedAmt * POWER(@Ten, @Decimal), 0, 1) * 10)) AND 0 = CAST((ROUND(@RoundedAmt * POWER(@Ten, @Decimal) ,0,1) - (ROUND(@RoundedAmt * POWER(@Ten, @Decimal - 1) ,0,1) * 10)) AS INTEGER) % 2			
-			SET @RoundedAmt = ROUND(@RoundedAmt,@Decimal, 1 )
-		ELSE 
+		--IF	5 = (ROUND(@RoundedAmt * POWER(@Ten, @Decimal + 1), 0,1) - (ROUND(@RoundedAmt * POWER(@Ten, @Decimal), 0, 1) * 10)) AND 0 = CAST((ROUND(@RoundedAmt * POWER(@Ten, @Decimal) ,0,1) - (ROUND(@RoundedAmt * POWER(@Ten, @Decimal - 1) ,0,1) * 10)) AS INTEGER) % 2			
+		--	SET @RoundedAmt = ROUND(@RoundedAmt,@Decimal, 1 )
+		--ELSE 
 			SET @RoundedAmt = ROUND(@RoundedAmt,@Decimal, 0 )
 	END
 	

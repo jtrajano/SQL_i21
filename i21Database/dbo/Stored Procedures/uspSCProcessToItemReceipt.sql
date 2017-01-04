@@ -7,6 +7,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	,@intEntityId AS INT
 	,@intContractId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
+	,@intStorageScheduleId AS INT = NULL
 	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
@@ -468,7 +469,7 @@ BEGIN TRY
 							,ysnIsStorage
 							,strSourceTransactionId 
 					)
-					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
+					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
 				END
 		END
 	END

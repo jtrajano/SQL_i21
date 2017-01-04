@@ -1,5 +1,5 @@
-﻿CREATE VIEW vyuLGLoadWarehouseServicesForInvoice
-AS 
+﻿CREATE VIEW vyuLGLoadStorageCostForInvoice
+AS
 SELECT strTransactionType
 	,strTransactionNumber
 	,NULL AS strShippedItemId
@@ -10,16 +10,16 @@ SELECT strTransactionType
 	,intLoadId
 	,NULL AS intLoadDetailId
 	,strLoadNumber
-	,intContractHeaderId
+	,NULL AS intContractHeaderId
 	,'' COLLATE Latin1_General_CI_AS AS strContractNumber
-	,intContractDetailId
-	,intContractSeq
+	,NULL AS intContractDetailId
+	,NULL AS intContractSeq
 	,intCompanyLocationId
 	,strLocationName
 	,intItemId
 	,strItemNo
 	,strItemDescription
-	,intShipmentItemUOMId
+	,NULL AS intShipmentItemUOMId
 	,SUM(dblPrice) AS dblPrice
 	,SUM(dblShipmentUnitPrice) AS dblShipmentUnitPrice
 	,SUM(dblTotal) AS dblTotal
@@ -34,7 +34,7 @@ FROM (
 		,[strShippedItemId] = 'ld:' + CAST(LD.intLoadDetailId AS NVARCHAR(250))
 		,[intEntityCustomerId] = LD.intCustomerEntityId
 		,[strCustomerName] = EME.[strName]
-		,[intCurrencyId] = ISNULL(ISNULL(WRMD.[intCurrencyId], ARC.[intCurrencyId]), (
+		,[intCurrencyId] = ISNULL(ISNULL(LSC.[intCurrency], ARC.[intCurrencyId]), (
 				SELECT TOP 1 intDefaultCurrencyId
 				FROM tblSMCompanyPreference
 				WHERE intDefaultCurrencyId IS NOT NULL
@@ -44,10 +44,10 @@ FROM (
 		,L.intLoadId
 		,LD.intLoadDetailId
 		,L.[strLoadNumber]
-		,[intContractHeaderId] = NULL
-		,[strContractNumber] = NULL
-		,[intContractDetailId] = NULL
-		,[intContractSeq] = NULL
+		,[intContractHeaderId] = ISNULL(CH.[intContractHeaderId], CD.[intContractHeaderId])
+		,[strContractNumber] = CH.strContractNumber
+		,[intContractDetailId] = ISNULL(CD.[intContractDetailId], LD.[intPContractDetailId])
+		,[intContractSeq] = CD.[intContractSeq]
 		,[intCompanyLocationId] = LD.intSCompanyLocationId
 		,[strLocationName] = SMCL.[strLocationName]
 		,[intItemId] = ICI.[intItemId]
@@ -57,23 +57,23 @@ FROM (
 				THEN ICI.[strItemNo]
 			ELSE ICI.[strDescription]
 			END
-		,[intShipmentItemUOMId] = NULL
+		,[intShipmentItemUOMId] = LD.[intItemUOMId]
 		,[dblPrice] = (
-			Sum(LWS.dblBillAmount) / (
+			Sum(LSC.dblAmount) / (
 				SELECT SUM(dblNet)
 				FROM tblLGLoadDetail D
 				WHERE L.intLoadId = D.intLoadId
 				) * SUM(LD.dblNet)
 			)
 		,[dblShipmentUnitPrice] = (
-			Sum(LWS.dblBillAmount) / (
+			Sum(LSC.dblAmount) / (
 				SELECT SUM(dblNet)
 				FROM tblLGLoadDetail D
 				WHERE L.intLoadId = D.intLoadId
 				) * SUM(LD.dblNet)
 			)
 		,[dblTotal] = (
-			Sum(LWS.dblBillAmount) / (
+			Sum(LSC.dblAmount) / (
 				SELECT SUM(dblNet)
 				FROM tblLGLoadDetail D
 				WHERE L.intLoadId = D.intLoadId
@@ -86,28 +86,31 @@ FROM (
 		,[ysnPosted] = L.ysnPosted
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblLGLoadStorageCost LSC ON LSC.intLoadId = L.intLoadId
+	JOIN tblLGLoadDetailLot LDL ON LSC.intLoadDetailLotId = LDL.intLoadDetailLotId
+	JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
 	JOIN tblARCustomer ARC ON LD.intCustomerEntityId = ARC.intEntityCustomerId
 	JOIN tblEMEntity EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
-	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-	LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
-	LEFT JOIN tblICItem ICI ON LWS.intItemId = ICI.intItemId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	LEFT JOIN [tblSMCompanyLocation] SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]
+	LEFT JOIN tblICItem ICI ON LSC.intCostType = ICI.intItemId
 	LEFT JOIN vyuARGetItemAccount ARIA ON LD.[intItemId] = ARIA.[intItemId]
 		AND LD.intSCompanyLocationId = ARIA.[intLocationId]
 	LEFT JOIN tblARInvoiceDetail ARID ON LD.intLoadDetailId = ARID.[intInventoryShipmentItemId]
-	LEFT JOIN [tblSMCompanyLocation] SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]
-	LEFT JOIN tblLGWarehouseRateMatrixHeader WRMD ON WRMD.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
-	GROUP BY LWS.intLoadWarehouseServicesId
-		,L.[strLoadNumber]
+	WHERE ISNULL(LSC.dblAmount,0) > 0
+	GROUP BY L.[strLoadNumber]
 		,LD.intLoadDetailId
 		,EME.[strName]
-		,WRMD.intCurrencyId
+		,CD.intCurrencyId
 		,L.dtmScheduledDate
 		,L.intLoadId
 		,SMCL.[strLocationName]
 		,ICI.strItemNo
 		,ICI.strDescription
+		,CD.intContractHeaderId
+		,CH.strContractNumber
+		,LD.intPContractDetailId
 		,CD.intContractSeq
 		,LD.intItemUOMId
 		,ARC.[intCurrencyId]
@@ -123,16 +126,15 @@ FROM (
 		,LD.dblQuantity
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
-		,CD.dblCashPrice
+		,LSC.dblPrice
 		,LD.[intWeightItemUOMId]
 		,ARIA.[intAccountId]
 		,ARIA.[intCOGSAccountId]
 		,ARIA.[intSalesAccountId]
 		,ARIA.[intInventoryAccountId]
+		,LSC.[intCurrency]
 		,L.ysnPosted
-		,LWS.dblUnitRate
 	) tbl
-WHERE dblTotal > 0
 GROUP BY strTransactionType
 	,strTransactionNumber
 	,intEntityCustomerId
@@ -141,16 +143,11 @@ GROUP BY strTransactionType
 	,dtmProcessDate
 	,intLoadId
 	,strLoadNumber
-	,intContractHeaderId
-	,strContractNumber
-	,intContractDetailId
-	,intContractSeq
 	,intCompanyLocationId
 	,strLocationName
 	,intItemId
 	,strItemNo
 	,strItemDescription
-	,intShipmentItemUOMId
 	,intAccountId
 	,intCOGSAccountId
 	,intSalesAccountId

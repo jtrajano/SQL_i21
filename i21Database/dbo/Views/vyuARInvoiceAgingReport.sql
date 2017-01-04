@@ -208,7 +208,7 @@ SELECT dtmDate				= I.dtmPostDate
      , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) = (I.dblInvoiceTotal * -1) 
 								THEN I.dblInvoiceTotal * -1 
 								ELSE 
-									CASE WHEN I.strTransactionType = 'Overpayment' AND ISNULL(P.dblAmountPaid, 0) < 0
+									CASE WHEN I.strTransactionType IN ('Overpayment', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) < 0
 										THEN ISNULL(PD.dblInvoiceTotal, 0)
 										ELSE 0
 									END
@@ -401,7 +401,7 @@ SELECT I.strInvoiceNumber
   , dblInvoiceTotal			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) = (I.dblInvoiceTotal * -1) 
 								THEN I.dblInvoiceTotal * -1 
 								ELSE 
-									CASE WHEN I.strTransactionType = 'Overpayment' AND ISNULL(P.dblAmountPaid, 0) < 0
+									CASE WHEN I.strTransactionType IN ('Overpayment', 'Customer Prepayment') AND ISNULL(P.dblAmountPaid, 0) < 0
 										THEN ISNULL(PD.dblInvoiceTotal, 0)
 										ELSE 0
 									END

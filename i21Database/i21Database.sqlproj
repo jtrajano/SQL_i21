@@ -3969,7 +3969,6 @@
     <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityLineOfBusiness.sql" />
-    <Build Include="vyuSCTicketFormatView.sql" />
     <Build Include="dbo\Tables\tblSCTicketEmailOption.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
     <Build Include="dbo\Functions\fnMFConvertCostToTargetItemUOM.sql" />
@@ -4650,6 +4649,13 @@
     <Build Include="dbo\User Defined Types\TFReceiptItem.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCriteria.sql" />
+    <Build Include="dbo\Views\vyuLGLoadStorageCostView.sql" />
+    <Build Include="dbo\Views\vyuLGLoadStorageCostLots.sql" />
+    <Build Include="dbo\Views\vyuLGLoadStorageCostForInvoice.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateDiscountUnit.sql" />
+    <Build Include="dbo\Views\vyuSCTicketFormatView.sql" />
+    <Build Include="dbo\Functions\fnTMGetItemTotalTaxForCustomer.sql" />
+    <Build Include="dbo\Functions\fnTMGetItemPricingDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -174,6 +174,10 @@ BEGIN TRY
 		,[intPerformerId]
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
+		,[intDestinationGradeId]
+		,[intDestinationWeightId]
+		,[intSubCurrencyId] 
+		,[dblSubCurrencyRate]
 	)
 	SELECT
 		 [strTransactionType]				= 'Invoice'
@@ -260,6 +264,10 @@ BEGIN TRY
 		,[intPerformerId]					= ARID.[intPerformerId]
 		,[ysnLeaseBilling]					= ARID.[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]			= ARID.[ysnVirtualMeterReading]
+		,[intDestinationGradeId]			= ARSID.[intDestinationGradeId]
+		,[intDestinationWeightId]			= ARSID.[intDestinationWeightId]
+		,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
+		,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
 	FROM
 		vyuARShippedItemDetail ARSID
 	INNER JOIN
@@ -364,6 +372,10 @@ SELECT
 		,[intPerformerId]					= ARID.[intPerformerId]
 		,[ysnLeaseBilling]					= ARID.[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]			= ARID.[ysnVirtualMeterReading]
+		,[intDestinationGradeId]			= ISI.[intDestinationGradeId]
+		,[intDestinationWeightId]			= ISI.[intDestinationWeightId]
+		,[intSubCurrencyId]					= ARID.[intSubCurrencyId]
+		,[dblSubCurrencyRate]				= ARID.[dblSubCurrencyRate]
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -385,7 +397,7 @@ SELECT
 															ON IC.[intInventoryShipmentItemId] = AR.[intInventoryShipmentItemId]  
 													WHERE AR.[intInvoiceId] = @InvoiceId
 												)
-	
+
 
 END TRY
 BEGIN CATCH
@@ -400,16 +412,19 @@ END CATCH
 DECLARE	@CurrentErrorMessage NVARCHAR(250)
 		,@CreatedIvoices NVARCHAR(MAX)
 		,@UpdatedIvoices NVARCHAR(MAX)	
+
+DECLARE @LineItemTaxes AS LineItemTaxDetailStagingTable
 				
 BEGIN TRY
 EXEC [dbo].[uspARProcessInvoices]
-	 @InvoiceEntries	= @EntriesForInvoice
-	,@UserId			= @UserId
-	,@GroupingOption	= 11
-	,@RaiseError		= @RaiseError
-	,@ErrorMessage		= @CurrentErrorMessage	OUTPUT
-	,@CreatedIvoices	= @CreatedIvoices		OUTPUT
-	,@UpdatedIvoices	= @UpdatedIvoices		OUTPUT
+	 @InvoiceEntries		= @EntriesForInvoice
+	,@LineItemTaxEntries	= @LineItemTaxes
+	,@UserId				= @UserId
+	,@GroupingOption		= 11
+	,@RaiseError			= @RaiseError
+	,@ErrorMessage			= @CurrentErrorMessage	OUTPUT
+	,@CreatedIvoices		= @CreatedIvoices		OUTPUT
+	,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
 
 
 	IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0

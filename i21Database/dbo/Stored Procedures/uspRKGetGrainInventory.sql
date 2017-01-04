@@ -56,7 +56,7 @@ ROUND((SELECT TOP 1 intInventoryAdjustmentId FROM tblICInventoryAdjustment ia WH
 
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4,5,10)
-JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and il.strDescription <> 'In-Transit' 
+JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
 WHERE intCommodityId=@intCommodityId
 and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
  AND dtmDate BETWEEN @dtmFromTransactionDate and @dtmToTransactionDate  )t
