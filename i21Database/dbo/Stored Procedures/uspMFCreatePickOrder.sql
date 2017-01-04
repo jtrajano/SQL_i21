@@ -46,8 +46,8 @@ BEGIN TRY
 		,@strUnitMeasure NVARCHAR(50)
 		,@strMinQtyCanBeProduced NVARCHAR(50)
 		,@intProductId INT
-		,@intSubstituteItemId int
-		,@intSubstituteItemUOMId int
+		,@intSubstituteItemId INT
+		,@intSubstituteItemUOMId INT
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -394,7 +394,7 @@ BEGIN TRY
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
-			SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId,@intItemUOMId, L.dblQty)) - IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM( L.intItemUOMId,@intItemUOMId, T.dblQty)), 0)
+			SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)) - IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intItemUOMId, @intItemUOMId, T.dblQty)), 0)
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
@@ -453,22 +453,26 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblSubstituteRatio = NULL
 						,@dblMaxSubstituteRatio = NULL
-						,@intSubstituteItemId=NULL
+						,@intSubstituteItemId = NULL
 
 					SELECT @dblSubstituteRatio = dblSubstituteRatio
 						,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
-						,@intSubstituteItemId=intSubstituteItemId
+						,@intSubstituteItemId = intSubstituteItemId
 					FROM @tblSubstituteItem
 					WHERE intItemRecordId = @intItemRecordId
 
-					Select @intUnitMeasureId =intUnitMeasureId from dbo.tblICItemUOM Where intItemUOMId=@intItemUOMId
+					SELECT @intUnitMeasureId = intUnitMeasureId
+					FROM dbo.tblICItemUOM
+					WHERE intItemUOMId = @intItemUOMId
 
-					Select @intSubstituteItemUOMId=intItemUOMId
-					from tblICItemUOM Where intItemId=@intSubstituteItemId AND intUnitMeasureId =@intUnitMeasureId
+					SELECT @intSubstituteItemUOMId = intItemUOMId
+					FROM tblICItemUOM
+					WHERE intItemId = @intSubstituteItemId
+						AND intUnitMeasureId = @intUnitMeasureId
 
 					SELECT @dblAvailableQty = 0
 
-					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId,@intItemUOMId, L.dblQty)) - IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM( L.intItemUOMId,@intItemUOMId, T.dblQty)), 0)
+					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)) - IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intItemUOMId, @intItemUOMId, T.dblQty)), 0)
 					FROM dbo.tblICLot L
 					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
@@ -487,8 +491,6 @@ BEGIN TRY
 					END
 
 					SELECT @dblQty = @dblQty * (@dblMaxSubstituteRatio / 100) * @dblSubstituteRatio
-
-					
 
 					IF @dblAvailableQty - @dblQty >= 0
 					BEGIN
@@ -651,6 +653,10 @@ BEGIN TRY
 
 		RETURN
 	END
+
+	DELETE
+	FROM @OrderDetailInformation
+	WHERE dblQty <= 0
 
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 
