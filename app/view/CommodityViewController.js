@@ -151,6 +151,14 @@ Ext.define('Inventory.view.CommodityViewController', {
                         origValueField: 'intUnitMeasureId',
                         origUpdateField: 'intDefaultPackingUOMId',
                     }
+                },
+                colPurchasingGroup: {
+                    dataIndex: 'strPurchasingGroup',
+                    editor: {
+                        store: '{purchasinggroups}',
+                        origValueField: 'intPurchasingGroupId',
+                        origUpdateField: 'intPurchasingGroupId'
+                    }
                 }
             },
 
@@ -197,6 +205,7 @@ Ext.define('Inventory.view.CommodityViewController', {
                 'tblICCommodityGrades, ' +
                 'tblICCommodityOrigins, ' +
                 'tblICCommodityOrigins.tblICUnitMeasure, ' +
+                'tblICCommodityOrigins.tblSMPurchasingGroup, ' +
                 'tblICCommodityProductLines, ' +
                 'tblICCommodityProductTypes, ' +
                 'tblICCommodityRegions, ' +

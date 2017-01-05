@@ -152,6 +152,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblSMCurrencyMap());
             modelBuilder.Configurations.Add(new tblSMCompanyLocationSubLocationMap());
             modelBuilder.Configurations.Add(new tblSMTaxCodeMap());
+            modelBuilder.Configurations.Add(new tblSMPurchasingGroupMap());
 
             modelBuilder.Configurations.Add(new tblSTPaidOutMap());
             modelBuilder.Configurations.Add(new tblSTStoreMap());

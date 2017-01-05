@@ -32,6 +32,8 @@ Ext.define('Inventory.model.CommodityOrigin', {
         { name: 'intSort', type: 'int'},
         { name: 'intDefaultPackingUOMId', type: 'int' },
         { name: 'strDefaultPackingUOM', type: 'string' },
+        { name: 'intPurchasingGroupId', type: 'int' },
+        { name: 'strPurchasingGroup', type: 'string' },
         { name: 'intCountryID', type: 'int' }
     ],
 

@@ -199,7 +199,37 @@ namespace iRely.Inventory.Model
                 _strDefaultPackingUOM = value;
             }
         }
+        public int? intPurchasingGroupId { get; set; }
+        private string _strPurchasingGroup;
+        [NotMapped]
+        public string strPurchasingGroup
+        {
+            get
+            {
+                if(string.IsNullOrEmpty(_strPurchasingGroup))
+                {
+                    if (tblSMPurchasingGroup != null)
+                        return tblSMPurchasingGroup.strName;
+                    return null;
+                }
+                return _strPurchasingGroup;
+            }
+            set
+            {
+                _strPurchasingGroup = value;
+            }
+        }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblSMPurchasingGroup tblSMPurchasingGroup { get; set; }
+    }
+
+    public class tblSMPurchasingGroup : BaseEntity
+    {
+        public int intPurchasingGroupId { get; set; }
+        public string strName { get; set; }
+        public string strDescription { get; set; }
+
+        public ICollection<tblICCommodityOrigin> tblICCommodityOrigins { get; set; }
     }
 
     public class tblICCommodityProductType : tblICCommodityAttribute

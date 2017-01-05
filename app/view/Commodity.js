@@ -641,9 +641,10 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         includeFullTextSearch: false,
-                                                        flex: 1,
+                                                        flex: 1.5,
                                                         itemId: 'grdOrigin',
                                                         margin: '0 5 0 0',
+                                                        width: 328,
                                                         title: 'Origins',
                                                         columnLines: true,
                                                         dockedItems: [
@@ -685,7 +686,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colOrigin',
-                                                                width: 100,
+                                                                width: 68,
                                                                 dataIndex: 'string',
                                                                 text: 'Origin',
                                                                 editor: {
@@ -712,9 +713,9 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colDefaultPackingUOM',
+                                                                width: 123,
                                                                 dataIndex: 'string',
                                                                 text: 'Default Packing UOM',
-                                                                flex: 1,
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
@@ -740,6 +741,39 @@ Ext.define('Inventory.view.Commodity', {
                                                                     itemId: 'cboDefaultPackingUOM',
                                                                     displayField: 'strUnitMeasure',
                                                                     valueField: 'strUnitMeasure'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colPurchasingGroup',
+                                                                dataIndex: 'string',
+                                                                text: 'Purchasing Group',
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intPurchasingGroupId',
+                                                                            dataType: 'numeric',
+                                                                            text: 'Purchasing Group Id',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strName',
+                                                                            dataType: 'string',
+                                                                            text: 'Purchasing Group',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strDescription',
+                                                                            dataType: 'string',
+                                                                            text: 'Description',
+                                                                            flex: 1
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboPurchasingGroup',
+                                                                    displayField: 'strName',
+                                                                    valueField: 'strName'
                                                                 }
                                                             }
                                                         ],

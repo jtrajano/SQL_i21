@@ -112,6 +112,19 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblSMPurchasingGroupMap: EntityTypeConfiguration<tblSMPurchasingGroup>
+    {
+        public tblSMPurchasingGroupMap()
+        {
+            this.HasKey(t => t.intPurchasingGroupId);
+
+            this.ToTable("tblSMPurchasingGroup");
+            this.Property(t => t.intPurchasingGroupId).HasColumnName("intPurchasingGroupId");
+            this.Property(t => t.strName).HasColumnName("strName");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+        }
+    }
+
     public class tblICCommodityClassVariantMap : EntityTypeConfiguration<tblICCommodityClassVariant>
     {
         public tblICCommodityClassVariantMap()
@@ -138,6 +151,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICUnitMeasure)
                 .WithMany(p => p.tblICCommodityOrigins)
                 .HasForeignKey(p => p.intDefaultPackingUOMId);
+            this.HasOptional(p => p.tblSMPurchasingGroup)
+                .WithMany(p => p.tblICCommodityOrigins)
+                .HasForeignKey(p => p.intPurchasingGroupId);
         }
     }
 
