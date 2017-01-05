@@ -623,6 +623,7 @@ BEGIN
 			,[ysnPostedCSV]
 			,[strForeignCardId]
 			,[ysnDuplicate]
+			,[strOriginalProductNumber]
 		)
 		VALUES
 		(
@@ -664,6 +665,7 @@ BEGIN
 			,@ysnPostedCSV  
 			,@strCardId
 			,@ysnDuplicate
+			,@strProductId
 		)			
 	
 		DECLARE @Pk	INT		
@@ -676,8 +678,8 @@ BEGIN
 		------------------------------------------------------------
 		IF(@intARItemId = 0 OR @intARItemId IS NULL)
 		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
+			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
 		END

@@ -1,6 +1,6 @@
 ﻿CREATE  PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
- @ProductId				INT    
+ @ProductId				INT				
 ,@CardId				INT				
 ,@SiteId				INT    
 ,@TransactionDate		DATETIME			    
@@ -88,8 +88,12 @@ BEGIN
 	DECLARE @strSiteGroup					NVARCHAR(MAX)
 	DECLARE @dblPriceProfileRate			NUMERIC(18,6)
 	DECLARE @dblPriceIndexRate				NUMERIC(18,6)
-	DECLARE	@dtmPriceIndexDate				DATETIME					
-
+	DECLARE	@dtmPriceIndexDate				DATETIME		
+	
+				
+	DECLARE @intProductId					INT
+	DECLARE @strProductNumber				NVARCHAR(MAX)
+	DECLARE @strItemId						NVARCHAR(MAX)
 
 
 	-- IF RECALCULATE FROM IMPORTING--
@@ -103,6 +107,9 @@ BEGIN
 	END
 		CREATE TABLE ##tblCFTransactionPricingType (
 		 intItemId						INT
+		,intProductId					INT
+		,strProductNumber				NVARCHAR(MAX)
+		,strItemId						NVARCHAR(MAX)
 		,intCustomerId					INT
 		,intLocationId					INT
 		,dblQuantity					NUMERIC(18,6)
@@ -232,22 +239,93 @@ BEGIN
 	FROM tblCFSite as cfSite
 	WHERE cfSite.intSiteId = @intSiteId
 
-	--GET IC ITEM ID BY SITE--
-	SELECT TOP 1
-		@intItemId = cfItem.intARItemId
-	FROM tblCFItem as cfItem 
-	WHERE cfItem.intSiteId = @intSiteId
-	AND cfItem.intItemId = @ProductId
-	
-	--GET IC ITEM ID BY NETWORK--
-	IF (@intItemId IS NULL)
+	------------ORIGINAL VALUE----------
+	DECLARE @strOriginalProduct NVARCHAR(MAX)
+	IF(@ProductId = 0 AND @TransactionId IS NOT NULL)
 	BEGIN
+		SELECT TOP 1 @strOriginalProduct = strOriginalProductNumber 
+		FROM tblCFTransaction 
+		WHERE intTransactionId = @TransactionId
+
+		--GET IC ITEM ID BY SITE--
 		SELECT TOP 1
-			@intItemId = cfItem.intARItemId
+			@intItemId = cfItem.intARItemId,
+			@intProductId = cfItem.intItemId,
+			@strProductNumber = cfItem.strProductNumber,
+			@strItemId = icItem.strItemNo
 		FROM tblCFItem as cfItem 
-		WHERE cfItem.intNetworkId = @intNetworkId
-		AND cfItem.intItemId = @ProductId
+		INNER JOIN tblICItem as icItem
+		ON cfItem.intARItemId = icItem.intItemId
+		WHERE cfItem.intSiteId = @intSiteId
+		AND cfItem.intNetworkId = @intNetworkId
+		AND cfItem.strProductNumber = @strOriginalProduct
+	
+		--GET IC ITEM ID BY NETWORK--
+		IF (@intItemId IS NULL)
+		BEGIN
+			SELECT TOP 1
+				@intItemId = cfItem.intARItemId,
+				@intProductId = cfItem.intItemId,
+				@strProductNumber = cfItem.strProductNumber,
+				@strItemId = icItem.strItemNo
+			FROM tblCFItem as cfItem 
+			INNER JOIN tblICItem as icItem
+			ON cfItem.intARItemId = icItem.intItemId
+			WHERE cfItem.intNetworkId = @intNetworkId
+			AND cfItem.strProductNumber = @strOriginalProduct
+		END
+
+		IF (@intItemId IS NULL)
+		BEGIN
+
+			INSERT INTO tblCFTransactionNote (
+				intTransactionId
+				,strProcess
+				,dtmProcessDate
+				,strNote
+				,strGuid
+			)
+			SELECT 
+				@intTransactionId
+				,'Calculation'
+				,@runDate
+				,'Unable to find product number ' + @strOriginalProduct + ' into i21 item list'
+				,@guid
+		END
+
 	END
+	ELSE
+	BEGIN
+		--GET IC ITEM ID BY SITE--
+		SELECT TOP 1
+			@intItemId = cfItem.intARItemId,
+			@intProductId = cfItem.intItemId,
+			@strProductNumber = cfItem.strProductNumber,
+			@strItemId = icItem.strItemNo
+		FROM tblCFItem as cfItem 
+		INNER JOIN tblICItem as icItem
+		ON cfItem.intARItemId = icItem.intItemId
+		WHERE cfItem.intSiteId = @intSiteId
+		AND cfItem.intNetworkId = @intNetworkId
+		AND cfItem.intItemId = @ProductId
+	
+		--GET IC ITEM ID BY NETWORK--
+		IF (@intItemId IS NULL)
+		BEGIN
+			SELECT TOP 1
+				@intItemId = cfItem.intARItemId,
+				@intProductId = cfItem.intItemId,
+				@strProductNumber = cfItem.strProductNumber,
+				@strItemId = icItem.strItemNo
+			FROM tblCFItem as cfItem 
+			INNER JOIN tblICItem as icItem
+			ON cfItem.intARItemId = icItem.intItemId
+			WHERE cfItem.intNetworkId = @intNetworkId
+			AND cfItem.intItemId = @ProductId
+		END
+	END
+
+	------------ORIGINAL VALUE----------
 
 	--GET IC ITEM UOM ID--
 	SELECT TOP 1
@@ -1523,6 +1601,9 @@ BEGIN
 			INSERT INTO ##tblCFTransactionPricingType
 			(
 			 intItemId
+			,intProductId		
+			,strProductNumber	
+			,strItemId			
 			,intCustomerId
 			,intLocationId
 			,dblQuantity
@@ -1555,6 +1636,9 @@ BEGIN
 			)
 			SELECT
 			 @intItemId					AS intItemId
+			,@intProductId				AS intProductId		
+			,@strProductNumber			AS strProductNumber	
+			,@strItemId					AS strItemId			
 			,@intCustomerId				AS intCustomerId
 			,@intLocationId				AS intLocationId
 			,@dblQuantity				AS dblQuantity
@@ -1589,6 +1673,9 @@ BEGIN
 		BEGIN
 			SELECT
 			 @intItemId					AS intItemId
+			,@intProductId				AS intProductId		
+			,@strProductNumber			AS strProductNumber	
+			,@strItemId					AS strItemId			
 			,@intCustomerId				AS intCustomerId
 			,@intLocationId				AS intLocationId
 			,@dblQuantity				AS dblQuantity
