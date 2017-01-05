@@ -19,6 +19,7 @@
 	[strRetrospective] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strImageId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intNumberOfAttendee] [int] null,
+	[strURL] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCRMCampaign_intCampaignId] PRIMARY KEY CLUSTERED ([intCampaignId] ASC),
 	CONSTRAINT [UQ_tblCRMCampaign_strCampaignName] UNIQUE ([strCampaignName]),
