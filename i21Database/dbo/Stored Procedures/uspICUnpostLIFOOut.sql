@@ -101,3 +101,17 @@ FROM	dbo.tblICInventoryLIFO LIFOBucket INNER JOIN (
 			ON LIFOOutGrouped.intInventoryLIFOId = LIFOBucket.intInventoryLIFOId
 WHERE	ISNULL(LIFOBucket.ysnIsUnposted, 0) = 0
 ;
+
+-- Update lifo out. Update dblQtyReturned. 
+UPDATE	cbOut
+SET		cbOut.dblQtyReturned = cbOut.dblQtyReturned - rtn.dblQtyReturned
+FROM	tblICInventoryLIFOOut cbOut CROSS APPLY (
+			SELECT	rtn.intInventoryLIFOId
+					,rtn.intOutId
+					,dblQtyReturned = SUM(rtn.dblQtyReturned) 
+			FROM	tblICInventoryReturned rtn 
+			WHERE	rtn.intTransactionId = @intTransactionId
+					AND rtn.strTransactionId = @strTransactionId
+			GROUP BY rtn.intInventoryLIFOId, rtn.intOutId
+		) rtn
+;

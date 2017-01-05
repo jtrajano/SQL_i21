@@ -44,7 +44,14 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb.dbo.##ContractProperty') IS NOT NULL
 		DROP TABLE ##ContractProperty
 
-	SELECT @SQL = 'CREATE TABLE ##ContractProperty (intSampleId INT,strContractNumber INT,strName INT,strContractItemName INT,strBundleItemNo INT,strItemNo INT,strDescription INT,strLoadNumber INT,strContainerNumber INT,strMarks INT,strShipperCode INT,strShipperName INT,strSubLocationName INT,strSampleNumber INT,strSampleTypeName INT,strStatus INT,dtmSampleReceivedDate INT,dtmSamplingEndDate INT,strComment INT,' + @str + ')'
+	IF ISNULL(@str, '') <> ''
+	BEGIN
+		SELECT @SQL = 'CREATE TABLE ##ContractProperty (intSampleId INT,strContractNumber INT,strName INT,strContractItemName INT,strBundleItemNo INT,strItemNo INT,strDescription INT,strLoadNumber INT,strContainerNumber INT,strMarks INT,strShipperCode INT,strShipperName INT,strSubLocationName INT,strSampleNumber INT,strSampleTypeName INT,strStatus INT,dtmSampleReceivedDate INT,dtmSamplingEndDate INT,strComment INT,' + @str + ')'
+	END
+	ELSE
+	BEGIN
+		SELECT @SQL = 'CREATE TABLE ##ContractProperty (intSampleId INT,strContractNumber INT,strName INT,strContractItemName INT,strBundleItemNo INT,strItemNo INT,strDescription INT,strLoadNumber INT,strContainerNumber INT,strMarks INT,strShipperCode INT,strShipperName INT,strSubLocationName INT,strSampleNumber INT,strSampleTypeName INT,strStatus INT,dtmSampleReceivedDate INT,dtmSamplingEndDate INT,strComment INT)'
+	END
 
 	EXEC sp_executesql @SQL
 

@@ -43,7 +43,14 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb.dbo.##ParentLotProperty') IS NOT NULL
 		DROP TABLE ##ParentLotProperty
 
-	SELECT @SQL = 'CREATE TABLE ##ParentLotProperty (intSampleId INT,intItemId INT,intLotId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strLotNumber INT,strLotStatus INT,strLotAlias INT,dblLotQty INT,strUnitMeasure INT,dtmDateCreated INT,strSampleNumber INT,strSampleStatus INT,strComment INT,' + @str + ')'
+	IF ISNULL(@str, '') <> ''
+	BEGIN
+		SELECT @SQL = 'CREATE TABLE ##ParentLotProperty (intSampleId INT,intItemId INT,intLotId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strLotNumber INT,strLotStatus INT,strLotAlias INT,dblLotQty INT,strUnitMeasure INT,dtmDateCreated INT,strSampleNumber INT,strSampleStatus INT,strComment INT,' + @str + ')'
+	END
+	ELSE
+	BEGIN
+		SELECT @SQL = 'CREATE TABLE ##ParentLotProperty (intSampleId INT,intItemId INT,intLotId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strLotNumber INT,strLotStatus INT,strLotAlias INT,dblLotQty INT,strUnitMeasure INT,dtmDateCreated INT,strSampleNumber INT,strSampleStatus INT,strComment INT)'
+	END
 
 	EXEC sp_executesql @SQL
 

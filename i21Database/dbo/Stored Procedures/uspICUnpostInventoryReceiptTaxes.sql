@@ -111,13 +111,13 @@ BEGIN
 				,intTransactionId					= Receipt.intInventoryReceiptId				
 				,strTransactionId					= Receipt.strReceiptNumber
 				,intReceiptItemTaxId				= ReceiptTaxes.intInventoryReceiptItemTaxId
-				,dblTax								=	ReceiptTaxes.dblTax + ISNULL(@OtherChargeTaxes,0)
-														--/ 
-														--CASE	WHEN ReceiptItem.ysnSubCurrency = 1 THEN 
-														--			CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Receipt.intSubCurrencyCents, 1) ELSE 1 END 
-														--		ELSE 
-														--			1
-														--END
+				,dblTax								=	
+													CASE WHEN Receipt.strReceiptType = 'Inventory Return' 
+															THEN -(ReceiptTaxes.dblTax + ISNULL(@OtherChargeTaxes,0))
+														ELSE
+															ReceiptTaxes.dblTax + ISNULL(@OtherChargeTaxes,0)
+													END 
+
 				,intTransactionTypeId				= @intTransactionTypeId
 				,intCurrencyId						= Receipt.intCurrencyId
 				,dblExchangeRate					= 1

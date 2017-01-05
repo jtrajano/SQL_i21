@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICReturnReceipt]
 	@intReceiptId AS INT
 	,@intEntityUserSecurityId AS INT = NULL 
-	,@intInventoryReturnId INT OUTPUT
+	,@intInventoryReturnId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -18,6 +18,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @strReceiptNumber AS NVARCHAR(50)
 		,@ysnPosted AS BIT 
+		,@strReceiptType AS NVARCHAR(50)
 
 -- Validate if the Inventory Receipt exists   
 IF @intReceiptId IS NULL  
@@ -30,6 +31,7 @@ END
 SELECT TOP 1 
 		@strReceiptNumber = r.strReceiptNumber
 		,@ysnPosted = r.ysnPosted
+		,@strReceiptType = r.strReceiptType 
 FROM	tblICInventoryReceipt r
 WHERE	r.intInventoryReceiptId = @intReceiptId
 
@@ -48,15 +50,24 @@ BEGIN
 	GOTO ReturnReceipt_Exit  
 END 
 
+IF @strReceiptType = 'Transfer Order'
+BEGIN 
+	-- 'Cannot return {Receipt Id} because it is a Transfer Order.'
+	RAISERROR(80103, 11, 1, @strReceiptNumber)  
+	GOTO ReturnReceipt_Exit  
+END 
+
 -- Get the starting number 
 BEGIN 
 	-- Get the starting number 
 	DECLARE @strInventoryReturnId AS NVARCHAR(50)
-			,@strReceiptType AS NVARCHAR(50) = 'Inventory Return'
+			,@receiptType AS NVARCHAR(50) = 'Inventory Return'
 			,@STARTING_NUMBER_BATCH AS INT = 107
 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strInventoryReturnId OUTPUT  
 END 
+
+SET @intInventoryReturnId = NULL
 
 -- Create a new Inventory Return Transaction (header). 
 BEGIN 
@@ -103,7 +114,7 @@ BEGIN
 			,ysnOrigin
 			,intSourceInventoryReceiptId 
 	)
-	SELECT	strReceiptType = @strReceiptType
+	SELECT	strReceiptType = @receiptType
 			,intSourceType
 			,intEntityVendorId
 			,intTransferorId

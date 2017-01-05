@@ -65,16 +65,19 @@ BEGIN
 	EXEC dbo.uspICGetItemsFromItemReceipt
 		@intReceiptId = @intTransactionId		
 
-	-- Negate if processing Inventory Return
+	-- Negate the Qty if posting an Inventory Return
 	UPDATE	@ItemsFromInventoryReceipt
-	SET		dblQty = CASE WHEN @ysnPost = 1 THEN dblQty ELSE -dblQty END 
-			,intLoadReceive = CASE WHEN @ysnPost = 1 THEN intLoadReceive ELSE -intLoadReceive END 
+	SET		dblQty = -dblQty 
+			,intLoadReceive = -intLoadReceive 
 	FROM	@ItemsFromInventoryReceipt
 	WHERE	strReceiptType = @RECEIPT_TYPE_INVENTORY_RETURN
+			AND ISNULL(@ysnPost, 0) = 1
 
+	-- Negate the Qty if unposting the transaction. 
 	UPDATE	@ItemsFromInventoryReceipt
-	SET		dblQty = CASE WHEN @ysnPost = 1 THEN dblQty ELSE -dblQty END 
-			,intLoadReceive = CASE WHEN @ysnPost = 1 THEN intLoadReceive ELSE -intLoadReceive END 
+	SET		dblQty = -dblQty 
+			,intLoadReceive = -intLoadReceive 
+	WHERE	ISNULL(@ysnPost, 0) = 0 
 END
 
 -- Get the receipt-type and source-type from tblICInventoryReceipt
@@ -100,7 +103,7 @@ BEGIN
 	IF	@ReceiptType = @RECEIPT_TYPE_INVENTORY_RETURN 
 	BEGIN 
 		-- Check if the source IR is a purchase contract 
-		IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt r WHERE r.intInventoryReceiptId = @intTransactionId AND r.strReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT)
+		IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt r WHERE r.intSourceInventoryReceiptId = @intTransactionId AND r.strReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT)
 		BEGIN 
 			EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 		END 		

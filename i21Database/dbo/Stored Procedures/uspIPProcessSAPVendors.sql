@@ -28,6 +28,8 @@ Select @intTermId=intTermID From tblSMTerm Where strTerm=@strTerm
 
 Select @intCurrencyId=intCurrencyID From tblSMCurrency Where strCurrency=@strCurrency
 
+DECLARE @tblEntityContactIdOutput table (intEntityId int)
+
 If ISNULL(@intTermId,0)=0
 	RaisError('Term not found.',16,1)
 
@@ -53,26 +55,26 @@ Begin
 
 	--Entity Location
 	Insert Into tblEMEntityLocation(intEntityId,strLocationName,strAddress,strCity,strCountry,strZipCode,intTermsId,ysnDefaultLocation,ysnActive)
-	Select @intEntityId,LEFT(@strVendorName,50),strAddress,strCity,strCountry,strZipCode,@intTermId,1,1
+	Select @intEntityId,LEFT(strCity,50),ISNULL(strAddress,'') + ' ' + ISNULL(strAddress1,'') ,strCity,strCountry,strZipCode,@intTermId,1,1
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intEntityLocationId=SCOPE_IDENTITY()
 
 	--Vendor
-	Insert Into tblAPVendor(intEntityVendorId,intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit)
-	Select @intEntityId,@intCurrencyId,@strEntityNo,1,strTaxNo,@intEntityLocationId,@intEntityLocationId,strFLOId,0,0,0.0
+	Insert Into tblAPVendor(intEntityVendorId,intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit,strVendorAccountNum)
+	Select @intEntityId,@intCurrencyId,@strEntityNo,1,strTaxNo,@intEntityLocationId,@intEntityLocationId,strFLOId,0,0,0.0,strAccountNo
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	--Add Contacts to Entity table
 	Insert Into tblEMEntity(strName,strContactNumber,ysnActive)
-	Select strName,strName,1
+	OUTPUT inserted.intEntityId INTO @tblEntityContactIdOutput
+	Select ISNULL([strFirstName],'') + ' ' + ISNULL([strLastName],''),ISNULL([strFirstName],'') + ' ' + ISNULL([strLastName],''),1
 	From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 
 	--Map Contacts to Vendor
 	Insert Into tblEMEntityToContact(intEntityId,intEntityContactId,intEntityLocationId,ysnPortalAccess)
 	Select @intEntityId,intEntityId,@intEntityLocationId,0
-	From tblEMEntity Where strName In (Select strName From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId)
-	AND intEntityId>@intEntityId
+	From @tblEntityContactIdOutput
 
 	--Set default contact
 	Update tblEMEntityToContact Set ysnDefaultContact=1 Where intEntityToContactId=(Select TOP 1 intEntityToContactId From tblEMEntityToContact Where intEntityId=@intEntityId)
@@ -80,14 +82,14 @@ Begin
 	--Add Phone
 	Insert Into tblEMEntityPhoneNumber(intEntityId,strPhone,intCountryId)
 	Select intEntityId,ec.strPhone,(Select TOP 1 intCountryID From tblSMCountry Where strCountry=(Select strCountry From tblEMEntityLocation Where intEntityLocationId=@intEntityLocationId))
-	From tblEMEntity e Join tblIPEntityContactStage ec on e.strName=ec.strName 
+	From tblEMEntity e Join tblIPEntityContactStage ec on e.strName=ISNULL(ec.strFirstName,'') + ' ' + ISNULL(ec.strLastName,'')
 	Where ec.intStageEntityId=@intStageEntityId
 	AND intEntityId>@intEntityId
 End
 Else
 Begin --Update
 	Update tblEMEntityLocation 
-	Set strAddress=(Select strAddress From tblIPEntityStage Where intStageEntityId=@intStageEntityId),
+	Set strAddress=(Select ISNULL(strAddress,'') + ' ' + ISNULL(strAddress1,'') From tblIPEntityStage Where intStageEntityId=@intStageEntityId),
 	strCity=(Select strCity From tblIPEntityStage Where intStageEntityId=@intStageEntityId),
 	strCountry=(Select strCountry From tblIPEntityStage Where intStageEntityId=@intStageEntityId),
 	strZipCode=(Select strZipCode From tblIPEntityStage Where intStageEntityId=@intStageEntityId),
@@ -96,14 +98,14 @@ Begin --Update
 End
 
 	--Move to Archive
-	Insert into tblIPEntityArchive(strName,strEntityType,strAddress,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName)
-	Select strName,strEntityType,strAddress,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName
+	Insert into tblIPEntityArchive(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName)
+	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
 
-	Insert Into tblIPEntityContactArchive(intStageEntityId,strEntityName,strName,strFirstName,strPhone)
-	Select @intNewStageEntityId,@strVendorName,strName,strFirstName,strPhone
+	Insert Into tblIPEntityContactArchive(intStageEntityId,strEntityName,strFirstName,strLastName,strPhone)
+	Select @intNewStageEntityId,@strVendorName,strFirstName,strLastName,strPhone
 	From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 
 	Delete From tblIPEntityStage Where intStageEntityId=@intStageEntityId
@@ -121,14 +123,14 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	--Move to Error
-	Insert into tblIPEntityError(strName,strEntityType,strAddress,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus)
-	Select strName,strEntityType,strAddress,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName,@ErrMsg,'Failed'
+	Insert into tblIPEntityError(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus)
+	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName,@ErrMsg,'Failed'
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
 
-	Insert Into tblIPEntityContactError(intStageEntityId,strEntityName,strName,strFirstName,strPhone)
-	Select @intNewStageEntityId,@strVendorName,strName,strFirstName,strPhone
+	Insert Into tblIPEntityContactError(intStageEntityId,strEntityName,strFirstName,strLastName,strPhone)
+	Select @intNewStageEntityId,@strVendorName,strFirstName,strLastName,strPhone
 	From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 
 	Delete From tblIPEntityStage Where intStageEntityId=@intStageEntityId

@@ -174,7 +174,7 @@ BEGIN
 		[intEntityId]			=	@userId,
 		[ysnPosted]				=	0,
 		[ysnPaid]				=	0,
-		[intTransactionType]	=	CASE WHEN @receiptAmount > 0 THEN 1 ELSE 3 END,
+		[intTransactionType]	=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END, -- CASE WHEN @receiptAmount > 0 THEN 1 ELSE 3 END,
 		[dblDiscount]			=	0,
 		[dblWithheld]			=	0,
 		[intStoreLocationId]	=	A.intLocationId,

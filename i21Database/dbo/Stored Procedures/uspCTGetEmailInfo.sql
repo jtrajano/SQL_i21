@@ -93,7 +93,7 @@ BEGIN
 	SET @body +='#SIGNATURE#'
 	SET @body +='</html>'
 
-	SET @Filter = '[{"column":"intEntityId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+	SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 	
 	SELECT @Subject AS strSubject,@Filter AS strFilters,@body AS strMessage
 END

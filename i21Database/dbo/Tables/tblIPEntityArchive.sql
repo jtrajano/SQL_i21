@@ -4,6 +4,7 @@
 	strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strEntityType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strAddress NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	strAddress1 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	strCity NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	strState NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	strCountry NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,

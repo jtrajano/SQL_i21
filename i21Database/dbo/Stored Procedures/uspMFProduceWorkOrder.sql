@@ -29,7 +29,7 @@
 	,@intInputLotId INT = NULL
 	,@intInputStorageLocationId INT = NULL
 	,@ysnFillPartialPallet BIT = 0
-	,@intSpecialPalletLotId int=NULL
+	,@intSpecialPalletLotId INT = NULL
 	)
 AS
 BEGIN
@@ -38,6 +38,7 @@ BEGIN
 		,@intBusinessShiftId INT
 		,@intWorkOrderProducedLotId INT
 		,@intItemOwnerId INT
+		,@intOwnerId INT
 
 	SELECT @dtmCreated = Getdate()
 
@@ -144,8 +145,6 @@ BEGIN
 		,@intSpecialPalletLotId
 
 	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
-
-	
 
 	UPDATE tblMFWorkOrder
 	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) + (
@@ -288,6 +287,7 @@ BEGIN
 	END
 
 	SELECT @intItemOwnerId = intItemOwnerId
+		,@intOwnerId = intOwnerId
 	FROM tblICItemOwner
 	WHERE intItemId = @intItemId
 		AND ysnActive = 1
@@ -306,6 +306,17 @@ BEGIN
 		SELECT 1
 			,@intLotId
 			,@intItemOwnerId
+
+		INSERT INTO tblMFItemOwnerDetail (
+			intLotId
+			,intItemId
+			,intOwnerId
+			,dtmFromDate
+			)
+		SELECT @intLotId
+			,@intItemId
+			,@intOwnerId
+			,@dtmProductionDate
 	END
 	ELSE
 	BEGIN

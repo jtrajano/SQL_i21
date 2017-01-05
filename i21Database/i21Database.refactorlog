@@ -5593,4 +5593,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnSend" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="306a7e48-6f3d-43a1-a488-369e12292126" ChangeDateTime="01/04/2017 13:45:40">
+    <Property Name="ElementName" Value="[dbo].[tblIPEntityContactStage].[strName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIPEntityContactStage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strLastName]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9a0efb2d-47fc-4131-8b3f-ef7c59d8643b" ChangeDateTime="01/04/2017 13:47:01">
+    <Property Name="ElementName" Value="[dbo].[tblIPEntityContactArchive].[strName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIPEntityContactArchive]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strLastName]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b3a554df-0b12-41eb-87fb-d305d4897496" ChangeDateTime="01/04/2017 13:48:00">
+    <Property Name="ElementName" Value="[dbo].[tblIPEntityContactError].[strName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIPEntityContactError]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strLastName]" />
+  </Operation>
 </Operations>

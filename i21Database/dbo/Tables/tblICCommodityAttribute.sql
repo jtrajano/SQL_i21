@@ -18,9 +18,11 @@ Type the overview for the table here.
 		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intDefaultPackingUOMId] INT NULL,
 		[intCountryID] INT NULL,
+		[intPurchasingGroupId] INT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodityAttribute] PRIMARY KEY ([intCommodityAttributeId]), 
+		CONSTRAINT [PK_tblICCommodityAttribute_tblSMPurchasingGroup] FOREIGN KEY ([intPurchasingGroupId]) REFERENCES [tblSMPurchasingGroup] ([intPurchasingGroupId]),
 		CONSTRAINT [PK_tblICCommodityAttribute_tblSMCountry] FOREIGN KEY ([intCountryID]) REFERENCES [tblSMCountry] ([intCountryID]),
 		CONSTRAINT [PK_tblICCommodityAttribute_tblICUnitMeasure] FOREIGN KEY ([intDefaultPackingUOMId]) REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICCommodityAttribute_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]) ON DELETE CASCADE

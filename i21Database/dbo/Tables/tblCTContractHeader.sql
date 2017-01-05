@@ -54,6 +54,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intLoadCategoryUnitMeasureId] INT NULL,
 	[intArbitrationId] INT NULL,
 	[intProducerId] INT NULL,
+	[ysnClaimsToProducer] BIT,
 	[ysnExported] BIT NULL,
 	[dtmExported] DATETIME NULL,
 	intCreatedById INT,
