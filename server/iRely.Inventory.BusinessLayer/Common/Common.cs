@@ -40,11 +40,14 @@ namespace iRely.Inventory.BusinessLayer
         {
             var _db = new Repository(new Inventory.Model.InventoryEntities());
             tblSMStartingNumber startingNumber = _db.GetQuery<tblSMStartingNumber>().Find((int)transaction);
-
-            string strTransactionId = string.Concat(startingNumber.strPrefix, startingNumber.intNumber);
-            startingNumber.intNumber += 1;
-            _db.Save();
-
+            string strTransactionId = string.Empty;
+            if (startingNumber != null)
+            {
+                strTransactionId = string.Concat(startingNumber.strPrefix.ToString(), startingNumber.intNumber.ToString());
+                startingNumber.intNumber += 1;
+                _db.Save();
+                _db.Dispose();
+            }
             return strTransactionId;
         }
 
@@ -52,13 +55,15 @@ namespace iRely.Inventory.BusinessLayer
         {
             var _db = new Repository(new Inventory.Model.InventoryEntities());
             tblSMStartingNumber startingNumber = await _db.GetQuery<tblSMStartingNumber>().FindAsync((int)transaction);
+            string strTransactionId = string.Empty;
+            if (startingNumber != null)
+            {
+                strTransactionId = string.Concat(startingNumber.strPrefix.ToString(), startingNumber.intNumber.ToString());
+                startingNumber.intNumber += 1;
+                await _db.SaveAsync(false);
 
-            string strTransactionId = string.Concat(startingNumber.strPrefix, startingNumber.intNumber);
-            startingNumber.intNumber += 1;
-            await _db.SaveAsync(false);
-
-            _db.Dispose();
-
+                _db.Dispose();
+            }
             return strTransactionId;
         }
 
