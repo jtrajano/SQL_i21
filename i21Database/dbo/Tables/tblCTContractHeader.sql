@@ -105,3 +105,15 @@ GO
 
 CREATE STATISTICS [_dta_stat_34411492_1_4_3] ON [dbo].[tblCTContractHeader]([intContractHeaderId], [intEntityId], [intContractTypeId])
 GO
+
+CREATE STATISTICS [_dta_stat_34411492_30] ON [dbo].[tblCTContractHeader]([intPositionId])
+GO
+
+CREATE STATISTICS [_dta_stat_34411492_4_30] ON [dbo].[tblCTContractHeader]([intEntityId], [intPositionId])
+GO
+
+CREATE STATISTICS [_dta_stat_34411492_1_30_29] ON [dbo].[tblCTContractHeader]([intContractHeaderId], [intPositionId], [intContractBasisId])
+GO
+
+CREATE STATISTICS [_dta_stat_34411492_29_30_4_1] ON [dbo].[tblCTContractHeader]([intContractBasisId], [intPositionId], [intEntityId], [intContractHeaderId])
+GO
