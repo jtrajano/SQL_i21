@@ -292,38 +292,41 @@ BEGIN
 	WHERE intItemId = @intItemId
 		AND ysnActive = 1
 
-	IF NOT EXISTS (
+	IF @intItemOwnerId IS NOT NULL
+	BEGIN
+		IF NOT EXISTS (
+				SELECT 1
+				FROM tblMFLotInventory
+				WHERE intLotId = @intLotId
+				)
+		BEGIN
+			INSERT INTO tblMFLotInventory (
+				intConcurrencyId
+				,intLotId
+				,intItemOwnerId
+				)
 			SELECT 1
-			FROM tblMFLotInventory
-			WHERE intLotId = @intLotId
-			)
-	BEGIN
-		INSERT INTO tblMFLotInventory (
-			intConcurrencyId
-			,intLotId
-			,intItemOwnerId
-			)
-		SELECT 1
-			,@intLotId
-			,@intItemOwnerId
+				,@intLotId
+				,@intItemOwnerId
 
-		INSERT INTO tblMFItemOwnerDetail (
-			intLotId
-			,intItemId
-			,intOwnerId
-			,dtmFromDate
-			)
-		SELECT @intLotId
-			,@intItemId
-			,@intOwnerId
-			,@dtmProductionDate
-	END
-	ELSE
-	BEGIN
-		UPDATE tblMFLotInventory
-		SET intItemOwnerId = @intItemOwnerId
-			,intConcurrencyId = (intConcurrencyId + 1)
-		WHERE intLotId = @intLotId
+			INSERT INTO tblMFItemOwnerDetail (
+				intLotId
+				,intItemId
+				,intOwnerId
+				,dtmFromDate
+				)
+			SELECT @intLotId
+				,@intItemId
+				,@intOwnerId
+				,@dtmProductionDate
+		END
+		ELSE
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET intItemOwnerId = @intItemOwnerId
+				,intConcurrencyId = (intConcurrencyId + 1)
+			WHERE intLotId = @intLotId
+		END
 	END
 
 	UPDATE tblMFWorkOrderProducedLot
