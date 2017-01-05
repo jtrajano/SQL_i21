@@ -3985,7 +3985,6 @@
     <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityLineOfBusiness.sql" />
-    <Build Include="vyuSCTicketFormatView.sql" />
     <Build Include="dbo\Tables\tblSCTicketEmailOption.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
     <Build Include="dbo\Functions\fnMFConvertCostToTargetItemUOM.sql" />
@@ -4823,6 +4822,8 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessLoadToIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetBlendDemandNetMonth.sql" />
     <Build Include="dbo\Tables\tblCRMHoursWorked.sql" />
+    <Build Include="dbo\Views\vyuSCTicketFormatView.sql" />
+    <Build Include="dbo\Views\vyuSCTicketTypeView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
