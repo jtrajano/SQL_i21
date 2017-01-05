@@ -15,8 +15,7 @@ AS
 			CR.strCategoryCode,
 			IM.intCommodityId,
 			CO.strCommodityCode,
-			OG.strCountry AS strOrigin,
-			OG.intPurchasingGroupId
+			OG.strCountry AS strOrigin
 
 	FROM	tblICItem			IM
 	JOIN	tblICItemLocation	IL	ON	IL.intItemId		=	IM.intItemId		LEFT
