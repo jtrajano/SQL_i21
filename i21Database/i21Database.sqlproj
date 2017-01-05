@@ -4742,7 +4742,6 @@
     <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentCustomer.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostView.sql" />
-    
     <Build Include="dbo\Tables\tblGLMulticurrencySetting.sql" />
     <Build Include="dbo\Tables\tblGRSettleStorage.sql" />
     <Build Include="dbo\Tables\tblGRSettleStorageTicket.sql" />
@@ -4756,6 +4755,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSetSampleLotStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReport.sql" />
     <Build Include="dbo\Tables\tblMFItemOwnerDetail.sql" />
+    <Build Include="dbo\Tables\tblCTContractFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
