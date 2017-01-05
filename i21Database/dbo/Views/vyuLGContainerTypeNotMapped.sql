@@ -12,11 +12,15 @@ SELECT CT.intContainerTypeId
 	  ,CT.dblGrossWeight
 	  ,CT.intWeightUnitMeasureId
 	  ,CTCQ.intContainerTypeCommodityQtyId
+	  ,CTCQ.dblBulkQuantity
+	  ,CTCQ.intCommodityAttributeId
 	  ,CTCQ.dblQuantity
-	  ,C.strCommodityCode
+	  ,CA.strDescription AS strOrigin
+	  ,C.strCommodityCode 
 	  ,C.strDescription AS strCommodityDescription
 	  ,UM.strUnitMeasure
 FROM tblLGContainerType CT
-JOIN tblLGContainerTypeCommodityQty CTCQ ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-JOIN tblICCommodity C ON C.intCommodityId = CTCQ.intCommodityId
-JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CT.intWeightUnitMeasureId
+LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CT.intContainerTypeId = CTCQ.intContainerTypeId
+LEFT JOIN tblICCommodity C ON C.intCommodityId = CTCQ.intCommodityId
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CT.intWeightUnitMeasureId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId

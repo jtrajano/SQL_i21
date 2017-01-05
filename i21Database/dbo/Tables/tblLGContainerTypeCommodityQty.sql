@@ -4,6 +4,8 @@
     [intConcurrencyId] INT NOT NULL, 
 	[intContainerTypeId] INT NOT NULL, 
     [intCommodityId] INT NOT NULL, 
+	[intCommodityAttributeId] INT NULL,
+	[dblBulkQuantity] NUMERIC(18, 6) NULL, 
     [dblQuantity] NUMERIC(18, 6) NULL, 
     [intUnitMeasureId] INT NULL, 
     [dblConversionFactor] NUMERIC(18, 6) NULL, 
