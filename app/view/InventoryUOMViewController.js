@@ -44,7 +44,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             },
 
             grdConversion: {
-                colConversionStockUOM: {
+                colOtherUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{unitMeasure}'
@@ -151,7 +151,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
         var plugin = grid.getPlugin('cepConversion');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colConversionStockUOM')
+        if (combo.column.itemId === 'colOtherUOM')
         {
             current.set('intStockUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
@@ -171,7 +171,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
 
     init: function(application) {
         this.control({
-            "#cboStockUom": {
+            "#cboOtherUOM": {
                 select: this.onUOMSelect
             },
             "#txtDecimalPlacesForCalculation": {
