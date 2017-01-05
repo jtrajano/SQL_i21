@@ -154,7 +154,7 @@ INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_Genera
 INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no
 INNER JOIN tblCMBankAccount D ON A.apivc_cbk_no = D.strCbkNo COLLATE Latin1_General_CS_AS
 LEFT JOIN apchkmst E ON A.apchk_A4GLIdentity = E.A4GLIdentity
-WHERE (A.apivc_status_ind = 'P' OR A.apivc_chk_no IS NOT NULL) AND A.apchk_A4GLIdentity IS NOT NULL
+WHERE (A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '') AND A.apchk_A4GLIdentity IS NOT NULL
 UNION ALL
 --FOR MISSING PAYMENT GROUP IT BY VENDOR, CHECKBOOK AND DATE THEN CREATE PAYMENT
 SELECT
@@ -357,8 +357,8 @@ VALUES
 --UPDATE ysnPrepay
 UPDATE A
 	SET A.ysnPrepay = CASE WHEN (SELECT intTransactionType 
-										FROM tblAPBill B INNER JOIN tblAPPaymentDetail C ON B.intBillId = C.intBillId 
-										WHERE C.intPaymentId = B.intPaymentId) = 2 
+										FROM tblAPBill C INNER JOIN tblAPPaymentDetail D ON C.intBillId = D.intBillId 
+										WHERE D.intPaymentId = B.intPaymentId) = 2 
 								THEN 1 ELSE 0 END
 FROM tblAPPayment A
 INNER JOIN #tmpPaymentCreated B ON A.intPaymentId = B.intPaymentId
