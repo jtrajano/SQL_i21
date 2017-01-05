@@ -15,11 +15,14 @@ AS
 			CR.strCategoryCode,
 			IM.intCommodityId,
 			CO.strCommodityCode,
-			OG.strCountry AS strOrigin
+			OG.strCountry AS strOrigin,
+			CA.intPurchasingGroupId
 
-	FROM	tblICItem			IM
-	JOIN	tblICItemLocation	IL	ON	IL.intItemId		=	IM.intItemId		LEFT
-	JOIN	tblICCategory		CR	ON	CR.intCategoryId	=	IM.intCategoryId	LEFT
-	JOIN	tblICCommodity		CO	ON	CO.intCommodityId	=	IM.intCommodityId	LEFT
-	JOIN	tblSMCountry		OG	ON	OG.intCountryID		=	IM.intOriginId				
-	WHERE	strType IN ('Inventory','Finished Good','Raw Material','Bundle')
+	FROM	tblICItem				IM
+	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT
+	JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	LEFT
+	JOIN	tblICCommodity			CO	ON	CO.intCommodityId			=	IM.intCommodityId	LEFT
+	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	IM.intOriginId		LEFT
+	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId
+										AND	CA.strType					=	'Origin'
+	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material','Bundle')

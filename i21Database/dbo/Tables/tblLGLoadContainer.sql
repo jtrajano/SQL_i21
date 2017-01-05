@@ -49,3 +49,6 @@ CONSTRAINT [FK_tblLGLoadContainer_tblICUnitMeasure_intWeightUnitMeasureId] FOREI
 CONSTRAINT [FK_tblLGLoadContainer_tblICItemUOM_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 CONSTRAINT [FK_tblLGLoadContainer_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )
+GO
+
+CREATE STATISTICS [_dta_stat_1001926791_16_1] ON [dbo].[tblLGLoadContainer]([ysnRejected], [intLoadContainerId])

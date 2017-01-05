@@ -31,3 +31,6 @@ CONSTRAINT [FK_tblLGLoadDetailContainerLink_tblICItemUOM_intItemUOMId] FOREIGN K
 CONSTRAINT [FK_tblLGLoadDetailContainerLink_tblICItemUOM_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 CONSTRAINT [FK_tblLGLoadDetailContainerLink_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )
+GO
+
+CREATE STATISTICS [_dta_stat_1097927133_4_5] ON [dbo].[tblLGLoadDetailContainerLink]([intLoadContainerId], [intLoadDetailId])
