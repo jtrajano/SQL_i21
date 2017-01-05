@@ -999,7 +999,17 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Truck Billing')
 	
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 105
+    SELECT  [intStartingNumberId]   = 105
+            ,[strTransactionType]   = N'Ticket Management'
+            ,[strPrefix]			= N'TKT-'
+            ,[intNumber]            = 1
+            ,[strModule]			= 'Grain'
+            ,[ysnEnable]			= 1
+            ,[intConcurrencyId]		= 1
+    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Ticket Management')
+	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 106
 			,[strTransactionType]	= N'Load Shipping Instruction'
 			,[strPrefix]			= N'LSI-'
 			,[intNumber]			= 1
@@ -1007,16 +1017,6 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Shipping Instruction')
-
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 106
-			,[strTransactionType]	= N'Process Refund'
-			,[strPrefix]			= N'PR-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Patronage'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Process Refund')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 107
@@ -1030,6 +1030,16 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 108
+			,[strTransactionType]	= N'Process Refund'
+			,[strPrefix]			= N'PR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Process Refund')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 109
 			,[strTransactionType]	= N'Equity Payment'
 			,[strPrefix]			= N'EP-'
 			,[intNumber]			= 1
