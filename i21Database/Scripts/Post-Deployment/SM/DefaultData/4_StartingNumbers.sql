@@ -1,8 +1,8 @@
 ﻿GO
 	PRINT N'BEGIN RENAME OF TRANSACTION'
 
-	UPDATE tblSMStartingNumber SET strTransactionType = 'Delivery Notice'
-	WHERE strModule = 'Logistics' AND strTransactionType = 'Weight Claims'
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Weight Claims'
+	WHERE strModule = 'Logistics' AND strTransactionType = 'Delivery Notice'
 
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Document Maintenance'
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Comment Maintenance'
@@ -812,13 +812,13 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 86
-			,[strTransactionType]	= N'Delivery Notice'
+			,[strTransactionType]	= N'Weight Claims'
 			,[strPrefix]			= N'WC-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Notice')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Weight Claims')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 87
@@ -997,7 +997,7 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Truck Billing')
-
+	
 	UNION ALL
     SELECT  [intStartingNumberId]   = 105
             ,[strTransactionType]   = N'Ticket Management'
@@ -1085,11 +1085,11 @@ GO
 		WHERE strTransactionType = N'Delivery Orders'
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Notice')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Weight Claims')
 	BEGIN
 		UPDATE tblSMStartingNumber
-		SET [strPrefix] = 'DN-'
-		WHERE strTransactionType = N'Delivery Notice'
+		SET [strPrefix] = 'WC-'
+		WHERE strTransactionType = N'Weight Claims'
 	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Document Maintenance')
