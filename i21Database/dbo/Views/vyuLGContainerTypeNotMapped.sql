@@ -16,6 +16,7 @@ SELECT CT.intContainerTypeId
 	  ,CTCQ.intCommodityAttributeId
 	  ,CTCQ.dblQuantity
 	  ,CA.strDescription AS strOrigin
+	  ,CTCQ.intCommodityId
 	  ,C.strCommodityCode 
 	  ,C.strDescription AS strCommodityDescription
 	  ,UM.strUnitMeasure
