@@ -205,8 +205,42 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        hidden: true,
                                                         itemId: 'colConversionStockUOM',
-                                                        dataIndex: 'string',
+                                                        dataIndex: 'strUnitMeasure',
+                                                        hideable: false,
+                                                        text: 'Other UOM',
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboStockUom',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colOtherUOM',
+                                                        dataIndex: 'strUnitMeasure',
                                                         text: 'Other UOM',
                                                         flex: 1,
                                                         editor: {
@@ -231,12 +265,9 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboStockUom',
+                                                            itemId: 'cboOtherUOM',
                                                             displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure',
-                                                            bind: {
-                                                                store: '{UnitMeasure}'
-                                                            }
+                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {

@@ -389,8 +389,10 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "string",
+                                                "dataIndex": "strUnitMeasure",
                                                 "flex": 1,
+                                                "hidden": true,
+                                                "hideable": false,
                                                 "itemId": "colConversionStockUOM",
                                                 "text": "Other UOM",
                                                 "width": null
@@ -408,32 +410,29 @@
                                                     "userConfig": {
                                                         "columns": [
                                                             "[",
-                                                            "    {",
-                                                            "        dataIndex: 'intUnitMeasureId',",
-                                                            "        dataType: 'numeric',",
-                                                            "        text: 'Unit Of Measure ID',",
-                                                            "        hidden: true",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'strUnitMeasure',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Unit Measure',",
-                                                            "        flex: 1",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'strUnitType',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Unit Type',",
-                                                            "        flex: 1",
-                                                            "    }",
+                                                            "{",
+                                                            "dataIndex: 'intUnitMeasureId',",
+                                                            "dataType: 'numeric',",
+                                                            "hidden: true",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strUnitMeasure',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Unit Measure',",
+                                                            "flex: 1",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strUnitType',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Unit Type',",
+                                                            "flex: 1",
+                                                            "}",
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "itemId": "cboStockUom",
-                                                        "store": [
-                                                            "{UnitMeasure}"
-                                                        ],
+                                                        "store": null,
                                                         "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox",
@@ -442,6 +441,73 @@
                                                         "store": "binding"
                                                     },
                                                     "designerId": "f5122bf4-c692-473e-9d3d-608f12a5c828",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strUnitMeasure",
+                                                "flex": 1,
+                                                "itemId": "colOtherUOM",
+                                                "text": "Other UOM"
+                                            },
+                                            "name": "MyColumn3",
+                                            "designerId": "11bd82f1-1a24-4e38-881d-6c81d1b21fb6",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "{",
+                                                            "    dataIndex: 'intUnitMeasureId',",
+                                                            "    dataType: 'numeric',",
+                                                            "    text: 'Unit Of Measure ID',",
+                                                            "    hidden: true",
+                                                            "},",
+                                                            "{",
+                                                            "    dataIndex: 'strUnitMeasure',",
+                                                            "    dataType: 'string',",
+                                                            "    text: 'Unit Measure',",
+                                                            "    flex: 1",
+                                                            "},",
+                                                            "{",
+                                                            "    dataIndex: 'strUnitType',",
+                                                            "    dataType: 'string',",
+                                                            "    text: 'Unit Type',",
+                                                            "    flex: 1",
+                                                            "}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "designer|displayName": null,
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboOtherUOM",
+                                                        "valueField": "strUnitMeasure"
+                                                    },
+                                                    "name": "MyComboBox12",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "03ad1ced-7c60-4523-b5ae-0ccd80959c35",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -542,7 +608,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging116",
+                    "name": "statusbarpaging12",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
