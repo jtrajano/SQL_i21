@@ -66,9 +66,16 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
 
 SELECT convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum,strVendorName,strRating,
 		dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue,
-		CONVERT(NUMERIC(16,6),dblTotalSpend) as dblTotalSpend ,
-		CONVERT(NUMERIC(16,6),dblShareWithSupplier) as dblShareWithSupplier ,dblMToM,
+		CONVERT(NUMERIC(16,2),dblTotalSpend) as dblTotalSpend ,
+		CONVERT(NUMERIC(16,2),dblShareWithSupplier) as dblShareWithSupplier ,dblMToM,
+		dblTotalCommittedVolume ,ISNULL(dblTotalSpend,0) dblTotalSpend,dblCompanyExposurePercentage,
+		(dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend,0) = 0 then 1 else dblTotalSpend end) * dblCompanyExposurePercentage a,
+		(dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier,0) = 0 then 1 else dblShareWithSupplier end) *dblSupplierSalesPercentage b,
+
+
+
 CASE WHEN 
+
 	(dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend,0) = 0 then 1 else dblTotalSpend end) * dblCompanyExposurePercentage <=
 	(dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier,0) = 0 then 1 else dblShareWithSupplier end) *dblSupplierSalesPercentage 
 THEN (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend,0) = 0 then 1 else dblTotalSpend end) * dblCompanyExposurePercentage 
@@ -83,15 +90,14 @@ SELECT strEntityName strVendorName,strRiskIndicator strRating,
 		 , (isnull(dblTotalCommittedVolume,0)/ CASE WHEN ISNULL(dblRiskTotalBusinessVolume,0) =0 then 1 else dblRiskTotalBusinessVolume end)*100 as dblShareWithSupplier
 		 ,dblResult as dblMToM,dblCompanyExposurePercentage,dblSupplierSalesPercentage
 FROM (
-SELECT strEntityName,CONVERT(NUMERIC(16,6),dblFixedPurchaseVolume) as dblFixedPurchaseVolume,
-					 CONVERT(NUMERIC(16,6),dblUnfixedPurchaseVolume) as dblUnfixedPurchaseVolume,
-					 CONVERT(NUMERIC(16,6),(dblFixedPurchaseVolume + dblUnfixedPurchaseVolume)) as dblTotalCommittedVolume,
-					 CONVERT(NUMERIC(16,6),dblFixedPurchaseValue) dblFixedPurchaseValue,
-					 CONVERT(NUMERIC(16,6),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue,
-					 CONVERT(NUMERIC(16,6),(dblFixedPurchaseValue + dblUnfixedPurchaseValue)) as dblTotalCommittedValue,
-					 CONVERT(NUMERIC(16,6),(dblResult)) as dblResult
-					 ,strRiskIndicator,intRiskUnitOfMeasureId,dblRiskTotalBusinessVolume,dblCompanyExposurePercentage,dblSupplierSalesPercentage				 
-					 			 
+SELECT strEntityName,CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) as dblFixedPurchaseVolume,
+					 CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) as dblUnfixedPurchaseVolume,
+					 CONVERT(NUMERIC(16,2),(dblFixedPurchaseVolume + dblUnfixedPurchaseVolume)) as dblTotalCommittedVolume,
+					 CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
+					 CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue,
+					 CONVERT(NUMERIC(16,2),(dblFixedPurchaseValue + dblUnfixedPurchaseValue)) as dblTotalCommittedValue,
+					 CONVERT(NUMERIC(16,2),(dblResult)) as dblResult
+					 ,strRiskIndicator,intRiskUnitOfMeasureId,dblRiskTotalBusinessVolume,dblCompanyExposurePercentage,dblSupplierSalesPercentage		 			 
 FROM (
 		SELECT strEntityName,
 		SUM(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblOpenQty else 0 end) dblFixedPurchaseVolume,
@@ -104,17 +110,17 @@ FROM (
 				SELECT strEntityName,sum(dblOpenQty) as dblOpenQty,sum(dblQtyPrice) dblQtyPrice,sum(dblQtyUnFixedPrice) dblQtyUnFixedPrice,strPriOrNotPriOrParPriced,
 				sum(dblResult) dblResult,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage from(
 				SELECT strEntityName,dblOpenQty as dblOpenQty,
-						dblOpenQty*(isnull(dblContractBasis,0)+isnull(dblFutures,0)) dblQtyPrice,
-						dblOpenQty*(isnull(dblContractBasis,0)+ isnull(dblMarketBasis,0) + isnull(dblFuturePrice,0) ) dblQtyUnFixedPrice,
+						dblOpenQty*(round(isnull(dblContractBasis,0),2)+round(isnull(dblFutures,0),2)) dblQtyPrice,
+						dblOpenQty*(round(isnull(dblContractBasis,0),2) + round(isnull(dblFuturePrice,0),2) ) dblQtyUnFixedPrice,
 						CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced' 
 						WHEN  ISNULL(strPriOrNotPriOrParPriced,'') = '' THEN 'Priced' ELSE strPriOrNotPriOrParPriced END strPriOrNotPriOrParPriced
-						,isnull(dblResult,0) dblResult,
-						strRiskIndicator,isnull(dblRiskTotalBusinessVolume,0) as dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,
-						isnull(dblCompanyExposurePercentage,0) as dblCompanyExposurePercentage ,isnull(dblSupplierSalesPercentage,0) as dblSupplierSalesPercentage
+						,round(isnull(dblResult,0),2) dblResult,
+						strRiskIndicator,round(isnull(dblRiskTotalBusinessVolume,0),2) as dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,
+						round(isnull(dblCompanyExposurePercentage,0),2) as dblCompanyExposurePercentage ,round(isnull(dblSupplierSalesPercentage,0),2) as dblSupplierSalesPercentage
 				FROM @tblFinalDetail  fd
 				LEFT JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
 				LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
-				WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)') )t
+				WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ) )t
 GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
 GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
 )t3

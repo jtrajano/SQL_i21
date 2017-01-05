@@ -4758,6 +4758,7 @@
     <Build Include="dbo\Tables\tblCTContractFeed.sql" />
     <Build Include="dbo\Tables\tblCTApprovedContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractApproved.sql" />
+    <Build Include="dbo\Functions\fnCTConvertQtyToTargetCommodityUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
