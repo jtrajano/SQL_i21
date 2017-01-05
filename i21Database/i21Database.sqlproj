@@ -4756,6 +4756,8 @@
     <Build Include="dbo\Stored Procedures\uspRKSourcingReport.sql" />
     <Build Include="dbo\Tables\tblMFItemOwnerDetail.sql" />
     <Build Include="dbo\Tables\tblCTContractFeed.sql" />
+    <Build Include="dbo\Tables\tblCTApprovedContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractApproved.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
