@@ -151,7 +151,6 @@ StartTest (function (t) {
         .verifyGridData('StorageMeasurementReading', 1, 'colItem', '001 - CLTI')
         .verifyGridData('StorageMeasurementReading', 1, 'colSubLocation', 'Raw Station')
         .verifyGridData('StorageMeasurementReading', 1, 'colStorageLocation', 'RM Storage')
-        .verifyGridData('StorageMeasurementReading', 1, 'dblAirSpaceReading', '80')
         .enterGridData('StorageMeasurementReading', 1, 'dblCashPrice', '14')
 
         .selectGridComboBoxRowValue('StorageMeasurementReading',2,'strCommodity','Corn','strCommodity')
@@ -180,7 +179,6 @@ StartTest (function (t) {
         .verifyGridData('StorageMeasurementReading', 1, 'colItem', '001 - CLTI')
         .verifyGridData('StorageMeasurementReading', 1, 'colSubLocation', 'Raw Station')
         .verifyGridData('StorageMeasurementReading', 1, 'colStorageLocation', 'RM Storage')
-        .verifyGridData('StorageMeasurementReading', 1, 'dblAirSpaceReading', '80')
         .enterGridData('StorageMeasurementReading', 1, 'dblCashPrice', '14')
 
         .verifyGridData('StorageMeasurementReading', 2, 'colCommodity', 'Corn')

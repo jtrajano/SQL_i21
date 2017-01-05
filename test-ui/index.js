@@ -369,6 +369,14 @@ Harness.start(
                     functionalTest,
                     'CommonIC.js'
                 ]
+            },
+            {
+                url: 'StorageMeasurementReading/DeleteSMR.js?v='+version,
+                title: 'DeleteSMR',
+                preload: [
+                    functionalTest,
+                    'CommonIC.js'
+                ]
             }
         ]
     },
