@@ -1038,6 +1038,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Process Refund')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 109
+			,[strTransactionType]	= N'Equity Payment'
+			,[strPrefix]			= N'EP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Equity Payment')
+
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
