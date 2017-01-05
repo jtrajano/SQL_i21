@@ -4657,6 +4657,7 @@
     <Build Include="dbo\Functions\fnTMGetItemTotalTaxForCustomer.sql" />
     <Build Include="dbo\Functions\fnTMGetItemPricingDetails.sql" />
     <Build Include="dbo\Functions\fnTMFormatOriginPhone.sql" />
+    <Build Include="dbo\Views\vyuSCTicketTypeView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
