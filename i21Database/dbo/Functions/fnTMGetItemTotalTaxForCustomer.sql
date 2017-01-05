@@ -34,6 +34,6 @@ BEGIN
 											,@CardId				
 											,@VehicleId				
 											,@DisregardExemptionSetup
-											--,0
+											,0
 											)
 END
