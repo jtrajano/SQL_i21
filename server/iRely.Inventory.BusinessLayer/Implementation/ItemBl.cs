@@ -769,40 +769,30 @@ namespace iRely.Inventory.BusinessLayer
 
             return newItemId;
         }*/
-        public SaveResult DuplicateItem(int intItemId, out int? itemId)
+        public class DuplicateItemSaveResult : SaveResult
         {
-            SaveResult saveResult = new SaveResult();
-            int? newItemId = null;
+            public int? Id { get; set; }
+        }
 
-            using (SqlConnection conn = new SqlConnection(_db.ContextManager.Database.Connection.ConnectionString))
+        public DuplicateItemSaveResult DuplicateItem(int intItemId)
+        {
+            int? newItemId = 0;
+            var duplicationResult = new DuplicateItemSaveResult();
+            try
             {
-                conn.Open();
-                try
-                {
-                    using (SqlCommand command = new SqlCommand("uspICDuplicateItem", conn))
-                    {
-                        command.Parameters.Add(new SqlParameter("@ItemId", intItemId));
-                        var outParam = new SqlParameter("@NewItemId", newItemId);
-                        outParam.Direction = System.Data.ParameterDirection.Output;
-                        outParam.DbType = System.Data.DbType.Int32;
-                        outParam.SqlDbType = System.Data.SqlDbType.Int;
-                        command.Parameters.Add(outParam);
-                        command.CommandType = System.Data.CommandType.StoredProcedure;
-                        command.ExecuteNonQuery();
-                        newItemId = (int)outParam.Value;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    saveResult.BaseException = ex;
-                    saveResult.Exception = new ServerException(ex);
-                    saveResult.HasError = true;
-                }
-                
-                conn.Close();
+                var db = (InventoryEntities)_db.ContextManager;
+                newItemId = db.DuplicateItem(intItemId);
+                var res = _db.Save(false);
+                duplicationResult.Id = newItemId;
+                duplicationResult.HasError = false;
             }
-            itemId = newItemId;
-            return saveResult;
+            catch (Exception ex)
+            {
+                duplicationResult.BaseException = ex;
+                duplicationResult.HasError = true;
+                duplicationResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return duplicationResult;
         }
 
         public SaveResult CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId)
@@ -854,37 +844,21 @@ namespace iRely.Inventory.BusinessLayer
 
         public SaveResult ConvertItemToNewStockUnit(int ItemId, int ItemUOMId)
         {
-            SaveResult saveResult = new SaveResult();
-
-            using (SqlConnection conn = new SqlConnection(_db.ContextManager.Database.Connection.ConnectionString))
+            var conversionResult = new SaveResult();
+            try
             {
-                conn.Open();
-                try
-                {
-                    using (SqlCommand command = new SqlCommand("uspICChangeItemStockUOM", conn))
-                    {
-                        command.Parameters.Add(new SqlParameter("@intItemId", ItemId));
-                        command.Parameters.Add(new SqlParameter("@NewStockItemUOMId", ItemUOMId));
-                        command.Parameters.Add(new SqlParameter("@intEntitySecurityUserId", iRely.Common.Security.GetEntityId()));
-                        
-                        command.CommandType = System.Data.CommandType.StoredProcedure;
-                        command.ExecuteNonQuery();
-
-                        saveResult = _db.Save(true);
-                        saveResult.HasError = false; 
-                    }
-                }
-
-                catch (Exception ex)
-                {
-                    saveResult.BaseException = ex;
-                    saveResult.Exception = new ServerException(ex);
-                    saveResult.HasError = true;
-                }
-                conn.Close();
+                var db = (InventoryEntities)_db.ContextManager;
+                db.ConvertItemToNewStockUnit(ItemId, ItemUOMId);
+                conversionResult = _db.Save(false);
+                conversionResult.HasError = false;
             }
-
-            return saveResult;
+            catch (Exception ex)
+            {
+                conversionResult.BaseException = ex;
+                conversionResult.HasError = true;
+                conversionResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return conversionResult;
         }
 
         public class UnitOfMeasure

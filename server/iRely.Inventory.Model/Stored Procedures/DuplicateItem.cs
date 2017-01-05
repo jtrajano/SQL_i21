@@ -15,18 +15,17 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public void DuplicateItem(int ItemId, out int? NewItemId)
+        public int? DuplicateItem(int ItemId)
         {
-            int? intNewId = null;
-            var outParam = new SqlParameter("@NewItemId", intNewId);
-            outParam.Direction = ParameterDirection.Output;
-            outParam.DbType = DbType.Int32;
+            var newItemId = new SqlParameter("@NewItemId", SqlDbType.Int);
+            newItemId.Direction = ParameterDirection.Output;
+
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICDuplicateItem @ItemId, @NewItemId",
+                "EXEC dbo.uspICDuplicateItem @ItemId, @NewItemId OUTPUT",
                 new SqlParameter("@ItemId", ItemId),
-                outParam
+                newItemId
             );
-            NewItemId = intNewId;
+            return (int)newItemId.Value;
         }
     }
 }

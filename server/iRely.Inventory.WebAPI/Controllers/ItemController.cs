@@ -124,8 +124,7 @@ namespace iRely.Inventory.WebApi
         [ActionName("DuplicateItem")]
         public HttpResponseMessage DuplicateItem(int ItemId)
         {
-            int? newItemId = null;
-            var result = _bl.DuplicateItem(ItemId, out newItemId);
+            var result = _bl.DuplicateItem(ItemId) as ItemBl.DuplicateItemSaveResult;
 
             var httpStatusCode = HttpStatusCode.OK;
             if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
@@ -135,7 +134,7 @@ namespace iRely.Inventory.WebApi
                 success = !result.HasError,
                 message = new
                 {
-                    id = newItemId,
+                    id = result.Id,
                     statusText = result.Exception.Message,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()

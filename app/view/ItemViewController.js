@@ -3465,6 +3465,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
+            iRely.Msg.showWait('Duplicating item...');
             ic.utils.ajax({
                 timeout: 120000,
                 url: '../Inventory/api/Item/DuplicateItem',
@@ -3473,6 +3474,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 method: 'Get'  
             })
+            .finally(function() { iRely.Msg.close(); })
             .subscribe(
                 function (successResponse) {
 				    var jsonData = Ext.decode(successResponse.responseText);
