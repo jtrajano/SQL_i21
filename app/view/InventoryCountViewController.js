@@ -68,7 +68,15 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             bind: {
                 title: 'Inventory Count - {current.strCountNo}'
             },
-
+            btnDelete: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnSave: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnUndo: {
+                disabled: '{current.ysnPosted}'
+            },
             btnPrintCountSheets: {
                 hidden: '{checkPrintCountSheet}'
             },
@@ -177,8 +185,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 value: '{current.intStatus}',
                 store: '{status}'
             },
-
+            btnRemove: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnInsert:  {
+                hidden: '{current.ysnPosted}'
+            },
             grdPhysicalCount: {
+                readOnly: '{current.ysnPosted}',
                 colItem: {
                     dataIndex: 'strItemNo',
                     editor: {
