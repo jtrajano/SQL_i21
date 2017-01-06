@@ -14,6 +14,7 @@ SELECT
 	WD.intItemId,
 	WD.dblFromNet,
 	WD.dblToNet,
+	WD.dblFranchise,
 	WD.dblFranchiseWt,
 	WD.dblWeightLoss,
 	WD.dblClaimableWt,
