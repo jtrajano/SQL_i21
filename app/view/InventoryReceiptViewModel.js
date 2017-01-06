@@ -38,6 +38,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     data: {
         forceSelection: false,
         weightLoss: 0,
+        modifiedOnPosted: undefined,
         locationFromTransferOrder: null
     },
 

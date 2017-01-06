@@ -629,7 +629,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{hasItemSelection}'
             },*/
             grdLotTracking: {
-                readOnly: '{readOnlyReceiptItemGrid}',
+                //readOnly: '{readOnlyReceiptItemGrid}', -- Commented out to enable remarks even when receipt is already posted.
                 colLotId: {
                     dataIndex: 'strLotNumber',
                     editor: {
@@ -6085,6 +6085,43 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#grdInventoryReceipt": {
                 selectionchange: this.onItemSelectionChange
+            },
+            "#grdLotTracking": {
+                beforecellclick: function(me, td, cellIndex, record, tr, rowIndex, e, eOpts) {
+                    var win = me.up('window');
+                    var vm = win.viewModel;
+                    
+                    var posted = vm.get('readOnlyReceiptItemGrid');
+                    if(cellIndex !== 0)
+                        me.select(rowIndex); // Don't force selection when the selection checkbox is clicked                                   
+                    if(posted) {
+                        if(me.grid.getColumns()[cellIndex].itemId === 'colLotRemarks' && cellIndex != 0) {
+                            return !record.dummy; // Enable when remarks is not in a dummy row
+                        }
+                        return cellIndex == 0; // Enable when selection checkbox is clicked
+                    }
+                    return true;
+                }
+            },
+            "#txtLotRemarks": {
+                change: function(e, newValue, oldValue) {
+                    var win = e.up('#grdLotTracking').up('window');
+                    var btnSave = win.down("#btnSave");
+                    var vm = win.viewModel;
+                    var modifiedOnPosted = vm.get('modifiedOnPosted');
+                    var dirty = newValue !== oldValue;
+                    vm.set('modifiedOnPosted', modifiedOnPosted || dirty);
+                    modifiedOnPosted = vm.get('modifiedOnPosted');
+                    btnSave.setDisabled(!modifiedOnPosted);
+                }
+            },
+            "#btnSave": {
+                click: function(e) {
+                    var win = e.up('window');
+                    var vm = win.viewModel;
+                    vm.set('modifiedOnPosted', false);
+                    e.setDisabled(true);
+                }
             },
             "#cboLotUOM": {
                 select: this.onLotSelect

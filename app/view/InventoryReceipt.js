@@ -213,8 +213,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strDescription',
-                                                        valueField: 'strDescription',
-                                                        forceSelection: false
+                                                        valueField: 'strDescription'
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',
@@ -2189,7 +2188,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 dataIndex: 'string',
                                                                                 text: 'Remarks',
                                                                                 editor: {
-                                                                                    xtype: 'textfield'
+                                                                                    xtype: 'textfield',
+                                                                                    itemId: 'txtLotRemarks'
                                                                                 }
                                                                             },
                                                                             {
