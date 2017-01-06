@@ -43,11 +43,11 @@ BEGIN
 		SET @body += '<!DOCTYPE html>'
 		SET @body += '<html>'
 		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
-		SET @body += 'Please see your ' + LOWER(@strReportName) + ' in the attachments tab. <br><br>'
+		SET @body += 'Please see your shipping instruction in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '</html>'
-		SET @Filter = '[{"column":"intEntityId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
 		SELECT @Subject AS strSubject
 			,@Filter AS strFilters
@@ -80,11 +80,11 @@ BEGIN
 		SET @body += '<!DOCTYPE html>'
 		SET @body += '<html>'
 		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
-		SET @body += 'Please see your ' + LOWER(@strReportName) + ' in the attachments tab. <br><br>'
+		SET @body += 'Please see your insurance letter in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '</html>'
-		SET @Filter = '[{"column":"intEntityId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
 		SELECT @Subject AS strSubject
 			,@Filter AS strFilters
@@ -119,11 +119,11 @@ BEGIN
 		SET @body += '<!DOCTYPE html>'
 		SET @body += '<html>'
 		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
-		SET @body += 'Please see your ' + LOWER(@strReportName) + ' in the attachments tab. <br><br>'
+		SET @body += 'Please see your delivery order in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '</html>'
-		SET @Filter = '[{"column":"intEntityId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
 		SELECT @Subject AS strSubject
 			,@Filter AS strFilters
@@ -162,7 +162,7 @@ BEGIN
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '</html>'
-		SET @Filter = '[{"column":"intEntityId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
 		SELECT @Subject AS strSubject
 			,@Filter AS strFilters
@@ -204,7 +204,7 @@ BEGIN
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '</html>'
-		SET @Filter = '[{"column":"intEntityId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
 		SELECT @Subject AS strSubject
 			,@Filter AS strFilters
@@ -243,7 +243,7 @@ BEGIN
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '</html>'
-		SET @Filter = '[{"column":"intEntityId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
 		SELECT @Subject AS strSubject
 			,@Filter AS strFilters
