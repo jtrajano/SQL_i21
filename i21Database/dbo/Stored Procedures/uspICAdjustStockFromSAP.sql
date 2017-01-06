@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAdjustStockFromSAP]
-	@dtmQtyChange			DATETIME				-- Date of quantity change (if not specified, it will default to current system date)
+	@dtmQtyChange			DATETIME	   = NULL	-- Date of quantity change (if not specified, it will default to current system date)
 	,@intItemId				INT						-- Id of item to adjust
-	,@strLotNumber			NVARCHAR(50) 			-- Lot Number of the item to adjust (required for lot tracked items; Can be flagged as '[FIFO]' if exact lot number can't be specified. The system will reduce the lot in FIFO order.)
+	,@strLotNumber			NVARCHAR(50)   = NULL	-- Lot Number of the item to adjust (required for lot tracked items; Can be flagged as '[FIFO]' if exact lot number can't be specified. The system will reduce the lot in FIFO order.)
 	,@intLocationId			INT						-- Location Id of the item
 	,@intSubLocationId		INT						-- Sub Location of the item
-	,@intStorageLocationId	INT 					-- Storage Location of the item
-	,@intItemUOMId			INT 					-- Unit of Measure Id of the item (if not specified, system will get the item's stock UOM id)
+	,@intStorageLocationId	INT 		   = NULL	-- Storage Location of the item
+	,@intItemUOMId			INT 		   = NULL	-- Unit of Measure Id of the item (if not specified, system will get the item's stock UOM id)
 	,@dblNewQty				NUMERIC(38, 20)	        -- New Quantity for the item
-	,@dblCost				NUMERIC(38, 20) 		-- Cost of the item (required if increasing stock; if missing, the system will use the item's last cost to increase the stock)
+	,@dblCost				NUMERIC(38, 20)= NULL	-- Cost of the item (required if increasing stock; if missing, the system will use the item's last cost to increase the stock)
 	,@intEntityUserId		INT 					-- Entity User Id
 	,@intSourceId			INT						-- Source Transaction Id
 AS
