@@ -6120,7 +6120,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     var win = e.up('window');
                     var vm = win.viewModel;
                     vm.set('modifiedOnPosted', false);
-                    e.setDisabled(true);
+                    var posted = vm.get('readOnlyReceiptItemGrid');
+                    if(posted)
+                        e.setDisabled(true);
                 }
             },
             "#cboLotUOM": {
