@@ -24,7 +24,7 @@ BEGIN
 		SELECT @intEntityId = (SELECT TOP 1 CASE @intPurchaseSaleId 
 												WHEN 1 THEN intVendorEntityId 
 												WHEN 2 THEN intCustomerEntityId 
-												WHEN 3 THEN intCustomerEntityId END FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId)
+												WHEN 3 THEN intVendorEntityId END FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId)
 
 		SELECT @strEntityName = strName
 		FROM tblEMEntity
