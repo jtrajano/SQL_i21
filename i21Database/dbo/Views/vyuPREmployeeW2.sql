@@ -17,8 +17,8 @@ SELECT
 	,[EMP].strLastName			/* box e_1 */
 	,[EMP].strNameSuffix		/* box e_2 */
 	,strEmployeeAddress =		/* box f */
-						CASE WHEN ISNULL (dbo.fnConvertToFullAddress ([COM].strAddress, [COM].strCity, [COM].strState, [COM].strZip), '') <> '' 
-						THEN dbo.fnConvertToFullAddress ([COM].strAddress, [COM].strCity, [COM].strState, [COM].strZip) ELSE NULL END
+						CASE WHEN ISNULL (dbo.fnConvertToFullAddress ([EML].strAddress, [EML].strCity, [EML].strState, [EML].strZipCode), '') <> '' 
+						THEN dbo.fnConvertToFullAddress ([EML].strAddress, [EML].strCity, [EML].strState, [EML].strZipCode) ELSE NULL END
 	,[W2].dblAdjustedGross		/* box 1 */
 	,[W2].dblFIT				/* box 2 */
 	,[W2].dblTaxableSS			/* box 3 */
