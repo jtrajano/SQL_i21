@@ -30,8 +30,7 @@ SELECT C.intEntityCustomerId
 	 , dblUnappliedCredits			= ISNULL(CI.dblUnappliedCredits, CONVERT(NUMERIC(18,6), 0))
 	 , dblPrepaids					= ISNULL(CI.dblPrepaids, CONVERT(NUMERIC(18,6), 0))
 	 , dblTotalDue					= ISNULL(CI.dblTotalDue, CONVERT(NUMERIC(18,6), 0))
-	 , dblBudgetAmount				= ISNULL(CI.dblBudgetAmount, CONVERT(NUMERIC(18,6), 0))
-	 , dblBudgetMonth				= ISNULL(CI.dblBudgetMonth, CONVERT(NUMERIC(18,6), 0))
+	 , dblBudgetAmount				= ISNULL(CI.dblBudgetAmount, CONVERT(NUMERIC(18,6), 0))	 
 	 , dblThru						= ISNULL(CI.dblThru, CONVERT(NUMERIC(18,6), 0))
 	 , dblNextPaymentAmount			= ISNULL(CI.dblNextPaymentAmount, CONVERT(NUMERIC(18,6), 0))
 	 , dblAmountPastDue				= ISNULL(CI.dblAmountPastDue, CONVERT(NUMERIC(18,6), 0))
@@ -39,6 +38,7 @@ SELECT C.intEntityCustomerId
 	 , dtmNextPaymentDate			= CI.dtmNextPaymentDate
 	 , dtmLastPaymentDate			= CI.dtmLastPaymentDate
 	 , dtmLastStatementDate			= CI.dtmLastStatementDate
+	 , dtmBudgetMonth				= CI.dtmBudgetMonth
 FROM vyuARCustomer C
 LEFT JOIN vyuARCustomerInquiryReport CI
 	ON C.intEntityCustomerId = CI.intEntityCustomerId
