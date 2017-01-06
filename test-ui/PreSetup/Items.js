@@ -1,5 +1,4 @@
 StartTest (function (t) {
-    var commonIC = Ext.create('i21.test.Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
 

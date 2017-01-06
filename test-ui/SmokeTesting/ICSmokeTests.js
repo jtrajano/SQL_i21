@@ -119,7 +119,7 @@ StartTest (function (t) {
             ,'LotTracking'
         ], true)
         //IR Charges Tab
-        //.clickTab('FreightInvoice')
+        .clickTab('FreightInvoice')
         .waitUntilLoaded()
         .isControlVisible('txt',
         [
@@ -132,7 +132,6 @@ StartTest (function (t) {
             ,'CalculateCharges'
             ,'GridLayout'
             ,'InsertCriteria'
-            ,'Help'
             ,'Support'
             ,'FieldName'
             ,'EmailUrl'

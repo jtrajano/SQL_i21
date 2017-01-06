@@ -406,20 +406,6 @@ Harness.start(
             }
 
         ]
-    },
-
-    { group: 'BusinessDomain',
-
-        items: [
-            {
-                url: 'BusinessDomain/StockChecking/ICStockCheckingLotted.js?v='+version,
-                title: 'ICStockChecking',
-                preload: [
-                    functionalTest
-                ]
-            }
-
-        ]
     }
 
 );
