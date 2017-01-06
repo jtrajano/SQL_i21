@@ -1,7 +1,6 @@
 var Harness = Siesta.Harness.Browser.ExtJS,
     version = Math.floor(Math.random() * 9999) + 1,
-    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version,
-    commonIC = '../../Inventory/test-ui/Common/CommonIC.js?v='+version;
+    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version;
 
 Harness.configure({
     title: 'i21 Test Suite',
@@ -27,24 +26,21 @@ Harness.start(
                 url: 'PreSetup/UsersLocation.js?v='+version,
                 title: 'UserLocation',
                 preload: [
-                    functionalTest,
-                    commonIC
+                    functionalTest
                 ]
             },
             {
                 url: 'PreSetup/StorageLocation.js?v='+version,
                 title: 'StorageLocation',
                 preload: [
-                    functionalTest,
-                    commonIC
+                    functionalTest
                 ]
             },
             {
                 url: 'PreSetup/Items.js?v='+version,
                 title: 'Items',
                 preload: [
-                    functionalTest,
-                    commonIC
+                    functionalTest
                 ]
             }
 
@@ -346,16 +342,14 @@ Harness.start(
                 url: 'InventoryCount/AddInventoryCount.js?v='+version,
                 title: 'AddInventoryCount',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             },
             {
                 url: 'InventoryCount/DeleteInventoryCount.js?v='+version,
                 title: 'DeleteInventoryCount',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             }
         ]
@@ -367,16 +361,14 @@ Harness.start(
                 url: 'StorageMeasurementReading/AddSMR.js?v='+version,
                 title: 'AddSMR',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             },
             {
                 url: 'StorageMeasurementReading/DeleteSMR.js?v='+version,
                 title: 'DeleteSMR',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             }
         ]
@@ -388,32 +380,28 @@ Harness.start(
                 url: 'SmokeTesting/ICSmokeTests.js?v='+version,
                 title: 'ICSmokeTests',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             },
             {
                 url: 'SmokeTesting/ICOpenScreens.js?v='+version,
                 title: 'ICOpenScreens',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             },
             {
                 url: 'SmokeTesting/ICAddMaintenance.js?v='+version,
                 title: 'ICAddMaintenance',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             },
             {
                 url: 'SmokeTesting/ICAddTransactions.js?v='+version,
                 title: 'ICAddTransactions',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             }
 
@@ -427,8 +415,7 @@ Harness.start(
                 url: 'BusinessDomain/StockChecking/ICStockCheckingLotted.js?v='+version,
                 title: 'ICStockChecking',
                 preload: [
-                    functionalTest,
-                   commonIC
+                    functionalTest
                 ]
             }
 
