@@ -4761,6 +4761,7 @@
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCommodityUOM.sql" />
     <Build Include="dbo\Views\vyuLGGetOpenWeightClaim.sql" />
     <Build Include="dbo\Views\vyuLGWeightClaimSearch.sql" />
+    <Build Include="dbo\Views\vyuRKContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

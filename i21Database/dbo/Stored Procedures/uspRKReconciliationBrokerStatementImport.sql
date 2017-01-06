@@ -166,7 +166,7 @@ BEGIN
 END
 
 SELECT  t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,sum(t.balQty) balQty,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-	   t.ImportId, convert(nvarchar,sum(balQty))+'Number of contract is mismatch between broker statement and i21. Broker statement has: '+convert(nvarchar,sum(imptQty))+' and i21 has: '+convert(nvarchar,sum(tranQty))+'.' AS strErrMessage into #MisMatchedQty FROM (
+	   t.ImportId,'Contract mismatch. Broker statement has: '+convert(nvarchar,sum(imptQty))+' and i21 has: '+convert(nvarchar,sum(tranQty))+'. Difference : '+convert(nvarchar,sum(imptQty)-sum(tranQty)) +' ' AS strErrMessage into #MisMatchedQty FROM (
 	SELECT *,imptQty-tranQty as balQty  FROM(
 			SELECT *,intNoOfContract as imptQty, 0 as tranQty FROM @ImportedRec WHERE ImportId NOT IN (SELECT ImportId FROM #impRec)
 			UNION
@@ -202,4 +202,3 @@ BEGIN CATCH
   RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
  END  
 END CATCH
-
