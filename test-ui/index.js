@@ -1,6 +1,7 @@
 var Harness = Siesta.Harness.Browser.ExtJS,
     version = Math.floor(Math.random() * 9999) + 1,
-    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version;
+    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version,
+    commonIC = '../../Inventory/test-ui/Common/CommonIC.js?v='+version;
 
 Harness.configure({
     title: 'i21 Test Suite',
@@ -27,7 +28,7 @@ Harness.start(
                 title: 'UserLocation',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                    commonIC
                 ]
             },
             {
@@ -35,7 +36,7 @@ Harness.start(
                 title: 'StorageLocation',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                    commonIC
                 ]
             },
             {
@@ -43,9 +44,9 @@ Harness.start(
                 title: 'Items',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                    commonIC
                 ]
-            },
+            }
 
         ]
     },
@@ -346,7 +347,7 @@ Harness.start(
                 title: 'AddInventoryCount',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                   commonIC
                 ]
             },
             {
@@ -354,7 +355,7 @@ Harness.start(
                 title: 'DeleteInventoryCount',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                   commonIC
                 ]
             }
         ]
@@ -367,7 +368,7 @@ Harness.start(
                 title: 'AddSMR',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                   commonIC
                 ]
             },
             {
@@ -375,7 +376,7 @@ Harness.start(
                 title: 'DeleteSMR',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                   commonIC
                 ]
             }
         ]
@@ -388,7 +389,7 @@ Harness.start(
                 title: 'ICSmokeTests',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                   commonIC
                 ]
             },
             {
@@ -396,7 +397,7 @@ Harness.start(
                 title: 'ICOpenScreens',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                   commonIC
                 ]
             },
             {
@@ -404,7 +405,7 @@ Harness.start(
                 title: 'ICAddMaintenance',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                   commonIC
                 ]
             },
             {
@@ -412,7 +413,22 @@ Harness.start(
                 title: 'ICAddTransactions',
                 preload: [
                     functionalTest,
-                    'CommonIC.js'
+                   commonIC
+                ]
+            }
+
+        ]
+    },
+
+    { group: 'BusinessDomain',
+
+        items: [
+            {
+                url: 'BusinessDomain/StockChecking/ICStockCheckingLotted.js?v='+version,
+                title: 'ICStockChecking',
+                preload: [
+                    functionalTest,
+                   commonIC
                 ]
             }
 
