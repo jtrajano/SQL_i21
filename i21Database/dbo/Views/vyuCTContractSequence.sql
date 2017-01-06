@@ -11,6 +11,7 @@ AS
 			CD.dblScheduleQty,		CD.intPriceItemUOMId,	CD.intNetWeightUOMId,								
 			CD.dblNoOfLots,			CD.intItemUOMId,		CD.dblNetWeight,	
 			CD.intBookId,			CD.intSubBookId,		CD.intDiscountScheduleCodeId,
+			CD.strERPPONumber,								CD.dtmPlannedAvailabilityDate,
 
 			--Detail Join
 			IM.strItemNo,			PT.strPricingType,		IM.strDescription			AS	strItemDescription,
@@ -19,6 +20,8 @@ AS
 			CU.intMainCurrencyId,	CU.strCurrency,			PU.intUnitMeasureId			AS	intPriceUnitMeasureId,
 			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,
 			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')						AS	strFutureMonth,
+			SL.strName AS strStorageLocation,				UL.strSubLocationName		AS	strSubLocation,
+			PG.strName	AS strPurchasingGroup,				CE.strEntityNo				AS	strCreatedByNo,
 
 			--Detail Computed Columns
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)									AS	ysnSubCurrency,
@@ -62,4 +65,10 @@ AS
 	JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
 	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID			=	CU.intMainCurrencyId		LEFT
 	JOIN	tblICCommodityUnitMeasure	C1	ON	C1.intCommodityId			=	CH.intCommodityId
-											AND	C1.intUnitMeasureId			=	PU.intUnitMeasureId
+											AND	C1.intUnitMeasureId			=	PU.intUnitMeasureId			LEFT
+	--JOIN	tblICCommodityAttribute		CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId
+	--										AND	CA.strType					=	'Origin'					LEFT
+	JOIN	tblSMPurchasingGroup		PG	ON	PG.intPurchasingGroupId		=	CD.intPurchasingGroupId		LEFT
+	JOIN	tblICStorageLocation		SL	ON	SL.intStorageLocationId		=	CD.intStorageLocationId		LEFT
+	JOIN	tblEMEntity					CE	ON	EY.intEntityId				=	CD.intCreatedById			LEFT
+	JOIN	tblSMCompanyLocationSubLocation	UL	ON	UL.intCompanyLocationSubLocationId	=	CD.intSubLocationId

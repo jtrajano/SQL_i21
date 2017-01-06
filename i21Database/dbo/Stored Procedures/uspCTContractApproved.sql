@@ -5,7 +5,10 @@ AS
 
 BEGIN TRY
 
-	DECLARE @ErrMsg	NVARCHAR(MAX)
+	DECLARE @ErrMsg	NVARCHAR(MAX),
+			@intApprovedContractId	INT
+
+	DECLARE	@SCOPE_IDENTITY TABLE (intApprovedContractId INT)
 
 	INSERT INTO tblCTApprovedContract
 	(
@@ -19,6 +22,7 @@ BEGIN TRY
 			intPriceUOMId,			intSubLocationId,		intStorageLocationId,
 			intPurchasingGroupId,	intApprovedById,		dtmApproved
 	)
+	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
 			CD.intContractDetailId,
 			CH.intEntityId,
@@ -51,6 +55,15 @@ BEGIN TRY
 	JOIN	tblCTContractHeader CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItemUOM		PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+
+	SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY
+
+	WHILE ISNULL(@intApprovedContractId,0) > 0 
+	BEGIN
+		EXEC uspCTProcessApprovedContractToFeed @intApprovedContractId
+		
+		SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY WHERE intApprovedContractId > @intApprovedContractId
+	END
 
 END TRY
 

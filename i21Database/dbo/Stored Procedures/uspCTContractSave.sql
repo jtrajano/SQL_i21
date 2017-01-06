@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTContractSave]
 	
-	@intContractHeaderId int
+	@intContractHeaderId int,
+	@strXML	NVARCHAR(MAX)
 	
 AS
 
@@ -20,6 +21,11 @@ BEGIN TRY
 			@strContractNumber			=	strContractNumber
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId			=	@intContractHeaderId
+
+	IF @strXML = 'Delete'
+	BEGIN
+		RETURN
+	END
 
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 	
