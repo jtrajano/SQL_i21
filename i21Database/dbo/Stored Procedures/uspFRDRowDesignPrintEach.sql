@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspFRDRowDesignPrintEach]
-	@intRowId	AS INT
+	@intRowId		AS INT,
+	@ysnSupressZero	AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -83,7 +84,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 				
 					FROM #tempRowDesignPrintEach ORDER BY [intSort]
 				
-		SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLAccountView where ' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ' ORDER BY strAccountId'
+		IF(@ysnSupressZero = 1)
+		BEGIN
+			SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLSummary where ' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ' ORDER BY strAccountId'
+		END
+		ELSE
+		BEGIN
+			SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLAccountView where ' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ' ORDER BY strAccountId'
+		END
 
 		INSERT INTO #tempGLAccount
 		EXEC (@queryString)
