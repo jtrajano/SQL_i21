@@ -297,6 +297,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboFromLocation',
                                                                 fieldLabel: 'From Location',
                                                                 labelWidth: 110,
@@ -325,6 +326,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboToLocation',
                                                                 fieldLabel: 'To Location',
                                                                 labelWidth: 110,
@@ -487,6 +489,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                hidden: true,
                                                                 itemId: 'btnViewItem',
                                                                 iconCls: 'small-open',
                                                                 text: 'View Item'
@@ -561,6 +564,8 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownText: 'Open Item',
+                                                        headerDrillDownClick: 'onItemHeaderClick',
                                                         itemId: 'colItemNumber',
                                                         width: 100,
                                                         dataIndex: 'strItemNumber',
@@ -712,6 +717,8 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownClick: 'onStorageHeaderClick',
+                                                        headerDrillDownText: 'Open Storage',
                                                         itemId: 'colFromStorage',
                                                         width: 88,
                                                         dataIndex: 'strFromStorage',

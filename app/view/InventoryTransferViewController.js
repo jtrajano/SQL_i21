@@ -825,6 +825,56 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         i21.ModuleMgr.Inventory.showScreen(value, 'TransferNo');
     },
 
+    onItemHeaderClick: function(menu, column) {
+        //var grid = column.initOwnerCt.grid;
+        var grid = column.$initParent.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
+    },
+
+    onStorageHeaderClick: function(menu, column) {
+        //var grid = column.initOwnerCt.grid;
+        var grid = column.$initParent.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.StorageUnit', grid, 'intFromStorageLocationId');
+    },
+
+    onFromLocationDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+        }
+        
+        else {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { 
+                filters: [
+                    {
+                        column: 'strLocationName',
+                        value: combo.getRawValue()
+                    }
+                ],
+                viewConfig: { modal: true } 
+            });
+        }
+    },
+
+    onToLocationDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+        }
+        
+        else {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { 
+                filters: [
+                    {
+                        column: 'strLocationName',
+                        value: combo.getRawValue()
+                    }
+                ],
+                viewConfig: { modal: true } 
+            });
+        }
+    },
+
     onViewTransaction: function (value, record) {
         var intSourceType = record.get('intSourceType');
         switch (intSourceType) {
@@ -876,6 +926,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#cboToStorage": {
                 select: this.onTransferDetailSelect
+            },
+            "#cboFromLocation": {
+                drilldown: this.onFromLocationDrilldown
+            },
+            "#cboToLocation": {
+                drilldown: this.onToLocationDrilldown
             },
             //"#cboUOM": {
             //    select: this.onTransferDetailSelect

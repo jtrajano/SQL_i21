@@ -639,6 +639,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLocationName",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "From Location",
                                                         "hidden": null,
                                                         "hideTrigger": null,
@@ -653,7 +654,8 @@
                                                     "name": "MyComboBox18",
                                                     "configAlternates": {
                                                         "alwaysDisplayDecimals": "boolean",
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "72e3ff13-6f2d-4f16-9add-dc772d76d9f7",
                                                     "customConfigs": [
@@ -665,6 +667,11 @@
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -702,6 +709,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLocationName",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "To Location",
                                                         "hidden": null,
                                                         "hideTrigger": null,
@@ -717,7 +725,8 @@
                                                     "name": "MyComboBox20",
                                                     "configAlternates": {
                                                         "alwaysDisplayDecimals": "boolean",
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "74b1e33a-fd6c-4309-b85b-f992e36a7614",
                                                     "customConfigs": [
@@ -729,6 +738,11 @@
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -1077,6 +1091,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "hidden": true,
                                                         "icon": null,
                                                         "iconCls": "small-open",
                                                         "itemId": "btnViewItem",
@@ -1115,7 +1130,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter140",
+                                                    "name": "filter15",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1225,12 +1240,26 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strItemNumber",
+                                                "headerDrillDownClick": "onItemHeaderClick",
+                                                "headerDrillDownText": "Open Item",
                                                 "itemId": "colItemNumber",
                                                 "text": "Item No.",
                                                 "width": 100
                                             },
                                             "name": "MyColumn7",
                                             "designerId": "bdf31adc-ecbc-4937-abf4-0728c0c4dd81",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownText",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownClick",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1453,12 +1482,26 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strFromStorage",
+                                                "headerDrillDownClick": "onStorageHeaderClick",
+                                                "headerDrillDownText": "Open Storage",
                                                 "itemId": "colFromStorage",
                                                 "text": "From Storage",
                                                 "width": 88
                                             },
                                             "name": "MyColumn22",
                                             "designerId": "4d214fd7-8e7c-40b4-960d-48cc227999fd",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownClick",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownText",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -2232,7 +2275,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging17",
+                    "name": "statusbarpaging12",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
