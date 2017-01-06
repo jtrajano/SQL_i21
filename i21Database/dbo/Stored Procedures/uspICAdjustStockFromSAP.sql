@@ -112,7 +112,8 @@ BEGIN
 	END
 
 	-- Validate Sub Location
-	IF NOT EXISTS (SELECT 1 FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId AND intCompanyLocationId = @intLocationId)
+	IF NOT EXISTS (SELECT 1 FROM tblSMCompanyLocationSubLocation SubLocation INNER JOIN tblICItemStockUOM StockUOM ON SubLocation.intCompanyLocationSubLocationId = StockUOM.intSubLocationId
+					WHERE SubLocation.intCompanyLocationSubLocationId = @intSubLocationId AND SubLocation.intCompanyLocationId = @intLocationId AND StockUOM.intItemId = @intItemId)
 		BEGIN
 			-- Sub Location is invalid or missing for item {item}.
 			RAISERROR(80097, 11, 1, @strItemNo);
@@ -122,7 +123,8 @@ BEGIN
 	-- Validate Storage Location if specified
 	IF @intStorageLocationId IS NOT NULL
 		BEGIN
-			IF NOT EXISTS (SELECT 1 FROM tblICStorageLocation WHERE intLocationId = @intLocationId AND intSubLocationId = @intSubLocationId AND intStorageLocationId = @intStorageLocationId)
+			IF NOT EXISTS (SELECT 1 FROM tblICStorageLocation StorageLocation INNER JOIN tblICItemStockUOM StockUOM ON StorageLocation.intStorageLocationId = StockUOM.intStorageLocationId
+							WHERE StorageLocation.intLocationId = @intLocationId AND StorageLocation.intSubLocationId = @intSubLocationId AND StorageLocation.intStorageLocationId = @intStorageLocationId AND StockUOM.intItemId=@intItemId)
 				BEGIN
 					-- Storage Location is invalid for item {item}
 					RAISERROR(80098, 11, 1, @strItemNo);
@@ -169,6 +171,14 @@ BEGIN
 			END 
 		END
 	END
+
+	-- Validate Item UOM Id
+	IF NOT EXISTS (SELECT 1 FROM tblICItemStockUOM StockUOM WHERE StockUOM.intItemUOMId = @intItemUOMId AND StockUOM.intItemId = @intItemId AND StockUOM.intItemLocationId = @intItemLocationId AND StockUOM.intSubLocationId = @intSubLocationId)
+		BEGIN
+			-- Invalid UOM Id or no existing stocks found for item {item} with the specified UOM Id
+			RAISERROR(80104,11,1,@strItemNo);
+			GOTO _Exit;
+		END
 
 	--------------------------------------
 	-- Transaction: Quantity Adjustment -- 
