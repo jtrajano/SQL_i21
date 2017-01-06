@@ -9,6 +9,7 @@
 	[intRecordId]			[int]												NOT NULL,
 	[dblAmount]				[numeric](18, 6)									NULL,
 	[ysnLocked]				[bit]												NULL,
+	[ysnOnceApproved]		[bit]												NULL,	
 	[dtmLockedDate]			DATETIME											NULL,
 	[intLockedBy]			[int]												NULL,
 	[intCurrencyId]			[int]												NULL,
