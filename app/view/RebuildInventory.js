@@ -18,141 +18,140 @@ Ext.define('Inventory.view.RebuildInventory', {
     alias: 'widget.icrebuildinventory',
 
     requires: [
+        'Inventory.view.Statusbar1',
+        'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
-        'Ext.form.Panel',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Display'
     ],
 
-    height: 219,
+    height: 258,
     hidden: false,
     margin: '',
-    maxHeight: 225,
+    minHeight: 250,
     width: 438,
     layout: 'fit',
     title: 'Rebuild Inventory',
     titleCollapse: false,
     modal: true,
 
-    dockedItems: [
-        {
-            xtype: 'toolbar',
-            dock: 'top',
-            height: 32,
-            ui: 'i21-toolbar',
-            items: [
-                {
-                    xtype: 'button',
-                    itemId: 'btnRepost',
-                    ui: 'i21-button-toolbar-small',
-                    text: 'Post'
-                },
-                {
-                    xtype: 'button',
-                    itemId: 'btnClose',
-                    ui: 'i21-button-toolbar-small',
-                    text: 'Close'
-                }
-            ]
-        }
-    ],
     items: [
         {
-            xtype: 'container',
-            padding: '',
-            layout: 'fit',
-            items: [
+            xtype: 'form',
+            layout: 'border',
+            dockedItems: [
                 {
-                    xtype: 'container',
-                    layout: 'border',
+                    xtype: 'toolbar',
+                    dock: 'top',
+                    height: 32,
+                    ui: 'i21-toolbar',
                     items: [
                         {
-                            xtype: 'form',
-                            region: 'center',
-                            border: false,
-                            itemId: 'frmRebuildInventory',
-                            ui: 'i21-form',
-                            bodyPadding: 8,
+                            xtype: 'button',
+                            itemId: 'btnRepost',
+                            ui: 'i21-button-toolbar-small',
+                            text: 'Post'
+                        },
+                        {
+                            xtype: 'button',
+                            itemId: 'btnClose',
+                            ui: 'i21-button-toolbar-small',
+                            text: 'Close'
+                        }
+                    ]
+                },
+                {
+                    xtype: 'ipagingstatusbar',
+                    dock: 'bottom',
+                    width: 150,
+                    region: 'east'
+                }
+            ],
+            items: [
+                {
+                    xtype: 'form',
+                    region: 'center',
+                    border: false,
+                    itemId: 'frmRebuildInventory',
+                    bodyPadding: 10,
+                    items: [
+                        {
+                            xtype: 'container',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch',
+                                padding: '0 0 5 0'
+                            },
                             items: [
                                 {
-                                    xtype: 'container',
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch',
-                                        padding: '0 0 5 0'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'combobox',
-                                            flex: 2,
-                                            publishes: 'value',
-                                            reference: 'fiscalmonth',
-                                            itemId: 'cboFiscalMonth',
-                                            fieldLabel: 'Fiscal Month',
-                                            displayField: 'strStartMonth',
-                                            forceSelection: true,
-                                            valueField: 'strStartMonth'
-                                        }
-                                    ]
-                                },
-                                {
                                     xtype: 'combobox',
-                                    anchor: '100%',
+                                    flex: 2,
                                     publishes: 'value',
-                                    reference: 'postorder',
-                                    itemId: 'cboPostOrder',
-                                    fieldLabel: 'Post Order',
-                                    displayField: 'strPostOrder',
+                                    reference: 'fiscalmonth',
+                                    itemId: 'cboFiscalMonth',
+                                    fieldLabel: 'Fiscal Month',
+                                    displayField: 'strStartMonth',
                                     forceSelection: true,
-                                    valueField: 'strPostOrder'
-                                },
-                                {
-                                    xtype: 'gridcombobox',
-                                    columns: [
-                                        {
-                                            dataIndex: 'intItemId',
-                                            dataType: 'int',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'strItemNo',
-                                            dataType: 'string',
-                                            text: 'Item No.',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strType',
-                                            dataType: 'string',
-                                            text: 'Type',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strDescription',
-                                            dataType: 'string',
-                                            text: 'Description',
-                                            flex: 1
-                                        }
-                                    ],
-                                    anchor: '100%',
-                                    publishes: 'value',
-                                    reference: 'item',
-                                    itemId: 'cboItem',
-                                    fieldLabel: 'Item (optional)',
-                                    displayField: 'strItemNo',
-                                    valueField: 'strItemNo'
-                                },
-                                {
-                                    xtype: 'displayfield',
-                                    anchor: '100%',
-                                    itemId: 'lblDescription',
-                                    padding: '0 0 0 105',
-                                    hideEmptyLabel: false,
-                                    hideLabel: true,
-                                    value: 'Please fill out the required fields above.',
-                                    fieldStyle: 'font-size: 8pt; font-style: italic;'
+                                    valueField: 'strStartMonth'
                                 }
                             ]
+                        },
+                        {
+                            xtype: 'combobox',
+                            anchor: '100%',
+                            publishes: 'value',
+                            reference: 'postorder',
+                            itemId: 'cboPostOrder',
+                            fieldLabel: 'Post Order',
+                            displayField: 'strPostOrder',
+                            forceSelection: true,
+                            valueField: 'strPostOrder'
+                        },
+                        {
+                            xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intItemId',
+                                    dataType: 'int',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strItemNo',
+                                    dataType: 'string',
+                                    text: 'Item No.',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strType',
+                                    dataType: 'string',
+                                    text: 'Type',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Description',
+                                    flex: 1
+                                }
+                            ],
+                            anchor: '100%',
+                            publishes: 'value',
+                            reference: 'item',
+                            itemId: 'cboItem',
+                            fieldLabel: 'Item (optional)',
+                            displayField: 'strItemNo',
+                            valueField: 'strItemNo'
+                        },
+                        {
+                            xtype: 'displayfield',
+                            anchor: '100%',
+                            itemId: 'lblDescription',
+                            padding: '0 0 0 105',
+                            hideEmptyLabel: false,
+                            hideLabel: true,
+                            value: 'Please fill out the required fields above.',
+                            fieldStyle: 'font-size: 8pt; font-style: italic;'
                         }
                     ]
                 }

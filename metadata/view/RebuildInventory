@@ -9,11 +9,12 @@
         "bodyPadding": null,
         "designer|userAlias": "icrebuildinventory",
         "designer|userClassName": "RebuildInventory",
-        "height": 219,
+        "height": 258,
         "hidden": false,
         "layout": "fit",
         "margin": "",
-        "maxHeight": 225,
+        "maxHeight": null,
+        "minHeight": 250,
         "modal": true,
         "padding": null,
         "reference": null,
@@ -30,255 +31,254 @@
     "viewModelInstanceId": "7ad81c96-3967-4e86-a0b5-4fd6a7dd60ff",
     "cn": [
         {
-            "type": "Ext.toolbar.Toolbar",
-            "reference": {
-                "name": "dockedItems",
-                "type": "array"
-            },
-            "codeClass": null,
-            "userConfig": {
-                "designer|displayName": "toolbar",
-                "designer|uiInterfaceName": "i21-toolbar",
-                "dock": "top",
-                "height": 32,
-                "ui": "i21-toolbar"
-            },
-            "name": "MyToolbar1",
-            "designerId": "f8ca864b-12c5-44e8-8b8e-926e7b4a058d",
-            "cn": [
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|uiInterfaceName": "i21-button-toolbar-small",
-                        "itemId": "btnRepost",
-                        "layout|flex": null,
-                        "text": "Post",
-                        "ui": "i21-button-toolbar-small"
-                    },
-                    "name": "MyButton3",
-                    "designerId": "f51c2b69-fe9a-4cf7-9176-b91f81e287b1"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|uiInterfaceName": "i21-button-toolbar-small",
-                        "itemId": "btnClose",
-                        "layout|flex": null,
-                        "text": "Close",
-                        "ui": "i21-button-toolbar-small"
-                    },
-                    "name": "MyButton4",
-                    "designerId": "b3423920-314b-4aa3-ba07-9c1671f4d64a"
-                }
-            ]
-        },
-        {
-            "type": "Ext.container.Container",
+            "type": "Ext.form.Panel",
             "reference": {
                 "name": "items",
                 "type": "array"
             },
             "codeClass": null,
             "userConfig": {
-                "designer|displayName": "container",
-                "layout": "fit",
-                "padding": ""
+                "bodyPadding": null,
+                "layout": "border",
+                "title": null
             },
-            "name": "MyContainer",
-            "designerId": "73abbeff-0e34-4b65-b20a-9b7cf3bf535e",
+            "name": "MyForm1",
+            "designerId": "c6325e9a-1d51-4349-993d-512934aeb28f",
             "cn": [
                 {
-                    "type": "Ext.container.Container",
+                    "type": "Ext.toolbar.Toolbar",
                     "reference": {
-                        "name": "items",
+                        "name": "dockedItems",
                         "type": "array"
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "designer|displayName": "container",
-                        "layout": "border",
-                        "padding": null
+                        "designer|displayName": "toolbar",
+                        "designer|uiInterfaceName": "i21-toolbar",
+                        "dock": "top",
+                        "height": 32,
+                        "ui": "i21-toolbar"
                     },
-                    "name": "MyContainer2",
-                    "designerId": "509053b3-107f-4fef-bb10-5850141049d5",
+                    "name": "MyToolbar1",
+                    "designerId": "f8ca864b-12c5-44e8-8b8e-926e7b4a058d",
                     "cn": [
                         {
-                            "type": "Ext.form.Panel",
+                            "type": "Ext.button.Button",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "bodyPadding": 8,
-                                "border": false,
-                                "designer|displayName": "frmRebuildInventory",
-                                "designer|uiInterfaceName": "i21-form",
-                                "itemId": "frmRebuildInventory",
-                                "layout|region": "center",
-                                "title": null,
-                                "ui": "i21-form"
+                                "designer|uiInterfaceName": "i21-button-toolbar-small",
+                                "itemId": "btnRepost",
+                                "layout|flex": null,
+                                "text": "Post",
+                                "ui": "i21-button-toolbar-small"
                             },
-                            "name": "MyForm",
-                            "designerId": "2011366b-f3db-4d99-a52b-7089bbb70249",
-                            "cn": [
-                                {
-                                    "type": "Ext.container.Container",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "container|align": "stretch",
-                                        "container|padding": "0 0 5 0",
-                                        "layout": "hbox"
-                                    },
-                                    "name": "MyContainer8",
-                                    "designerId": "8c21f9b4-44d1-4cb9-9435-a1125b59e2e5",
-                                    "cn": [
-                                        {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "displayField": "strStartMonth",
-                                                "fieldLabel": "Fiscal Month",
-                                                "forceSelection": true,
-                                                "itemId": "cboFiscalMonth",
-                                                "layout|flex": 2,
-                                                "publishes": [
-                                                    "value"
-                                                ],
-                                                "reference": "fiscalmonth",
-                                                "valueField": "strStartMonth"
-                                            },
-                                            "name": "MyComboBox7",
-                                            "designerId": "0c339596-eedd-4229-91be-ee47d5adaa20"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "displayField": "strPostOrder",
-                                        "fieldLabel": "Post Order",
-                                        "forceSelection": true,
-                                        "itemId": "cboPostOrder",
-                                        "layout|anchor": "100%",
-                                        "maxWidth": null,
-                                        "publishes": [
-                                            "value"
-                                        ],
-                                        "reference": "postorder",
-                                        "valueField": "strPostOrder"
-                                    },
-                                    "name": "MyComboBox1",
-                                    "designerId": "f5471f3f-6afa-44e4-97e0-77607f43696b"
-                                },
-                                {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "columns": [
-                                            "[{",
-                                            "    dataIndex: 'intItemId',",
-                                            "    dataType: 'int',",
-                                            "    hidden: true",
-                                            "},",
-                                            "{",
-                                            "    dataIndex: 'strItemNo',",
-                                            "    dataType: 'string',",
-                                            "    text: 'Item No.',",
-                                            "    flex: 1",
-                                            "},",
-                                            "{",
-                                            "    dataIndex: 'strType',",
-                                            "    dataType: 'string',",
-                                            "    text: 'Type',",
-                                            "    flex: 1",
-                                            "},",
-                                            "{",
-                                            "    dataIndex: 'strDescription',",
-                                            "    dataType: 'string',",
-                                            "    text: 'Description',",
-                                            "    flex: 1",
-                                            "}]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strItemNo",
-                                        "fieldLabel": "Item (optional)",
-                                        "itemId": "cboItem",
-                                        "layout|anchor": "100%",
-                                        "maxWidth": null,
-                                        "publishes": [
-                                            "value"
-                                        ],
-                                        "reference": "item",
-                                        "valueField": "strItemNo"
-                                    },
-                                    "name": "MyComboBox2",
-                                    "configAlternates": {
-                                        "columns": "object"
-                                    },
-                                    "designerId": "02c6fa80-5101-4d17-bac4-03cbcfc3adc2",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.form.field.Display",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "cls": null,
-                                        "fieldBodyCls": null,
-                                        "fieldCls": null,
-                                        "fieldLabel": null,
-                                        "fieldStyle": "font-size: 8pt; font-style: italic;",
-                                        "hideEmptyLabel": false,
-                                        "hideLabel": true,
-                                        "itemId": "lblDescription",
-                                        "labelPad": null,
-                                        "layout|anchor": "100%",
-                                        "padding": "0 0 0 105",
-                                        "value": "Please fill out the required fields above."
-                                    },
-                                    "name": "MyDisplayField",
-                                    "designerId": "8cea60c7-49e2-4ed1-91f8-c424b00bca08"
-                                }
-                            ]
+                            "name": "MyButton3",
+                            "designerId": "f51c2b69-fe9a-4cf7-9176-b91f81e287b1"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|uiInterfaceName": "i21-button-toolbar-small",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "text": "Close",
+                                "ui": "i21-button-toolbar-small"
+                            },
+                            "name": "MyButton4",
+                            "designerId": "b3423920-314b-4aa3-ba07-9c1671f4d64a"
                         }
                     ]
+                },
+                {
+                    "type": "Ext.form.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "bodyPadding": 10,
+                        "border": false,
+                        "designer|displayName": "frmRebuildInventory",
+                        "itemId": "frmRebuildInventory",
+                        "layout|region": "center",
+                        "padding": null,
+                        "title": null
+                    },
+                    "name": "MyForm",
+                    "designerId": "2011366b-f3db-4d99-a52b-7089bbb70249",
+                    "cn": [
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "stretch",
+                                "container|padding": "0 0 5 0",
+                                "layout": "hbox"
+                            },
+                            "name": "MyContainer8",
+                            "designerId": "8c21f9b4-44d1-4cb9-9435-a1125b59e2e5",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "displayField": "strStartMonth",
+                                        "fieldLabel": "Fiscal Month",
+                                        "forceSelection": true,
+                                        "itemId": "cboFiscalMonth",
+                                        "layout|flex": 2,
+                                        "publishes": [
+                                            "value"
+                                        ],
+                                        "reference": "fiscalmonth",
+                                        "valueField": "strStartMonth"
+                                    },
+                                    "name": "MyComboBox7",
+                                    "designerId": "0c339596-eedd-4229-91be-ee47d5adaa20"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "displayField": "strPostOrder",
+                                "fieldLabel": "Post Order",
+                                "forceSelection": true,
+                                "itemId": "cboPostOrder",
+                                "layout|anchor": "100%",
+                                "maxWidth": null,
+                                "publishes": [
+                                    "value"
+                                ],
+                                "reference": "postorder",
+                                "valueField": "strPostOrder"
+                            },
+                            "name": "MyComboBox1",
+                            "designerId": "f5471f3f-6afa-44e4-97e0-77607f43696b"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "columns": [
+                                    "[{",
+                                    "    dataIndex: 'intItemId',",
+                                    "    dataType: 'int',",
+                                    "    hidden: true",
+                                    "},",
+                                    "{",
+                                    "    dataIndex: 'strItemNo',",
+                                    "    dataType: 'string',",
+                                    "    text: 'Item No.',",
+                                    "    flex: 1",
+                                    "},",
+                                    "{",
+                                    "    dataIndex: 'strType',",
+                                    "    dataType: 'string',",
+                                    "    text: 'Type',",
+                                    "    flex: 1",
+                                    "},",
+                                    "{",
+                                    "    dataIndex: 'strDescription',",
+                                    "    dataType: 'string',",
+                                    "    text: 'Description',",
+                                    "    flex: 1",
+                                    "}]"
+                                ],
+                                "designer|createAlias": "gridcombobox",
+                                "displayField": "strItemNo",
+                                "fieldLabel": "Item (optional)",
+                                "itemId": "cboItem",
+                                "layout|anchor": "100%",
+                                "maxWidth": null,
+                                "publishes": [
+                                    "value"
+                                ],
+                                "reference": "item",
+                                "valueField": "strItemNo"
+                            },
+                            "name": "MyComboBox2",
+                            "configAlternates": {
+                                "columns": "object"
+                            },
+                            "designerId": "02c6fa80-5101-4d17-bac4-03cbcfc3adc2",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.form.field.Display",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "cls": null,
+                                "fieldBodyCls": null,
+                                "fieldCls": null,
+                                "fieldLabel": null,
+                                "fieldStyle": "font-size: 8pt; font-style: italic;",
+                                "hideEmptyLabel": false,
+                                "hideLabel": true,
+                                "itemId": "lblDescription",
+                                "labelPad": null,
+                                "layout|anchor": "100%",
+                                "padding": "0 0 0 105",
+                                "value": "Please fill out the required fields above."
+                            },
+                            "name": "MyDisplayField",
+                            "designerId": "8cea60c7-49e2-4ed1-91f8-c424b00bca08"
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "designer|createAlias": "ipagingstatusbar",
+                        "dock": "bottom",
+                        "layout|region": "east",
+                        "width": 150
+                    },
+                    "name": "statusbar12",
+                    "designerId": "f99cbb97-f355-4a7a-9435-98f19e7193ee",
+                    "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
             ]
         }
