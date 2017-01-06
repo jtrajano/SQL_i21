@@ -295,9 +295,15 @@ BEGIN
 		[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
 										     WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
 											 WHEN (SELECT CHARINDEX('B', D2.str1099Form)) > 0 THEN 3 
+											 WHEN (SELECT CHARINDEX('PATR', D2.str1099Form)) > 0 THEN 4 
+											 WHEN (SELECT CHARINDEX('DIV', D2.str1099Form)) > 0 THEN 5
 										ELSE 0
 										END,
-		[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0)							   
+		[int1099Category]			=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0)	
+											 WHEN (SELECT CHARINDEX('PATR', D2.str1099Form)) > 0 THEN ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099PATRCategory WHERE strCategory = D2.str1099Type),0)
+											 WHEN (SELECT CHARINDEX('DIV', D2.str1099Form)) > 0 THEN ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0)
+										ELSE 0
+										END							   
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId

@@ -4658,6 +4658,8 @@
     <Build Include="dbo\Functions\fnTMGetItemPricingDetails.sql" />
     <Build Include="dbo\Functions\fnTMFormatOriginPhone.sql" />
     <Build Include="dbo\Views\vyuSCTicketTypeView.sql" />
+    <Build Include="dbo\Tables\tblAP1099PATRCategory.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099PATR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

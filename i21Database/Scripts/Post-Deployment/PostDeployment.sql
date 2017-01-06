@@ -218,7 +218,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\FixPaymentRecordStatus.sql
 --:r .\AP\FixstrBillId.sql
 :r .\AP\DefaultData\POOrderStatus.sql
-:r .\AP\DefaultData\Categories1099.sql
+:r .\AP\DefaultData\Categories1099.SQL
+:r .\AP\DefaultData\Categories1099PATR.sql
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
