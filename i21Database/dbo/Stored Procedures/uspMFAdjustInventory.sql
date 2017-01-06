@@ -24,6 +24,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
+		,@intStorageLocationId int
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
 
@@ -33,10 +34,13 @@ BEGIN TRY
 		AND @dtmDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
+	SELECT @intStorageLocationId=intStorageLocationId FROM dbo.tblICLot WHERE intLotId =@intSourceLotId 
+
 	INSERT INTO tblMFInventoryAdjustment (
 		dtmDate
 		,intTransactionTypeId
 		,intItemId
+		,intStorageLocationId 
 		,intSourceLotId
 		,intDestinationLotId
 		,dblQty
@@ -59,6 +63,7 @@ BEGIN TRY
 	SELECT @dtmDate
 		,@intTransactionTypeId
 		,@intItemId
+		,@intStorageLocationId
 		,@intSourceLotId
 		,@intDestinationLotId
 		,@dblQty

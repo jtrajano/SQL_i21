@@ -3,6 +3,7 @@
 	,dtmDate DATETIME NOT NULL
 	,intTransactionTypeId INT NOT NULL
 	,intItemId INT NOT NULL
+	,intStorageLocationId int NULL
 	,intSourceLotId INT NOT NULL
 	,intDestinationLotId INT
 	,dblQty NUMERIC(38, 20)

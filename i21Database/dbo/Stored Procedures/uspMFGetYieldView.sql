@@ -106,6 +106,7 @@ BEGIN TRY
 		,intItemUOMId INT
 		,intWorkOrderId INT
 		,intItemId INT
+		,intCategoryId int
 		)
 
 	INSERT INTO @tblMFWorkOrder (
@@ -134,6 +135,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intWorkOrderId
 		,intItemId
+		,intCategoryId
 		)
 	SELECT W.dtmPlannedDate
 		,W.intPlannedShiftId
@@ -144,8 +146,10 @@ BEGIN TRY
 		,WI.intItemUOMId
 		,WI.intWorkOrderId
 		,W.intItemId
+		,I.intCategoryId 
 	FROM dbo.tblMFWorkOrderInputLot WI
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
+	JOIN dbo.tblICItem I on I.intItemId=WI.intItemId
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -157,20 +161,22 @@ BEGIN TRY
 		,intItemUOMId
 		,intWorkOrderId
 		,intItemId
+		,intCategoryId
 		)
 	SELECT W.dtmPlannedDate
 		,W.intPlannedShiftId
 		,'OUTPUT' COLLATE Latin1_General_CI_AS AS strTransactionType
 		,WP.intWorkOrderProducedLotId AS intTransactionId
 		,WP.intItemId
-		,WP.dblQuantity
-		,WP.intItemUOMId
+		,WP.dblQuantity  
+		,WP.intItemUOMId 
 		,WP.intWorkOrderId
 		,WP.intItemId
+		,I.intCategoryId 
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
 		AND WP.ysnProductionReversed = 0
-
+		JOIN dbo.tblICItem I on I.intItemId=WP.intItemId
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
 		,intShiftId
@@ -181,6 +187,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intWorkOrderId
 		,intItemId
+		,intCategoryId
 		)
 	SELECT W.dtmPlannedDate
 		,W.intPlannedShiftId AS intShiftId
@@ -188,9 +195,10 @@ BEGIN TRY
 		,intProductionSummaryId AS intTransactionId
 		,UnPvt.intItemId
 		,UnPvt.dblQuantity
-		,NULL intItemUOMId
+		,IU.intItemUOMId
 		,UnPvt.intWorkOrderId
 		,W.intItemId
+		,I.intCategoryId 
 	FROM dbo.tblMFProductionSummary
 	UNPIVOT(dblQuantity FOR strTransactionType IN (
 				dblOpeningQuantity
@@ -200,6 +208,8 @@ BEGIN TRY
 				)) AS UnPvt
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = UnPvt.intWorkOrderId
 		AND UnPvt.dblQuantity > 0
+	JOIN dbo.tblICItemUOM IU on IU.intItemId=UnPvt.intItemId and IU.ysnStockUnit =1
+	JOIN dbo.tblICItem I on I.intItemId=UnPvt.intItemId
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -211,6 +221,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intWorkOrderId
 		,intItemId
+		,intCategoryId
 		)
 	SELECT W.dtmPlannedDate
 		,W.intPlannedShiftId
@@ -221,8 +232,10 @@ BEGIN TRY
 		,WLT.intItemUOMId
 		,WLT.intWorkOrderId
 		,W.intItemId
+		,I.intCategoryId 
 	FROM tblMFWorkOrderProducedLotTransaction WLT
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WLT.intWorkOrderId
+	JOIN dbo.tblICItem I on I.intItemId=WLT.intItemId
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -490,8 +503,9 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
-			,RI.intItemUOMId
+			,TR.intItemUOMId
 			,strTransactionType
+			,TR.intCategoryId 
 		INTO ##tblMFInputItemYield
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
@@ -564,8 +578,9 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
-			,RI.intItemUOMId
+			,TR.intItemUOMId
 			,strTransactionType
+			,TR.intCategoryId 
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = TR.intWorkOrderId
@@ -594,6 +609,7 @@ BEGIN TRY
 			,dblVariance
 			,intItemUOMId
 			,strTransactionType
+			,intCategoryId 
 		INTO ##tblMFFinalInputItemYield
 		FROM ##tblMFInputItemYield
 		GROUP BY intWorkOrderId
@@ -609,6 +625,7 @@ BEGIN TRY
 			,dblVariance
 			,intItemUOMId
 			,strTransactionType
+			,intCategoryId 
 
 		SELECT @intWorkOrderId = MIN(intWorkOrderId)
 		FROM ##tblMFFinalInputItemYield
@@ -645,7 +662,7 @@ BEGIN TRY
 					SELECT @dblInput = SUM(dblQuantity)
 					FROM ##tblMFTransaction
 					WHERE intWorkOrderId = @intWorkOrderId
-						AND strTransactionType = 'Input'
+						AND strTransactionType = 'Input' and intCategoryId <>@intCategoryId
 				END
 				ELSE
 				BEGIN
@@ -678,7 +695,7 @@ BEGIN TRY
 					SELECT @dblInputOB = SUM(dblQuantity)
 					FROM ##tblMFTransaction
 					WHERE intWorkOrderId = @intWorkOrderId
-						AND strTransactionType = 'dblOpeningQuantity'
+						AND strTransactionType = 'dblOpeningQuantity'and intCategoryId <>@intCategoryId
 				END
 				ELSE
 				BEGIN
@@ -743,18 +760,21 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					SELECT @dblCalculatedQuantity = 100 * (
-							SELECT SUM(dblQuantity)
-							FROM dbo.tblMFWorkOrderRecipeItem
-							WHERE intWorkOrderId = @intWorkOrderId
-								AND intRecipeItemTypeId = 2
-								AND intItemId = @intItemId
-							) / (
-							SELECT SUM(dblCalculatedQuantity)
-							FROM dbo.tblMFWorkOrderRecipeItem
-							WHERE intWorkOrderId = @intWorkOrderId
-								AND intRecipeItemTypeId = 1
-							)
+					--SELECT @dblCalculatedQuantity = 100 * (
+					--		SELECT SUM(dblQuantity)
+					--		FROM dbo.tblMFWorkOrderRecipeItem
+					--		WHERE intWorkOrderId = @intWorkOrderId
+					--			AND intRecipeItemTypeId = 2
+					--			AND intItemId = @intItemId
+					--		) / (
+					--		SELECT SUM(dblCalculatedQuantity)
+					--		FROM dbo.tblMFWorkOrderRecipeItem
+					--		WHERE intWorkOrderId = @intWorkOrderId
+					--			AND intRecipeItemTypeId = 1
+					--		)
+
+					SELECT @dblCalculatedQuantity = 100
+
 				END
 				ELSE
 				BEGIN
@@ -779,11 +799,25 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					SET @dblYieldP = @dblTOutput / CASE 
+					--SET @dblYieldP = @dblTOutput / CASE 
+					--		WHEN ISNULL(@dblTInput, 0) = 0
+					--			THEN 1
+					--		ELSE @dblTInput
+					--		END
+
+					SELECT @dblRequiredQty = 0
+
+					SELECT @dblRequiredQty = Sum(dblRequiredQty)
+					FROM ##tblMFFinalInputItemYield
+					WHERE intWorkOrderId = @intWorkOrderId
+					and intCategoryId <>@intCategoryId
+
+					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL(@dblTInput, 0) = 0
 								THEN 1
 							ELSE @dblTInput
 							END
+		
 				END
 				ELSE
 				BEGIN
@@ -822,7 +856,7 @@ BEGIN TRY
 
 		DELETE
 		FROM ##tblMFFinalInputItemYield
-		WHERE strTransactionType = 'dblOpeningQuantity'
+		WHERE strTransactionType = 'dblOpeningQuantity' and intInputItemId in (Select Y.intInputItemId from ##tblMFFinalInputItemYield Y Where Y.strTransactionType = 'Input')
 
 		SELECT dtmFromDate
 			,dtmToDate
@@ -1225,9 +1259,10 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
-			,RI.intItemUOMId
+			,TR.intItemUOMId
 			,W.intItemId AS intPrimaryItemId
 			,strTransactionType
+			,TR.intCategoryId 
 		INTO ##tblMFInputItemYieldByDate
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
@@ -1306,9 +1341,10 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
-			,RI.intItemUOMId
+			,TR.intItemUOMId
 			,W.intItemId AS intPrimaryItemId
 			,strTransactionType
+			,TR.intCategoryId 
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
@@ -1344,6 +1380,7 @@ BEGIN TRY
 			,intItemUOMId
 			,intPrimaryItemId
 			,strTransactionType
+			,intCategoryId 
 		INTO ##tblMFFinalInputItemYieldByDate
 		FROM ##tblMFInputItemYieldByDate
 		GROUP BY intYieldId
@@ -1359,6 +1396,7 @@ BEGIN TRY
 			,intItemUOMId
 			,intPrimaryItemId
 			,strTransactionType
+			,intCategoryId
 
 		SELECT @intYieldId = MIN(intYieldId)
 		FROM ##tblMFFinalInputItemYieldByDate
@@ -1397,6 +1435,8 @@ BEGIN TRY
 				WHERE intYieldId = @intYieldId
 					AND intInputItemId = @intInputItemId
 
+if @intInputItemId = @intItemId 
+begin
 				SELECT @dblInput = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intItemId = @intPrimaryItemId
@@ -1408,6 +1448,22 @@ BEGIN TRY
 						ELSE @intInputItemId
 						END
 					AND strTransactionType = 'Input'
+					and intCategoryId <>@intCategoryId 
+					End
+					else
+					begin
+						SELECT @dblInput = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intPrimaryItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'Input'
+					End
 
 				--SELECT @dblInput = 0
 				SELECT @dblOutput = SUM(dblQuantity)
@@ -1438,6 +1494,7 @@ BEGIN TRY
 						AND dtmDate = @dtmDate
 						AND intShiftId = IsNULL(@intShiftId, intShiftId)
 						AND strTransactionType = 'dblOpeningQuantity'
+						And intCategoryId <>@intCategoryId 
 				END
 				ELSE
 				BEGIN
@@ -1508,26 +1565,27 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					SELECT @intRecipeId = NULL
+					--SELECT @intRecipeId = NULL
 
-					SELECT @intRecipeId = intRecipeId
-					FROM dbo.tblMFRecipe
-					WHERE intItemId = @intPrimaryItemId
-						AND intLocationId = @intLocationId
-						AND ysnActive = 1
+					--SELECT @intRecipeId = intRecipeId
+					--FROM dbo.tblMFRecipe
+					--WHERE intItemId = @intPrimaryItemId
+					--	AND intLocationId = @intLocationId
+					--	AND ysnActive = 1
 
-					SELECT @dblCalculatedQuantity = 100 * (
-							SELECT SUM(dblQuantity)
-							FROM dbo.tblMFRecipeItem
-							WHERE intRecipeId = @intRecipeId
-								AND intRecipeItemTypeId = 2
-								AND intItemId = @intItemId
-							) / (
-							SELECT SUM(dblCalculatedQuantity)
-							FROM dbo.tblMFRecipeItem
-							WHERE intRecipeId = @intRecipeId
-								AND intRecipeItemTypeId = 1
-							)
+					--SELECT @dblCalculatedQuantity = 100 * (
+					--		SELECT SUM(dblQuantity)
+					--		FROM dbo.tblMFRecipeItem
+					--		WHERE intRecipeId = @intRecipeId
+					--			AND intRecipeItemTypeId = 2
+					--			AND intItemId = @intItemId
+					--		) / (
+					--		SELECT SUM(dblCalculatedQuantity)
+					--		FROM dbo.tblMFRecipeItem
+					--		WHERE intRecipeId = @intRecipeId
+					--			AND intRecipeItemTypeId = 1
+					--		)
+					SELECT @dblCalculatedQuantity = 100
 				END
 				ELSE
 				BEGIN
@@ -1552,11 +1610,25 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					SET @dblYieldP = @dblTOutput / CASE 
+					SELECT @dblRequiredQty = 0
+
+					SELECT @dblRequiredQty = SUM(dblRequiredQty)
+					FROM ##tblMFFinalInputItemYieldByDate
+					WHERE intItemId = @intPrimaryItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					And intCategoryId <>@intCategoryId 
+					--SET @dblYieldP = @dblTOutput / CASE 
+					--		WHEN ISNULL(@dblTInput, 0) = 0
+					--			THEN 1
+					--		ELSE @dblTInput
+					--		END
+					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL(@dblTInput, 0) = 0
 								THEN 1
 							ELSE @dblTInput
 							END
+					
 				END
 				ELSE
 				BEGIN
@@ -1609,7 +1681,7 @@ BEGIN TRY
 		--WHERE intInputItemId = intItemId
 		DELETE
 		FROM ##tblMFFinalInputItemYieldByDate
-		WHERE strTransactionType = 'dblOpeningQuantity'
+		WHERE strTransactionType = 'dblOpeningQuantity'  and intInputItemId in (Select Y.intInputItemId from ##tblMFFinalInputItemYieldByDate Y Where Y.strTransactionType = 'Input')
 
 		SELECT dtmFromDate
 			,dtmToDate
@@ -1714,6 +1786,28 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
+
+	IF OBJECT_ID('tempdb..##tblMFTransaction') IS NOT NULL
+		DROP TABLE ##tblMFTransaction
+
+	IF OBJECT_ID('tempdb..##tblMFYield') IS NOT NULL
+		DROP TABLE ##tblMFYield
+
+	IF OBJECT_ID('tempdb..##tblMFInputItemYield') IS NOT NULL
+		DROP TABLE ##tblMFInputItemYield
+
+	IF OBJECT_ID('tempdb..##tblMFFinalInputItemYield') IS NOT NULL
+		DROP TABLE ##tblMFFinalInputItemYield
+
+	IF OBJECT_ID('tempdb..##tblMFYieldByDate') IS NOT NULL
+		DROP TABLE ##tblMFYieldByDate
+
+	IF OBJECT_ID('tempdb..##tblMFInputItemYieldByDate') IS NOT NULL
+		DROP TABLE ##tblMFInputItemYieldByDate
+
+	IF OBJECT_ID('tempdb..##tblMFFinalInputItemYieldByDate') IS NOT NULL
+		DROP TABLE ##tblMFFinalInputItemYieldByDate
+
 	SET @strErrMsg = 'uspMFGetYieldView - ' + ERROR_MESSAGE()
 
 	RAISERROR (
