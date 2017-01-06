@@ -4760,6 +4760,7 @@
     <Build Include="dbo\Stored Procedures\uspCTContractApproved.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCommodityUOM.sql" />
     <Build Include="dbo\Views\vyuLGGetOpenWeightClaim.sql" />
+    <Build Include="dbo\Views\vyuLGWeightClaimSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

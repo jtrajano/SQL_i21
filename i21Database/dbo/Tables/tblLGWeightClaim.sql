@@ -9,6 +9,7 @@
 [dtmETAPOD] DATETIME NULL,
 [dtmLastWeighingDate] DATETIME NULL,
 [dtmActualWeighingDate] DATETIME NULL,
+[intPurchaseSale] INT NULL,
 
 CONSTRAINT [PK_tblLGWeightClaim_intWeightClaimId] PRIMARY KEY ([intWeightClaimId]), 
 CONSTRAINT [UK_tblLGWeightClaim_intReferenceNumber] UNIQUE ([strReferenceNumber]),

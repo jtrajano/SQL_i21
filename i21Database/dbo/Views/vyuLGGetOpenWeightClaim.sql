@@ -22,7 +22,6 @@ FROM (
 	dtmLastWeighingDate = Load.dtmETAPOD + 45,
 	Load.strBLNumber,
 	Load.dtmBLDate,
-	LD.intPContractDetailId,
 	Load.intWeightUnitMeasureId,
 	strWeightUOM = WUOM.strUnitMeasure,
 	CH.intWeightId,
@@ -67,7 +66,11 @@ FROM (
 	AD.intSeqPriceUOMId,
 	AD.ysnSeqSubCurrency,
 	dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM((SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId),AD.intSeqPriceUOMId,AD.dblSeqPrice),
-	CD.intItemId
+	CD.intItemId,
+	CD.intContractDetailId,
+	WC.strReferenceNumber,
+	WC.dtmTransDate,
+	WC.dtmActualWeighingDate
 
 FROM tblLGLoad Load
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Load.intWeightUnitMeasureId
@@ -84,5 +87,5 @@ LEFT JOIN (
 		GROUP BY ReceiptItem.intSourceId, ReceiptItem.intLineNo, ReceiptItem.intOrderId
 	) RI ON RI.intSourceId = LD.intLoadDetailId AND RI.intLineNo = LD.intPContractDetailId AND RI.intOrderId = CH.intContractHeaderId AND Load.intPurchaseSale = 1
 LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = Load.intLoadId
-WHERE Load.intShipmentStatus = CASE Load.intPurchaseSale WHEN  1 THEN 4 ELSE 6 END
+WHERE Load.intShipmentStatus = CASE Load.intPurchaseSale WHEN  1 THEN 4 ELSE 6 END AND IsNull(WC.intWeightClaimId, 0) = 0
 ) t1
