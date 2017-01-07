@@ -22,7 +22,7 @@ AS
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT
 	JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	LEFT
 	JOIN	tblICCommodity			CO	ON	CO.intCommodityId			=	IM.intCommodityId	LEFT
-	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	IM.intOriginId		LEFT
 	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId
-										AND	CA.strType					=	'Origin'
+										AND	CA.strType					=	'Origin'			LEFT
+	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material','Bundle')
