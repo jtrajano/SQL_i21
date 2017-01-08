@@ -371,6 +371,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,dblRequiredQty NUMERIC(38, 20)
 		,ysnMainItem BIT
+		,intItemUOMId int
 		)
 	DECLARE @tblICFinalItem TABLE (
 		intItemId INT
@@ -378,6 +379,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,dblRequiredQty NUMERIC(38, 20)
 		,ysnMainItem BIT
+		,intItemUOMId int
 		)
 	DECLARE @dblProduceQty NUMERIC(38, 20)
 		,@intProduceUOMId INT
@@ -416,6 +418,7 @@ BEGIN TRY
 			,intStorageLocationId
 			,dblRequiredQty
 			,ysnMainItem
+			,intItemUOMId
 			)
 		SELECT ri.intItemId
 			,ri.intConsumptionMethodId
@@ -439,6 +442,7 @@ BEGIN TRY
 						)
 				END AS RequiredQty
 			,1 AS ysnMainItem
+			,ri.intItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -488,6 +492,7 @@ BEGIN TRY
 						)
 				END AS RequiredQty
 			,0 AS ysnMainItem
+			,RI.intItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -541,6 +546,7 @@ BEGIN TRY
 			,intStorageLocationId
 			,dblRequiredQty
 			,ysnMainItem
+			,intItemUOMId
 			)
 		SELECT ri.intItemId
 			,ri.intConsumptionMethodId
@@ -576,6 +582,7 @@ BEGIN TRY
 						)
 				END AS RequiredQty
 			,1 AS ysnMainItem
+			,ri.intItemUOMId 
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -637,6 +644,7 @@ BEGIN TRY
 						)
 				END AS RequiredQty
 			,0 AS ysnMainItem
+			,RI.intItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -671,17 +679,20 @@ BEGIN TRY
 		,intStorageLocationId
 		,dblRequiredQty
 		,ysnMainItem
+		,intItemUOMId
 		)
 	SELECT intItemId
 		,intConsumptionMethodId
 		,intStorageLocationId
 		,SUM(dblRequiredQty)
 		,ysnMainItem
+		,intItemUOMId
 	FROM @tblICItem
 	GROUP BY intItemId
 		,intConsumptionMethodId
 		,intStorageLocationId
 		,ysnMainItem
+		,intItemUOMId
 
 	IF @ysnIncludeOutputItem = 1
 	BEGIN
@@ -746,6 +757,7 @@ BEGIN TRY
 	DECLARE @tblMFLot TABLE (
 		intItemId INT
 		,dblQty NUMERIC(18, 6)
+		,intItemUOMId int
 		)
 
 	INSERT INTO @tblMFLot
@@ -757,6 +769,7 @@ BEGIN TRY
 						ELSE L.dblWeight
 						END
 					), 0))
+					,IsNULL(L.intWeightUOMId,L.intItemUOMId )
 	FROM @tblICFinalItem I
 	JOIN tblICLot L ON L.intItemId = I.intItemId
 		AND L.intLotStatusId = 1
@@ -767,20 +780,22 @@ BEGIN TRY
 				THEN I.intStorageLocationId
 			ELSE @intProductionStageLocationId
 			END
-	GROUP BY I.intItemId
+	GROUP BY I.intItemId,IsNULL(L.intWeightUOMId,L.intItemUOMId )
 
 	DECLARE @tblMFWorkOrderInputLot TABLE (
 		intItemId INT
 		,dblQuantity NUMERIC(18, 6)
+		,intItemUOMId int
 		)
 
 	INSERT INTO @tblMFWorkOrderInputLot
 	SELECT I.intItemId
 		,SUM(IsNULL(WI.dblQuantity, 0))
+		,WI.intItemUOMId
 	FROM @tblICFinalItem I
 	JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
 		AND WI.intWorkOrderId = @intWorkOrderId
-	GROUP BY I.intItemId
+	GROUP BY I.intItemId,WI.intItemUOMId
 
 	INSERT INTO @tblMFQtyInProductionStagingLocation (
 		intItemId
@@ -789,13 +804,13 @@ BEGIN TRY
 		,dblQtyInProdStagingLocation
 		)
 	SELECT I.intItemId
-		,IsNULL(L.dblQty, 0) - IsNULL(I.dblRequiredQty, 0)
+		,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId , I.intItemUOMId, L.dblQty), 0) - IsNULL(I.dblRequiredQty, 0)
 		,CASE 
-			WHEN IsNULL(L.dblQty, 0) - IsNULL(WI.dblQuantity, 0) > 0
-				THEN IsNULL(L.dblQty, 0) - IsNULL(WI.dblQuantity, 0)
+			WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId , I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId , I.intItemUOMId, WI.dblQuantity), 0) > 0
+				THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId , I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId , I.intItemUOMId, WI.dblQuantity), 0)
 			ELSE 0
 			END
-		,IsNULL(L.dblQty, 0)
+		,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId , I.intItemUOMId, L.dblQty), 0)
 	FROM @tblICFinalItem I
 	LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
 	LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
@@ -836,6 +851,7 @@ BEGIN TRY
 		,dblQtyInProdStagingLocation
 		,dblRequiredQty
 		,dblSystemQty
+		,intItemUOMId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -858,6 +874,7 @@ BEGIN TRY
 			FROM @tblMFQtyInProductionStagingLocation PS
 			WHERE PS.intItemId = I.intItemId
 			)
+		,I.intItemUOMId
 		,@intUserId
 		,@dtmCurrentDateTime
 		,@intUserId
