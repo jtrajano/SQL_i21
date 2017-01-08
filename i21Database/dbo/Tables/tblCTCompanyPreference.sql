@@ -26,6 +26,7 @@
 	[strSignature] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strDefPackingDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	intDefContractStatusId INT,
+	ysnBasisComponent BIT,
 
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),

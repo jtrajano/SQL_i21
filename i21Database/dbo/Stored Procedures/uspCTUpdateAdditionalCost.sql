@@ -50,6 +50,15 @@ BEGIN TRY
 			WHERE	intPriceFixationId	=	@intPriceFixationId
 		END
 		
+		UPDATE	CC 
+		SET		CC.intItemUOMId		=	CU.intItemUOMId
+		FROM	tblCTContractCost	CC
+		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+		JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CD.intPriceItemUOMId
+		JOIN	tblICItemUOM		CU	ON	CU.intItemId			=	CC.intItemId
+										AND	CU.intUnitMeasureId		=	IU.intUnitMeasureId
+		WHERE	CC.intContractDetailId = @intContractDetailId AND CC.ysnBasis = 1
+
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 	

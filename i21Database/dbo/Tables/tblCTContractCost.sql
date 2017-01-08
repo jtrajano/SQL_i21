@@ -13,6 +13,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[ysnMTM] [bit] NULL,
 	[ysnPrice] [bit] NULL,
 	[ysnAdditionalCost] [bit] NULL,
+	[ysnBasis] [bit] NULL,
 
 	CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
 	CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,

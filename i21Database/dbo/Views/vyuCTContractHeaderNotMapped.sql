@@ -18,9 +18,11 @@ AS
 
 						dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intLoadUOMId,CH.intCommodityUOMId,1)	AS	dblCommodityUOMConversionFactor,
 						dbo.fnCTGetPrepaidIds(CH.intContractHeaderId) strPrepaidIds,
-						CY.ysnExchangeTraded
+						CY.ysnExchangeTraded,
+						EY.strName AS strEntityName
 
-				FROM	tblCTContractHeader CH	LEFT
+				FROM	tblCTContractHeader CH	
+				JOIN	tblEMEntity			EY	ON	EY.intEntityId		=	CH.intEntityId			LEFT
 				JOIN	tblICCommodity		CY	ON	CY.intCommodityId	=	CH.intCommodityId		LEFT
 				JOIN	tblCTPriceFixation	PF	ON	CH.intContractHeaderId = PF.intContractHeaderId AND CH.ysnMultiplePriceFixation = 1
 			)t

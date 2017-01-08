@@ -15,6 +15,7 @@ AS
 				CC.ysnMTM, 
 				CC.ysnPrice, 
 				CC.ysnAdditionalCost,
+				CC.ysnBasis,
 				IM.strItemNo, 
 				IM.strDescription strItemDescription,
 				UM.strUnitMeasure strUOM, 
