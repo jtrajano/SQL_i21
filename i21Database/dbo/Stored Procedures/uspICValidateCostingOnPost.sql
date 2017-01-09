@@ -200,6 +200,7 @@ FROM	@ItemsToValidate iv INNER JOIN tblICItem i ON iv.intItemId = i.intItemId
 			ON cm.intCostingMethodId = icm.CostingMethod
 WHERE	strActualCostId IS NOT NULL 
 		AND cm.strCostingMethod = 'AVERAGE COST'
+		AND iv.dblQty > 0 
 
 IF @intItemId IS NOT NULL 
 BEGIN 
