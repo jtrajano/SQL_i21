@@ -4765,6 +4765,7 @@
     <Build Include="dbo\Views\vyuCTContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCompareRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessApprovedContractToFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDeleteInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
