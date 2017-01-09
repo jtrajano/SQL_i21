@@ -28,7 +28,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'Grain.store.BufferedUniqueDiscountId',
         'Grain.store.BufferedDistributions',
         'Grain.store.BufferedUniqueStorageSchedule',
-        'i21.store.Country',
+        'i21.store.CountryBufferedStore',
         'i21.store.PurchasingGroupBuffered'
     ],
 
@@ -42,7 +42,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
             }
         },
         origins: {
-            type: 'country',
+            type: 'countrybufferedstore',
             pageSize: 200,
             sortOnLoad: true,
             sorters: {
