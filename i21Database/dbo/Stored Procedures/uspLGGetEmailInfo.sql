@@ -199,7 +199,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName = 'In_store')
+	ELSE IF (@strReportName = 'In_store' Or @strReportName = 'In_store2')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
