@@ -37,13 +37,17 @@ SELECT
 	EM.intEntityId,
 	strPaidTo = PTEM.strName,
 	strCurrency = SM.strCurrency,
-	strPriceUOM = ItemUOM.strUnitMeasure
+	strPriceUOM = ItemUOM.strUnitMeasure,
+	AD.ysnSeqSubCurrency,
+	dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM((SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId),AD.intSeqPriceUOMId,AD.dblSeqPrice)
 
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId
 JOIN tblLGLoad Load ON Load.intLoadId = WC.intLoadId
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Load.intWeightUnitMeasureId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WD.intContractDetailId
+	CROSS
+	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
