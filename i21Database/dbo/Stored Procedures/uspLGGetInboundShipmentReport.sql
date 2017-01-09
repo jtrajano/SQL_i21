@@ -16,7 +16,10 @@ BEGIN
 			@strCountry					NVARCHAR(25),
 			@strPhone					NVARCHAR(50),
 			@strFullName				NVARCHAR(100),
-			@strUserName				NVARCHAR(100)
+			@strUserName				NVARCHAR(100),
+			@strLogisticsCompanyName	NVARCHAR(MAX),
+			@strLogisticsPrintSignOff	NVARCHAR(MAX),
+			@intCompanyLocationId		INT
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -64,6 +67,10 @@ BEGIN
 	SELECT	@strUserName = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strUserName' 
+	
+	SELECT	@intCompanyLocationId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intCompanyLocationId' 
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
 				,@strCompanyAddress = strAddress
@@ -78,9 +85,14 @@ BEGIN
 
 	SELECT @strFullName = strFullName FROM tblSMUserSecurity WHERE strUserName = @strUserName
 
+	
+	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
+		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
+	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+
 IF ISNULL(@intLoadWarehouseId,0) = 0 
 	BEGIN
-		SELECT 
+		SELECT TOP 1
 				L.strLoadNumber AS strTrackingNumber,
 				LW.strDeliveryNoticeNumber, 
 				LW.dtmDeliveryNoticeDate,
@@ -195,10 +207,17 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
 				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				@strFullName AS strUserFullName
+				@strFullName AS strUserFullName,
+				'' AS strExternalPONumber,
+				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
+				CType.strContainerType,
+				@strLogisticsCompanyName AS strLogisticsCompanyName,
+				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
+				WETC.strName AS strWarehouseContact
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
 		LEFT JOIN	tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
@@ -215,13 +234,15 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 		LEFT JOIN	tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
+		LEFT JOIN   tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
+		LEFT JOIN   tblEMEntity WETC ON WETC .intEntityId = WEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		WHERE L.strLoadNumber = @strTrackingNumber
 	END
 	ELSE
 	BEGIN
-			SELECT 
+		SELECT TOP 1			
 				L.strLoadNumber AS strTrackingNumber,
 				LW.strDeliveryNoticeNumber,
 				LW.dtmDeliveryNoticeDate,
@@ -336,10 +357,17 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
 				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				@strFullName AS strUserFullName
+				@strFullName AS strUserFullName,
+				'' AS strExternalPONumber,
+				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
+				CType.strContainerType,
+				@strLogisticsCompanyName AS strLogisticsCompanyName,
+				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
+				WETC.strName AS strWarehouseContact
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
 		LEFT JOIN	tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
@@ -357,6 +385,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		--LEFT JOIN   tblEMEntityToContact VEC ON VEC.intEntityId = Vendor.intEntityId
 		LEFT JOIN	tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
+		LEFT JOIN   tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
+		LEFT JOIN   tblEMEntity WETC ON WETC .intEntityId = WEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
