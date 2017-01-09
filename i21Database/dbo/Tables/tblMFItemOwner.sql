@@ -3,7 +3,6 @@
 	,intOwnerId INT NOT NULL
 	,intItemId INT NOT NULL
 	,intReceivedLife INT
-	,ysnPickByOwner BIT NOT NULL
 	,CONSTRAINT PK_tblMFItemOwner PRIMARY KEY (intItemOwnerId)
 	,CONSTRAINT FK_tblMFItemOwner_tblICItem FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFItemOwner_tblEMEntity FOREIGN KEY (intOwnerId) REFERENCES tblEMEntity(intEntityId)

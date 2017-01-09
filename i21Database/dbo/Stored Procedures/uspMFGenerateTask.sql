@@ -44,12 +44,12 @@ BEGIN TRY
 		,dblLineItemWeight NUMERIC(18, 6)
 		)
 	DECLARE @intReceivedLife INT
-		,@ysnPickByOwner BIT
 		,@strReferenceNo NVARCHAR(50)
 		,@intEntityCustomerId INT
 		,@intItemOwnerId INT
+		,@ysnPickByItemOwner bit
 
-	SELECT @intReceivedLife = 0,@ysnPickByOwner=0,@intItemOwnerId=0
+	SELECT @intReceivedLife = 0,@ysnPickByItemOwner=0,@intItemOwnerId=0
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -58,6 +58,7 @@ BEGIN TRY
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
 		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
+		,@ysnPickByItemOwner=ysnPickByItemOwner
 	FROM tblMFCompanyPreference
 
 	SELECT @intAllowablePickDayRange = intAllowablePickDayRange
@@ -212,7 +213,6 @@ BEGIN TRY
 				WHERE strShipmentNumber = @strReferenceNo
 
 				SELECT @intReceivedLife = intReceivedLife
-					,@ysnPickByOwner = ysnPickByOwner
 				FROM tblMFItemOwner
 				WHERE intOwnerId = @intEntityCustomerId
 					AND intItemId = @intItemId
@@ -311,7 +311,7 @@ BEGIN TRY
 						), 0)
 				AND IsNULL(LI.intItemOwnerId,0) = (
 					CASE 
-						WHEN @ysnPickByOwner = 1
+						WHEN @ysnPickByItemOwner = 1
 							THEN @intItemOwnerId
 						ELSE IsNULL(LI.intItemOwnerId,0)
 						END
@@ -445,7 +445,7 @@ BEGIN TRY
 						), 0)
 				AND LI.intItemOwnerId = (
 					CASE 
-						WHEN @ysnPickByOwner = 1
+						WHEN @ysnPickByItemOwner = 1
 							THEN @intItemOwnerId
 						ELSE LI.intItemOwnerId
 						END
@@ -510,6 +510,270 @@ BEGIN TRY
 							)
 						) - @dblRequiredWeight)
 				,L.dtmDateCreated ASC
+
+			If @ysnPickByItemOwner =1 and not exists(Select *from @tblLot)
+			Begin
+				--- INSERT ALL THE LOTS WITHIN THE ALLOWABLE PICK DAY RANGE
+			INSERT INTO @tblLot (
+				intLotId
+				,intItemId
+				,dblQty
+				,intItemUOMId
+				,dblWeight
+				,intWeightUOMId
+				,dblRemainingLotQty
+				,dblRemainingLotWeight
+				,dtmProductionDate
+				,intGroupId
+				)
+			SELECT L.intLotId
+				,L.intItemId
+				,L.dblQty
+				,L.intItemUOMId
+				,L.dblWeight
+				,L.intWeightUOMId
+				,L.dblQty - (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN L.dblQty - T.dblQty
+								ELSE T.dblQty
+								END, 0))
+					) AS dblRemainingLotQty
+				,L.dblWeight - (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN L.dblWeight - T.dblWeight
+								ELSE T.dblWeight
+								END, 0))
+					) AS dblRemainingLotWeight
+				,L.dtmDateCreated
+				,1
+			FROM tblICLot L
+			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+				AND UT.ysnAllowPick = 1
+			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
+				AND T.intTaskTypeId NOT IN (
+					5
+					,6
+					,8
+					,9
+					,10
+					,11
+					)
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				AND R.strInternalCode = 'STOCK'
+			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			WHERE L.intItemId = @intItemId
+				AND L.intLotStatusId = 1
+				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND L.dtmDateCreated BETWEEN (
+							SELECT MIN(dtmDateCreated)
+							FROM tblICLot
+							WHERE intItemId = @intItemId
+								AND dblQty > 0
+							)
+					AND (
+							SELECT MIN(dtmDateCreated) + @intAllowablePickDayRange
+							FROM tblICLot
+							WHERE intItemId = @intItemId
+								AND dblQty > 0
+							)
+				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+						CASE 
+							WHEN @intLineItemLotId IS NULL
+								THEN L.intParentLotId
+							ELSE @intLineItemLotId
+							END
+						), 0)
+				GROUP BY L.intLotId
+				,L.intItemId
+				,L.dblQty
+				,L.intItemUOMId
+				,L.dblWeight
+				,L.intWeightUOMId
+				,L.dtmDateCreated
+				,L.dtmManufacturedDate
+				,L.strLotNumber
+			HAVING (
+					CASE 
+						WHEN L.intWeightUOMId IS NULL
+							THEN L.dblQty
+						ELSE L.dblWeight
+						END
+					) - (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN (
+											CASE 
+												WHEN L.intWeightUOMId IS NULL
+													THEN L.dblQty
+												ELSE L.dblWeight
+												END
+											) - T.dblWeight
+								ELSE T.dblWeight
+								END, 0))
+					) > 0
+			ORDER BY CASE 
+					WHEN @ysnPickByLotCode = 0
+						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+					ELSE '1900-01-01'
+					END ASC
+				,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+					ELSE '1'
+					END ASC
+				,ABS((
+						(
+							CASE 
+								WHEN L.intWeightUOMId IS NULL
+									THEN L.dblQty
+								ELSE L.dblWeight
+								END
+							) - (
+							SUM(ISNULL(CASE 
+										WHEN T.intTaskTypeId = 13
+											THEN (
+													CASE 
+														WHEN L.intWeightUOMId IS NULL
+															THEN L.dblQty
+														ELSE L.dblWeight
+														END
+													) - T.dblWeight
+										ELSE T.dblWeight
+										END, 0))
+							)
+						) - @dblRequiredWeight)
+				,L.dtmDateCreated ASC
+
+			--- INSERT ALL THE LOTS OUTSIDE ALLOWABLE PICK DAY RANGE
+			INSERT INTO @tblLot (
+				intLotId
+				,intItemId
+				,dblQty
+				,intItemUOMId
+				,dblWeight
+				,intWeightUOMId
+				,dblRemainingLotQty
+				,dblRemainingLotWeight
+				,dtmProductionDate
+				,intGroupId
+				)
+			SELECT L.intLotId
+				,L.intItemId
+				,L.dblQty
+				,L.intItemUOMId
+				,L.dblWeight
+				,L.intWeightUOMId
+				,L.dblQty - (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN L.dblQty - T.dblQty
+								ELSE T.dblQty
+								END, 0))
+					) AS dblRemainingLotQty
+				,L.dblWeight - (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN L.dblWeight - T.dblWeight
+								ELSE T.dblWeight
+								END, 0))
+					) AS dblRemainingLotWeight
+				,L.dtmDateCreated
+				,2
+			FROM tblICLot L
+			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+				AND UT.ysnAllowPick = 1
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				AND R.strInternalCode = 'STOCK'
+			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
+				AND T.intTaskTypeId NOT IN (
+					5
+					,6
+					,8
+					,9
+					,10
+					,11
+					)
+			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			WHERE L.intItemId = @intItemId
+				AND L.intLotStatusId = 1
+				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND NOT EXISTS (
+					SELECT *
+					FROM @tblLot
+					WHERE intLotId = L.intLotId
+					)
+				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+						CASE 
+							WHEN @intLineItemLotId IS NULL
+								THEN L.intParentLotId
+							ELSE @intLineItemLotId
+							END
+						), 0)
+				GROUP BY L.intLotId
+				,L.intItemId
+				,L.dblQty
+				,L.intItemUOMId
+				,L.dblWeight
+				,L.intWeightUOMId
+				,L.dtmDateCreated
+				,L.dtmManufacturedDate
+				,L.strLotNumber
+			HAVING (
+					CASE 
+						WHEN L.intWeightUOMId IS NULL
+							THEN L.dblQty
+						ELSE L.dblWeight
+						END
+					) - (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN (
+											CASE 
+												WHEN L.intWeightUOMId IS NULL
+													THEN L.dblQty
+												ELSE L.dblWeight
+												END
+											) - L.dblWeight
+								ELSE T.dblWeight
+								END, 0))
+					) > 0
+			ORDER BY CASE 
+					WHEN @ysnPickByLotCode = 0
+						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+					ELSE '1900-01-01'
+					END ASC
+				,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+					ELSE '1'
+					END ASC
+				,ABS((
+						(
+							CASE 
+								WHEN L.intWeightUOMId IS NULL
+									THEN L.dblQty
+								ELSE L.dblWeight
+								END
+							) - (
+							SUM(ISNULL(CASE 
+										WHEN T.intTaskTypeId = 13
+											THEN (
+													CASE 
+														WHEN L.intWeightUOMId IS NULL
+															THEN L.dblQty
+														ELSE L.dblWeight
+														END
+													) - T.dblWeight
+										ELSE T.dblWeight
+										END, 0))
+							)
+						) - @dblRequiredWeight)
+				,L.dtmDateCreated ASC
+			End
 
 			SELECT @intLotRecordId = MIN(intLotRecordId)
 			FROM @tblLot
