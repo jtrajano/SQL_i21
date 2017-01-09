@@ -454,6 +454,25 @@ Ext.define('Inventory.view.CommodityViewController', {
         
     },
 
+    onOriginBeforeQuery: function(obj) {
+        if (obj.combo) {
+            var store = obj.combo.store;
+            var win = obj.combo.up('window');
+
+            if (store) {
+                store.remoteFilter = false;
+                store.remoteSort = false;
+            }
+
+            if (obj.combo.itemId === 'cboOrigin') {
+                store.clearFilter();
+                store.filterBy(function (rec, id) {
+                    return rec.get('strCountry').toLowerCase().indexOf(obj.query.toLowerCase()) !== -1;
+                });
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboUOM": {
@@ -477,6 +496,9 @@ Ext.define('Inventory.view.CommodityViewController', {
              "#cboFutureMarket": {
                 drilldown: this.onFutureMarketDrilldown
             },
+            '#cboOrigin': {
+                beforequery: this.onOriginBeforeQuery
+            }
         });
     }
 });
