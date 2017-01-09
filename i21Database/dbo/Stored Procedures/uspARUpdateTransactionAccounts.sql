@@ -87,12 +87,15 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		SET
 			LIA.[intAccountId] = (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE [intItemId] = ARID.[intItemId] AND [strType] IN ('Non-Inventory','Service'))) 
 										THEN
-											IST.[intGeneralAccountId]													
+											(CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId],IST.[intGeneralAccountId]) ELSE IST.[intGeneralAccountId] END)													
 										WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE [intItemId] = ARID.[intItemId] AND [strType] = 'Other Charge')) 
 										THEN
-											IST.[intOtherChargeIncomeAccountId]
+											(CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId],IST.[intOtherChargeIncomeAccountId]) ELSE IST.[intOtherChargeIncomeAccountId] END)
 										ELSE
-											ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END))
+											(CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END))) 
+												ELSE
+													ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END)) 
+											END)											
 									END)
 		FROM
 			@LineItemAccounts LIA
