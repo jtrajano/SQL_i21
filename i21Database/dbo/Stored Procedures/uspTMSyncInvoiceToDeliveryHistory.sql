@@ -545,6 +545,7 @@ BEGIN
 							,intWillCallDispatchId
 							,ysnWillCallLeakCheckRequired
 							,intInvoiceId
+							,dblWillCallPercentLeft
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
@@ -596,6 +597,7 @@ BEGIN
 							,intWillCallDispatchId = G.intDispatchID
 							,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 							,intInvoiceId = B.intInvoiceId
+							,dblWillCallPercentLeft = G.dblPercentLeft
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -738,6 +740,7 @@ BEGIN
 						,intWillCallDispatchId
 						,ysnWillCallLeakCheckRequired
 						,intInvoiceId
+						,dblWillCallPercentLeft
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -803,6 +806,7 @@ BEGIN
 						,intWillCallDispatchId = G.intDispatchID
 						,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 						,intInvoiceId = B.intInvoiceId
+						,dblWillCallPercentLeft = G.dblPercentLeft
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -1105,6 +1109,7 @@ BEGIN
 			,intWillCallDispatchId
 			,ysnWillCallLeakCheckRequired
 			,intInvoiceId
+			,dblWillCallPercentLeft
 		)
 		SELECT TOP 1
 			strInvoiceNumber = C.strInvoiceNumber
@@ -1159,6 +1164,7 @@ BEGIN
 			,intWillCallDispatchId = G.intDispatchID
 			,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 			,intInvoiceId = B.intInvoiceId
+			,dblWillCallPercentLeft = G.dblPercentLeft
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId

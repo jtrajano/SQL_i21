@@ -76,6 +76,17 @@ SELECT
 	,intCustomerPricingLevel = Cus.intCompanyLocationPricingLevelId
 	,strCustomerContactEmail = Con.strEmail
 	,intCustomerDeliveryTermId = Loc.intTermsId
+	,dtmLastInvoiceRevisedDate = (SELECT TOP 1 dtmDate FROM tblARInvoice WHERE intEntityId = Ent.intEntityId AND strTransactionType = 'Invoice' ORDER BY dtmDate DESC)
+	,dtmLastPaymentRevisedDate = CI.dtmLastPaymentDate
+	,dtmLastStatementRevDate = CI.dtmLastStatementDate
+	,strCompleteAddress = dbo.[fnConvertToFullAddress](ISNULL(Loc.strAddress,'')
+														,ISNULL(Loc.strCity,'')
+														,ISNULL(Loc.strState,'')
+														,ISNULL(Loc.strZipCode,'')) COLLATE Latin1_General_CI_AS
+	,strFormattedAddress =  ISNULL(Loc.strAddress,'') COLLATE Latin1_General_CI_AS
+	,strFullName = Ent.strName
+	,strFullTermName = (CAST(ISNULL(T.intTermID,'') AS NVARCHAR(10)) + ' - ' + ISNULL(T.strTerm,'')) COLLATE Latin1_General_CI_AS
+	,strCreditNote =''
 FROM tblEMEntity Ent
 INNER JOIN tblARCustomer Cus 
 	ON Ent.intEntityId = Cus.intEntityCustomerId
@@ -93,5 +104,7 @@ LEFT JOIN tblEMEntityPhoneNumber E
 	ON Con.intEntityId = E.intEntityId   
 LEFT JOIN tblEMEntityMobileNumber F
 	ON Con.intEntityId = F.intEntityId   
+LEFT JOIN tblSMTerm T
+	ON Loc.intTermsId = T.intTermID
 
 GO
