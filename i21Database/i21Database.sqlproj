@@ -4769,6 +4769,7 @@
     <Build Include="dbo\Views\vyuLGWeightClaimHeader.sql" />
     <Build Include="dbo\Tables\tblMFItemOwner.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC.sql" />
+    <Build Include="dbo\Views\vyuCTEvent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -509,4 +509,12 @@ SET strDemandItemType = 'Finished Good'
 WHERE strDemandItemType IS NULL
 GO
 
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTAction WHERE intActionId = 1)
+BEGIN
+	INSERT INTO tblCTAction(strActionName, strInternalCode, intConcurrencyId, strRoute)
+	VALUES('Unconfirmed Sequence','Unconfirmed Sequence',1,'ContractManagement.view.Contract?routeId=')
+END
+GO
+
 PRINT('Contract 1_MasterTables End')
