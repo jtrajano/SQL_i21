@@ -90,6 +90,7 @@ SELECT l.intLotId
 	,um1.strUnitMeasure AS strReservedQtyUOM
 	,CA.strDescription as strGrade
 	,LI.intItemOwnerId
+	,R.strDisplayMember As strRestrictionType
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -99,6 +100,7 @@ JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
 JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
+Left JOIN dbo.tblICRestriction R on R.intRestrictionId =sl.intRestrictionId 
 LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLocationId
 LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
 LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
