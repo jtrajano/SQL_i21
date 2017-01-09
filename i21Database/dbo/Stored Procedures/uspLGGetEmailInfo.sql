@@ -13,18 +13,49 @@ BEGIN
 	DECLARE @strIds AS NVARCHAR(MAX)
 	DECLARE @intPurchaseSaleId INT 
 	DECLARE @intInsurerEntityId INT
+	DECLARE @ysnClaimsToProducer BIT
+	DECLARE @intProducerEntityId INT
 
-	IF (@strReportName = 'ShippingInstruction')
+	IF (@strReportName = 'ShippingInstruction' or @strReportName = 'ShippingInstruction2')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 				@intPurchaseSaleId = intPurchaseSale
 		FROM tblLGLoad
 		WHERE intLoadId = @intTransactionId
 
-		SELECT @intEntityId = (SELECT TOP 1 CASE @intPurchaseSaleId 
-												WHEN 1 THEN intVendorEntityId 
-												WHEN 2 THEN intCustomerEntityId 
-												WHEN 3 THEN intVendorEntityId END FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId)
+		SELECT TOP 1 @ysnClaimsToProducer = ISNULL(CH.ysnClaimsToProducer, 0),
+					 @intProducerEntityId = intProducerId
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+				WHEN L.intPurchaseSale = 1
+					THEN LD.intPContractDetailId
+				ELSE LD.intSContractDetailId
+				END
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN tblCTContractText CT ON CT.intContractTextId = CH.intContractTextId
+		WHERE L.intLoadId = @intTransactionId
+
+
+		IF (@ysnClaimsToProducer = 1)
+		BEGIN
+			SELECT @intEntityId = @intProducerEntityId
+		END
+		ELSE
+		BEGIN
+			SELECT @intEntityId = (
+					SELECT TOP 1 CASE @intPurchaseSaleId
+								 WHEN 1
+									 THEN intVendorEntityId
+								 WHEN 2
+									 THEN intCustomerEntityId
+								 WHEN 3
+									 THEN intVendorEntityId
+								 END
+					FROM tblLGLoadDetail
+					WHERE intLoadId = @intTransactionId
+					)
+		END
 
 		SELECT @strEntityName = strName
 		FROM tblEMEntity

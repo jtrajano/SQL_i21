@@ -14,7 +14,12 @@ BEGIN
 			@strCountry					NVARCHAR(25),
 			@strPhone					NVARCHAR(50),
 			@strFullName				NVARCHAR(100),
-			@strUserName				NVARCHAR(100)
+			@strUserName				NVARCHAR(100),
+			@strLogisticsCompanyName	NVARCHAR(MAX),
+			@strLogisticsPrintSignOff	NVARCHAR(MAX),
+			@intCompanyLocationId		INT,
+			@strPrintableRemarks		NVARCHAR(MAX),
+			@strContractText			NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -55,6 +60,10 @@ BEGIN
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strUserName' 
 
+	SELECT	@intCompanyLocationId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intCompanyLocationId' 
+
 	SELECT TOP 1 @strCompanyName = strCompanyName
 			,@strCompanyAddress = strAddress
 			,@strContactName = strContactName
@@ -67,14 +76,33 @@ BEGIN
 	FROM tblSMCompanySetup
 	
 	SELECT @strFullName = strFullName FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	
+	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
+		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
+	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+
+	
+	SELECT TOP 1 @strPrintableRemarks = CH.strPrintableRemarks
+				,@strContractText = CT.strText
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+			WHEN L.intPurchaseSale = 1
+				THEN LD.intPContractDetailId
+			ELSE LD.intSContractDetailId
+			END
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN tblCTContractText CT ON CT.intContractTextId = CH.intContractTextId
+	WHERE L.intLoadId = @intLoadId
+
 
 SELECT TOP 1 L.intLoadId
 	,L.dtmScheduledDate
 	,L.strLoadNumber
 	,L.dtmBLDate
 	,L.dtmDeliveredDate
-	,Vendor.strName AS strVendor
-	,VETC.strName AS strVendorContact
+	,CASE WHEN CH.ysnClaimsToProducer = 1 THEN Producer.strName ELSE Vendor.strName END AS strVendor
+	,CASE WHEN CH.ysnClaimsToProducer = 1 THEN PETC.strName ELSE VETC.strName END AS strVendorContact
 	,Customer.strName AS strCustomer
 	,CETC.strName AS strCustomerContact
 	,L.strOriginPort
@@ -83,6 +111,7 @@ SELECT TOP 1 L.intLoadId
 	,L.strServiceContractNumber
 	,L.strPackingDescription
 	,L.intNumberOfContainers
+	,CONVERT(NVARCHAR,L.intNumberOfContainers) +' (' + L.strPackingDescription + ')' AS strNumberOfContainers
 	,ContType.strContainerType
 	,L.strShippingMode
 	,L.strMVessel
@@ -373,9 +402,17 @@ SELECT TOP 1 L.intLoadId
 	,@strPhone AS strCompanyPhone 
 	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
 	,@strFullName AS strUserFullName
-
+	,@strLogisticsCompanyName AS strLogisticsCompanyName
+	,@strLogisticsPrintSignOff AS strLogisticsPrintSignOff
+	,@strPrintableRemarks AS strPrintableRemarks
+	,@strContractText AS strContractText
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN intPContractDetailId ELSE intSContractDetailId END
+JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
+LEFT JOIN tblEMEntityToContact PEC ON PEC.intEntityId = Producer.intEntityId
+LEFT JOIN tblEMEntity PETC ON PETC.intEntityId = PEC.intEntityContactId
 LEFT JOIN tblLGLoadContainer LC ON L.intLoadId = LC.intLoadId
 LEFT JOIN tblLGLoadNotifyParties LNP ON LNP.intLoadId = L.intLoadId
 LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
