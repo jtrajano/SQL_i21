@@ -13,6 +13,7 @@ CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
 	@ReceiptEntries ReceiptStagingTable READONLY
 	,@OtherCharges ReceiptOtherChargesTableType READONLY 
 	,@intUserId AS INT	
+	,@LotEntries ReceiptItemLotStagingTable READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -862,6 +863,139 @@ BEGIN
 			DEALLOCATE loopReceiptItems;
 		END 
 		
+		-- Add lot/s to receipt item
+		BEGIN
+			DECLARE @intCountItems INT
+					,@counterItem INT = 0
+					,@currentReceiptItemId INT
+					,@prevReceiptItemId INT = NULL
+
+			SELECT @intCountItems=COUNT(ReceiptItem.intInventoryReceiptItemId)
+			FROM tblICInventoryReceipt Receipt
+			INNER JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+			WHERE Receipt.intInventoryReceiptId = @inventoryReceiptId
+
+			WHILE @counterItem < @intCountItems
+				BEGIN
+					-- Get intInventoryReceiptItemId
+					IF @prevReceiptItemId IS NOT NULL
+						BEGIN
+							SELECT TOP 1 @currentReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+							FROM tblICInventoryReceipt Receipt
+							INNER JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+							WHERE Receipt.intInventoryReceiptId = @inventoryReceiptId AND ReceiptItem.intInventoryReceiptItemId > @prevReceiptItemId
+							ORDER BY ReceiptItem.intInventoryReceiptItemId ASC
+						END
+					ELSE
+						BEGIN
+							SELECT TOP 1 @currentReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+							FROM tblICInventoryReceipt Receipt
+							INNER JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+							WHERE Receipt.intInventoryReceiptId = @inventoryReceiptId AND ReceiptItem.intInventoryReceiptItemId IS NOT NULL
+						END
+
+					
+					-- Check if item is lot-tracked
+					IF EXISTS (SELECT * 
+							   FROM tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
+							   WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId AND Item.strLotTracking != 'No')
+						BEGIN
+							-- Insert Lot for Receipt Item
+							INSERT INTO dbo.tblICInventoryReceiptItemLot (
+								[intInventoryReceiptItemId]		
+								,[intLotId]
+								,[strLotNumber]
+								,[strLotAlias]
+								,[intSubLocationId]
+								,[intStorageLocationId]
+								,[intItemUnitMeasureId]
+								,[dblQuantity]
+								,[dblGrossWeight]
+								,[dblTareWeight]
+								,[dblCost]
+								,[intNoPallet]
+								,[intUnitPallet]
+								,[dblStatedGrossPerUnit]
+								,[dblStatedTarePerUnit]
+								,[strContainerNo]
+								,[intEntityVendorId]
+								,[strGarden]
+								,[strMarkings]
+								,[intOriginId]
+								,[intGradeId]
+								,[intSeasonCropYear]
+								,[strVendorLotId]
+								,[dtmManufacturedDate]
+								,[strRemarks]
+								,[strCondition]
+								,[dtmCertified]
+								,[dtmExpiryDate]
+								,[intParentLotId]
+								,[strParentLotNumber]
+								,[strParentLotAlias]
+								,[intSort]
+								,[intConcurrencyId]
+							)
+							SELECT
+								[intInventoryReceiptItemId]	= @currentReceiptItemId
+								,[intLotId] = ItemLot.intLotId
+								,[strLotNumber] = ItemLot.strLotNumber
+								,[strLotAlias] = ItemLot.strLotAlias
+								,[intSubLocationId] = ItemLot.intSubLocationId
+								,[intStorageLocationId] = ItemLot.intStorageLocationId
+								,[intItemUnitMeasureId] = ItemLot.intItemUnitMeasureId
+								,[dblQuantity] = ItemLot.dblQuantity
+								,[dblGrossWeight] = ItemLot.dblGrossWeight
+								,[dblTareWeight] = ItemLot.dblTareWeight
+								,[dblCost] = ItemLot.dblCost
+								,[intNoPallet] = ItemLot.intNoPallet
+								,[intUnitPallet] = ItemLot.intUnitPallet
+								,[dblStatedGrossPerUnit] = ItemLot.dblStatedGrossPerUnit
+								,[dblStatedTarePerUnit] = ItemLot.dblStatedTarePerUnit
+								,[strContainerNo] = ItemLot.strContainerNo
+								,[intEntityVendorId] = ItemLot.intEntityVendorId
+								,[strGarden] = ItemLot.strGarden
+								,[strMarkings] = ItemLot.strMarkings
+								,[intOriginId] = ItemLot.intOriginId
+								,[intGradeId] = ItemLot.intGradeId
+								,[intSeasonCropYear] = ItemLot.intSeasonCropYear
+								,[strVendorLotId] = ItemLot.strVendorLotId
+								,[dtmManufacturedDate] = ItemLot.dtmManufacturedDate
+								,[strRemarks] = ItemLot.strRemarks
+								,[strCondition] = ItemLot.strCondition
+								,[dtmCertified] = ItemLot.dtmCertified
+								,[dtmExpiryDate] = ItemLot.dtmExpiryDate
+								,[intParentLotId] = ItemLot.intParentLotId
+								,[strParentLotNumber] = ItemLot.strParentLotNumber
+								,[strParentLotAlias] = ItemLot.strParentLotAlias
+								,[intSort] = 1
+								,[intConcurrencyId] = 1
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+								ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+								AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+								AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+								AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+								AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+								AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+								AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+								AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+							LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+								ON ReceiptItem.intItemId = ItemLot.intItemId
+								AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+								AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId
+						END
+					ELSE
+						GOTO _Exit
+
+
+					SET @prevReceiptItemId = @currentReceiptItemId
+
+					SET @counterItem = @counterItem + 1
+
+				END
+		END
+
 		-- Calculate the other charges
 		BEGIN 			
 			-- Calculate the other charges. 

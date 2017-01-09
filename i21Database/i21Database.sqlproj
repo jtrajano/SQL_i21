@@ -4773,6 +4773,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPNLIDOC.sql" />
     <Build Include="dbo\Views\vyuCTCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblRKStgMatchPnS.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptItemLotStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
