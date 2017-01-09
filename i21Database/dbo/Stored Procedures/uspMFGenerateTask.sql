@@ -43,6 +43,13 @@ BEGIN TRY
 		,dblTotalTaskWeight NUMERIC(18, 6)
 		,dblLineItemWeight NUMERIC(18, 6)
 		)
+	DECLARE @intReceivedLife INT
+		,@ysnPickByOwner BIT
+		,@strReferenceNo NVARCHAR(50)
+		,@intEntityCustomerId INT
+		,@intItemOwnerId INT
+
+	SELECT @intReceivedLife = 0,@ysnPickByOwner=0,@intItemOwnerId=0
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -72,6 +79,7 @@ BEGIN TRY
 	SELECT @strOrderType = OT.strOrderType
 		,@strOrderNo = OH.strOrderNo
 		,@strOrderDirection = OD.strOrderDirection
+		,@strReferenceNo = OH.strReferenceNo
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	JOIN tblMFOrderDirection OD ON OD.intOrderDirectionId = OH.intOrderDirectionId
@@ -197,6 +205,37 @@ BEGIN TRY
 			FROM @tblLineItem
 			WHERE intItemRecordId = @intItemRecordId
 
+			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+			BEGIN
+				SELECT @intEntityCustomerId = intEntityCustomerId
+				FROM tblICInventoryShipment
+				WHERE strShipmentNumber = @strReferenceNo
+
+				SELECT @intReceivedLife = intReceivedLife
+					,@ysnPickByOwner = ysnPickByOwner
+				FROM tblMFItemOwner
+				WHERE intOwnerId = @intEntityCustomerId
+					AND intItemId = @intItemId
+
+				IF @intReceivedLife = 0
+					OR @intReceivedLife IS NULL
+				BEGIN
+					SELECT @intReceivedLife = intReceiveLife
+					FROM tblICItem
+					WHERE intItemId = @intItemId
+				END
+
+				IF @intReceivedLife IS NULL
+				BEGIN
+					SELECT @intReceivedLife = 0
+				END
+
+				SELECT @intItemOwnerId = intItemOwnerId
+				FROM tblICItemOwner
+				WHERE intOwnerId = @intEntityCustomerId
+					AND intItemId = @intItemId
+			END
+
 			--- INSERT ALL THE LOTS WITHIN THE ALLOWABLE PICK DAY RANGE
 			INSERT INTO @tblLot (
 				intLotId
@@ -247,9 +286,10 @@ BEGIN TRY
 					)
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 				AND R.strInternalCode = 'STOCK'
+			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			WHERE L.intItemId = @intItemId
 				AND L.intLotStatusId = 1
-				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.dtmDateCreated BETWEEN (
 							SELECT MIN(dtmDateCreated)
 							FROM tblICLot
@@ -269,6 +309,13 @@ BEGIN TRY
 							ELSE @intLineItemLotId
 							END
 						), 0)
+				AND IsNULL(LI.intItemOwnerId,0) = (
+					CASE 
+						WHEN @ysnPickByOwner = 1
+							THEN @intItemOwnerId
+						ELSE IsNULL(LI.intItemOwnerId,0)
+						END
+					)
 			GROUP BY L.intLotId
 				,L.intItemId
 				,L.dblQty
@@ -380,9 +427,10 @@ BEGIN TRY
 					,10
 					,11
 					)
+			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			WHERE L.intItemId = @intItemId
 				AND L.intLotStatusId = 1
-				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND NOT EXISTS (
 					SELECT *
 					FROM @tblLot
@@ -395,6 +443,13 @@ BEGIN TRY
 							ELSE @intLineItemLotId
 							END
 						), 0)
+				AND LI.intItemOwnerId = (
+					CASE 
+						WHEN @ysnPickByOwner = 1
+							THEN @intItemOwnerId
+						ELSE LI.intItemOwnerId
+						END
+					)
 			GROUP BY L.intLotId
 				,L.intItemId
 				,L.dblQty

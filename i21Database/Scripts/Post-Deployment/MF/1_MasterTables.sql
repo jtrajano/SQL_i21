@@ -2396,3 +2396,10 @@ UPDATE tblMFRecipeItem
 SET ysnPartialFillConsumption = 1
 WHERE ysnPartialFillConsumption IS NULL
 GO
+Go
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderType WHERE strOrderType = 'INVENTORY SHIPMENT STAGING')
+BEGIN 
+	INSERT INTO tblMFOrderType (intConcurrencyId,strInternalCode,strOrderType,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES(5,'INVS','INVENTORY SHIPMENT STAGING',0,1,1,GETDATE())
+END
+GO
