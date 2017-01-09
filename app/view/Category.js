@@ -37,9 +37,9 @@ Ext.define('Inventory.view.Category', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 543,
+    height: 560,
     hidden: false,
-    minHeight: 530,
+    minHeight: 560,
     width: 860,
     layout: 'fit',
     collapsible: true,
@@ -483,6 +483,7 @@ Ext.define('Inventory.view.Category', {
                                             {
                                                 xtype: 'container',
                                                 flex: 1,
+                                                hidden: true,
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch',
