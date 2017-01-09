@@ -1152,7 +1152,7 @@ BEGIN TRY
 
 				SELECT @intUnitMeasureId = intUnitMeasureId
 				FROM dbo.tblICItemUOM
-				WHERE intItemUOMId = @intItemUOMId
+				WHERE intItemUOMId = @intRecipeItemUOMId
 
 				SELECT @strUnitMeasure = ' ' + strUnitMeasure
 				FROM dbo.tblICUnitMeasure
