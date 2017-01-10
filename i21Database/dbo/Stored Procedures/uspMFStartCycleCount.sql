@@ -492,7 +492,7 @@ BEGIN TRY
 						)
 				END AS RequiredQty
 			,0 AS ysnMainItem
-			,RI.intItemUOMId
+			,IU.intItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -501,6 +501,8 @@ BEGIN TRY
 		JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
 		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
 		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
+		JOIN dbo.tblICItemUOM IU1 on IU1.intItemUOMId=RSI.intItemUOMId 
+		JOIN dbo.tblICItemUOM IU on IU.intItemId=RSI.intSubstituteItemId and IU.intUnitMeasureId =IU1.intUnitMeasureId 
 		WHERE RI.intWorkOrderId = @intWorkOrderId
 			AND (
 				(
@@ -644,7 +646,7 @@ BEGIN TRY
 						)
 				END AS RequiredQty
 			,0 AS ysnMainItem
-			,RI.intItemUOMId
+			,IU.intItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -653,6 +655,8 @@ BEGIN TRY
 		JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
 		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
 		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
+		JOIN dbo.tblICItemUOM IU1 on IU1.intItemUOMId=RSI.intItemUOMId 
+		JOIN dbo.tblICItemUOM IU on IU.intItemId=RSI.intSubstituteItemId and IU.intUnitMeasureId =IU1.intUnitMeasureId
 		WHERE RI.intWorkOrderId = @intWorkOrderId
 			AND (
 				(

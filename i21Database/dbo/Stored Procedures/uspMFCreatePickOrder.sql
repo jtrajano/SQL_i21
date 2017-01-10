@@ -610,7 +610,7 @@ BEGIN TRY
 
 						SELECT @strAvailableQty = Ltrim(@dblRequiredQty - @dblQty) + ' ' + @strUnitMeasure
 
-						SELECT @strMinQtyCanBeProduced = Ltrim(@dblMinQtyCanBeProduced)
+						SELECT @strMinQtyCanBeProduced = Ltrim(Floor(@dblMinQtyCanBeProduced))
 					END
 				END
 

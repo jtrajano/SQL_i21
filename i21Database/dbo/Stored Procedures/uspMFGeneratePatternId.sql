@@ -80,6 +80,11 @@ BEGIN
 
 	SET @strPatternString = ''
 
+	If @intCategoryId is null
+	Begin 
+		Select @intCategoryId=intCategoryId from dbo.tblICItem Where intCategoryId=@intCategoryId
+	End
+
 	INSERT INTO @tblMFPatternDetail (
 		intSubPatternTypeId
 		,intSubPatternSize
