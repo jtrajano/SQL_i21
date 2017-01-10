@@ -10,6 +10,7 @@
 [intUnitMeasureId] INT NULL,
 [dtmScheduledDate] DATETIME NULL,
 [strCustomerReference] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strBookingReference] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intEquipmentTypeId] INT NULL,
 [intEntityId] INT NULL,
 [intEntityLocationId] INT NULL,
@@ -79,6 +80,7 @@
 [dtmDeadlineBL] DATETIME NULL,
 [dtmISFReceivedDate] DATETIME NULL,
 [dtmISFFiledDate] DATETIME NULL,
+[dtmStuffingDate] DATETIME NULL,
 
 [dblDemurrage] NUMERIC(18, 6) NULL,
 [intDemurrageCurrencyId] INT NULL,
