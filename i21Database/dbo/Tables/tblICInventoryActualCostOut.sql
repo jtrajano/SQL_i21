@@ -42,9 +42,13 @@ This table is also used to map the negative ActualCost stock buckets it was able
 		[dblQtyReturned] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryActualCostOut] PRIMARY KEY CLUSTERED ([intId])    
 	)
-	GO
+GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCost_intInventoryTransactionId]
-		ON [dbo].[tblICInventoryActualCostOut]([intInventoryTransactionId] ASC)
-		INCLUDE([intInventoryActualCostId]);
-	GO
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCost_intInventoryTransactionId]
+	--	ON [dbo].[tblICInventoryActualCostOut]([intInventoryTransactionId] ASC)
+	--	INCLUDE([intInventoryActualCostId]);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCostOut]
+		ON [dbo].[tblICInventoryActualCostOut]([intInventoryActualCostId] ASC, [intInventoryTransactionId] ASC)
+GO

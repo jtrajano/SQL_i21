@@ -26,9 +26,14 @@
 		CONSTRAINT [PK_tblICInventoryLIFOCostAdjustmentLog] PRIMARY KEY CLUSTERED ([intId]),
 		CONSTRAINT [FK_tblICInventoryLIFOCostAdjustmentLog_tblICInventoryLIFO] FOREIGN KEY ([intInventoryLIFOId]) REFERENCES [tblICInventoryLIFO]([intInventoryLIFOId])
 	)
-	GO
+GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOCostAdjustmentLog_intInventoryLIFOId]
-		ON [dbo].[tblICInventoryLIFOCostAdjustmentLog]([intId] ASC)
-		INCLUDE (dblQty, dblCost);
-	GO
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOCostAdjustmentLog_intInventoryLIFOId]
+	--	ON [dbo].[tblICInventoryLIFOCostAdjustmentLog]([intId] ASC)
+	--	INCLUDE (dblQty, dblCost);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOCostAdjustmentLog]
+		ON [dbo].[tblICInventoryLIFOCostAdjustmentLog]([intInventoryLIFOId] ASC)
+		INCLUDE ([dblQty], [dblCost], [ysnIsUnposted], [intInventoryCostAdjustmentTypeId]);
+GO

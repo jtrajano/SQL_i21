@@ -26,9 +26,14 @@
 		CONSTRAINT [PK_tblICInventoryActualCostAdjustmentLog] PRIMARY KEY CLUSTERED ([intId]),
 		CONSTRAINT [FK_tblICInventoryActualCostAdjustmentLog_tblICInventoryLot] FOREIGN KEY ([intInventoryActualCostId]) REFERENCES [tblICInventoryActualCost]([intInventoryActualCostId])
 	)
-	GO
+GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCostAdjustmentLog_intInventoryActualCostId]
-		ON [dbo].[tblICInventoryActualCostAdjustmentLog]([intId] ASC)
-		INCLUDE (dblQty, dblCost);
-	GO
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCostAdjustmentLog_intInventoryActualCostId]
+	--	ON [dbo].[tblICInventoryActualCostAdjustmentLog]([intId] ASC)
+	--	INCLUDE (dblQty, dblCost);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCostAdjustmentLog]
+		ON [dbo].[tblICInventoryActualCostAdjustmentLog]([intInventoryActualCostId] ASC)
+		INCLUDE ([dblQty], [dblCost], [ysnIsUnposted], [intInventoryCostAdjustmentTypeId]);
+GO

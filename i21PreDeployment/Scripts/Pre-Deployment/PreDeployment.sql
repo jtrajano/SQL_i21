@@ -100,10 +100,8 @@
 --:r .\11_IC\01_Delete_Charges_No_Shipment.sql
 :r .\11_IC\Rename_IC_Database_Objects.sql 
 :r .\11_IC\Remove_Unused_Shipment_Charges.sql
---:r .\11_IC\01_Delete_Charges_No_Shipment.sql
+:r .\11_IC\Clean_Cost_Bucket_Indexes.sql
 
---:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
---:r :.\11_IC\Drop_References_to_RecapTableType.sql
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
 :r .\12_EM\02_UpdateGroupIdFromNonExistence.sql

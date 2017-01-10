@@ -285,4 +285,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\Rename_IC_Database_Objects.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\Clean_Cost_Bucket_Indexes.sql" />
+  </ItemGroup>
 </Project>

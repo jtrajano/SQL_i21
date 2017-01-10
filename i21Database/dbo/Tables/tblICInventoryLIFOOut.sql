@@ -21,9 +21,13 @@ Type the overview for the table here.
 		[dblQtyReturned] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryLIFOOut] PRIMARY KEY CLUSTERED ([intId])    
 	)
-	GO
+GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOOut_intInventoryTransactionId]
-		ON [dbo].[tblICInventoryLIFOOut]([intInventoryTransactionId] ASC)
-		INCLUDE(intInventoryLIFOId);
-	GO
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOOut_intInventoryTransactionId]
+	--	ON [dbo].[tblICInventoryLIFOOut]([intInventoryTransactionId] ASC)
+	--	INCLUDE(intInventoryLIFOId);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOOut]
+		ON [dbo].[tblICInventoryLIFOOut]([intInventoryLIFOId] ASC, [intInventoryTransactionId] ASC)
+GO
