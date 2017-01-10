@@ -39,6 +39,7 @@ BEGIN
 			,U1.strUserName AS strLastModifiedUserName
 			,ri.dtmLastModified
 			,r.intVersionNo
+			,ri.ysnPartialFillConsumption
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
@@ -89,6 +90,7 @@ BEGIN
 			,U1.strUserName AS strLastModifiedUserName
 			,ri.dtmLastModified
 			,r.intVersionNo
+			,ri.ysnPartialFillConsumption
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
