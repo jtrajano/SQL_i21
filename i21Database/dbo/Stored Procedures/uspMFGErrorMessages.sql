@@ -110,7 +110,7 @@ SET @strmessage = 'There have been subsequent transactions on Lot %s. Unposting 
 EXEC sp_addmessage 90023,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90024) EXEC sp_dropmessage 90024, 'us_english'	
-SET @strmessage = 'Line sample is not being taken for the line %s. Please take a line sample and create a pallet.'
+SET @strmessage = 'Sample is not taken for the line %s for a while. Please take the sample and then produce the pallet'
 EXEC sp_addmessage 90024,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90025) EXEC sp_dropmessage 90025, 'us_english'	
