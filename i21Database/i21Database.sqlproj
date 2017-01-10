@@ -4771,6 +4771,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC.sql" />
     <Build Include="dbo\Views\vyuCTEvent.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPNLIDOC.sql" />
+    <Build Include="dbo\Views\vyuCTCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
