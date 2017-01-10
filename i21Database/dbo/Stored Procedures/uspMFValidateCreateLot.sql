@@ -376,11 +376,13 @@ BEGIN TRY
 		DECLARE @intProductId INT
 			,@dblRequiredQuantity DECIMAL(18, 6)
 			,@intManufacturingProcessId INT
+			,@intManufacturingCellId int
 
 		SELECT @intProductId = intItemId
 			,@dblRequiredQuantity = dblQuantity
 			,@intManufacturingProcessId = intManufacturingProcessId
 			,@dtmStartedDate = dtmStartedDate
+			,@intManufacturingCellId=intManufacturingCellId 
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -664,7 +666,7 @@ BEGIN TRY
 		BEGIN
 			SELECT @strCellName = strCellName
 			FROM tblMFManufacturingCell
-			WHERE intManufacturingCellId = @intManufacturingProcessId
+			WHERE intManufacturingCellId = @intManufacturingCellId
 
 			RAISERROR (
 					90022
@@ -697,7 +699,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @strCellName = strCellName
 				FROM tblMFManufacturingCell
-				WHERE intManufacturingCellId = @intManufacturingProcessId
+				WHERE intManufacturingCellId = @intManufacturingCellId
 
 				RAISERROR (
 						90024
