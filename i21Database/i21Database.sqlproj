@@ -4774,6 +4774,9 @@
     <Build Include="dbo\Views\vyuCTCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblRKStgMatchPnS.sql" />
     <Build Include="dbo\User Defined Types\ReceiptItemLotStagingTable.sql" />
+    <Build Include="dbo\Tables\tblLGLoadStg.sql" />
+    <Build Include="dbo\Tables\tblLGLoadContainerStg.sql" />
+    <Build Include="dbo\Tables\tblLGLoadDetailStg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
