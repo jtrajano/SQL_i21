@@ -81,6 +81,9 @@ BEGIN TRY
 			,ERNAM NVARCHAR(100)
 			)
 
+	If NOT Exists (Select 1 From @tblVendor)
+		RaisError('Unable to process. Xml tag (CREMAS06/IDOC/E1LFA1M) not found.',16,1)
+
 	Update @tblVendor Set strTerm=x.ZTERM,strCurrency=x.WAERS
 		FROM OPENXML(@idoc, 'CREMAS06/IDOC/E1LFA1M/E1LFM1M', 2) WITH (
 			 ZTERM NVARCHAR(100)

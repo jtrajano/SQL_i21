@@ -68,6 +68,9 @@ BEGIN TRY
 			,BMATN NVARCHAR(50)
 			)
 
+	If NOT Exists (Select 1 From @tblItem)
+		RaisError('Unable to process. Xml tag (MATMAS03/IDOC/E1MARAM) not found.',16,1)
+
 	Update @tblItem Set strShortName=x.MAKTX
 		FROM OPENXML(@idoc, 'MATMAS03/IDOC/E1MARAM/E1MAKTM', 2) WITH (
 			 MAKTX NVARCHAR(50)

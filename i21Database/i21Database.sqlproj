@@ -4781,6 +4781,9 @@
     <Build Include="dbo\Views\vyuRKCommodityMarketMap.sql" />
     <Build Include="dbo\Tables\tblCTAmendment.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveAmendment.sql" />
+    <Build Include="dbo\Tables\tblIPSAPIDOCTag.sql" />
+    <Build Include="dbo\Functions\fnIPGetSAPIDOCHeader.sql" />
+    <Build Include="dbo\Functions\fnIPGetSAPIDOCTagValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

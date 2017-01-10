@@ -34,7 +34,9 @@ Declare @intMinSeq					INT,
 		@strRowState				NVARCHAR(50) ,
 		@strFeedStatus				NVARCHAR(50) ,
 		@strXml						NVARCHAR(MAX),
-		@strDocType					NVARCHAR(50)
+		@strDocType					NVARCHAR(50),
+		@strIDOCHeader				NVARCHAR(MAX),
+		@strCompCode				NVARCHAR(100)
 
 Declare @tblOutput AS Table
 (
@@ -42,6 +44,9 @@ Declare @tblOutput AS Table
 	strRowState NVARCHAR(50),
 	strXml NVARCHAR(MAX)
 )
+
+Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PO')
+Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 
 Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='COFFEE'
 
@@ -98,13 +103,14 @@ Begin
 
 		--IDOC Header
 		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
+		Set @strXml +=	@strIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
 		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
 
 		--Header
 		Set @strXml += '<E1BPMEPOHEADER SEGMENT="1">'
-		Set @strXml += '<COMP_CODE>'	+ '0440'							+ '</COMP_CODE>'
+		Set @strXml += '<COMP_CODE>'	+ ISNULL(@strCompCode,'')			+ '</COMP_CODE>'
 		Set @strXml += '<DOC_TYPE>'		+ ISNULL(@strDocType,'')			+ '</DOC_TYPE>'
 		Set @strXml += '<CREAT_DATE>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</CREAT_DATE>'
 		Set @strXml += '<CREATED_BY>'	+ ISNULL(@strCreatedByNo,'')		+ '</CREATED_BY>'
@@ -174,13 +180,14 @@ Begin
 
 		--IDOC Header
 		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
+		Set @strXml +=	@strIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
 		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
 
 		--Header
 		Set @strXml += '<E1BPMEPOHEADER SEGMENT="1">'
-		Set @strXml += '<COMP_CODE>'	+ '0440'							+ '</COMP_CODE>'
+		Set @strXml += '<COMP_CODE>'	+ ISNULL(@strCompCode,'')			+ '</COMP_CODE>'
 		Set @strXml += '<DOC_TYPE>'		+ ISNULL(@strDocType,'')			+ '</DOC_TYPE>'
 		Set @strXml += '<CREAT_DATE>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</CREAT_DATE>'
 		Set @strXml += '<CREATED_BY>'	+ ISNULL(@strCreatedByNo,'')		+ '</CREATED_BY>'
@@ -328,18 +335,19 @@ Begin
 
 	If UPPER(@strRowState)='DELETE'
 	Begin
-		Set @strXml =  '<PORDCR103>'
+		Set @strXml =  '<PORDCH03>'
 		Set @strXml += '<IDOC BEGIN="1">'
 
 		--IDOC Header
 		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
+		Set @strXml +=	@strIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
 		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
 
 		--Header
 		Set @strXml += '<E1BPMEPOHEADER SEGMENT="1">'
-		Set @strXml += '<COMP_CODE>'	+ '0440'							+ '</COMP_CODE>'
+		Set @strXml += '<COMP_CODE>'	+ ISNULL(@strCompCode,'')		+ '</COMP_CODE>'
 		Set @strXml += '<PO_NUMBER>'	+ ISNULL(@strERPPONumber,'')	+ '</PO_NUMBER>'
 		Set @strXml +=	'</E1BPMEPOHEADER>'
 
@@ -362,7 +370,7 @@ Begin
 		Set @strXml +=	'</E1PORDCR1>'
 
 		Set @strXml += '</IDOC>'
-		Set @strXml +=  '</PORDCR103>'
+		Set @strXml +=  '</PORDCH03>'
 
 		INSERT INTO @tblOutput(strRowState,strXml)
 		VALUES('DELETE',@strXml)

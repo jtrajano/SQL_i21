@@ -22,6 +22,9 @@ Declare @intEntityLocationId Int
 
 Select TOP 1 @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency From tblIPEntityStage Where strEntityType='Vendor'
 
+If ISNULL(@intStageEntityId,0)=0
+	RaisError('No data found.',16,1)
+
 Select @intEntityId=intEntityId From tblEMEntity Where strName=@strVendorName
 
 Select @intTermId=intTermID From tblSMTerm Where strTerm=@strTerm
@@ -81,10 +84,13 @@ Begin
 
 	--Add Phone
 	Insert Into tblEMEntityPhoneNumber(intEntityId,strPhone,intCountryId)
-	Select intEntityId,ec.strPhone,(Select TOP 1 intCountryID From tblSMCountry Where strCountry=(Select strCountry From tblEMEntityLocation Where intEntityLocationId=@intEntityLocationId))
-	From tblEMEntity e Join tblIPEntityContactStage ec on e.strName=ISNULL(ec.strFirstName,'') + ' ' + ISNULL(ec.strLastName,'')
-	Where ec.intStageEntityId=@intStageEntityId
-	AND intEntityId>@intEntityId
+	Select t1.intEntityId,t2.strPhone,(Select TOP 1 intCountryID From tblSMCountry Where strCountry=(Select strCountry From tblEMEntityLocation Where intEntityLocationId=@intEntityLocationId)) 
+	From
+	(Select ROW_NUMBER() OVER(ORDER BY intEntityId ASC) AS intRowNo,* from @tblEntityContactIdOutput) t1
+	Join
+	(Select ROW_NUMBER() OVER(ORDER BY intStageEntityContactId ASC) AS intRowNo,* from tblIPEntityContactStage Where intStageEntityId=@intStageEntityId) t2
+	on t1.intRowNo=t2.intRowNo
+
 End
 Else
 Begin --Update

@@ -24,6 +24,9 @@ Declare @intNewStageItemId int
 
 Select TOP 1 @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,@strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0) From tblIPItemStage
 
+If ISNULL(@intStageItemId,0)=0
+	RaisError('No data found.',16,1)
+
 Select @intCategoryId=intCategoryId From tblICCategory Where strCategoryCode=@strItemType
 
 If @strItemType='ZMPN' --Contract Item
