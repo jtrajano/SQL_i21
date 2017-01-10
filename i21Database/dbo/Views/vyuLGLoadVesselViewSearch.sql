@@ -3,6 +3,7 @@ AS
 SELECT  L.intLoadId
 	   ,L.intGenerateLoadId
 	   ,L.strLoadNumber
+	   ,L.strBookingReference
 	   ,L.strBLNumber
 	   ,L.dtmBLDate
 	   ,L.strOriginPort
@@ -27,6 +28,7 @@ SELECT  L.intLoadId
 	   ,L.dtmDeadlineBL
 	   ,L.dtmISFReceivedDate
 	   ,L.dtmISFFiledDate
+	   ,L.dtmStuffingDate
 	   ,L.dtmDocsToBroker
 	   ,L.strForwardingAgentRef
 	   ,strTerminal =  Terminal.strName
