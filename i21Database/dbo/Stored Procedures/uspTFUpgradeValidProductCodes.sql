@@ -16,7 +16,7 @@ DECLARE @ErrorState INT
 BEGIN TRY
 
 	MERGE	
-	INTO	tblTFValidProductCode
+	INTO	tblTFReportingComponentProductCode
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
@@ -28,28 +28,25 @@ BEGIN TRY
 			AND PC.intTaxAuthorityId = RC.intTaxAuthorityId
 
 	) AS SOURCE
-		ON TARGET.intProductCode = SOURCE.intProductCodeId
+		ON TARGET.intReportingComponentProductCodeId = SOURCE.intProductCodeId
 			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
 
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
 			intReportingComponentId	= SOURCE.intReportingComponentId
-			, intProductCode		= SOURCE.intProductCodeId
-			, strProductCode		= SOURCE.strProductCode
-			, strFilter				= SOURCE.strFilter
+			, intProductCodeId		= SOURCE.intProductCodeId
+			, strType			= SOURCE.strFilter
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
-			, intProductCode
-			, strProductCode
-			, strFilter
+			, intProductCodeId
+			, strType
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.intProductCodeId
-			, SOURCE.strProductCode
-			, SOURCE.strFilter
+			, SOURCE.strType
 		)
 	WHEN NOT MATCHED BY SOURCE THEN 
 		DELETE;

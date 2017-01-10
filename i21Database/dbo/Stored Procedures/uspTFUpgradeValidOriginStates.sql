@@ -16,7 +16,7 @@ DECLARE @ErrorState INT
 BEGIN TRY
 
 	MERGE	
-	INTO	tblTFValidOriginState
+	INTO	tblTFReportingComponentOriginState
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
@@ -34,23 +34,19 @@ BEGIN TRY
 		SET 
 			intReportingComponentId			= SOURCE.intReportingComponentId
 			, intOriginDestinationStateId	= SOURCE.intOriginDestinationStateId
-			, strOriginState				= SOURCE.strState
 			, strType						= SOURCE.strStatus
-			, strFilter						= SOURCE.strFilter
+
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
 			, intOriginDestinationStateId
-			, strOriginState
 			, strType
-			, strFilter
+		
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.intOriginDestinationStateId
-			, SOURCE.strState
 			, SOURCE.strStatus
-			, SOURCE.strFilter
 		)
 	WHEN NOT MATCHED BY SOURCE THEN 
 		DELETE;

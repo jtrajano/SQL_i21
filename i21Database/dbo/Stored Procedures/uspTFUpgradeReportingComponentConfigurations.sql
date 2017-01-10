@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFUpgradeReportingComponentConfigurations]
-	@TaxAuthorityCode NVARCHAR(10),
 	@ReportingComponentConfigurations TFReportingComponentConfigurations READONLY
 
 AS
@@ -16,15 +15,8 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @TaxAuthorityId INT
-	SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
-	IF (ISNULL(@TaxAuthorityId, 0) = 0)
-	BEGIN
-		RAISERROR('Tax Authority code does not exist.', 16, 1)
-	END
-
 	MERGE	
-	INTO	tblTFTaxReportTemplate
+	INTO	tblTFReportingComponentConfiguration
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
@@ -32,7 +24,6 @@ BEGIN TRY
 		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
 			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
 			AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
-			AND RC.intTaxAuthorityId = @TaxAuthorityId
 	) AS SOURCE
 		ON TARGET.strTemplateItemId = SOURCE.strTemplateItemId
 
@@ -41,7 +32,6 @@ BEGIN TRY
 		SET 
 			intReportingComponentId		= SOURCE.intReportingComponentId
 			, strTemplateItemId			= SOURCE.strTemplateItemId
-			, strFormCode				= SOURCE.strFormCode
 			, strReportSection			= SOURCE.strReportSection
 			, intReportItemSequence		= SOURCE.intReportItemSequence
 			, intTemplateItemNumber		= SOURCE.intTemplateItemNumber
@@ -57,7 +47,6 @@ BEGIN TRY
 		INSERT (
 			intReportingComponentId
 			, strTemplateItemId
-			, strFormCode
 			, strReportSection
 			, intReportItemSequence
 			, intTemplateItemNumber
@@ -73,7 +62,6 @@ BEGIN TRY
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.strTemplateItemId
-			, SOURCE.strFormCode
 			, SOURCE.strReportSection
 			, SOURCE.intReportItemSequence
 			, SOURCE.intTemplateItemNumber
