@@ -118,28 +118,28 @@ BEGIN
 	DECLARE @ysnSiteAcceptCreditCard	BIT = 0
 	--LOGS--
 
-
-	DECLARE @intCardId				INT = 0
-	DECLARE @intVehicleId			INT	= 0
-	DECLARE @intProductId			INT	= 0
-	DECLARE @intARItemId			INT	= NULL
-	DECLARE @intARItemLocationId	INT	= 0
-	DECLARE @intCustomerLocationId  INT	= 0
-	DECLARE @intTaxGroupId			INT = 0
-	DECLARE @intTaxMasterId			INT = 0
-	DECLARE @strCountry				NVARCHAR(MAX)
-	DECLARE @strCounty				NVARCHAR(MAX)
-	DECLARE @strCity				NVARCHAR(MAX)
-	DECLARE @strState				NVARCHAR(MAX)
-	DECLARE @intCustomerId			INT = 0
-	DECLARE @ysnInvalid				BIT	= 0
-	DECLARE @ysnPosted				BIT = 0
-	DECLARE @ysnCreditCardUsed		BIT	= 0
-	DECLARE @intParticipantNo		INT = 0
-	DECLARE @strNetworkType			NVARCHAR(MAX)
-	DECLARE @intNetworkLocation		INT = 0
-	DECLARE @intDupTransCount		INT = 0
-	DECLARE @ysnDuplicate			BIT = 0
+	DECLARE @intOverFilledTransactionId INT = NULL
+	DECLARE @intCardId					INT = 0
+	DECLARE @intVehicleId				INT	= 0
+	DECLARE @intProductId				INT	= 0
+	DECLARE @intARItemId				INT	= NULL
+	DECLARE @intARItemLocationId		INT	= 0
+	DECLARE @intCustomerLocationId		INT	= 0
+	DECLARE @intTaxGroupId				INT = 0
+	DECLARE @intTaxMasterId				INT = 0
+	DECLARE @strCountry					NVARCHAR(MAX)
+	DECLARE @strCounty					NVARCHAR(MAX)
+	DECLARE @strCity					NVARCHAR(MAX)
+	DECLARE @strState					NVARCHAR(MAX)
+	DECLARE @intCustomerId				INT = 0
+	DECLARE @ysnInvalid					BIT	= 0
+	DECLARE @ysnPosted					BIT = 0
+	DECLARE @ysnCreditCardUsed			BIT	= 0
+	DECLARE @intParticipantNo			INT = 0
+	DECLARE @strNetworkType				NVARCHAR(MAX)
+	DECLARE @intNetworkLocation			INT = 0
+	DECLARE @intDupTransCount			INT = 0
+	DECLARE @ysnDuplicate				BIT = 0
 	  
 	------------------------------------------------------------
 
@@ -624,6 +624,7 @@ BEGIN
 			,[strForeignCardId]
 			,[ysnDuplicate]
 			,[strOriginalProductNumber]
+			,[intOverFilledTransactionId]
 		)
 		VALUES
 		(
@@ -666,6 +667,7 @@ BEGIN
 			,@strCardId
 			,@ysnDuplicate
 			,@strProductId
+			,@intOverFilledTransactionId
 		)			
 	
 		DECLARE @Pk	INT		
@@ -1059,6 +1061,12 @@ BEGIN
 		print @dblCalcOverfillQuantity
 		IF(@dblCalcOverfillQuantity > 0)
 		BEGIN
+
+			IF(@intOverFilledTransactionId IS NULL)
+			BEGIN
+				SET @intOverFilledTransactionId = @Pk
+			END
+			
 			SET @dblQuantity = @dblCalcOverfillQuantity
 			SET @dblPrcPriceOut				  = NULL
 			SET @strPrcPricingOut			  = NULL

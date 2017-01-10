@@ -1566,6 +1566,7 @@ BEGIN
 	DECLARE @intDupTransCount INT = 0
 	DECLARE @ysnDuplicate BIT = 0
 	DECLARE @ysnInvalid	BIT = 0
+	DECLARE @intParentId INT = 0
 
 	SELECT @intDupTransCount = COUNT(*)
 	FROM tblCFTransaction
@@ -1576,8 +1577,13 @@ BEGIN
 	AND intProductId = @ProductId
 	AND intPumpNumber = @PumpId
 	AND intTransactionId != @intTransactionId
+	AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
 
-	IF(@intDupTransCount > 0)
+	SELECT TOP 1 @intParentId = intOverFilledTransactionId 
+	FROM tblCFTransaction 
+	WHERE intTransactionId = @intTransactionId
+
+	IF(@intDupTransCount > 0 AND ISNULL(@intParentId,0) = 0)
 	BEGIN
 		--SET @ysnInvalid = 1
 		SET @ysnDuplicate = 1
