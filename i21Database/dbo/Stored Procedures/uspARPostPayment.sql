@@ -628,7 +628,7 @@ SET @batchIdUsed = @batchId
 					@ARPrepayment P
 						ON A.intPaymentId = P.intPaymentId						 
 				WHERE
-					ISNULL(CL.intPurchaseAdvAccount,0)  = 0										
+					ISNULL(CL.intSalesAdvAcct,0)  = 0										
 
 				--ALREADY POSTED
 				INSERT INTO
@@ -1451,12 +1451,12 @@ IF @post = 1
 		SELECT
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
-			,intAccountId				= SMCL.intPurchaseAdvAccount 
+			,intAccountId				= SMCL.intSalesAdvAcct 
 			,dblDebit					= 0
 			,dblCredit					= A.dblAmountPaid
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
-			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = SMCL.intPurchaseAdvAccount) 
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = SMCL.intSalesAdvAcct) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
