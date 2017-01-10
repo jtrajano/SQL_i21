@@ -1,16 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetAllStorageSchedule]
 AS
 SELECT 
- S.intStorageScheduleRuleId
-,S.strScheduleId
-,S.strScheduleDescription
-,S.intStorageType
+ SR.intStorageScheduleRuleId
+,SR.strScheduleId
+,SR.strScheduleDescription
+,SR.intStorageType
 ,ST.strStorageTypeDescription
-,S.intCommodity
-,Com.strCommodityCode  
-,S.intCurrencyID
-,Cur.strCurrency  
-FROM tblGRStorageScheduleRule S
-JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=S.intStorageType
-JOIN tblSMCurrency Cur ON Cur.intCurrencyID = S.intCurrencyID  
-JOIN tblICCommodity Com ON Com.intCommodityId=S.intCommodity
+,SR.intCommodity
+,COM.strCommodityCode  
+,SR.intCurrencyID
+,CUR.strCurrency  
+FROM tblGRStorageScheduleRule SR
+JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=SR.intStorageType
+JOIN tblSMCurrency CUR ON CUR.intCurrencyID = SR.intCurrencyID  
+JOIN tblICCommodity COM ON COM.intCommodityId=SR.intCommodity

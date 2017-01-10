@@ -1,12 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSettleSubLocations]
 AS   
-SELECT Distinct   
-  Cs.intCompanyLocationSubLocationId
- ,Cs.intItemId
-,Sub.strSubLocationName
+SELECT DISTINCT   
+ CS.intCompanyLocationSubLocationId
+,CS.intItemId
+,SLOC.strSubLocationName
 ,ST.ysnCustomerStorage
-,Sub.intCompanyLocationId
-FROM tblGRCustomerStorage Cs
-JOIN tblSMCompanyLocationSubLocation Sub ON Sub.intCompanyLocationSubLocationId=Cs.intCompanyLocationSubLocationId
-JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=Cs.intStorageTypeId 
-Where Cs.dblOpenBalance >0 AND ISNULL(Cs.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=1
+,SLOC.intCompanyLocationId
+FROM tblGRCustomerStorage CS
+JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=CS.intCompanyLocationSubLocationId
+JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=CS.intStorageTypeId 
+WHERE CS.dblOpenBalance >0 AND ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=1

@@ -1,13 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuGRDiscountScheduleCodeNotMapped]
 AS
 SELECT
- S.intDiscountScheduleCodeId
-,S.intStorageTypeId
+ Dcode.intDiscountScheduleCodeId
+,Dcode.intStorageTypeId
 ,ST.strStorageTypeCode
 ,ST.strStorageTypeDescription
-,S.intCompanyLocationId
-,L.strLocationName
-FROM tblGRDiscountScheduleCode S
-LEFT JOIN tblICItem Item ON Item.intItemId=S.intItemId
-LEFT JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=S.intStorageTypeId
-LEFT JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = S.intCompanyLocationId
+,Dcode.intCompanyLocationId
+,LOC.strLocationName
+FROM tblGRDiscountScheduleCode Dcode
+LEFT JOIN tblICItem Item ON Item.intItemId=Dcode.intItemId
+LEFT JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=Dcode.intStorageTypeId
+LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = Dcode.intCompanyLocationId

@@ -1,11 +1,11 @@
 CREATE VIEW [dbo].[vyuGRGetStorageCommodity]  
 AS  
 SELECT Distinct
-   Cs.intEntityId
-  ,Cs.intCompanyLocationId     
-  ,Cs.intCommodityId  
- ,Cm.strCommodityCode
- ,Cm.strDescription  
-FROM tblGRCustomerStorage Cs
-JOIN tblICCommodity Cm ON Cm.intCommodityId=Cs.intCommodityId
-Where Cs.dblOpenBalance >0 AND ISNULL(Cs.strStorageType,'') <> 'ITR'
+   CS.intEntityId
+  ,CS.intCompanyLocationId     
+  ,CS.intCommodityId  
+ ,COM.strCommodityCode
+ ,COM.strDescription  
+FROM tblGRCustomerStorage CS
+JOIN tblICCommodity COM ON COM.intCommodityId=CS.intCommodityId
+Where CS.dblOpenBalance >0 AND ISNULL(CS.strStorageType,'') <> 'ITR'

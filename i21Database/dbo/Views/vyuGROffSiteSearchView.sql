@@ -1,19 +1,19 @@
 ﻿CREATE VIEW [dbo].[vyuGROffSiteSearchView]
 AS    
 SELECT TOP 100 PERCENT  
-  s.intCustomerStorageId
+  CS.intCustomerStorageId
  ,E.strName  
 ,strStorageTicketNumber
-,loc.strLocationName
-,st.strStorageTypeDescription  
-,s.dtmDeliveryDate  
-,i.strItemNo  
-,ISNULL(s.strCustomerReference,'')strCustomerReference  
-,s.dblOpenBalance  
-FROM tblGRCustomerStorage s  
-JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId=s.intCompanyLocationId  
-LEFT JOIN tblGRStorageType st ON st.intStorageScheduleTypeId=s.intStorageTypeId  
-JOIN tblICItem i on i.intItemId=s.intItemId  
-JOIN tblEMEntity E ON E.intEntityId = s.intEntityId  
-Where ISNULL(s.strStorageType,'') <> 'ITR' AND st.ysnCustomerStorage=1 
-ORDER BY s.intCustomerStorageId 
+,LOC.strLocationName
+,ST.strStorageTypeDescription  
+,CS.dtmDeliveryDate  
+,Item.strItemNo  
+,ISNULL(CS.strCustomerReference,'')strCustomerReference  
+,CS.dblOpenBalance  
+FROM tblGRCustomerStorage CS  
+JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId=CS.intCompanyLocationId  
+LEFT JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=CS.intStorageTypeId  
+JOIN tblICItem Item on Item.intItemId=CS.intItemId  
+JOIN tblEMEntity E ON E.intEntityId = CS.intEntityId  
+Where ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=1 
+ORDER BY CS.intCustomerStorageId 

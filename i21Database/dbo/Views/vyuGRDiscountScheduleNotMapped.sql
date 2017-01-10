@@ -1,11 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuGRDiscountScheduleNotMapped]
 AS
 SELECT
- S.intDiscountScheduleId
-,S.intCurrencyId
+ DSch.intDiscountScheduleId
+,DSch.intCurrencyId
 ,ST.strCurrency
-,S.intCommodityId
-,Com.strCommodityCode	
-FROM tblGRDiscountSchedule S
-JOIN tblSMCurrency ST ON ST.intCurrencyID = S.intCurrencyId
-JOIN tblICCommodity Com ON Com.intCommodityId=S.intCommodityId
+,DSch.intCommodityId
+,COM.strCommodityCode	
+FROM tblGRDiscountSchedule DSch
+JOIN tblSMCurrency ST ON ST.intCurrencyID = DSch.intCurrencyId
+JOIN tblICCommodity COM ON COM.intCommodityId=DSch.intCommodityId

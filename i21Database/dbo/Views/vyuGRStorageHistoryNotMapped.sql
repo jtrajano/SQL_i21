@@ -1,20 +1,20 @@
 ﻿CREATE VIEW [dbo].[vyuGRStorageHistoryNotMapped]
 AS
 SELECT    
- a.intStorageHistoryId
-,a.intEntityId  
+ SH.intStorageHistoryId
+,SH.intEntityId  
 ,E.strName  
-,a.intCompanyLocationId  
-,c.strLocationName
-,a.intContractHeaderId
+,SH.intCompanyLocationId  
+,LOC.strLocationName
+,SH.intContractHeaderId
 ,CH.strContractNumber
-,a.intInvoiceId
+,SH.intInvoiceId
 ,Inv.strInvoiceNumber
-,a.intBillId
+,SH.intBillId
 ,Bill.strBillId
-FROM tblGRStorageHistory a
-LEFT JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
-LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
-LEFT JOIN vyuCTContractHeaderView CH ON CH.intContractHeaderId=a.intContractHeaderId
-LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId=a.intInvoiceId
-LEFT JOIN tblAPBill Bill ON Bill.intBillId=a.intBillId
+FROM tblGRStorageHistory SH
+LEFT JOIN tblEMEntity E ON E.intEntityId = SH.intEntityId
+LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = SH.intCompanyLocationId
+LEFT JOIN vyuCTContractHeaderView CH ON CH.intContractHeaderId=SH.intContractHeaderId
+LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId=SH.intInvoiceId
+LEFT JOIN tblAPBill Bill ON Bill.intBillId=SH.intBillId

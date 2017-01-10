@@ -1,12 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetStorageType]
 AS  
-SELECT Distinct
-   Cs.intEntityId
-  ,Cs.intCompanyLocationId     
-  ,Cs.intItemId  
- ,ST.intStorageScheduleTypeId
- ,ST.strStorageTypeCode
- ,ST.strStorageTypeDescription
-FROM tblGRCustomerStorage Cs
-JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=Cs.intStorageTypeId 
-Where Cs.dblOpenBalance >0 AND ISNULL(Cs.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=0
+SELECT DISTINCT
+ CS.intEntityId
+,CS.intCompanyLocationId     
+,CS.intItemId  
+,ST.intStorageScheduleTypeId
+,ST.strStorageTypeCode
+,ST.strStorageTypeDescription
+FROM tblGRCustomerStorage CS
+JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=CS.intStorageTypeId 
+WHERE CS.dblOpenBalance >0 AND ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=0

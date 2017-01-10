@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuGRDiscountIdNotMapped]
 AS
 SELECT
- S.intDiscountId
-,S.intCurrencyId
-,ST.strCurrency	
-FROM tblGRDiscountId S
-JOIN tblSMCurrency ST ON ST.intCurrencyID = S.intCurrencyId
+ DId.intDiscountId
+,DId.intCurrencyId
+,CUR.strCurrency	
+FROM tblGRDiscountId DId
+JOIN tblSMCurrency CUR ON CUR.intCurrencyID = DId.intCurrencyId

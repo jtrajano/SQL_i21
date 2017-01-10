@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetTransferLocation]
 AS  
-SELECT Distinct   
-  Cs.intCompanyLocationId  
- ,Loc.strLocationName  
-FROM tblGRCustomerStorage Cs
-JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId =Cs.intCompanyLocationId 
+SELECT DISTINCT   
+ CS.intCompanyLocationId  
+,LOC.strLocationName  
+FROM tblGRCustomerStorage CS
+JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId =CS.intCompanyLocationId 
