@@ -17,3 +17,10 @@ FROM	tblCTSequenceUsageHistory HI
 CROSS	APPLY dbo.fnCTGetSequenceUsageHistoryAdditionalParam(HI.intContractDetailId,HI.strScreenName,HI.intExternalId,HI.intUserId) AP
 WHERE	HI.intContractHeaderId IS NULL
 GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTAmendment)
+BEGIN
+	INSERT INTO tblCTAmendment (intConcurrencyId) SELECT 1
+END
+GO

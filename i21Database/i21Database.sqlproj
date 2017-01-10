@@ -4779,6 +4779,8 @@
     <Build Include="dbo\Tables\tblLGLoadDetailStg.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPostMatchPnS.sql" />
     <Build Include="dbo\Views\vyuRKCommodityMarketMap.sql" />
+    <Build Include="dbo\Tables\tblCTAmendment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveAmendment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
