@@ -27,7 +27,12 @@
 	)
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotCostAdjustmentLog_intInventoryLotId]
-		ON [dbo].[tblICInventoryLotCostAdjustmentLog]([intId] ASC)
-		INCLUDE (dblQty, dblCost);
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotCostAdjustmentLog_intInventoryLotId]
+	--	ON [dbo].[tblICInventoryLotCostAdjustmentLog]([intId] ASC)
+	--	INCLUDE (dblQty, dblCost);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotCostAdjustmentLog]
+		ON [dbo].[tblICInventoryLotCostAdjustmentLog]([intInventoryLotId] ASC)
+		INCLUDE (dblQty, dblCost, ysnIsUnposted, intInventoryCostAdjustmentTypeId);
 	GO

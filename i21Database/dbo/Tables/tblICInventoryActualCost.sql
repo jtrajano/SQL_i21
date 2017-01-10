@@ -98,7 +98,12 @@ Tracks all stocks in a Actual-Cost manner. Records are physically arranged in an
 		ON [dbo].[tblICInventoryActualCost]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [strActualCostId] ASC);
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCost_intItemId_intLocationId]
-		ON [dbo].[tblICInventoryActualCost]([intItemId] ASC, [intItemLocationId] ASC)
-		INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCost_intItemId_intLocationId]
+	--	ON [dbo].[tblICInventoryActualCost]([intItemId] ASC, [intItemLocationId] ASC)
+	--	INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCost]
+		ON [dbo].[tblICInventoryActualCost]([intItemId] ASC, [intItemLocationId] ASC, [strTransactionId] ASC, [intTransactionId] ASC, [ysnIsUnposted] ASC)
+		INCLUDE (dtmDate, strActualCostId, intItemUOMId, dblStockIn, dblStockOut, dblCost);
 	GO

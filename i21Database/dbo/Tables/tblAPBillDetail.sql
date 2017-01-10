@@ -73,3 +73,18 @@
 
 
 GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryShipmentChargeId]
+		ON [dbo].[tblAPBillDetail]([intInventoryShipmentChargeId] ASC)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryReceiptItemId]
+		ON [dbo].[tblAPBillDetail]([intInventoryReceiptItemId] ASC)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryReceiptChargeId]
+		ON [dbo].[tblAPBillDetail]([intInventoryReceiptChargeId] ASC)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+GO

@@ -97,12 +97,17 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intItemId_intLocationId]
-		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC)
-		INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
-	GO
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intItemId_intLocationId]
+	--	ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC)
+	--	INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
+	--GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_strTransactionId]
-		ON [dbo].[tblICInventoryFIFO]([strTransactionId] ASC)
-		INCLUDE (intTransactionId);
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_strTransactionId]
+	--	ON [dbo].[tblICInventoryFIFO]([strTransactionId] ASC)
+	--	INCLUDE (intTransactionId);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO]
+		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC, [strTransactionId] ASC, [intTransactionId] ASC, [ysnIsUnposted] ASC)
+		INCLUDE (dtmDate, intItemUOMId, dblStockIn, dblStockOut, dblCost);
 	GO
