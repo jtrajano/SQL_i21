@@ -13,6 +13,7 @@
     [intCommodityId] INT NULL, 
     [intCompanyLocationId] INT NULL, 
     [intMarketZoneId] INT NULL, 
+    [ysnByProducer] BIT NULL, 
     CONSTRAINT [PK_tblRKM2MInquiry_intM2MInquiryId] PRIMARY KEY (intM2MInquiryId),   
 	CONSTRAINT [UK_tblRKM2MInquiry_strRecordName] UNIQUE ([strRecordName]),
 	CONSTRAINT [FK_tblRKM2MInquiry_tblRKM2MBasis_intM2MBasisId] FOREIGN KEY(intM2MBasisId)REFERENCES [dbo].[tblRKM2MBasis] (intM2MBasisId),

@@ -5614,4 +5614,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strLastName]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2efc03ad-60b3-4292-b925-e2e6560700d1" ChangeDateTime="01/10/2017 12:46:29">
+    <Property Name="ElementName" Value="[dbo].[tblRKM2MInquiry].[ysn]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKM2MInquiry]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnByProducer" />
+  </Operation>
 </Operations>
