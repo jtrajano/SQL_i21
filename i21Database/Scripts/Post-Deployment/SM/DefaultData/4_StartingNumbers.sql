@@ -1047,8 +1047,48 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Equity Payment')
+	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 110
+			,[strTransactionType]	= N'Asset'
+			,[strPrefix]			= N'AM-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Fixed Assets'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Asset')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 111
+			,[strTransactionType]	= N'Disposition'
+			,[strPrefix]			= N'AMDIS-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Fixed Assets'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Disposition')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 112
+			,[strTransactionType]	= N'Purchase'
+			,[strPrefix]			= N'AMPUR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Fixed Assets'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Purchase')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 113
+			,[strTransactionType]	= N'Depreciation'
+			,[strPrefix]			= N'AMDPR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Fixed Assets'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Depreciation')
+	
+	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
