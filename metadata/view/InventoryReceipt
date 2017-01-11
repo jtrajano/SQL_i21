@@ -4532,7 +4532,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
+                                                                        "designer|createAlias": "datecolumn",
                                                                         "itemId": "colLotManufacturedDate",
+                                                                        "modelValidation": null,
                                                                         "text": "Manufactured Date",
                                                                         "width": 110
                                                                     },

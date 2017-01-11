@@ -1310,9 +1310,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         //Expiry Date Calculation
         var receiptDate = current.get('dtmReceiptDate');
+        var manufacturedDate = record.get('dtmManufacturedDate');
         var lifetime = currentReceiptItem.get('intLifeTime');
         var lifetimeType = currentReceiptItem.get('strLifeTimeType');
-        var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
+        //Calculate Expiry Date by Manufactured Date if available otherwise, Receipt Date
+        if(!iRely.Functions.isEmpty(manufacturedDate)) {
+            var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(manufacturedDate, lifetime, lifetimeType);
+        }
+        else {
+            var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
+        }
         record.set('dtmExpiryDate', expiryDate);
 
         var qty = config.dummy.get('dblQuantity');
@@ -3404,6 +3411,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var receiptItem = win.viewModel.data.currentReceiptItem;
         var totalGross = iRely.Functions.isEmpty(receiptItem.get('dblGross')) ? 0 : receiptItem.get('dblGross');
         var totalNet = iRely.Functions.isEmpty(receiptItem.get('dblNet')) ? 0 : receiptItem.get('dblNet');
+        var currentReceipt = win.viewModel.data.current;
 
         if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
             var gross = context.record.get('dblGrossWeight');
@@ -3426,11 +3434,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         //Calculate Line Total
-        var currentReceipt = win.viewModel.data.current;
         receiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, receiptItem));
 
         if (context.field === 'dblQuantity') {
             me.calculateGrossNet(receiptItem, 0);
+        }
+
+        //Calculate expiryDate
+        if (context.field === 'dtmManufacturedDate') {
+        //Expiry Date Calculation
+            var receiptDate = currentReceipt.get('dtmReceiptDate');
+            var manufacturedDate = context.record.get('dtmManufacturedDate');
+            var lifetime = receiptItem.get('intLifeTime');
+            var lifetimeType = receiptItem.get('strLifeTimeType');
+            //Calculate Expiry Date by Manufactured Date if available otherwise, Receipt Date
+            if(!iRely.Functions.isEmpty(manufacturedDate)) {
+                var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(manufacturedDate, lifetime, lifetimeType);
+            }
+            else {
+                var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
+            }
+            context.record.set('dtmExpiryDate', expiryDate);
         }
     },
 
