@@ -66,10 +66,15 @@ AS
 					AND E.intContractDetailId = L.intContractDetailId
 					AND E.intContractHeaderId = L.intContractHeaderId
 		CROSS APPLY (
-			SELECT 
-				SUM(C.dblNet) AS dblNetQtyReceived
-			FROM tblICInventoryReceiptItem C 
-			WHERE C.intLineNo = C2.intLineNo AND C.intOrderId = C2.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+			SELECT SUM(dblNetQtyReceived) dblNetQtyReceived FROM (
+				SELECT 
+					(CASE WHEN B.dblNetWeight > 0 THEN C.dblNet * (ISNULL(ICWeightUOM.dblUnitQty,1) / ICUOM.dblUnitQty)
+							ELSE C.dblOrderQty END) AS dblNetQtyReceived
+				FROM tblICInventoryReceiptItem C 
+				INNER JOIN tblICItemUOM ICUOM ON C.intUnitMeasureId = ICUOM.intItemUOMId AND C.intItemId = ICUOM.intItemId
+				LEFT JOIN tblICItemUOM ICWeightUOM ON C.intWeightUOMId = ICWeightUOM.intItemUOMId AND C.intItemId = ICWeightUOM.intItemId
+				WHERE C.intLineNo = C2.intLineNo AND C.intOrderId = C2.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+			) ReceiptsQtyReceived
 		) Receipts
 		CROSS APPLY (
 			SELECT 
