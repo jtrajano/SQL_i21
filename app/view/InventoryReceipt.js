@@ -2172,7 +2172,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 }
                                                                             },
                                                                             {
-                                                                                xtype: 'gridcolumn',
+                                                                                xtype: 'datecolumn',
                                                                                 itemId: 'colLotManufacturedDate',
                                                                                 width: 110,
                                                                                 dataIndex: 'string',
