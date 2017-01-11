@@ -2,13 +2,12 @@
 	
 AS 
 
-SELECT	Item.intItemId,
+SELECT		Item.intItemId,
 			Item.strItemNo,
 			Item.strDescription,
 			Item.strType,
 			Item.strStatus,
 			Item.ysnAccrue,
-			Item.ysnMTM,
 			Item.ysnPrice,
 			Item.strCostMethod,
 			Item.intOnCostTypeId,
