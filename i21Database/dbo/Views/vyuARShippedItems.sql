@@ -626,7 +626,7 @@ SELECT
 	,[strSalespersonName]				= ''
 	,[ysnBlended]						= NULL
 	,[intRecipeId]						= NULL
-	,[intSubLocationId]					= NULL
+	,[intSubLocationId]					= ICISI.[intSubLocationId]
 	,[intCostTypeId]					= NULL
 	,[intMarginById]					= NULL
 	,[intCommentTypeId]					= NULL
@@ -803,7 +803,7 @@ SELECT
 	,[strPricing]						= ''
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= 1 * ICISC.[dblAmount]
-	,[intStorageLocationId]				= NULL
+	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
 	,[strStorageLocationName]			= NULL
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
@@ -827,7 +827,7 @@ SELECT
 	,[strSalespersonName]				= ''
 	,[ysnBlended]						= NULL
 	,[intRecipeId]						= NULL
-	,[intSubLocationId]					= NULL
+	,[intSubLocationId]					= ICISI.[intSubLocationId]
 	,[intCostTypeId]					= NULL
 	,[intMarginById]					= NULL
 	,[intCommentTypeId]					= NULL

@@ -61,7 +61,7 @@ BEGIN TRY
 	WHERE 
 		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 		OR
-		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice')) 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
 	CREATE TABLE #EntriesForProcessing(
@@ -315,7 +315,7 @@ BEGIN
 		,@LoadDistributionHeaderId		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
 		,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
 		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
-		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
+		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Card Fueling Transaction', 'CF Tran') THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@ContractHeaderId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Sales Contract' THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
 		,@LoadId						= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Load Schedule' THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
@@ -402,7 +402,7 @@ BEGIN
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
 		AND ([intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
+		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
 		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (ISNULL([intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST([dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -429,7 +429,7 @@ BEGIN
 						SET @SourceColumn = 'intShipmentId'
 						SET @SourceTable = 'tblLGShipment'
 					END
-				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction'
+				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
 					BEGIN
 						SET @SourceColumn = 'intTransactionId'
 						SET @SourceTable = 'tblCFTransaction'
@@ -462,7 +462,7 @@ BEGIN
 						SET @SourceTable = 'tblLGLoad'
 					END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
+				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
 					BEGIN
 						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 					END
@@ -651,7 +651,7 @@ BEGIN
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -944,7 +944,7 @@ BEGIN
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -1114,7 +1114,7 @@ BEGIN TRY
 					SET @SourceColumn = 'intShipmentId'
 					SET @SourceTable = 'tblLGShipment'
 				END
-			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction'
+			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
 				BEGIN
 					SET @SourceColumn = 'intTransactionId'
 					SET @SourceTable = 'tblCFTransaction'
@@ -1148,7 +1148,7 @@ BEGIN TRY
 						SET @SourceTable = 'tblLGLoad'
 					END
 
-			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
+			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
 				BEGIN
 					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 				END

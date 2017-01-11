@@ -30,7 +30,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 3. "Transport Load"
 																											-- 4. "Inbound Shipment"
 																											-- 5. "Inventory Shipment"
-																											-- 6. "Card Fueling Transaction"
+																											-- 6. "Card Fueling Transaction" / "CF Tran"
 																											-- 7. "Transfer Storage"
 																											-- 8. "Sale OffSite"
 																											-- 9. "Settle Storage"
@@ -41,6 +41,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 14. "Credit Card Reconciliation"
 																											-- 15. "Sales Contract"
 																											-- 16. "Load Schedule"
+																											-- 17. "CF Invoice"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
