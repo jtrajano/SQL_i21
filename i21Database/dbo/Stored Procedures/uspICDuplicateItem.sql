@@ -161,7 +161,7 @@ BEGIN
 		ysnSellableItem,
 		dblMinStockWeeks,
 		dblFullContainerSize,
-		strCostType)
+		strCostType, intM2MComputationId)
 	SELECT @NewItemNo,
 		strType,
 		strDescription,
@@ -292,7 +292,8 @@ BEGIN
 		ysnSellableItem,
 		dblMinStockWeeks,
 		dblFullContainerSize,
-		strCostType
+		strCostType,
+		intM2MComputationId
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
