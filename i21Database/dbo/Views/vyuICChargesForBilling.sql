@@ -191,25 +191,8 @@ SELECT
 	,[intLineNo]								=	1
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId  --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
-	,[dblUnitCost]								=	
-													CASE 
-														WHEN ReceiptCharge.ysnSubCurrency > 0 
-															THEN (ABS(ReceiptCharge.dblAmount) * 100)  
-														ELSE 
-															ABS(ReceiptCharge.dblAmount) 
-													END 
-	,[dblTax]									=	
-													CASE 
-														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
-														--	THEN ISNULL(ReceiptCharge.dblTax,0)
-														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
-														--	THEN -ISNULL(ReceiptCharge.dblTax,0)
-														WHEN ReceiptCharge.dblAmount > 0 
-															THEN -ISNULL(ReceiptCharge.dblTax,0) --Negate tax if amount is positive for Price Down charges; 
-														ELSE 
-															ISNULL(ReceiptCharge.dblTax,0)													
-													END 
-
+	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount END /* Negate the cost if other charge is set as price; this is only for script computation for total cost in voucher; Cost will still be seen as positive value in Voucher screen*/  
+	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0)
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
 																OtherChargeExpense.intAccountId 
