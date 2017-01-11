@@ -28,11 +28,6 @@ BEGIN TRY
 	DECLARE @QueryRC NVARCHAR(MAX)
 	DECLARE @RCId NVARCHAR(50)
 
-	-- ORIGIN/DESTINATION
-	DECLARE @IncludeOriginState NVARCHAR(250)
-	DECLARE @ExcludeOriginState NVARCHAR(250)
-	DECLARE @IncludeDestinationState NVARCHAR(250)
-	DECLARE @ExcludeDestinationState NVARCHAR(250)
 	-- USER DEFINED TABLES
 	DECLARE @TFReceiptTransaction TFReceiptTransaction
 	DECLARE @TFTaxCategory TFTaxCategory
@@ -82,6 +77,9 @@ BEGIN TRY
 			AND Origin.strState NOT IN (SELECT strState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
 			AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
 			AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+			AND Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId)
+			AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId) = 0
+				OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxCriteria WHERE intReportingComponentId = @RCId)
 		BEGIN
@@ -168,6 +166,9 @@ BEGIN TRY
 				AND Origin.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
 				AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
 				AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+				AND Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId)
+				AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId) = 0
+					OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
 		END
 		ELSE
 		BEGIN
@@ -256,6 +257,9 @@ BEGIN TRY
 				AND Origin.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
 				AND Destination.strStateProvince IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
 				AND Destination.strStateProvince NOT IN (SELECT strStateProvince FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+				AND Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId)
+				AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId) = 0
+					OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
 		END
 		
 		-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
