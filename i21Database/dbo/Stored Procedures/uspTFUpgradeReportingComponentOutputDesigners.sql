@@ -16,7 +16,7 @@ DECLARE @ErrorState INT
 BEGIN TRY
 
 	MERGE	
-	INTO	tblTFScheduleFields
+	INTO	tblTFReportingComponentField
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
