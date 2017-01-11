@@ -178,7 +178,7 @@ BEGIN TRY
 	FROM tblMFMachine
 	WHERE intMachineId = @intMachineId
 
-	IF @intIssuedUOMTypeId = 0
+	IF ISNULL(@intIssuedUOMTypeId,0) = 0
 	BEGIN
 		--SET @strErrMsg='Please configure Issued UOM Type for machine ''' + @strBlenderName + '''.'
 		--RAISERROR(@strErrMsg,16,1)
@@ -1203,7 +1203,7 @@ BEGIN TRY
 					(Select intStorageLocationId From tblICStorageLocation Where intSubLocationId = ISNULL(@intPartialQuantitySubLocationId,0))
 			End
 
-			If @intOriginalIssuedUOMTypeId<>@intIssuedUOMTypeId AND (Select COUNT(1) From #tblInputLot)=0
+			If (Select COUNT(1) From #tblInputLot)=0
 				GOTO NOLOT
 
 			DECLARE Cursor_FetchItem CURSOR LOCAL FAST_FORWARD
