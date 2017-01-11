@@ -4784,6 +4784,7 @@
     <Build Include="dbo\Tables\tblIPSAPIDOCTag.sql" />
     <Build Include="dbo\Functions\fnIPGetSAPIDOCHeader.sql" />
     <Build Include="dbo\Functions\fnIPGetSAPIDOCTagValue.sql" />
+    <Build Include="dbo\Tables\tblRKStgBlendDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
