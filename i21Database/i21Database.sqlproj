@@ -4796,6 +4796,7 @@
     <Build Include="dbo\Functions\fnPATReverseEquityPayoutGLEntries.sql" />
     <Build Include="dbo\Functions\fnPATCreateEquityPayoutGLEntries.sql" />
     <Build Include="dbo\Views\vyuMFLotList.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeleteVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
