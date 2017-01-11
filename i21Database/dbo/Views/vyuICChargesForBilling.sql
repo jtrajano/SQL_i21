@@ -138,7 +138,7 @@ SELECT
 	,[intLineNo]								=	1
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId  --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
-	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount /* Negate the amount if other charge is set as price*/  END 
+	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount END /* Negate the cost if other charge is set as price; this is only for script computation for total cost in voucher; Cost will still be seen as positive value in Voucher screen*/  
 	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0)
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 

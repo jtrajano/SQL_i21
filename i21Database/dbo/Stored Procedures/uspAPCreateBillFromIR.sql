@@ -362,7 +362,7 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END,
-		[dblCost]					=	A.dblUnitCost,
+		[dblCost]					=	ABS(A.dblUnitCost),
 		[dblOldCost]				=	NULL,
 		[dblClaimAmount]			=	0,
 		[dblNetWeight]				=	0,
