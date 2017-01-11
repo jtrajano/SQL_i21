@@ -155,7 +155,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[dblLicenseAmount]
 	,[intTaxGroupId]
 	,[intStorageLocationId]
-	--,[intCompanyLocationSubLocationId]
+	,[intCompanyLocationSubLocationId]
 	,[ysnRecomputeTax]
 	,[intSCInvoiceId]
 	,[strSCInvoiceNumber]
@@ -263,6 +263,7 @@ SELECT
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
 	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
+	,[intCompanyLocationSubLocationId]		= ARSI.[intSubLocationId]
 	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(ARSI.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)	
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
@@ -376,7 +377,8 @@ SELECT
 	,[dblMaintenanceAmount]					= @ZeroDecimal 
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= NULL
-	,[intStorageLocationId]					= NULL
+	,[intStorageLocationId]					= SOD.[intStorageLocationId] 
+	,[intCompanyLocationSubLocationId]		= SOD.[intSubLocationId] 
 	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(SOD.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL

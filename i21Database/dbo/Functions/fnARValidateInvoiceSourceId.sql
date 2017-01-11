@@ -27,7 +27,7 @@ BEGIN
 	IF @SourceTransaction = 'Inventory Shipment'
 		RETURN 5		
 		
-	IF @SourceTransaction = 'Card Fueling Transaction'
+	IF @SourceTransaction = 'Card Fueling Transaction' OR @SourceTransaction = 'CF Tran'
 		RETURN 6		
 		
 	IF @SourceTransaction = 'Transfer Storage'
@@ -59,6 +59,9 @@ BEGIN
 
 	IF @SourceTransaction = 'Load Schedule'
 		RETURN 16
+
+	IF @SourceTransaction = 'CF Invoice'
+		RETURN 17	
 
 	RETURN @SourceIdOut
 END
