@@ -33,7 +33,6 @@ BEGIN
 				ELSE LD.intSContractDetailId
 				END
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		JOIN tblCTContractText CT ON CT.intContractTextId = CH.intContractTextId
 		WHERE L.intLoadId = @intTransactionId
 
 
