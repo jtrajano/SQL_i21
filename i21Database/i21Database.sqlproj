@@ -4785,6 +4785,7 @@
     <Build Include="dbo\Functions\fnIPGetSAPIDOCHeader.sql" />
     <Build Include="dbo\Functions\fnIPGetSAPIDOCTagValue.sql" />
     <Build Include="dbo\Tables\tblRKStgBlendDemand.sql" />
+    <Build Include="dbo\Tables\tblICM2MComputation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4915,6 +4916,7 @@
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
     <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
+    <None Include="Scripts\Post-Deployment\IC\19_M2MComputations.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\IN_Indiana.sql" />
     <Build Include="dbo\User Defined Types\TFReportingComponentConfigurations.sql">
       <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
