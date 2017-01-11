@@ -263,7 +263,8 @@ DECLARE
 		,[ysnClearDetailTaxes]
 		,[intTempDetailIdForTaxes]
 		,[intSubCurrencyId]
-		,[dblSubCurrencyRate])
+		,[dblSubCurrencyRate]
+		,[intCompanyLocationSubLocationId])
 	SELECT
 		 [strSourceTransaction]					= 'Load Schedule'
 		,[intSourceId]							= @intLoadId
@@ -358,7 +359,8 @@ DECLARE
 		,[ysnClearDetailTaxes]					= 0
 		,[intTempDetailIdForTaxes]				= NULL
 		,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
-		,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
+		,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate
+		,[intCompanyLocationSubLocationId]		= ARSI.intSubLocationId 
 	FROM vyuARShippedItems ARSI
 	WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 	  AND ARSI.[intLoadId] = @intLoadId

@@ -89,7 +89,7 @@ BEGIN
 		,[dblLicenseAmount]
 		,[intTaxGroupId]
 		,[intStorageLocationId]
-		--,[intCompanyLocationSubLocationId]
+		,[intCompanyLocationSubLocationId]
 		,[ysnRecomputeTax]
 		,[intSCInvoiceId]
 		,[strSCInvoiceNumber]
@@ -198,6 +198,7 @@ BEGIN
 		,[dblLicenseAmount]						= 0
 		,[intTaxGroupId]						= NULL 
 		,[intStorageLocationId]					= NULL
+		,[intCompanyLocationSubLocationId]		= LD.[intSSubLocationId]
 		,[ysnRecomputeTax]						= 1
 		,[intSCInvoiceId]						= NULL
 		,[strSCInvoiceNumber]					= NULL
