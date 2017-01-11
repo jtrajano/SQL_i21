@@ -274,6 +274,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.ysnMTM).HasColumnName("ysnMTM");
+            this.Property(t => t.intM2MComputationId).HasColumnName("intM2MComputationId");
+            this.Property(t => t.strM2MComputation).HasColumnName("strM2MComputation");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
             this.Property(t => t.intOnCostTypeId).HasColumnName("intOnCostTypeId");
@@ -348,6 +350,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.ysnMTM).HasColumnName("ysnMTM");
+            this.Property(t => t.intM2MComputationId).HasColumnName("intM2MComputationId");
+            this.Property(t => t.strM2MComputation).HasColumnName("strM2MComputation");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
             this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);

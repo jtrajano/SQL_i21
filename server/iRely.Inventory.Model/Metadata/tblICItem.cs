@@ -292,6 +292,8 @@ namespace iRely.Inventory.Model
         public bool? ysnInventoryCost { get; set; }
         public bool? ysnAccrue { get; set; }
         public bool? ysnMTM { get; set; }
+        public int? intM2MComputationId { get; set; }
+        public string strM2MComputation { get; set; }
         public bool? ysnPrice { get; set; }
         public string strCostMethod { get; set; }
         public int? intOnCostTypeId { get; set; }
@@ -352,6 +354,8 @@ namespace iRely.Inventory.Model
         public bool? ysnInventoryCost { get; set; }
         public bool? ysnAccrue { get; set; }
         public bool? ysnMTM { get; set; }
+        public int? intM2MComputationId { get; set; }
+        public string strM2MComputation { get; set; }
         public bool? ysnPrice { get; set; }
         public string strCostMethod { get; set; }
         public decimal? dblAmount { get; set; }
