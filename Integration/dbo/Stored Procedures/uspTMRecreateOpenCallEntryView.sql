@@ -60,6 +60,7 @@ BEGIN
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
+				,strFillMethod = N.strFillMethod
 			,strLocation = B.strLocation
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
@@ -87,6 +88,8 @@ BEGIN
 					GROUP BY intSiteID
 				) M
 					ON A.intSiteID = M.intSiteId
+			LEFT JOIN tblTMFillMethod N
+				ON B.intFillMethodId = N.intFillMethodId
 		')
 	END
 	ELSE
@@ -124,6 +127,7 @@ BEGIN
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
+				,strFillMethod = N.strFillMethod
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -150,6 +154,8 @@ BEGIN
 					GROUP BY intSiteID
 				) M
 					ON A.intSiteID = M.intSiteId
+			LEFT JOIN tblTMFillMethod N
+				ON B.intFillMethodId = N.intFillMethodId
 		')
 	END
 END

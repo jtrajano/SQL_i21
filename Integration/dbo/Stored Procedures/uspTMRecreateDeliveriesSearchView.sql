@@ -74,6 +74,7 @@ BEGIN
 						,F.intDeliveryHistoryID
 						,intLocationId = C.intLocationId
 						,F.strInvoiceNumber
+						,K.strFillMethod
 					FROM tblTMSite C 
 					INNER JOIN tblTMCustomer E 
 						ON C.intCustomerID = E.intCustomerID
@@ -83,6 +84,8 @@ BEGIN
 						ON C.intSiteID = F.intSiteID
 					INNER JOIN vwitmmst I
 						ON C.intProduct = I.A4GLIdentity
+					LEFT JOIN tblTMFillMethod K
+						ON C.intFillMethodId = K.intFillMethodId
 				')
 		END
 		ELSE
@@ -116,6 +119,7 @@ BEGIN
 					,F.intDeliveryHistoryID
 					,intLocationId = C.intLocationId
 					,F.strInvoiceNumber
+					,K.strFillMethod
 				FROM tblTMSite C 
 				INNER JOIN tblTMCustomer E 
 					ON C.intCustomerID = E.intCustomerID
@@ -129,6 +133,8 @@ BEGIN
 					ON F.intInvoiceId = G.intInvoiceId
 				LEFT JOIN tblEMEntity H
 					ON G.intEntitySalespersonId = H.intEntityId
+				LEFT JOIN tblTMFillMethod K
+					ON C.intFillMethodId = K.intFillMethodId
 		')
 	END
 END

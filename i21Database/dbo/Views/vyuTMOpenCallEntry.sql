@@ -30,6 +30,7 @@ AS
 		,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 		,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 		,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
+		,strFillMethod = N.strFillMethod
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID
@@ -56,4 +57,6 @@ AS
 		GROUP BY intSiteID
 	) M
 		ON A.intSiteID = M.intSiteId
+	LEFT JOIN tblTMFillMethod N
+		ON B.intFillMethodId = N.intFillMethodId
 GO

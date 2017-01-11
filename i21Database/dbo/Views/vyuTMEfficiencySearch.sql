@@ -35,6 +35,8 @@ AS
 		,intSiteID = C.intSiteID
 		,intCntId = CAST((ROW_NUMBER() OVER (ORDER BY C.intSiteID)) AS INT)
 		,intLocationId = C.intLocationId
+		,strLocation = J.strLocationNumber
+		,strItemNo = K.strItemNo
 	FROM tblTMSite C 
 	INNER JOIN tblTMCustomer E 
 		ON C.intCustomerID = E.intCustomerID
@@ -42,5 +44,10 @@ AS
 		ON E.intCustomerNumber = B.intEntityId
 	LEFT JOIN tblTMFillMethod F
 		ON C.intFillMethodId = F.intFillMethodId
+	LEFT JOIN tblSMCompanyLocation J
+		ON C.intLocationId = J.intCompanyLocationId
+	LEFT JOIN tblICItem K
+		ON C.intProduct = K.intItemId
 	OUTER APPLY (SELECT * FROM [fnTMGetSiteEfficiencyTable](C.intSiteID)) I
+	
 GO

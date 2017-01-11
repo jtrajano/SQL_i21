@@ -87,6 +87,8 @@ BEGIN
 						,intSiteID = C.intSiteID
 						,intCntId = CAST((ROW_NUMBER() OVER (ORDER BY C.intSiteID)) AS INT)
 						,intLocationId = C.intLocationId
+						,strLocation = J.vwloc_loc_no
+						,strItemNo = K.vwitm_no
 					FROM tblTMSite C 
 					INNER JOIN tblTMCustomer E 
 						ON C.intCustomerID = E.intCustomerID
@@ -94,6 +96,10 @@ BEGIN
 						ON E.intCustomerNumber = B.A4GLIdentity
 					LEFT JOIN tblTMFillMethod F
 						ON C.intFillMethodId = F.intFillMethodId
+					LEFT JOIN vwlocmst J
+						ON C.intLocationId = J.A4GLIdentity
+					LEFT JOIN vwitmmst K
+						ON C.intProduct = K.A4GLIdentity
 					OUTER APPLY (SELECT * FROM [fnTMGetSiteEfficiencyTable](C.intSiteID)) I
 				')
 		END
@@ -143,6 +149,8 @@ BEGIN
 					,intSiteID = C.intSiteID
 					,intCntId = CAST((ROW_NUMBER() OVER (ORDER BY C.intSiteID)) AS INT)
 					,intLocationId = C.intLocationId
+					,strLocation = J.strLocationNumber
+					,strItemNo = K.strItemNo
 				FROM tblTMSite C 
 				INNER JOIN tblTMCustomer E 
 					ON C.intCustomerID = E.intCustomerID
@@ -150,6 +158,10 @@ BEGIN
 					ON E.intCustomerNumber = B.intEntityId
 				LEFT JOIN tblTMFillMethod F
 					ON C.intFillMethodId = F.intFillMethodId
+				LEFT JOIN tblSMCompanyLocation J
+					ON C.intLocationId = J.intCompanyLocationId
+				LEFT JOIN tblICItem K
+					ON C.intProduct = K.intItemId
 				OUTER APPLY (SELECT * FROM [fnTMGetSiteEfficiencyTable](C.intSiteID)) I
 		')
 	END

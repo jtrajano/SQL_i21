@@ -20,6 +20,7 @@ AS
 		,F.intDeliveryHistoryID
 		,intLocationId = C.intLocationId
 		,F.strInvoiceNumber
+		,K.strFillMethod
 	FROM tblTMSite C 
 	INNER JOIN tblTMCustomer E 
 		ON C.intCustomerID = E.intCustomerID
@@ -33,4 +34,6 @@ AS
 		ON F.intInvoiceId = G.intInvoiceId
 	LEFT JOIN tblEMEntity H
 		ON G.intEntitySalespersonId = H.intEntityId
+	LEFT JOIN tblTMFillMethod K
+		ON C.intFillMethodId = K.intFillMethodId
 GO
