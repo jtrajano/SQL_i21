@@ -111,8 +111,8 @@ namespace iRely.Inventory.WebApi.Controllers
                     @"SELECT y.strFiscalYear, f.strPeriod, f.dtmStartDate, f.dtmEndDate, f.ysnOpen, f.ysnINVOpen, y.ysnStatus, f.intFiscalYearId, f.intGLFiscalYearPeriodId,
                         DATENAME(MM, f.dtmStartDate) strStartMonth, DATEPART(MM, f.dtmStartDate) intStartMonth, DATENAME(MM, f.dtmEndDate) strEndMonth, DATEPART(MM, f.dtmEndDate) intEndMonth
                     FROM tblGLFiscalYearPeriod f
-                    INNER JOIN tblGLFiscalYear y ON y.intFiscalYearId = f.intFiscalYearId
-                    INNER JOIN tblGLCurrentFiscalYear c ON c.intFiscalYearId = f.intFiscalYearId"
+                        INNER JOIN tblGLCurrentFiscalYear c ON c.intFiscalYearId = f.intFiscalYearId
+                        INNER JOIN tblGLFiscalYear y ON y.intFiscalYearId = f.intFiscalYearId WHERE f.ysnOpen = 1 ORDER BY dtmStartDate ASC"
                 , parameters);
                 data = await query.ToListAsync();
                 success = true;

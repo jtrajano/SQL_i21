@@ -2,7 +2,7 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.icrebuildinventory',
     requires: [
-        'Inventory.store.Item',
+        'Inventory.store.BufferedItem',
         'Inventory.store.FiscalPeriod'
     ],
 
@@ -19,7 +19,11 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
             ]
         },
         items: {
-            type: 'icitem'
+            type: 'icbuffereditem',
+            sorters: {
+                direction: 'ASC',
+                property: 'strItemNo'
+            }
         },
         fiscalMonths: {
             type: 'icfiscalperiod'
@@ -27,7 +31,8 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
     },
 
     data: {
-        selectedItem: null
+        selectedItem: null,
+        rebuildCompleted: false
     },
 
     formulas: {
@@ -54,7 +59,7 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
             return 'Inventory will be rebuilt for ' + item + ' from ' + month + '-' + moment(get('current.dtmDate')).format('l') + ' onwards including item(s) that are used for production. Do you want to continue?';
         },
         canPost: function(get) {
-            return get('current.strPostOrder') && get('current.strMonth'); 
+            return (get('current.strPostOrder') && get('current.strMonth')) && !get('rebuildCompleted'); 
         }
     }
 });

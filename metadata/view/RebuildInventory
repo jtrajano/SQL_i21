@@ -9,12 +9,12 @@
         "bodyPadding": null,
         "designer|userAlias": "icrebuildinventory",
         "designer|userClassName": "RebuildInventory",
-        "height": 258,
+        "height": 220,
         "hidden": false,
         "layout": "fit",
         "margin": "",
         "maxHeight": null,
-        "minHeight": 250,
+        "minHeight": 220,
         "modal": true,
         "padding": null,
         "reference": null,
@@ -140,7 +140,35 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "displayField": "strStartMonth",
+                                        "columns": [
+                                            "[",
+                                            "{",
+                                            "dataIndex: 'intGLFiscalYearPeriodId',",
+                                            "dataType: 'int',",
+                                            "hidden: true",
+                                            "},",
+                                            "{",
+                                            "dataIndex: 'strPeriod',",
+                                            "dataType: 'string',",
+                                            "text: 'Period',",
+                                            "flex: 1",
+                                            "},",
+                                            "{",
+                                            "dataIndex: 'strStartMonth',",
+                                            "dataType: 'string',",
+                                            "text: 'Fiscal Month',",
+                                            "flex: 1",
+                                            "},",
+                                            "{",
+                                            "dataIndex: 'strFiscalYear',",
+                                            "dataType: 'string',",
+                                            "text: 'Fiscal Year',",
+                                            "flex: 1",
+                                            "}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strPeriod",
                                         "fieldLabel": "Fiscal Month",
                                         "forceSelection": true,
                                         "itemId": "cboFiscalMonth",
@@ -152,7 +180,17 @@
                                         "valueField": "strStartMonth"
                                     },
                                     "name": "MyComboBox7",
-                                    "designerId": "0c339596-eedd-4229-91be-ee47d5adaa20"
+                                    "configAlternates": {
+                                        "columns": "object"
+                                    },
+                                    "designerId": "0c339596-eedd-4229-91be-ee47d5adaa20",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 }
                             ]
                         },
@@ -236,30 +274,6 @@
                                     "type": "string"
                                 }
                             ]
-                        },
-                        {
-                            "type": "Ext.form.field.Display",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "cls": null,
-                                "fieldBodyCls": null,
-                                "fieldCls": null,
-                                "fieldLabel": null,
-                                "fieldStyle": "font-size: 8pt; font-style: italic;",
-                                "hideEmptyLabel": false,
-                                "hideLabel": true,
-                                "itemId": "lblDescription",
-                                "labelPad": null,
-                                "layout|anchor": "100%",
-                                "padding": "0 0 0 105",
-                                "value": "Please fill out the required fields above."
-                            },
-                            "name": "MyDisplayField",
-                            "designerId": "8cea60c7-49e2-4ed1-91f8-c424b00bca08"
                         }
                     ]
                 },
@@ -276,7 +290,7 @@
                         "layout|region": "east",
                         "width": 150
                     },
-                    "name": "statusbar12",
+                    "name": "statusbar1",
                     "designerId": "f99cbb97-f355-4a7a-9435-98f19e7193ee",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

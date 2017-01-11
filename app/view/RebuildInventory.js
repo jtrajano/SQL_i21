@@ -22,14 +22,13 @@ Ext.define('Inventory.view.RebuildInventory', {
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
-        'Ext.form.field.ComboBox',
-        'Ext.form.field.Display'
+        'Ext.form.field.ComboBox'
     ],
 
-    height: 258,
+    height: 220,
     hidden: false,
     margin: '',
-    minHeight: 250,
+    minHeight: 220,
     width: 438,
     layout: 'fit',
     title: 'Rebuild Inventory',
@@ -63,9 +62,9 @@ Ext.define('Inventory.view.RebuildInventory', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    dock: 'bottom',
                     width: 150,
-                    region: 'east'
+                    region: 'east',
+                    dock: 'bottom'
                 }
             ],
             items: [
@@ -85,13 +84,38 @@ Ext.define('Inventory.view.RebuildInventory', {
                             },
                             items: [
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intGLFiscalYearPeriodId',
+                                            dataType: 'int',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strPeriod',
+                                            dataType: 'string',
+                                            text: 'Period',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strStartMonth',
+                                            dataType: 'string',
+                                            text: 'Fiscal Month',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strFiscalYear',
+                                            dataType: 'string',
+                                            text: 'Fiscal Year',
+                                            flex: 1
+                                        }
+                                    ],
                                     flex: 2,
                                     publishes: 'value',
                                     reference: 'fiscalmonth',
                                     itemId: 'cboFiscalMonth',
                                     fieldLabel: 'Fiscal Month',
-                                    displayField: 'strStartMonth',
+                                    displayField: 'strPeriod',
                                     forceSelection: true,
                                     valueField: 'strStartMonth'
                                 }
@@ -142,16 +166,6 @@ Ext.define('Inventory.view.RebuildInventory', {
                             fieldLabel: 'Item (optional)',
                             displayField: 'strItemNo',
                             valueField: 'strItemNo'
-                        },
-                        {
-                            xtype: 'displayfield',
-                            anchor: '100%',
-                            itemId: 'lblDescription',
-                            padding: '0 0 0 105',
-                            hideEmptyLabel: false,
-                            hideLabel: true,
-                            value: 'Please fill out the required fields above.',
-                            fieldStyle: 'font-size: 8pt; font-style: italic;'
                         }
                     ]
                 }

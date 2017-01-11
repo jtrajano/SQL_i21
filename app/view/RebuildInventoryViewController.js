@@ -18,9 +18,6 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
 
     config: {
         binding: {
-            lblDescription: {
-                value: '{description}'
-            },
             cboPostOrder: {
                 store: '{postOrderTypes}',
                 value: '{current.strPostOrder}'
@@ -56,15 +53,14 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
 
     onMonthSelect: function (combo, record) {
         var current = this.getView().viewModel.data.current;
-        current.set('intMonth', record.data.intStartMonth);
-        current.set('dtmDate', record.data.dtmStartDate);
+        current.set('intMonth', record[0].data.intMonth);
+        current.set('dtmDate', record[0].data.dtmStartDate);
     },
 
     onRepostClick: function (e) {
         var me = this;
         var vm = me.getView().viewModel;
         var win = e.up('window');
-        var combo = win.down('#cboFiscalDate');
         var cboFiscalMonth = win.down('#cboFiscalMonth');
 
         var jsondata = {
@@ -74,7 +70,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         };
         var callback = function (button) {
             if (button === 'yes') {
-                me.repost(jsondata);
+                me.repost(vm, jsondata);
             }
         };
         iRely.Functions.showCustomDialog('question', 'yesno', vm.data.prompt, callback);
@@ -122,14 +118,17 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         ic.utils.writeCSV(columns, data, alias, "disrepancies.csv");
     },
 
-    repost: function (data) {
+    repost: function (vm, data) {
         var me = this;
-        iRely.Msg.showWait('Rebuilding inventory...');
+        iRely.Msg.showWait('In Progress');
+        me.view.context.screenMgr.toolbarMgr.provideFeedBack({ text: 'In Progress', color: 'Red'});
         var rebuildObs = me.rebuild(data);
         var verifyObs = me.verifyValuation(data.dtmStartDate);
         rebuildObs
             .flatMap(verifyObs)
-            .finally(function () { iRely.Msg.close(); })
+            .finally(function () { 
+                iRely.Msg.close(); 
+            })
             .subscribe(
             function (res) {
                 var json = JSON.parse(res.responseText);
@@ -154,6 +153,8 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                                 .subscribe(
                                     function (res) {
                                         if (res.success) {
+                                            me.view.context.screenMgr.toolbarMgr.provideFeedBack({ text: 'Rebuild Complete', color: 'Blue'});
+                                            vm.setData({ rebuildCompleted: true });
                                             me.downloadDiscrepancies(res.csv.columns, res.csv.data);
                                         } else {
                                             iRely.Functions.showErrorDialog("Error downloading." + res.message);
@@ -166,8 +167,11 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                                 );
                             }
                         });
-                    else
-                        iRely.Functions.showInfoDialog("Inventory Rebuild successful.");
+                    else {
+                        iRely.Functions.showInfoDialog("Rebuild Complete.");
+                        me.view.context.screenMgr.toolbarMgr.provideFeedBack({ text: 'Rebuild Complete', color: 'Blue'});
+                        vm.setData({ rebuildCompleted: true });
+                    }
                 }
                 else
                     iRely.Functions.showErrorDialog(json.message);
@@ -181,13 +185,34 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             );
     },
 
+    onFiscalMonthBeforeQuery: function(obj) {
+        if (obj.combo) {
+            var store = obj.combo.store;
+            var win = obj.combo.up('window');
+            if (store) {
+                store.remoteFilter = false;
+                store.remoteSort = false;
+            }
+
+            if (obj.combo.itemId === 'cboFiscalMonth') {
+                store.clearFilter();
+                store.filterBy(function (rec, id) {
+                    if(rec.get('strPeriod').toLowerCase().indexOf(obj.query.toLowerCase()) !== -1)
+                        return true;
+                    return false;
+                });
+            }
+        }
+    },
+
     init: function (cfg) {
         this.control({
             '#cboItem': {
                 select: this.onItemSelect
             },
             '#cboFiscalMonth': {
-                select: this.onMonthSelect
+                select: this.onMonthSelect,
+                beforequery: this.onFiscalMonthBeforeQuery
             },
             '#btnRepost': {
                 click: this.onRepostClick
