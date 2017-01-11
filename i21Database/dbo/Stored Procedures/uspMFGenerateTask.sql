@@ -947,7 +947,7 @@ BEGIN TRY
 
 	INSERT INTO @tblTaskGenerated
 	SELECT OD.intItemId
-		,ISNULL(SUM(T.dblWeight), 0) dblTotalTaskWeight
+		,ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId,T.dblWeight)), 0) dblTotalTaskWeight
 		,OD.dblWeight
 	FROM tblMFOrderDetail OD
 	LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
