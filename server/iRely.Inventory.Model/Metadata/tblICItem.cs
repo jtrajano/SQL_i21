@@ -117,6 +117,7 @@ namespace iRely.Inventory.Model
         public bool? ysnInventoryCost { get; set; }
         public bool? ysnAccrue { get; set; }
         public bool? ysnMTM { get; set; }
+        public int? intM2MComputationId { get; set; }
         public bool? ysnPrice { get; set; }
         public string strCostMethod { get; set; }
         public string strCostType { get; set; }
@@ -153,6 +154,26 @@ namespace iRely.Inventory.Model
         public int? intLotStatusId { get; set; }
         public string strRequired { get; set; }
         public bool? ysnBasisContract { get; set; }
+
+        private string _strM2MComputation;
+        [NotMapped]
+        public string strM2MComputation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strM2MComputation))
+                    if (tblICM2MComputation != null)
+                        return tblICM2MComputation.strM2MComputation;
+                    else
+                        return null;
+                else
+                    return _strM2MComputation;
+            }
+            set
+            {
+                _strM2MComputation = value;
+            }
+        }
 
         private string _manufacturer;
         [NotMapped]
@@ -213,6 +234,7 @@ namespace iRely.Inventory.Model
         }
 
         public tblICManufacturer tblICManufacturer { get; set; }
+        public tblICM2MComputation tblICM2MComputation { get; set; }
         public tblICBrand tblICBrand { get; set; }
         public tblICCategory tblICCategory { get; set; }
         public tblICCommodity tblICCommodity { get; set; } 

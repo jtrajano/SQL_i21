@@ -145,6 +145,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\tblICM2MComputationMap.cs" />
+    <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Metadata\tblICM2MComputation.cs" />
     <Compile Include="Configuration\tblICParentLotMap.cs" />
     <Compile Include="Configuration\tblICItemMotorFuelTaxMap.cs" />
     <Compile Include="Configuration\tblICStorageMeasurementReadingMap.cs" />
@@ -206,7 +209,6 @@
     <Compile Include="Configuration\tblPATPatronageCategoryMap.cs" />
     <Compile Include="Configuration\tblSMCompanyLocationPricingLevelMap.cs" />
     <Compile Include="InventoryEntities.cs" />
-    <Compile Include="InventoryEntities.Views.cs" />
     <Compile Include="Metadata\tblICInventoryReceiptItemLot.cs" />
     <Compile Include="Metadata\tblICInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblICParentLot.cs" />

@@ -3515,31 +3515,54 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkInventoryCost',
                                                                         fieldLabel: 'Inventory Cost',
-                                                                        labelWidth: 105
+                                                                        labelWidth: 150
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkAccrue',
                                                                         fieldLabel: 'Accrue',
-                                                                        labelWidth: 105
+                                                                        labelWidth: 150
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
+                                                                        hidden: true,
                                                                         itemId: 'chkMTM',
                                                                         fieldLabel: 'MTM',
-                                                                        labelWidth: 105
+                                                                        labelWidth: 105,
+                                                                        readOnly: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intM2MComputationId',
+                                                                                dataType: 'int',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strM2MComputation',
+                                                                                dataType: 'string',
+                                                                                text: 'M2M Computation',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboM2M',
+                                                                        fieldLabel: 'M2M',
+                                                                        labelWidth: 150,
+                                                                        displayField: 'strM2MComputation',
+                                                                        valueField: 'intM2MComputationId'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkPrice',
                                                                         fieldLabel: 'Price',
-                                                                        labelWidth: 105
+                                                                        labelWidth: 150
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkBasisContract',
                                                                         fieldLabel: 'Basis Contract',
-                                                                        labelWidth: 105
+                                                                        labelWidth: 150
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -3553,7 +3576,7 @@ Ext.define('Inventory.view.Item', {
                                                                         ],
                                                                         itemId: 'cboCostType',
                                                                         fieldLabel: 'Cost Type',
-                                                                        labelWidth: 105,
+                                                                        labelWidth: 150,
                                                                         displayField: 'strDescription',
                                                                         valueField: 'strDescription'
                                                                     },
@@ -3581,7 +3604,7 @@ Ext.define('Inventory.view.Item', {
                                                                         ],
                                                                         itemId: 'cboOnCost',
                                                                         fieldLabel: 'On Cost',
-                                                                        labelWidth: 105,
+                                                                        labelWidth: 150,
                                                                         displayField: 'strItemNo',
                                                                         valueField: 'intItemId'
                                                                     },
@@ -3597,7 +3620,7 @@ Ext.define('Inventory.view.Item', {
                                                                         ],
                                                                         itemId: 'cboCostMethod',
                                                                         fieldLabel: 'Cost Method',
-                                                                        labelWidth: 105,
+                                                                        labelWidth: 150,
                                                                         displayField: 'strDescription',
                                                                         valueField: 'strDescription'
                                                                     },
@@ -3605,7 +3628,7 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'numericfield',
                                                                         itemId: 'txtAmount',
                                                                         fieldLabel: 'Amount',
-                                                                        labelWidth: 105,
+                                                                        labelWidth: 150,
                                                                         hideTrigger: true
                                                                     },
                                                                     {
@@ -3639,7 +3662,7 @@ Ext.define('Inventory.view.Item', {
                                                                         ],
                                                                         itemId: 'cboCostUOM',
                                                                         fieldLabel: 'UOM',
-                                                                        labelWidth: 105,
+                                                                        labelWidth: 150,
                                                                         displayField: 'strUnitMeasure',
                                                                         valueField: 'intItemUOMId'
                                                                     }

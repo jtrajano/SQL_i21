@@ -41,10 +41,19 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Manufacturing.store.BufferedPackType',
         'Patronage.store.BufferedPatronageCategory',
         'TaxForm.store.BufferedTaxAuthority',
-        'TaxForm.store.BufferedProductCode'
+        'TaxForm.store.BufferedProductCode',
+        'Inventory.store.BufferedM2MComputation'
     ],
 
     stores: {
+        m2mComputations: {
+            type: 'icbufferedm2mcomputation',
+            
+            sorters: {
+                direction: 'ASC',
+                property: 'intM2MComputationId'
+            },
+        },
         itemTypes: {
             autoLoad: true,
             data: [

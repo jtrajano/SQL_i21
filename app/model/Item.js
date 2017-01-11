@@ -139,6 +139,8 @@ Ext.define('Inventory.model.Item', {
         { name: 'ysnInventoryCost', type: 'boolean' },
         { name: 'ysnAccrue', type: 'boolean' },
         { name: 'ysnMTM', type: 'boolean' },
+        { name: 'intM2MComputationId', type: 'int', allowNull: true },
+        { name: 'strM2MComputation', type: 'string', allowNull: true },    
         { name: 'ysnPrice', type: 'boolean' },
         { name: 'strCostMethod', type: 'string' },
         { name: 'strCostType', type: 'string' },

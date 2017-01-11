@@ -74,7 +74,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICLineOfBusinessMap());
             modelBuilder.Configurations.Add(new tblICLotStatusMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
-            
+            modelBuilder.Configurations.Add(new tblICM2MComputationMap());
+
             modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());    
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeWorkCenterMap());

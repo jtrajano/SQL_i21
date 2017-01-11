@@ -118,6 +118,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.ysnMTM).HasColumnName("ysnMTM");
+            this.Property(t => t.intM2MComputationId).HasColumnName("intM2MComputationId");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
             this.Property(t => t.strCostType).HasColumnName("strCostType");
@@ -166,6 +167,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICCommodity)
                 .WithMany(p => p.tblICItems)
                 .HasForeignKey(p => p.intCommodityId);
+            this.HasOptional(p => p.tblICM2MComputation)
+                .WithMany(p => p.tblICItems)
+                .HasForeignKey(p => p.intM2MComputationId);
 
             this.HasMany(p => p.tblICItemUOMs)
                 .WithRequired(p => p.tblICItem) 
