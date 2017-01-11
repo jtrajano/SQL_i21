@@ -58,7 +58,8 @@
 					,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101)
 					,proj.intPercentComplete
 					,proj.ysnCompleted
-					,proj.strOpportunityStatus
+					--,proj.strOpportunityStatus
+					,strOpportunityStatus = (select top 1 tblCRMStatus.strStatus from tblCRMStatus where tblCRMStatus.intStatusId = proj.intStatusId)
 					,strProjectManager = (select top 1 e.strName from tblEMEntity e where e.intEntityId = proj.intInternalProjectManager)
 					,strProjectType = 'CRM'
 					,proj.intCustomerContactId
