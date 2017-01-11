@@ -1528,6 +1528,8 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = this;
         var record = Ext.create('Inventory.model.Item');
         record.set('strStatus', 'Active');
+        record.set('strM2MComputation', 'No');
+        record.set('intM2MComputationId', 1);
         record.set('strType', 'Inventory');
         record.set('strLotTracking', 'No');
         record.set('strInventoryTracking', 'Item Level');
