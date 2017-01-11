@@ -219,7 +219,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.strReceiptType}',
                 store: '{receiptTypes}',
                 readOnly: '{checkReadOnlyWithOrder}',
-                disabled: '{isOriginOrInventoryReturn}'
+                disabled: '{isOriginOrInventoryReturn}',
+                forceSelection: '{forceSelection}'
             },
             cboSourceType: {
                 value: '{current.intSourceType}',
