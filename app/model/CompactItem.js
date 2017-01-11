@@ -29,6 +29,8 @@ Ext.define('Inventory.model.CompactItem', {
         { name: 'ysnInventoryCost', type: 'boolean' },
         { name: 'ysnAccrue', type: 'boolean' },
         { name: 'ysnMTM', type: 'boolean' },
+        { name: 'intM2MComputationId', type: 'int', allowNull: true },
+        { name: 'strM2MComputation', type: 'string' },
         { name: 'ysnPrice', type: 'boolean' },
         { name: 'strCostMethod', type: 'string' },
         { name: 'intOnCostTypeId', type: 'int', allowNull: true },
