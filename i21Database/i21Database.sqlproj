@@ -4786,6 +4786,7 @@
     <Build Include="dbo\Functions\fnIPGetSAPIDOCTagValue.sql" />
     <Build Include="dbo\Tables\tblRKStgBlendDemand.sql" />
     <Build Include="dbo\Tables\tblICM2MComputation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUndistributeTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
