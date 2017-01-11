@@ -24,7 +24,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intInventoryReceiptItemId]		,
 		[intWeightUOMId]				,
 		[intCostUOMId]					,
-		[intUnitOfMeasureId]						,
+		[intUnitOfMeasureId]			,
 		[intItemId]						,
 		[dblCostUnitQty]				,
 		[dblWeightUnitQty]				,
@@ -60,8 +60,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblFranchiseWeight]			=	A.dblFranchiseWeight			,
 		[dblWeightLoss]					=	A.dblWeightLoss					,
 		[dblClaimAmount]				=	A.dblClaim						,
-		[dblQtyOrdered]					=	1,
-		[dblQtyReceived]				=	1,
+		[dblQtyOrdered]					=	A.dblQtyReceived,
+		[dblQtyReceived]				=	A.dblQtyReceived,
 		[dblCost]						=	A.dblCost,
 		[int1099Form]					=	(CASE WHEN E.str1099Form = '1099-MISC' THEN 1
 													WHEN E.str1099Form = '1099-INT' THEN 2
