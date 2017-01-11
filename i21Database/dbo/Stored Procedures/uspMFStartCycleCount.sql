@@ -769,11 +769,11 @@ BEGIN TRY
 		,SUM(IsNULL((
 					CASE 
 						WHEN L.intWeightUOMId IS NULL
-							THEN L.dblQty
-						ELSE L.dblWeight
+							THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId,I.intItemUOMId ,L.dblQty)
+						ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId,I.intItemUOMId ,L.dblWeight)
 						END
 					), 0))
-					,IsNULL(L.intWeightUOMId,L.intItemUOMId )
+					,I.intItemUOMId
 	FROM @tblICFinalItem I
 	JOIN tblICLot L ON L.intItemId = I.intItemId
 		AND L.intLotStatusId = 1
@@ -784,7 +784,7 @@ BEGIN TRY
 				THEN I.intStorageLocationId
 			ELSE @intProductionStageLocationId
 			END
-	GROUP BY I.intItemId,IsNULL(L.intWeightUOMId,L.intItemUOMId )
+	GROUP BY I.intItemId,I.intItemUOMId
 
 	DECLARE @tblMFWorkOrderInputLot TABLE (
 		intItemId INT
