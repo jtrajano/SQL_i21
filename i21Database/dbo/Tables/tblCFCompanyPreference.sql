@@ -6,7 +6,11 @@
     [ysnCFUseContracts]                 BIT            NULL,
     [ysnCFSummarizeInvoice]             BIT            NULL,
     [strCFInvoiceSummarizationLocation] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intGLAccountId]                    INT            NULL,
     [intConcurrencyId]                  INT            CONSTRAINT [DF_tblCFCompanyPreference_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFCompanyPreference] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
+    CONSTRAINT [PK_tblCFCompanyPreference] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
+    CONSTRAINT [FK_tblCFCompanyPreference_tblGLAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
+
+
 
