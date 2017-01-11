@@ -12,5 +12,6 @@ AS
 			dtmLastNoticeDate,
 			dtmLastTradingDate,
 			dtmSpotDate,
-			ysnExpired 
+			ysnExpired,
+			MONTH(CONVERT(DATETIME,'01 '+strFutureMonth)) intMonth
 	FROM	tblRKFuturesMonth
