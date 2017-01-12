@@ -44,7 +44,8 @@ Ext.define('Inventory.model.ItemOwner', {
         { name: 'ysnActive', type: 'boolean'},
         { name: 'intSort', type: 'int'},
 
-        { name: 'strCustomerNumber', type: 'string'}
+        { name: 'strCustomerNumber', type: 'string'},
+        { name: 'strName', type: 'string'}
     ],
 
     validators: [

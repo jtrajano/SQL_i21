@@ -6301,6 +6301,12 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'strName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Customer Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'strType',
                                                                                     dataType: 'string',
                                                                                     text: 'Type',
@@ -6311,6 +6317,13 @@ Ext.define('Inventory.view.Item', {
                                                                             displayField: 'strCustomerNumber',
                                                                             valueField: 'strCustomerNumber'
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colOwnerName',
+                                                                        dataIndex: 'strName',
+                                                                        text: 'Name',
+                                                                        flex: 2
                                                                     },
                                                                     {
                                                                         xtype: 'checkcolumn',

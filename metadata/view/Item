@@ -13850,6 +13850,12 @@
                                                                             "\t\tflex: 1",
                                                                             "\t},",
                                                                             "\t{",
+                                                                            "\t\tdataIndex: 'strName',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Customer Name',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
                                                                             "\t\tdataIndex: 'strType',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Type',",
@@ -13876,6 +13882,22 @@
                                                                     ]
                                                                 }
                                                             ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strName",
+                                                                "flex": 2,
+                                                                "itemId": "colOwnerName",
+                                                                "text": "Name"
+                                                            },
+                                                            "name": "MyColumn58",
+                                                            "designerId": "974e5c4b-7773-4986-b5ac-b6361a037514"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Check",

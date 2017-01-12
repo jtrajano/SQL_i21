@@ -1217,6 +1217,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{owner}'
                     }
                 },
+                colOwnerName: 'strName',
                 colOwnerDefault: 'ysnActive'
             },
 
@@ -3801,6 +3802,22 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onOwnerSelect: function(combo, records) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var grid = combo.up('grid');
+        var grdOwner = win.down('#grdOwner');
+        var plugin = grid.getPlugin('cepOwner');
+        var current = plugin.getActiveRecord();
+
+        if (combo.itemId === 'cboOwner'){
+            current.set('strName', records[0].get('strName'));
+        }
+    },
+    
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -3993,6 +4010,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboPatronageDirect": {
                 drilldown: this.onPatronageDirectDrilldown
+            },
+            "#cboOwner": {
+                select: this.onOwnerSelect
             }
         });
 
