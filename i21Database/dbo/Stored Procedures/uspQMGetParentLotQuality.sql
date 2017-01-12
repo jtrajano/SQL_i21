@@ -86,7 +86,9 @@ BEGIN TRY
 			AND S.intProductTypeId = 11
 			AND S.intLocationId =' 
 		+ @strLocationId + '
-		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId'
+		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+		LEFT JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+		LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = LI.intItemOwnerId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN

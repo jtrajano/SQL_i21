@@ -53,6 +53,7 @@ SELECT S.intSampleId
 	,IR.strReceiptNumber
 	,WO.strWorkOrderNo
 	,S.strComment
+	,ito1.intOwnerId AS intEntityId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -72,6 +73,8 @@ LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intProductValueId
 	AND S.intProductTypeId = 6
 LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = S.intProductValueId
 	AND S.intProductTypeId = 11
+LEFT JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = LI.intItemOwnerId
 LEFT JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = S.intLotStatusId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 LEFT JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intSampleUOMId
