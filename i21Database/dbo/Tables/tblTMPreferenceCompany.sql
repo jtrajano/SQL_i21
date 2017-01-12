@@ -25,6 +25,7 @@
     [strDispatchFile] NVARCHAR(5) COLLATE Latin1_General_CI_AS  NOT NULL DEFAULT 'XML', 
     [ysnUseOriginIntegration] BIT NOT NULL DEFAULT 1, 
     [strCSVPath] NVARCHAR(500)  COLLATE Latin1_General_CI_AS NULL DEFAULT '', 
+    [ysnOriginToi21TMData] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 
@@ -266,3 +267,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strCSVPath'
 GO
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if TM data conversion from Origin to i21 was executed.',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnOriginToi21TMData'
