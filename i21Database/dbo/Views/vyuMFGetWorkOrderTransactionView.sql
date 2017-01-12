@@ -71,6 +71,7 @@ SELECT W.intWorkOrderId
 	,WI.dtmProductionDate
 	,1 AS intSequenceNo
 	,'' AS strBatchId
+	,O.intOwnerId 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -91,6 +92,7 @@ JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
+Left JOIN tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 WHERE WI.ysnConsumptionReversed = 0
 
 UNION
@@ -166,6 +168,7 @@ SELECT W.intWorkOrderId
 	,WP.dtmProductionDate
 	,1 AS intSequenceNo
 	,WI.strBatchId
+	,O.intOwnerId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intBatchId = WI.intBatchId
@@ -187,7 +190,7 @@ LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
-
+Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 UNION
 
 SELECT W.intWorkOrderId
@@ -261,6 +264,7 @@ SELECT W.intWorkOrderId
 	,WI.dtmProductionDate
 	,2 AS intSequenceNo
 	,'' AS strBatchId
+	,O.intOwnerId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -281,6 +285,7 @@ JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
+Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 WHERE WI.ysnConsumptionReversed = 1
 
 UNION
@@ -356,6 +361,7 @@ SELECT W.intWorkOrderId
 	,WP.dtmProductionDate
 	,3 AS intSequenceNo
 	,WP.strBatchId 
+	,O.intOwnerId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -376,6 +382,7 @@ LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
+Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 WHERE WP.ysnProductionReversed = 0
 
 UNION
@@ -451,6 +458,7 @@ SELECT W.intWorkOrderId
 	,WP.dtmProductionDate
 	,4 AS intSequenceNo
 	,WP.strBatchId
+	,O.intOwnerId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -471,4 +479,5 @@ LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
+Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 WHERE WP.ysnProductionReversed = 1

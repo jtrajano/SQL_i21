@@ -27,6 +27,7 @@ SELECT W.intWorkOrderId
 	,US.strUserName
 	,MP.intManufacturingProcessId 
 	,MP.strProcessName 
+	,O.intOwnerId
 FROM dbo.tblMFWorkOrder W
 LEFT JOIN dbo.tblMFProductionSummary PS  ON W.intWorkOrderId = PS.intWorkOrderId
 JOIN dbo.tblMFManufacturingProcess MP On MP.intManufacturingProcessId =W.intManufacturingProcessId 
@@ -38,6 +39,7 @@ JOIN dbo.tblSMUserSecurity US ON US.intEntityUserSecurityId = W.intLastModifiedU
 JOIN dbo.tblSMCompanyLocationSubLocation CLS ON CLS.intCompanyLocationSubLocationId = W.intSubLocationId
 JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
+Left JOIN dbo.tblICItemOwner O on O.intItemId=W.intItemId and O.ysnDefault=1
 GROUP BY W.intWorkOrderId
 	,W.strWorkOrderNo
 	,I.intItemId
@@ -61,3 +63,4 @@ GROUP BY W.intWorkOrderId
 	,US.strUserName
 	,MP.intManufacturingProcessId 
 	,MP.strProcessName 
+	,O.intOwnerId
