@@ -6,7 +6,7 @@ Ext.define('Inventory.store.BufferedItem', {
         'Inventory.model.Item'
     ],
 
-    model: 'Inventory.model.Brand',
+    model: 'Inventory.model.Item',
     storeId: 'BufferedItem',
     pageSize: 50,
     batchActions: true,
