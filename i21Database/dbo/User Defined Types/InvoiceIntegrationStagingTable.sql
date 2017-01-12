@@ -47,6 +47,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
 	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer (tblARCustomer.intEntityCustomerId)	
 	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
+	,[intAccountId]							INT												NULL		-- Key Value from tblGLAccount
 	,[intCurrencyId]						INT												NULL		-- Currency Id (tblSMCurrency.intCurrencyID)
 	,[intTermId]							INT												NULL		-- Term Id(If NULL, customer's default will be used)	
 	,[intPeriodsToAccrue]					INT												NULL		-- Default(1) Period to Accrue	
@@ -166,7 +167,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnBlended]							BIT												NULL		-- Indicates if a Finished Good item is already blended
 	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
 	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
-    ,[intConversionAccountId]                INT                                            NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
+    ,[intConversionAccountId]               INT												NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
 
 	,[intStorageScheduleTypeId]				INT												NULL		-- Indicates the Grain Bank of an Item
 	,[intDestinationGradeId]				INT												NULL		-- Key Value from tblCTWeightGrade (Grain Destination - Grade)

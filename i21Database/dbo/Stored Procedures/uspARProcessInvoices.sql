@@ -138,6 +138,7 @@ DECLARE  @Id									INT
 		,@InvoiceId								INT
 		,@EntityCustomerId						INT
 		,@CompanyLocationId						INT
+		,@AccountId								INT
 		,@CurrencyId							INT
 		,@TermId								INT
 		,@Date									DATETIME
@@ -287,6 +288,7 @@ BEGIN
 		,@InvoiceId						= [intInvoiceId]
 		,@EntityCustomerId				= [intEntityCustomerId]
 		,@CompanyLocationId				= [intCompanyLocationId]
+		,@AccountId						= [intAccountId]
 		,@CurrencyId					= [intCurrencyId]
 		,@TermId						= [intTermId]
 		,@Date							= CAST(ISNULL([dtmDate], @DateNow) AS DATE)
@@ -494,6 +496,7 @@ BEGIN
 		EXEC [dbo].[uspARCreateCustomerInvoice]
 			 @EntityCustomerId				= @EntityCustomerId
 			,@CompanyLocationId				= @CompanyLocationId
+			,@AccountId						= @AccountId
 			,@CurrencyId					= @CurrencyId
 			,@TermId						= @TermId
 			,@EntityId						= @EntityId
@@ -1056,6 +1059,7 @@ BEGIN TRY
 			,@InvoiceId						= [intInvoiceId]
 			,@EntityCustomerId				= [intEntityCustomerId]
 			,@CompanyLocationId				= [intCompanyLocationId]
+			,@AccountId						= [intAccountId] 
 			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurreny]([intEntityCustomerId]))
 			,@TermId						= [intTermId]
 			,@Date							= CAST([dtmDate] AS DATE)
@@ -1167,6 +1171,7 @@ BEGIN TRY
 			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling') THEN [tblARInvoice].[strType] ELSE @Type END
 			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
+			--,[intAccountId]				= @AccountId 
 			,[intCurrencyId]			= @CurrencyId
 			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
 			,[intSourceId] 				= @NewSourceId
