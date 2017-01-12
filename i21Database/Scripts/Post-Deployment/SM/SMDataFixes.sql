@@ -222,3 +222,25 @@ GO
 
 	END
 GO
+	PRINT N'UPDATE MODULE VERSION TO 16.2 & below'
+	UPDATE tblARCustomerLicenseInformation SET strVersion = '16.2 & below'
+	WHERE intCustomerLicenseInformationId 
+	IN
+	(
+		SELECT DISTINCT Information.intCustomerLicenseInformationId FROM tblARCustomerLicenseInformation Information
+		INNER JOIN tblARCustomerLicenseModule Module ON Information.intCustomerLicenseInformationId = Module.intCustomerLicenseInformationId
+		WHERE Module.intModuleId IN (112, 92)
+	) 
+	AND strVersion = ''
+
+	PRINT N'UPDATE MODULE VERSION TO Current'
+	UPDATE tblARCustomerLicenseInformation SET strVersion = 'Current'
+	WHERE intCustomerLicenseInformationId 
+	IN
+	(
+		SELECT DISTINCT Information.intCustomerLicenseInformationId FROM tblARCustomerLicenseInformation Information
+		INNER JOIN tblARCustomerLicenseModule Module ON Information.intCustomerLicenseInformationId = Module.intCustomerLicenseInformationId
+		WHERE Module.intModuleId = 15 AND Module.strModuleName = 'Ticket Management'
+	) 
+	AND strVersion = ''
+GO
