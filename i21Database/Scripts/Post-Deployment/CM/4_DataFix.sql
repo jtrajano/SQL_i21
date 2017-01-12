@@ -14,30 +14,16 @@ BEGIN
 	UPDATE tblCMBankAccount set strMICRBankAccountNo = strBankAccountNo WHERE strMICRBankAccountNo IS NULL
 END
 
-
+--This will update the Bank Routing No to encrypted value
+IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) < 20)
+BEGIN
+	UPDATE tblCMBank SET strRTN = strRTN
+END	
 
 --This will update the BankAccount Account No, Routing No, MICR Bank Account No, MICR Routing No to encrypted value
 IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strRTN) < 20)
 BEGIN
 	UPDATE vyuCMBankAccount SET strRTN = strRTN
-END	
-IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strBankAccountNo) < 20)
-BEGIN
-	UPDATE vyuCMBankAccount SET  strBankAccountNo = strBankAccountNo
-END	
-IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strMICRBankAccountNo) < 20)
-BEGIN
-	UPDATE vyuCMBankAccount SET strMICRBankAccountNo = strMICRBankAccountNo 
-END	
-IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strMICRRoutingNo) < 20)
-BEGIN
-	UPDATE vyuCMBankAccount SET strMICRRoutingNo = strMICRRoutingNo
-END	
-
---This will update the Bank Routing No to encrypted value
-IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) < 20)
-BEGIN
-	UPDATE tblCMBank SET strRTN = strRTN
 END	
 
 print('/*******************  END Cash Management Data Fixess *******************/')
