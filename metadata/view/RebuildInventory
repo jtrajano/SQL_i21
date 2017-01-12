@@ -71,13 +71,31 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|uiInterfaceName": "i21-button-toolbar-small",
-                                "itemId": "btnRepost",
+                                "itemId": "btnPost",
                                 "layout|flex": null,
                                 "text": "Post",
                                 "ui": "i21-button-toolbar-small"
                             },
                             "name": "MyButton3",
                             "designerId": "f51c2b69-fe9a-4cf7-9176-b91f81e287b1"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|uiInterfaceName": "i21-button-toolbar-small",
+                                "hidden": true,
+                                "itemId": "btnUnpost",
+                                "layout|flex": null,
+                                "text": "Unpost",
+                                "ui": "i21-button-toolbar-small"
+                            },
+                            "name": "MyButton41",
+                            "designerId": "23f1f5dc-fdb3-41d6-8f76-7cb47af0c09d"
                         },
                         {
                             "type": "Ext.button.Button",

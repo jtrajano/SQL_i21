@@ -48,9 +48,16 @@ Ext.define('Inventory.view.RebuildInventory', {
                     items: [
                         {
                             xtype: 'button',
-                            itemId: 'btnRepost',
+                            itemId: 'btnPost',
                             ui: 'i21-button-toolbar-small',
                             text: 'Post'
+                        },
+                        {
+                            xtype: 'button',
+                            hidden: true,
+                            itemId: 'btnUnpost',
+                            ui: 'i21-button-toolbar-small',
+                            text: 'Unpost'
                         },
                         {
                             xtype: 'button',

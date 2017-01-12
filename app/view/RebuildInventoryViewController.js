@@ -20,18 +20,18 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         binding: {
             cboPostOrder: {
                 store: '{postOrderTypes}',
-                value: '{current.strPostOrder}'
+                value: '{current.strPostOrder}',
+                readOnly: '{isInProgress}'
             },
             cboFiscalMonth: {
                 store: '{fiscalMonths}',
-                value: '{current.strMonth}'
-            },
-            cboFiscalDate: {
-                value: '{current.dtmDate}'
+                value: '{current.strMonth}',
+                readOnly: '{isInProgress}'
             },
             cboItem: {
                 store: '{items}',
                 value: '{current.strItemNo}',
+                readOnly: '{isInProgress}',
                 defaultFilters: [
                     {
                         column: 'strType',
@@ -41,7 +41,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                     }
                 ]
             },
-            btnRepost: {
+            btnPost: {
                 disabled: '{!canPost}'
             }
         }
@@ -122,6 +122,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         var me = this;
         iRely.Msg.showWait('In Progress');
         me.view.context.screenMgr.toolbarMgr.provideFeedBack({ text: 'In Progress', color: 'Red'});
+        vm.setData({ inProgress: true });
         var rebuildObs = me.rebuild(data);
         var verifyObs = me.verifyValuation(data.dtmStartDate);
         rebuildObs
@@ -154,7 +155,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                                     function (res) {
                                         if (res.success) {
                                             me.view.context.screenMgr.toolbarMgr.provideFeedBack({ text: 'Rebuild Complete', color: 'Blue'});
-                                            vm.setData({ rebuildCompleted: true });
+                                            vm.setData({ inProgress: false });
                                             me.downloadDiscrepancies(res.csv.columns, res.csv.data);
                                         } else {
                                             iRely.Functions.showErrorDialog("Error downloading." + res.message);
@@ -170,7 +171,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                     else {
                         iRely.Functions.showInfoDialog("Rebuild Complete.");
                         me.view.context.screenMgr.toolbarMgr.provideFeedBack({ text: 'Rebuild Complete', color: 'Blue'});
-                        vm.setData({ rebuildCompleted: true });
+                        vm.setData({ inProgress: false });
                     }
                 }
                 else
@@ -214,7 +215,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                 select: this.onMonthSelect,
                 beforequery: this.onFiscalMonthBeforeQuery
             },
-            '#btnRepost': {
+            '#btnPost': {
                 click: this.onRepostClick
             }
         });
@@ -250,8 +251,8 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         var me = this;
         if (cfg) {
             var win = cfg.window;
-            var btnRepost = win.down('#btnRepost');
-            btnRepost.setVisible(iRely.Configuration.Security.IsAdmin);
+            var btnPost = win.down('#btnPost');
+            btnPost.setVisible(iRely.Configuration.Security.IsAdmin);
         }
     },
 

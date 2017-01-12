@@ -32,7 +32,7 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
 
     data: {
         selectedItem: null,
-        rebuildCompleted: false
+        inProgress: false
     },
 
     formulas: {
@@ -59,7 +59,10 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
             return 'Inventory will be rebuilt for ' + item + ' from ' + month + '-' + moment(get('current.dtmDate')).format('l') + ' onwards including item(s) that are used for production. Do you want to continue?';
         },
         canPost: function(get) {
-            return (get('current.strPostOrder') && get('current.strMonth')) && !get('rebuildCompleted'); 
+            return (get('current.strPostOrder') && get('current.strMonth')) && !get('inProgress'); 
+        },
+        isInProgress: function(get) {
+            return get('inProgress');
         }
     }
 });
