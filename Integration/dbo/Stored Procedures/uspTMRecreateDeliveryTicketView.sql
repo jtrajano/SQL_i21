@@ -70,7 +70,7 @@ BEGIN
 				,J.dtmCallInDate
 				,strUserCreated = P.strUserName
 				,strSerialNumber = Q.strSerialNumber
-				,strTaxGroup = R.vwlcl_tax_state
+				,strTaxGroup = ISNULL(R.vwlcl_tax_state, ISNULL(S.vwlcl_tax_state,''''))
 				,A.dblYTDGalsThisSeason
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
 				,strSiteDescription = ISNULL(A.strDescription,'''')
@@ -107,6 +107,8 @@ BEGIN
 				AND Q.intCntId = 1
 			LEFT JOIN vwlclmst R
 				ON A.intTaxStateID = R.A4GLIdentity
+			LEFT JOIN vwlclmst S
+				ON C.intTaxId = S.A4GLIdentity
 		')
 	END
 	ELSE
@@ -170,7 +172,7 @@ BEGIN
 				,J.dtmCallInDate
 				,strUserCreated = P.strUserName
 				,strSerialNumber = Q.strSerialNumber
-				,R.strTaxGroup
+				,strTaxGroup = ISNULL(R.strTaxGroup,'''')
 				,A.dblYTDGalsThisSeason
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
 				,strSiteDescription = ISNULL(A.strDescription,'''')

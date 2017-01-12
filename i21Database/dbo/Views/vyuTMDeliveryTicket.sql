@@ -55,7 +55,7 @@ SELECT
 	,J.dtmCallInDate
 	,strUserCreated = P.strUserName
 	,strSerialNumber = Q.strSerialNumber
-	,R.strTaxGroup
+	,strTaxGroup = ISNULL(R.strTaxGroup,'')
 	,A.dblYTDGalsThisSeason
 	,ysnTaxable = ISNULL(A.ysnTaxable,0)
 	,strSiteDescription = ISNULL(A.strDescription,'')
