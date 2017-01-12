@@ -129,7 +129,7 @@ BEGIN TRY
 		AND intStatusId = 13
 		AND ISNULL(W.dtmPlannedDate, W.dtmExpectedDate) BETWEEN @dtmFromDate
 			AND @dtmToDate
-			and IO1.intOwnerId=@intOwnerId 
+			and IO1.intOwnerId=IsNULL(@intOwnerId,IO1.intOwnerId) 
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
