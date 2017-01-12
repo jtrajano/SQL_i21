@@ -101,6 +101,9 @@ namespace iRely.Inventory.Model
         public int? intNewSubLocationId { get; set; }
         public int? intNewStorageLocationId { get; set; }
 
+        public int? intItemOwnerId { get; set; }
+        public int? intNewItemOwnerId { get; set; }
+
         // 1: Sub Location
         private string _subLocation;
         [NotMapped]
@@ -544,6 +547,46 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _ownerName;
+        [NotMapped]
+        public string strOwnerName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_ownerName))
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strOwnerName;
+                    else
+                        return null;
+                else
+                    return _ownerName;
+            }
+            set
+            {
+                _ownerName = value;
+            }
+        }
+
+        private string _newOwnerName;
+        [NotMapped]
+        public string strNewOwnerName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_newOwnerName))
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewOwnerName;
+                    else
+                        return null;
+                else
+                    return _newOwnerName;
+            }
+            set
+            {
+                _newOwnerName = value;
+            }
+        }
+
         public tblICInventoryAdjustment tblICInventoryAdjustment { get; set; }
         public vyuICGetInventoryAdjustmentDetail vyuICGetInventoryAdjustmentDetail { get; set; }
     }
@@ -617,6 +660,8 @@ namespace iRely.Inventory.Model
         public string strNewStorageLocationName { get; set; }
         public decimal? dblLineTotal { get; set; }
         public int? intSort { get; set; }
+        public string strOwnerName { get; set; }
+        public string strNewOwnerName { get; set; }
 
         public tblICInventoryAdjustmentDetail tblICInventoryAdjustmentDetail { get; set; }
     }

@@ -115,6 +115,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intNewSubLocationId).HasColumnName("intNewSubLocationId");
             this.Property(t => t.intNewStorageLocationId).HasColumnName("intNewStorageLocationId");
 
+            this.Property(t => t.intItemOwnerId).HasColumnName("intItemOwnerId");
+            this.Property(t => t.intNewItemOwnerId).HasColumnName("intNewItemOwnerId");
+
             this.HasOptional(p => p.vyuICGetInventoryAdjustmentDetail)
                 .WithRequired(p => p.tblICInventoryAdjustmentDetail);
         }
@@ -196,6 +199,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strNewStorageLocationName).HasColumnName("strNewStorageLocationName");
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.strOwnerName).HasColumnName("strOwnerName");
+            this.Property(t => t.strNewOwnerName).HasColumnName("strNewOwnerName");
         }
     }
 }

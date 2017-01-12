@@ -48,6 +48,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 },{
                     intAdjustmentTypeId : '8',
                     strDescription: 'Lot Move'
+                },{
+                    intAdjustmentTypeId : '9',
+                    strDescription: 'Lot Owner Change'
                 }
             ],
             fields: [
@@ -104,6 +107,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         newStorageLocation: {
             type: 'icbufferedstoragelocation'
         }
+        // ,
+        // newOwner: {
+        //     type: 'icbuffereditemowner'
+        // }        
     },
 
     adjustmentTypes: {
@@ -114,7 +121,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         SplitLot: 5,
         ExpiryDateChange: 6,
         LotMerge: 7,
-        LotMove: 8
+        LotMove: 8,
+        LotOwnerChange: 9
     },
 
     hide: true,
@@ -175,6 +183,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -193,6 +202,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
 
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.QuantityChange:
@@ -213,6 +223,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             switch (intAdjustmentTypeId) {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
 
@@ -234,6 +245,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             switch (intAdjustmentTypeId) {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.QuantityChange:
@@ -257,6 +269,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
 
@@ -275,6 +288,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             switch (intAdjustmentTypeId) {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
 
@@ -298,6 +312,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -319,6 +334,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -339,6 +355,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -359,6 +376,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -379,6 +397,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -402,6 +421,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.SplitLot:
                 case me.adjustmentTypes.LotMerge:
                 case me.adjustmentTypes.LotMove:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 default:
@@ -422,6 +442,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.SplitLot:
                 case me.adjustmentTypes.LotMerge:
                 case me.adjustmentTypes.LotMove:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 default:
@@ -438,6 +459,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
 
@@ -459,6 +481,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
 
@@ -483,6 +506,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.ItemChange:
@@ -503,6 +527,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:                
                     return me.hide;
                     break;
                 case me.adjustmentTypes.ItemChange:
@@ -523,6 +548,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.ExpiryDateChange:
@@ -543,6 +569,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.ExpiryDateChange:
@@ -563,6 +590,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.LotStatusChange:
@@ -583,6 +611,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.LotStatusChange:
@@ -604,6 +633,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     // Todo: Hide Line total for now.
                     return me.hide;
                     break;
@@ -622,6 +652,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -642,6 +673,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -662,6 +694,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.LotOwnerChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.SplitLot:
@@ -694,7 +727,49 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                     return me.readOnly;
                 }
             }
-        }
+        },
+
+        formulaHideColumn_colOwner: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.LotMerge:
+                case me.adjustmentTypes.LotMove:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotStatusChange:
+                    return me.hide;
+                    break;                
+                case me.adjustmentTypes.LotOwnerChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewOwner: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.LotMerge:
+                case me.adjustmentTypes.LotMove:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotStatusChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.LotOwnerChange:
+                default:
+                    return me.show;
+            }
+        }       
 
     }
 

@@ -507,6 +507,26 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             }
                         ]
                     }
+                },
+
+                colOwner: {
+                    dataIndex: 'strOwnerName',
+                    hidden: '{formulaHideColumn_colOwner}'
+                },
+
+                colNewOwner: {
+                    dataIndex: 'strNewOwnerName',
+                    hidden: '{formulaHideColumn_colNewOwner}',
+                    editor: {
+                        //store: '{newOwner}',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryAdjustment.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]                        
+                    }
                 }
             }
         }
@@ -1011,6 +1031,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var ExpiryDateChange = 6;
         var LotMerge = 7;
         var LotMove = 8;
+        var LotOwnerChange = 9;
 
         var data = record.getData();
         var adjustmentTypeId;
@@ -1024,6 +1045,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 case LotMerge:
                 case LotMove:
                 case ItemChange:
+                case LotOwnerChange: 
                     break;
                 default:
                     var msgBox = iRely.Functions;

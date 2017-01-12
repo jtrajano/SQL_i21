@@ -1140,6 +1140,47 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colOwner',
+                                                        width: 120,
+                                                        dataIndex: 'strOwnerName',
+                                                        text: 'Owner Name'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNewOwner',
+                                                        width: 230,
+                                                        dataIndex: 'strNewOwnerName',
+                                                        tdCls: 'blue-text-column',
+                                                        text: 'New Owner Name',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemOwnerId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Owner Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCustomerNumber',
+                                                                    dataType: 'string',
+                                                                    text: 'Customer No',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strName',
+                                                                    dataType: 'string',
+                                                                    text: 'Name',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboNewOwner',
+                                                            displayField: 'strName',
+                                                            valueField: 'strName'
+                                                        }
+                                                    },                                                    
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colLineTotal',
                                                         width: 75,
