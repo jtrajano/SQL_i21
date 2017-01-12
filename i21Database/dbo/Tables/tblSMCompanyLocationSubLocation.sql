@@ -14,6 +14,7 @@
 	[strCity] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strState] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strZipCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intCountryId] INT NULL,
 	[dblLatitude] NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [dblLongitude] NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 

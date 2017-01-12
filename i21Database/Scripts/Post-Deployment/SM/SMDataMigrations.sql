@@ -604,3 +604,17 @@ GO
 GO
 	UPDATE tblSMDocumentMaintenanceMessage set strMessageOld = '<p>' + strMessage + '</p>'
 GO
+	PRINT N'UPDATE COMPANY LOCATION SUB LOCATION COUNTRY'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Update Sub Location Country - Company Location')
+	BEGIN
+		UPDATE SubLocation SET SubLocation.intCountryId = ZipCode.intCountryID
+		FROM tblSMCompanyLocationSubLocation SubLocation
+		INNER JOIN tblSMZipCode ZipCode ON SubLocation.strZipCode = ZipCode.strZipCode
+		WHERE SubLocation.intCountryId IS NULL AND SubLocation.strZipCode <> ''
+		
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Update Sub Location Country - Company Location', 'Update Sub Location Country - Company Location', GETDATE())
+	END
+GO
