@@ -834,6 +834,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intStorageLocationId', record.get('intStorageLocationId'));
             current.set('strSubLocation', record.get('strSubLocationName'));
             current.set('strStorageLocation', record.get('strStorageLocationName'));
+            current.set('strOwnerName', record.get('strOwnerName'));
+            current.set('intItemOwnerId', record.get('intItemOwnerId'));
             current.set('dblLineTotal', 0.00);
 
             // Clear the values for the following fields:
@@ -856,6 +858,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strNewSubLocation', null);
             current.set('intNewStorageLocationId', null);
             current.set('strNewStorageLocation', null);
+            
         }
         else if (combo.itemId === 'cboNewUOM') {
             // Auto-calculate a new cost.
@@ -950,6 +953,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intNewSubLocationId', record.get('intSubLocationId'));
             current.set('strNewSubLocation', record.get('strSubLocationName'));
         }
+        else if (combo.itemId === 'cboNewOwner') {
+            current.set('intNewItemOwnerId', record.get('intItemOwnerId'));
+        }        
     },
 
     getStockQuantity: function (record, win) {
@@ -1562,6 +1568,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#btnViewItem": {
                 click: this.onInventoryClick
+            },
+            "#cboNewOwner": {
+                select: this.onAdjustmentDetailSelect
             }
         });
     }

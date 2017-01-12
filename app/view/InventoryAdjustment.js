@@ -577,6 +577,18 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'string',
                                                                     text: 'Storage Location Name',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strOwnerName',
+                                                                    dataType: 'string',
+                                                                    text: 'Owner Name',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemOwnerId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Owner Id',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboLotNumber',

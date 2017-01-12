@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2fdfa947b70f23c44c0a2a087a87f73882e34b62fb8755b7f4f860d7b95f56a4))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets84307b0ec00bebeb500ff2f5fbc1e4f50c4bff37e9d70fdca6dee777a7713759))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets2fdfa947b70f23c44c0a2a087a87f73882e34b62fb8755b7f4f860d7b95f56a4 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets84307b0ec00bebeb500ff2f5fbc1e4f50c4bff37e9d70fdca6dee777a7713759 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "2fdfa947b70f23c44c0a2a087a87f73882e34b62fb8755b7f4f860d7b95f56a4"; }
+            get { return "84307b0ec00bebeb500ff2f5fbc1e4f50c4bff37e9d70fdca6dee777a7713759"; }
         }
 
         /// <summary>
@@ -13003,7 +13003,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetPostedLot
-        [CodeFirstDatabaseSchema.vyuICGetPostedLot](T1.vyuICGetPostedLot_intLotId, T1.vyuICGetPostedLot_strLotNumber, T1.vyuICGetPostedLot_strLotAlias, T1.vyuICGetPostedLot_intItemId, T1.vyuICGetPostedLot_strItemNo, T1.vyuICGetPostedLot_strDescription, T1.vyuICGetPostedLot_intLocationId, T1.vyuICGetPostedLot_strLocationName, T1.vyuICGetPostedLot_intItemLocationId, T1.vyuICGetPostedLot_intSubLocationId, T1.vyuICGetPostedLot_strSubLocationName, T1.vyuICGetPostedLot_intStorageLocationId, T1.vyuICGetPostedLot_strStorageLocationName, T1.vyuICGetPostedLot_intItemUOMId, T1.vyuICGetPostedLot_dblItemUOMUnitQty, T1.vyuICGetPostedLot_strItemUOM, T1.vyuICGetPostedLot_intWeightUOMId, T1.vyuICGetPostedLot_strWeightUOM, T1.vyuICGetPostedLot_dblQty, T1.vyuICGetPostedLot_dblWeight, T1.vyuICGetPostedLot_dblWeightPerQty, T1.vyuICGetPostedLot_dblCost, T1.vyuICGetPostedLot_dtmExpiryDate, T1.vyuICGetPostedLot_intLotStatusId, T1.vyuICGetPostedLot_strLotStatus, T1.vyuICGetPostedLot_strLotPrimaryStatus)
+        [CodeFirstDatabaseSchema.vyuICGetPostedLot](T1.vyuICGetPostedLot_intLotId, T1.vyuICGetPostedLot_strLotNumber, T1.vyuICGetPostedLot_strLotAlias, T1.vyuICGetPostedLot_intItemId, T1.vyuICGetPostedLot_strItemNo, T1.vyuICGetPostedLot_strDescription, T1.vyuICGetPostedLot_intLocationId, T1.vyuICGetPostedLot_strLocationName, T1.vyuICGetPostedLot_intItemLocationId, T1.vyuICGetPostedLot_intSubLocationId, T1.vyuICGetPostedLot_strSubLocationName, T1.vyuICGetPostedLot_intStorageLocationId, T1.vyuICGetPostedLot_strStorageLocationName, T1.vyuICGetPostedLot_intItemUOMId, T1.vyuICGetPostedLot_dblItemUOMUnitQty, T1.vyuICGetPostedLot_strItemUOM, T1.vyuICGetPostedLot_intWeightUOMId, T1.vyuICGetPostedLot_strWeightUOM, T1.vyuICGetPostedLot_dblQty, T1.vyuICGetPostedLot_dblWeight, T1.vyuICGetPostedLot_dblWeightPerQty, T1.vyuICGetPostedLot_dblCost, T1.vyuICGetPostedLot_dtmExpiryDate, T1.vyuICGetPostedLot_intLotStatusId, T1.vyuICGetPostedLot_strLotStatus, T1.vyuICGetPostedLot_strLotPrimaryStatus, T1.vyuICGetPostedLot_strOwnerName, T1.vyuICGetPostedLot_intItemOwnerId)
     FROM (
         SELECT 
             T.intLotId AS vyuICGetPostedLot_intLotId, 
@@ -13032,6 +13032,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intLotStatusId AS vyuICGetPostedLot_intLotStatusId, 
             T.strLotStatus AS vyuICGetPostedLot_strLotStatus, 
             T.strLotPrimaryStatus AS vyuICGetPostedLot_strLotPrimaryStatus, 
+            T.strOwnerName AS vyuICGetPostedLot_strOwnerName, 
+            T.intItemOwnerId AS vyuICGetPostedLot_intItemOwnerId, 
             True AS _from0
         FROM InventoryEntities.vyuICGetPostedLots AS T
     ) AS T1");
@@ -13045,7 +13047,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetPostedLots
-        [iRely.Inventory.Model.vyuICGetPostedLot](T1.vyuICGetPostedLot_intLotId, T1.vyuICGetPostedLot_strLotNumber, T1.vyuICGetPostedLot_strLotAlias, T1.vyuICGetPostedLot_intItemId, T1.vyuICGetPostedLot_strItemNo, T1.vyuICGetPostedLot_strDescription, T1.vyuICGetPostedLot_intLocationId, T1.vyuICGetPostedLot_strLocationName, T1.vyuICGetPostedLot_intItemLocationId, T1.vyuICGetPostedLot_intSubLocationId, T1.vyuICGetPostedLot_strSubLocationName, T1.vyuICGetPostedLot_intStorageLocationId, T1.vyuICGetPostedLot_strStorageLocationName, T1.vyuICGetPostedLot_intItemUOMId, T1.vyuICGetPostedLot_dblItemUOMUnitQty, T1.vyuICGetPostedLot_strItemUOM, T1.vyuICGetPostedLot_intWeightUOMId, T1.vyuICGetPostedLot_strWeightUOM, T1.vyuICGetPostedLot_dblQty, T1.vyuICGetPostedLot_dblWeight, T1.vyuICGetPostedLot_dblWeightPerQty, T1.vyuICGetPostedLot_dblCost, T1.vyuICGetPostedLot_dtmExpiryDate, T1.vyuICGetPostedLot_intLotStatusId, T1.vyuICGetPostedLot_strLotStatus, T1.vyuICGetPostedLot_strLotPrimaryStatus)
+        [iRely.Inventory.Model.vyuICGetPostedLot](T1.vyuICGetPostedLot_intLotId, T1.vyuICGetPostedLot_strLotNumber, T1.vyuICGetPostedLot_strLotAlias, T1.vyuICGetPostedLot_intItemId, T1.vyuICGetPostedLot_strItemNo, T1.vyuICGetPostedLot_strDescription, T1.vyuICGetPostedLot_intLocationId, T1.vyuICGetPostedLot_strLocationName, T1.vyuICGetPostedLot_intItemLocationId, T1.vyuICGetPostedLot_intSubLocationId, T1.vyuICGetPostedLot_strSubLocationName, T1.vyuICGetPostedLot_intStorageLocationId, T1.vyuICGetPostedLot_strStorageLocationName, T1.vyuICGetPostedLot_intItemUOMId, T1.vyuICGetPostedLot_dblItemUOMUnitQty, T1.vyuICGetPostedLot_strItemUOM, T1.vyuICGetPostedLot_intWeightUOMId, T1.vyuICGetPostedLot_strWeightUOM, T1.vyuICGetPostedLot_dblQty, T1.vyuICGetPostedLot_dblWeight, T1.vyuICGetPostedLot_dblWeightPerQty, T1.vyuICGetPostedLot_dblCost, T1.vyuICGetPostedLot_dtmExpiryDate, T1.vyuICGetPostedLot_intLotStatusId, T1.vyuICGetPostedLot_strLotStatus, T1.vyuICGetPostedLot_strLotPrimaryStatus, T1.vyuICGetPostedLot_strOwnerName, T1.vyuICGetPostedLot_intItemOwnerId)
     FROM (
         SELECT 
             T.intLotId AS vyuICGetPostedLot_intLotId, 
@@ -13074,6 +13076,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intLotStatusId AS vyuICGetPostedLot_intLotStatusId, 
             T.strLotStatus AS vyuICGetPostedLot_strLotStatus, 
             T.strLotPrimaryStatus AS vyuICGetPostedLot_strLotPrimaryStatus, 
+            T.strOwnerName AS vyuICGetPostedLot_strOwnerName, 
+            T.intItemOwnerId AS vyuICGetPostedLot_intItemOwnerId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetPostedLot AS T
     ) AS T1");
