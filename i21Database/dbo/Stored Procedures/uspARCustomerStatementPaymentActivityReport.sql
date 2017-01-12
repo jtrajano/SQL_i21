@@ -294,65 +294,74 @@ WHEN NOT MATCHED BY TARGET THEN
 INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
  
-SELECT @intMaxInvoiceId= MAX(intInvoiceId) FROM tblARInvoice
- 
+--- Without CF Report
+SELECT 
+	 [STATEMENTREPORT].[strReferenceNumber]		
+    ,[STATEMENTREPORT].[intEntityCustomerId]		
+    ,[STATEMENTREPORT].[strCustomerNumber]		
+    ,[STATEMENTREPORT].[strCustomerName]			
+    ,[STATEMENTREPORT].[dblCreditLimit]			
+    ,[STATEMENTREPORT].[intInvoiceId]				
+    ,[STATEMENTREPORT].[strInvoiceNumber]			
+    ,[STATEMENTREPORT].[strBOLNumber]				
+    ,[STATEMENTREPORT].[dtmDate]					
+    ,[STATEMENTREPORT].[dtmDueDate]				
+    ,[STATEMENTREPORT].[dtmShipDate]				
+    ,[STATEMENTREPORT].[dblInvoiceTotal]			
+    ,[STATEMENTREPORT].[intPaymentId]				
+    ,[STATEMENTREPORT].[strRecordNumber]			
+    ,[STATEMENTREPORT].[strPaymentInfo]			
+    ,[STATEMENTREPORT].[dtmDatePaid]				
+    ,[STATEMENTREPORT].[dblPayment]				
+    ,[STATEMENTREPORT].[dblBalance]				
+    ,[STATEMENTREPORT].[strSalespersonName]		    
+    ,[STATEMENTREPORT].[strFullAddress]			
+    ,[STATEMENTREPORT].[strCompanyName]			
+    ,[STATEMENTREPORT].[strCompanyAddress]			
+    ,dblCreditAvailable							= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+    ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
+    ,dbl10Days									= ISNULL(AGINGREPORT.dbl10Days, 0)
+    ,dbl30Days									= ISNULL(AGINGREPORT.dbl30Days, 0)
+    ,dbl60Days									= ISNULL(AGINGREPORT.dbl60Days, 0)
+    ,dbl90Days									= ISNULL(AGINGREPORT.dbl90Days, 0)
+    ,dbl91Days									= ISNULL(AGINGREPORT.dbl91Days, 0)
+    ,dblCredits									= ISNULL(AGINGREPORT.dblCredits, 0)
+	,dblPrepayments								= ISNULL(AGINGREPORT.dblPrepayments, 0)
+    ,dtmAsOfDate								= @dtmDateTo
+    ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
+FROM 
+	@temp_statement_table AS STATEMENTREPORT
+INNER JOIN (SELECT intEntityCustomerId
+					,dblTotalAR
+					,dbl0Days
+					,dbl10Days
+					,dbl30Days
+					,dbl60Days
+					,dbl90Days
+					,dbl91Days
+					,dblCredits
+					,dblPrepayments
+			FROM 
+				@temp_aging_table) AS AGINGREPORT ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+INNER JOIN (SELECT intEntityCustomerId			
+			FROM 
+				tblARCustomer
+			WHERE 
+				strStatementFormat = 'Payment Activity') CUSTOMER ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+WHERE 
+	AGINGREPORT.dblTotalAR <> 0
+	AND strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 
+UNION ALL
 
- DECLARE @inInvoiceIdUpdated INT =0 
- 
- 
-
-
---WHILE @cnt < 10
---BEGIN
---   PRINT 'Inside simulated FOR LOOP on TechOnTheNet.com';
---   SET @cnt = @cnt + 1;
---END;
-
- 
- INSERT INTO @temp_cfinvoices_statement
- (
- 	 [strReferenceNumber]
-	,[intEntityCustomerId]		
-	,[strCustomerNumber]		
-	,[strCustomerName]			
-	,[dblCreditLimit]				
-	,[intInvoiceId]									 
-	,[strInvoiceNumber]								 
-	,[strBOLNumber]				
-	,[dtmDate]										 				
-	,[dtmDueDate]									 
-	,[dtmShipDate]									
-	,[dblInvoiceTotal]								 
-	,[intPaymentId]				
-	,[strRecordNumber]			
-	,[strPaymentInfo]			
-	,[dtmDatePaid]				
-	,[dblPayment]				
-	,[dblBalance]									 
-	,[strSalespersonName]		
-	,[strFullAddress]			
-	,[strCompanyName]			
-	,[strCompanyAddress]		
-    ,[dblCreditAvailable]						
-    ,[dbl0Days]									 
-    ,[dbl10Days]										 
-    ,[dbl30Days]									 
-    ,[dbl60Days]										 
-    ,[dbl90Days]									 
-    ,[dbl91Days]									 
-    ,[dblCredits]										 
-	,[dblPrepayments]
-    ,[dtmAsOfDate]									 
-    ,[blbLogo]										 
- )
- SELECT 	 
+--- With CF Report
+SELECT 	 
 	 [strReferenceNumber]							= CFReportTable.strInvoiceReportNumber
 	,[STATEMENTREPORT].[intEntityCustomerId]		
 	,[STATEMENTREPORT].[strCustomerNumber]		
 	,[STATEMENTREPORT].[strCustomerName]			
 	,[STATEMENTREPORT].[dblCreditLimit]				
-	,[intInvoiceId]									=  ROW_NUMBER() OVER (ORDER BY CFReportTable.strInvoiceReportNumber)  
+	,[intInvoiceId]									= RIGHT(CFReportTable.strInvoiceReportNumber, (CHARINDEX('-',REVERSE(CFReportTable.strInvoiceReportNumber),0))-1)  
 	,[strInvoiceNumber]								= CFReportTable.strInvoiceReportNumber
 	,[STATEMENTREPORT].[strBOLNumber]				
 	,[dtmDate]										= CFReportTable.dtmInvoiceDate				
@@ -427,68 +436,3 @@ GROUP BY CFReportTable.strInvoiceReportNumber
 		,STATEMENTREPORT.strCompanyName
 		,STATEMENTREPORT.strCompanyAddress
 		,AGINGREPORT.dblTotalAR  
- 
---- Without CF Report
-SELECT 
-	 [STATEMENTREPORT].[strReferenceNumber]		
-    ,[STATEMENTREPORT].[intEntityCustomerId]		
-    ,[STATEMENTREPORT].[strCustomerNumber]		
-    ,[STATEMENTREPORT].[strCustomerName]			
-    ,[STATEMENTREPORT].[dblCreditLimit]			
-    ,[STATEMENTREPORT].[intInvoiceId]				
-    ,[STATEMENTREPORT].[strInvoiceNumber]			
-    ,[STATEMENTREPORT].[strBOLNumber]				
-    ,[STATEMENTREPORT].[dtmDate]					
-    ,[STATEMENTREPORT].[dtmDueDate]				
-    ,[STATEMENTREPORT].[dtmShipDate]				
-    ,[STATEMENTREPORT].[dblInvoiceTotal]			
-    ,[STATEMENTREPORT].[intPaymentId]				
-    ,[STATEMENTREPORT].[strRecordNumber]			
-    ,[STATEMENTREPORT].[strPaymentInfo]			
-    ,[STATEMENTREPORT].[dtmDatePaid]				
-    ,[STATEMENTREPORT].[dblPayment]				
-    ,[STATEMENTREPORT].[dblBalance]				
-    ,[STATEMENTREPORT].[strSalespersonName]		    
-    ,[STATEMENTREPORT].[strFullAddress]			
-    ,[STATEMENTREPORT].[strCompanyName]			
-    ,[STATEMENTREPORT].[strCompanyAddress]			
-    ,dblCreditAvailable							= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-    ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
-    ,dbl10Days									= ISNULL(AGINGREPORT.dbl10Days, 0)
-    ,dbl30Days									= ISNULL(AGINGREPORT.dbl30Days, 0)
-    ,dbl60Days									= ISNULL(AGINGREPORT.dbl60Days, 0)
-    ,dbl90Days									= ISNULL(AGINGREPORT.dbl90Days, 0)
-    ,dbl91Days									= ISNULL(AGINGREPORT.dbl91Days, 0)
-    ,dblCredits									= ISNULL(AGINGREPORT.dblCredits, 0)
-	,dblPrepayments								= ISNULL(AGINGREPORT.dblPrepayments, 0)
-    ,dtmAsOfDate								= @dtmDateTo
-    ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
-FROM 
-	@temp_statement_table AS STATEMENTREPORT
-INNER JOIN (SELECT intEntityCustomerId
-					,dblTotalAR
-					,dbl0Days
-					,dbl10Days
-					,dbl30Days
-					,dbl60Days
-					,dbl90Days
-					,dbl91Days
-					,dblCredits
-					,dblPrepayments
-			FROM 
-				@temp_aging_table) AS AGINGREPORT ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN (SELECT intEntityCustomerId			
-			FROM 
-				tblARCustomer
-			WHERE 
-				strStatementFormat = 'Payment Activity') CUSTOMER ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-WHERE 
-	AGINGREPORT.dblTotalAR <> 0
-	AND strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
-
-UNION ALL
-
-SELECT 	 
-	*
-FROM 
-	@temp_cfinvoices_statement
