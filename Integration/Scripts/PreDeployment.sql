@@ -182,6 +182,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateLeaseCodeView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateCustomerContractSubReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql"
+:r "..\dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP"
 
 
 
