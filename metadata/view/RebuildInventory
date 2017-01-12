@@ -303,7 +303,7 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "designer|createAlias": "ipagingstatusbar",
+                        "designer|createAlias": "istatusbar",
                         "dock": "bottom",
                         "layout|region": "east",
                         "width": 150

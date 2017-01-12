@@ -68,7 +68,7 @@ Ext.define('Inventory.view.RebuildInventory', {
                     ]
                 },
                 {
-                    xtype: 'ipagingstatusbar',
+                    xtype: 'istatusbar',
                     width: 150,
                     region: 'east',
                     dock: 'bottom'
