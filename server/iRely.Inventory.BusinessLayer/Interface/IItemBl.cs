@@ -28,5 +28,6 @@ namespace iRely.Inventory.BusinessLayer
         SaveResult ConvertItemToNewStockUnit(int ItemId, int ItemUOMId);
         ItemBl.DuplicateItemSaveResult DuplicateItem(int intItemId);
         Task<object> GetItemUOMsByType(int? intItemId, string strUnitType);
+        Task<SearchResult> GetItemOwner(GetParameter param);
     }
 }

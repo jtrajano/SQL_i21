@@ -12,13 +12,11 @@ Ext.define('Inventory.model.AdjustItemOwner', {
 
     fields: [
         { name: 'intItemOwnerId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intOwnerId', type: 'int', allowNull: true },
-        { name: 'ysnDefault', type: 'boolean'},
-        { name: 'intSort', type: 'int'},
-        { name: 'strCustomerNumber', type: 'string'},
-        { name: 'strName', type: 'string'}
-    ],
-
-    validators: []    
+        { name: 'ysnDefault', type: 'boolean', allowNull: true },
+        { name: 'intSort', type: 'int', allowNull: true },
+        { name: 'strCustomerNumber', type: 'string', allowNull: true },
+        { name: 'strName', type: 'string', allowNull: true }
+    ]
 });

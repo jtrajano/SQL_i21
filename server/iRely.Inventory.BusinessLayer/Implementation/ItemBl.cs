@@ -869,5 +869,24 @@ namespace iRely.Inventory.BusinessLayer
             public string strUnitType { get; set; }
             public string strSymbol { get; set; }
         }
+
+        /// <summary>
+        /// Return the owners of an item. 
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetItemOwner(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemOwner>()
+                .Filter(param, true);
+
+            var data = await query.ExecuteProjection(param, "intItemOwnerId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

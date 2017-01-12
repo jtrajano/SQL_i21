@@ -247,6 +247,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeTaxMap());
 
             modelBuilder.Configurations.Add(new vyuICGetChargeTaxDetailsMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemOwnerMap());
         }
     }
 }

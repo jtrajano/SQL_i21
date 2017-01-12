@@ -866,4 +866,14 @@ namespace iRely.Inventory.Model
         //Value from tblSTSubcategoryRegProd
         public string strRegProdCode { get; set; }
     }
+
+    public class vyuICGetItemOwner
+    {
+        public int intItemOwnerId { get; set; }
+        public int intItemId { get; set; }
+        public int intOwnerId { get; set; }
+        public string strName { get; set; }
+        public string strCustomerNumber { get; set; }
+        public string strItemNo { get; set;  }
+    }
 }

@@ -186,5 +186,12 @@ namespace iRely.Inventory.WebApi
             });
         }
 
+        [HttpGet]
+        [ActionName("GetItemOwner")]
+        public async Task<HttpResponseMessage> GetItemOwner(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemOwner(param));
+        }
+
     }
 }

@@ -1179,7 +1179,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                             displayField: 'strName',
                                                             valueField: 'strName'
                                                         }
-                                                    },                                                    
+                                                    },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colLineTotal',

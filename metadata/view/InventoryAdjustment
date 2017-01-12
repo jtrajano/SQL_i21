@@ -655,7 +655,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter135",
+                                                    "name": "filter134",
                                                     "designerId": "be0a06de-99ab-416d-ae5c-3a1068a87c05",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2213,6 +2213,89 @@
                                                         "columns": "array"
                                                     },
                                                     "designerId": "2f3be45d-5be9-4c3e-8ebb-c36fc857f57b",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strOwnerName",
+                                                "itemId": "colOwner",
+                                                "text": "Owner Name",
+                                                "width": 120
+                                            },
+                                            "name": "MyColumn65",
+                                            "designerId": "1b72ca1a-f956-4707-9297-2be834c74092"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strNewOwnerName",
+                                                "itemId": "colNewOwner",
+                                                "tdCls": "blue-text-column",
+                                                "text": "New Owner Name",
+                                                "width": 230
+                                            },
+                                            "name": "MyColumn66",
+                                            "designerId": "f723788f-8b9b-438b-b760-9459e7a97142",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intItemOwnerId',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Item Owner Id',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strCustomerNumber',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Customer No',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strName',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Name',",
+                                                            "        flex: 1",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strName",
+                                                        "itemId": "cboNewOwner",
+                                                        "valueField": "strName"
+                                                    },
+                                                    "name": "MyComboBox82",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "ac71d926-a504-4c86-9394-ecbf90992d2e",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",

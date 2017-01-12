@@ -518,7 +518,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     dataIndex: 'strNewOwnerName',
                     hidden: '{formulaHideColumn_colNewOwner}',
                     editor: {
-                        //store: '{newOwner}',
+                        store: '{newOwner}',
                         defaultFilters: [
                             {
                                 column: 'intItemId',

@@ -861,4 +861,22 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICGetItemOwnerMap : EntityTypeConfiguration<vyuICGetItemOwner>
+    {
+        public vyuICGetItemOwnerMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intItemOwnerId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemOwner");
+            this.Property(t => t.intItemOwnerId).HasColumnName("intItemOwnerId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intOwnerId).HasColumnName("intOwnerId");
+            this.Property(t => t.strName).HasColumnName("strName");
+            this.Property(t => t.strCustomerNumber).HasColumnName("strCustomerNumber");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+        }
+    }
+
 }

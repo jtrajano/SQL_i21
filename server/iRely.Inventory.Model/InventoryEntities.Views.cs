@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsc763fabf5ce9df667a7b9f780b59d25e5be13cb3d643ee606ef142a1a6acc448))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2fdfa947b70f23c44c0a2a087a87f73882e34b62fb8755b7f4f860d7b95f56a4))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsc763fabf5ce9df667a7b9f780b59d25e5be13cb3d643ee606ef142a1a6acc448 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets2fdfa947b70f23c44c0a2a087a87f73882e34b62fb8755b7f4f860d7b95f56a4 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "c763fabf5ce9df667a7b9f780b59d25e5be13cb3d643ee606ef142a1a6acc448"; }
+            get { return "2fdfa947b70f23c44c0a2a087a87f73882e34b62fb8755b7f4f860d7b95f56a4"; }
         }
 
         /// <summary>
@@ -1885,6 +1885,16 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.vyuICGetChargeTaxDetails")
             {
                 return GetView367();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetItemOwner")
+            {
+                return GetView368();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetItemOwners")
+            {
+                return GetView369();
             }
 
             return null;
@@ -14910,6 +14920,50 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblTax AS vyuICGetChargeTaxDetails_dblTax, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetChargeTaxDetails AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetItemOwner.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView368()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetItemOwner
+        [CodeFirstDatabaseSchema.vyuICGetItemOwner](T1.vyuICGetItemOwner_intItemOwnerId, T1.vyuICGetItemOwner_intItemId, T1.vyuICGetItemOwner_intOwnerId, T1.vyuICGetItemOwner_strName, T1.vyuICGetItemOwner_strCustomerNumber, T1.vyuICGetItemOwner_strItemNo)
+    FROM (
+        SELECT 
+            T.intItemOwnerId AS vyuICGetItemOwner_intItemOwnerId, 
+            T.intItemId AS vyuICGetItemOwner_intItemId, 
+            T.intOwnerId AS vyuICGetItemOwner_intOwnerId, 
+            T.strName AS vyuICGetItemOwner_strName, 
+            T.strCustomerNumber AS vyuICGetItemOwner_strCustomerNumber, 
+            T.strItemNo AS vyuICGetItemOwner_strItemNo, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetItemOwners AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetItemOwners.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView369()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetItemOwners
+        [iRely.Inventory.Model.vyuICGetItemOwner](T1.vyuICGetItemOwner_intItemOwnerId, T1.vyuICGetItemOwner_intItemId, T1.vyuICGetItemOwner_intOwnerId, T1.vyuICGetItemOwner_strName, T1.vyuICGetItemOwner_strCustomerNumber, T1.vyuICGetItemOwner_strItemNo)
+    FROM (
+        SELECT 
+            T.intItemOwnerId AS vyuICGetItemOwner_intItemOwnerId, 
+            T.intItemId AS vyuICGetItemOwner_intItemId, 
+            T.intOwnerId AS vyuICGetItemOwner_intOwnerId, 
+            T.strName AS vyuICGetItemOwner_strName, 
+            T.strCustomerNumber AS vyuICGetItemOwner_strCustomerNumber, 
+            T.strItemNo AS vyuICGetItemOwner_strItemNo, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetItemOwner AS T
     ) AS T1");
         }
     }
