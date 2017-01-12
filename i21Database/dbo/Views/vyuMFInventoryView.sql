@@ -106,7 +106,7 @@ LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLo
 LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
 LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
 LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
-LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId and ito.ysnActive =1
+LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId and ito.ysnDefault =1
 LEFT JOIN tblEMEntity e1 ON e1.intEntityId = ito.intOwnerId
 LEFT JOIN tblEMEntity e ON e.intEntityId = l.intEntityVendorId
 LEFT JOIN vyuMFStockReservation S ON S.intLotId = l.intLotId

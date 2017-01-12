@@ -15,7 +15,7 @@ Type the overview for the table here.
 		[intItemOwnerId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
 		[intOwnerId] INT NOT NULL, 
-		[ysnActive] BIT NULL DEFAULT ((0)), 
+		[ysnDefault] BIT NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemOwner] PRIMARY KEY ([intItemOwnerId]), 
@@ -58,7 +58,7 @@ Type the overview for the table here.
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemOwner',
 		@level2type = N'COLUMN',
-		@level2name = N'ysnActive'
+		@level2name = 'ysnDefault'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sort Field',

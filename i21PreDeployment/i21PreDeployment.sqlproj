@@ -289,4 +289,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\Clean_Cost_Bucket_Indexes.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\Rename_tblICItemOwner_Fields.sql" />
+  </ItemGroup>
 </Project>

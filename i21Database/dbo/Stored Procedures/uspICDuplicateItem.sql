@@ -671,11 +671,11 @@ BEGIN
 	--------------------------------
 	INSERT INTO tblICItemOwner(intItemId,
 		intOwnerId,
-		ysnActive,
+		ysnDefault,
 		intSort)
 	SELECT @NewItemId,
 		intOwnerId,
-		ysnActive,
+		ysnDefault,
 		intSort
 	FROM tblICItemOwner
 	WHERE intItemId = @ItemId

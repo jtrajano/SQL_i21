@@ -243,4 +243,5 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[strTransactionId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
 	,[strSourceTransactionId]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
 	,[intSourceTransactionTypeId] INT NULL 
+	,[intOwnerId]				INT NULL 
 )

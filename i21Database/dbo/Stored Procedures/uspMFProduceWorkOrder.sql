@@ -290,7 +290,7 @@ BEGIN
 		,@intOwnerId = intOwnerId
 	FROM tblICItemOwner
 	WHERE intItemId = @intItemId
-		AND ysnActive = 1
+		AND ysnDefault = 1
 
 	IF @intItemOwnerId IS NOT NULL
 	BEGIN

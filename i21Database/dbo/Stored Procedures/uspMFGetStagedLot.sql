@@ -59,7 +59,7 @@ BEGIN
 		AND L.dblQty > 0
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 	LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemId = I.intItemId
-		AND IO1.ysnActive = 1
+		AND IO1.ysnDefault = 1
 	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId

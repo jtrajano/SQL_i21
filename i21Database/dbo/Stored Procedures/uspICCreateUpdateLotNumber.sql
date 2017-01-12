@@ -91,6 +91,10 @@ DECLARE
 	,@strTransactionId			AS NVARCHAR(50) 
 	,@strSourceTransactionId	AS NVARCHAR(50) 
 	,@intSourceTransactionTypeId AS INT 
+	,@intOwnerId				AS INT 	
+
+DECLARE @strName AS NVARCHAR(200)
+		,@intItemOwnerId AS INT 
 
 DECLARE @OwnerShipType_Own AS INT = 1
 
@@ -164,6 +168,7 @@ SELECT  intId
 		,strTransactionId
 		,strSourceTransactionId
 		,intSourceTransactionTypeId
+		,intOwnerId 
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -210,6 +215,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strTransactionId
 		,@strSourceTransactionId
 		,@intSourceTransactionTypeId
+		,@intOwnerId 
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -303,6 +309,37 @@ BEGIN
 	WHERE	intItemId = @intItemId
 	SET @intLotStatusId_ItemLotTable = COALESCE(@intLotStatusId, @intLotStatusId_ItemLotTable, @lotStatusFromItemSetup, @LotStatus_Active)
 
+	-- Initialize the Item-Owner Id.
+	SET @intItemOwnerId = NULL  
+	SELECT	@intItemOwnerId = o.intItemOwnerId
+	FROM	tblICItemOwner o CROSS APPLY (
+				SELECT	TOP 1 
+						intItemOwnerId 
+				FROM	tblICItemOwner defaultOwner
+				WHERE	defaultOwner.ysnDefault = 1
+						AND defaultOwner.intOwnerId = ISNULL(@intOwnerId, defaultOwner.intOwnerId) 
+			) defaultOwner  
+	WHERE	o.intItemId = @intItemId
+			AND o.intItemOwnerId = defaultOwner.intItemOwnerId
+
+	-- Validate Owner Id 
+	IF (@intOwnerId IS NOT NULL) AND (@intItemOwnerId IS NULL)
+	BEGIN 
+		SET @strItemNo = NULL 
+		SELECT	@strItemNo = strItemNo
+		FROM	dbo.tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+		
+		SET @strName = NULL 
+		SELECT	@strName = e.strName
+		FROM	tblEMEntity e
+		WHERE	e.intEntityId = @intOwnerId
+
+		--'Invalid Owner. {Owner Name} is not configured as an Owner for {Item Name}. Please check the Item setup.'
+		RAISERROR(80105, 11, 1, @strName, @strItemNo);
+		RETURN -11;
+	END 
+
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  
 		SET @intInsertedLotId = NULL 
@@ -370,6 +407,7 @@ BEGIN
 						,dblWeight = @dblWeight
 						,dblWeightPerQty = @dblWeightPerQty
 						,intSplitFromLotId = @intSplitFromLotId
+						,intItemOwnerId = @intItemOwnerId
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -467,6 +505,7 @@ BEGIN
 											END
 				,intSubLocationId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intSubLocationId ELSE LotMaster.intSubLocationId END
 				,intStorageLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
+				,intItemOwnerId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemOwnerId ELSE LotMaster.intItemOwnerId END
 
 				-- The following fields are always updated if it has the same: 
 				-- 1. Quantity UOM
@@ -554,7 +593,8 @@ BEGIN
 													) THEN 
 														LotMaster.intLotId 
 													ELSE 0 
-											END			
+											END	
+
 
 
 		-- If none found, insert a new lot record. 
@@ -599,6 +639,7 @@ BEGIN
 				,strTransactionId
 				,strSourceTransactionId
 				,intSourceTransactionTypeId
+				,intItemOwnerId
 
 			) VALUES (
 				@intItemId
@@ -645,6 +686,7 @@ BEGIN
 				,@strTransactionId
 				,@strSourceTransactionId
 				,@intSourceTransactionTypeId
+				,@intItemOwnerId 
 			)
 		;
 	
@@ -816,6 +858,7 @@ BEGIN
 		,@strTransactionId
 		,@strSourceTransactionId
 		,@intSourceTransactionTypeId
+		,@intOwnerId 
 	;
 END
 

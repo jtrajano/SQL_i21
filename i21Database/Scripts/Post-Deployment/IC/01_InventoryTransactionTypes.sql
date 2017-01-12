@@ -178,6 +178,10 @@ USING	(
 		SELECT	id = 42
 				,name = 'Inventory Return'
 				,form = NULL 
+		UNION ALL 
+		SELECT	id = 43
+				,name = 'Inventory Adjustment - Ownership Change'
+				,form = 'Inventory Adjustment'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
