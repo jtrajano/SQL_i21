@@ -10,7 +10,11 @@ RETURNS @tblArray TABLE
     )
 AS
 BEGIN
-
+	/*
+		RecordKey is being used by a view in Entity [ vyuEMETExportCustomerComment ]
+		Any changes on this return table please inform the Entity Developer
+		Thanks 2017.01.12
+	*/
     -- Local Variable Declarations
     -- ---------------------------
     DECLARE @Index      smallint,
