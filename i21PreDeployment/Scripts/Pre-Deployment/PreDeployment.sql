@@ -101,6 +101,7 @@
 :r .\11_IC\Rename_IC_Database_Objects.sql 
 :r .\11_IC\Remove_Unused_Shipment_Charges.sql
 :r .\11_IC\Clean_Cost_Bucket_Indexes.sql
+:r .\11_IC\Update_M2M_Computation_Setup.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql

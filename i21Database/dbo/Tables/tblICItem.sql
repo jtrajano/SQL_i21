@@ -156,7 +156,7 @@ Type the overview for the table here.
         [intLotStatusId] INT NULL, 
 		[strRequired] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnBasisContract] BIT NULL, 
-		[intM2MComputationId] INT NULL,
+		[intM2MComputationId] INT NULL DEFAULT ((1)),
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
