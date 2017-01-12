@@ -2,13 +2,33 @@
 	PRINT N'Begin splitting CRM and Help Desk data..'
 GO
 
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDSalesPipeStatus'))
+BEGIN
+
+	IF not EXISTS(SELECT * FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblHDSalesPipeStatus' AND COLUMN_NAME = 'strProjectStatus')
+	begin
+		exec('ALTER TABLE tblHDSalesPipeStatus ADD strProjectStatus VARCHAR(255) COLLATE Latin1_General_CI_AS null;')
+	end
+
+end
+
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDProject'))
+BEGIN
+
+	IF not EXISTS(SELECT * FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblHDProject' AND COLUMN_NAME = 'strProjectStatus')
+	begin
+		exec('ALTER TABLE tblHDProject ADD strProjectStatus VARCHAR(255) COLLATE Latin1_General_CI_AS null;')
+	end
+
+end
+
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicketPriority'))
 BEGIN
 
 	PRINT N'Begin splitting Priority...'
 
 	SET IDENTITY_INSERT tblCRMPriority ON
-	insert into tblCRMPriority (
+	exec('insert into tblCRMPriority (
 		intPriorityId
 		,strPriority
 		,strDescription
@@ -42,9 +62,9 @@ BEGIN
 			,ysnUpdated
 			,intConcurrencyId
 		from tblHDTicketPriority
-		where intTicketPriorityId in (select distinct intTicketPriorityId from tblHDTicket where strType = 'CRM' union all select distinct intTicketPriorityId from tblHDTicketPriority where ysnActivity = 1 or ysnOpportunity = 1)
+		where intTicketPriorityId in (select distinct intTicketPriorityId from tblHDTicket where strType = ''CRM'' union all select distinct intTicketPriorityId from tblHDTicketPriority where ysnActivity = 1 or ysnOpportunity = 1)
 			and intTicketPriorityId not in (select intPriorityId from tblCRMPriority)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMPriority OFF
 END
 
@@ -54,7 +74,7 @@ BEGIN
 	PRINT N'Begin splitting Sales Pipe Status...'
 
 	SET IDENTITY_INSERT tblCRMSalesPipeStatus ON
-	insert into tblCRMSalesPipeStatus (
+	exec('insert into tblCRMSalesPipeStatus (
 		intSalesPipeStatusId
 		,strStatus
 		,strDescription
@@ -75,7 +95,7 @@ BEGIN
 			,intConcurrencyId
 		from tblHDSalesPipeStatus
 		where intSalesPipeStatusId not in (select intSalesPipeStatusId from tblCRMSalesPipeStatus)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMSalesPipeStatus OFF
 
 	--update tblCRMSalesPipeStatus set tblCRMSalesPipeStatus.intStatusId = (select tblCRMStatus.intStatusId from tblCRMStatus where tblCRMStatus.strStatus = tblCRMSalesPipeStatus.strProjectStatus)
@@ -88,7 +108,7 @@ BEGIN
 	PRINT N'Begin splitting Type...'
 
 	SET IDENTITY_INSERT tblCRMType ON
-	insert into tblCRMType (
+	exec('insert into tblCRMType (
 		intTypeId
 		,strType
 		,strDescription
@@ -114,13 +134,13 @@ BEGIN
 			,intSort
 			,intConcurrencyId
 		from tblHDTicketType
-		where intTicketTypeId in (select distinct intTicketTypeId from tblHDTicket where strType = 'CRM' union all select distinct intTicketTypeId from tblHDProject where strType = 'CRM' union all select distinct intTicketTypeId from tblHDTicketType where ysnActivity = 1 or ysnOpportunity = 1 or ysnCampaign = 1)
+		where intTicketTypeId in (select distinct intTicketTypeId from tblHDTicket where strType = ''CRM'' union all select distinct intTicketTypeId from tblHDProject where strType = ''CRM'' union all select distinct intTicketTypeId from tblHDTicketType where ysnActivity = 1 or ysnOpportunity = 1 or ysnCampaign = 1)
 			and intTicketTypeId not in (select intTypeId from tblCRMType)
-	)
+	)');
 
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMCampaign'))
 	begin
-		insert into tblCRMType (
+		exec('insert into tblCRMType (
 		intTypeId
 		,strType
 		,strDescription
@@ -148,12 +168,12 @@ BEGIN
 		from tblHDTicketType
 		where intTicketTypeId in (select distinct intTypeId from tblCRMCampaign union all select distinct intTicketTypeId from tblHDTicketType where ysnActivity = 1 or ysnOpportunity = 1 or ysnCampaign = 1)
 			and intTicketTypeId not in (select intTypeId from tblCRMType)
-	)
+	)');
 	end
 
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityCampaign'))
 	begin
-		insert into tblCRMType (
+		exec('insert into tblCRMType (
 		intTypeId
 		,strType
 		,strDescription
@@ -181,7 +201,7 @@ BEGIN
 		from tblHDTicketType
 		where intTicketTypeId in (select distinct intTicketTypeId from tblHDOpportunityCampaign union all select distinct intTicketTypeId from tblHDTicketType where ysnActivity = 1 or ysnOpportunity = 1 or ysnCampaign = 1)
 			and intTicketTypeId not in (select intTypeId from tblCRMType)
-	)
+	)');
 	end
 
 	SET IDENTITY_INSERT tblCRMType OFF
@@ -194,7 +214,7 @@ BEGIN
 
 	SET IDENTITY_INSERT tblCRMStatus ON
 
-	insert into tblCRMStatus (
+	exec('insert into tblCRMStatus (
 		intStatusId
 		,strStatus
 		,strDescription
@@ -228,11 +248,11 @@ BEGIN
 		from tblHDTicketStatus
 		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicketStatus where ysnActivity = 1 or ysnOpportunity = 1)
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-	)
+	)');
 
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDTicket'))
 	begin
-	insert into tblCRMStatus (
+	exec('insert into tblCRMStatus (
 		intStatusId
 		,strStatus
 		,strDescription
@@ -264,14 +284,14 @@ BEGIN
 			,ysnUpdated
 			,intConcurrencyId
 		from tblHDTicketStatus
-		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = 'CRM')
+		where intTicketStatusId in (select distinct intTicketStatusId from tblHDTicket where strType = ''CRM'')
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-	)
+	)');
 	end
 
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDProject'))
 	begin
-	insert into tblCRMStatus (
+	exec('insert into tblCRMStatus (
 		intStatusId
 		,strStatus
 		,strDescription
@@ -303,14 +323,14 @@ BEGIN
 			,ysnUpdated
 			,intConcurrencyId
 		from tblHDTicketStatus
-		where intTicketStatusId in (select distinct intTicketStatusId from tblHDProject where strType = 'CRM')
+		where intTicketStatusId in (select distinct intTicketStatusId from tblHDProject where strType = ''CRM'')
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-	)
+	)');
 	end
 
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDSalesPipeStatus'))
 	begin
-	insert into tblCRMStatus (
+	exec('insert into tblCRMStatus (
 		intStatusId
 		,strStatus
 		,strDescription
@@ -344,12 +364,12 @@ BEGIN
 		from tblHDTicketStatus
 		where strStatus in (select distinct strProjectStatus from tblHDSalesPipeStatus)
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-	)
+	)');
 	end
 
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMSalesPipeStatus'))
 	begin
-	insert into tblCRMStatus (
+	exec('insert into tblCRMStatus (
 		intStatusId
 		,strStatus
 		,strDescription
@@ -383,12 +403,12 @@ BEGIN
 		from tblHDTicketStatus
 		where intTicketStatusId in (select distinct intStatusId from tblCRMSalesPipeStatus)
 			and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-	)
+	)');
 	end
 
 	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityCampaign'))
 	begin
-		insert into tblCRMStatus (
+		exec('insert into tblCRMStatus (
 			intStatusId
 			,strStatus
 			,strDescription
@@ -422,12 +442,12 @@ BEGIN
 			from tblHDTicketStatus
 			where intTicketStatusId in (select distinct intTicketStatusId from tblHDOpportunityCampaign)
 				and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-		)
+		)');
 	end
 
 		IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMCampaign'))
 	begin
-		insert into tblCRMStatus (
+		exec('insert into tblCRMStatus (
 			intStatusId
 			,strStatus
 			,strDescription
@@ -461,7 +481,7 @@ BEGIN
 			from tblHDTicketStatus
 			where intTicketStatusId in (select distinct intStatusId from tblCRMCampaign)
 				and intTicketStatusId not in (select intStatusId from tblCRMStatus)
-		)
+		)');
 	end
 
 	SET IDENTITY_INSERT tblCRMStatus OFF
@@ -473,7 +493,7 @@ BEGIN
 	PRINT N'Begin splitting Campaign...'
 
 	SET IDENTITY_INSERT tblCRMCampaign ON
-	insert into tblCRMCampaign (
+	exec('insert into tblCRMCampaign (
 		intCampaignId
 		,strCampaignName
 		,strDescription
@@ -516,7 +536,7 @@ BEGIN
 			,intConcurrencyId = intConcurrencyId
 		from tblHDOpportunityCampaign
 		where intOpportunityCampaignId not in (select intCampaignId from tblCRMCampaign)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMCampaign OFF
 
 	if exists (SELECT * FROM sys.columns WHERE object_id = object_id('tblHDOpportunityCampaign') and name = 'strRetrospective')
@@ -535,7 +555,7 @@ BEGIN
 	PRINT N'Begin splitting Source...'
 
 	SET IDENTITY_INSERT tblCRMSource ON
-	insert tblCRMSource
+	exec('insert tblCRMSource
 	(
 		intSourceId
 		,strSource
@@ -550,35 +570,38 @@ BEGIN
 			tblHDOpportunitySource
 		where
 			intOpportunitySourceId not in (select intSourceId from tblCRMSource)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMSource OFF
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDMilestone'))
 BEGIN
 	
-	PRINT N'Begin splitting Milestone...'
-
-	SET IDENTITY_INSERT tblCRMMilestone ON
-	insert into tblCRMMilestone (
-		intMilestoneId
-		,strMileStone
-		,strDescription
-		,intPriority
-		,intSort
-		,intConcurrencyId
-	)(
-		select
+	IF NOT EXISTS (SELECT * FROM tblCRMMilestone)
+	BEGIN
+		PRINT N'Begin splitting Milestone...'
+		SET IDENTITY_INSERT tblCRMMilestone ON
+		exec('insert into tblCRMMilestone (
 			intMilestoneId
 			,strMileStone
 			,strDescription
 			,intPriority
 			,intSort
 			,intConcurrencyId
-		from tblHDMilestone
-		where intMilestoneId not in (select intMilestoneId from tblCRMMilestone)
-	)
-	SET IDENTITY_INSERT tblCRMMilestone OFF
+		)(
+			select
+				intMilestoneId
+				,strMileStone
+				,strDescription
+				,intPriority
+				,intSort
+				,intConcurrencyId
+			from tblHDMilestone
+			where intMilestoneId not in (select intMilestoneId from tblCRMMilestone)
+		)');
+		SET IDENTITY_INSERT tblCRMMilestone OFF
+	END
+
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityWinLossReason'))
@@ -587,7 +610,7 @@ BEGIN
 	PRINT N'Begin splitting Win/Loss Reason...'
 
 	SET IDENTITY_INSERT tblCRMWinLossReason ON
-	insert into tblCRMWinLossReason (
+	exec('insert into tblCRMWinLossReason (
 		intWinLossReasonId
 		,strReason
 		,strDescription
@@ -600,7 +623,7 @@ BEGIN
 			,intConcurrencyId
 		from tblHDOpportunityWinLossReason
 		where intOpportunityWinLossReasonId not in (select intWinLossReasonId from tblCRMWinLossReason)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMWinLossReason OFF
 END
 
@@ -623,7 +646,7 @@ BEGIN
 	PRINT N'Begin splitting Opportunity and Project...'
 
 	SET IDENTITY_INSERT tblCRMOpportunity ON
-	insert into tblCRMOpportunity
+	exec('insert into tblCRMOpportunity
 	(
 		intOpportunityId
 		,strName
@@ -741,11 +764,21 @@ BEGIN
 			,intLostToCompetitorId = intLostToCompetitorId
 			,intConcurrencyId = intConcurrencyId
 		from tblHDProject
-		where strType = 'CRM' and intProjectId not in (select intOpportunityId from tblCRMOpportunity)
-	)
+		where strType = ''CRM'' and intProjectId not in (select intOpportunityId from tblCRMOpportunity)
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunity OFF
 
-	insert into tblSMTransaction
+	IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMStatus'))
+	begin
+		exec('update tblCRMOpportunity set tblCRMOpportunity.intStatusId = (select top 1 tblCRMStatus.intStatusId from tblCRMStatus where tblCRMStatus.strStatus = tblCRMOpportunity.strOpportunityStatus) where tblCRMOpportunity.intStatusId is null and tblCRMOpportunity.strOpportunityStatus is not null');
+		
+		IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMSalesPipeStatus'))
+		begin
+			exec('update tblCRMSalesPipeStatus set tblCRMSalesPipeStatus.intStatusId = (select top 1 tblCRMStatus.intStatusId from tblCRMStatus where tblCRMStatus.strStatus = tblCRMSalesPipeStatus.strProjectStatus) where tblCRMSalesPipeStatus.intStatusId is null');
+		end
+	end
+
+	exec('insert into tblSMTransaction
 	(
 		intScreenId
 		,intRecordId
@@ -757,9 +790,9 @@ BEGIN
 	)
 	(
 		select
-			intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity')
+			intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = ''CRM.view.Opportunity'')
 			,intRecordId = tblCRMOpportunity.intOpportunityId
-			,strTransactionNo = (case when len(tblCRMOpportunity.strName) > 50 THEN SUBSTRING(tblCRMOpportunity.strName, 0, 47) + '...' else tblCRMOpportunity.strName end)
+			,strTransactionNo = convert(nvarchar(50), tblCRMOpportunity.intOpportunityId)--(case when len(tblCRMOpportunity.strName) > 50 THEN SUBSTRING(tblCRMOpportunity.strName, 0, 47) + ''...'' else tblCRMOpportunity.strName end)
 			,intEntityId = tblCRMOpportunity.intInternalSalesPerson
 			,dtmDate = tblCRMOpportunity.dtmCreated
 			,strApprovalStatus = null
@@ -767,10 +800,10 @@ BEGIN
 		from
 			tblCRMOpportunity
 		where
-			tblCRMOpportunity.intOpportunityId not in (select intRecordId from tblSMTransaction where intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'CRM.view.Opportunity'))
-	)
+			tblCRMOpportunity.intOpportunityId not in (select intRecordId from tblSMTransaction where intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = ''CRM.view.Opportunity''))
+	)');
 
-	update tblSMAttachment set strScreen = 'CRM.Opportunity' where strScreen = 'HelpDesk.Project' and strRecordNo in (select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity);
+	exec('update tblSMAttachment set strScreen = ''CRM.Opportunity'' where strScreen = ''HelpDesk.Project'' and strRecordNo in (select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity)');
 
 END
 
@@ -780,7 +813,7 @@ BEGIN
 	PRINT N'Begin splitting Opportunity Overview...'
 
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewProblem ON
-	insert tblCRMOpportunityOverviewProblem
+	exec('insert tblCRMOpportunityOverviewProblem
 	(
 		intOpportunityOverviewId
 		,intOpportunityId
@@ -800,16 +833,16 @@ BEGIN
 		from
 			tblHDOpportunityOverview
 		where
-			intProjectId in (select intProjectId from tblHDProject where strType = 'CRM')
+			intProjectId in (select intProjectId from tblHDProject where strType = ''CRM'')
 			and intOpportunityOverviewId not in (select intOpportunityOverviewId from tblCRMOpportunityOverviewProblem)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewProblem OFF
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityOverviewConcern'))
 BEGIN
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewConcern ON
-	insert tblCRMOpportunityOverviewConcern
+	exec('insert tblCRMOpportunityOverviewConcern
 	(
 		intOpportunityOverviewConcernId
 		,intOpportunityId
@@ -829,16 +862,16 @@ BEGIN
 		from
 			tblHDOpportunityOverviewConcern
 		where
-			intProjectId in (select intProjectId from tblHDProject where strType = 'CRM')
+			intProjectId in (select intProjectId from tblHDProject where strType = ''CRM'')
 			and intOpportunityOverviewConcernId not in (select intOpportunityOverviewConcernId from tblCRMOpportunityOverviewConcern)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewConcern OFF
 END
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityOverviewSolution'))
 BEGIN
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewSolution ON
-	insert tblCRMOpportunityOverviewSolution
+	exec('insert tblCRMOpportunityOverviewSolution
 	(
 		intOpportunityOverviewSolutionId
 		,intOpportunityId
@@ -858,9 +891,9 @@ BEGIN
 		from
 			tblHDOpportunityOverviewSolution
 		where
-			intProjectId in (select intProjectId from tblHDProject where strType = 'CRM')
+			intProjectId in (select intProjectId from tblHDProject where strType = ''CRM'')
 			and intOpportunityOverviewSolutionId not in (select intOpportunityOverviewSolutionId from tblCRMOpportunityOverviewSolution)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewSolution OFF
 
 END
@@ -868,7 +901,7 @@ END
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityOverviewUniqueValue'))
 BEGIN
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewUniqueValue ON
-	insert tblCRMOpportunityOverviewUniqueValue
+	exec('insert tblCRMOpportunityOverviewUniqueValue
 	(
 		intOpportunityOverviewUniqueValueId
 		,intOpportunityId
@@ -888,9 +921,9 @@ BEGIN
 		from
 			tblHDOpportunityOverviewUniqueValue
 		where
-			intProjectId in (select intProjectId from tblHDProject where strType = 'CRM')
+			intProjectId in (select intProjectId from tblHDProject where strType = ''CRM'')
 			and intOpportunityOverviewUniqueValueId not in (select intOpportunityOverviewUniqueValueId from tblCRMOpportunityOverviewUniqueValue)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewUniqueValue OFF
 
 END
@@ -898,7 +931,7 @@ END
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblHDOpportunityOverviewGain'))
 BEGIN
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewGain ON
-	insert tblCRMOpportunityOverviewGain
+	exec('insert tblCRMOpportunityOverviewGain
 	(
 		intOpportunityOverviewGainId
 		,intOpportunityId
@@ -918,9 +951,9 @@ BEGIN
 		from
 			tblHDOpportunityOverviewGain
 		where
-			intProjectId in (select intProjectId from tblHDProject where strType = 'CRM')
+			intProjectId in (select intProjectId from tblHDProject where strType = ''CRM'')
 			and intOpportunityOverviewGainId not in (select intOpportunityOverviewGainId from tblCRMOpportunityOverviewGain)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunityOverviewGain OFF
 
 END
@@ -931,7 +964,7 @@ BEGIN
 	PRINT N'Begin splitting Opportunity Quote...'
 
 	SET IDENTITY_INSERT tblCRMOpportunityQuote ON
-	insert tblCRMOpportunityQuote
+	exec('insert tblCRMOpportunityQuote
 	(
 		intOpportunityQuoteId
 		,intOpportunityId
@@ -947,9 +980,9 @@ BEGIN
 		from
 			tblHDOpportunityQuote
 		where
-			intProjectId in (select intProjectId from tblHDProject where strType = 'CRM')
+			intProjectId in (select intProjectId from tblHDProject where strType = ''CRM'')
 			and intOpportunityQuoteId not in (select intOpportunityQuoteId from tblCRMOpportunityQuote)
-	)
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunityQuote OFF
 
 END
@@ -960,7 +993,7 @@ BEGIN
 	PRINT N'Begin splitting Opportunity Contract...'
 
 	SET IDENTITY_INSERT tblCRMOpportunityContract ON
-	insert tblCRMOpportunityContract
+	exec('insert tblCRMOpportunityContract
 	(
 		intOpportunityContractId
 		,intOpportunityId
@@ -977,8 +1010,8 @@ BEGIN
 			tblHDOpportunityContract
 		where
 			intOpportunityContractId not in (select intOpportunityContractId from tblCRMOpportunityContract)
-			and intProjectId in (select intProjectId from tblHDProject where strType = 'CRM')
-	)
+			and intProjectId in (select intProjectId from tblHDProject where strType = ''CRM'')
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunityContract OFF
 
 END
@@ -989,7 +1022,7 @@ BEGIN
 	PRINT N'Begin splitting Opportunity Contact...'
 
 	SET IDENTITY_INSERT tblCRMOpportunityContact ON
-	insert tblCRMOpportunityContact
+	exec('insert tblCRMOpportunityContact
 	(
 		intOpportunityContactId
 		,intOpportunityId
@@ -1018,8 +1051,8 @@ BEGIN
 			tblHDProjectContactInfo
 		where
 			intProjectContactInfoId not in (select intOpportunityContactId from tblCRMOpportunityContact)
-			and intProjectId in (select intProjectId from tblHDProject where strType = 'CRM')
-	)
+			and intProjectId in (select intProjectId from tblHDProject where strType = ''CRM'')
+	)');
 	SET IDENTITY_INSERT tblCRMOpportunityContact OFF
 END
 
@@ -1048,11 +1081,14 @@ END
 
 DECLARE @queryResultAct CURSOR
 
+declare @intOffset int = (SELECT datediff(hour,GETUTCDATE(), getdate()));
+
 declare @intTransactionIdAct int
 declare @strTypeAct nvarchar(50)
 declare @strSubjectAct nvarchar(100)
 declare @intEntityContactIdAct int
 declare @intEntityIdAct int
+declare @intCompanyLocationIdAct int
 declare @dtmStartDateAct datetime
 declare @dtmEndDateAct datetime
 declare @dtmStartTimeAct datetime
@@ -1081,10 +1117,11 @@ SET @queryResultAct = CURSOR FOR
 		,strSubject = tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject
 		,intEntityContactId = tblHDTicket.intCustomerContactId
 		,intEntityId = tblHDTicket.intCustomerId
-		,dtmStartDate = tblHDTicket.dtmDueDate
-		,dtmEndDate = tblHDTicket.dtmDueDate
-		,dtmStartTime = tblHDTicket.dtmDueDate
-		,dtmEndTime = tblHDTicket.dtmDueDate
+		,intCompanyLocationId = tblHDTicket.intCompanyLocationId
+		,dtmStartDate = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmEndDate = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmStartTime = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmEndTime = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
 		,strStatus = (select top 1 tblHDTicketStatus.strStatus from tblHDTicketStatus where tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId)
 		,strPriority = (select top 1 (case when tblHDTicketPriority.strPriority = 'Sev 1 - Blocker' then 'High' when tblHDTicketPriority.strPriority = 'Sev 2 - Major' then 'High' else 'Normal' end) from tblHDTicketPriority where tblHDTicketPriority.intTicketPriorityId = tblHDTicket.intTicketPriorityId)
 		,strCategory = (select top 1 tblHDTicketType.strType from tblHDTicketType where tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId)
@@ -1092,8 +1129,8 @@ SET @queryResultAct = CURSOR FOR
 		,strActivityNo = (select top 1 tblSMStartingNumber.strPrefix from tblSMStartingNumber where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity')
 		,strDetails = '<p>'+tblHDTicket.strSubject+'</p>'
 		,ysnPublic = 1
-		,dtmCreated = tblHDTicket.dtmCreated
-		,dtmModified = tblHDTicket.dtmLastModified
+		,dtmCreated = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmCreated) else DATEADD(hour, -@intOffset, tblHDTicket.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmLastModified) else DATEADD(hour, -@intOffset, tblHDTicket.dtmLastModified) end)
 		,intCreatedBy = tblHDTicket.intCreatedUserEntityId
 		,intConcurrencyId = 1
 		,intTicketId = tblHDTicket.intTicketId
@@ -1101,6 +1138,35 @@ SET @queryResultAct = CURSOR FOR
 	where tblHDProject.strType = 'CRM'
 		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
 		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+
+	union all
+
+		select
+		intTransactionId = null
+		,strType = 'Task'
+		,strSubject = (case when len(tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject) > 100 then SUBSTRING(tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject, 1, 97) + '...' else tblHDTicket.strTicketNumber + ' - ' + tblHDTicket.strSubject end)
+		,intEntityContactId = tblHDTicket.intCustomerContactId
+		,intEntityId = tblHDTicket.intCustomerId
+		,intCompanyLocationId = tblHDTicket.intCompanyLocationId
+		,dtmStartDate = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmEndDate = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmStartTime = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,dtmEndTime = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmDueDate) else DATEADD(hour, -@intOffset, tblHDTicket.dtmDueDate) end)
+		,strStatus = (select top 1 tblHDTicketStatus.strStatus from tblHDTicketStatus where tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId)
+		,strPriority = (select top 1 (case when tblHDTicketPriority.strPriority = 'Sev 1 - Blocker' then 'High' when tblHDTicketPriority.strPriority = 'Sev 2 - Major' then 'High' else 'Normal' end) from tblHDTicketPriority where tblHDTicketPriority.intTicketPriorityId = tblHDTicket.intTicketPriorityId)
+		,strCategory = (select top 1 tblHDTicketType.strType from tblHDTicketType where tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId)
+		,intAssignedTo = tblHDTicket.intAssignedToEntity
+		,strActivityNo = (select top 1 tblSMStartingNumber.strPrefix from tblSMStartingNumber where tblSMStartingNumber.strModule = 'System Manager' and tblSMStartingNumber.strTransactionType = 'Activity')
+		,strDetails = '<p>'+tblHDTicket.strSubject+'</p>'
+		,ysnPublic = 1
+		,dtmCreated = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmCreated) else DATEADD(hour, -@intOffset, tblHDTicket.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intOffset), tblHDTicket.dtmLastModified) else DATEADD(hour, -@intOffset, tblHDTicket.dtmLastModified) end)
+		,intCreatedBy = tblHDTicket.intCreatedUserEntityId
+		,intConcurrencyId = 1
+		,intTicketId = tblHDTicket.intTicketId
+	from tblHDTicket
+	where tblHDTicket.strType = 'CRM'
+		and tblHDTicket.intTicketId not in (select distinct tblHDProjectTask.intTicketId from tblHDProjectTask)
 
 OPEN @queryResultAct
 FETCH NEXT
@@ -1112,6 +1178,7 @@ INTO
 	,@strSubjectAct
 	,@intEntityContactIdAct
 	,@intEntityIdAct
+	,@intCompanyLocationIdAct
 	,@dtmStartDateAct
 	,@dtmEndDateAct
 	,@dtmStartTimeAct
@@ -1158,6 +1225,7 @@ BEGIN
 			,strSubject
 			,intEntityContactId
 			,intEntityId
+			,intCompanyLocationId
 			,dtmStartDate
 			,dtmEndDate
 			,dtmStartTime
@@ -1178,9 +1246,10 @@ BEGIN
 			select 
 				intTransactionId = @intTransactionIdAct
 				,strType = @strTypeAct
-				,strSubject = (case when len(@strSubjectAct) > 100 then SUBSTRING(@strSubjectAct, 1,97) + '...' else @strSubjectAct end)
+				,strSubject = @strSubjectAct
 				,intEntityContactId = @intEntityContactIdAct
 				,intEntityId = @intEntityIdAct
+				,intCompanyLocationId = @intCompanyLocationIdAct
 				,dtmStartDate = @dtmEndDateAct
 				,dtmEndDate = @dtmEndDateAct
 				,dtmStartTime = @dtmEndDateAct
@@ -1224,7 +1293,7 @@ BEGIN
 		(
 			select
 				intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'GlobalComponentEngine.view.Activity' and strScreenName = 'Activity')
-				,intRecordId = @intGeneratedActivityIdentityAct
+				,intRecordId =  @intGeneratedActivityIdentityAct
 				,strTransactionNo = @strActivityNoAct
 				,intEntityId = @intEntityIdAct
 				,dtmDate = @dtmCreatedAct
@@ -1243,6 +1312,7 @@ BEGIN
 		,@strSubjectAct
 		,@intEntityContactIdAct
 		,@intEntityIdAct
+		,@intCompanyLocationIdAct
 		,@dtmStartDateAct
 		,@dtmEndDateAct
 		,@dtmStartTimeAct
@@ -1270,6 +1340,8 @@ PRINT N'Creating Activity Note from Activity Details...'
 
 DECLARE @queryResultComment CURSOR
 
+declare @intDetailsOffset int = (SELECT datediff(hour,GETUTCDATE(), getdate()));
+
 declare @strCommentComment nvarchar(max);
 declare @strScreenComment nvarchar(50);
 declare @strRecordNoComment nvarchar(50);
@@ -1292,8 +1364,8 @@ SET @queryResultComment = CURSOR FOR
 		strComment = '<p>Comment : '+(case when tblHDTicketComment.ysnSent = 1 then 'Sent' else '<font color="red">Draft</font>' end)+'</p>'+(case when tblHDTicketComment.ysnEncoded = 1 then dbo.fnHDDecodeComment(substring(tblHDTicketComment.strComment,4,len(tblHDTicketComment.strComment)-3)) else tblHDTicketComment.strComment end)+'</br>'
 		,strScreen = ''
 		,strRecordNo = ''
-		,dtmAdded = tblHDTicketComment.dtmCreated
-		,dtmModified = tblHDTicketComment.dtmLastModified
+		,dtmAdded = (case when @intOffset < 0 then DATEADD(hour, ABS(@intDetailsOffset), tblHDTicketComment.dtmCreated) else DATEADD(hour, -@intDetailsOffset, tblHDTicketComment.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intDetailsOffset), tblHDTicketComment.dtmLastModified) else DATEADD(hour, -@intDetailsOffset, tblHDTicketComment.dtmLastModified) end)
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketComment.intCreatedUserEntityId
@@ -1305,6 +1377,27 @@ SET @queryResultComment = CURSOR FOR
 	where tblHDProject.strType = 'CRM'
 		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
 		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
+		and tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
+
+	union all
+
+	select
+		strComment = '<p>Comment : '+(case when tblHDTicketComment.ysnSent = 1 then 'Sent' else '<font color="red">Draft</font>' end)+'</p>'+(case when tblHDTicketComment.ysnEncoded = 1 then dbo.fnHDDecodeComment(substring(tblHDTicketComment.strComment,4,len(tblHDTicketComment.strComment)-3)) else tblHDTicketComment.strComment end)+'</br>'
+		,strScreen = ''
+		,strRecordNo = ''
+		,dtmAdded = (case when @intOffset < 0 then DATEADD(hour, ABS(@intDetailsOffset), tblHDTicketComment.dtmCreated) else DATEADD(hour, -@intDetailsOffset, tblHDTicketComment.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intDetailsOffset), tblHDTicketComment.dtmLastModified) else DATEADD(hour, -@intDetailsOffset, tblHDTicketComment.dtmLastModified) end)
+		,ysnPublic = convert(bit,1)
+		,ysnEdited = null
+		,intEntityId = tblHDTicketComment.intCreatedUserEntityId
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
+		,intConcurrencyId = 1
+		,tblHDTicketComment.intTicketCommentId
+	from tblHDTicket, tblCRMOpportunityActivityTmp, tblHDTicketComment
+	where tblHDTicket.strType = 'CRM'
+		and tblHDTicket.intTicketId not in (select distinct tblHDProjectTask.intTicketId from tblHDProjectTask)
 		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
 		and tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
 
@@ -1414,6 +1507,8 @@ PRINT N'Creating Activity Note from Activity Internal Note...'
 
 DECLARE @queryResultNote CURSOR
 
+declare @intNotesOffset int = (SELECT datediff(hour,GETUTCDATE(), getdate()));
+
 declare @strCommentNote nvarchar(max);
 declare @strScreenNote nvarchar(50);
 declare @strRecordNoNote nvarchar(50);
@@ -1436,8 +1531,8 @@ SET @queryResultNote = CURSOR FOR
 		strComment = '<p>Internal Note:</p><p>'+tblHDTicketNote.strNote+'</p></br>'
 		,strScreen = ''
 		,strRecordNo = ''
-		,dtmAdded = tblHDTicketNote.dtmCreated
-		,dtmModified = tblHDTicketNote.dtmCreated
+		,dtmAdded = (case when @intOffset < 0 then DATEADD(hour, ABS(@intNotesOffset), tblHDTicketNote.dtmCreated) else DATEADD(hour, -@intNotesOffset, tblHDTicketNote.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intNotesOffset), tblHDTicketNote.dtmCreated) else DATEADD(hour, -@intNotesOffset, tblHDTicketNote.dtmCreated) end)
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketNote.intCreatedUserEntityId
@@ -1449,6 +1544,27 @@ SET @queryResultNote = CURSOR FOR
 	where tblHDProject.strType = 'CRM'
 		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
 		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
+		and tblHDTicketNote.intTicketId = tblHDTicket.intTicketId
+
+	union all
+
+	select
+		strComment = '<p>Internal Note:</p><p>'+tblHDTicketNote.strNote+'</p></br>'
+		,strScreen = ''
+		,strRecordNo = ''
+		,dtmAdded = (case when @intOffset < 0 then DATEADD(hour, ABS(@intNotesOffset), tblHDTicketNote.dtmCreated) else DATEADD(hour, -@intNotesOffset, tblHDTicketNote.dtmCreated) end)
+		,dtmModified = (case when @intOffset < 0 then DATEADD(hour, ABS(@intNotesOffset), tblHDTicketNote.dtmCreated) else DATEADD(hour, -@intNotesOffset, tblHDTicketNote.dtmCreated) end)
+		,ysnPublic = convert(bit,1)
+		,ysnEdited = null
+		,intEntityId = tblHDTicketNote.intCreatedUserEntityId
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
+		,intConcurrencyId = 1
+		,tblHDTicketNote.intTicketNoteId
+	from tblHDTicket, tblCRMOpportunityActivityTmp, tblHDTicketNote
+	where tblHDTicket.strType = 'CRM'
+		and tblHDTicket.intTicketId not in (select distinct tblHDProjectTask.intTicketId from tblHDProjectTask)
 		and tblCRMOpportunityActivityTmp.intTicketIdId = tblHDTicket.intTicketId
 		and tblHDTicketNote.intTicketId = tblHDTicket.intTicketId
 
@@ -1553,6 +1669,99 @@ END
 CLOSE @queryResultNote
 DEALLOCATE @queryResultNote
 
+Print 'Fixing Opportunity Lines of Business'
+
+DECLARE @queryResultOpportunity CURSOR;
+declare @intOpportunityId int;
+declare @strLinesOfBusinessId nvarchar(50);
+
+declare @queryResultLobItem cursor;
+declare @Item nvarchar(5);
+declare @intItem int;
+
+SET @queryResultOpportunity = CURSOR FOR
+
+	select
+		intOpportunityId
+		,strLinesOfBusinessId = ltrim(rtrim(strLinesOfBusinessId))
+	from
+		tblCRMOpportunity
+	where
+		strLinesOfBusinessId is not null
+		and ltrim(rtrim(strLinesOfBusinessId)) <> ''
+
+OPEN @queryResultOpportunity
+FETCH NEXT
+FROM
+	@queryResultOpportunity
+INTO
+	@intOpportunityId
+	,@strLinesOfBusinessId
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	/*---------------------------------------------------------------*/
+	SET @queryResultLobItem = CURSOR FOR
+
+		select
+			Item
+		from
+			dbo.fnSplitString(@strLinesOfBusinessId, ',')
+
+	OPEN @queryResultLobItem
+	FETCH NEXT
+	FROM
+		@queryResultLobItem
+	INTO
+		@Item
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		set @intItem = convert(int, @Item);
+		
+		--Print 'Opportunity Id = ' + convert(nvarchar(50), @intOpportunityId) + ' - LOB Id = ' + convert(nvarchar(50), @intItem)
+
+		IF NOT EXISTS (select * from tblCRMOpportunityLob where intOpportunityId = @intOpportunityId and intLineOfBusinessId = @intItem)
+		begin
+			IF EXISTS (select * from tblSMLineOfBusiness where intLineOfBusinessId = @intItem)
+			begin
+				INSERT INTO [dbo].[tblCRMOpportunityLob]
+						   ([intOpportunityId]
+						   ,[intLineOfBusinessId]
+						   ,[intConcurrencyId])
+					 VALUES
+						   (@intOpportunityId
+						   ,@intItem
+						   ,1)
+			end
+		end
+
+		FETCH NEXT
+		FROM
+			@queryResultLobItem
+		INTO
+			@Item
+	END
+
+	CLOSE @queryResultLobItem
+	DEALLOCATE @queryResultLobItem
+	/*---------------------------------------------------------------*/
+
+    FETCH NEXT
+    FROM
+		@queryResultOpportunity
+	INTO
+	@intOpportunityId
+	,@strLinesOfBusinessId
+END
+
+CLOSE @queryResultOpportunity
+DEALLOCATE @queryResultOpportunity
+
+Print 'End Fixing Opportunity Lines of Business'
+
 insert into tblSMTypeValue
 (
 	strType, strValue, ysnDefault, intConcurrencyId
@@ -1618,6 +1827,51 @@ insert into tblSMTypeValue
 		and strCategory not in (select strValue from tblSMTypeValue where strType = 'Category')
 	) as priorityType
 )
+
+Print N'Start fixing CRM opportunity Sales Person';
+
+exec('
+	update tblCRMOpportunity set tblCRMOpportunity.intInternalSalesPerson = (select top 1 ec.intEntityId from tblEMEntityToContact ec where ec.intEntityContactId = tblCRMOpportunity.intInternalSalesPerson) where tblCRMOpportunity.intInternalSalesPerson in
+		(
+		select
+			tblEMEntityToContact.intEntityContactId
+		from tblARSalesperson, tblEMEntityToContact
+		where
+			tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+		)
+	');
+
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblSMLineOfBusiness'))
+begin
+	exec('
+			update tblSMLineOfBusiness set tblSMLineOfBusiness.intEntityId = (select top 1 ec.intEntityId from tblEMEntityToContact ec where ec.intEntityContactId = tblSMLineOfBusiness.intEntityId) where tblSMLineOfBusiness.intEntityId in
+				(
+				select
+					tblEMEntityToContact.intEntityContactId
+				from tblARSalesperson, tblEMEntityToContact
+				where
+					tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+				)
+		');
+end
+
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblCRMCampaign'))
+begin
+	exec('
+			update tblCRMCampaign set tblCRMCampaign.intEntityId = (select top 1 ec.intEntityId from tblEMEntityToContact ec where ec.intEntityContactId = tblCRMCampaign.intEntityId) where tblCRMCampaign.intEntityId in
+				(
+				select
+					tblEMEntityToContact.intEntityContactId
+				from tblARSalesperson, tblEMEntityToContact
+				where
+					tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+				)
+		');
+end
+
+Print N'End fixing CRM opportunity Sales Person';
+
+exec('update tblSMCustomTab set intScreenId = (select top 1 intScreenId from tblSMScreen where strScreenName = ''Campaign'' and strModule = ''CRM'' and strNamespace = ''CRM.view.Campaign'') where intScreenId = (select top 1 intScreenId from tblSMScreen where strScreenName = ''Campaign'' and strModule = ''Help Desk'' and strNamespace = ''HelpDesk.view.Campaign'')');
 
 GO
 	PRINT N'End splitting CRM and Help Desk data..'
