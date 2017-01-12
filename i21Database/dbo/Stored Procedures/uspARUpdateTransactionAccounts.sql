@@ -87,14 +87,14 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		SET
 			LIA.[intAccountId] = (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE [intItemId] = ARID.[intItemId] AND [strType] IN ('Non-Inventory','Service'))) 
 										THEN
-											(CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId],IST.[intGeneralAccountId]) ELSE IST.[intGeneralAccountId] END)													
+											(CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId],ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](IST.[intGeneralAccountId], SMCL.[intProfitCenter]), ISNULL(ARID.intSalesAccountId, IST.[intGeneralAccountId]))) ELSE ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](IST.[intGeneralAccountId], SMCL.[intProfitCenter]), ISNULL(ARID.intSalesAccountId, IST.[intGeneralAccountId])) END)													
 										WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE [intItemId] = ARID.[intItemId] AND [strType] = 'Other Charge')) 
 										THEN
-											(CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId],IST.[intOtherChargeIncomeAccountId]) ELSE IST.[intOtherChargeIncomeAccountId] END)
+											(CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId],ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](IST.[intOtherChargeIncomeAccountId], SMCL.[intProfitCenter]), ISNULL(ARID.intSalesAccountId, IST.[intOtherChargeIncomeAccountId]))) ELSE ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](IST.[intOtherChargeIncomeAccountId], SMCL.[intProfitCenter]), ISNULL(ARID.intSalesAccountId, IST.[intOtherChargeIncomeAccountId])) END)
 										ELSE
 											(CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END))) 
 												ELSE
-													ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END)) 
+													ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END)), SMCL.[intProfitCenter]), ISNULL(ARID.intSalesAccountId, ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END)))) 
 											END)											
 									END)
 		FROM
@@ -111,7 +111,10 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON ARID.[intItemId] = IST.[intItemId] 
-				AND ARI.[intCompanyLocationId] = IST.[intLocationId]					
+				AND ARI.[intCompanyLocationId] = IST.[intLocationId]
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]				
 		WHERE
 			ISNULL(ARID.[intItemId], 0) <> 0
 			OR (EXISTS(SELECT NULL FROM tblICItem WHERE [intItemId] = ARID.[intItemId] AND [strType] IN ('Non-Inventory','Service','Other Charge')))
