@@ -50,6 +50,8 @@ BEGIN TRY
 		,@strPackagingCategory NVARCHAR(50)
 		,@intPackagingCategoryId INT
 		,@intCategoryId INT
+		,@intOwnerId int
+
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT
 		,dtmPlannedDate DATETIME
@@ -67,12 +69,14 @@ BEGIN TRY
 		,@dtmToDate = ISNULL(dtmToDate, @dtmFromDate)
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = intLocationId
+		,@intOwnerId=intOwnerId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strMode NVARCHAR(50)
 			,dtmFromDate DATETIME
 			,dtmToDate DATETIME
 			,intManufacturingProcessId INT
 			,intLocationId INT
+			,intOwnerId int
 			)
 
 	SELECT @strIFormula = strInputFormula
@@ -115,15 +119,17 @@ BEGIN TRY
 		,intPlannedShiftId
 		,intItemId
 		)
-	SELECT intWorkOrderId
+	SELECT Distinct W.intWorkOrderId
 		,ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
-		,intPlannedShiftId
-		,intItemId
+		,W.intPlannedShiftId
+		,W.intItemId
 	FROM dbo.tblMFWorkOrder W
+	Left JOIN dbo.tblICItemOwner IO1 On IO1.intItemId=W.intItemId 
 	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
 		AND intStatusId = 13
 		AND ISNULL(W.dtmPlannedDate, W.dtmExpectedDate) BETWEEN @dtmFromDate
 			AND @dtmToDate
+			and IO1.intOwnerId=@intOwnerId 
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
