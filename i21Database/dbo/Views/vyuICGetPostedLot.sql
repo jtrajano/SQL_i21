@@ -27,6 +27,8 @@ SELECT	intLotId				= Lot.intLotId
 		,intLotStatusId			= Lot.intLotStatusId
 		,strLotStatus			= LotStatus.strSecondaryStatus
 		,strLotPrimaryStatus	= LotStatus.strPrimaryStatus
+		,strOwnerName			= entity.strName
+		,intItemOwnerId			= Lot.intItemOwnerId
 FROM	dbo.tblICLot Lot INNER JOIN tblICItem Item 
 			ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblSMCompanyLocation Location 
@@ -45,3 +47,7 @@ FROM	dbo.tblICLot Lot INNER JOIN tblICItem Item
 			ON ItemWeightUOM.intItemUOMId = Lot.intWeightUOMId
 		LEFT JOIN tblICUnitMeasure WeightUOM 
 			ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+		LEFT JOIN tblICItemOwner o
+			ON o.intItemOwnerId = Lot.intItemOwnerId
+		LEFT JOIN tblEMEntity entity
+			ON entity.intEntityId = o.intOwnerId
