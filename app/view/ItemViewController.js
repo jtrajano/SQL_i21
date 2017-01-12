@@ -135,7 +135,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         {dataIndex: 'ysnStockUnit', text: 'Stock Unit', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
                         {dataIndex: 'ysnAllowPurchase', text: 'Allow Purchase', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
                         {dataIndex: 'ysnAllowSale', text: 'Allow Sale', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
-                        {dataIndex: 'dblUnitQty', text: 'Unit Qty', width: 100, dataType: 'float', xtype: 'numbercolumn' },
+                        // {dataIndex: 'dblUnitQty', text: 'Unit Qty', width: 100, dataType: 'float', xtype: 'numbercolumn' },
                         {dataIndex: 'dblAmountPercent', text: 'Amount/Percent', width: 100, dataType: 'float', xtype: 'numbercolumn' },
                         {dataIndex: 'dblSalePrice', text: 'Sale Price', width: 100, dataType: 'float', xtype: 'numbercolumn' },
                         {dataIndex: 'dblMSRPPrice', text: 'MSRP Price', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
