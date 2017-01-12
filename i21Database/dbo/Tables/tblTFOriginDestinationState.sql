@@ -10,3 +10,6 @@
 
 GO
 
+ALTER TABLE [dbo].[tblTFOriginDestinationState] ADD  CONSTRAINT [DF_tblTFOriginDestinationState_intConcurrencyId]  DEFAULT ((1)) FOR [intConcurrencyId]
+GO
+
