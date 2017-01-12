@@ -405,7 +405,7 @@ BEGIN TRY
 				AND L.intLotStatusId = 1
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 
-			IF @dblAvailableQty IS NULL
+			IF @dblAvailableQty IS NULL OR @dblAvailableQty < 0
 			BEGIN
 				SELECT @dblAvailableQty = 0
 
