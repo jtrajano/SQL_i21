@@ -69,6 +69,8 @@ SELECT
 	, strNewStorageLocationName = NewStorageLocation.strName
 	, AdjDetail.dblLineTotal
 	, AdjDetail.intSort
+	, strOwnerName = LotOwnerEntity.strName
+	, strNewOwnerName = NewLotOwnerEntity.strName
 FROM tblICInventoryAdjustmentDetail AdjDetail
 LEFT JOIN vyuICGetInventoryAdjustment Adj ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation NewLocation ON NewLocation.intCompanyLocationId = AdjDetail.intNewLocationId
@@ -85,3 +87,15 @@ LEFT JOIN vyuICGetItemUOM WeightUOM ON WeightUOM.intItemUOMId = AdjDetail.intWei
 LEFT JOIN vyuICGetItemUOM NewWeightUOM ON NewWeightUOM.intItemUOMId = AdjDetail.intNewWeightUOMId
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = AdjDetail.intLotStatusId
 LEFT JOIN tblICLotStatus NewLotStatus ON NewLotStatus.intLotStatusId = AdjDetail.intNewLotStatusId
+
+LEFT JOIN (
+	tblICItemOwner LotOwner INNER JOIN tblEMEntity LotOwnerEntity 
+		ON LotOwner.intOwnerId = LotOwnerEntity.intEntityId
+)
+	ON LotOwner.intItemOwnerId = AdjDetail.intItemOwnerId
+
+LEFT JOIN (
+	tblICItemOwner NewLotOwner INNER JOIN tblEMEntity NewLotOwnerEntity 
+		ON NewLotOwner.intOwnerId = NewLotOwnerEntity.intEntityId
+)
+	ON NewLotOwner.intItemOwnerId = AdjDetail.intNewItemOwnerId

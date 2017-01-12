@@ -31,6 +31,8 @@
 	[intNewSubLocationId] INT NULL, 
 	[intNewStorageLocationId] INT NULL, 
 	[dblLineTotal] NUMERIC(38,20) NULL , 
+	[intItemOwnerId] INT NULL,
+	[intNewItemOwnerId] INT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblICInventoryAdjustmentDetail] PRIMARY KEY ([intInventoryAdjustmentDetailId]), 

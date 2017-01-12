@@ -1339,7 +1339,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdationFromTicketDistribution.sql" />
     <Build Include="dbo\Views\vyuICGetStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotOwnerChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotStatusChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentQtyChange.sql" />
@@ -4801,6 +4801,9 @@
     <Build Include="dbo\Functions\fnRKRKConvertProductTypeKeyToName.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerSplit.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostOwnerChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
+    <Build Include="dbo\Views\vyuICGetItemOwner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

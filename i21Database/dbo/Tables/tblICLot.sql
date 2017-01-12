@@ -79,9 +79,17 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		CONSTRAINT [FK_tblICLot_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 		CONSTRAINT [FK_tblICLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 		CONSTRAINT [FK_tblICLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
-		CONSTRAINT [FK_tblICLot_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]) 
+		CONSTRAINT [FK_tblICLot_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]),
+		CONSTRAINT [FK_tblICLot_tblICItemOwner] FOREIGN KEY ([intItemOwnerId]) REFERENCES [tblICItemOwner]([intItemOwnerId]) 
 	)
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICLot_strLotNumber_intLocationId_intSubLocationId_intStorageLocationId]
 		ON [dbo].[tblICLot](strLotNumber ASC, intLocationId ASC, intSubLocationId ASC, intStorageLocationId ASC);
+
+	GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblICLot_intItemOwnerId]
+		ON [dbo].[tblICLot](intItemOwnerId ASC);
+
+	GO 
