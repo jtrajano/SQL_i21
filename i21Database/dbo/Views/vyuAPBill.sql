@@ -45,7 +45,9 @@ SELECT
 	Approvals.strName as strApprover,
 	Approvals.dtmApprovalDate,
 	GL.strBatchId,
-	EL.strLocationName AS strVendorLocation
+	EL.strLocationName AS strVendorLocation,
+	ISNULL(Payment.dblWithheld,0) AS dblWithheld,
+	ISNULL(Payment.dblDiscount,0) AS dblDiscount
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -66,6 +68,8 @@ FROM
 			,D.ysnVoid
 			,D.ysnCleared
 			,D.dtmDateReconciled
+			,D.dblWithheld
+			,D.dblDiscount
 		FROM dbo.vyuAPBillPayment D
 		WHERE A.intBillId = D.intBillId
 		ORDER BY D.intPaymentId DESC --get only the latest payment
