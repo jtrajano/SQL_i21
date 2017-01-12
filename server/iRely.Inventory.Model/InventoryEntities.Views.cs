@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets1a06d42541aa45ad5ef781dec55c3c42500ae37838eff971cc674851383115e8))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets1b93e5b6dd2cc679d00df99c811dc6e53a94655c9d028731b36b4ef82d8f7a2d))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets1a06d42541aa45ad5ef781dec55c3c42500ae37838eff971cc674851383115e8 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets1b93e5b6dd2cc679d00df99c811dc6e53a94655c9d028731b36b4ef82d8f7a2d : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "1a06d42541aa45ad5ef781dec55c3c42500ae37838eff971cc674851383115e8"; }
+            get { return "1b93e5b6dd2cc679d00df99c811dc6e53a94655c9d028731b36b4ef82d8f7a2d"; }
         }
 
         /// <summary>
@@ -2943,13 +2943,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemOwner
-        [CodeFirstDatabaseSchema.tblICItemOwner](T1.tblICItemOwner_intItemOwnerId, T1.tblICItemOwner_intItemId, T1.tblICItemOwner_intOwnerId, T1.tblICItemOwner_ysnActive, T1.tblICItemOwner_intSort, T1.tblICItemOwner_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemOwner](T1.tblICItemOwner_intItemOwnerId, T1.tblICItemOwner_intItemId, T1.tblICItemOwner_intOwnerId, T1.tblICItemOwner_ysnDefault, T1.tblICItemOwner_intSort, T1.tblICItemOwner_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemOwnerId AS tblICItemOwner_intItemOwnerId, 
             T.intItemId AS tblICItemOwner_intItemId, 
             T.intOwnerId AS tblICItemOwner_intOwnerId, 
-            T.ysnActive AS tblICItemOwner_ysnActive, 
+            T.ysnDefault AS tblICItemOwner_ysnDefault, 
             T.intSort AS tblICItemOwner_intSort, 
             T.intConcurrencyId AS tblICItemOwner_intConcurrencyId, 
             True AS _from0
@@ -6207,13 +6207,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemOwners
-        [iRely.Inventory.Model.tblICItemOwner](T1.tblICItemOwner_intItemOwnerId, T1.tblICItemOwner_intItemId, T1.tblICItemOwner_intOwnerId, T1.tblICItemOwner_ysnActive, T1.tblICItemOwner_intSort, T1.tblICItemOwner_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemOwner](T1.tblICItemOwner_intItemOwnerId, T1.tblICItemOwner_intItemId, T1.tblICItemOwner_intOwnerId, T1.tblICItemOwner_ysnDefault, T1.tblICItemOwner_intSort, T1.tblICItemOwner_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemOwnerId AS tblICItemOwner_intItemOwnerId, 
             T.intItemId AS tblICItemOwner_intItemId, 
             T.intOwnerId AS tblICItemOwner_intOwnerId, 
-            T.ysnActive AS tblICItemOwner_ysnActive, 
+            T.ysnDefault AS tblICItemOwner_ysnDefault, 
             T.intSort AS tblICItemOwner_intSort, 
             T.intConcurrencyId AS tblICItemOwner_intConcurrencyId, 
             True AS _from0

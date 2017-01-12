@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemOwnerId).HasColumnName("intItemOwnerId");
             this.Property(t => t.intOwnerId).HasColumnName("intOwnerId");
             this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
+            this.Property(t => t.ysnDefault).HasColumnName("ysnDefault");
 
             this.HasRequired(p => p.tblARCustomer)
                 .WithMany(p => p.tblICItemOwners)

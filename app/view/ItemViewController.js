@@ -1218,7 +1218,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colOwnerName: 'strName',
-                colOwnerDefault: 'ysnActive'
+                colOwnerDefault: 'ysnDefault'
             },
 
             //----------//

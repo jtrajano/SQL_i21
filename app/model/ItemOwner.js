@@ -41,7 +41,7 @@ Ext.define('Inventory.model.ItemOwner', {
             }
         },
         { name: 'intOwnerId', type: 'int', allowNull: true },
-        { name: 'ysnActive', type: 'boolean'},
+        { name: 'ysnDefault', type: 'boolean'},
         { name: 'intSort', type: 'int'},
 
         { name: 'strCustomerNumber', type: 'string'},

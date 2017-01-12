@@ -14,7 +14,7 @@ namespace iRely.Inventory.Model
         public int intItemOwnerId { get; set; }
         public int intItemId { get; set; }
         public int? intOwnerId { get; set; }
-        public bool ysnActive { get; set; }
+        public bool ysnDefault { get; set; }
         public int? intSort { get; set; }
 
         private string _customerNo;
