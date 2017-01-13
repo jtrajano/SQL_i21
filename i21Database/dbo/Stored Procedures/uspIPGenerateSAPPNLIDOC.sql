@@ -22,7 +22,8 @@ Declare
 	   @strXml NVARCHAR(MAX),
 	   @strIDOCHeader	NVARCHAR(MAX),
 	   @strCompCode		NVARCHAR(100),
-	   @strCostCenter	NVARCHAR(100)
+	   @strCostCenter	NVARCHAR(100),
+	   @strGLAccount	NVARCHAR(100)
 
 Declare @tblOutput AS Table
 (
@@ -34,6 +35,7 @@ Declare @tblOutput AS Table
 Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PO')
 Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 Select @strCostCenter=dbo.[fnIPGetSAPIDOCTagValue]('PNL','COSTCENTER')
+Select @strGLAccount=dbo.[fnIPGetSAPIDOCTagValue]('PNL','GL_ACCOUNT')
 
 Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where ISNULL(strStatus,'')=''
 
@@ -54,7 +56,7 @@ Begin
 	   @dtmPostingDate				=	dtmPostingDate ,
        @strStatus					=	strStatus   ,
 	   @strMessage					=	strMessage
-	From tblRKStgMatchPnS Where intStgMatchPnSId>@intMinStageId
+	From tblRKStgMatchPnS Where intStgMatchPnSId=@intMinStageId
 
 	Begin
 		Set @strXml =  '<ACC_DOCUMENT03>'
@@ -91,7 +93,7 @@ Begin
 		--GL account details (TM account)
 		Set @strXml += '<E1BPACGL09 SEGMENT="1">'
 		Set @strXml += '<ITEMNO_ACC>'	+ '0000001001'		+ '</ITEMNO_ACC>'
-		Set @strXml += '<GL_ACCOUNT>'	+ '0945102550'				+ '</GL_ACCOUNT>'
+		Set @strXml += '<GL_ACCOUNT>'	+ ISNULL(@strGLAccount,'')	+ '</GL_ACCOUNT>'
 		Set @strXml += '<ITEM_TEXT>'	+ ISNULL(CONVERT(VARCHAR,@intMatchNo),'')	+ '</ITEM_TEXT>'
 		Set @strXml += '<COSTCENTER>'	+ ISNULL(@strCostCenter,'')	+ '</COSTCENTER>'
 		Set @strXml +=	'</E1BPACGL09>'
@@ -107,7 +109,7 @@ Begin
 		Set @strXml += '<E1BPACCR09 SEGMENT="1">'
 		Set @strXml += '<ITEMNO_ACC>'	+ '0000001001'		+ '</ITEMNO_ACC>'
 		Set @strXml += '<CURRENCY>'	+ ISNULL(@strCurrency,'')				+ '</CURRENCY>'
-		Set @strXml += '<AMT_DOCCUR>'	+ ISNULL(CONVERT(VARCHAR,@dblGrossPnL),'')	+ '</AMT_DOCCUR>'
+		Set @strXml += '<AMT_DOCCUR>'	+ ISNULL(CONVERT(VARCHAR,-@dblGrossPnL),'')	+ '</AMT_DOCCUR>'
 		Set @strXml +=	'</E1BPACCR09>'
 
 		Set @strXml +=	'</ACC_DOCUMENT>'
