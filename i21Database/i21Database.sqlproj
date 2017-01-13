@@ -4649,6 +4649,7 @@
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099PATR.sql" />
     <Build Include="dbo\Stored Procedures\uspCFDeleteTransaction.sql" />
     <Build Include="dbo\Functions\fnARGetAccountIds.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
