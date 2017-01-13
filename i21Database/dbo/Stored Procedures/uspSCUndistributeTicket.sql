@@ -65,7 +65,7 @@ BEGIN TRY
 							,@userId = @intUserId
 							,@success = @success OUTPUT
 						END
-					
+					EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intEntityId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intEntityId
 
@@ -81,7 +81,7 @@ BEGIN TRY
 					[strShipmentNumber] [VARCHAR],
 					UNIQUE ([intInventoryReceiptId])
 				);
-				INSERT INTO #tmpItemReceiptIds(intInventoryShipmentId,intInventoryShipmentItemId,strShipmentNumber) SELECT intInventoryShipmentId, intInventoryShipmentItemId,strShipmentNumber FROM vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = "Scale"
+				INSERT INTO #tmpItemReceiptIds(intInventoryShipmentId,intInventoryShipmentItemId,strShipmentNumber) SELECT intInventoryShipmentId, intInventoryShipmentItemId,strShipmentNumber FROM vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
