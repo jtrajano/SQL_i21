@@ -7,7 +7,7 @@ SELECT intReportingComponentConfigurationId
 	, strReportSection
 	, intReportItemSequence
 	, intTemplateItemNumber
-	, strDescription = REPLACE(strDescription, '<value>', strConfiguration)
+	, strDescription = REPLACE(strDescription, '<value>', ISNULL(strConfiguration, ''))
 	, strScheduleCode
 	, strConfiguration
 	, ysnConfiguration
