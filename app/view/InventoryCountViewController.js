@@ -803,9 +803,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 search.multi = false;
                 search.show();
             };
-            if (button.itemId === 'btnPrintCountSheets') {
+            /*if (button.itemId === 'btnPrintCountSheets') {
                 current.set('intStatus', 2);
-            }
+            }*/
             
             //Save the record first before showing the Print Count Sheets screen
             if(!current.dirty)
