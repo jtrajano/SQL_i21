@@ -571,6 +571,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        hidden: true,
                                                         itemId: 'colDetailLength',
                                                         width: 90,
                                                         align: 'right',
@@ -584,6 +585,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        hidden: true,
                                                         itemId: 'colDetailWidth',
                                                         width: 90,
                                                         align: 'right',
@@ -597,6 +599,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        hidden: true,
                                                         itemId: 'colDetailHeight',
                                                         width: 90,
                                                         align: 'right',
@@ -610,6 +613,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        hidden: true,
                                                         itemId: 'colDetailDimensionUOM',
                                                         minWidth: 95,
                                                         width: 100,
@@ -645,6 +649,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        hidden: true,
                                                         itemId: 'colDetailVolume',
                                                         width: 90,
                                                         align: 'right',
@@ -658,6 +663,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        hidden: true,
                                                         itemId: 'colDetailVolumeUOM',
                                                         minWidth: 95,
                                                         width: 100,
@@ -693,6 +699,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        hidden: true,
                                                         itemId: 'colDetailWeight',
                                                         width: 90,
                                                         align: 'right',
@@ -707,6 +714,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        hidden: true,
                                                         itemId: 'colDetailWeightUOM',
                                                         minWidth: 95,
                                                         width: 100,
