@@ -927,6 +927,11 @@ galds_dlvd_rev_dt
 from galdsmst, agcusmst where galds_cus_no = agcus_key',
 N'', N'@DATE@', N'@DATE@', N'', N'Origin - Load Scheduling', N'', N'', N'', N'None', N'', N'', N'', N'', N'', N'', N'', 0, 0, NULL, NULL, N'16.4', NULL, 2, 135, NULL)
 
+--RECEIPT/MISSING DOCUMENTS
+INSERT INTO #TempCannedPanels VALUES (15565, 0, 10, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'Track Shipment Documents', N'Grid', N'', N'Track Shipment Documents', N'Bar', N'outside', N'Chameleon', N'i21 Demo', N'None', N'None', N'', N'',
+N'select * from vyuLGLoadDocumentTracking',
+N'', N'@DATE@', N'@DATE@', N'', N'Track Shipment Documents', N'', N'', N'', N'None', N'', N'', N'', N'', N'', N'', N'', 0, 0, NULL, NULL, N'17.1', NULL, 2, 136, NULL)
+
 
 
 
