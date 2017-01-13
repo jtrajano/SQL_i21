@@ -51,6 +51,8 @@ SELECT
 			THEN 'Prepayment was posted but not payment transaction created.'
 		WHEN A.ysnPosted = 1 AND A.intTransactionType = 2 AND A.dblPayment != 0 AND ISNULL(Payments.dblPayment,0) = 0
 			THEN 'Prepayment has payment but did no offset transaction'
+		WHEN A.ysnPosted = 1 AND DuplicatePayment.intBillId IS NOT NULL
+			THEN 'There are duplicate payment made for voucher ' + A.strBillId
 			ELSE 'OK' END AS strStatus
 FROM tblAPBill A
 OUTER APPLY (
@@ -119,3 +121,11 @@ OUTER APPLY (
 	AND A.intBillId = F.intTransactionId AND A.strBillId = F.strTransactionId
 	AND F.ysnIsUnposted = 0
 ) GLRecord 
+OUTER APPLY (
+	SELECT H.intBillId FROM tblAPPaymentDetail H
+	INNER JOIN tblAPPayment I ON H.intPaymentId = I.intPaymentId
+	INNER JOIN tblCMBankTransaction J ON I.strPaymentRecordNum = J.strTransactionId
+	WHERE A.intBillId = H.intBillId AND J.ysnCheckVoid = 0
+	GROUP BY H.intBillId
+	HAVING COUNT(*) > 1
+) DuplicatePayment

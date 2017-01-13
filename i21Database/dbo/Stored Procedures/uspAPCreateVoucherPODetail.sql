@@ -44,11 +44,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intItemId]						=	B.[intItemId]					,
 		[strMiscDescription]			=	B.strMiscDescription,
 		[intPurchaseDetailId]			=	A.[intPurchaseDetailId]			,
-		[dblTotal]						=	ISNULL(A.dblCost, B.dblCost) * dbo.fnAPValidatePODetailQtyToReceive(A.intPurchaseDetailId, ISNULL(A.dblQtyReceived, 1))
+		[dblTotal]						=	CAST(ISNULL(A.dblCost, B.dblCost) * dbo.fnAPValidatePODetailQtyToReceive(A.intPurchaseDetailId, ISNULL(A.dblQtyReceived, 1))
 											- (
 												(ISNULL(A.dblCost, B.dblCost)  * (dbo.fnAPValidatePODetailQtyToReceive(A.intPurchaseDetailId, ISNULL(A.dblQtyReceived,1)))) 
 												* (ISNULL(A.dblDiscount,0) / 100)
-											),
+											) AS DECIMAL(18,2)),
 		[dblQtyOrdered]					=	dbo.fnAPValidatePODetailQtyToReceive(A.intPurchaseDetailId, ISNULL(A.dblQtyReceived,1)),
 		[dblQtyReceived]				=	dbo.fnAPValidatePODetailQtyToReceive(A.intPurchaseDetailId, ISNULL(A.dblQtyReceived,1)),
 		[dblDiscount]					=	ISNULL(A.[dblDiscount],0),
