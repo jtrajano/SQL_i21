@@ -4805,6 +4805,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
     <Build Include="dbo\Views\vyuICGetItemOwner.sql" />
     <Build Include="dbo\Views\vyuMFGetWorkOrderSummaryView.sql" />
+    <None Include="Scripts\Post-Deployment\EM\037_DefaultDataLocationPayee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
