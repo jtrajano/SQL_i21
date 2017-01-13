@@ -8,9 +8,13 @@
     [dblFIT] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [ysnNoTaxable] BIT NULL DEFAULT ((0)), 
     [dblTaxableSS] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblSSTax] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblTaxableSSTips] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblSSTipsTax] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblTaxableMed] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblMedTax] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblTaxableAddMed] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblAddMedTax] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblTaxDueUnreported] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblAdjustFractionCents] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblAdjustSickPay] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -462,3 +466,39 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRForm941',
     @level2type = N'COLUMN',
     @level2name = N'dblTaxableAddMed'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'SS Tax',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRForm941',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSSTax'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'SS Tips Tax',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRForm941',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSSTipsTax'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Medicare Tax',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRForm941',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMedTax'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Additional Medicare Tax',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRForm941',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAddMedTax'

@@ -18,9 +18,13 @@ BEGIN
 			,dblFIT
 			,ysnNoTaxable
 			,dblTaxableSS
+			,dblSSTax
 			,dblTaxableSSTips
+			,dblSSTipsTax
 			,dblTaxableMed
+			,dblMedTax
 			,dblTaxableAddMed
+			,dblAddMedTax
 			,dblTaxDueUnreported
 			,dblAdjustFractionCents
 			,dblAdjustSickPay
@@ -67,10 +71,14 @@ BEGIN
 								+ CASE WHEN (ISNULL(SSTAX.dblTotal, 0) <= 0) THEN 0 ELSE ISNULL(SSTAX.dblTotal, 0) END
 								+ CASE WHEN (ISNULL(SSMED.dblTotal, 0) <= 0) THEN 0 ELSE ISNULL(SSMED.dblTotal, 0) END
 								) <= 0) THEN 1 ELSE 0 END
-			,dblTaxableSS = (SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)) / 0.124
+			,dblTaxableSS = ISNULL(TXBLSS.dblTotal, 0)
+			,dblSSTax = SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)
 			,dblTaxableSSTips = (SSTAX.dblTotal * TIPS.dblTipsPercent) / 0.124
-			,dblTaxableMed = ((SSMED.dblTotal) - (ADDMED.dblTotal)) / 0.029
+			,dblSSTipsTax = (SSTAX.dblTotal * TIPS.dblTipsPercent)
+			,dblTaxableMed = ISNULL(TXBLMED.dblTotal, 0)
+			,dblMedTax = ((SSMED.dblTotal) - (ADDMED.dblTotal))
 			,dblTaxableAddMed = (ADDMED.dblTotal) / 0.009
+			,dblAddMedTax = (ADDMED.dblTotal)
 			,dblTaxDueUnreported = 0
 			,dblAdjustFractionCents = 0
 			,dblAdjustSickPay = 0
@@ -122,6 +130,9 @@ BEGIN
 				 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) D2
 			 ) TIPS,
 			 (SELECT dblTotal = ISNULL(E.dblTotal, 0) - ISNULL(D.dblTotal, 0) FROM 
+				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) E,
+				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) D) TXBLSS,
+			 (SELECT dblTotal = ISNULL(E.dblTotal, 0) - ISNULL(D.dblTotal, 0) FROM 
 				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE ysnMedTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) E,
 				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnMedTaxable = 1  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) D) TXBLMED, 
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay'
@@ -146,10 +157,14 @@ BEGIN
 								) <= 0) THEN 1 ELSE 0 END
 			,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
 			,dblFIT = ISNULL(FIT.dblTotal, 0)
-			,dblTaxableSS = (SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)) / 0.124
+			,dblTaxableSS = ISNULL(TXBLSS.dblTotal, 0)
+			,dblSSTax = SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)
 			,dblTaxableSSTips = (SSTAX.dblTotal * TIPS.dblTipsPercent) / 0.124
-			,dblTaxableMed = ((SSMED.dblTotal) - (ADDMED.dblTotal)) / 0.029
+			,dblSSTipsTax = (SSTAX.dblTotal * TIPS.dblTipsPercent)
+			,dblTaxableMed = ISNULL(TXBLMED.dblTotal, 0)
+			,dblMedTax = ((SSMED.dblTotal) - (ADDMED.dblTotal))
 			,dblTaxableAddMed = (ADDMED.dblTotal) / 0.009
+			,dblAddMedTax = (ADDMED.dblTotal)
 			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotal, 0))
 			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotal, 0))
 			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotal, 0))
@@ -168,6 +183,9 @@ BEGIN
 				 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) E2,
 				 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) D2
 			 ) TIPS,
+			 (SELECT dblTotal = ISNULL(E.dblTotal, 0) - ISNULL(D.dblTotal, 0) FROM 
+				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) E,
+				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) D) TXBLSS,
 			 (SELECT dblTotal = ISNULL(E.dblTotal, 0) - ISNULL(D.dblTotal, 0) FROM 
 				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE ysnMedTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) E,
 				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnMedTaxable = 1  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) D) TXBLMED, 
