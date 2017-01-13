@@ -4650,6 +4650,7 @@
     <Build Include="dbo\Stored Procedures\uspCFDeleteTransaction.sql" />
     <Build Include="dbo\Functions\fnARGetAccountIds.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentConfiguration.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeW3.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
