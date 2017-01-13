@@ -25,11 +25,11 @@ BEGIN
 	DECLARE @intDuplicate						      INT = 0
 	DECLARE @intId								      INT
 	---------------------------------------------------------
-	DECLARE @intItemId								  INT = 0
-	DECLARE @intNetworkId							  INT = 0
-	DECLARE @intSiteGroup							  INT = 0
-	DECLARE @intSiteId								  INT = 0
-	DECLARE @intLocalPricingIndex					  INT = 0
+	DECLARE @intItemId								  INT = NULL
+	DECLARE @intNetworkId							  INT = NULL
+	DECLARE @intSiteGroup							  INT = NULL
+	DECLARE @intSiteId								  INT = NULL
+	DECLARE @intLocalPricingIndex					  INT = NULL
 	---------------------------------------------------------
 
 	---------------------------------------------------------
@@ -75,7 +75,7 @@ BEGIN
 				SET @ysnHasError = 1
 			END
 	END
-	ELSE IF(@strType = 'Local\Network')
+	ELSE IF(@strType = 'Local/Network')
 	BEGIN
 		IF(@strBasis = 'Local Index Retail' OR @strBasis = 'Local Index Cost')
 			BEGIN
@@ -307,14 +307,12 @@ BEGIN
 			RETURN 1
 		END TRY
 		BEGIN CATCH
+			ROLLBACK TRANSACTION
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strPriceProfile,'Internal Error - ' + ERROR_MESSAGE())
 			SET @ysnHasError = 1
-			ROLLBACK TRANSACTION
 			RETURN 0
 		END CATCH
 	END
 END
 GO
-
-
