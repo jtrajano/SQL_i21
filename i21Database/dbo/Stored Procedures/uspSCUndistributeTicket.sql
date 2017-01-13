@@ -34,12 +34,12 @@ BEGIN TRY
 		IF @strInOutFlag = 'I'
 			BEGIN
 				CREATE TABLE #tmpItemReceiptIds (
-					[intInventoryReceiptId] [INT] PRIMARY KEY,
-					[intInventoryReceiptItemId] [INT],
+					[intInventoryReceiptItemId] [INT] PRIMARY KEY,
+					[intInventoryReceiptId] [INT],
 					[strReceiptNumber] [VARCHAR](100),
-					UNIQUE ([intInventoryReceiptId])
+					UNIQUE ([intInventoryReceiptItemId])
 				);
-				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,intInventoryReceiptItemId,strReceiptNumber) SELECT intInventoryReceiptId,intInventoryReceiptItemId,strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
+				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intInventoryReceiptId,strReceiptNumber) SELECT intInventoryReceiptItemId,intInventoryReceiptId,strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
@@ -76,12 +76,12 @@ BEGIN TRY
 		ELSE
 			BEGIN
 				CREATE TABLE #tmpItemShipmentIds (
-					[intInventoryShipmentId] [INT] PRIMARY KEY,
-					[intInventoryShipmentItemId] [INT],
+					[intInventoryShipmentItemId] [INT] PRIMARY KEY,
+					[intInventoryShipmentId] [INT],
 					[strShipmentNumber] [VARCHAR],
-					UNIQUE ([intInventoryReceiptId])
+					UNIQUE ([intInventoryShipmentItemId])
 				);
-				INSERT INTO #tmpItemReceiptIds(intInventoryShipmentId,intInventoryShipmentItemId,strShipmentNumber) SELECT intInventoryShipmentId, intInventoryShipmentItemId,strShipmentNumber FROM vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
+				INSERT INTO #tmpItemShipmentIds(intInventoryShipmentItemId,intInventoryShipmentId,strShipmentNumber) SELECT  intInventoryShipmentItemId,intInventoryShipmentId,strShipmentNumber FROM vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
