@@ -1855,11 +1855,11 @@ ELSE
 --ELSE
 --	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'EntityManagement.view.Entity?searchCommand=searchEntityCompetitor' WHERE strMenuName = 'Competitors' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Sales Entity Contacts', N'CRM', @CRMParentMenuId, N'Sales Entity Contacts', N'Activity', N'Screen', N'EntityManagement.view.SalesEntityContact', N'small-menu-activity', 0, 0, 0, 1, 12, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'EntityManagement.view.SalesEntityContact' WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+--	VALUES (N'Sales Entity Contacts', N'CRM', @CRMParentMenuId, N'Sales Entity Contacts', N'Activity', N'Screen', N'EntityManagement.view.SalesEntityContact', N'small-menu-activity', 0, 0, 0, 1, 12, 1)
+--ELSE
+--	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'EntityManagement.view.SalesEntityContact' WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Leads' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -1869,6 +1869,7 @@ ELSE
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 /* END OF DELETING */
 
 /* HELP DESK */
