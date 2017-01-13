@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblLGLoadDetailStg]
 (
-	[intLGLoadDetailStgId] INT PRIMARY KEY,
+	[intLGLoadDetailStgId] INT IDENTITY(1,1) PRIMARY KEY,
 	[intLoadStgId] INT,
 	[intLoadId] INT,
 	[intRowNumber] INT,

@@ -544,6 +544,7 @@ BEGIN
 	UPDATE	dbo.tblLGLoad
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+			,intShipmentStatus = 6
 	WHERE	strLoadNumber = @strTransactionId  
 
 	DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType

@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblLGLoadContainerStg]
 (
-	[intLoadContainerStgId] INT PRIMARY KEY,
+	[intLoadContainerStgId] INT IDENTITY(1,1) PRIMARY KEY,
 	[intLoadStgId] INT,
 	[intLoadId] INT,
 	[strContainerNo] NVARCHAR(100)  COLLATE Latin1_General_CI_AS, 
