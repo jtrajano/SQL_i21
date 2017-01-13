@@ -4810,6 +4810,11 @@
     <Build Include="dbo\Tables\tblCTAOPDetail.sql" />
     <Build Include="dbo\Views\vyuCTAOP.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetUnsavedAOPDetail.sql" />
+    <Build Include="dbo\Tables\tblIPStockStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPStock.sql" />
+    <Build Include="dbo\Tables\tblIPStockArchive.sql" />
+    <Build Include="dbo\Tables\tblIPStockError.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
