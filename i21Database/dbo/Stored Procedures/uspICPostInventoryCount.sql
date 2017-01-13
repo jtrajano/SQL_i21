@@ -360,6 +360,36 @@ BEGIN
 	COMMIT TRAN @TransactionName
 END 
 
+-- Update Status & Inventory Lock
+IF EXISTS (SELECT 1 FROM dbo.tblICInventoryCount WHERE intInventoryCountId = @intTransactionId AND ysnPosted=1)
+    BEGIN
+        UPDATE dbo.tblICInventoryCount 
+        SET intStatus = 4 --Closed
+        WHERE intInventoryCountId=@intTransactionId
+
+		--Unlock Inventory
+		UPDATE il SET il.ysnLockedInventory = 0
+		FROM tblICItemLocation il
+			INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
+			INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
+				AND il.intItemId = icd.intItemId
+		WHERE ic.intInventoryCountId = @intTransactionId
+	END
+ELSE
+	BEGIN
+		UPDATE dbo.tblICInventoryCount 
+        SET intStatus = 3 --InventoryLocked
+        WHERE intInventoryCountId=@intTransactionId
+
+		--Lock Inventory
+		UPDATE il SET il.ysnLockedInventory = 1
+		FROM tblICItemLocation il
+			INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
+			INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
+				AND il.intItemId = icd.intItemId
+		WHERE ic.intInventoryCountId = @intTransactionId
+	END
+
 -- Create an Audit Log
 IF @ysnRecap = 0 
 BEGIN 
