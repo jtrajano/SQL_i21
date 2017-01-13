@@ -4806,6 +4806,10 @@
     <Build Include="dbo\Views\vyuICGetItemOwner.sql" />
     <Build Include="dbo\Views\vyuMFGetWorkOrderSummaryView.sql" />
     <None Include="Scripts\Post-Deployment\EM\037_DefaultDataLocationPayee.sql" />
+    <Build Include="dbo\Tables\tblCTAOP.sql" />
+    <Build Include="dbo\Tables\tblCTAOPDetail.sql" />
+    <Build Include="dbo\Views\vyuCTAOP.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetUnsavedAOPDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
