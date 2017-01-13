@@ -21,7 +21,8 @@ Ext.Loader.setConfig({
 
 Ext.application({
     views: [
-        'RebuildInventory'
+        'RebuildInventory',
+        'CopyItemLocation'
     ],
     name: 'Inventory',
 
