@@ -770,6 +770,8 @@ namespace iRely.Inventory.Model
         public decimal? dblLastCost { get; set; }
         public decimal? dblStandardCost { get; set; }
         public decimal? dblAverageCost { get; set; }
+        public decimal? dblQuantityInStockUOM { get; set; }
+        public string strStockUOM { get; set; }
     }
 
     public class vyuSMGetCompanyLocationSearchList
