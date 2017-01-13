@@ -34,5 +34,7 @@
 	strERPLineNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strMessage				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strFeedStatus			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	dtmFeedCreated			DATETIME
+	dtmFeedCreated			DATETIME,
+
+	CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC)
 )
