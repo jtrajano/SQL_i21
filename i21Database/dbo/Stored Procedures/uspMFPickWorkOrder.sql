@@ -1318,6 +1318,10 @@ BEGIN TRY
 							AND intItemId = @intItemId
 						)
 				BEGIN
+					SELECT @intCategoryId = intCategoryId
+					FROM tblICItem
+					WHERE intItemId = @intItemId
+
 					INSERT INTO tblMFProductionSummary (
 						intWorkOrderId
 						,intItemId
@@ -1332,6 +1336,8 @@ BEGIN TRY
 						,dblCountOutputQuantity
 						,dblCountConversionQuantity
 						,dblCalculatedQuantity
+						,intCategoryId
+						,intItemTypeId
 						)
 					SELECT @intWorkOrderId
 						,@intItemId
@@ -1346,6 +1352,12 @@ BEGIN TRY
 						,0
 						,0
 						,0
+						,@intCategoryId
+						,CASE 
+							WHEN @ysnSubstituteItem = 1
+								THEN 3
+							ELSE 1
+							END
 				END
 				ELSE
 				BEGIN
@@ -1426,6 +1438,10 @@ BEGIN TRY
 							AND intItemId = @intItemId
 						)
 				BEGIN
+					SELECT @intCategoryId = intCategoryId
+					FROM tblICItem
+					WHERE intItemId = @intItemId
+
 					INSERT INTO tblMFProductionSummary (
 						intWorkOrderId
 						,intItemId
@@ -1440,6 +1456,8 @@ BEGIN TRY
 						,dblCountOutputQuantity
 						,dblCountConversionQuantity
 						,dblCalculatedQuantity
+						,intCategoryId
+						,intItemTypeId
 						)
 					SELECT @intWorkOrderId
 						,@intItemId
@@ -1454,6 +1472,12 @@ BEGIN TRY
 						,0
 						,0
 						,0
+						,@intCategoryId
+						,CASE 
+							WHEN @ysnSubstituteItem = 1
+								THEN 3
+							ELSE 1
+							END
 				END
 				ELSE
 				BEGIN

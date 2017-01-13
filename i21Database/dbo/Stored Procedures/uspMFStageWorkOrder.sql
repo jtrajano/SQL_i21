@@ -54,6 +54,8 @@ BEGIN TRY
 		,@intWorkOrderInputLotId INT
 		,@intProductionStagingId INT
 		,@intProductionStageLocationId INT
+		,@intCategoryId INT
+		,@intItemTypeId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -112,6 +114,7 @@ BEGIN TRY
 			)
 
 	SELECT @strInventoryTracking = strInventoryTracking
+		,@intCategoryId = intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intInputItemId
 
@@ -221,6 +224,13 @@ BEGIN TRY
 				THEN @intProductionStageLocationId
 			ELSE RI.intStorageLocationId
 			END
+		,@intItemTypeId = (
+			CASE 
+				WHEN RS.intRecipeSubstituteItemId IS NULL
+					THEN 1
+				ELSE 3
+				END
+			)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
 	WHERE RI.intWorkOrderId = @intWorkOrderId
@@ -639,6 +649,8 @@ BEGIN TRY
 			,dblCountOutputQuantity
 			,dblCountConversionQuantity
 			,dblCalculatedQuantity
+			,intCategoryId
+			,intItemTypeId
 			)
 		SELECT @intWorkOrderId
 			,@intInputItemId
@@ -653,6 +665,8 @@ BEGIN TRY
 			,0
 			,0
 			,0
+			,@intCategoryId
+			,@intItemTypeId
 	END
 	ELSE
 	BEGIN

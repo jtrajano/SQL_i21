@@ -2,6 +2,8 @@
 	intProductionSummaryId INT identity(1, 1)
 	,intWorkOrderId INT NOT NULL
 	,intItemId INT NOT NULL
+	,intCategoryId INT NULL
+	,intItemTypeId INT NULL 
 	,dblOpeningQuantity NUMERIC(18, 6)
 	,dblOpeningOutputQuantity NUMERIC(18, 6)
 	,dblOpeningConversionQuantity NUMERIC(18, 6)
