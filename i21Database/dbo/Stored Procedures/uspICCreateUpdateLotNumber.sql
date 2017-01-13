@@ -92,6 +92,7 @@ DECLARE
 	,@strSourceTransactionId	AS NVARCHAR(50) 
 	,@intSourceTransactionTypeId AS INT 
 	,@intOwnerId				AS INT 	
+	,@intShiftId				AS INT 
 
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
@@ -169,6 +170,7 @@ SELECT  intId
 		,strSourceTransactionId
 		,intSourceTransactionTypeId
 		,intOwnerId 
+		,intShiftId 
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -216,6 +218,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strSourceTransactionId
 		,@intSourceTransactionTypeId
 		,@intOwnerId 
+		,@intShiftId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -264,7 +267,20 @@ BEGIN
 			DECLARE @intPatternCode INT = 24
 			DECLARE @ysnProposed INT = 0
 
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId, @intItemId, @intManufacturingId, @intSubLocationId, @intLocationId, @intOrderTypeId, @intBlendRequirementId, @intPatternCode, @ysnProposed, @strLotNumber OUTPUT
+			EXEC dbo.uspMFGeneratePatternId 
+				@intCategoryId
+				, @intItemId
+				, @intManufacturingId
+				, @intSubLocationId
+				, @intLocationId
+				, @intOrderTypeId
+				, @intBlendRequirementId
+				, @intPatternCode
+				, @ysnProposed
+				, @strLotNumber OUTPUT
+				, @intEntityUserSecurityId
+				, @intShiftId
+				, @dtmManufacturedDate
 		END 
 	END 
 
@@ -714,6 +730,8 @@ BEGIN
 				,@intParentLotId OUTPUT 
 				,@intSubLocationId
 				,@intLocationId
+				,@dtmManufacturedDate
+				,@intShiftId
 
 			IF @intErrorFoundOnMFCreateUpdateParentLotNumber <> 0
 				RETURN @intErrorFoundOnMFCreateUpdateParentLotNumber;
@@ -859,6 +877,7 @@ BEGIN
 		,@strSourceTransactionId
 		,@intSourceTransactionTypeId
 		,@intOwnerId 
+		,@intShiftId
 	;
 END
 
