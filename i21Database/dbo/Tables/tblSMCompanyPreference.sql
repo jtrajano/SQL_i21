@@ -39,6 +39,6 @@
 	[strDateFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strNumberFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intCompanySetupId] INT NOT NULL,
-	[intLockedRecordExpiration] INT NOT NULL DEFAULT 30,
+	[intLockedRecordExpiration] INT NOT NULL DEFAULT 60,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
