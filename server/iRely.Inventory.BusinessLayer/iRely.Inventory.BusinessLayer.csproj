@@ -86,8 +86,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="iRely.Common, Version=17.1.6219.20144, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\iRely.Common.17.1.6219.20144\lib\net45\iRely.Common.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\resources\references\iRely.Common.dll</HintPath>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\iTextSharp.5.5.10\lib\itextsharp.dll</HintPath>
