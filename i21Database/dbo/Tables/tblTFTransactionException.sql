@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFTransactionException](
     [intTransactionExceptionId] INT IDENTITY NOT NULL,
+	[intTransactionId] INT NOT NULL,
     [intProductCodeId] INT NULL,
     [strBillOfLading] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [dblReceived] NUMERIC(18, 6) NULL,
@@ -55,7 +56,8 @@
     [strTaxPayerAddress] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblTFTransactionException] PRIMARY KEY ([intTransactionExceptionId]), 
-    CONSTRAINT [FK_tblTFTransactionException_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId])
+    CONSTRAINT [FK_tblTFTransactionException_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId]),
+	CONSTRAINT [FK_tblTFTransactionException_tblTFTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblTFTransaction]([intTransactionId])
 )
 
 GO
