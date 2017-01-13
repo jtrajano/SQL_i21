@@ -165,13 +165,13 @@ SELECT W.intWorkOrderId
 	,L.strLotAlias
 	,S.intShiftId
 	,S.strShiftName
-	,WP.dtmProductionDate
+	,IsNULL(WP.dtmProductionDate,W.dtmPlannedDate )
 	,1 AS intSequenceNo
 	,WI.strBatchId
 	,O.intOwnerId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WI ON WI.intWorkOrderId = W.intWorkOrderId
-JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intBatchId = WI.intBatchId
+Left JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intBatchId = WI.intBatchId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
