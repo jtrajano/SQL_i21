@@ -631,9 +631,44 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 var colNewUnitCost = win.down('#colNewUnitCost');
 
                 if(current) {
-                    var lineItems = config.viewModel.data.current.tblICInventoryAdjustmentDetails();
+                    var lineItems = current.tblICInventoryAdjustmentDetails().data.items,
+                        countLineItems = lineItems.length,
+                        currentLotId = null,
+                        currentItemIndex = 0,
+                        countLineNumber = 0,
+                        duplicateLotDetected = 0;
+                    //Validate Lot Id
+                    if(countLineItems > 1) {
+                        Ext.Array.each(current.tblICInventoryAdjustmentDetails().data.items, function (item) {
+                            if (!item.dummy) {
+                                countLineNumber++;
 
-                    var lotIds = [];
+                                if(currentItemIndex == 0) {
+                                    currentItemIndex = 1;
+                                }
+                                else {
+                                    if(countLineNumber == countLineItems) {
+                                        currentItemIndex++;
+                                    }
+                                }
+
+                                if(currentItemIndex == countLineNumber) {
+                                    currentLotId = item.get('intLotId');
+                                }
+                                else{
+                                    if(item.get('intLotId') == currentLotId) {
+                                        iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
+                                        duplicateLotDetected = 1;
+                                    }
+                                }
+                            }
+                        });
+
+                        if(duplicateLotDetected == 1) {
+                            return;
+                        }
+                    }
+                   /* var lotIds = [];
                     _.each(lineItems.data.items, function (value, key, list) {
                         if(!value.dummy)
                             lotIds.push(value.data.intLotId);
@@ -641,10 +676,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     if(_.size(lotIds) !== _.size(_.uniq(lotIds))) {
                         iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
                         return;
-                    }
+                    }*/
+
+
 
                     var zeroCost = false;
-                        zeroCost = Ext.Array.each(lineItems.data.items, function (detail) {
+                        zeroCost = Ext.Array.each(lineItems, function (detail) {
                             if (!detail.dummy) {
                                 if(!iRely.Functions.isEmpty(detail.get('dblNewCost')) || detail.modified.dblNewCost !== null) {
                                    /* var hasModification = !_.isUndefined(detail.modified);
