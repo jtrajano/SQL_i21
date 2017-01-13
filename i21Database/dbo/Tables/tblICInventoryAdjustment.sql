@@ -5,7 +5,7 @@
     [dtmAdjustmentDate] DATETIME NOT NULL DEFAULT (getdate()), 
     [intAdjustmentType] INT NOT NULL, 
     [strAdjustmentNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [strDescription] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
 	[ysnPosted] BIT NULL DEFAULT ((0)),
 	[intEntityId] INT NULL,

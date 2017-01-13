@@ -18,6 +18,7 @@
 	,@intSourceTransactionTypeId AS INT
 	,@intEntityUserSecurityId AS INT 
 	,@intInventoryAdjustmentId AS INT OUTPUT	
+	,@strDescription AS NVARCHAR(1000) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -113,7 +114,7 @@ END
 --IF ISNULL(@dblMoveQty, 0) > 0 
 --BEGIN 
 --	-- 'Internal Error. The Adjust By Quantity is required to be a negative value.'
---	RAISERROR(80035, 11, 1)  
+--	RAISERROR(80106, 11, 1)  
 --	GOTO _Exit
 --END 
 
@@ -205,7 +206,7 @@ BEGIN
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
 			,intAdjustmentType			= @ADJUSTMENT_TYPE_LotMove
 			,strAdjustmentNo			= @strAdjustmentNo
-			,strDescription				= ''
+			,strDescription				= @strDescription
 			,intSort					= 1
 			,ysnPosted					= 0
 			,intEntityId				= @intEntityUserSecurityId

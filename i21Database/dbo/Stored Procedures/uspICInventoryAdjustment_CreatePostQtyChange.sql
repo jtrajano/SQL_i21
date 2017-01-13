@@ -15,6 +15,7 @@
 	,@intSourceTransactionTypeId AS INT
 	,@intEntityUserSecurityId AS INT 
 	,@intInventoryAdjustmentId AS INT OUTPUT
+	,@strDescription AS NVARCHAR(1000) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -152,7 +153,7 @@ BEGIN
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
 			,intAdjustmentType			= @ADJUSTMENT_TYPE_QuantityChange
 			,strAdjustmentNo			= @strAdjustmentNo
-			,strDescription				= ''
+			,strDescription				= @strDescription
 			,intSort					= 1
 			,ysnPosted					= 0
 			,intEntityId				= @intEntityUserSecurityId
