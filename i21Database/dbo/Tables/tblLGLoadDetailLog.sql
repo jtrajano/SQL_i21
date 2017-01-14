@@ -1,7 +1,7 @@
-﻿CREATE TABLE [dbo].[tblLGLoadDetailStg]
+﻿CREATE TABLE [dbo].[tblLGLoadDetailLog]
 (
-	[intLGLoadDetailStgId] INT IDENTITY(1,1) PRIMARY KEY,
-	[intLoadStgId] INT,
+	[intLGLoadDetailLogId] INT IDENTITY(1,1) PRIMARY KEY,
+	[intLoadLogId] INT,
 	[intLoadId] INT,
 	[intLoadDetailId] INT,
 	[intRowNumber] INT,
@@ -19,7 +19,4 @@
 	[strLoadNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strChangeType] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strRowState] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
-	[dtmFeedCreated] DATETIME,
-
-	CONSTRAINT [FK_tblLGLoadDetailStg_tblLGLoadStg_intLoadStgId] FOREIGN KEY ([intLoadStgId]) REFERENCES [dbo].[tblLGLoadStg] ([intLoadStgId]) ON DELETE CASCADE,
 )

@@ -4816,6 +4816,12 @@
     <Build Include="dbo\Tables\tblIPStockArchive.sql" />
     <Build Include="dbo\Tables\tblIPStockError.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractStatus.sql" />
+    <Build Include="dbo\Tables\tblLGLoadLog.sql" />
+    <Build Include="dbo\Tables\tblLGLoadDetailLog.sql" />
+    <Build Include="dbo\Tables\tblLGLoadContainerLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateLoadIntegrationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessIntegrationLogData.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessLoadToIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

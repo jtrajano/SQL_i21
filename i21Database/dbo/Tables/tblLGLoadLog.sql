@@ -1,6 +1,6 @@
-﻿CREATE TABLE [dbo].[tblLGLoadStg]
+﻿CREATE TABLE [dbo].[tblLGLoadLog]
 (
-	[intLoadStgId] INT IDENTITY(1,1) PRIMARY KEY,
+	[intLoadLogId] INT IDENTITY(1,1) PRIMARY KEY,
 	[intLoadId] INT,
 	[strTransactionType] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	[strLoadNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
@@ -13,6 +13,5 @@
 	[dtmScheduledDate] DATETIME, 
 	[strRowState] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[strFeedStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	[dtmFeedCreated] DATETIME,
 	[strMessage] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 )
