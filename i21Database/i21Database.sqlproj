@@ -4815,6 +4815,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPStock.sql" />
     <Build Include="dbo\Tables\tblIPStockArchive.sql" />
     <Build Include="dbo\Tables\tblIPStockError.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContractStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
