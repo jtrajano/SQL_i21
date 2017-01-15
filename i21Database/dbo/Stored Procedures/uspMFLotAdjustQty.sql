@@ -29,7 +29,7 @@ BEGIN TRY
 		,@dblWeight NUMERIC(38, 20)
 		,@dblLotReservedQty NUMERIC(38, 20)
 		,@dblLotAvailableQty NUMERIC(38, 20)
-
+		,@strNote1 nvarchar(MAX)
 	IF @strReasonCode = '0'
 		SELECT @strReasonCode = ''
 
@@ -169,6 +169,7 @@ BEGIN TRY
 	END
 
 	BEGIN TRANSACTION
+	Set @strNote1=isNULL(@strReasonCode,'')+' '+IsNULL(@strNotes,'')
 
 	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId
 		,@dtmDate
@@ -183,6 +184,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId
 		,@intUserId
 		,@intInventoryAdjustmentId OUTPUT
+		,@strNote1
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 10
