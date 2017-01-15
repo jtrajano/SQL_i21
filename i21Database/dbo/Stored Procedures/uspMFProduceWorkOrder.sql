@@ -284,6 +284,8 @@ BEGIN
 			,@strVesselNo
 			,@dtmProductionDate
 			,@intWorkOrderProducedLotId
+			,NULL
+			,@intShiftId
 	END
 	ELSE
 	BEGIN
