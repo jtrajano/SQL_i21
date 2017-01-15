@@ -226,9 +226,9 @@ BEGIN TRY
 			END
 		,@intItemTypeId = (
 			CASE 
-				WHEN RS.intRecipeSubstituteItemId IS NULL
-					THEN 1
-				ELSE 3
+				WHEN RS.intSubstituteItemId is not null and RS.intSubstituteItemId =@intInputItemId
+					THEN 3
+				ELSE 1
 				END
 			)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
@@ -633,6 +633,7 @@ BEGIN TRY
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intInputItemId
+				And intItemTypeId IN (1,3)
 			)
 	BEGIN
 		INSERT INTO tblMFProductionSummary (
@@ -674,6 +675,7 @@ BEGIN TRY
 		SET dblInputQuantity = dblInputQuantity + @dblInputWeight
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intInputItemId
+			And intItemTypeId IN (1,3)
 	END
 
 	IF @intTransactionCount = 0

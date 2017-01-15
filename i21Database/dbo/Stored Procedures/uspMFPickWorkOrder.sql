@@ -71,6 +71,7 @@ BEGIN TRY
 		,@intLotCodeStartingPosition INT
 		,@intLotCodeNoOfDigits INT
 		,@dblLowerToleranceReqQty NUMERIC(18, 6)
+		,@intLotItemId int
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
@@ -341,7 +342,7 @@ BEGIN TRY
 						)
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
-		,ri.intItemUOMId
+		,IU.intItemUOMId
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
 		,I.strLotTracking
@@ -377,6 +378,10 @@ BEGIN TRY
 		AND rs.intItemId = ri.intItemId
 	JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 	JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = ri.intItemUOMId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemId = rs.intSubstituteItemId
+			AND IU.intUnitMeasureId = IU1.intUnitMeasureId
+		
 	JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
@@ -1177,7 +1182,17 @@ BEGIN TRY
 
 		WHILE (@intLotRecordId IS NOT NULL)
 		BEGIN
+			SELECT @intLotId = NULL
+				,@intLotItemId=NULL
+				,@dblQty = NULL
+				,@ysnSubstituteItem = NULL
+				,@dblMaxSubstituteRatio = NULL
+				,@dblSubstituteRatio = NULL
+				,@intItemUOMId = NULL
+				,@intItemIssuedUOMId = NULL
+
 			SELECT @intLotId = intLotId
+				,@intLotItemId=intItemId
 				,@dblQty = dblQty
 				,@ysnSubstituteItem = ysnSubstituteItem
 				,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
@@ -1190,6 +1205,8 @@ BEGIN TRY
 			IF @ysnSubstituteItem = 1
 			BEGIN
 				SELECT @dblReqQty = @dblReqQty * (@dblMaxSubstituteRatio / 100) * @dblSubstituteRatio
+				Select @intUnitMeasureId =intUnitMeasureId from tblICItemUOM Where intItemUOMId=@intRecipeItemUOMId
+				Select @intRecipeItemUOMId= intItemUOMId from tblICItemUOM Where intItemId=@intLotItemId and intUnitMeasureId=@intUnitMeasureId
 			END
 
 			IF EXISTS (
@@ -1232,7 +1249,7 @@ BEGIN TRY
 
 					EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 						-- Parameters for filtering:
-						@intItemId = @intItemId
+						@intItemId = @intLotItemId
 						,@dtmDate = @dtmCurrentDateTime
 						,@intLocationId = @intLocationId
 						,@intSubLocationId = @intSubLocationId
@@ -1285,7 +1302,7 @@ BEGIN TRY
 					,intSubLocationId
 					)
 				SELECT @intWorkOrderId
-					,@intItemId
+					,@intLotItemId
 					,intLotId
 					,[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
 					,intItemUOMId
@@ -1315,12 +1332,13 @@ BEGIN TRY
 						SELECT *
 						FROM tblMFProductionSummary
 						WHERE intWorkOrderId = @intWorkOrderId
-							AND intItemId = @intItemId
+							AND intItemId = @intLotItemId
+							And intItemTypeId IN (1,3)
 						)
 				BEGIN
 					SELECT @intCategoryId = intCategoryId
 					FROM tblICItem
-					WHERE intItemId = @intItemId
+					WHERE intItemId = @intLotItemId
 
 					INSERT INTO tblMFProductionSummary (
 						intWorkOrderId
@@ -1340,7 +1358,7 @@ BEGIN TRY
 						,intItemTypeId
 						)
 					SELECT @intWorkOrderId
-						,@intItemId
+						,@intLotItemId
 						,0
 						,0
 						,0
@@ -1364,7 +1382,8 @@ BEGIN TRY
 					UPDATE tblMFProductionSummary
 					SET dblConsumedQuantity = dblConsumedQuantity + @dblReqQty
 					WHERE intWorkOrderId = @intWorkOrderId
-						AND intItemId = @intItemId
+						AND intItemId = @intLotItemId
+						And intItemTypeId IN (1,3)
 				END
 
 				UPDATE @tblLot
@@ -1405,7 +1424,7 @@ BEGIN TRY
 					,intSubLocationId
 					)
 				SELECT @intWorkOrderId
-					,@intItemId
+					,@intLotItemId
 					,intLotId
 					,@dblQty
 					,intItemUOMId
@@ -1435,12 +1454,13 @@ BEGIN TRY
 						SELECT *
 						FROM tblMFProductionSummary
 						WHERE intWorkOrderId = @intWorkOrderId
-							AND intItemId = @intItemId
+							AND intItemId = @intLotItemId
+							And intItemTypeId IN (1,3)
 						)
 				BEGIN
 					SELECT @intCategoryId = intCategoryId
 					FROM tblICItem
-					WHERE intItemId = @intItemId
+					WHERE intItemId = @intLotItemId
 
 					INSERT INTO tblMFProductionSummary (
 						intWorkOrderId
@@ -1460,7 +1480,7 @@ BEGIN TRY
 						,intItemTypeId
 						)
 					SELECT @intWorkOrderId
-						,@intItemId
+						,@intLotItemId
 						,0
 						,0
 						,0
@@ -1484,7 +1504,8 @@ BEGIN TRY
 					UPDATE tblMFProductionSummary
 					SET dblConsumedQuantity = dblConsumedQuantity + @dblQty
 					WHERE intWorkOrderId = @intWorkOrderId
-						AND intItemId = @intItemId
+						AND intItemId = @intLotItemId
+						And intItemTypeId IN (1,3)
 				END
 
 				UPDATE @tblLot

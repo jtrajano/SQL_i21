@@ -90,7 +90,7 @@ BEGIN TRY
 		,@intLotId
 		,Case When @intWeightUOMId is NULL Then @dblSplitAndPickQty Else @dblSplitAndPickWeight End
 		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
-		,@dblSplitAndPickWeight
+		,Case When @intWeightUOMId is NULL Then @dblSplitAndPickQty Else @dblSplitAndPickWeight End
 		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
 		,Case When @intWeightUOMId is NULL Then 1 Else @dblWeightPerQty End
 		,@intEntityUserSecurityId

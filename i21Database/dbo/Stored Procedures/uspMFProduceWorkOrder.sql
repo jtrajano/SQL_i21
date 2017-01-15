@@ -199,6 +199,7 @@ BEGIN
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intItemId
+				And intItemTypeId IN (2,4,5)
 			)
 	BEGIN
 		SELECT @intCategoryId = intCategoryId
@@ -244,6 +245,7 @@ BEGIN
 		SET dblOutputQuantity = dblOutputQuantity + @dblProduceQty
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intItemId
+			And intItemTypeId IN (2,4,5)
 	END
 
 	DECLARE @intAttributeTypeId INT

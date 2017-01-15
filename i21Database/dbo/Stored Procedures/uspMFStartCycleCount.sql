@@ -886,13 +886,13 @@ BEGIN TRY
 		,I.intItemId
 		,NULL
 		,(
-			SELECT PS.dblQtyInProdStagingLocation
+			SELECT SUM(PS.dblQtyInProdStagingLocation)
 			FROM @tblMFQtyInProductionStagingLocation PS
 			WHERE PS.intItemId = I.intItemId
 			)
 		,I.dblRequiredQty
 		,(
-			SELECT PS.dblQtyInProductionStagingLocation
+			SELECT SUM(PS.dblQtyInProductionStagingLocation)
 			FROM @tblMFQtyInProductionStagingLocation PS
 			WHERE PS.intItemId = I.intItemId
 			)
@@ -934,7 +934,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId = PSL.intItemId
 		AND RSI.intWorkOrderId = @intWorkOrderId
 	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId = PSL.intItemId
-		AND PS.intWorkOrderId = @intWorkOrderId
+		AND PS.intWorkOrderId = @intWorkOrderId And intItemTypeId IN (1,3)
 
 	INSERT INTO dbo.tblMFProductionSummary (
 		intWorkOrderId
@@ -949,6 +949,8 @@ BEGIN TRY
 		,dblCountQuantity
 		,dblCountOutputQuantity
 		,dblCountConversionQuantity
+
+
 		,dblCalculatedQuantity
 		,intCategoryId
 		,intItemTypeId
@@ -991,6 +993,7 @@ BEGIN TRY
 			FROM dbo.tblMFProductionSummary PS
 			WHERE PS.intWorkOrderId = @intWorkOrderId
 				AND PS.intItemId = PSL.intItemId
+				And intItemTypeId IN (1,3)
 			)
 
 	--COMMIT TRANSACTION

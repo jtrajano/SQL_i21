@@ -82,13 +82,13 @@ BEGIN
 		FROM dbo.tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		JOIN tblMFWorkOrderRecipeItem RI ON RI.intItemId = PS.intItemId
-			AND RI.intWorkOrderId = @intWorkOrderId
-			AND RI.intRecipeItemTypeId = 2
+		--JOIN tblMFWorkOrderRecipeItem RI ON RI.intItemId = PS.intItemId
+		--	AND RI.intWorkOrderId = @intWorkOrderId
+		--	AND RI.intRecipeItemTypeId = 2
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE PS.intWorkOrderId = @intWorkOrderId
+		WHERE PS.intWorkOrderId = @intWorkOrderId and PS.intItemTypeId in (2,4,5)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
@@ -127,13 +127,13 @@ BEGIN
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 		--AND I.intCategoryId <> @intCategoryId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		JOIN tblMFWorkOrderRecipeItem RI ON RI.intItemId = PS.intItemId
-			AND RI.intWorkOrderId = @intWorkOrderId
-			AND RI.intRecipeItemTypeId = 1
+		--JOIN tblMFWorkOrderRecipeItem RI ON RI.intItemId = PS.intItemId
+		--	AND RI.intWorkOrderId = @intWorkOrderId
+		--	AND RI.intRecipeItemTypeId = 1
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE PS.intWorkOrderId = @intWorkOrderId
+		WHERE PS.intWorkOrderId = @intWorkOrderId and PS.intItemTypeId in (1,3)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
@@ -171,12 +171,12 @@ BEGIN
 			,UM.strUnitMeasure
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
-			AND I.intCategoryId <> @intCategoryId
-		JOIN dbo.tblICCategory C ON C.intCategoryId = @intItemCategoryId
+			--AND I.intCategoryId <> @intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId 
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE intWorkOrderId = @intWorkOrderId
+		WHERE intWorkOrderId = @intWorkOrderId and intItemTypeId IN (2,4,5)
 		GROUP BY C.intCategoryId
 			,C.strCategoryCode
 			,C.strDescription
@@ -210,12 +210,12 @@ BEGIN
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			--AND I.intCategoryId <> @intCategoryId
-			AND I.intItemId <> @intItemId
+			--AND I.intItemId <> @intItemId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE intWorkOrderId = @intWorkOrderId
+		WHERE intWorkOrderId = @intWorkOrderId and intItemTypeId IN (1,3)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription

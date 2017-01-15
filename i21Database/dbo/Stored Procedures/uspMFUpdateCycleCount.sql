@@ -45,7 +45,8 @@ BEGIN TRY
 	JOIN dbo.tblMFProcessCycleCountSession CCS ON CCS.intCycleCountSessionId=CC.intCycleCountSessionId AND CCS.intWorkOrderId =@intWorkOrderId
 	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId =CC.intItemId AND RSI.intWorkOrderId=@intWorkOrderId 
-	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId=CC.intItemId AND PS.intWorkOrderId=@intWorkOrderId 
+	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId=CC.intItemId AND PS.intWorkOrderId=@intWorkOrderId  and PS.intItemTypeId IN (1,3)
+
 
 	INSERT INTO dbo.tblMFProductionSummary (
 		intWorkOrderId
@@ -86,7 +87,7 @@ BEGIN TRY
 	FROM dbo.tblMFProcessCycleCount CC 
 	JOIN dbo.tblMFProcessCycleCountSession S ON S.intCycleCountSessionId = CC.intCycleCountSessionId AND S.intWorkOrderId = @intWorkOrderId
 	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
-	WHERE NOT EXISTS (SELECT *FROM dbo.tblMFProductionSummary PS WHERE PS.intWorkOrderId=@intWorkOrderId AND PS.intItemId=CC.intItemId)
+	WHERE NOT EXISTS (SELECT *FROM dbo.tblMFProductionSummary PS WHERE PS.intWorkOrderId=@intWorkOrderId AND PS.intItemId=CC.intItemId and PS.intItemTypeId IN (1,3))
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
