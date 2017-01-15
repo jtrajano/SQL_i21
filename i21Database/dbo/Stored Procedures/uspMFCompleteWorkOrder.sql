@@ -83,6 +83,7 @@ BEGIN TRY
 		,@intBusinessShiftId INT
 		,@ysnFillPartialPallet bit
 		,@intSpecialPalletLotId int
+		,@strComputeGrossWeight nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -185,6 +186,18 @@ BEGIN TRY
 			,ysnFillPartialPallet bit
 			,intSpecialPalletLotId int
 			)
+
+	SELECT @strComputeGrossWeight = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 89
+
+	if @strComputeGrossWeight='True'
+	Begin
+		Select @dblProduceQty =@dblPhysicalCount *@dblUnitQty 
+	end
+
 
 	IF @ysnIgnoreTolerance IS NULL
 		SELECT @ysnIgnoreTolerance = 1
