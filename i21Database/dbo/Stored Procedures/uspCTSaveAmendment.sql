@@ -9,9 +9,12 @@ BEGIN TRY
 			@strTableColumns	NVARCHAR(MAX),
 			@SQL				NVARCHAR(MAX)
 
-	DECLARE	@OrigColumn TABLE (strFieldIndex  NVARCHAR(MAX),strDataIndex  NVARCHAR(MAX))
+	IF OBJECT_ID('tempdb..#OrigColumn') IS NOT NULL  	
+		DROP TABLE #OrigColumn	
 
-	INSERT	INTO @OrigColumn					
+	CREATE	 TABLE #OrigColumn (strFieldIndex  NVARCHAR(MAX) COLLATE SQL_Latin1_General_CP1_CS_AS,strDataIndex  NVARCHAR(MAX) COLLATE SQL_Latin1_General_CP1_CS_AS)
+
+	INSERT	INTO #OrigColumn					
 				SELECT	'ysnEntity','intEntityId'		 
 	UNION ALL	SELECT	'ysnTerm','intTermId'		
 	UNION ALL	SELECT	'ysnGrade','intGradeId'		
@@ -33,17 +36,18 @@ BEGIN TRY
 
 	SELECT	@strTableColumns = COALESCE(@strTableColumns+',' ,'') + OC.strFieldIndex
 	FROM	INFORMATION_SCHEMA.COLUMNS COL 
-	JOIN	@OrigColumn	OC	ON	OC.strFieldIndex = COL.COLUMN_NAME
+	JOIN	#OrigColumn	OC	ON	OC.strFieldIndex = COL.COLUMN_NAME
 	WHERE	COL.TABLE_NAME = 'tblCTAmendment' AND COLUMN_NAME NOT IN ('intAmendment','ysnHeaderQuantity','intConcurrencyId')
 	
 	SET @SQL = 
-	'SELECT @strAmendmentFields = COALESCE(@strAmendmentFields+'','' ,'''') + strColumn
+	'SELECT @strAmendmentFields = COALESCE(@strAmendmentFields+'','' ,'''') + strDataIndex
 	from tblCTAmendment s
 	UNPIVOT
 	(
 	  ysnValue
 	  for strColumn in ('+@strTableColumns+')
 	) u 
+	JOIN	#OrigColumn	OC	ON	OC.strFieldIndex = u.strColumn
 	WHERE ysnValue = 1'
 	EXEC sp_executesql @SQL,N'@strAmendmentFields NVARCHAR(MAX) OUTPUT',@strAmendmentFields  = @strAmendmentFields OUTPUT
 

@@ -85,7 +85,7 @@ BEGIN TRY
 		,@intLotId
 		,Case When @intWeightUOMId is NULL Then @dblLotQty Else @dblLotWeight End
 		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
-		,@dblLotWeight
+		,Case When @intWeightUOMId is NULL Then @dblLotQty Else @dblLotWeight End
 		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
 		,Case When @intWeightUOMId is NULL Then 1 Else @dblWeightPerQty End
 		,@intEntityUserSecurityId

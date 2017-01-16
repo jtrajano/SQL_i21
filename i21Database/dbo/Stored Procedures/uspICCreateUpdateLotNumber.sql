@@ -30,6 +30,7 @@ DECLARE @strStorageLocatioNameTo AS NVARCHAR(50)
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
+		,@LotType_ManualSerial AS INT = 3
 
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intParentLotId AS INT = NULL
@@ -92,11 +93,19 @@ DECLARE
 	,@strSourceTransactionId	AS NVARCHAR(50) 
 	,@intSourceTransactionTypeId AS INT 
 	,@intOwnerId				AS INT 	
+	,@intShiftId				AS INT 
 
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
 
 DECLARE @OwnerShipType_Own AS INT = 1
+
+DECLARE @intCategoryId INT = NULL
+DECLARE @intManufacturingId INT = NULL
+DECLARE @intOrderTypeId INT = NULL
+DECLARE @intBlendRequirementId INT = NULL
+DECLARE @intPatternCode INT = 24
+DECLARE @ysnProposed INT = 0
 
 -- Check for redundant lot numbers 
 BEGIN 
@@ -169,6 +178,7 @@ SELECT  intId
 		,strSourceTransactionId
 		,intSourceTransactionTypeId
 		,intOwnerId 
+		,intShiftId 
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -216,6 +226,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strSourceTransactionId
 		,@intSourceTransactionTypeId
 		,@intOwnerId 
+		,@intShiftId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -257,19 +268,53 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblICLot WHERE strLotNumber = @strLotNumber AND intItemId = @intItemId ) AND @ysnItemChange = 0
 		BEGIN 
 			--EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT
-			DECLARE @intCategoryId INT = NULL
-			DECLARE @intManufacturingId INT = NULL
-			DECLARE @intOrderTypeId INT = NULL
-			DECLARE @intBlendRequirementId INT = NULL
-			DECLARE @intPatternCode INT = 24
-			DECLARE @ysnProposed INT = 0
+			EXEC dbo.uspMFGeneratePatternId 
+				@intCategoryId
+				, @intItemId
+				, @intManufacturingId
+				, @intSubLocationId
+				, @intLocationId
+				, @intOrderTypeId
+				, @intBlendRequirementId
+				, @intPatternCode
+				, @ysnProposed
+				, @strLotNumber OUTPUT
+				, @intEntityUserSecurityId
+				, @intShiftId
+				, @dtmManufacturedDate
+		END 
+	END 
 
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId, @intItemId, @intManufacturingId, @intSubLocationId, @intLocationId, @intOrderTypeId, @intBlendRequirementId, @intPatternCode, @ysnProposed, @strLotNumber OUTPUT
+	-- Generate the next lot number - if lot number is blank and lot type is manual/serial. 
+	IF @intLotTypeId = @LotType_ManualSerial AND @strLotNumber = '' AND @intLotId IS NULL 
+	BEGIN 		 
+		-- Generate a new lot id if: 
+		-- 1. Lot id is NULL. 
+		-- 2. Lot Number is blank. 
+		-- 3. and Lot Number was never used before for that item. If it was used, then user must be doing a lot move or merge for that serial number
+		-- 4. if changing the item id of an existing lot. 
+		IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblICLot WHERE strLotNumber = @strLotNumber AND intItemId = @intItemId ) AND @ysnItemChange = 0
+		BEGIN 
+			--EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT
+			EXEC dbo.uspMFGeneratePatternId 
+				@intCategoryId
+				, @intItemId
+				, @intManufacturingId
+				, @intSubLocationId
+				, @intLocationId
+				, @intOrderTypeId
+				, @intBlendRequirementId
+				, @intPatternCode
+				, @ysnProposed
+				, @strLotNumber OUTPUT
+				, @intEntityUserSecurityId
+				, @intShiftId
+				, @dtmManufacturedDate
 		END 
 	END 
 
 	-- Validate if the Serial lot item does not have a lot number. 
-	IF ISNULL(@strLotNumber, '') = '' AND @intLotTypeId = @LotType_Serial
+	IF ISNULL(@strLotNumber, '') = '' AND @intLotTypeId IN (@LotType_Serial, @LotType_ManualSerial)
 	BEGIN 
 		SELECT	@strItemNo = strItemNo
 		FROM	dbo.tblICItem Item
@@ -714,6 +759,8 @@ BEGIN
 				,@intParentLotId OUTPUT 
 				,@intSubLocationId
 				,@intLocationId
+				,@dtmManufacturedDate
+				,@intShiftId
 
 			IF @intErrorFoundOnMFCreateUpdateParentLotNumber <> 0
 				RETURN @intErrorFoundOnMFCreateUpdateParentLotNumber;
@@ -859,6 +906,7 @@ BEGIN
 		,@strSourceTransactionId
 		,@intSourceTransactionTypeId
 		,@intOwnerId 
+		,@intShiftId
 	;
 END
 

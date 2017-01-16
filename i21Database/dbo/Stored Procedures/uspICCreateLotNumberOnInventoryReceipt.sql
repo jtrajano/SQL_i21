@@ -14,6 +14,7 @@ DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
+		,@LotType_ManualSerial AS INT = 3
 
 		,@InventoryTransactionType_InventoryReceipt AS INT = 4
 
@@ -106,7 +107,7 @@ BEGIN
 				GROUP BY AggregrateLot.intInventoryReceiptItemId
 			) ItemLot
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
-	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
 			AND Receipt.strReceiptNumber = @strTransactionId
 			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
 			
@@ -165,7 +166,7 @@ BEGIN
 					WHERE strCondition = 'Clean Wgt'
 					GROUP BY intInventoryReceiptItemId
 			) clean ON clean.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId										
-	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
 			AND Receipt.strReceiptNumber = @strTransactionId
 			AND ROUND(ItemLot.TotalLotQtyInItemUOM,6) <> ROUND(ReceiptItem.dblNet,6)
 			AND ReceiptItem.intWeightUOMId IS NOT NULL -- There is a Gross/Net UOM. 

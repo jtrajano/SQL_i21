@@ -29,7 +29,12 @@ BEGIN TRY
 			CD.dblCashPrice,
 			CY.strCurrency,
 			CD.dblTotalCost,
-			PU.strUnitMeasure strPriceUOM
+			PU.strUnitMeasure strPriceUOM,
+			CASE 
+				WHEN UM.strUnitType='Weight' THEN LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) + ' ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL THEN  ' (' ELSE '' END + ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
+				ELSE ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') 
+			END
+			AS  strQuantityDesc			
 	FROM	tblCTContractDetail CD	
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItemUOM		QM	ON	QM.intItemUOMId			=	CD.intItemUOMId			LEFT
@@ -39,10 +44,12 @@ BEGIN TRY
 	JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT
 	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId		LEFT
 	JOIN	tblICItem			IM	ON	IM.intItemId			=	CD.intItemId			LEFT
-	JOIN	[tblEMEntityFarm]		EF	ON	EF.intFarmFieldId		=	CD.intFarmFieldId		LEFT
+	JOIN	[tblEMEntityFarm]	EF	ON	EF.intFarmFieldId		=	CD.intFarmFieldId		LEFT
 	JOIN	tblCTBagMark		BM	ON	BM.intContractDetailId	=	CD.intContractDetailId	
 									AND	BM.ysnDefault			=	1						LEFT
 	JOIN	tblICItemUOM		NM	ON	NM.intWeightUOMId		=	CD.intNetWeightUOMId	LEFT
+	JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
+	JOIN	tblICUnitMeasure	U7	ON	U7.intUnitMeasureId		=	WU.intUnitMeasureId		LEFT
 	JOIN	tblICUnitMeasure	NU	ON	NU.intUnitMeasureId		=	NM.intUnitMeasureId
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 

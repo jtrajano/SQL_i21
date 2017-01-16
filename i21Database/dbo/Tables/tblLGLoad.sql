@@ -100,6 +100,7 @@
 [intTransUsedBy] INT NULL,
 [intShipmentType] INT NULL,
 [intLoadShippingInstructionId]  INT NULL,
+[strExternalShipmentNumber]  NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),

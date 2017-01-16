@@ -1888,3 +1888,24 @@ BEGIN
 		,'Select CONVERT(nvarchar,intItemId) as ValueMember,strItemNo as DisplayMember from tblICItem I JOIN tblICCategory C on C.intCategoryId=I.intCategoryId Where C.strCategoryCode =''PM'''
 END
 GO
+GO
+IF NOT EXISTS (
+        SELECT 1
+        FROM tblMFAttribute
+        WHERE intAttributeId = 89
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+		,strSQL
+        )
+    SELECT 89
+        ,'Compute Gross Weight in Produce Screen'
+		,5
+		,5
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO

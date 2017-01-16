@@ -49,7 +49,30 @@
 					,strPipePercentage = convert(nvarchar(20), cast(round(pipe.dblProbability,2) as numeric(36,2))) + '%'
 					,dblOpportunityAmmount = (select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
 					,dblNetOpportunityAmmount = (cast(round(pipe.dblProbability/100,2) as numeric (36,2))*(select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId)))
-					,dtmLastActivityDate = null
+					,dtmLastActivityDate = (
+						select
+							max(tblSMActivity.dtmCreated)
+						from
+							tblSMActivity
+						where
+							tblSMActivity.intTransactionId = (
+								select
+									top 1 tblSMTransaction.intTransactionId 
+								from
+									tblSMTransaction 
+								where
+									tblSMTransaction.intScreenId = (
+										select top 1
+											tblSMScreen.intScreenId
+										from
+											tblSMScreen
+										where
+											tblSMScreen.strScreenId = 'Opportunity'
+											and tblSMScreen.strNamespace = 'CRM.view.Opportunity'
+									)
+									and tblSMTransaction.intRecordId = proj.intOpportunityId
+							)
+					)
 					,strSalesPerson = (select top 1 e.strName from tblEMEntity e where e.intEntityId = proj.intInternalSalesPerson)
 					,proj.strDescription
 					,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = cus.[intEntityCustomerId])

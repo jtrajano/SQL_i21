@@ -54,6 +54,8 @@ BEGIN TRY
 		,@intWorkOrderInputLotId INT
 		,@intProductionStagingId INT
 		,@intProductionStageLocationId INT
+		,@intCategoryId INT
+		,@intItemTypeId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -112,6 +114,7 @@ BEGIN TRY
 			)
 
 	SELECT @strInventoryTracking = strInventoryTracking
+		,@intCategoryId = intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intInputItemId
 
@@ -221,6 +224,13 @@ BEGIN TRY
 				THEN @intProductionStageLocationId
 			ELSE RI.intStorageLocationId
 			END
+		,@intItemTypeId = (
+			CASE 
+				WHEN RS.intSubstituteItemId is not null and RS.intSubstituteItemId =@intInputItemId
+					THEN 3
+				ELSE 1
+				END
+			)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
 	WHERE RI.intWorkOrderId = @intWorkOrderId
@@ -623,6 +633,7 @@ BEGIN TRY
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intInputItemId
+				And intItemTypeId IN (1,3)
 			)
 	BEGIN
 		INSERT INTO tblMFProductionSummary (
@@ -639,6 +650,8 @@ BEGIN TRY
 			,dblCountOutputQuantity
 			,dblCountConversionQuantity
 			,dblCalculatedQuantity
+			,intCategoryId
+			,intItemTypeId
 			)
 		SELECT @intWorkOrderId
 			,@intInputItemId
@@ -653,6 +666,8 @@ BEGIN TRY
 			,0
 			,0
 			,0
+			,@intCategoryId
+			,@intItemTypeId
 	END
 	ELSE
 	BEGIN
@@ -660,6 +675,7 @@ BEGIN TRY
 		SET dblInputQuantity = dblInputQuantity + @dblInputWeight
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intInputItemId
+			And intItemTypeId IN (1,3)
 	END
 
 	IF @intTransactionCount = 0

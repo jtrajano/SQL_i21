@@ -1,8 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblLGLoadDetailStg]
 (
-	[intLGLoadDetailStgId] INT PRIMARY KEY,
+	[intLGLoadDetailStgId] INT IDENTITY(1,1) PRIMARY KEY,
 	[intLoadStgId] INT,
 	[intLoadId] INT,
+	[intLoadDetailId] INT,
 	[intRowNumber] INT,
 	[strItemNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strSubLocationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
@@ -18,6 +19,7 @@
 	[strLoadNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strChangeType] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strRowState] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	[dtmFeedCreated] DATETIME,
 
 	CONSTRAINT [FK_tblLGLoadDetailStg_tblLGLoadStg_intLoadStgId] FOREIGN KEY ([intLoadStgId]) REFERENCES [dbo].[tblLGLoadStg] ([intLoadStgId]) ON DELETE CASCADE,
 )

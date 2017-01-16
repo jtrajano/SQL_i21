@@ -39,6 +39,9 @@ BEGIN
 		,@intWorkOrderProducedLotId INT
 		,@intItemOwnerId INT
 		,@intOwnerId INT
+		,@intCategoryId INT
+		,@intItemTypeId INT
+		,@intProductId INT
 
 	SELECT @dtmCreated = Getdate()
 
@@ -71,6 +74,25 @@ BEGIN
 	IF @intShiftId = 0
 		SELECT @intShiftId = NULL
 
+	SELECT @intProductId = intItemId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @intItemTypeId = (
+			CASE 
+				WHEN RI.ysnConsumptionRequired = 0
+					OR RI.ysnConsumptionRequired IS NULL
+					THEN 5
+				WHEN @intProductId = @intItemId
+					THEN 2
+				ELSE 4
+				END
+			)
+	FROM dbo.tblMFWorkOrderRecipeItem RI
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND RI.intRecipeItemTypeId = 2
+		AND RI.intItemId = @intItemId
+
 	INSERT INTO dbo.tblMFWorkOrderProducedLot (
 		intWorkOrderId
 		,intItemId
@@ -101,6 +123,7 @@ BEGIN
 		,intInputStorageLocationId
 		,ysnFillPartialPallet
 		,intSpecialPalletLotId
+		,intItemTypeId
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -143,6 +166,7 @@ BEGIN
 		,@intInputStorageLocationId
 		,@ysnFillPartialPallet
 		,@intSpecialPalletLotId
+		,@intItemTypeId
 
 	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
 
@@ -175,8 +199,13 @@ BEGIN
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intItemId
+				And intItemTypeId IN (2,4,5)
 			)
 	BEGIN
+		SELECT @intCategoryId = intCategoryId
+		FROM tblICItem
+		WHERE intItemId = @intItemId
+
 		INSERT INTO tblMFProductionSummary (
 			intWorkOrderId
 			,intItemId
@@ -191,6 +220,8 @@ BEGIN
 			,dblCountOutputQuantity
 			,dblCountConversionQuantity
 			,dblCalculatedQuantity
+			,intCategoryId
+			,intItemTypeId
 			)
 		SELECT @intWorkOrderId
 			,@intItemId
@@ -205,6 +236,8 @@ BEGIN
 			,0
 			,0
 			,0
+			,@intCategoryId
+			,@intItemTypeId
 	END
 	ELSE
 	BEGIN
@@ -212,6 +245,7 @@ BEGIN
 		SET dblOutputQuantity = dblOutputQuantity + @dblProduceQty
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intItemId
+			And intItemTypeId IN (2,4,5)
 	END
 
 	DECLARE @intAttributeTypeId INT
@@ -250,6 +284,8 @@ BEGIN
 			,@strVesselNo
 			,@dtmProductionDate
 			,@intWorkOrderProducedLotId
+			,NULL
+			,@intShiftId
 	END
 	ELSE
 	BEGIN

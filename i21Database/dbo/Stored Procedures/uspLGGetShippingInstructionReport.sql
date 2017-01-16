@@ -143,6 +143,8 @@ SELECT TOP 1 L.intLoadId
 			THEN FirstNotifyCompany.strCompanyName
 		WHEN 'Vendor'
 			THEN FirstNotify.strName
+		WHEN 'Customer'
+			THEN FirstNotify.strName
 		END strFirstNotify
 	,CASE FLNP.strType
 		WHEN 'Bank'
@@ -150,6 +152,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN FirstNotifyCompany.strEmail
 		WHEN 'Vendor'
+			THEN FirstNotify.strEmail
+		WHEN 'Customer'
 			THEN FirstNotify.strEmail
 		END strFirstNotifyMail
 	,CASE FLNP.strType
@@ -159,6 +163,8 @@ SELECT TOP 1 L.intLoadId
 			THEN FirstNotifyCompany.strFax
 		WHEN 'Vendor'
 			THEN FirstNotify.strFax
+		WHEN 'Customer'
+			THEN FirstNotify.strFax
 		END strFirstNotifyFax
 	,CASE FLNP.strType
 		WHEN 'Bank'
@@ -167,6 +173,8 @@ SELECT TOP 1 L.intLoadId
 			THEN ''
 		WHEN 'Vendor'
 			THEN FirstNotify.strMobile
+		WHEN 'Customer'
+			THEN FirstNotify.strMobile
 		END strFirstNotifyMobile
 	,CASE FLNP.strType
 		WHEN 'Bank'
@@ -174,7 +182,9 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN FirstNotifyCompany.strPhone
 		WHEN 'Vendor'
-			THEN FirstNotify.strPhone
+			THEN FirstNotifyContactEntity.strPhone
+		WHEN 'Customer'
+			THEN FirstNotifyContactEntity.strPhone
 		END strFirstNotifyPhone
 	,CASE FLNP.strType
 		WHEN 'Bank'
@@ -182,6 +192,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN FirstNotifyCompany.strAddress
 		WHEN 'Vendor'
+			THEN FNLocation.strAddress
+		WHEN 'Customer'
 			THEN FNLocation.strAddress
 		END strFirstNotifyAddress
 	,CASE FLNP.strType
@@ -191,6 +203,8 @@ SELECT TOP 1 L.intLoadId
 			THEN FirstNotifyCompany.strCity
 		WHEN 'Vendor'
 			THEN FNLocation.strCity
+		WHEN 'Customer'
+			THEN FNLocation.strCity
 		END strFirstNotifyCity
 	,CASE FLNP.strType
 		WHEN 'Bank'
@@ -198,6 +212,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN FirstNotifyCompany.strCountry
 		WHEN 'Vendor'
+			THEN FNLocation.strCountry
+		WHEN 'Customer'
 			THEN FNLocation.strCountry
 		END strFirstNotifyCountry
 	,CASE FLNP.strType
@@ -207,6 +223,8 @@ SELECT TOP 1 L.intLoadId
 			THEN FirstNotifyCompany.strState
 		WHEN 'Vendor'
 			THEN FNLocation.strState
+		WHEN 'Customer'
+			THEN FNLocation.strState
 		END strFirstNotifyState
 	,CASE FLNP.strType
 		WHEN 'Bank'
@@ -214,6 +232,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN FirstNotifyCompany.strZip
 		WHEN 'Vendor'
+			THEN FNLocation.strZipCode
+		WHEN 'Customer'
 			THEN FNLocation.strZipCode
 		END strFirstNotifyZipCode
 	,CASE SLNP.strType
@@ -223,6 +243,8 @@ SELECT TOP 1 L.intLoadId
 			THEN SecondNotifyCompany.strCompanyName
 		WHEN 'Vendor'
 			THEN SecondNotify.strName
+		WHEN 'Customer'
+			THEN SecondNotify.strName
 		END strSecondNotify
 	,CASE SLNP.strType
 		WHEN 'Bank'
@@ -230,6 +252,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN SecondNotifyCompany.strEmail
 		WHEN 'Vendor'
+			THEN SecondNotify.strEmail
+		WHEN 'Customer'
 			THEN SecondNotify.strEmail
 		END strSecondNotifyMail
 	,CASE SLNP.strType
@@ -239,6 +263,8 @@ SELECT TOP 1 L.intLoadId
 			THEN SecondNotifyCompany.strFax
 		WHEN 'Vendor'
 			THEN SecondNotify.strFax
+		WHEN 'Customer'
+			THEN SecondNotify.strFax
 		END strSecondNotifyFax
 	,CASE SLNP.strType
 		WHEN 'Bank'
@@ -247,6 +273,8 @@ SELECT TOP 1 L.intLoadId
 			THEN ''
 		WHEN 'Vendor'
 			THEN SecondNotify.strMobile
+		WHEN 'Customer'
+			THEN SecondNotify.strMobile
 		END strSecondNotifyMobile
 	,CASE SLNP.strType
 		WHEN 'Bank'
@@ -254,7 +282,9 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN SecondNotifyCompany.strPhone
 		WHEN 'Vendor'
-			THEN SecondNotify.strPhone
+			THEN SecondNotifyContactEntity.strPhone
+		WHEN 'Customer'
+			THEN SecondNotifyContactEntity.strPhone
 		END strSecondNotifyPhone
 	,CASE SLNP.strType
 		WHEN 'Bank'
@@ -262,6 +292,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN SecondNotifyCompany.strAddress
 		WHEN 'Vendor'
+			THEN SNLocation.strAddress
+		WHEN 'Customer'
 			THEN SNLocation.strAddress
 		END strSecondNotifyAddress
 	,CASE SLNP.strType
@@ -271,6 +303,8 @@ SELECT TOP 1 L.intLoadId
 			THEN SecondNotifyCompany.strCity
 		WHEN 'Vendor'
 			THEN SNLocation.strCity
+		WHEN 'Customer'
+			THEN SNLocation.strCity
 		END strSecondNotifyCity
 	,CASE SLNP.strType
 		WHEN 'Bank'
@@ -278,6 +312,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN SecondNotifyCompany.strCountry
 		WHEN 'Vendor'
+			THEN SNLocation.strCountry
+		WHEN 'Customer'
 			THEN SNLocation.strCountry
 		END strSecondNotifyCountry
 	,CASE SLNP.strType
@@ -287,6 +323,8 @@ SELECT TOP 1 L.intLoadId
 			THEN SecondNotifyCompany.strState
 		WHEN 'Vendor'
 			THEN SNLocation.strState
+		WHEN 'Customer'
+			THEN SNLocation.strState
 		END strSecondNotifyState
 	,CASE SLNP.strType
 		WHEN 'Bank'
@@ -294,6 +332,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN SecondNotifyCompany.strZip
 		WHEN 'Vendor'
+			THEN SNLocation.strZipCode
+		WHEN 'Customer'
 			THEN SNLocation.strZipCode
 		END strSecondNotifyZipCode
 	,CASE CLNP.strType
@@ -303,6 +343,8 @@ SELECT TOP 1 L.intLoadId
 			THEN ConsigneeNotifyCompany.strCompanyName
 		WHEN 'Vendor'
 			THEN ConsigneeNotify.strName
+		WHEN 'Customer'
+			THEN ConsigneeNotify.strName
 		END strConsignee
 	,CASE CLNP.strType
 		WHEN 'Bank'
@@ -310,6 +352,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN ConsigneeNotifyCompany.strEmail
 		WHEN 'Vendor'
+			THEN ConsigneeNotify.strEmail
+		WHEN 'Customer'
 			THEN ConsigneeNotify.strEmail
 		END strConsigneeMail
 	,CASE CLNP.strType
@@ -319,6 +363,8 @@ SELECT TOP 1 L.intLoadId
 			THEN ConsigneeNotifyCompany.strFax
 		WHEN 'Vendor'
 			THEN ConsigneeNotify.strFax
+		WHEN 'Customer'
+			THEN ConsigneeNotify.strFax
 		END strConsigneeFax
 	,CASE CLNP.strType
 		WHEN 'Bank'
@@ -327,6 +373,8 @@ SELECT TOP 1 L.intLoadId
 			THEN ''
 		WHEN 'Vendor'
 			THEN ConsigneeNotify.strMobile
+		WHEN 'Customer'
+			THEN ConsigneeNotify.strMobile
 		END strConsigneeMobile
 	,CASE CLNP.strType
 		WHEN 'Bank'
@@ -334,7 +382,9 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN ConsigneeNotifyCompany.strPhone
 		WHEN 'Vendor'
-			THEN ConsigneeNotify.strPhone
+			THEN ConsigneeNotifyContactEntity.strPhone
+		WHEN 'Customer'
+			THEN ConsigneeNotifyContactEntity.strPhone
 		END strConsigneePhone
 	,CASE CLNP.strType
 		WHEN 'Bank'
@@ -342,6 +392,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN ConsigneeNotifyCompany.strAddress
 		WHEN 'Vendor'
+			THEN CNLocation.strAddress
+		WHEN 'Customer'
 			THEN CNLocation.strAddress
 		END strConsigneeAddress
 	,CASE CLNP.strType
@@ -351,6 +403,8 @@ SELECT TOP 1 L.intLoadId
 			THEN ConsigneeNotifyCompany.strCity
 		WHEN 'Vendor'
 			THEN CNLocation.strCity
+		WHEN 'Customer'
+			THEN CNLocation.strCity
 		END strConsigneeCity
 	,CASE CLNP.strType
 		WHEN 'Bank'
@@ -358,6 +412,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN ConsigneeNotifyCompany.strCountry
 		WHEN 'Vendor'
+			THEN CNLocation.strCountry
+		WHEN 'Customer'
 			THEN CNLocation.strCountry
 		END strConsigneeCountry
 	,CASE CLNP.strType
@@ -367,6 +423,8 @@ SELECT TOP 1 L.intLoadId
 			THEN ConsigneeNotifyCompany.strState
 		WHEN 'Vendor'
 			THEN CNLocation.strState
+		WHEN 'Customer'
+			THEN CNLocation.strState
 		END strConsigneeState
 	,CASE CLNP.strType
 		WHEN 'Bank'
@@ -374,6 +432,8 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN ConsigneeNotifyCompany.strZip
 		WHEN 'Vendor'
+			THEN CNLocation.strZipCode
+		WHEN 'Customer'
 			THEN CNLocation.strZipCode
 		END strConsigneeZipCode
 	,LC.strMarks
@@ -431,14 +491,20 @@ LEFT JOIN tblLGLoadNotifyParties FLNP ON L.intLoadId = FLNP.intLoadId AND FLNP.s
 LEFT JOIN tblLGLoadNotifyParties SLNP ON L.intLoadId = SLNP.intLoadId AND SLNP.strNotifyOrConsignee = 'Second Notify'
 LEFT JOIN tblLGLoadNotifyParties CLNP ON L.intLoadId = CLNP.intLoadId AND CLNP.strNotifyOrConsignee = 'Consignee'
 LEFT JOIN tblEMEntity FirstNotify ON FirstNotify.intEntityId = FLNP.intEntityId
+LEFT JOIN tblEMEntityToContact FirstNotifyContact ON FirstNotifyContact.intEntityId = FirstNotify.intEntityId
+LEFT JOIN tblEMEntity FirstNotifyContactEntity ON FirstNotifyContactEntity.intEntityId = FirstNotifyContact.intEntityContactId
 LEFT JOIN tblCMBank FirstNotifyBank ON FirstNotifyBank.intBankId = FLNP.intBankId
 LEFT JOIN tblSMCompanySetup FirstNotifyCompany ON FirstNotifyCompany.intCompanySetupID = FLNP.intCompanySetupID
 LEFT JOIN tblEMEntityLocation FNLocation ON FNLocation.intEntityLocationId = FLNP.intEntityLocationId
 LEFT JOIN tblEMEntity SecondNotify ON SecondNotify.intEntityId = SLNP.intEntityId
+LEFT JOIN tblEMEntityToContact SecondNotifyContact ON SecondNotifyContact.intEntityId = SecondNotify.intEntityId
+LEFT JOIN tblEMEntity SecondNotifyContactEntity ON SecondNotifyContactEntity.intEntityId = SecondNotifyContact.intEntityContactId
 LEFT JOIN tblCMBank SecondNotifyBank ON SecondNotifyBank.intBankId = SLNP.intBankId
 LEFT JOIN tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SLNP.intCompanySetupID
 LEFT JOIN tblEMEntityLocation SNLocation ON SNLocation.intEntityLocationId = SLNP.intEntityLocationId
 LEFT JOIN tblEMEntity ConsigneeNotify ON ConsigneeNotify.intEntityId = CLNP.intEntityId
+LEFT JOIN tblEMEntityToContact ConsigneeNotifyContact ON ConsigneeNotifyContact.intEntityId = ConsigneeNotify.intEntityId
+LEFT JOIN tblEMEntity ConsigneeNotifyContactEntity ON ConsigneeNotifyContactEntity.intEntityId =ConsigneeNotifyContact.intEntityContactId
 LEFT JOIN tblCMBank ConsigneeNotifyBank ON ConsigneeNotifyBank.intBankId = CLNP.intBankId
 LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
 LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationId

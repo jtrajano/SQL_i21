@@ -182,11 +182,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateLeaseCodeView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateCustomerContractSubReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql"
-:r "..\dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP"
-
-
-
-
+:r "..\dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP.sql"
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"

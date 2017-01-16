@@ -1,65 +1,70 @@
-﻿CREATE PROCEDURE [dbo].[uspMFTransferPickListForProduction]
-	@intWorkOrderId int,
-	@intLocationId int,
-	@intProductionStagingLocationId int,
-	@intUserId int
+﻿CREATE PROCEDURE [dbo].[uspMFTransferPickListForProduction] @intWorkOrderId INT
+	,@intLocationId INT
+	,@intProductionStagingLocationId INT
+	,@intUserId INT
 AS
-Begin Try
+BEGIN TRY
+	DECLARE @intPickListId INT
+	DECLARE @intManufacturingProcessId INT
+	DECLARE @intLotId INT
+	DECLARE @intNewSubLocationId INT
+	DECLARE @strLotNumber NVARCHAR(50)
+	DECLARE @intNewLotId INT
+	DECLARE @intItemId INT
+	DECLARE @ErrMsg NVARCHAR(max)
+	DECLARE @intMinWorkOrder INT
+	DECLARE @intMinParentLot INT
+	DECLARE @intMinChildLot INT
+	DECLARE @intParentLotId INT
+	DECLARE @dblReqQty NUMERIC(38, 20)
+	DECLARE @dblAvailableQty NUMERIC(38, 20)
+	DECLARE @dtmCurrentDateTime DATETIME = GETDATE()
+	DECLARE @index INT
+	DECLARE @id INT
+	DECLARE @intBlendItemId INT
+	DECLARE @dblWeightPerUnit NUMERIC(38, 20)
+	DECLARE @intItemUOMId INT
+	DECLARE @intItemIssuedUOMId INT
+	DECLARE @strInActiveLots NVARCHAR(MAX)
+	DECLARE @intPickListDetailId INT
+		,@dtmProductionDate DATETIME
+		,@intShiftId INT
+		,@dtmBusinessDate DATETIME
+		,@intBusinessShiftId INT
+		,@dblInputWeight NUMERIC(38, 20)
+		,@intItemTypeId INT
+		,@intCategoryId INT
+	DECLARE @strBulkItemXml NVARCHAR(max)
+		,@dblPickQuantity NUMERIC(38, 20)
+		,@intPickUOMId INT
+		,@intQtyItemUOMId INT
 
-Declare @intPickListId int
-Declare @intManufacturingProcessId int
-Declare @intLotId int
-Declare @intNewSubLocationId int
-Declare @strLotNumber nvarchar(50)
-Declare @intNewLotId int
-Declare @intItemId int
-Declare @ErrMsg nvarchar(max)
-Declare @intMinWorkOrder int
-Declare @intMinParentLot int
-Declare @intMinChildLot int
-Declare @intParentLotId int
-Declare @dblReqQty numeric(38,20)
-Declare @dblAvailableQty numeric(38,20)
-Declare @dtmCurrentDateTime DateTime=GETDATE()
-Declare @index int
-Declare @id int
-Declare @intBlendItemId int
-Declare @dblWeightPerUnit numeric(38,20)
-Declare @intItemUOMId int
-Declare @intItemIssuedUOMId int
-DECLARE @strInActiveLots NVARCHAR(MAX) 
-Declare @intPickListDetailId int
-		,@dtmProductionDate Datetime
-		,@intShiftId int
-		,@dtmBusinessDate datetime
-		,@intBusinessShiftId int
-		,@dblInputWeight numeric(38,20)
+	IF ISNULL(@intProductionStagingLocationId, 0) = 0
+		RAISERROR (
+				'Blend Staging Location is not defined.'
+				,16
+				,1
+				)
 
-Declare @strBulkItemXml nvarchar(max)
-		,@dblPickQuantity numeric(38,20)
-		,@intPickUOMId int
-		,@intQtyItemUOMId int
- 
-If ISNULL(@intProductionStagingLocationId ,0)=0
-	RaisError('Blend Staging Location is not defined.',16,1)
+	SELECT @intNewSubLocationId = intSubLocationId
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intProductionStagingLocationId
 
-Select @intNewSubLocationId=intSubLocationId from tblICStorageLocation Where intStorageLocationId=@intProductionStagingLocationId
+	DECLARE @tblChildLot TABLE (
+		intRowNo INT Identity(1, 1)
+		,intStageLotId INT
+		,strStageLotNumber NVARCHAR(50)
+		,intItemId INT
+		,dblAvailableQty NUMERIC(38, 20)
+		,intItemUOMId INT
+		,intItemIssuedUOMId INT
+		,dblWeightPerUnit NUMERIC(38, 20)
+		,dblPickQuantity NUMERIC(38, 20)
+		,intPickUOMId INT
+		,intPickListDetailId INT
+		)
 
-Declare @tblChildLot table
-(
-	intRowNo int Identity(1,1),
-	intStageLotId int,
-	strStageLotNumber nvarchar(50),
-	intItemId int,
-	dblAvailableQty numeric(38,20),
-	intItemUOMId int,
-	intItemIssuedUOMId int,
-	dblWeightPerUnit numeric(38,20),
-	dblPickQuantity numeric(38,20),
-	intPickUOMId int,
-	intPickListDetailId int
-)
-SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
 	SELECT @intBusinessShiftId = intShiftId
 	FROM dbo.tblMFShift
@@ -67,199 +72,407 @@ SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocatio
 		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
+	SELECT @intPickListId = intPickListId
+		,@intBlendItemId = intItemId
+		,@dtmProductionDate = dtmPlannedDate
+		,@intShiftId = intPlannedShiftId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
-Select @intPickListId=intPickListId,@intBlendItemId=intItemId,@dtmProductionDate=dtmPlannedDate,@intShiftId=intPlannedShiftId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+	IF (
+			SELECT intKitStatusId
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
+			) = 8
+	BEGIN
+		SET @ErrMsg = 'The Work Order is already transferred.'
 
-If (Select intKitStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) = 8
-Begin
-	Set @ErrMsg='The Work Order is already transferred.'
-	RaisError(@ErrMsg,16,1)
-End
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+	END
 
-If (Select intStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) = 13
-Begin
-	Set @ErrMsg='The Work Order is already completed.'
-	RaisError(@ErrMsg,16,1)
-End
+	IF (
+			SELECT intStatusId
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
+			) = 13
+	BEGIN
+		SET @ErrMsg = 'The Work Order is already completed.'
 
---Only Active lots are allowed to transfer
-SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
-FROM tblMFPickListDetail tpl Join tblICLot l on tpl.intLotId=l.intLotId 
-Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId Where tpl.intPickListId=@intPickListId AND ls.strPrimaryStatus<>'Active'
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+	END
 
-If ISNULL(@strInActiveLots,'')<>''
-Begin
-	Set @ErrMsg='Lots ' + @strInActiveLots + ' are not active. Unable to perform transfer operation.'
-	RaisError(@ErrMsg,16,1)
-End
-	
+	--Only Active lots are allowed to transfer
+	SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
+	FROM tblMFPickListDetail tpl
+	JOIN tblICLot l ON tpl.intLotId = l.intLotId
+	JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId
+	WHERE tpl.intPickListId = @intPickListId
+		AND ls.strPrimaryStatus <> 'Active'
+
+	IF ISNULL(@strInActiveLots, '') <> ''
+	BEGIN
+		SET @ErrMsg = 'Lots ' + @strInActiveLots + ' are not active. Unable to perform transfer operation.'
+
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+	END
+
 	--validate shortage of inventory
-	Exec uspMFValidateTransferKit @intWorkOrderId,0,1
+	EXEC uspMFValidateTransferKit @intWorkOrderId
+		,0
+		,1
 
-	Begin Tran
+	BEGIN TRAN
 
 	--Create Reservation
 	--Get Bulk Items From Reserved Lots
-	Set @strBulkItemXml='<root>'
+	SET @strBulkItemXml = '<root>'
 
 	--Bulk Item
-	Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
-	'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
-	'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
-	'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
-	From tblICStockReservation sr 
-	Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
-	AND sr.intItemId NOT IN (Select intItemId From tblMFPickListDetail Where intPickListId=@intPickListId)
+	SELECT @strBulkItemXml = COALESCE(@strBulkItemXml, '') + '<lot>' + '<intItemId>' + convert(VARCHAR, sr.intItemId) + '</intItemId>' + '<intItemUOMId>' + convert(VARCHAR, sr.intItemUOMId) + '</intItemUOMId>' + '<dblQuantity>' + convert(VARCHAR, sr.dblQty) + '</dblQuantity>' + '</lot>'
+	FROM tblICStockReservation sr
+	WHERE sr.intTransactionId = @intPickListId
+		AND sr.intInventoryTransactionType = 34
+		AND ISNULL(sr.intLotId, 0) = 0
+		AND sr.intItemId NOT IN (
+			SELECT intItemId
+			FROM tblMFPickListDetail
+			WHERE intPickListId = @intPickListId
+			)
 
-	Set @strBulkItemXml=@strBulkItemXml+'</root>'
+	SET @strBulkItemXml = @strBulkItemXml + '</root>'
 
-	If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
-		Set @strBulkItemXml=''
+	IF LTRIM(RTRIM(@strBulkItemXml)) = '<root></root>'
+		SET @strBulkItemXml = ''
 
 	EXEC uspMFDeleteLotReservationByPickList @intPickListId = @intPickListId
 
 	--Get the child Lots attached to Pick List
-	Delete From @tblChildLot
-	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId,intPickListDetailId)
-	Select l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
-	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId,pld.intPickListDetailId
-	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
-	Where pld.intPickListId=@intPickListId AND pld.intLotId=pld.intStageLotId
+	DELETE
+	FROM @tblChildLot
+
+	INSERT INTO @tblChildLot (
+		intStageLotId
+		,strStageLotNumber
+		,intItemId
+		,dblAvailableQty
+		,intItemUOMId
+		,intItemIssuedUOMId
+		,dblWeightPerUnit
+		,dblPickQuantity
+		,intPickUOMId
+		,intPickListDetailId
+		)
+	SELECT l.intLotId
+		,l.strLotNumber
+		,l.intItemId
+		,pld.dblQuantity
+		,pld.intItemUOMId
+		,pld.intItemIssuedUOMId
+		,CASE 
+			WHEN ISNULL(l.dblWeightPerQty, 0) = 0
+				THEN 1
+			ELSE l.dblWeightPerQty
+			END AS dblWeightPerQty
+		,pld.dblPickQuantity
+		,pld.intPickUOMId
+		,pld.intPickListDetailId
+	FROM tblMFPickListDetail pld
+	JOIN tblICLot l ON pld.intStageLotId = l.intLotId
+	WHERE pld.intPickListId = @intPickListId
+		AND pld.intLotId = pld.intStageLotId
+	
 	UNION --Non Lot Tracked
-	Select 0,'',pld.intItemId,0,pld.intItemUOMId,pld.intItemIssuedUOMId,1,
-	pld.dblQuantity,pld.intPickUOMId,pld.intPickListDetailId
-	From tblMFPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId 
-	Where pld.intPickListId=@intPickListId AND i.strLotTracking='No'
+	
+	SELECT 0
+		,''
+		,pld.intItemId
+		,0
+		,pld.intItemUOMId
+		,pld.intItemIssuedUOMId
+		,1
+		,pld.dblQuantity
+		,pld.intPickUOMId
+		,pld.intPickListDetailId
+	FROM tblMFPickListDetail pld
+	JOIN tblICItem i ON pld.intItemId = i.intItemId
+	WHERE pld.intPickListId = @intPickListId
+		AND i.strLotTracking = 'No'
 
-	Select @intMinChildLot=Min(intRowNo) from @tblChildLot
+	SELECT @intMinChildLot = Min(intRowNo)
+	FROM @tblChildLot
 
-	While(@intMinChildLot is not null) --Loop Child Lot.
-	Begin
-		Select @dblPickQuantity=NULL,@intPickUOMId=NULL,@intQtyItemUOMId=NULL
-		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblReqQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId
-				,@intQtyItemUOMId=intItemUOMId,@intPickListDetailId=intPickListDetailId
-		From @tblChildLot Where intRowNo=@intMinChildLot
+	WHILE (@intMinChildLot IS NOT NULL) --Loop Child Lot.
+	BEGIN
+		SELECT @dblPickQuantity = NULL
+			,@intPickUOMId = NULL
+			,@intQtyItemUOMId = NULL
+
+		SELECT @intLotId = intStageLotId
+			,@strLotNumber = strStageLotNumber
+			,@dblReqQty = dblAvailableQty
+			,@intItemId = intItemId
+			,@dblWeightPerUnit = dblWeightPerUnit
+			,@dblPickQuantity = dblPickQuantity
+			,@intPickUOMId = intPickUOMId
+			,@intQtyItemUOMId = intItemUOMId
+			,@intPickListDetailId = intPickListDetailId
+		FROM @tblChildLot
+		WHERE intRowNo = @intMinChildLot
 
 		--Non Lot Tracked Item
-		If ISNULL(@intLotId,0)=0
-		Begin
-			Exec uspMFKitItemMove @intPickListDetailId,@intProductionStagingLocationId,@intUserId
+		IF ISNULL(@intLotId, 0) = 0
+		BEGIN
+			EXEC uspMFKitItemMove @intPickListDetailId
+				,@intProductionStagingLocationId
+				,@intUserId
 
-			Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,intStorageLocationId,dtmProductionDate,intShiftId,dtmActualInputDateTime
-		,dtmBusinessDate
-		,intBusinessShiftId
-		)
-			Select @intWorkOrderId,NULL,@intItemId,@dblPickQuantity,@intPickUOMId,
-			@dblPickQuantity,@intPickUOMId,null,
-			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null,@intProductionStagingLocationId,@dtmProductionDate,@intShiftId,@dtmCurrentDateTime,@dtmBusinessDate,@intBusinessShiftId
+			INSERT INTO tblMFWorkOrderInputLot (
+				intWorkOrderId
+				,intLotId
+				,intItemId
+				,dblQuantity
+				,intItemUOMId
+				,dblIssuedQuantity
+				,intItemIssuedUOMId
+				,intSequenceNo
+				,dtmCreated
+				,intCreatedUserId
+				,dtmLastModified
+				,intLastModifiedUserId
+				,intRecipeItemId
+				,intStorageLocationId
+				,dtmProductionDate
+				,intShiftId
+				,dtmActualInputDateTime
+				,dtmBusinessDate
+				,intBusinessShiftId
+				)
+			SELECT @intWorkOrderId
+				,NULL
+				,@intItemId
+				,@dblPickQuantity
+				,@intPickUOMId
+				,@dblPickQuantity
+				,@intPickUOMId
+				,NULL
+				,@dtmCurrentDateTime
+				,@intUserId
+				,@dtmCurrentDateTime
+				,@intUserId
+				,NULL
+				,@intProductionStagingLocationId
+				,@dtmProductionDate
+				,@intShiftId
+				,@dtmCurrentDateTime
+				,@dtmBusinessDate
+				,@intBusinessShiftId
 
 			GOTO NEXT_RECORD
-		End
+		END
 
-		Set @intNewLotId=NULL
-		Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
-		And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intProductionStagingLocationId --And dblQty > 0
+		SET @intNewLotId = NULL
+
+		SELECT TOP 1 @intNewLotId = intLotId
+		FROM tblICLot
+		WHERE strLotNumber = @strLotNumber
+			AND intItemId = @intItemId
+			AND intLocationId = @intLocationId
+			AND intSubLocationId = @intNewSubLocationId
+			AND intStorageLocationId = @intProductionStagingLocationId --And dblQty > 0
 
 		--IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
 		--BEGIN
 		--	SELECT @dblPickQuantity=@dblReqQty
 		--	SELECT @intPickUOMId=@intQtyItemUOMId
 		--END
+		IF ISNULL(@intNewLotId, 0) = 0 --Move
+		BEGIN
+			EXEC [uspMFLotMove] @intLotId = @intLotId
+				,@intNewSubLocationId = @intNewSubLocationId
+				,@intNewStorageLocationId = @intProductionStagingLocationId
+				,@dblMoveQty = @dblPickQuantity
+				,@intMoveItemUOMId = @intPickUOMId
+				,@intUserId = @intUserId
 
-		If ISNULL(@intNewLotId,0) = 0 --Move
-			Begin
-				Exec [uspMFLotMove] @intLotId=@intLotId,
-									@intNewSubLocationId=@intNewSubLocationId,
-									@intNewStorageLocationId=@intProductionStagingLocationId,
-									@dblMoveQty=@dblPickQuantity,
-									@intMoveItemUOMId=@intPickUOMId,
-									@intUserId=@intUserId
-
-				Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
-				And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intProductionStagingLocationId --And dblQty > 0
-
-			End
-		Else --Merge
-			Exec [uspMFLotMerge] @intLotId=@intLotId,
-						@intNewLotId=@intNewLotId,
-						@dblMergeQty=@dblPickQuantity,
-						@intMergeItemUOMId=@intPickUOMId,
-						@intUserId=@intUserId
-			
-		Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,intStorageLocationId , dtmProductionDate,intShiftId,dtmActualInputDateTime
-		,dtmBusinessDate
-		,intBusinessShiftId)
-			Select @intWorkOrderId,@intNewLotId,@intItemId,dblPickQuantity,intPickUOMId,
-			dblPickQuantity,intPickUOMId,null,
-			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null,@intProductionStagingLocationId,@dtmProductionDate,@intShiftId,@dtmCurrentDateTime,@dtmBusinessDate,@intBusinessShiftId
-			From @tblChildLot where intRowNo = @intMinChildLot
-
-
-
-		Update tblMFPickListDetail set intStageLotId=@intNewLotId Where intPickListDetailId=@intPickListDetailId
-		Select @dblInputWeight=NULL
-		Select @dblInputWeight=dblPickQuantity from @tblChildLot where intRowNo = @intMinChildLot
-
-		IF NOT EXISTS (
-			SELECT *
-			FROM tblMFProductionSummary
-			WHERE intWorkOrderId = @intWorkOrderId
+			SELECT TOP 1 @intNewLotId = intLotId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
 				AND intItemId = @intItemId
-			)
-	BEGIN
-		INSERT INTO tblMFProductionSummary (
+				AND intLocationId = @intLocationId
+				AND intSubLocationId = @intNewSubLocationId
+				AND intStorageLocationId = @intProductionStagingLocationId --And dblQty > 0
+		END
+		ELSE --Merge
+			EXEC [uspMFLotMerge] @intLotId = @intLotId
+				,@intNewLotId = @intNewLotId
+				,@dblMergeQty = @dblPickQuantity
+				,@intMergeItemUOMId = @intPickUOMId
+				,@intUserId = @intUserId
+
+		INSERT INTO tblMFWorkOrderInputLot (
 			intWorkOrderId
+			,intLotId
 			,intItemId
-			,dblOpeningQuantity
-			,dblOpeningOutputQuantity
-			,dblOpeningConversionQuantity
-			,dblInputQuantity
-			,dblConsumedQuantity
-			,dblOutputQuantity
-			,dblOutputConversionQuantity
-			,dblCountQuantity
-			,dblCountOutputQuantity
-			,dblCountConversionQuantity
-			,dblCalculatedQuantity
+			,dblQuantity
+			,intItemUOMId
+			,dblIssuedQuantity
+			,intItemIssuedUOMId
+			,intSequenceNo
+			,dtmCreated
+			,intCreatedUserId
+			,dtmLastModified
+			,intLastModifiedUserId
+			,intRecipeItemId
+			,intStorageLocationId
+			,dtmProductionDate
+			,intShiftId
+			,dtmActualInputDateTime
+			,dtmBusinessDate
+			,intBusinessShiftId
 			)
 		SELECT @intWorkOrderId
+			,@intNewLotId
 			,@intItemId
-			,0
-			,0
-			,0
-			,@dblInputWeight
-			,0
-			,0
-			,0
-			,0
-			,0
-			,0
-			,0
-	END
-	ELSE
-	BEGIN
-		UPDATE tblMFProductionSummary
-		SET dblInputQuantity = dblInputQuantity + @dblInputWeight
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intItemId = @intItemId
-	END
+			,dblPickQuantity
+			,intPickUOMId
+			,dblPickQuantity
+			,intPickUOMId
+			,NULL
+			,@dtmCurrentDateTime
+			,@intUserId
+			,@dtmCurrentDateTime
+			,@intUserId
+			,NULL
+			,@intProductionStagingLocationId
+			,@dtmProductionDate
+			,@intShiftId
+			,@dtmCurrentDateTime
+			,@dtmBusinessDate
+			,@intBusinessShiftId
+		FROM @tblChildLot
+		WHERE intRowNo = @intMinChildLot
+
+		UPDATE tblMFPickListDetail
+		SET intStageLotId = @intNewLotId
+		WHERE intPickListDetailId = @intPickListDetailId
+
+		SELECT @dblInputWeight = NULL
+
+		SELECT @dblInputWeight = dblPickQuantity
+		FROM @tblChildLot
+		WHERE intRowNo = @intMinChildLot
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblMFProductionSummary
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intItemId = @intItemId
+				)
+		BEGIN
+			SELECT @intCategoryId = intCategoryId
+			FROM dbo.tblICItem
+			WHERE intItemId = @intItemId
+
+			SELECT @intItemTypeId = (
+					CASE 
+						WHEN RS.intRecipeSubstituteItemId IS NULL
+							THEN 1
+						ELSE 3
+						END
+					)
+			FROM dbo.tblMFWorkOrderRecipeItem RI
+			LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
+			WHERE RI.intWorkOrderId = @intWorkOrderId
+				AND RI.intRecipeItemTypeId = 1
+				AND (
+					RI.intItemId = @intItemId
+					OR RS.intSubstituteItemId = @intItemId
+					)
+
+			INSERT INTO tblMFProductionSummary (
+				intWorkOrderId
+				,intItemId
+				,dblOpeningQuantity
+				,dblOpeningOutputQuantity
+				,dblOpeningConversionQuantity
+				,dblInputQuantity
+				,dblConsumedQuantity
+				,dblOutputQuantity
+				,dblOutputConversionQuantity
+				,dblCountQuantity
+				,dblCountOutputQuantity
+				,dblCountConversionQuantity
+				,dblCalculatedQuantity
+				,intItemTypeId
+				)
+			SELECT @intWorkOrderId
+				,@intItemId
+				,0
+				,0
+				,0
+				,@dblInputWeight
+				,0
+				,0
+				,0
+				,0
+				,0
+				,0
+				,0
+				,@intItemTypeId
+		END
+		ELSE
+		BEGIN
+			UPDATE tblMFProductionSummary
+			SET dblInputQuantity = dblInputQuantity + @dblInputWeight
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intItemId = @intItemId
+		END
 
 		NEXT_RECORD:
-		Select @intMinChildLot=Min(intRowNo) from @tblChildLot where intRowNo>@intMinChildLot
-	End --End Loop Child Lots
 
-	Exec [uspMFCreateLotReservation] @intWorkOrderId=@intWorkOrderId,@ysnReservationByParentLot=0,@strBulkItemXml=@strBulkItemXml
+		SELECT @intMinChildLot = Min(intRowNo)
+		FROM @tblChildLot
+		WHERE intRowNo > @intMinChildLot
+	END --End Loop Child Lots
 
-	Update tblMFWorkOrder Set intKitStatusId=8,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime,
-	intStagingLocationId=@intProductionStagingLocationId,dtmStagedDate=@dtmCurrentDateTime Where intWorkOrderId=@intWorkOrderId
+	EXEC [uspMFCreateLotReservation] @intWorkOrderId = @intWorkOrderId
+		,@ysnReservationByParentLot = 0
+		,@strBulkItemXml = @strBulkItemXml
 
-	Commit Tran
+	UPDATE tblMFWorkOrder
+	SET intKitStatusId = 8
+		,intLastModifiedUserId = @intUserId
+		,dtmLastModified = @dtmCurrentDateTime
+		,intStagingLocationId = @intProductionStagingLocationId
+		,dtmStagedDate = @dtmCurrentDateTime
+	WHERE intWorkOrderId = @intWorkOrderId
 
-End Try
-Begin Catch
-	 IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
-	 SET @ErrMsg = ERROR_MESSAGE()  
-	 RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
-End Catch
+	COMMIT TRAN
+END TRY
+
+BEGIN CATCH
+	IF XACT_STATE() != 0
+		AND @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION
+
+	SET @ErrMsg = ERROR_MESSAGE()
+
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
+END CATCH

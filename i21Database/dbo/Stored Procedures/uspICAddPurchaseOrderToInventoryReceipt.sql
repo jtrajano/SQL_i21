@@ -166,7 +166,7 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 										WHERE	tblICItemUOM.intItemId = PODetail.intItemId 
 												AND tblICItemUOM.ysnStockUnit = 1 
 												AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
-												AND dbo.fnGetItemLotType(PODetail.intItemId) IN (1,2)
+												AND dbo.fnGetItemLotType(PODetail.intItemId) <> 0 
 									)
 		,dblUnitCost			= PODetail.dblCost
 		,dblLineTotal			= (ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)) * PODetail.dblCost

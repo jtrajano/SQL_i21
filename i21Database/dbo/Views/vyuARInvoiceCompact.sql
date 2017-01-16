@@ -31,8 +31,8 @@ SELECT
 	,strAccountId					= GLA.strAccountId
 	,intCompanyLocationId			= ARI.intCompanyLocationId	
 	,strLocationName				= SML.strLocationName
-	,intPaymentMethodId				= ARI.intPaymentMethodId	
-	,strPaymentMethod				= NULL
+	,intPaymentMethodId				= ARC.intPaymentMethodId	
+	,strPaymentMethod				= SMP.strPaymentMethod
 	,strCustomerEmail				= E.strEmail
 	,intCurrencyId					= ARI.intCurrencyId
 	,strCurrency					= SMC.strCurrency
@@ -93,7 +93,8 @@ FROM
 INNER JOIN
 	(SELECT 
 		strCustomerNumber,
-		intEntityCustomerId
+		intEntityCustomerId,
+		intPaymentMethodId
 	 FROM 
 		dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
 LEFT OUTER JOIN
@@ -136,9 +137,10 @@ LEFT OUTER JOIN
 		dbo.tblSMCompanyLocation) AS SML ON ARI.intCompanyLocationId  = SML.intCompanyLocationId 
 LEFT OUTER JOIN
 	(SELECT 
-		intPaymentMethodID
+		intPaymentMethodID,
+		strPaymentMethod
 	 FROM
-		dbo.tblSMPaymentMethod) AS SMP ON ARI.intPaymentMethodId = SMP.intPaymentMethodID
+		dbo.tblSMPaymentMethod) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
 LEFT OUTER JOIN
 	(SELECT 
 		intCurrencyID,

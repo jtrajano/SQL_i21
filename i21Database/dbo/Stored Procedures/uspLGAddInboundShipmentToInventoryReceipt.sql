@@ -133,7 +133,7 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 										WHERE	tblICItemUOM.intItemId = ShipmentDetail.intItemId 
 												AND tblICItemUOM.ysnStockUnit = 1 
 												AND tblICUnitMeasure.strUnitType = 'Weight'
-												AND dbo.fnGetItemLotType(ShipmentDetail.intItemId) IN (1,2)
+												AND dbo.fnGetItemLotType(ShipmentDetail.intItemId) <> 0 
 									)
 		,dblUnitCost			= ShipmentDetail.dblCost
 		,dblLineTotal			= ISNULL(ShipmentDetail.dblQuantity, 0) * ShipmentDetail.dblCost

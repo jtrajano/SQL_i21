@@ -1,66 +1,70 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryReceiptItemLot]
 	AS
 
-SELECT ReceiptItemLot.intInventoryReceiptItemLotId
-	, ReceiptItemLot.intInventoryReceiptItemId
-	, ReceiptItem.intInventoryReceiptId
-	, ReceiptItem.strReceiptNumber
-	, ReceiptItem.strReceiptType
-	, ReceiptItem.strOrderNumber
-	, ReceiptItem.strLocationName
-	, ReceiptItem.strSourceType
-	, ReceiptItem.strSourceNumber
-	, ReceiptItem.dtmReceiptDate
-	, ReceiptItem.strBillOfLading
-	, ReceiptItem.ysnPosted
-	, ReceiptItem.strItemNo
-	, ReceiptItem.strItemDescription
-	, strItemUOM = ReceiptItem.strUnitMeasure
-	, ReceiptItemLot.intLotId
-	, ReceiptItemLot.strLotNumber
-	, ReceiptItemLot.strLotAlias
-	, ReceiptItemLot.intSubLocationId
-	, SubLocation.strSubLocationName
-	, ReceiptItemLot.intStorageLocationId
-	, strStorageLocationName = StorageLocation.strName
-	, ReceiptItemLot.intItemUnitMeasureId
-	, ItemUOM.dblUnitQty
-	, UOM.strUnitMeasure
-	, UOM.strUnitType
-	, ReceiptItemLot.dblQuantity
-	, ReceiptItemLot.dblGrossWeight
-	, ReceiptItemLot.dblTareWeight
-	, dblNetWeight = ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
-	, ReceiptItemLot.dblCost
-	, ReceiptItemLot.intUnitPallet
-	, ReceiptItemLot.dblStatedGrossPerUnit
-	, ReceiptItemLot.dblStatedTarePerUnit
-	, ReceiptItemLot.strContainerNo
-	, ReceiptItemLot.intEntityVendorId
-	, Vendor.strVendorId
-	, ReceiptItemLot.strGarden
-	, ReceiptItemLot.strMarkings
-	, ReceiptItemLot.intOriginId
-	, strOrigin = Origin.strCountry
-	, ReceiptItemLot.intGradeId
-	, strGrade = Grade.strDescription
-	, ReceiptItemLot.intSeasonCropYear
-	, ReceiptItemLot.strVendorLotId
-	, ReceiptItemLot.dtmManufacturedDate
-	, ReceiptItemLot.strRemarks
-	, ReceiptItemLot.strCondition
-	, ReceiptItemLot.dtmCertified
-	, ReceiptItemLot.dtmExpiryDate
-	, ReceiptItemLot.intSort		
-	, ReceiptItemLot.intParentLotId
-	, ReceiptItemLot.strParentLotNumber
-	, ReceiptItemLot.strParentLotAlias
-FROM tblICInventoryReceiptItemLot ReceiptItemLot
-LEFT JOIN vyuICGetInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
-LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ReceiptItemLot.intSubLocationId
-LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ReceiptItemLot.intStorageLocationId
-LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItemLot.intItemUnitMeasureId
+SELECT 
+	receiptItemLot.intInventoryReceiptItemLotId
+	,receiptItemLot.intInventoryReceiptItemId
+	,receiptItem.intInventoryReceiptId
+	,receiptItem.strReceiptNumber
+	,receiptItem.strReceiptType
+	,receiptItem.strOrderNumber
+	,receiptItem.strLocationName
+	,receiptItem.strSourceType
+	,receiptItem.strSourceNumber
+	,receiptItem.dtmReceiptDate
+	,receiptItem.strBillOfLading
+	,receiptItem.ysnPosted
+	,receiptItem.strItemNo
+	,receiptItem.strItemDescription
+	,strItemUOM = receiptItem.strUnitMeasure
+	,receiptItemLot.intLotId
+	,receiptItemLot.strLotNumber
+	,receiptItemLot.strLotAlias
+	,receiptItemLot.intSubLocationId
+	,SubLocation.strSubLocationName
+	,receiptItemLot.intStorageLocationId
+	,strStorageLocationName = StorageLocation.strName
+	,receiptItemLot.intItemUnitMeasureId
+	,ItemUOM.dblUnitQty
+	,UOM.strUnitMeasure
+	,UOM.strUnitType
+	,receiptItemLot.dblQuantity
+	,receiptItemLot.dblGrossWeight
+	,receiptItemLot.dblTareWeight
+	,dblNetWeight = ISNULL(receiptItemLot.dblGrossWeight, 0) - ISNULL(receiptItemLot.dblTareWeight, 0)
+	,receiptItemLot.dblCost
+	,receiptItemLot.intUnitPallet
+	,receiptItemLot.dblStatedGrossPerUnit
+	,receiptItemLot.dblStatedTarePerUnit
+	,receiptItemLot.strContainerNo
+	,receiptItemLot.intEntityVendorId
+	,Vendor.strVendorId
+	,receiptItemLot.strGarden
+	,receiptItemLot.strMarkings
+	,receiptItemLot.intOriginId
+	,strOrigin = Origin.strCountry
+	,receiptItemLot.intGradeId
+	,strGrade = Grade.strDescription
+	,receiptItemLot.intSeasonCropYear
+	,receiptItemLot.strVendorLotId
+	,receiptItemLot.dtmManufacturedDate
+	,receiptItemLot.strRemarks
+	,receiptItemLot.strCondition
+	,receiptItemLot.dtmCertified
+	,receiptItemLot.dtmExpiryDate
+	,receiptItemLot.intSort		
+	,receiptItemLot.intParentLotId
+	,receiptItemLot.strParentLotNumber
+	,receiptItemLot.strParentLotAlias
+	,receiptItemLot.dblStatedNetPerUnit
+	,receiptItemLot.dblStatedTotalNet
+	,receiptItemLot.dblPhysicalVsStated
+FROM tblICInventoryReceiptItemLot receiptItemLot
+LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
+LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = receiptItemLot.intSubLocationId
+LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = receiptItemLot.intStorageLocationId
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = receiptItemLot.intItemUnitMeasureId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityVendorId = ReceiptItemLot.intEntityVendorId
-LEFT JOIN tblSMCountry Origin ON Origin.intCountryID = ReceiptItemLot.intOriginId
-LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItemLot.intGradeId
+LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityVendorId = receiptItemLot.intEntityVendorId
+LEFT JOIN tblSMCountry Origin ON Origin.intCountryID = receiptItemLot.intOriginId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = receiptItemLot.intGradeId

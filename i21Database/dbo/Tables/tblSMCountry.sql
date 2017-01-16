@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMCountry] (
     [intCountryID]				INT				IDENTITY (1, 1) NOT NULL,
     [strCountry]				NVARCHAR (100)	COLLATE Latin1_General_CI_AS NOT NULL,	
+	[strISOCode]				NVARCHAR (3)	COLLATE Latin1_General_CI_AS NULL,	
     [strCountryCode]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
 	[strCountryFormat]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
 	[strAreaCityFormat]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,

@@ -326,6 +326,14 @@ END
 GO
 
 GO
+IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 6)
+BEGIN
+	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	SELECT 6,'Short Close',1	
+END
+GO
+
+GO
 IF NOT EXISTS(SELECT * FROM tblCTCleanCostExpenseType)
 BEGIN
 	INSERT INTO tblCTCleanCostExpenseType(intConcurrencyId,strExpenseName,strExpenseDescription,ysnQuantityEnable)

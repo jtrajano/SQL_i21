@@ -148,10 +148,7 @@ BEGIN
 		WHERE L.strLoadNumber = @strTransactionId
 		GROUP BY LDL.intLoadDetailId
 		) ItemLot ON ItemLot.intLoadDetailId = Detail.intLoadDetailId
-	WHERE dbo.fnGetItemLotType(Detail.intItemId) IN (
-			@LotType_Manual
-			,@LotType_Serial
-			)
+	WHERE dbo.fnGetItemLotType(Detail.intItemId) <> 0 
 		AND LOAD.strLoadNumber = @strTransactionId
 		AND ROUND(ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0), 2) <> ROUND(Detail.dblQuantity, 2)
 
@@ -544,6 +541,7 @@ BEGIN
 	UPDATE	dbo.tblLGLoad
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+			,intShipmentStatus = 6
 	WHERE	strLoadNumber = @strTransactionId  
 
 	DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType

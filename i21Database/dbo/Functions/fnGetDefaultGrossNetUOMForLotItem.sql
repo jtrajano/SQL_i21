@@ -14,4 +14,4 @@ RETURN
 	WHERE	tblICItemUOM.intItemId = @intItemId
 			AND tblICItemUOM.ysnStockUnit = 1 
 			AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
-			AND dbo.fnGetItemLotType(@intItemId) IN (1, 2)
+			AND dbo.fnGetItemLotType(@intItemId) <> 0 

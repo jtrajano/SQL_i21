@@ -258,6 +258,11 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
 
+		UPDATE tblMFProductionSummary
+		SET dblConsumedQuantity = 0
+		WHERE intWorkOrderId = @intWorkOrderId
+		And intItemTypeId IN (1,3)
+
 		DELETE FROM dbo.tblMFWorkOrderProducedLotTransaction WHERE intWorkOrderId=@intWorkOrderId
 	END
 

@@ -1411,7 +1411,7 @@ DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT  IRI.intInventoryReceiptItemId
 FROM tblICInventoryReceiptItem IRI WHERE 
-IRI.intInventoryReceiptId = @InventoryReceiptId AND dbo.fnGetItemLotType(IRI.intItemId) IN (@LotType_Manual, @LotType_Serial);
+IRI.intInventoryReceiptId = @InventoryReceiptId AND dbo.fnGetItemLotType(IRI.intItemId) <> 0;
 
 OPEN intListCursor;
 

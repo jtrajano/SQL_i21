@@ -194,7 +194,8 @@ SELECT -- Load Header
 		LOAD.[strDischargePerUnit],
 		LOAD.[intTransportationMode],
 		LOAD.[intShipmentStatus],
-		LOAD.intShipmentType
+		LOAD.intShipmentType,
+		LOAD.[strExternalShipmentNumber]
 FROM tblLGLoad LOAD
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId

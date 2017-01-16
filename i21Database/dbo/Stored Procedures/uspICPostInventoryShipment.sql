@@ -252,7 +252,7 @@ BEGIN
 				) ItemLot
 					ON ItemLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId	
 
-		WHERE	dbo.fnGetItemLotType(Detail.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+		WHERE	dbo.fnGetItemLotType(Detail.intItemId) <> 0 
 				AND Header.strShipmentNumber = @strTransactionId
 				AND ROUND(ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0), 2) <>
 					ROUND(Detail.dblQuantity, 2)

@@ -53,14 +53,27 @@ BEGIN TRY
 		BEGIN
 			IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strFeedStatus,'') ='')
 			BEGIN
-				DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId
+				DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND  ISNULL(strFeedStatus,'') =''
+				IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId)
+				BEGIN
+					INSERT	INTO tblCTContractFeed (intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,strItemNo,strRowState,dtmFeedCreated)
+					SELECT	TOP 1 intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,
+							(SELECT TOP 1 strItemNo FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strItemNo,'') <> '') strItemNo,
+							'Delete',GETDATE()
+					FROM	tblCTContractFeed
+					WHERE	intContractDetailId = @intContractDetailId
+					ORDER BY intContractFeedId DESC
+				END
 			END
 			ELSE
 			BEGIN
-				INSERT INTO tblCTContractFeed (intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,strItemNo,strRowState,dtmFeedCreated)
-				SELECT	intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,strItemNo,'Delete',GETDATE()
-				FROM	vyuCTContractFeed
+				INSERT	INTO tblCTContractFeed (intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,strItemNo,strRowState,dtmFeedCreated)
+				SELECT	TOP 1 intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,
+						(SELECT TOP 1 strItemNo FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strItemNo,'') <> '') strItemNo,
+						'Delete',GETDATE()
+				FROM	tblCTContractFeed
 				WHERE	intContractDetailId = @intContractDetailId
+				ORDER BY intContractFeedId DESC
 			END
 		END
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail WHERE intUniqueId > @intUniqueId

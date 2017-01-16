@@ -42,6 +42,7 @@ Type the overview for the table here.
 		[intEntityId] INT NULL,
 		[intCreatedUserId] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[dtmCreated] DATETIME NULL DEFAULT (GETDATE()),
 		CONSTRAINT [PK_tblICInventoryShipment] PRIMARY KEY ([intInventoryShipmentId]), 
 		--CONSTRAINT [FK_tblICInventoryShipment_tblSMCompanyLocation] FOREIGN KEY ([intShipFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 

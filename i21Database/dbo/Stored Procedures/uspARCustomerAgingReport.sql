@@ -39,9 +39,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			,[strARAccount]				NVARCHAR(100)
 			,[dblPrepaymentBalance]		NUMERIC(18,6)
 			,[strPrepaymentAccount]		NVARCHAR(100)
-		)
-
-		SELECT * FROM @temp_aging_table
+		)		
 	END
 
 -- Declare the variables.
@@ -60,6 +58,7 @@ DECLARE  @strAsOfDateTo				AS NVARCHAR(50)
 		,@begingroup				AS NVARCHAR(50)
 		,@endgroup					AS NVARCHAR(50)
 		,@datatype					AS NVARCHAR(50)
+		,@strSourceTransaction	    AS NVARCHAR(50)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -102,11 +101,17 @@ SELECT	@strAsOfDateFrom = ISNULL([from], '')
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 
+SELECT  @strSourceTransaction = ISNULL([from], '')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strSourceTransaction'
+
+
 SET @strAsOfDateFrom = CASE WHEN @strAsOfDateFrom IS NULL THEN '''''' ELSE ''''+@strAsOfDateFrom+'''' END
 SET @strAsOfDateTo   = CASE WHEN @strAsOfDateTo IS NULL THEN '''''' ELSE ''''+@strAsOfDateTo+'''' END
 SET @strSalesperson  = CASE WHEN @strSalesperson IS NULL THEN '''''' ELSE ''''+@strSalesperson+'''' END
+SET @strSourceTransaction  = CASE WHEN @strSourceTransaction IS NULL THEN '''''' ELSE ''''+@strSourceTransaction+'''' END
 	
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'strSalespersonName')
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'strSalespersonName', 'strSourceTransaction')
 
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
@@ -141,15 +146,18 @@ SET @query = 'DECLARE @temp_aging_table TABLE(
 	,[dblPrepaids]				NUMERIC(18,6)
 	,[dtmAsOfDate]				DATETIME
 	,[strSalespersonName]		NVARCHAR(100)
+	,[strSourceTransaction]		NVARCHAR(100)
 )
 
-DECLARE @dtmDateTo DATETIME
-       ,@dtmDateFrom DATETIME
-	   ,@strSalesperson NVARCHAR(100)
+DECLARE @dtmDateTo				DATETIME
+       ,@dtmDateFrom			DATETIME
+	   ,@strSalesperson			NVARCHAR(100)
+	   ,@strSourceTransaction	NVARCHAR(100)
 
 SET @dtmDateTo   = CAST(CASE WHEN '+@strAsOfDateTo+' <> '''' THEN '+@strAsOfDateTo+' ELSE GETDATE() END AS DATETIME)
 SET @dtmDateFrom = CAST(CASE WHEN '+@strAsOfDateFrom+' <> '''' THEN '+@strAsOfDateFrom+' ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
 SET @strSalesperson = ISNULL('+@strSalesperson+', NULL)
+SET @strSourceTransaction = ISNULL('+@strSourceTransaction+', NULL)
 
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)
@@ -162,7 +170,7 @@ ELSE
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 	
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson
+EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, @strSourceTransaction
 
 SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
      , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)

@@ -1585,7 +1585,7 @@
     <Build Include="dbo\Tables\tblFRBudgetDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPostConsumptionProduction.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessToItemReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotStatusChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostOwnerChange.sql" />
     <Build Include="dbo\Tables\tblCTContractDocument.sql" />
     <Build Include="dbo\Tables\tblLGDeliveryPickDetail.sql" />
     <Build Include="dbo\Tables\tblLGDeliveryDetail.sql" />
@@ -2746,7 +2746,6 @@
     <Build Include="dbo\Tables\tblPATDividendsCustomer.sql" />
     <Build Include="dbo\Tables\tblPATDividendsStock.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportItemPlan.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFInventoryAdjustment_CreatePostLotItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessProvisionalInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportItemPlanSummary.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockSummary.sql" />
@@ -3986,7 +3985,6 @@
     <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityLineOfBusiness.sql" />
-    <Build Include="vyuSCTicketFormatView.sql" />
     <Build Include="dbo\Tables\tblSCTicketEmailOption.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
     <Build Include="dbo\Functions\fnMFConvertCostToTargetItemUOM.sql" />
@@ -4801,10 +4799,32 @@
     <Build Include="dbo\Functions\fnRKRKConvertProductTypeKeyToName.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerSplit.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerComment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostOwnerChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotStatusChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
     <Build Include="dbo\Views\vyuICGetItemOwner.sql" />
     <Build Include="dbo\Views\vyuMFGetWorkOrderSummaryView.sql" />
+    <None Include="Scripts\Post-Deployment\EM\037_DefaultDataLocationPayee.sql" />
+    <Build Include="dbo\Tables\tblCTAOP.sql" />
+    <Build Include="dbo\Tables\tblCTAOPDetail.sql" />
+    <Build Include="dbo\Views\vyuCTAOP.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetUnsavedAOPDetail.sql" />
+    <Build Include="dbo\Tables\tblIPStockStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPStock.sql" />
+    <Build Include="dbo\Tables\tblIPStockArchive.sql" />
+    <Build Include="dbo\Tables\tblIPStockError.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContractStatus.sql" />
+    <Build Include="dbo\Tables\tblLGLoadLog.sql" />
+    <Build Include="dbo\Tables\tblLGLoadDetailLog.sql" />
+    <Build Include="dbo\Tables\tblLGLoadContainerLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateLoadIntegrationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessIntegrationLogData.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessLoadToIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetBlendDemandNetMonth.sql" />
+    <Build Include="dbo\Tables\tblCRMHoursWorked.sql" />
+    <Build Include="dbo\Views\vyuSCTicketFormatView.sql" />
+    <Build Include="dbo\Views\vyuSCTicketTypeView.sql" />
+    <Build Include="dbo\Views\vyuARAgingSourceTransactionSearch.sql" />
     <Build Include="dbo\Tables\tblSMCustomLabel.sql" />
   </ItemGroup>
   <ItemGroup>

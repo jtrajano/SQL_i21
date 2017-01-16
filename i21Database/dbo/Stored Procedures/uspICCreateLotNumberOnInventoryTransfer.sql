@@ -14,6 +14,7 @@ DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
+		,@LotType_ManualSerial AS INT = 3
 
 -- Create the temp table 
 CREATE TABLE #GeneratedLotItems (
@@ -103,7 +104,7 @@ BEGIN
 				GROUP BY tblICInventoryTransferDetail.intInventoryTransferDetailId
 			) ItemLot
 				ON ItemLot.intInventoryTransferDetailId = TransferItem.intInventoryTransferDetailId											
-	WHERE	dbo.fnGetItemLotType(TransferItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+	WHERE	dbo.fnGetItemLotType(TransferItem.intItemId) <> 0 
 			AND Transfer.strTransferNo = @strTransactionId
 			AND ROUND(ItemLot.TotalLotQtyInItemUOM, 2) <>
 				ROUND(dbo.fnCalculateQtyBetweenUOM (

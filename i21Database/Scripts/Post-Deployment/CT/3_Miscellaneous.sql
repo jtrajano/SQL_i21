@@ -24,3 +24,27 @@ BEGIN
 	INSERT INTO tblCTAmendment (intConcurrencyId) SELECT 1
 END
 GO
+
+GO
+
+IF NOT EXISTS(SELECT * FROM tblCTPriceContract)
+BEGIN
+	PRINT('Filling data in Price Contract table')
+	DECLARE @intNextId INT
+	SET IDENTITY_INSERT tblCTPriceContract ON
+
+	INSERT	INTO tblCTPriceContract(intPriceContractId,strPriceContractNo,intCommodityId,intFinalPriceUOMId,intConcurrencyId)
+	SELECT	intPriceFixationId,LTRIM(intPriceFixationId),CH.intCommodityId,PF.intFinalPriceUOMId,1
+	FROM	tblCTPriceFixation	PF
+	JOIN	tblCTContractHeader CH	ON	CH.intContractHeaderId	=	PF.intContractHeaderId
+	
+	UPDATE tblCTPriceFixation	SET intPriceContractId = intPriceFixationId WHERE intPriceContractId IS NULL
+
+	SELECT @intNextId = MAX(intPriceContractId)+1 FROM tblCTPriceContract
+	UPDATE tblSMStartingNumber SET intNumber = LTRIM(@intNextId) WHERE strTransactionType = 'Price Contract' AND strModule	= 'Contract Management'
+
+	SET IDENTITY_INSERT tblCTPriceContract OFF
+	PRINT('End filling data in Price Contract table')
+END	
+
+GO

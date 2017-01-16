@@ -1,0 +1,8 @@
+﻿CREATE TABLE [dbo].[tblCTAOP]
+(
+	intAOPId int IDENTITY(1,1) NOT NULL,
+	strYear nvarchar(100) COLLATE Latin1_General_CI_AS  NOT NULL,
+	intConcurrencyId INT NOT NULL, 
+	CONSTRAINT PK_tblCTAOP_intAOPId PRIMARY KEY CLUSTERED (intAOPId ASC),
+	CONSTRAINT UQ_tblCTAOP_strYear UNIQUE (strYear)
+)

@@ -107,9 +107,8 @@ BEGIN TRY
 			CH.strContractNumber,
 			CH.strCustomerContract,
 			CB.strContractBasis,
-			SQ.strLocationName,
+			SQ.strLocationName,			
 			CY.strCropYear,
-
 			SQ.srtLoadingPoint + ' :' srtLoadingPoint,
 			SQ.strLoadingPointName,
 			SQ.strShipper,
@@ -141,14 +140,36 @@ BEGIN TRY
 			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
 			CH.dblQuantity,
 			SQ.strCurrency,
-			'To be covered by ' + IB.strInsuranceBy AS strInsuranceBy,
-			CH.strPrintableRemarks,
+			'To be covered by ' + IB.strInsuranceBy AS strInsuranceBy,			
+			CH.strPrintableRemarks,			
 			AN.strComment	AS strArbitrationComment,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 			PR.strName AS strProducer,
 			PO.strPosition,
 			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' strCaller,
-			@strContractConditions AS strContractConditions
+			@strContractConditions AS strContractConditions,
+			CASE WHEN ISNULL(CB.strContractBasis,'') <>'' THEN 'Condition :' ELSE NULL END AS lblCondition,
+			CASE WHEN ISNULL(PR.strName,'') <>'' THEN 'Producer :' ELSE NULL END AS lblProducer,
+			CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>'' THEN SQ.srtLoadingPoint + ' :'  ELSE NULL END AS lblLoadingPoint,
+			CASE WHEN ISNULL(PO.strPosition,'') <>'' THEN 'Position :' ELSE NULL END AS lblPosition,			
+			CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END AS lblSellerRefNo,
+			CASE WHEN ISNULL(CY.strCropYear,'') <>'' THEN 'Crop Year :' ELSE NULL END AS lblCropYear,
+			CASE WHEN ISNULL(SQ.strShipper,'') <>'' THEN 'Shipper :' ELSE NULL END AS lblShipper,
+			CASE WHEN ISNULL(SQ.strDestinationPointName,'') <>'' THEN SQ.srtDestinationPoint + ' :'  ELSE NULL END AS lblDestinationPoint,			
+			CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' THEN 'Pricing :' ELSE NULL END AS lblPricing,
+			CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>'' THEN 'Weighing:' ELSE NULL END AS lblWeighing,
+			CASE WHEN ISNULL(TM.strTerm,'') <>'' THEN 'Payment Term:' ELSE NULL END AS lblTerm,
+			CASE WHEN ISNULL(IB.strInsuranceBy,'') <>'' THEN 'Insurance:' ELSE NULL END AS lblInsurance,
+			CASE WHEN ISNULL(AN.strComment,'') <>'' AND ISNULL(AB.strState,'') <>'' AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:' ELSE NULL END AS lblArbitration,
+			CASE WHEN ISNULL(@strContractConditions,'') <>'' THEN 'Conditions:' ELSE NULL END AS lblContractCondition,
+			SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13) AS strLocationWithDate,
+	        'The contract has been closed on the conditions of the '+ AN.strComment + '('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' strCondition,
+		    PO.strPosition +'('+SQ.strPackingDescription +')' AS strPositionWithPackDesc,
+			TX.strText+' '+CH.strPrintableRemarks AS strText,
+			SQ.strContractCompanyName,
+			SQ.strContractPrintSignOff,
+			LTRIM(RTRIM(EY.strEntityName))AS strCompanyName
+
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
@@ -181,7 +202,10 @@ BEGIN TRY
 							TT.strName								AS	strShipper,
 							CY.strCurrency,
 							CD.strFixationBy,
-							MA.strFutMarketName
+							MA.strFutMarketName,
+							CD.strPackingDescription				AS strPackingDescription,
+							CL.strContractCompanyName				AS strContractCompanyName,
+						    CL.strContractPrintSignOff              AS strContractPrintSignOff
 
 				FROM		tblCTContractDetail		CD
 				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
@@ -190,7 +214,7 @@ BEGIN TRY
 				JOIN		tblEMEntity				TT	ON	TT.intEntityId				=	CD.intShipperId				LEFT
 				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId			LEFT
 				JOIN		tblRKFutureMarket		MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId		
-			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1			
+			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1 
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
 	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId

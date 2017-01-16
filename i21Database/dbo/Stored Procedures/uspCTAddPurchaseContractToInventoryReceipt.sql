@@ -136,7 +136,7 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 										WHERE	tblICItemUOM.intItemId = ContractDetail.intItemId 
 												AND tblICItemUOM.ysnStockUnit = 1 
 												AND tblICUnitMeasure.strUnitType = 'Weight'
-												AND dbo.fnGetItemLotType(ContractDetail.intItemId) IN (1,2)
+												AND dbo.fnGetItemLotType(ContractDetail.intItemId) <> 0 
 									)
 		,dblUnitCost			= ContractDetail.dblCashPrice
 		,dblLineTotal			= ISNULL(ContractDetail.dblBalance, 0) * ContractDetail.dblCashPrice
