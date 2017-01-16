@@ -1,66 +1,154 @@
 ﻿CREATE VIEW dbo.vyuMFItemDetails
 AS
-	SELECT i.intConcurrencyId, 
-		   i.intItemId, 
-		   i.strItemNo, 
-		   i.strShortName, 
-		   i.strType, 
-		   i.strDescription, 
-		   i.intCategoryId, 
-		   i.strStatus, 
-		   i.strModelNo, 
-		   i.strInventoryTracking, 
-		   i.strLotTracking, 
-		   i.ysnRequireCustomerApproval, 
-		   i.intRecipeId, 
-		   i.ysnSanitationRequired, 
-		   i.intLifeTime, 
-		   i.strLifeTimeType, 
-		   i.intReceiveLife, 
-		   i.strGTIN, 
-		   i.strRotationType, 
-		   i.intNMFCId, 
-		   i.ysnStrictFIFO, 
-		   i.intDimensionUOMId, 
-		   i.dblHeight, 
-		   i.dblWidth, 
-		   i.dblDepth, 
-		   i.intWeightUOMId, 
-		   i.dblWeight, 
-		   i.intMaterialPackTypeId, 
-		   i.strMaterialSizeCode, 
-		   i.intInnerUnits, 
-		   i.intLayerPerPallet, 
-		   i.intUnitPerLayer, 
-		   i.dblStandardPalletRatio, 
-		   i.strMask1, 
-		   i.strMask2, 
-		   i.strMask3, 
-		   i.dblAmount, 
-		   i.intCostUOMId, 
-		   i.intPackTypeId, 
-		   i.strWeightControlCode, 
-		   i.dblBlendWeight, 
-		   i.dblNetWeight, 
-		   i.dblUnitPerCase, 
-		   i.intOwnerId, 
-		   i.intCustomerId, 
-		   i.dblCaseWeight, 
-		   i.strWarehouseStatus, 
-		   i.ysnSellableItem, 
-		   um.strUnitMeasure AS strWeightUOM, 
-		   iu.intUnitMeasureId AS intItemUOMId,
-		   um1.strUnitMeasure AS strItemUOM,
-		   ISNULL(um.strUnitMeasure,um1.strUnitMeasure) AS strUOM,
-		   c.strCategoryCode,
-		   e.strName AS strItemOwner,
-		   ac.intEntityCustomerId AS intItemOwnerId
-	FROM tblICItem i
-	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId --AND ysnWarehouseTracked = 1
-	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = i.intWeightUOMId
-	LEFT JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId
-	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu.intUnitMeasureId
-	LEFT JOIN tblICItemOwner io ON io.intItemId = i.intItemId 
-	LEFT JOIN tblARCustomer ac ON ac.intEntityCustomerId = io.intOwnerId
-	LEFT JOIN tblEMEntity e ON e.intEntityId = ac.intEntityCustomerId
-	WHERE iu.ysnStockUnit = 1 
+SELECT I.strItemNo
+	,I.intItemId AS intProductItemId
+	,I.intItemId
+	,I.strDescription
+	,CONVERT(BIT, 0) AS ysnSubstituteItem
+	,I.intConcurrencyId
+	,I.strShortName
+	,I.strType
+	,I.intCategoryId
+	,I.strStatus
+	,I.strModelNo
+	,I.strInventoryTracking
+	,I.strLotTracking
+	,I.ysnRequireCustomerApproval
+	,I.intRecipeId
+	,I.ysnSanitationRequired
+	,I.intLifeTime
+	,I.strLifeTimeType
+	,I.intReceiveLife
+	,I.strGTIN
+	,I.strRotationType
+	,I.intNMFCId
+	,I.ysnStrictFIFO
+	,I.intDimensionUOMId
+	,I.dblHeight
+	,I.dblWidth
+	,I.dblDepth
+	,I.intWeightUOMId
+	,I.dblWeight
+	,I.intMaterialPackTypeId
+	,I.strMaterialSizeCode
+	,I.intInnerUnits
+	,I.intLayerPerPallet
+	,I.intUnitPerLayer
+	,I.dblStandardPalletRatio
+	,I.strMask1
+	,I.strMask2
+	,I.strMask3
+	,I.dblAmount
+	,I.intCostUOMId
+	,I.intPackTypeId
+	,I.strWeightControlCode
+	,I.dblBlendWeight
+	,I.dblNetWeight
+	,I.dblUnitPerCase
+	,I.intOwnerId
+	,I.intCustomerId
+	,I.dblCaseWeight
+	,I.strWarehouseStatus
+	,I.ysnSellableItem
+	,UM.strUnitMeasure AS strWeightUOM
+	,IU.intUnitMeasureId AS intItemUOMId
+	,UM1.strUnitMeasure AS strItemUOM
+	,ISNULL(UM.strUnitMeasure, UM1.strUnitMeasure) AS strUOM
+	,C.strCategoryCode
+	,E.strName AS strItemOwner
+	,AC.intEntityCustomerId AS intItemOwnerId
+	,CONVERT(NVARCHAR, 1) AS strAutoManual
+FROM tblICItem I
+JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId --AND ysnWarehouseTracked = 1
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = I.intWeightUOMId
+LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+LEFT JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICItemOwner IO ON IO.intItemId = I.intItemId
+LEFT JOIN tblARCustomer AC ON AC.intEntityCustomerId = IO.intOwnerId
+LEFT JOIN tblEMEntity E ON E.intEntityId = AC.intEntityCustomerId
+WHERE IU.ysnStockUnit = 1
+
+UNION ALL
+
+SELECT DISTINCT I.strItemNo
+	,R.intItemId AS intProductItemId
+	,I.intItemId
+	,I.strDescription
+	,CONVERT(BIT, CASE 
+			WHEN SI.intSubstituteItemId IS NOT NULL
+				THEN 1
+			ELSE 0
+			END) AS ysnSubstituteItem
+	,I.intConcurrencyId
+	,I.strShortName
+	,I.strType
+	,I.intCategoryId
+	,I.strStatus
+	,I.strModelNo
+	,I.strInventoryTracking
+	,I.strLotTracking
+	,I.ysnRequireCustomerApproval
+	,I.intRecipeId
+	,I.ysnSanitationRequired
+	,I.intLifeTime
+	,I.strLifeTimeType
+	,I.intReceiveLife
+	,I.strGTIN
+	,I.strRotationType
+	,I.intNMFCId
+	,I.ysnStrictFIFO
+	,I.intDimensionUOMId
+	,I.dblHeight
+	,I.dblWidth
+	,I.dblDepth
+	,I.intWeightUOMId
+	,I.dblWeight
+	,I.intMaterialPackTypeId
+	,I.strMaterialSizeCode
+	,I.intInnerUnits
+	,I.intLayerPerPallet
+	,I.intUnitPerLayer
+	,I.dblStandardPalletRatio
+	,I.strMask1
+	,I.strMask2
+	,I.strMask3
+	,I.dblAmount
+	,I.intCostUOMId
+	,I.intPackTypeId
+	,I.strWeightControlCode
+	,I.dblBlendWeight
+	,I.dblNetWeight
+	,I.dblUnitPerCase
+	,I.intOwnerId
+	,I.intCustomerId
+	,I.dblCaseWeight
+	,I.strWarehouseStatus
+	,I.ysnSellableItem
+	,U.strUnitMeasure AS strWeightUOM
+	,CASE 
+		WHEN SI.intSubstituteItemId IS NOT NULL
+			THEN IU1.intItemUOMId
+		ELSE IU.intItemUOMId
+		END AS intItemUOMId
+	,UM1.strUnitMeasure AS strItemUOM
+	,ISNULL(U.strUnitMeasure, UM1.strUnitMeasure) AS strUOM
+	,C.strCategoryCode
+	,E.strName AS strItemOwner
+	,AC.intEntityCustomerId AS intItemOwnerId
+	,CONVERT(NVARCHAR, 2) AS strAutoManual
+FROM dbo.tblMFRecipe R
+JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+	AND RI.intRecipeItemTypeId = 1
+LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
+	AND SI.intRecipeId = R.intRecipeId
+JOIN dbo.tblICItem I ON (I.intItemId = RI.intItemId)
+	OR (I.intItemId = SI.intSubstituteItemId)
+JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = RI.intItemUOMId
+JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId --AND ysnWarehouseTracked = 1
+LEFT JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICItemOwner IO ON IO.intItemId = I.intItemId
+LEFT JOIN tblARCustomer AC ON AC.intEntityCustomerId = IO.intOwnerId
+LEFT JOIN tblEMEntity E ON E.intEntityId = AC.intEntityCustomerId
+LEFT JOIN tblICItemUOM IU1 ON IU1.intItemId = SI.intSubstituteItemId
+	AND IU1.intUnitMeasureId = IU.intUnitMeasureId
