@@ -28,9 +28,17 @@ DECLARE @InventoryReceiptId INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
 		,@batchIdUsed AS NVARCHAR(100)
-		,@recapId AS INT;
+		,@recapId AS INT
+		,@intLoadId INT
+		,@intLoadDetailId INT
+		,@intLoadContractId INT
+		,@dblLoadScheduledUnits AS NUMERIC(12,4);
 
 BEGIN TRY
+		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId, @dblLoadScheduledUnits = LGLD.dblDeliveredQuantity 
+		FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
+		WHERE LGL.intTicketId = @intTicketId
+
 		IF @strInOutFlag = 'I'
 			BEGIN
 				CREATE TABLE #tmpItemReceiptIds (
@@ -127,6 +135,11 @@ BEGIN TRY
 				END
 				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 			END
+
+		IF ISNULL(@intLoadDetailId,0) > 0
+		BEGIN
+			EXEC [dbo].[uspLGUpdateLoadDetails] @intLoadDetailId, 1 , @intTicketId, NULL, 0;
+		END
 	_Exit:
 
 END TRY
