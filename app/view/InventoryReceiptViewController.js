@@ -1050,6 +1050,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             onPageChange: me.onPageChange,
             binding: me.config.binding,
             enableActivity: true,
+            enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             onSaveClick: me.saveAndPokeGrid(win, grdInventoryReceipt),
