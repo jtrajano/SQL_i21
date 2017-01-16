@@ -120,9 +120,25 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        itemId: 'btnRecap',
+                                        hidden: true,
+                                        itemId: 'btnUnpost',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Unpost'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        itemId: 'btnPostPreview',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post Preview'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        hidden: true,
+                                        itemId: 'btnUnpostPreview',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Unpost Preview'
                                     },
                                     {
                                         xtype: 'button',

@@ -156,10 +156,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
-            btnShip: {
-                text: '{getShipButtonText}',
-                iconCls: '{getShipButtonIcon}',
-                hidden: '{checkHidePostUnpost}'
+            btnPost: {
+                hidden: '{hidePostButton}'
+            },
+            btnUnpost: {
+                hidden: '{hideUnpostButton}'
+            },
+            btnPostPreview: {
+                hidden: '{hidePostButton}'
+            },
+            btnUnpostPreview: {
+                hidden: '{hideUnpostButton}'    
             },
             btnInvoice: {
                 hidden: '{!current.ysnPosted}'
@@ -1294,14 +1301,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
-    onShipClick: function(button, e, eOpts) {
+    onPostClick: function(button, e, eOpts) {
         var me = this;
         var win = button.up('window');
         var context = win.context;
 
         var doPost = function() {
-            var strShipmentNumber = win.viewModel.data.current.get('strShipmentNumber');
-            var posted = win.viewModel.data.current.get('ysnPosted');
+            var strShipmentNumber = me.getCurrentValue('strShipmentNumber');
+            var posted = me.getCurrentValue('ysnPosted');
 
             var options = {
                 postURL             : '../Inventory/api/InventoryShipment/Ship',
@@ -1367,10 +1374,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         showPostButton: showButton,
                         showUnpostButton: showButton,
                         postCallback: function(){
-                            me.onShipClick(recapButton);
+                            me.onPostClick(recapButton);
                         },
                         unpostCallback: function(){
-                            me.onShipClick(recapButton);
+                            me.onPostClick(recapButton);
                         }
                     });
                 },
@@ -2768,10 +2775,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             "#btnCustomer": {
                 click: this.onCustomerClick
             },
-            "#btnShip": {
-                click: this.onShipClick
+            "#btnPost": {
+                click: this.onPostClick
             },
-            "#btnRecap": {
+            "#btnUnpost": {
+                click: this.onPostClick
+            },
+            "#btnPostPreview": {
+                click: this.onRecapClick
+            },
+            "#btnUnpostPreview": {
                 click: this.onRecapClick
             },
             "#btnInvoice": {

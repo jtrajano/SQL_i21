@@ -251,7 +251,7 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "icon": null,
-                                "itemId": "btnRecap",
+                                "itemId": "btnPostPreview",
                                 "layout|flex": null,
                                 "tabIndex": -1,
                                 "text": "Post Preview",
@@ -260,6 +260,27 @@
                             },
                             "name": "MyButton8",
                             "designerId": "1f0007e6-e037-4ac6-abb2-c12006159db1"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "hidden": true,
+                                "icon": null,
+                                "itemId": "btnUnpostPreview",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Unpost Preview",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton44",
+                            "designerId": "478e0695-2c86-4643-9c53-4517b880b575"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -655,7 +676,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter134",
                                                     "designerId": "be0a06de-99ab-416d-ae5c-3a1068a87c05",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2537,7 +2558,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging15",
                     "designerId": "fc46f0de-7c8f-4d13-8dd6-f03119153f7d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

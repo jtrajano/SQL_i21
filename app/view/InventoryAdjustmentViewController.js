@@ -149,6 +149,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             btnUnpost: {
                 hidden: '{!current.ysnPosted}'
             },
+            btnPostPreview: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnUnpostPreview: {
+                hidden: '{!current.ysnPosted}'
+            },
             btnSave: {
                 disabled: '{current.ysnPosted}'
             },
@@ -1591,7 +1597,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             "#btnUnpost": {
                 click: this.onPostOrUnPostClick
             },
-            "#btnRecap": {
+            "#btnPostPreview": {
+                click: this.onRecapClick
+            },
+            "#btnUnpostPreview": {
                 click: this.onRecapClick
             },
             "#cboNewLocation": {

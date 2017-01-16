@@ -338,17 +338,30 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
             return get('current.strReceiptNumber');
         },
-        checkHidePostUnpost: function(get) {
+        hidePostButton: function(get) {
+            var posted = get('current.ysnPosted');
+            var hide = true;
             switch (get('current.intSourceType')) {
                 case 1: // Scale  
                 case 3: // Transport Load
                 case 4: // Settle Storage 
-                    return true; 
-                    break; 
+                    return true;
                 default:  
-                    return false;  
+                    return posted;
             }
         },
+        hideUnpostButton: function(get) {
+            var posted = get('current.ysnPosted');
+            switch (get('current.intSourceType')) {
+                case 1: // Scale  
+                case 3: // Transport Load
+                case 4: // Settle Storage 
+                    return true;
+                default:  
+                    return !posted;
+            }
+        },
+
         checkHiddenAddOrders: function(get) {
             var isHidden = false;
             if (get('current.ysnPosted')) {

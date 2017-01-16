@@ -417,7 +417,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             "#btnPost": {
                 click: this.onBuildClick
             },
-            "#btnRecap": {
+            "#btnPostPreview": {
                 click: this.onRecapClick
             },
             "#btnViewItem": {

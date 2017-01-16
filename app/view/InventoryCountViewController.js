@@ -88,11 +88,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 text: '{getLockInventoryText}'
             },
             btnPost: {
-                text: '{getPostText}',
-                hidden: '{checkPost}'
+                hidden: '{hidePostButton}'
             },
-            btnRecap: {
-                hidden: '{checkPost}'
+            btnUnpost: {
+                hidden: '{hideUnpostButton}'
+            },
+            btnPostPreview: {
+                hidden: '{hideUnpostButton}'
+            },
+            btnUnpostPreview: {
+                hidden: '{hideUnpostButton}'
             },
             btnRecount: {
                 hidden: '{checkRecount}'
@@ -1182,7 +1187,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             "#btnPost": {
                 click: this.onPostClick
             },
-            "#btnRecap": {
+            "#btnUnpost": {
+                click: this.onPostClick
+            },
+            "#btnPostPreview": {
+                click: this.onRecapClick
+            },
+            "#btnUnpostPreview": {
                 click: this.onRecapClick
             },
             "#cboItem": {

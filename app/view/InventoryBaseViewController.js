@@ -22,5 +22,13 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
                 }
             });
         }, me);
+    },
+
+    getCurrent: function() {
+        return this.getView().getViewModel().data.current;
+    },
+
+    getCurrentValue: function(key) {
+        return this.getCurrent().get(key);
     }
 });

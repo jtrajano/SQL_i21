@@ -117,9 +117,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        itemId: 'btnReceive',
+                                        itemId: 'btnPost',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        hidden: true,
+                                        itemId: 'btnUnpost',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Unpost'
                                     },
                                     {
                                         xtype: 'button',
@@ -131,9 +139,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        itemId: 'btnRecap',
+                                        itemId: 'btnPostPreview',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post Preview'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        hidden: true,
+                                        itemId: 'btnUnpostPreview',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Unpost Preview'
                                     },
                                     {
                                         xtype: 'button',

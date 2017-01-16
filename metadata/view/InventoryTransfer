@@ -228,8 +228,29 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
+                                "hidden": true,
                                 "icon": null,
-                                "itemId": "btnRecap",
+                                "itemId": "btnUnpost",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Unpost",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton55",
+                            "designerId": "e39743e8-27e1-477d-be07-366952cf126c"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
+                                "itemId": "btnPostPreview",
                                 "layout|flex": null,
                                 "tabIndex": -1,
                                 "text": "Post Preview",
@@ -238,6 +259,27 @@
                             },
                             "name": "MyButton18",
                             "designerId": "0d883e19-040d-492f-a967-b3a848a851bf"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "hidden": true,
+                                "icon": null,
+                                "itemId": "btnUnpostPreview",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Unpost Preview",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton56",
+                            "designerId": "44194e72-1592-4250-a5dc-f578ef2e1987"
                         },
                         {
                             "type": "Ext.button.Button",

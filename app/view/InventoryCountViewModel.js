@@ -107,11 +107,19 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             }
             else return true;
         },
-        checkPost: function (get) {
+        hidePostButton: function(get) {
+            var posted = get('current.ysnPosted');
             if (get('current.intStatus') === 3 || get('current.intStatus') === 4) {
-                return false;
+                return true;
             }
-            else return true;
+            else return posted;
+        },
+        hideUnpostButton: function (get) {
+            var posted = get('current.ysnPosted');
+            if (get('current.intStatus') === 3 || get('current.intStatus') === 4) {
+                return true;
+            }
+            else return !posted;
         },
         checkRecount: function (get) {
             if (get('current.intStatus') !== 4) {

@@ -144,12 +144,24 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             }
             return false;
         },
-        checkTransportPosting: function(get) {
+        hidePostButton: function(get) {
+            var posted = get('current.ysnPosted');
+
             if (get('current.intSourceType') === 3) {
                 return true;
             }
             else {
-                return false;
+                return posted;
+            }
+        },
+        hideUnpostButton: function(get) {
+            var posted = get('current.ysnPosted');
+
+            if (get('current.intSourceType') === 3) {
+                return true;
+            }
+            else {
+                return !posted;
             }
         },
         hideOnLocationToLocation: function(get) {

@@ -127,9 +127,17 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        itemId: 'btnRecap',
+                                        itemId: 'btnPostPreview',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post Preview'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        hidden: true,
+                                        itemId: 'btnUnpostPreview',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Unpost Preview'
                                     },
                                     {
                                         xtype: 'button',

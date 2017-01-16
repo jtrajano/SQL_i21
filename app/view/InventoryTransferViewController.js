@@ -126,9 +126,16 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 disabled: '{current.ysnPosted}'
             },
             btnPost: {
-                text: '{getPostButtonText}',
-                iconCls: '{getPostButtonIcon}',
-                hidden: '{checkTransportPosting}'
+                hidden: '{hidePostButton}'
+            },
+            btnUnpost: {
+                hidden: '{hideUnpostButton}'
+            },
+            btnPostPreview: {
+                hidden: '{hidePostButton}'
+            },
+            btnUnpostPreview: {
+                hidden: '{hideUnpostButton}'  
             },
             btnAddItem: {
                 hidden: '{current.ysnPosted}'
@@ -951,7 +958,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             "#btnPost": {
                 click: this.onPostClick
             },
-            "#btnRecap": {
+            "#btnUnpost": {
+                click: this.onPostClick
+            },
+            "#btnPostPreview": {
+                click: this.onRecapClick
+            },
+            "#btnUnpostPreview": {
                 click: this.onRecapClick
             },
             "#btnViewItem": {

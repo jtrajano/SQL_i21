@@ -197,13 +197,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnUndo: {
                 disabled: '{isOriginOrPosted}'
             },
-            btnReceive: {
+            btnPost: {
                 disabled: '{current.ysnOrigin}',
-                text: '{getReceiveButtonText}',
-                hidden: '{checkHidePostUnpost}'
+                hidden: '{hidePostButton}'
             },
-            btnRecap: {
-                disabled: '{current.ysnOrigin}'
+            btnUnpost: {
+                disabled: '{current.ysnOrigin}',
+                hidden: '{hideUnpostButton}'
+            },
+            btnPostPreview: {
+                disabled: '{current.ysnOrigin}',
+                hidden: '{hidePostButton}'
+            },
+            btnUnpostPreview: {
+                disabled: '{current.ysnOrigin}',
+                hidden: '{hideUnpostButton}'
             },
             btnReturn: {
                 hidden: '{checkHideReturnButton}'
@@ -3025,7 +3033,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var context = win.context;
         var current = win.viewModel.data.current;
-        var btnReceive = win.down('#btnReceive');
+        var btnPost = win.down('#btnPost');
         var pnlLotTracking = win.down('#pnlLotTracking');
         var grdInventoryReceipt = win.down('#grdInventoryReceipt');
         
@@ -3126,7 +3134,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
 
-            if (ReceivedGrossDiscrepancyItems !== '' && btnReceive.text === 'Post') {
+            if (ReceivedGrossDiscrepancyItems !== '' && button.text === 'Post') {
                 iRely.Functions.showCustomDialog('question', 'yesno', 'Received and Gross quantities are not equal for the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?', buttonAction);
             }
             else {
@@ -6134,10 +6142,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#txtInvoiceAmount": {
                 change: this.onCalculateTotalAmount
             },
-            "#btnReceive": {
+            "#btnPost": {
                 click: this.onReceiveClick
             },
-            "#btnRecap": {
+            "#btnUnpost": {
+                click: this.onReceiveClick
+            },
+            "#btnPostPreview": {
+                click: this.onRecapClick
+            },
+            "#btnUnpostPreview": {
                 click: this.onRecapClick
             },
             "#btnReturn": {
