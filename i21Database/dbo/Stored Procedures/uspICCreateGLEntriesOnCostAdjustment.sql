@@ -354,6 +354,7 @@ AS
 				ON i.intItemId = t.intItemId
 	WHERE	t.strBatchId = @strBatchId
 			AND ISNULL(t.ysnNoGLPosting, 0) = 0
+			AND ROUND(t.dblQty * t.dblCost + t.dblValue, 2) <> 0 
 )
 
 -----------------------------------------------------------------------------------
