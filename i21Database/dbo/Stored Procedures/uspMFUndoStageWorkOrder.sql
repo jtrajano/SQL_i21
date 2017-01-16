@@ -55,12 +55,17 @@ BEGIN TRY
 		,@strInventoryTracking NVARCHAR(50)
 		,@strTransferNo NVARCHAR(50)
 		,@intInventoryTransferId INT
+		,@intMachineId INT
+		,@intManufacturingProcessId INT
+		,@intProductionStageLocationId INT
+		,@intProductionStagingId INT
 
 	SELECT @intLotId = intLotId
 		,@intInputItemId = intItemId
 		,@dblNewWeight = dblQuantity
 		,@intNewItemUOMId = intItemUOMId
 		,@intNewStorageLocationId = intStorageLocationId
+		,@intMachineId = intMachineId
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
@@ -72,6 +77,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @intItemId = intItemId
 			,@intLocationId = intLocationId
+			,@intManufacturingProcessId = intManufacturingProcessId
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -93,6 +99,24 @@ BEGIN TRY
 		FROM tblICStorageLocation
 		WHERE intStorageLocationId = @intNewStorageLocationId
 
+		SELECT @intProductionStageLocationId = intProductionStagingLocationId
+		FROM tblMFManufacturingProcessMachine
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intMachineId = @intMachineId
+
+		IF @intProductionStageLocationId IS NULL
+		BEGIN
+			SELECT @intProductionStagingId = intAttributeId
+			FROM tblMFAttribute
+			WHERE strAttributeName = 'Production Staging Location'
+
+			SELECT @intProductionStageLocationId = strAttributeValue
+			FROM tblMFManufacturingProcessAttribute
+			WHERE intManufacturingProcessId = @intManufacturingProcessId
+				AND intLocationId = @intLocationId
+				AND intAttributeId = @intProductionStagingId
+		END
+
 		SELECT TOP 1 @strLotNumber = L.strLotNumber
 			,@intLocationId = L.intLocationId
 			,@intSubLocationId = L.intSubLocationId
@@ -107,9 +131,12 @@ BEGIN TRY
 			AND L.intStorageLocationId = (
 				CASE 
 					WHEN @intStorageLocationId IS NULL
+						AND @intProductionStageLocationId IS NULL
 						THEN L.intStorageLocationId
 					ELSE (
 							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN @intProductionStageLocationId
 								WHEN @intConsumptionMethodId = 2
 									THEN @intStorageLocationId
 								ELSE L.intStorageLocationId
@@ -117,7 +144,7 @@ BEGIN TRY
 							) --By location, then apply location filter
 					END
 				)
-		ORDER BY L.dblQty
+		ORDER BY L.dblQty DESC
 			,L.dtmDateCreated ASC
 
 		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
