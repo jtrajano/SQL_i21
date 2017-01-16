@@ -662,6 +662,7 @@ BEGIN TRY
 
 	INSERT INTO tblMFStageWorkOrder (
 		intWorkOrderId
+		,intItemId
 		,dtmPlannedDate
 		,intPlannnedShiftId
 		,intOrderHeaderId
@@ -672,6 +673,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		)
 	SELECT intWorkOrderId
+		,intItemId
 		,dtmPlannedDate
 		,intPlannedShift
 		,@intOrderHeaderId

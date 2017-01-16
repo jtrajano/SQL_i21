@@ -1,6 +1,7 @@
 ﻿CREATE TABLE tblMFStageWorkOrder (
 	intStageId INT NOT NULL identity(1, 1)
 	,intWorkOrderId INT NOT NULL
+	,intItemId int
 	,dtmPlannedDate DATETIME NULL
 	,intPlannnedShiftId INT NULL
 	,intOrderHeaderId INT NOT NULL
@@ -15,6 +16,7 @@
 		,dtmPlannedDate
 		,intPlannnedShiftId
 		)
+	,CONSTRAINT [FK_tblMFStageWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 	,CONSTRAINT [FK_tblMFStageWorkOrder_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY (intWorkOrderId) REFERENCES tblMFWorkOrder(intWorkOrderId)
 	,CONSTRAINT [FK_tblMFStageWorkOrder_tblMFShift_intPlannedShiftId] FOREIGN KEY (intPlannnedShiftId) REFERENCES tblMFShift(intShiftId)
 	,CONSTRAINT [FK_tblMFStageWorkOrder_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY (intOrderHeaderId) REFERENCES tblMFOrderHeader(intOrderHeaderId) ON DELETE CASCADE
