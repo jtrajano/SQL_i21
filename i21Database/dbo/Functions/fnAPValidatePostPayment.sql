@@ -56,6 +56,7 @@ BEGIN
 			SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference
 		) BaseCurrency
 		WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND C.intCurrencyId != BaseCurrency.intDefaultCurrencyId
+		AND B.dblPayment > 0
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
