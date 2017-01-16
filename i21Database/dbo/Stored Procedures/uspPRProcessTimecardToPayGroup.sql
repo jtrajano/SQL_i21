@@ -142,7 +142,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TCE.dblOvertimeHours
 			,TCE.dblOvertimeHours
 			,EL.dblRateAmount 
-			,TCE.dblOvertimeHours * TCE.dblRateAmount
+			,TCE.dblOvertimeHours * EL.dblRateAmount
 			,@dtmBegin 
 			,@dtmEnd
 			,1
