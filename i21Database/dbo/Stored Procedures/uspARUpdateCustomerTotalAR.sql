@@ -25,12 +25,34 @@ DECLARE @temp_aging_table TABLE(
 	,[dblPrepayments]			NUMERIC(18,6)
 	,[dblPrepaids]				NUMERIC(18,6)
 	,[dtmAsOfDate]				DATETIME
-	,[strSalespersonName]		NVARCHAR(100))
+	,[strSalespersonName]		NVARCHAR(100)
+	,[strSourceTransaction]		NVARCHAR(100))
 
 SET @dateFrom = CAST(-53690 AS DATETIME)
 SET @dateTo = CAST(GETDATE() AS DATETIME)
 
-INSERT INTO @temp_aging_table
+INSERT INTO @temp_aging_table(
+	 [strCustomerName]			--= [strCustomerName]
+	,[strEntityNo]				--= [strEntityNo]
+	,[intEntityCustomerId]		--= [intEntityCustomerId]
+	,[dblCreditLimit]			--= [dblCreditLimit]
+	,[dblTotalAR]				--= [dblTotalAR]
+	,[dblFuture]				--= [dblFuture]
+	,[dbl0Days]					--= [dbl0Days]
+	,[dbl10Days]				--= [dbl10Days]
+	,[dbl30Days]				--= [dbl30Days]
+	,[dbl60Days]				--= [dbl60Days]
+	,[dbl90Days]				--= [dbl90Days]
+	,[dbl91Days]				--= [dbl91Days]
+	,[dblTotalDue]				--= [dblTotalDue]
+	,[dblAmountPaid]			--= [dblAmountPaid]
+	,[dblCredits]				--= [dblCredits]
+	,[dblPrepayments]			--= [dblPrepayments]
+	,[dblPrepaids]				--= [dblPrepaids]
+	,[dtmAsOfDate]				--= [dtmAsOfDate]
+	,[strSalespersonName]		--= [strSalespersonName]
+	,[strSourceTransaction]		--= [strSourceTransaction]
+)
 EXEC uspARCustomerAgingAsOfDateReport @dateFrom, @dateTo, NULL, @CustomerId
 
 IF ISNULL(@CustomerId, 0) <> 0 AND ISNULL(@InvoiceId, 0) <> 0 --AFTER POST INVOICE
