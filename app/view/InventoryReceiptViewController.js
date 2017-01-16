@@ -1929,10 +1929,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Show or hide the Lot Panel (or Grid)
         var pnlLotTracking = win.down("#pnlLotTracking");
 
-        if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
-            pnlLotTracking.setVisible(true);
-        } else {
+        //if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
+        if (current.get('strLotTracking') === 'No') {            
             pnlLotTracking.setVisible(false);
+        } 
+        else {
+            pnlLotTracking.setVisible(true);
         }
     },
 
@@ -4707,14 +4709,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     vm.data.currentReceiptItem = null;
                     pnlLotTracking.setVisible(false);
                 }
-                else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
-                    vm.data.currentReceiptItem = current;
-                    pnlLotTracking.setVisible(true);
-                }
-                else {
+                else if (current.get('strLotTracking') === 'No') {
                     pnlLotTracking.setVisible(false);
                     vm.data.currentReceiptItem = null;
                 }
+                else {
+                    vm.data.currentReceiptItem = current;
+                    pnlLotTracking.setVisible(true);
+                }
+
+                // else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
+                //     vm.data.currentReceiptItem = current;
+                //     pnlLotTracking.setVisible(true);
+                // }
+                // else {
+                //     pnlLotTracking.setVisible(false);
+                //     vm.data.currentReceiptItem = null;
+                // }
                 
                 if(!current.phantom && !current.dirty) {
                     win.down("#grdLotTracking").setLoading("Loading lots...");
