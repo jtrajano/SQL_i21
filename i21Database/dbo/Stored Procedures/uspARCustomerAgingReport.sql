@@ -35,11 +35,9 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			,[strSalespersonName]		NVARCHAR(100)
 			,[strCompanyName]		    NVARCHAR(MAX)
 			,[strCompanyAddress]	    NVARCHAR(MAX)
-			,[dblARBalance]				NUMERIC(18,6)
-			,[strARAccount]				NVARCHAR(100)
-			,[dblPrepaymentBalance]		NUMERIC(18,6)
-			,[strPrepaymentAccount]		NVARCHAR(100)
-		)		
+		)
+
+		SELECT * FROM @temp_aging_table
 	END
 
 -- Declare the variables.
@@ -174,10 +172,6 @@ EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperso
 SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
      , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
      , * 
-	 , dblARBalance			= ISNULL((SELECT SUM(dblDebit) - SUM(dblCredit) FROM vyuGLDetail WHERE strCode = ''AR'' AND ysnIsUnposted = 0 AND dtmDate <= @dtmDateTo AND intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account''))), 0)
-	 , strARAccount			= (SELECT TOP 1 strAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account''))
-	 , dblPrepaymentBalance	= ISNULL((SELECT SUM(dblDebit) - SUM(dblCredit) FROM vyuGLDetail WHERE strCode = ''AR'' AND ysnIsUnposted = 0 AND dtmDate <= @dtmDateTo AND intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''Customer Prepayments''))), 0)
-	 , strPrepaymentAccount	= (SELECT TOP 1 strAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''Customer Prepayments''))
 FROM @temp_aging_table'
 
 IF ISNULL(@filter,'') != ''
