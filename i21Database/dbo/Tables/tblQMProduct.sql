@@ -9,6 +9,8 @@
 	[ysnActive] BIT NOT NULL CONSTRAINT [DF_tblQMProduct_ysnActive] DEFAULT 1,
 	[intApprovalLotStatusId] INT, 
 	[intRejectionLotStatusId] INT, 
+	[intBondedApprovalLotStatusId] INT, 
+	[intBondedRejectionLotStatusId] INT, 
 	[intUnitMeasureId] INT, 
 
 	[intCreatedUserId] [int] NULL,
@@ -20,5 +22,7 @@
 	CONSTRAINT [FK_tblQMProduct_tblQMProductType] FOREIGN KEY ([intProductTypeId]) REFERENCES [tblQMProductType]([intProductTypeId]),
 	CONSTRAINT [FK_tblQMProduct_tblICLotStatus_intApprovalLotStatusId] FOREIGN KEY ([intApprovalLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMProduct_tblICLotStatus_intRejectionLotStatusId] FOREIGN KEY ([intRejectionLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]),
+	CONSTRAINT [FK_tblQMProduct_tblICLotStatus_intBondedApprovalLotStatusId] FOREIGN KEY ([intBondedApprovalLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]),
+	CONSTRAINT [FK_tblQMProduct_tblICLotStatus_intBondedRejectionLotStatusId] FOREIGN KEY ([intBondedRejectionLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMProduct_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )

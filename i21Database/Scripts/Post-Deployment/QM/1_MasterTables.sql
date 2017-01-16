@@ -146,6 +146,13 @@ BEGIN
 	VALUES(13,'Nutrient','Nutrient')
 END
 GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 14)
+BEGIN
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(14,'Customs Approval Sample','Customs Approval Sample')
+END
+GO
 -- Analysis Type
 GO
 IF NOT EXISTS(SELECT 1 FROM tblQMAnalysisType WHERE strAnalysisTypeName = 'Physical')

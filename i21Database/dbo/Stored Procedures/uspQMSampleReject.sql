@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspQMSampleReject]
-     @strXml NVARCHAR(Max)
+﻿CREATE PROCEDURE uspQMSampleReject @strXml NVARCHAR(MAX)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -9,7 +8,7 @@ BEGIN TRY
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @idoc INT
-	DECLARE @ErrMsg NVARCHAR(Max)
+	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -33,6 +32,9 @@ BEGIN TRY
 	DECLARE @ysnRejectLGContainer BIT
 	DECLARE @intUserSampleApproval INT
 	DECLARE @intApproveRejectUserId INT
+	DECLARE @intSampleItemId INT
+	DECLARE @ysnRequireCustomerApproval BIT
+	DECLARE @intSampleControlPointId INT
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -51,12 +53,92 @@ BEGIN TRY
 
 	BEGIN TRAN
 
-	SELECT @intContractDetailId = intContractDetailId
-		,@intLoadDetailContainerLinkId = intLoadDetailContainerLinkId
-		,@intSampleStatusId = intSampleStatusId
-		,@intApproveRejectUserId = intTestedById
-	FROM tblQMSample
-	WHERE intSampleId = @intSampleId
+	SELECT @intContractDetailId = S.intContractDetailId
+		,@intLoadDetailContainerLinkId = S.intLoadDetailContainerLinkId
+		,@intSampleStatusId = S.intSampleStatusId
+		,@intApproveRejectUserId = S.intTestedById
+		,@intSampleItemId = S.intItemId
+		,@intSampleControlPointId = ST.intControlPointId
+	FROM tblQMSample S
+	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+	WHERE S.intSampleId = @intSampleId
+
+	SELECT @ysnRequireCustomerApproval = ISNULL(ysnRequireCustomerApproval, 0)
+	FROM tblICItem
+	WHERE intItemId = @intSampleItemId
+
+	-- Wholesome Sweetener -- JIRA QC-240
+	IF @ysnRequireCustomerApproval = 1
+	BEGIN
+		IF (
+				@intProductTypeId = 6
+				OR @intProductTypeId = 11
+				) -- Lot / Parent Lot
+		BEGIN
+			DECLARE @intCustomsApprovalSampleCount INT
+			DECLARE @intOtherControlPointSampleCount INT
+			DECLARE @intBondedRejectionLotStatusId INT
+
+			SELECT @intCustomsApprovalSampleCount = COUNT(intSampleId)
+			FROM tblQMSample S
+			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+			WHERE S.intProductTypeId = @intProductTypeId
+				AND S.intProductValueId = @intProductValueId
+				AND S.intSampleId <> @intSampleId
+				AND S.intSampleStatusId IN (
+					3
+					,4
+					)
+				AND ST.intControlPointId = 14 -- Customs Approval Sample
+
+			SELECT @intOtherControlPointSampleCount = COUNT(intSampleId)
+			FROM tblQMSample S
+			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+			WHERE S.intProductTypeId = @intProductTypeId
+				AND S.intProductValueId = @intProductValueId
+				AND S.intSampleId <> @intSampleId
+				AND S.intSampleStatusId IN (
+					3
+					,4
+					)
+				AND ST.intControlPointId <> 14 -- Customs Approval Sample
+
+			-- If No Customs approval sample is available and current sample is not customs approval, take lot status from bonded status
+			-- If Customs approval sample taken on second time (Some other Sample taken), take lot status from bonded status
+			IF (
+					@intCustomsApprovalSampleCount = 0
+					AND @intSampleControlPointId <> 14
+					)
+				OR (
+					@intOtherControlPointSampleCount > 0
+					AND @intSampleControlPointId = 14
+					)
+			BEGIN
+				DECLARE @intProductId INT
+
+				SELECT TOP 1 @intProductId = intProductId
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+
+				SELECT @intBondedRejectionLotStatusId = intBondedRejectionLotStatusId
+				FROM tblQMProduct
+				WHERE intProductId = @intProductId
+
+				IF @intBondedRejectionLotStatusId IS NULL
+				BEGIN
+					RAISERROR (
+							'Bonded Rejection Lot Status is not configured in the quality template.'
+							,16
+							,1
+							)
+				END
+				ELSE
+				BEGIN
+					SET @intLotStatusId = @intBondedRejectionLotStatusId
+				END
+			END
+		END
+	END
 
 	SELECT TOP 1 @intUserSampleApproval = ISNULL(intUserSampleApproval, 0)
 	FROM tblQMCompanyPreference
@@ -70,13 +152,13 @@ BEGIN TRY
 				IF @intUserSampleApproval = 1 -- User Check
 				BEGIN
 					RAISERROR (
-						90025
-						,11
-						,1
-						,'approved'
-						,'user'
-						,'reject'
-						)
+							90025
+							,11
+							,1
+							,'approved'
+							,'user'
+							,'reject'
+							)
 				END
 				ELSE IF @intUserSampleApproval = 2 -- User Role Check
 				BEGIN
@@ -94,13 +176,13 @@ BEGIN TRY
 					IF @intApproveRejectUserRoleID <> @intUserRoleID
 					BEGIN
 						RAISERROR (
-							90025
-							,11
-							,1
-							,'approved'
-							,'user role'
-							,'reject'
-							)
+								90025
+								,11
+								,1
+								,'approved'
+								,'user role'
+								,'reject'
+								)
 					END
 				END
 			END
@@ -125,6 +207,7 @@ BEGIN TRY
 	UPDATE dbo.tblQMSample
 	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 		,intSampleStatusId = 4 -- Rejected
+		,intLotStatusId = (CASE WHEN @intProductTypeId IN (6, 11) THEN @intLotStatusId ELSE intLotStatusId END)
 		,intTestedById = x.intLastModifiedUserId
 		,dtmTestedOn = x.dtmLastModified
 		,intLastModifiedUserId = x.intLastModifiedUserId
