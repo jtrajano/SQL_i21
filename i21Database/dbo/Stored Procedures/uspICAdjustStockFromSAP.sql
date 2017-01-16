@@ -133,7 +133,7 @@ BEGIN
 		END
 
 	-- Check the lot number if it is lot-tracked. Validate the lot number. 
-	IF dbo.fnGetItemLotType(@intItemId) IN (1, 2)
+	IF dbo.fnGetItemLotType(@intItemId) <> 0 
 	BEGIN
 		IF @strLotNumber IS NOT NULL OR @strLotNumber != '[FIFO]' OR @strLotNumber != 'FIFO'
 		BEGIN

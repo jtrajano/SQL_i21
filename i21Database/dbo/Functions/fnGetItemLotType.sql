@@ -15,6 +15,7 @@ BEGIN
 	SELECT	@LotType =  
 				CASE	WHEN Item.strLotTracking = 'Yes - Manual' THEN 1
 						WHEN Item.strLotTracking = 'Yes - Serial Number' THEN 2
+						WHEN Item.strLotTracking = 'Yes - Manual/Serial Number' THEN 3
 						ELSE 0 
 				END 
 	FROM	dbo.tblICItem Item
