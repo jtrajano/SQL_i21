@@ -4805,6 +4805,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
     <Build Include="dbo\Views\vyuICGetItemOwner.sql" />
     <Build Include="dbo\Views\vyuMFGetWorkOrderSummaryView.sql" />
+    <Build Include="dbo\Tables\tblSMCustomLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
