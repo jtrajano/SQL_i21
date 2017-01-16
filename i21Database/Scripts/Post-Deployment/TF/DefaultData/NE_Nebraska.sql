@@ -226,7 +226,7 @@ select 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(intTaxCriteriaId AS NVARCHA
 	+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
 	+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
 	+ CASE WHEN strCriteria IS NULL THEN ', strCriteria = NULL' ELSE ', strCriteria = ''' + strCriteria + '''' END
-from tblTFTaxCriteria TaxCrit
+from tblTFReportingComponentCriteria TaxCrit
 left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCategoryId
 left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
 where RC.intTaxAuthorityId =  and TaxCat.intTaxAuthorityId = 

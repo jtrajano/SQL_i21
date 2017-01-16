@@ -95,7 +95,7 @@ DECLARE @tblTempTransaction TABLE (
 	SET @RCId = (SELECT intReportingComponentId FROM @tblTempReportingComponent WHERE intId = @CountRC)
 
 		DECLARE @IncludeValidOriginState NVARCHAR(MAX) = NULL
-		SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + strOriginState FROM tblTFValidOriginState WHERE intReportingComponentId = @RCId AND strFilter = 'Include'
+		SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include'
 		IF(@IncludeValidOriginState IS NOT NULL)
 			BEGIN
 				SET @IncludeValidOriginState = REPLACE(@IncludeValidOriginState,',',''',''')
@@ -107,7 +107,7 @@ DECLARE @tblTempTransaction TABLE (
 			END
 
 		DECLARE @ExcludeValidOriginState NVARCHAR(MAX) = NULL
-		SELECT @ExcludeValidOriginState = COALESCE(@ExcludeValidOriginState + ',', '') + strOriginState FROM tblTFValidOriginState WHERE intReportingComponentId = @RCId AND strFilter = 'Exclude'
+		SELECT @ExcludeValidOriginState = COALESCE(@ExcludeValidOriginState + ',', '') + strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'
 		IF(@ExcludeValidOriginState IS NOT NULL)
 			BEGIN
 				SET @ExcludeValidOriginState = REPLACE(@ExcludeValidOriginState,',',''',''')
@@ -120,7 +120,7 @@ DECLARE @tblTempTransaction TABLE (
 
 		-- DESTINATION NON PICKUP
 		DECLARE @IncludeValidDestinationState NVARCHAR(MAX) = NULL
-		SELECT @IncludeValidDestinationState = COALESCE(@IncludeValidDestinationState + ',', '') + strDestinationState FROM tblTFValidDestinationState WHERE intReportingComponentId = @RCId AND strStatus = 'Include'
+		SELECT @IncludeValidDestinationState = COALESCE(@IncludeValidDestinationState + ',', '') + strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include'
 		IF(@IncludeValidDestinationState IS NOT NULL)
 			BEGIN
 				SET @IncludeValidDestinationState = REPLACE(@IncludeValidDestinationState,',',''',''')
@@ -132,7 +132,7 @@ DECLARE @tblTempTransaction TABLE (
 			END
 
 		DECLARE @ExcludeValidDestinationState NVARCHAR(MAX) = NULL
-		SELECT @ExcludeValidDestinationState = COALESCE(@ExcludeValidDestinationState + ',', '') + strDestinationState FROM tblTFValidDestinationState WHERE intReportingComponentId = @RCId AND strStatus = 'Exclude'
+		SELECT @ExcludeValidDestinationState = COALESCE(@ExcludeValidDestinationState + ',', '') + strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'
 		IF(@ExcludeValidDestinationState IS NOT NULL)
 			BEGIN
 				SET @ExcludeValidDestinationState = REPLACE(@ExcludeValidDestinationState,',',''',''')
@@ -151,9 +151,9 @@ DECLARE @tblTempTransaction TABLE (
 				DECLARE @CriteriaCount INT
 				DECLARE @Criteria NVARCHAR(200) = ''
 				SET @CriteriaCount = (SELECT COUNT(tblTFReportingComponent.intReportingComponentId)
-				FROM  tblTFReportingComponent INNER JOIN tblTFTaxCriteria 
-				ON tblTFReportingComponent.intReportingComponentId = tblTFTaxCriteria.intReportingComponentId
-				WHERE tblTFReportingComponent.intReportingComponentId = @RCId AND tblTFTaxCriteria.strCriteria = '= 0')
+				FROM  tblTFReportingComponent INNER JOIN tblTFReportingComponentCriteria 
+				ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
+				WHERE tblTFReportingComponent.intReportingComponentId = @RCId AND tblTFReportingComponentCriteria.strCriteria = '= 0')
 
 				IF(@CriteriaCount > 0) 
 					BEGIN
@@ -166,8 +166,8 @@ DECLARE @tblTempTransaction TABLE (
 						 tblTFReportingComponent.intReportingComponentId, 
 						 tblTFReportingComponent.strScheduleCode, 
                          tblTFReportingComponent.strType, 
-						 tblTFValidProductCode.intProductCode, 
-						 tblTFValidProductCode.strProductCode, 
+						 vyuTFGetReportingComponentDestinationState.intProductCode, 
+						 vyuTFGetReportingComponentDestinationState.strProductCode, 
 						 tblICInventoryTransferDetail.intItemId, 
                          tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped, 
 						 tblICInventoryTransferDetail.dblQuantity AS dblGross, 
@@ -206,13 +206,13 @@ DECLARE @tblTempTransaction TABLE (
 						 tblSMCompanySetup.strFederalTaxID '
 
 				SET @InvQueryPart2 = 'FROM tblTFTaxCategory INNER JOIN
-                         tblTFTaxCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFTaxCriteria.intTaxCategoryId INNER JOIN
+                         tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId INNER JOIN
                          tblSMTaxCode ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId RIGHT OUTER JOIN
                          tblICInventoryTransferDetail INNER JOIN
                          tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId INNER JOIN
                          tblICItemMotorFuelTax INNER JOIN
-                         tblTFValidProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFValidProductCode.intProductCode INNER JOIN
-                         tblTFReportingComponent ON tblTFValidProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
+                         vyuTFGetReportingComponentDestinationState ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentDestinationState.intProductCode INNER JOIN
+                         tblTFReportingComponent ON vyuTFGetReportingComponentDestinationState.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
                          tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId INNER JOIN
                          tblTRLoadReceipt ON tblICInventoryTransfer.intInventoryTransferId = tblTRLoadReceipt.intInventoryTransferId INNER JOIN
                          tblTRLoadHeader ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId INNER JOIN
@@ -224,7 +224,7 @@ DECLARE @tblTempTransaction TABLE (
                          tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId INNER JOIN
                          tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId INNER JOIN
                          tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId ON 
-                         tblTFTaxCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId LEFT OUTER JOIN
+                         tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId LEFT OUTER JOIN
                          tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId LEFT OUTER JOIN
                          tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId CROSS JOIN
                          tblSMCompanySetup
@@ -391,7 +391,7 @@ DECLARE @TRRCId NVARCHAR(50)
 
 				-- ORIGIN
 				DECLARE @TRIncludeValidOriginState NVARCHAR(MAX) = NULL
-				SELECT @TRIncludeValidOriginState = COALESCE(@TRIncludeValidOriginState + ',', '') + strOriginState FROM tblTFValidOriginState WHERE intReportingComponentId = @TRRCId AND strFilter = 'Include'
+				SELECT @TRIncludeValidOriginState = COALESCE(@TRIncludeValidOriginState + ',', '') + strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @TRRCId AND strType = 'Include'
 				IF(@TRIncludeValidOriginState IS NOT NULL)
 					BEGIN
 						SET @TRIncludeValidOriginState = REPLACE(@TRIncludeValidOriginState,',',''',''')
@@ -403,7 +403,7 @@ DECLARE @TRRCId NVARCHAR(50)
 					END
 
 				DECLARE @TRExcludeValidOriginState NVARCHAR(MAX) = NULL
-				SELECT @TRExcludeValidOriginState = COALESCE(@TRExcludeValidOriginState + ',', '') + strOriginState FROM tblTFValidOriginState WHERE intReportingComponentId = @TRRCId AND strFilter = 'Exclude'
+				SELECT @TRExcludeValidOriginState = COALESCE(@TRExcludeValidOriginState + ',', '') + strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @TRRCId AND strType = 'Exclude'
 				IF(@TRExcludeValidOriginState IS NOT NULL)
 					BEGIN
 						SET @TRExcludeValidOriginState = REPLACE(@TRExcludeValidOriginState,',',''',''')
@@ -416,7 +416,7 @@ DECLARE @TRRCId NVARCHAR(50)
 
 				-- DESTINATION
 				DECLARE @TRIncludeValidDestinationState NVARCHAR(MAX) = NULL
-				SELECT @TRIncludeValidDestinationState = COALESCE(@TRIncludeValidDestinationState + ',', '') + strDestinationState FROM tblTFValidDestinationState WHERE intReportingComponentId = @TRRCId AND strStatus = 'Include'
+				SELECT @TRIncludeValidDestinationState = COALESCE(@TRIncludeValidDestinationState + ',', '') + strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @TRRCId AND strType = 'Include'
 				IF(@TRIncludeValidDestinationState IS NOT NULL)
 					BEGIN
 						SET @TRIncludeValidDestinationState = REPLACE(@TRIncludeValidDestinationState,',',''',''')
@@ -428,7 +428,7 @@ DECLARE @TRRCId NVARCHAR(50)
 					END
 
 				DECLARE @TRExcludeValidDestinationState NVARCHAR(MAX) = NULL
-				SELECT @TRExcludeValidDestinationState = COALESCE(@TRExcludeValidDestinationState + ',', '') + strDestinationState FROM tblTFValidDestinationState WHERE intReportingComponentId = @TRRCId AND strStatus = 'Exclude'
+				SELECT @TRExcludeValidDestinationState = COALESCE(@TRExcludeValidDestinationState + ',', '') + strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @TRRCId AND strType = 'Exclude'
 				IF(@TRExcludeValidDestinationState IS NOT NULL)
 					BEGIN
 						SET @TRExcludeValidDestinationState = REPLACE(@TRExcludeValidDestinationState,',',''',''')
@@ -492,11 +492,11 @@ DECLARE @TRRCId NVARCHAR(50)
 								TR.strItemNumber,
 								(SELECT COUNT(*) FROM tblTFIntegrationError),
 								0
-							  FROM tblTFTaxCriteria RIGHT OUTER JOIN
-							  tblTFValidProductCode AS VPC INNER JOIN
+							  FROM tblTFReportingComponentCriteria RIGHT OUTER JOIN
+							  vyuTFGetReportingComponentProductCode AS VPC INNER JOIN
 							  tblTFReportingComponent AS RC ON VPC.intReportingComponentId = RC.intReportingComponentId INNER JOIN
 							  tblTFIntegrationItemProductCode AS IPC ON VPC.strProductCode = IPC.strProductCode INNER JOIN
-							  tblTFIntegrationTransaction AS TR ON IPC.strItemNumber = TR.strItemNumber ON tblTFTaxCriteria.intReportingComponentId = RC.intReportingComponentId CROSS JOIN
+							  tblTFIntegrationTransaction AS TR ON IPC.strItemNumber = TR.strItemNumber ON tblTFReportingComponentCriteria.intReportingComponentId = RC.intReportingComponentId CROSS JOIN
 							  tblSMCompanySetup AS SMCOMPSETUP
 							  WHERE (RC.intReportingComponentId IN(' + @TRRCId + ')) 
 							  AND TR.strSourceSystem NOT IN (''F'')

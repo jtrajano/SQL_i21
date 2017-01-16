@@ -81,7 +81,7 @@ BEGIN TRY
 			AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId) = 0
 				OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxCriteria WHERE intReportingComponentId = @RCId)
+		IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId)
 		BEGIN
 			INSERT INTO @TFTransaction(intInventoryReceiptItemId
 				, intTaxAuthorityId
@@ -263,14 +263,14 @@ BEGIN TRY
 		END
 		
 		-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
-		SELECT ROW_NUMBER() OVER(ORDER BY tblSMTaxCode.intTaxCodeId, tblTFTaxCriteria.strCriteria DESC) AS intId
+		SELECT ROW_NUMBER() OVER(ORDER BY tblSMTaxCode.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria DESC) AS intId
 			, tblSMTaxCode.intTaxCodeId
-			, tblTFTaxCriteria.strCriteria
+			, tblTFReportingComponentCriteria.strCriteria
 		INTO #tmpTaxCategory
 		FROM tblSMTaxCode
 		INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-		INNER JOIN tblTFTaxCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFTaxCriteria.intTaxCategoryId
-		WHERE tblTFTaxCriteria.intReportingComponentId = @RCId
+		INNER JOIN tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
+		WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
 		
 
 		DECLARE @intReceiptTransactionId INT
@@ -326,7 +326,7 @@ BEGIN TRY
 			
 		IF (@ReportingComponentId <> '')
 		BEGIN
-			INSERT INTO tblTFTransactions (uniqTransactionGuid
+			INSERT INTO tblTFTransaction (uniqTransactionGuid
 				, intItemId
 				, intTaxAuthorityId
 				, strTaxAuthority
@@ -403,7 +403,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
+			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
 		END
 	
 		DELETE FROM #tmpRC WHERE @RCId = intReportingComponentId
@@ -411,7 +411,7 @@ BEGIN TRY
 	
 	IF (EXISTS(SELECT TOP 1 1 FROM @TFTransaction) AND @IsEdi = 0)
 	BEGIN
-		INSERT INTO tblTFTransactions (uniqTransactionGuid
+		INSERT INTO tblTFTransaction (uniqTransactionGuid
 			, intTaxAuthorityId
 			, strFormCode
 			, intProductCodeId

@@ -37,9 +37,9 @@ DECLARE @ExcludeLocationState NVARCHAR(250)
 
 	IF @Refresh = 'true'
 		BEGIN
-			DELETE FROM tblTFTransactions --WHERE uniqTransactionGuid = @Guid
+			DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 		END
-		DELETE FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
+		DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 
 	SELECT @QueryRC = 'SELECT ''' + REPLACE (@ReportingComponentId,',',''' UNION SELECT ''') + ''''
 	
@@ -118,7 +118,7 @@ DECLARE @ExcludeLocationState NVARCHAR(250)
 			END
 
 					SET @QueryInvoice = 'SELECT DISTINCT 0,tblARInvoiceDetail.intInvoiceDetailId,tblTFReportingComponent.intTaxAuthorityId,tblTFReportingComponent.strFormCode,tblTFReportingComponent.intReportingComponentId,tblTFReportingComponent.strScheduleCode, 
-                         tblTFReportingComponent.strType,tblTFValidProductCode.intProductCode,tblTFValidProductCode.strProductCode,tblARInvoiceDetail.intItemId,
+                         tblTFReportingComponent.strType,vyuTFGetReportingComponentProductCode.intProductCode,vyuTFGetReportingComponentProductCode.strProductCode,tblARInvoiceDetail.intItemId,
 						 tblARInvoiceDetail.dblQtyShipped,tblARInvoiceDetail.dblQtyShipped AS dblGross,tblARInvoiceDetail.dblQtyShipped AS dblNet,tblARInvoiceDetail.dblQtyShipped AS dblBillQty,0,0 AS dblTaxExempt,
 						 tblARInvoice.strInvoiceNumber,tblARInvoice.strPONumber,tblARInvoice.strBOLNumber,tblARInvoice.dtmDate, 
                          (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity, 
@@ -131,11 +131,11 @@ DECLARE @ExcludeLocationState NVARCHAR(250)
                          tblSMTaxCode INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId INNER JOIN
                          tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId INNER JOIN
                          tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId INNER JOIN
-                         tblICItemMotorFuelTax INNER JOIN tblTFValidProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFValidProductCode.intProductCode ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId INNER JOIN
+                         tblICItemMotorFuelTax INNER JOIN vyuTFGetReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCode ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId INNER JOIN
                          tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId INNER JOIN
                          tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityCustomerId INNER JOIN
                          tblEMEntity ON tblARCustomer.intEntityCustomerId = tblEMEntity.intEntityId INNER JOIN
-                         tblTFReportingComponent ON tblTFValidProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
+                         tblTFReportingComponent ON vyuTFGetReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
                          tblSMShipVia.intEntityShipViaId = tblARInvoice.intShipViaId FULL OUTER JOIN
                          tblARAccountStatus ON tblARCustomer.intAccountStatusId = tblARAccountStatus.intAccountStatusId CROSS JOIN
                          tblSMCompanySetup WHERE (tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ')) 
@@ -193,8 +193,8 @@ DECLARE @ExcludeLocationState NVARCHAR(250)
 						 tblTFReportingComponent.intReportingComponentId,
 						 tblTFReportingComponent.strScheduleCode,
 						 tblTFReportingComponent.strType, 
-                         tblTFValidProductCode.intProductCode,
-						 tblTFValidProductCode.strProductCode,
+                         vyuTFGetReportingComponentProductCode.intProductCode,
+						 vyuTFGetReportingComponentProductCode.strProductCode,
 						 tblICInventoryTransferDetail.intItemId,
 						 tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped,
 						 tblICInventoryTransferDetail.dblQuantity AS dblGross, 
@@ -233,8 +233,8 @@ DECLARE @ExcludeLocationState NVARCHAR(250)
 				SET @InvQueryPart2 = 'FROM tblICInventoryTransferDetail INNER JOIN
                          tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId INNER JOIN
                          tblICItemMotorFuelTax INNER JOIN
-                         tblTFValidProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFValidProductCode.intProductCode INNER JOIN
-                         tblTFReportingComponent ON tblTFValidProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
+                         vyuTFGetReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCode INNER JOIN
+                         tblTFReportingComponent ON vyuTFGetReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
                          tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId INNER JOIN
                          tblTRLoadReceipt ON tblICInventoryTransfer.intInventoryTransferId = tblTRLoadReceipt.intInventoryTransferId INNER JOIN
                          tblTRLoadHeader ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId INNER JOIN
@@ -292,7 +292,7 @@ DECLARE @ExcludeLocationState NVARCHAR(250)
 
 				IF (@ReportingComponentId <> '')
 					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, 
+						INSERT INTO tblTFTransaction (uniqTransactionGuid, 
 																	   intTaxAuthorityId,
 																	   strTaxAuthority,
 																	   strFormCode,
@@ -394,7 +394,7 @@ DECLARE @ExcludeLocationState NVARCHAR(250)
 					END
 				ELSE
 					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
+						INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
 					END
 			SET @CountRC = @CountRC - 1
 		END
@@ -402,5 +402,5 @@ DECLARE @ExcludeLocationState NVARCHAR(250)
 		SELECT TOP 1 @HasResult = intId from TFInvoiceTransaction
 		IF(@HasResult IS NULL AND @IsEdi = 'false')
 			BEGIN
-				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+				INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 			END
