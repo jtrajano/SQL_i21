@@ -35,17 +35,20 @@ Declare @intMinSeq					INT,
 		@strFeedStatus				NVARCHAR(50) ,
 		@strXml						NVARCHAR(MAX),
 		@strDocType					NVARCHAR(50),
-		@strIDOCHeader				NVARCHAR(MAX),
+		@strPOCreateIDOCHeader				NVARCHAR(MAX),
+		@strPOUpdateIDOCHeader				NVARCHAR(MAX),
 		@strCompCode				NVARCHAR(100)
 
 Declare @tblOutput AS Table
 (
 	intRowNo INT IDENTITY(1,1),
+	strContractFeedIds NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
 	strXml NVARCHAR(MAX)
 )
 
-Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PO')
+Select @strPOCreateIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PO CREATE')
+Select @strPOUpdateIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 
 Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='COFFEE'
@@ -103,7 +106,7 @@ Begin
 
 		--IDOC Header
 		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-		Set @strXml +=	@strIDOCHeader
+		Set @strXml +=	@strPOCreateIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
 		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
@@ -169,8 +172,8 @@ Begin
 		Set @strXml += '</IDOC>'
 		Set @strXml +=  '</PORDCR103>'
 
-		INSERT INTO @tblOutput(strRowState,strXml)
-		VALUES('CREATE',@strXml)
+		INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
+		VALUES(@intContractFeedId,'CREATE',@strXml)
 	End
 
 	If UPPER(@strRowState)='MODIFIED'
@@ -180,7 +183,7 @@ Begin
 
 		--IDOC Header
 		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-		Set @strXml +=	@strIDOCHeader
+		Set @strXml +=	@strPOUpdateIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
 		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
@@ -329,8 +332,8 @@ Begin
 		Set @strXml += '</IDOC>'
 		Set @strXml +=  '</PORDCH03>'
 
-		INSERT INTO @tblOutput(strRowState,strXml)
-		VALUES('UPDATE',@strXml)
+		INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
+		VALUES(@intContractFeedId,'UPDATE',@strXml)
 	End
 
 	If UPPER(@strRowState)='DELETE'
@@ -340,7 +343,7 @@ Begin
 
 		--IDOC Header
 		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-		Set @strXml +=	@strIDOCHeader
+		Set @strXml +=	@strPOUpdateIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
 		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
@@ -372,8 +375,8 @@ Begin
 		Set @strXml += '</IDOC>'
 		Set @strXml +=  '</PORDCH03>'
 
-		INSERT INTO @tblOutput(strRowState,strXml)
-		VALUES('DELETE',@strXml)
+		INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
+		VALUES(@intContractFeedId,'DELETE',@strXml)
 	End
 
 	Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where intContractFeedId>@intMinSeq
