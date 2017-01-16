@@ -190,3 +190,9 @@ BEGIN
     VALUES(9,'Send Mail')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 10)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(10,'Execute External Program')
+END
+GO
