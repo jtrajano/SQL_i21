@@ -4823,6 +4823,7 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessIntegrationLogData.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessLoadToIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetBlendDemandNetMonth.sql" />
+    <Build Include="dbo\Tables\tblCRMHoursWorked.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
