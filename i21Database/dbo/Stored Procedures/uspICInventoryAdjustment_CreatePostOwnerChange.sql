@@ -1,11 +1,11 @@
-﻿CREATE PROCEDURE [dbo].[uspICInventoryAdjustment_CreatePostLotStatusChange]
+﻿CREATE PROCEDURE [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange]
 	@intItemId AS INT
 	,@dtmDate AS DATETIME 
 	,@intLocationId AS INT
 	,@intSubLocationId AS INT
 	,@intStorageLocationId AS INT
 	,@strLotNumber AS NVARCHAR(50)
-	,@intNewLotStatusId AS INT
+	,@intNewOwnerId AS INT
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT
 	,@intEntityUserSecurityId AS INT 
@@ -19,18 +19,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
-		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
-		,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
-		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
-		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
-		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+DECLARE --@ADJUSTMENT_TYPE_QuantityChange AS INT = 1
+		--,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
+		--,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
+		--,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
+		--,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
+		--,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+		@ADJUSTMENT_TYPE_LotOwnerChange AS INT = 9
 
 DECLARE @TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
 
 DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@strAdjustmentNo AS NVARCHAR(40)
 		,@intLotId AS INT 
+		,@intNewItemOwnerId AS INT 
 
 -- Validate the source transaction type id. 
 IF NOT EXISTS (
@@ -79,7 +81,7 @@ BEGIN
 	)
 	SELECT	intLocationId				= @intLocationId
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
-			,intAdjustmentType			= @ADJUSTMENT_TYPE_LotStatusChange
+			,intAdjustmentType			= @ADJUSTMENT_TYPE_LotOwnerChange
 			,strAdjustmentNo			= @strAdjustmentNo
 			,strDescription				= @strDescription
 			,intSort					= 1
@@ -113,30 +115,36 @@ BEGIN
 	GOTO _Exit
 END 
 
--- Raise an error if new lot status is invalid.
+-- Raise an error if new owner is invalid 
 BEGIN 
-	IF NOT EXISTS (
-		SELECT	TOP 1 1 
-		FROM	dbo.tblICLotStatus 
-		WHERE	intLotStatusId = @intNewLotStatusId
-	)
-	OR EXISTS (
-		SELECT TOP 1 1 
-		FROM	dbo.tblICLot
-		WHERE	intLotId = @intLotId
-				AND intLotStatusId = @intNewLotStatusId
-	)
+	SELECT	TOP 1 
+			@intNewItemOwnerId = o.intItemOwnerId  
+	FROM	dbo.tblICItemOwner o 
+	WHERE	o.intItemId = @intItemId
+			AND o.intOwnerId = @intNewOwnerId
+
+	IF @intNewItemOwnerId IS NULL 
 	BEGIN 
-		-- The lot status is invalid.
-		RAISERROR(80030, 11, 1)  
+		DECLARE @strItemNo AS NVARCHAR(50)
+				,@strName AS NVARCHAR(200)
+
+		SELECT	@strItemNo = strItemNo 
+		FROM	tblICItem i
+		WHERE	i.intItemId = @intItemId
+
+		SELECT	@strName = e.strName
+		FROM	tblEMEntity e
+		WHERE	e.intEntityId = @intNewOwnerId
+
+		-- 'Invalid Owner. {Owner name} is not configured as an Owner for {Item}. Please check the Item setup.'
+		RAISERROR(80105, 11, 1, @strName, @strItemNo)  
 		GOTO _Exit
 	END
 END 
 
--- Continue with the insert if 
+-- Continue with the insert if following passed: 
 -- 1. It is a valid lot id. 
--- 2. And the lot status is valid. 
-IF @intLotId IS NOT NULL
+-- 2. The new owner is valid. 
 BEGIN 
 	INSERT INTO dbo.tblICInventoryAdjustmentDetail (
 			intInventoryAdjustmentId
@@ -144,8 +152,8 @@ BEGIN
 			,intStorageLocationId
 			,intItemId
 			,intLotId
-			,intLotStatusId
-			,intNewLotStatusId
+			,intItemOwnerId
+			,intNewItemOwnerId
 			,intSort
 			,intConcurrencyId
 	)
@@ -155,8 +163,8 @@ BEGIN
 			,intStorageLocationId		= Lot.intStorageLocationId
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
-			,intLotStatusId				= Lot.intLotStatusId
-			,intNewLotStatusId			= @intNewLotStatusId
+			,intItemOwnerId				= Lot.intItemOwnerId
+			,intNewItemOwnerId			= @intNewItemOwnerId
 			,intSort					= 1
 			,intConcurrencyId			= 1
 	FROM	dbo.tblICItem Item INNER JOIN dbo.tblICLot Lot
@@ -167,7 +175,6 @@ END
 
 -- Auto post the inventory adjustment
 BEGIN 
-
 	EXEC dbo.uspICPostInventoryAdjustment
 		@ysnPost = 1
 		,@ysnRecap = 0

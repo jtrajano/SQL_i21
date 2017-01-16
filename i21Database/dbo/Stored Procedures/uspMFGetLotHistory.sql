@@ -49,8 +49,8 @@ BEGIN
 
 	INSERT INTO #tempLotHistory
 	SELECT CASE 
-			WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, dtmCreated, 101))
-				THEN dtmCreated
+			WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
+				THEN ilt.dtmCreated
 			ELSE dtmDate
 			END AS dtmDateTime
 		,l.strLotNumber AS strLotNo
@@ -182,8 +182,8 @@ BEGIN
 
 		INSERT INTO #tempLotHistory
 		SELECT CASE 
-				WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, dtmCreated, 101))
-					THEN dtmCreated
+				WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
+					THEN ilt.dtmCreated
 				ELSE dtmDate
 				END AS dtmDateTime
 			,l.strLotNumber AS strLotNo
