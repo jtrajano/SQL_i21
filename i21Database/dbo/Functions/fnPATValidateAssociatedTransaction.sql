@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnPATValidateAssociatedTransaction]
 (
 	@transactionIds NVARCHAR(MAX),
-	@type INT -- 1 = Issued Stock, 2 = Retired Stock
+	@type INT -- 1 = Issued Stock, 2 = Retired Stock, 3 = Equity Payment
 )
 RETURNS @returnTable TABLE
 (
@@ -41,6 +41,18 @@ BEGIN
 		INNER JOIN tblAPBill APB
 			ON APB.intBillId = CS.intBillId
 		WHERE APB.ysnPaid = 1 AND CS.strActivityStatus = 'Retired' AND CS.intCustomerStockId IN (SELECT * FROM @tmpTransacions)
+	END
+	ELSE IF(@type = 3)
+	BEGIN
+		INSERT INTO @returnTable
+		SELECT 'Voucher('+ APB.strBillId +') for Equity Payment is already paid.',
+				'Equity Payment',
+				APB.strBillId,
+				APB.intBillId
+		FROM tblPATEquityPaySummary EPS
+		INNER JOIN tblAPBill APB
+			ON APB.intBillId = EPS.intBillId
+		WHERE APB.ysnPaid = 1 AND EPS.intEquityPaySummaryId IN (SELECT * FROM @tmpTransacions)
 	END
 
 	RETURN

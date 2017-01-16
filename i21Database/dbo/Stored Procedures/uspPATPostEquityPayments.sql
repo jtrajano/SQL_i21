@@ -86,8 +86,7 @@ SET @batchIdUsed = @batchId;
 	SET ysnPosted = @ysnPosted WHERE intEquityPayId = @intEquityPayId
 
 	UPDATE CE
-	SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tEP.dblEquityPay ELSE CE.dblEquity + tEP.dblEquityPay  END,
-		CE.dblEquityPaid = CASE WHEN @ysnPosted = 1 THEN CE.dblEquityPaid + tEP.dblEquityPay ELSE CE.dblEquityPaid - tEP.dblEquityPay END
+	SET	CE.dblEquityPaid = CASE WHEN @ysnPosted = 1 THEN CE.dblEquityPaid + tEP.dblEquityPay ELSE CE.dblEquityPaid - tEP.dblEquityPay END
 	FROM tblPATCustomerEquity CE
 	INNER JOIN #tempEquityPayment tEP
 		ON tEP.intCustomerEquityId = CE.intCustomerEquityId

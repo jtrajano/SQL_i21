@@ -10,6 +10,7 @@ SELECT	CE.intCustomerEquityId,
 		strRefundType = ISNULL(RR.strRefundType, ''),
 		CE.dblEquity,
 		CE.dblEquityPaid,
+		dblEquityAvailable = CE.dblEquity - CE.dblEquityPaid,
 		CE.intConcurrencyId,
 		ysnQualified = CASE WHEN ISNULL(RR.ysnQualified, 0) = 1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	FROM tblPATCustomerEquity CE

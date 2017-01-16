@@ -10,7 +10,7 @@ SELECT	NEWID() as id,
 		dtmLastActivityDate = MAX(AR.dtmLastActivityDate),
 		dblEquity = SUM(CASE WHEN CE.strEquityType = 'Undistributed' THEN CE.dblEquity ELSE 0 END),
 		dblEquityReserve = SUM(CASE WHEN CE.strEquityType = 'Reserve' THEN CE.dblEquity ELSE 0 END),
-		ysnEquityPaid = CASE WHEN CE.ysnEquityPaid IS NULL OR CE.ysnEquityPaid = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
+		dblEquityPaid = SUM(CE.dblEquityPaid),
 		CE.intConcurrencyId 
 	FROM tblPATCustomerEquity CE
 INNER JOIN tblEMEntity ENT
@@ -28,5 +28,4 @@ GROUP BY CE.intCustomerId,
 		FY.strFiscalYear,
 		AR.strStockStatus,
 		TC.strTaxCode,
-		CE.intConcurrencyId,
-		CE.ysnEquityPaid
+		CE.intConcurrencyId
