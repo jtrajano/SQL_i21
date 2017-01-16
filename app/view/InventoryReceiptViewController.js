@@ -744,8 +744,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotStatedGross: 'dblStatedGrossPerUnit',
                 colLotStatedTare: 'dblStatedTarePerUnit',
                 colLotStatedNet: 'dblStatedNetPerUnit',
+                colLotStatedTotalNet: 'dblStatedTotalNet',
+                colLotPhyVsStated: 'dblPhysicalVsStated',
                 colLotWeightUOM: 'strWeightUOM',
-                colLotPhyVsStated: 'dblPhyVsStated',
                 colLotParentLotId: {
                     dataIndex: 'strParentLotNumber',
                     editor: {
@@ -2164,6 +2165,73 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
     },
 
+    calculateStatedNetPerUnit: function (currentReceipt, currentReceiptItem, currentReceiptItemLot) {
+        if (!currentReceipt || !currentReceiptItem || !currentReceiptItemLot)
+            return;
+        
+        var dblStatedGrossPerUnit = currentReceiptItemLot.get('dblStatedGrossPerUnit');
+        var dblStatedTarePerUnit = currentReceiptItemLot.get('dblStatedTarePerUnit');
+
+        dblStatedGrossPerUnit = Ext.isNumeric(dblStatedGrossPerUnit) ? dblStatedGrossPerUnit: 0.00; 
+        dblStatedTarePerUnit = Ext.isNumeric(dblStatedTarePerUnit) ? dblStatedTarePerUnit: 0.00; 
+
+        var dblStatedNetPerUnit = dblStatedGrossPerUnit - dblStatedTarePerUnit; 
+        return dblStatedNetPerUnit; 
+    },    
+
+    calculateStatedTotalNet: function (currentReceipt, currentReceiptItem, currentReceiptItemLot) {
+        if (!currentReceipt || !currentReceiptItem || !currentReceiptItemLot)
+            return;
+
+        var me = this; 
+
+        // Get the Lot UOM and Lot Wgt UOM. 
+        var lotUOMId = currentReceiptItemLot.get('intItemUnitMeasureId');
+        var lotWgtUOMId = currentReceiptItem.get('intWeightUOMId');
+
+        lotUOMId = Ext.isNumeric(lotUOMId) ? lotUOMId : 0;
+        lotWgtUOMId = Ext.isNumeric(lotWgtUOMId) ? lotWgtUOMId : 0;
+
+        // Calculate the stated net total; 
+        var dblStatedNetPerUnit = me.calculateStatedNetPerUnit(currentReceipt, currentReceiptItem, currentReceiptItemLot);
+
+        if (lotUOMId === lotWgtUOMId)
+        {
+            return dblStatedNetPerUnit;
+        }
+        else {
+            var lotQty = currentReceiptItemLot.get('dblQuantity');
+            var lotQty = Ext.isNumeric(lotQty) ? lotQty : 0.00; 
+            var dblStatedTotalNet = lotQty * dblStatedNetPerUnit; 
+        }
+
+        return dblStatedTotalNet;
+    },
+
+    calculatePhysicalVsStated: function (currentReceipt, currentReceiptItem, currentReceiptItemLot) {
+        if (!currentReceipt || !currentReceiptItem || !currentReceiptItemLot)
+            return;
+
+        var me = this;
+
+        // Calculate the Lot Net Wgt
+        var lotGrossWgt = currentReceiptItemLot.get('dblGrossWeight');
+        var lotTareWgt = currentReceiptItemLot.get('dblTareWeight');
+        
+        lotGrossWgt = Ext.isNumeric(lotGrossWgt) ? lotGrossWgt : 0.00;
+        lotTareWgt = Ext.isNumeric(lotTareWgt) ? lotTareWgt : 0.00;
+
+        var lotNetWgt = lotGrossWgt - lotTareWgt;
+
+        // Calculate the Lot Stated Net Total 
+        var calculateStatedNetTotal = me.calculateStatedTotalNet(currentReceipt, currentReceiptItem, currentReceiptItemLot);
+
+        // Calculate the stated net total; 
+        var dblPhysicalVsStated = lotNetWgt - calculateStatedNetTotal;        
+
+        return dblPhysicalVsStated;
+    },
+
     showSummaryTotals: function (win) {
         var current = win.viewModel.data.current;
         var lblSubTotal = win.down('#lblSubTotal');
@@ -3455,6 +3523,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
             }
             context.record.set('dtmExpiryDate', expiryDate);
+        }
+
+        // // Calculate the 'Stated Net Per Unit'
+        // if (context.field === 'dblStatedNetPerUnit'){
+        //     context.record.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, receiptItem, context.record));
+        // }
+
+        // // Calculate the 'Stated Net Per Unit'
+        // if (context.field === 'dblStatedTotalNet'){
+        //     context.record.set('dblStatedTotalNet', me.calculateStatedTotalNet(currentReceipt, receiptItem, context.record));
+        // }        
+
+        // // Calculate the 'Physical vs Stated'
+        // if (context.field === 'dblPhysicalVsStated'){
+        //     context.record.set('dblPhysicalVsStated', me.calculatePhysicalVsStated(currentReceipt, receiptItem, context.record));
+        // }                
+
+        if (
+            context.field === 'dblStatedGrossPerUnit' 
+            || context.field === 'dblStatedTarePerUnit'
+            || context.field === 'dblQuantity'
+            || context.field === 'dblGrossWeight'
+            || context.field === 'dblTareWeight'
+            || context.field === 'dblTareWeight'
+        ) {
+        
+            context.record.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, receiptItem, context.record));
+            context.record.set('dblStatedTotalNet', me.calculateStatedTotalNet(currentReceipt, receiptItem, context.record));
+            context.record.set('dblPhysicalVsStated', me.calculatePhysicalVsStated(currentReceipt, receiptItem, context.record));
         }
     },
 

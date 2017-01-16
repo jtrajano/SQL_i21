@@ -54,5 +54,8 @@ namespace iRely.Inventory.Model
         public string strVendorId { get;set;}
         public string strOrigin { get;set;}
         public string strGrade { get;set;}
+        public decimal? dblStatedNetPerUnit { get; set; }
+        public decimal? dblStatedTotalNet { get; set; }
+        public decimal? dblPhysicalVsStated { get; set; }
     }
 }

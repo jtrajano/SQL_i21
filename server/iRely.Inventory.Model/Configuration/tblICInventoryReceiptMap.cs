@@ -195,6 +195,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.strOrigin).HasColumnName("strOrigin");
+            this.Property(t => t.dblStatedNetPerUnit).HasColumnName("dblStatedNetPerUnit").HasPrecision(38, 20);
+            this.Property(t => t.dblStatedTotalNet).HasColumnName("dblStatedTotalNet").HasPrecision(38, 20);
+            this.Property(t => t.dblPhysicalVsStated).HasColumnName("dblPhysicalVsStated").HasPrecision(38, 20);
         }
     }
 
@@ -495,7 +498,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intParentLotId).HasColumnName("intParentLotId");
             this.Property(t => t.strParentLotNumber).HasColumnName("strParentLotNumber");
             this.Property(t => t.strParentLotAlias).HasColumnName("strParentLotAlias");
-            
+            this.Property(t => t.dblStatedNetPerUnit).HasColumnName("dblStatedNetPerUnit").HasPrecision(38, 20);
+            this.Property(t => t.dblStatedTotalNet).HasColumnName("dblStatedTotalNet").HasPrecision(38, 20);
+            this.Property(t => t.dblPhysicalVsStated).HasColumnName("dblPhysicalVsStated").HasPrecision(38, 20);
             this.HasOptional(p => p.vyuICGetInventoryReceiptItemLot)
                 .WithRequired(p => p.tblICInventoryReceiptItemLot);
         }
@@ -564,7 +569,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intParentLotId).HasColumnName("intParentLotId");
             this.Property(t => t.strParentLotNumber).HasColumnName("strParentLotNumber");
             this.Property(t => t.strParentLotAlias).HasColumnName("strParentLotAlias");
-
+            this.Property(t => t.dblStatedNetPerUnit).HasColumnName("dblStatedNetPerUnit").HasPrecision(38, 20);
+            this.Property(t => t.dblStatedTotalNet).HasColumnName("dblStatedTotalNet").HasPrecision(38, 20);
+            this.Property(t => t.dblPhysicalVsStated).HasColumnName("dblPhysicalVsStated").HasPrecision(38, 20);
         }
     }
 

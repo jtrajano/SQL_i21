@@ -41,6 +41,9 @@ namespace iRely.Inventory.Model
         public int? intParentLotId { get; set; }
         public string strParentLotNumber { get; set; }
         public string strParentLotAlias { get; set; }
+        public decimal? dblStatedNetPerUnit { get; set; }
+        public decimal? dblStatedTotalNet { get; set; }
+        public decimal? dblPhysicalVsStated { get; set; }
         public int? intSort { get; set; }
     }
 }
