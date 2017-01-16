@@ -874,6 +874,7 @@ BEGIN TRY
 		,dblRequiredQty
 		,dblSystemQty
 		,intItemUOMId
+		,intProductionStagingLocationId 
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -897,6 +898,7 @@ BEGIN TRY
 			WHERE PS.intItemId = I.intItemId
 			)
 		,I.intItemUOMId
+		,@intProductionStageLocationId
 		,@intUserId
 		,@dtmCurrentDateTime
 		,@intUserId

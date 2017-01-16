@@ -16,6 +16,7 @@ SELECT CC.intCycleCountSessionId
 		,CC.dblQtyInProdStagingLocation 
 		,CC.dblRequiredQty 
 		,CC.dblSystemQty
+		,SL1.strName as strStorageLocation
 		,CC.intCreatedUserId 
 		,U.strUserName strCreatedUser
 		,CC.dtmCreated
@@ -30,6 +31,7 @@ SELECT CC.intCycleCountSessionId
 	JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = CC.intCreatedUserId
 	JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = CC.intCreatedUserId
 	JOIN dbo.tblSMCompanyLocationSubLocation SL on SL.intCompanyLocationSubLocationId =M.intSubLocationId
+	JOIN dbo.tblICStorageLocation SL1 on SL1.intStorageLocationId=CC.intProductionStagingLocationId 
 	WHERE CS.intWorkOrderId=@intWorkOrderId
 	ORDER BY CC.intCycleCountId
 END 

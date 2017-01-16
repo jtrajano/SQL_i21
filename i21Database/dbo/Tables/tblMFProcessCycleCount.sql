@@ -9,6 +9,7 @@
 	,dblRequiredQty NUMERIC(18, 6) NULL
 	,dblSystemQty NUMERIC(18, 6) NULL
 	,intItemUOMId int
+	,intProductionStagingLocationId int
 	,intCreatedUserId INT NOT NULL
 	,dtmCreated DATETIME NOT NULL CONSTRAINT DF_tblMFProcessCycleCount_dtmCreated DEFAULT(getdate())
 	,intLastModifiedUserId INT NOT NULL
