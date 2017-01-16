@@ -2,18 +2,22 @@
 	@dtmDateFrom		DATETIME = NULL,
 	@dtmDateTo			DATETIME = NULL,
 	@strSalesperson		NVARCHAR(100) = NULL,
-	@intEntityCustomerId	INT = NULL
+	@intEntityCustomerId	INT = NULL,
+	@strSourceTransaction	NVARCHAR(100)	= NULL
 AS
 
-DECLARE @dtmDateFromLocal			DATETIME = NULL,
-	    @dtmDateToLocal				DATETIME = NULL,
-	    @strSalespersonLocal		NVARCHAR(100) = NULL,
-	    @intEntityCustomerIdLocal	INT = NULL
+DECLARE @dtmDateFromLocal			DATETIME		= NULL,
+	    @dtmDateToLocal				DATETIME		= NULL,
+	    @strSalespersonLocal		NVARCHAR(100)	= NULL,
+	    @intEntityCustomerIdLocal	INT				= NULL,
+		@strSourceTransactionLocal	NVARCHAR(100)	= NULL
 
 SET @dtmDateFromLocal			= @dtmDateFrom
 SET	@dtmDateToLocal				= @dtmDateTo
 SET @strSalespersonLocal		= @strSalesperson
 SET @intEntityCustomerIdLocal   = @intEntityCustomerId
+SET @strSourceTransactionLocal  = @strSourceTransaction
+
 
 IF @dtmDateFromLocal IS NULL
     SET @dtmDateFromLocal = CAST(-53690 AS DATETIME)
@@ -23,6 +27,9 @@ IF @dtmDateToLocal IS NULL
 
 IF RTRIM(LTRIM(@strSalespersonLocal)) = ''
     SET @strSalespersonLocal = NULL
+
+IF RTRIM(LTRIM(@strSourceTransactionLocal)) = ''
+    SET @strSourceTransactionLocal = NULL
 
 SELECT A.strCustomerName
      , A.strEntityNo
@@ -43,6 +50,7 @@ SELECT A.strCustomerName
      , dblPrepaids          = 0.000000
      , dtmAsOfDate          = @dtmDateToLocal
      , strSalespersonName   ='strSalespersonName' 
+	 , strSourceTransaction	= @strSourceTransactionLocal
 FROM
 
 (SELECT I.dtmPostDate
@@ -79,6 +87,7 @@ WHERE I.ysnPosted = 1
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL
                                     
@@ -129,6 +138,7 @@ WHERE I.ysnPosted = 1
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL
                                     
@@ -173,7 +183,8 @@ WHERE I.ysnPosted = 1
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-                                   
+	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')                                   
+
 UNION ALL
 
 SELECT P.dtmDatePaid
@@ -214,6 +225,7 @@ FROM tblARPayment P
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
                                      
 UNION ALL      
       
@@ -276,6 +288,7 @@ WHERE I.ysnPosted = 1
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     --AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 	) AS A  
 
 LEFT JOIN
@@ -322,6 +335,7 @@ WHERE I.ysnPosted = 1
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL
 
@@ -357,6 +371,7 @@ WHERE I.ysnPosted = 1
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL
 
@@ -386,6 +401,7 @@ WHERE I.ysnPosted = 1
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
                                           
 UNION ALL
 
@@ -412,6 +428,7 @@ FROM tblARPayment P
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal   
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL      
             
@@ -460,6 +477,7 @@ WHERE I.ysnPosted  = 1
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
     --AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 	) AS TBL) AS B
           
 ON

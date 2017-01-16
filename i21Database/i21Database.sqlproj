@@ -4824,6 +4824,7 @@
     <Build Include="dbo\Tables\tblCRMHoursWorked.sql" />
     <Build Include="dbo\Views\vyuSCTicketFormatView.sql" />
     <Build Include="dbo\Views\vyuSCTicketTypeView.sql" />
+    <Build Include="dbo\Views\vyuARAgingSourceTransactionSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

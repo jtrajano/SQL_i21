@@ -1,16 +1,19 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingDetailAsOfDateReport]
 	@dtmDateFrom		DATETIME = NULL,
 	@dtmDateTo			DATETIME = NULL,
-	@strSalesperson		NVARCHAR(100) = NULL
+	@strSalesperson		NVARCHAR(100) = NULL,	
+	@strSourceTransaction	NVARCHAR(100)	= NULL
 AS
 
-DECLARE @dtmDateFromLocal			DATETIME = NULL,
-		@dtmDateToLocal				DATETIME = NULL,
-		@strSalespersonLocal		NVARCHAR(100) = NULL
+DECLARE @dtmDateFromLocal				DATETIME		= NULL,
+		@dtmDateToLocal					DATETIME		= NULL,
+		@strSalespersonLocal			NVARCHAR(100)	= NULL,
+		@strSourceTransactionLocal		NVARCHAR(100)	= NULL
 		
 SET @dtmDateFromLocal			= @dtmDateFrom
 SET	@dtmDateToLocal				= @dtmDateTo
 SET @strSalespersonLocal		= @strSalesperson
+SET @strSourceTransactionLocal	= @strSourceTransaction
 
 IF @dtmDateFromLocal IS NULL
     SET @dtmDateFromLocal = CAST(-53690 AS DATETIME)
@@ -20,6 +23,9 @@ IF @dtmDateToLocal IS NULL
 
 IF RTRIM(LTRIM(@strSalespersonLocal)) = ''
     SET @strSalespersonLocal = NULL
+
+IF RTRIM(LTRIM(@strSourceTransactionLocal)) = ''
+    SET @strSourceTransactionLocal = NULL
 
 SELECT A.strInvoiceNumber
      , A.strRecordNumber
@@ -47,7 +53,8 @@ SELECT A.strInvoiceNumber
 	 , dtmDueDate	 
 	 , dtmAsOfDate			= @dtmDateToLocal
 	 , strSalespersonName	= 'strSalespersonName'
-	 , intCompanyLocationId	 
+	 , intCompanyLocationId
+	 , strSourceTransaction	= @strSourceTransactionLocal
 FROM
 (SELECT dtmDate				= I.dtmPostDate
 	 , I.strInvoiceNumber
@@ -101,6 +108,7 @@ WHERE I.ysnPosted = 1
   AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) - ISNULL(TOTALSETTLEMENT.dblPayment, 0) <> 0
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
   AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL
 						
@@ -157,6 +165,7 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - (ISNULL(PD.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)) <> 0 
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL
 						
@@ -207,6 +216,7 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
       
 UNION ALL
 
@@ -260,6 +270,7 @@ WHERE P.ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')  
+  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL      
       
@@ -341,6 +352,7 @@ WHERE I.ysnPosted  = 1
  AND I.dblInvoiceTotal - (ISNULL(TOTALPAYMENT.dblPayment, 0) + ISNULL(TOTALSETTLEMENT.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)) <> 0
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
  --AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  ) AS A    
 
 LEFT JOIN
@@ -402,6 +414,7 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL
 
@@ -442,6 +455,7 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - (ISNULL(PD.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)) <> 0 
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL
 
@@ -476,6 +490,7 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 						      
 UNION ALL
 
@@ -513,6 +528,7 @@ WHERE P.ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
   AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL      
       
@@ -579,6 +595,7 @@ WHERE I.ysnPosted  = 1
  AND I.dblInvoiceTotal - (ISNULL(TOTALPAYMENT.dblPayment, 0) + ISNULL(TOTALSETTLEMENT.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)) <> 0
  AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
  --AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+ AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  ) AS TBL) AS B    
 
 ON
@@ -591,3 +608,4 @@ AND A.dblPrepayments	 = B.dblPrepayments
 AND A.intPaymentId		 = B.intPaymentId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0
+
