@@ -14144,6 +14144,39 @@
                                     "designerId": "8599aa93-0bad-413f-ad17-c34317019d84"
                                 }
                             ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": 10,
+                                "container|align": "stretch",
+                                "hidden": true,
+                                "itemId": "pnlCustom",
+                                "layout": "hbox",
+                                "title": "Custom"
+                            },
+                            "name": "MyPanel38",
+                            "designerId": "8d03703e-1625-478b-ae6c-c6e41ef35000",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabCustom"
+                                    },
+                                    "name": "TabConfig22",
+                                    "designerId": "9ac8129c-ced6-4115-bb39-98f8bd2bfb98"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -14158,6 +14191,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
+                        "hidden": null,
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },

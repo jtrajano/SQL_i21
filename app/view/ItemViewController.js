@@ -1278,6 +1278,7 @@ Ext.define('Inventory.view.ItemViewController', {
             fieldTitle: 'strItemNo',
             enableAudit: true,
             enableActivity: true,
+            enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             onSaveClick: me.saveAndPokeGrid(win, grdUOM),
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
