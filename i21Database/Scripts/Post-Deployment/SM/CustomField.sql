@@ -111,5 +111,19 @@ BEGIN
     print('/*******************  END Creating Site Custom Table *******************/')
 END
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('cstICItem'))
+BEGIN
+    print('/*******************  BEGIN Creating Site Custom Table *******************/')
+    EXEC('
+        CREATE TABLE [dbo].[cstICItem]
+        (
+            [intId] INT NOT NULL,
+            CONSTRAINT [PK_cstICItem] PRIMARY KEY CLUSTERED ([intId] ASC),
+            CONSTRAINT [FK_cstICItem_tblICItem] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblICItem] ([intItemId]) ON DELETE CASCADE
+        );
+    ')
+    print('/*******************  END Creating Site Custom Table *******************/')
+END
+
 GO
 print('/*******************  END Creating Custom Field Tables *******************/')
