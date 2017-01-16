@@ -12,20 +12,20 @@ BEGIN TRY
 		,@dblQuantity NUMERIC(38, 20)
 		,@intRecordId INT
 		,@dtmCurrentDate DATETIME
-		,@strLotNumber nvarchar(50)
-		,@intAttributeId int
-		,@intManufacturingProcessId int
-		,@intLocationId int
-		,@strAttributeValue nvarchar(50)
-		,@strCycleCountMandatory nvarchar(50)
+		,@strLotNumber NVARCHAR(50)
+		,@intAttributeId INT
+		,@intManufacturingProcessId INT
+		,@intLocationId INT
+		,@strAttributeValue NVARCHAR(50)
+		,@strCycleCountMandatory NVARCHAR(50)
 		,@intExecutionOrder INT
 		,@intManufacturingCellId INT
 		,@dtmPlannedDate DATETIME
 		,@intTransactionCount INT
-		,@strInstantConsumption nvarchar(50)
-		,@strWorkOrderNo nvarchar(50)
-		,@intBatchId int
-		,@strUndoXML nvarchar(MAX)
+		,@strInstantConsumption NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50)
+		,@intBatchId INT
+		,@strUndoXML NVARCHAR(MAX)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -45,32 +45,38 @@ BEGIN TRY
 			WHERE intWorkOrderId = @intWorkOrderId
 			)
 	BEGIN
-		RAISERROR (51140
+		RAISERROR (
+				51140
 				,11
 				,1
 				)
 	END
 
-	SELECT @intManufacturingProcessId=intManufacturingProcessId
-		,@intLocationId=intLocationId
-		,@strWorkOrderNo=strWorkOrderNo 
+	SELECT @intManufacturingProcessId = intManufacturingProcessId
+		,@intLocationId = intLocationId
+		,@strWorkOrderNo = strWorkOrderNo
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Warehouse Release Mandatory'
-	
-	Select @strAttributeValue=strAttributeValue
-	From tblMFManufacturingProcessAttribute
-	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Is Warehouse Release Mandatory'
 
-	IF @strAttributeValue='True' AND EXISTS (
+	SELECT @strAttributeValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @strAttributeValue = 'True'
+		AND EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrderProducedLot WP
-			JOIN dbo.tblICLot L on L.intLotId=WP.intLotId
+			JOIN dbo.tblICLot L ON L.intLotId = WP.intLotId
 			WHERE WP.intWorkOrderId = @intWorkOrderId
 				AND WP.ysnReleased = 0
 				AND WP.ysnProductionReversed = 0
-				AND L.intLotStatusId =3
+				AND L.intLotStatusId = 3
 			)
 	BEGIN
 		RAISERROR (
@@ -82,50 +88,77 @@ BEGIN TRY
 		RETURN
 	END
 
-	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Cycle Count Required'
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Is Cycle Count Required'
 
-	Select @strCycleCountMandatory=strAttributeValue
-	From tblMFManufacturingProcessAttribute
-	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+	SELECT @strCycleCountMandatory = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
 
-	If @strCycleCountMandatory='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId) 
-		and (Exists(SELECT *
-			FROM dbo.tblMFWorkOrderProducedLot
-			WHERE intWorkOrderId = @intWorkOrderId) 
-			OR Exists(SELECT *
-			FROM dbo.tblMFWorkOrderInputLot 
-			WHERE intWorkOrderId = @intWorkOrderId))
-	Begin
+	IF @strCycleCountMandatory = 'True'
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFProcessCycleCountSession
+			WHERE intWorkOrderId = @intWorkOrderId
+			)
+		AND (
+			EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrderProducedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND ysnProductionReversed = 0
+				)
+			OR EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrderInputLot
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND ysnConsumptionReversed = 0
+				)
+			)
+	BEGIN
 		RAISERROR (
 				51131
 				,11
 				,1
 				)
-	End
+	END
+
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	IF @intTransactionCount = 0
-	BEGIN TRANSACTION
+		BEGIN TRANSACTION
 
-	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Instant Consumption'
-	
-	Select @strInstantConsumption=strAttributeValue
-	From tblMFManufacturingProcessAttribute
-	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Is Instant Consumption'
 
-	IF @strCycleCountMandatory='False' and @strInstantConsumption='False'
+	SELECT @strInstantConsumption = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @strCycleCountMandatory = 'False'
+		AND @strInstantConsumption = 'False'
 	BEGIN
-		EXEC dbo.uspMFPostWorkOrder @strXML=@strXML
+		EXEC dbo.uspMFPostWorkOrder @strXML = @strXML
 	END
 
 	DECLARE @tblMFLot TABLE (
 		intRecordId INT identity(1, 1)
 		,intBatchId INT
-		,intLotId int
+		,intLotId INT
 		)
 
-	INSERT INTO @tblMFLot (intBatchId,intLotId)
-	SELECT PL.intBatchId,PL.intLotId
+	INSERT INTO @tblMFLot (
+		intBatchId
+		,intLotId
+		)
+	SELECT PL.intBatchId
+		,PL.intLotId
 	FROM dbo.tblMFWorkOrderProducedLot PL
 	JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -135,15 +168,18 @@ BEGIN TRY
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFLot
 
-	WHILE @intRecordId IS NOT NULL AND @strAttributeValue='True'
+	WHILE @intRecordId IS NOT NULL
+		AND @strAttributeValue = 'True'
 	BEGIN
-		SELECT @intBatchId=NULL,@intLotId=NULL
+		SELECT @intBatchId = NULL
+			,@intLotId = NULL
 
-		SELECT @intBatchId = intBatchId,@intLotId=intLotId
+		SELECT @intBatchId = intBatchId
+			,@intLotId = intLotId
 		FROM @tblMFLot
 		WHERE intRecordId = @intRecordId
 
-		Select @strUndoXML=N'<root><intWorkOrderId>'+Ltrim(@intWorkOrderId)+'</intWorkOrderId><intLotId>'+Ltrim(@intLotId)+'</intLotId><intBatchId>'+Ltrim(@intBatchId)+'</intBatchId><ysnForceUndo>True</ysnForceUndo><intUserId>'+Ltrim(@intUserId)+'</intUserId></root>'
+		SELECT @strUndoXML = N'<root><intWorkOrderId>' + Ltrim(@intWorkOrderId) + '</intWorkOrderId><intLotId>' + Ltrim(@intLotId) + '</intLotId><intBatchId>' + Ltrim(@intBatchId) + '</intBatchId><ysnForceUndo>True</ysnForceUndo><intUserId>' + Ltrim(@intUserId) + '</intUserId></root>'
 
 		EXEC uspMFUndoPallet @strUndoXML
 
@@ -161,15 +197,15 @@ BEGIN TRY
 	UPDATE dbo.tblMFWorkOrder
 	SET intStatusId = 13
 		,dtmCompletedDate = @dtmCurrentDate
-		,intExecutionOrder=0
-		,intConcurrencyId=intConcurrencyId+1
+		,intExecutionOrder = 0
+		,intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE dbo.tblMFScheduleWorkOrder
 	SET intStatusId = 13
-		,intConcurrencyId=intConcurrencyId+1
+		,intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -181,7 +217,7 @@ BEGIN TRY
 		AND intExecutionOrder > @intExecutionOrder
 
 	IF @intTransactionCount = 0
-	COMMIT TRANSACTION
+		COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
@@ -189,7 +225,8 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0 AND @intTransactionCount = 0
+	IF XACT_STATE() != 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0
