@@ -525,4 +525,12 @@ BEGIN
 END
 GO
 
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTAction WHERE intActionId = 2)
+BEGIN
+	INSERT INTO tblCTAction(strActionName, strInternalCode, intConcurrencyId, strRoute)
+	VALUES('Contract w/o Sequence','Contract without Sequence',1,'ContractManagement.view.Contract?routeId=')
+END
+GO
+
 PRINT('Contract 1_MasterTables End')
