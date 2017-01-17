@@ -164,6 +164,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strLotTracking: 'Yes - Serial Number'
                 },
                 {
+                    strLotTracking: 'Yes - Manual/Serial Number'
+                },                
+                {
                     strLotTracking: 'No'
                 }
             ],

@@ -6941,6 +6941,39 @@
                                     "designerId": "8b5266ea-5106-4566-a984-1d44c57caaba"
                                 }
                             ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": 10,
+                                "container|align": "stretch",
+                                "hidden": true,
+                                "itemId": "pnlCustom",
+                                "layout": "hbox",
+                                "title": "Custom"
+                            },
+                            "name": "MyPanel41",
+                            "designerId": "754bb355-ed65-4984-8c9f-862111f85566",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabCustom"
+                                    },
+                                    "name": "TabConfig22",
+                                    "designerId": "c52cbc74-3349-4e33-a319-3293ffeadc3b"
+                                }
+                            ]
                         }
                     ]
                 },

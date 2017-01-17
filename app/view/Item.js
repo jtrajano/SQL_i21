@@ -6414,6 +6414,21 @@ Ext.define('Inventory.view.Item', {
                                                 xtype: 'auditlogtree'
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        hidden: true,
+                                        itemId: 'pnlCustom',
+                                        bodyPadding: 10,
+                                        title: 'Custom',
+                                        layout: {
+                                            type: 'hbox',
+                                            align: 'stretch'
+                                        },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabCustom'
+                                        }
                                     }
                                 ]
                             }
