@@ -109,14 +109,14 @@ IF (@InvoiceAmountDue + @Interest) < (@Payment + (CASE WHEN @ApplyTermDiscount =
 
 SET @PaymentTotal = ROUND(ISNULL((SELECT SUM(ISNULL(dblPayment, @ZeroDecimal)) FROM tblARPaymentDetail WHERE [intPaymentId] = @PaymentId), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 
-IF (@PaymentTotal + @Payment) > @AmountPaid
+IF (@PaymentTotal + @Payment) > (@AmountPaid + @Payment)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120059, 16, 1, @Payment);
 		RETURN 0;
 	END
 
-IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) < @AmountPaid
+IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) > (@AmountPaid + @Payment)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120060, 16, 1, @Payment);
@@ -181,7 +181,8 @@ BEGIN TRY
 	
 	UPDATE tblARPayment
 	SET
-		[dblUnappliedAmount] = @AmountPaid - (@PaymentTotal + @Payment)
+		 [dblAmountPaid]		= (@PaymentTotal + @Payment)
+		,[dblUnappliedAmount]	= (@AmountPaid + @Payment) - (@PaymentTotal + @Payment)
 	WHERE
 		[intPaymentId] = @PaymentId
 	
