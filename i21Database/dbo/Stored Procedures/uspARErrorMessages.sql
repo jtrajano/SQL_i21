@@ -300,4 +300,8 @@ EXEC sp_addmessage 120074,16,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120075) EXEC sp_dropmessage 120075, 'us_english'	
 SET @strmessage = 'Transaction with Invoice Number - %s is already existing.'
-EXEC sp_addmessage 120075,16,@strmessage,'us_english','False' 
+EXEC sp_addmessage 120075,16,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120076) EXEC sp_dropmessage 120075, 'us_english'	
+SET @strmessage = 'Adding lot tracked item directly to invoice is not allowed.'
+EXEC sp_addmessage 120076,16,@strmessage,'us_english','False' 
