@@ -7,6 +7,12 @@ BEGIN TRY
 	DECLARE @intLoadStgId INT
 	DECLARE @intLoadLogId INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @dtmCurrentETAPOD DATETIME
+	DECLARE @dtmMaxETAPOD DATETIME
+
+	SELECT @dtmCurrentETAPOD = dtmETAPOD
+	FROM tblLGLoad
+	WHERE intLoadId = @intLoadId
 
 	IF (@strRowState = 'Added')
 	BEGIN
@@ -254,6 +260,45 @@ BEGIN TRY
 			WHERE LC.intLoadId = @intLoadId
 		END
 	END
+
+	IF (@intShipmentType = 1 AND @dtmCurrentETAPOD IS NOT NULL)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId)
+		BEGIN
+			INSERT INTO tblLGETATracking (
+				intLoadId
+				,dtmETAPOD
+				,dtmModifiedOn
+				,intConcurrencyId
+				)
+			SELECT @intLoadId
+				,@dtmCurrentETAPOD
+				,GETDATE()
+				,1
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @dtmMaxETAPOD = dtmETAPOD
+			FROM tblLGETATracking
+			WHERE intLoadId = @intLoadId
+			ORDER BY 1 DESC
+
+			IF (@dtmMaxETAPOD <> @dtmCurrentETAPOD)
+			BEGIN
+				INSERT INTO tblLGETATracking (
+					intLoadId
+					,dtmETAPOD
+					,dtmModifiedOn
+					,intConcurrencyId
+					)
+				SELECT @intLoadId
+					,@dtmCurrentETAPOD
+					,GETDATE()
+					,1
+			END
+		END
+	END
+
 END TRY
 BEGIN CATCH
 

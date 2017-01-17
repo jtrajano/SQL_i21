@@ -4832,6 +4832,8 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement.sql" />
     <Build Include="dbo\Stored Procedures\uspICDuplicateCategory.sql" />
     <Build Include="dbo\Tables\tblETExportTaxCodeMapping.sql" />
+    <Build Include="dbo\Tables\tblLGETATracking.sql" />
+    <Build Include="dbo\Views\vyuLGETATracking.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
