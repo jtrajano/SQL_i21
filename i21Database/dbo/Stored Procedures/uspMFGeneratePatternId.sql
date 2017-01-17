@@ -10,7 +10,7 @@
 	,@strPatternString NVARCHAR(50) OUTPUT
 	,@intEntityId INT = NULL
 	,@intShiftId INT = NULL
-	,@dtmDate datetime=NULL
+	,@dtmDate DATETIME = NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
@@ -38,7 +38,10 @@ BEGIN
 		,@intPatternId INT
 		,@dtmBusinessDate DATETIME
 
-	SET @dtmCurrentDate = GetDate()
+	IF @dtmDate IS NULL
+		SET @dtmCurrentDate = GetDate()
+	ELSE
+		SELECT @dtmCurrentDate = @dtmDate
 
 	DECLARE @tblMFPatternDetail TABLE (
 		intRecordId INT identity(1, 1)
@@ -80,10 +83,12 @@ BEGIN
 
 	SET @strPatternString = ''
 
-	If @intCategoryId is null
-	Begin 
-		Select @intCategoryId=intCategoryId from dbo.tblICItem Where intCategoryId=@intCategoryId
-	End
+	IF @intCategoryId IS NULL
+	BEGIN
+		SELECT @intCategoryId = intCategoryId
+		FROM dbo.tblICItem
+		WHERE intCategoryId = @intCategoryId
+	END
 
 	INSERT INTO @tblMFPatternDetail (
 		intSubPatternTypeId
@@ -97,7 +102,8 @@ BEGIN
 		,strSubPatternFormat
 	FROM dbo.tblMFPatternDetail
 	WHERE intPatternId = @intPatternId
-	ORDER BY intOrdinalPosition,strSubPatternName 
+	ORDER BY intOrdinalPosition
+		,strSubPatternName
 
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFPatternDetail
