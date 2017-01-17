@@ -96,7 +96,7 @@ BEGIN TRY
 
 				/* PURCHASING */
 				DECLARE @AccountsPayableParentMenuId INT
-				SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
+				SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (Accounts Payable)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
 
 				DECLARE @VendorMenuId INT
 				SELECT  @VendorMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
@@ -114,7 +114,7 @@ BEGIN TRY
 
 				/* SALES */
 				DECLARE @AccountsReceivableParentMenuId INT
-				SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
+				SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales (Accounts Receivable)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
 
 				DECLARE @CustomerMenuId INT
 				SELECT  @CustomerMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
