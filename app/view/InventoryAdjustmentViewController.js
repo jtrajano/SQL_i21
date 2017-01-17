@@ -662,7 +662,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                     currentLotId = item.get('intLotId');
                                 }
                                 else{
-                                    if(item.get('intLotId') == currentLotId) {
+                                    if(item.get('intLotId') == currentLotId && currentLotId != null) {
                                         iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
                                         duplicateLotDetected = 1;
                                     }
