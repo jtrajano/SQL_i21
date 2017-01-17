@@ -31,19 +31,28 @@ BEGIN
 	)
 	RETURN -1 
 
-	SET @periodOrder1 = 1
-	SELECT @periodOrder2 = COUNT(1) FROM tblGLFiscalYearPeriod WHERE dtmStartDate <= @dtmPeriod2 and intFiscalYearId = @intFiscalYearId
+	--SET @periodOrder1 = 1
+	
 	
 
-	DECLARE @BalanceType BIT = 0
-	SELECT @BalanceType = 1 FROM vyuGLAccountDetail A
+	DECLARE @incomeType BIT = 0
+	SELECT @incomeType = 1 FROM vyuGLAccountDetail A
 	WHERE intAccountId = @intAccountId AND strAccountType IN ('Revenue','Expense')
 
-
-	IF @BalanceType =1
+	IF  EXISTS(SELECT TOP 1 1 FROM vyuGLAccountDetail where intAccountId = @intAccountId and strAccountType in('Revenue', 'Expense'))-- @incomeType =1
+	BEGIN
+		--FOR INCOME STATEMENT
 		SELECT @periodOrder1 = COUNT(1) FROM tblGLFiscalYearPeriod WHERE dtmStartDate <= @dtmPeriod1 and intFiscalYearId = @intFiscalYearId	
+		SELECT @periodOrder2 = COUNT(1) FROM tblGLFiscalYearPeriod WHERE dtmStartDate <= @dtmPeriod2 and intFiscalYearId = @intFiscalYearId
+	END
+	ELSE
+	BEGIN
+		-- FOR BALANCE SHEET ACCOUNTS THE BUDGET SHOULD ALWAYS BE THE SUM OF THE TOTAL BUDGET FOR THE YEAR (YTD) NO MATTER WHAT IS THE SELECTED DATE
+		SET @periodOrder1 = 1
+		SELECT @periodOrder2 = COUNT(1) FROM tblGLFiscalYearPeriod WHERE  dtmStartDate <= @dtmPeriod2 and intFiscalYearId = @intFiscalYearId
+	END
 	
-		
+	
 
 	--COMPUTE THE BUDGET
 	WHILE @periodOrder1 <= @periodOrder2
