@@ -45,6 +45,13 @@ Type the overview for the table here.
 		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemUOMId_intUnitMeasureId_intItemId]
 		ON [dbo].[tblICItemUOM]([intItemUOMId] ASC, [intUnitMeasureId] ASC, [intItemId] ASC);
 	GO
+		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemUOMId]
+		ON [dbo].[tblICItemUOM]([intItemUOMId] ASC)
+		INCLUDE(intUnitMeasureId, intItemId, ysnStockUnit); 
+	GO
+		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intUnitMeasureId]
+		ON [dbo].[tblICItemUOM]([intUnitMeasureId] ASC);
+	GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

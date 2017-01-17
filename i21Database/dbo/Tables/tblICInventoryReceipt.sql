@@ -66,8 +66,20 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceipt_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId])
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceipt_intInventoryReceiptId]
+		ON [dbo].[tblICInventoryReceipt]([intInventoryReceiptId] ASC)
+		INCLUDE (strReceiptNumber, intEntityVendorId, strBillOfLading)
 
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceipt_strReceiptNumber]
+		ON [dbo].[tblICInventoryReceipt]([strReceiptNumber] ASC)
+		INCLUDE (intInventoryReceiptId, intEntityVendorId, strBillOfLading)
+
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
 		@level0type = N'SCHEMA',

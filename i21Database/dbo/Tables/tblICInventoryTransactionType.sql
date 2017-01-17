@@ -30,9 +30,10 @@ The transaction types are:
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionType_intTransactionTypeId]
-		ON [dbo].[tblICInventoryTransactionType]([intTransactionTypeId] ASC);
+		ON [dbo].[tblICInventoryTransactionType]([intTransactionTypeId] ASC)
+		INCLUDE (strName, strTransactionForm)
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionType_strName]
-		ON [dbo].[tblICInventoryTransactionType]([strName] ASC);
-	GO
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionType_strName]
+	--	ON [dbo].[tblICInventoryTransactionType]([strName] ASC);
+	--GO

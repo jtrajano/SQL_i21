@@ -21,8 +21,13 @@ Type the overview for the table here.
 		CONSTRAINT [AK_tblICUnitMeasure_strUnitMeasure] UNIQUE ([strUnitMeasure]) 
 	)
 	GO
-		CREATE NONCLUSTERED INDEX [IX_tblICUnitMeasure_intUnitMeasureId_strUnitMeasure]
-		ON [dbo].[tblICUnitMeasure]([intUnitMeasureId] ASC, [strUnitMeasure] ASC);
+	--	CREATE NONCLUSTERED INDEX [IX_tblICUnitMeasure_intUnitMeasureId_strUnitMeasure]
+	--	ON [dbo].[tblICUnitMeasure]([intUnitMeasureId] ASC, [strUnitMeasure] ASC);
+	--GO
+
+		CREATE NONCLUSTERED INDEX [IX_tblICUnitMeasure_intUnitMeasureId]
+		ON [dbo].[tblICUnitMeasure]([intUnitMeasureId] ASC)
+		INCLUDE (strUnitMeasure); 
 	GO
 
 	GO
