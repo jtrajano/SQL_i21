@@ -44,3 +44,4 @@ IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_tblICInventoryActualCost_i
 	EXEC('DROP INDEX tblICInventoryActualCostOut.[IX_tblICInventoryActualCost_intInventoryTransactionId]')
 	
 PRINT N'END: Clean the indexes in the cost bucket tables.'
+

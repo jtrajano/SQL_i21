@@ -53,6 +53,17 @@ Type the overview for the table here.
 		CONSTRAINT [AK_tblICInventoryShipment_strShipmentNumber] UNIQUE ([strShipmentNumber]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) 
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryShipment_intInventoryShipmentId]
+		ON [dbo].[tblICInventoryShipment]([intInventoryShipmentId] ASC)
+		INCLUDE (strShipmentNumber, intEntityCustomerId, strBOLNumber)
+
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryShipment_strShipmentNumber]
+		ON [dbo].[tblICInventoryShipment]([strShipmentNumber] ASC)
+		INCLUDE (intInventoryShipmentId, intEntityCustomerId, strBOLNumber)
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',

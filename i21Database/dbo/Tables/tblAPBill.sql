@@ -84,7 +84,8 @@ CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
     ON [dbo].[tblAPBill]([intBillBatchId] ASC);
 GO
 CREATE NONCLUSTERED INDEX [IX_strBillId]
-    ON [dbo].[tblAPBill]([strBillId] ASC);
+    ON [dbo].[tblAPBill]([strBillId] ASC)
+	INCLUDE (intBillId, intEntityVendorId);
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPBill]([intEntityVendorId] ASC)

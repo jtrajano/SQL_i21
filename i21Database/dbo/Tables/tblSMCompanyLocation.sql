@@ -218,6 +218,13 @@
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [AK_tblSMCompanyLocation_strLocationNumber] ON [tblSMCompanyLocation]([strLocationNumber]) WHERE [strLocationNumber] IS NOT NULL
 GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblSMCompanyLocation_intCompanyLocationId]
+	ON [dbo].[tblSMCompanyLocation]([intCompanyLocationId] ASC)
+	INCLUDE ([strLocationName]); 
+
+GO 
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity field',
     @level0type = N'SCHEMA',

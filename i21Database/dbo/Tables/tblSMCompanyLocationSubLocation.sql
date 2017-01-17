@@ -22,3 +22,10 @@
     CONSTRAINT [FK_tblSMCompanyLocationSubLocation_tblSMCompanyLocation] FOREIGN KEY (intCompanyLocationId) REFERENCES tblSMCompanyLocation(intCompanyLocationId) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblSMCompanyLocationSubLocation_tblEMEntity] FOREIGN KEY ([intVendorId]) REFERENCES tblEMEntity([intEntityId])
 )
+GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId]
+	ON [dbo].[tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId] ASC)
+	INCLUDE ([strSubLocationName], [intCompanyLocationId]); 
+
+GO 

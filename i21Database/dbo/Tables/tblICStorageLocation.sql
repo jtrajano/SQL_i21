@@ -52,6 +52,11 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICStorageLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 		CONSTRAINT [FK_tblICStorageLocation_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) 
 	)
+	GO 
+
+		CREATE NONCLUSTERED INDEX [IX_tblICStorageLocation_intStorageLocationId]
+		ON [dbo].[tblICStorageLocation]([intStorageLocationId] ASC)
+		INCLUDE (strName); 
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',

@@ -34,7 +34,7 @@ SELECT	-- Commented because ROW_NUMBER() will slow down huge set of data.
 		,strBatchId
 		,CostingMethod.strCostingMethod
 		,strUOM						= umTransUOM.strUnitMeasure
-		,strStockUOM				= umStock.strUnitMeasure
+		,strStockUOM				= iuStock.strUnitMeasure
 		,dblQuantityInStockUOM		= ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblQty), 0)
 		,dblCostInStockUOM			= ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblCost), 0)
 		,strBOLNumber				= CAST (
@@ -48,39 +48,49 @@ SELECT	-- Commented because ROW_NUMBER() will slow down huge set of data.
 		,strEntity					= e.strName										
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId
-FROM 	tblICItem i LEFT JOIN tblICItemUOM iuStock
-			ON iuStock.intItemId = i.intItemId
-			AND iuStock.ysnStockUnit = 1
-		LEFT JOIN tblICUnitMeasure umStock
-			ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
+FROM 	tblICItem i 
+		CROSS APPLY (
+			SELECT	TOP 1 
+					intItemUOMId			
+					,umStock.strUnitMeasure
+			FROM	tblICItemUOM iuStock INNER JOIN tblICUnitMeasure umStock
+						ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
+			WHERE	iuStock.intItemId = i.intItemId
+					AND iuStock.ysnStockUnit = 1
+		) iuStock
 		LEFT JOIN tblICCategory c 
 			ON c.intCategoryId = i.intCategoryId
 		LEFT JOIN tblICInventoryTransaction t 
 			ON i.intItemId = t.intItemId
-		LEFT JOIN tblICLot l
-			ON l.intLotId = t.intLotId
-		LEFT JOIN tblICItemUOM iuTransUOM
-			ON iuTransUOM.intItemUOMId = t.intItemUOMId
-		LEFT JOIN tblICUnitMeasure umTransUOM
-			ON umTransUOM.intUnitMeasureId = iuTransUOM.intUnitMeasureId		
-		LEFT JOIN tblICItemLocation il 
-			ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId) 
-		LEFT JOIN tblICCostingMethod CostingMethod
-			ON CostingMethod.intCostingMethodId = t.intCostingMethod
-		LEFT JOIN tblSMCompanyLocation cl 
-			ON cl.intCompanyLocationId = il.intLocationId
-		LEFT JOIN tblSMCompanyLocationSubLocation subLoc 
-			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
-		LEFT JOIN tblICStorageLocation strgLoc 
-			ON strgLoc.intStorageLocationId = t.intStorageLocationId
 		LEFT JOIN tblICInventoryTransactionType ty 
 			ON ty.intTransactionTypeId = t.intTransactionTypeId
+		LEFT JOIN tblICStorageLocation strgLoc 
+			ON strgLoc.intStorageLocationId = t.intStorageLocationId
+		LEFT JOIN (
+			tblICItemLocation il INNER JOIN tblSMCompanyLocation cl 
+				ON il.intLocationId = cl.intCompanyLocationId 						
+		)
+			ON il.intItemLocationId = COALESCE(t.intInTransitSourceLocationId, t.intItemLocationId) 
+		LEFT JOIN tblSMCompanyLocationSubLocation subLoc
+			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
+		LEFT JOIN tblICCostingMethod CostingMethod
+			ON CostingMethod.intCostingMethodId = t.intCostingMethod
+		LEFT JOIN (
+			tblICItemUOM iuTransUOM INNER JOIN tblICUnitMeasure umTransUOM
+				ON umTransUOM.intUnitMeasureId = iuTransUOM.intUnitMeasureId			
+		)
+			ON iuTransUOM.intItemUOMId = t.intItemUOMId
+		LEFT JOIN tblICLot l
+			ON l.intLotId = t.intLotId
+
 		LEFT JOIN tblICInventoryReceipt receipt 
 			ON receipt.intInventoryReceiptId = t.intTransactionId
 			AND receipt.strReceiptNumber = t.strTransactionId
+			AND ty.intTransactionTypeId = 4
 		LEFT JOIN tblICInventoryShipment shipment 
 			ON shipment.intInventoryShipmentId = t.intTransactionId
 			AND shipment.strShipmentNumber = t.strTransactionId
+			AND ty.intTransactionTypeId = 5
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
@@ -88,6 +98,5 @@ FROM 	tblICItem i LEFT JOIN tblICItemUOM iuStock
 			ON bill.intBillId = t.intTransactionId
 			AND bill.strBillId = t.strTransactionId
 		LEFT JOIN tblEMEntity e 
-			ON e.intEntityId = ISNULL(receipt.intEntityVendorId, ISNULL(shipment.intEntityCustomerId, ISNULL(invoice.intEntityCustomerId, bill.intEntityVendorId)))
-
+			ON e.intEntityId = COALESCE(receipt.intEntityVendorId, shipment.intEntityCustomerId, invoice.intEntityCustomerId, bill.intEntityVendorId)  
 WHERE	i.strType != 'Comment'
