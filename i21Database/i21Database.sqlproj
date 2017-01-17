@@ -4838,6 +4838,10 @@
     <Build Include="dbo\Views\vyuCFVehicleAccountCustomer.sql" />
     <Build Include="dbo\Views\vyuCFCardAccountCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryBySummary.sql" />
+    <Build Include="dbo\Tables\tblCFLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFDeleteTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCreateInvoicePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCreateDebitMemo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

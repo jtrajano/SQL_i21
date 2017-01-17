@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
