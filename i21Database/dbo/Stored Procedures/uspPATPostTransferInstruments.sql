@@ -98,14 +98,14 @@ SET @batchIdUsed = @batchId;
 	IF EXISTS(SELECT 1 FROM #tempTransferDetails WHERE intTransferType = 2)
 	BEGIN
 		---------------------------- TRANSFER STOCK TO EQUITY -----------------------------
-		MERGE tblPATCustomerEquity AS CE-- WHERE ysnEquityPaid = 0 AND strEquityType = 'Undistributed') AS CE
+		MERGE tblPATCustomerEquity AS CE
 		USING (SELECT * FROM #tempTransferDetails WHERE intTransferType = 2) TD
-			ON (TD.intToFiscalYearId = CE.intFiscalYearId AND TD.intTransferorId = CE.intCustomerId AND TD.intToRefundTypeId = CE.intRefundTypeId AND CE.ysnEquityPaid = 0 AND CE.strEquityType = 'Undistributed')
+			ON (TD.intToFiscalYearId = CE.intFiscalYearId AND TD.intTransferorId = CE.intCustomerId AND TD.intToRefundTypeId = CE.intRefundTypeId AND CE.strEquityType = 'Undistributed')
 			WHEN MATCHED
 				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity + TD.dblQuantityTransferred ELSE CE.dblEquity - TD.dblQuantityTransferred END
 			WHEN NOT MATCHED BY TARGET
-				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, ysnEquityPaid, intConcurrencyId)
-				VALUES(TD.intTransferorId, TD.intToFiscalYearId, 'Undistributed', TD.intToRefundTypeId, TD.dblQuantityTransferred, 0, 1);
+				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
+				VALUES(TD.intTransferorId, TD.intToFiscalYearId, 'Undistributed', TD.intToRefundTypeId, TD.dblQuantityTransferred, 1);
 
 		UPDATE CS
 		SET CS.dblSharesNo = CASE WHEN @ysnPosted = 1 THEN CS.dblSharesNo - tempTD.dblQuantityTransferred ELSE CS.dblSharesNo + tempTD.dblQuantityTransferred END,
@@ -136,7 +136,7 @@ SET @batchIdUsed = @batchId;
 		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
 		FROM tblPATCustomerEquity CE
 		INNER JOIN #tempTransferDetails AS tempTD
-			ON CE.intCustomerId = tempTD.intTransferorId AND CE.intFiscalYearId = tempTD.intFiscalYearId AND CE.intRefundTypeId = tempTD.intRefundTypeId AND CE.ysnEquityPaid <> 1 AND tempTD.intTransferType = 4;
+			ON CE.intCustomerId = tempTD.intTransferorId AND CE.intFiscalYearId = tempTD.intFiscalYearId AND CE.intRefundTypeId = tempTD.intRefundTypeId AND tempTD.intTransferType = 4;
 	END
 
 	IF ExISTS(SELECT 1 FROM #tempTransferDetails WHERE intTransferType = 5)
@@ -145,12 +145,12 @@ SET @batchIdUsed = @batchId;
 
 		MERGE tblPATCustomerEquity CE
 		USING (SELECT * FROM #tempTransferDetails WHERE intTransferType = 5) TD
-			ON (TD.intFiscalYearId = CE.intFiscalYearId AND CE.intCustomerId = TD.intTransferorId AND CE.ysnEquityPaid <> 1 AND CE.strEquityType = 'Reserve')
+			ON (TD.intFiscalYearId = CE.intFiscalYearId AND CE.intCustomerId = TD.intTransferorId AND CE.strEquityType = 'Reserve')
 			WHEN MATCHED
 				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity + TD.dblQuantityTransferred ELSE CE.dblEquity - TD.dblQuantityTransferred END
 			WHEN NOT MATCHED BY TARGET
-				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, ysnEquityPaid, intConcurrencyId)
-				VALUES (TD.intTransferorId, TD.intFiscalYearId, 'Reserve', TD.intRefundTypeId, TD.dblQuantityTransferred, 0, 1);
+				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
+				VALUES (TD.intTransferorId, TD.intFiscalYearId, 'Reserve', TD.intRefundTypeId, TD.dblQuantityTransferred, 1);
 
 		UPDATE CE
 		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
@@ -165,12 +165,12 @@ SET @batchIdUsed = @batchId;
 
 		MERGE tblPATCustomerEquity CE
 		USING (SELECT * FROM #tempTransferDetails WHERE intTransferType = 6) TD
-			ON (TD.intToFiscalYearId = CE.intFiscalYearId AND CE.intCustomerId = TD.intTransferorId AND CE.intRefundTypeId = TD.intToRefundTypeId AND CE.ysnEquityPaid <> 1 AND CE.strEquityType = 'Undistributed')
+			ON (TD.intToFiscalYearId = CE.intFiscalYearId AND CE.intCustomerId = TD.intTransferorId AND CE.intRefundTypeId = TD.intToRefundTypeId AND CE.strEquityType = 'Undistributed')
 			WHEN MATCHED
 				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity + TD.dblQuantityTransferred ELSE CE.dblEquity - TD.dblQuantityTransferred END
 			WHEN NOT MATCHED BY TARGET
-				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, ysnEquityPaid, intConcurrencyId)
-				VALUES (TD.intTransferorId, TD.intToFiscalYearId, 'Undistributed', TD.intToRefundTypeId, TD.dblQuantityTransferred, 0, 1);
+				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
+				VALUES (TD.intTransferorId, TD.intToFiscalYearId, 'Undistributed', TD.intToRefundTypeId, TD.dblQuantityTransferred, 1);
 
 		UPDATE CE
 		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
