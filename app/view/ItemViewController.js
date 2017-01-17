@@ -899,6 +899,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUOM: {
+                    hidden: true,
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{pricingLevelUOM}',
@@ -909,7 +910,10 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUPC: 'strUPC',
-                colPricingLevelUnits: 'dblUnit',
+                colPricingLevelUnits: {
+                    dataIndex: 'dblUnit',
+                    hidden: true
+                },
                 colPricingLevelMin: 'dblMin',
                 colPricingLevelMax: 'dblMax',
                 colPricingLevelMethod: {
@@ -947,6 +951,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colSpecialPricingUnit: {
+                    hidden: true,
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{specialPricingUOM}',
@@ -957,7 +962,10 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colSpecialPricingUPC: 'strUPC',
-                colSpecialPricingQty: 'dblUnit',
+                colSpecialPricingQty: {
+                    dataIndex: 'dblUnit',
+                    hidden: true
+                },
                 colSpecialPricingDiscountBy: {
                     dataIndex: 'strDiscountBy',
                     editor: {
