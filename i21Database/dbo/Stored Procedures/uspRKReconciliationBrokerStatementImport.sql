@@ -5,7 +5,7 @@
      @intBrokerId  int ,
      @intBorkerageAccountId     int=null,
      @intReconciliationBrokerStatementHeaderIdOut int  out
-   ,@strStatus nvarchar(50)  OUT
+    ,@strStatus nvarchar(50)  OUT
 AS
 --mm dd -yyy
 --declare   @dtmFilledDate datetime = '01/4/2017',
@@ -142,7 +142,7 @@ JOIN @tblTransRec t1 on t.strName=t1.strName
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -159,7 +159,7 @@ LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
---delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+--delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 --delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 ----INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -176,7 +176,7 @@ LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
 --        and t.dblPrice=t1.dblPrice 
 --        AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -206,7 +206,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -236,7 +236,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -266,7 +266,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -296,7 +296,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -326,7 +326,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -356,7 +356,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -386,7 +386,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -416,7 +416,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -446,7 +446,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
        -- and t.dblPrice=t1.dblPrice 
         
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -476,7 +476,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 
@@ -507,7 +507,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 
@@ -538,7 +538,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
@@ -560,7 +560,7 @@ FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
   
         
-delete from @ImportedRec where importId in(select ImportId from @tblFinalRec)
+delete from @ImportedRec where ImportId in(select ImportId from @tblFinalRec)
 delete from @tblTransRec where Id in(select ImportId from @tblFinalRec)
 
 
@@ -631,5 +631,3 @@ SET @ErrMsg = ERROR_MESSAGE()
   RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
  END  
 END CATCH
-
-
