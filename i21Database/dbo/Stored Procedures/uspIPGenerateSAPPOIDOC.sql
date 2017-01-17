@@ -186,7 +186,7 @@ Begin
 		Set @strXml +=	@strPOUpdateIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
-		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
+		Set @strXml +=	'<E1PORDCH SEGMENT="1">'
 
 		--Header
 		Set @strXml += '<E1BPMEPOHEADER SEGMENT="1">'
@@ -327,7 +327,7 @@ Begin
 		Set @strXml += '<CHANGE_ID>'		+ 'X'	+ '</CHANGE_ID>'
 		Set @strXml += '</E1BPMEPOCONDX>'
 
-		Set @strXml +=	'</E1PORDCR1>'
+		Set @strXml +=	'</E1PORDCH>'
 
 		Set @strXml += '</IDOC>'
 		Set @strXml +=  '</PORDCH03>'
@@ -346,7 +346,7 @@ Begin
 		Set @strXml +=	@strPOUpdateIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
-		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
+		Set @strXml +=	'<E1PORDCH SEGMENT="1">'
 
 		--Header
 		Set @strXml += '<E1BPMEPOHEADER SEGMENT="1">'
@@ -370,7 +370,7 @@ Begin
 		Set @strXml += '<E1BPMEPOCOND SEGMENT="1">'
 		Set @strXml += '</E1BPMEPOCOND>'
 
-		Set @strXml +=	'</E1PORDCR1>'
+		Set @strXml +=	'</E1PORDCH>'
 
 		Set @strXml += '</IDOC>'
 		Set @strXml +=  '</PORDCH03>'
