@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPAcknowledgement]
-	@strXml nvarchar(max)
+	@strXml nvarchar(max),
+	@strMessage nvarchar(max)='' OUT
 AS
 BEGIN TRY
 
@@ -11,7 +12,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @idoc INT
 DECLARE @ErrMsg nvarchar(max)
-DECLARE @strMessage NVARCHAR(MAX)
+DECLARE @strFinalMessage NVARCHAR(MAX)
 DECLARE @strMesssageType NVARCHAR(50)
 DECLARE @strStatus NVARCHAR(50)
 DECLARE @strStatusCode NVARCHAR(MAX)
@@ -73,7 +74,7 @@ Declare @tblAcknowledgement AS TABLE
 	--PO Create
 	If @strMesssageType='PORDCR1'
 	Begin
-		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=(Select TOP 1 strRefNo From @tblAcknowledgement)
+		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=(Select TOP 1 strRefNo From @tblAcknowledgement) AND intContractTypeId=1
 
 		If @strStatus=51 --Success
 		Begin
@@ -86,19 +87,19 @@ Declare @tblAcknowledgement AS TABLE
 
 		If @strStatus=53 --Error
 		Begin
-			Set @strMessage=@strStatusCode + ' : ' + @strStatusDesc
+			Set @strFinalMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
-			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
+			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strFinalMessage
 			Where intContractHeaderId=@intContractHeaderId AND intContractSeq IN (Select strTrackingNo From @tblAcknowledgement)
 
-			RAISERROR(@strMessage,16,1)
+			SET @strMessage=@strFinalMessage
 		End
 	End
 
 	--PO Update
 	If @strMesssageType='PORDCH'
 	Begin
-		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=(Select TOP 1 strRefNo From @tblAcknowledgement)
+		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=(Select TOP 1 strRefNo From @tblAcknowledgement) AND intContractTypeId=1
 
 		If @strStatus=51 --Success
 		Begin
@@ -108,12 +109,12 @@ Declare @tblAcknowledgement AS TABLE
 
 		If @strStatus=53 --Error
 		Begin
-			Set @strMessage=@strStatusCode + ' : ' + @strStatusDesc
+			Set @strFinalMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
-			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
+			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strFinalMessage
 			Where intContractHeaderId=@intContractHeaderId AND intContractSeq IN (Select strTrackingNo From @tblAcknowledgement)
 
-			RAISERROR(@strMessage,16,1)
+			SET @strMessage=@strFinalMessage
 		End
 	End
 
