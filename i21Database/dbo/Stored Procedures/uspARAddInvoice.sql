@@ -34,6 +34,8 @@ DECLARE @StartingNumberId_Invoice	INT = 19
 	  , @total						INT
 	  , @incval						INT
 	  , @InvoiceNumber				NVARCHAR(50)
+	  , @intCompanyLocationId		INT
+
 DECLARE @temp TABLE (intId			INT IDENTITY PRIMARY KEY CLUSTERED
 				   , Customer		INT
 				   , Location		INT
@@ -64,9 +66,9 @@ INSERT INTO @temp(Customer ,
 
 WHILE EXISTS(SELECT NULL FROM @temp WHERE ISNULL(InvoiceNumber,'') = '' AND ISNULL(InvoiceId,0) = 0)
 BEGIN
-	SELECT TOP 1 @incval = intId FROM @temp WHERE ISNULL(InvoiceNumber,'') = '' AND ISNULL(InvoiceId,0) = 0 ORDER BY intId 
+	SELECT TOP 1 @incval = intId, @intCompanyLocationId = Location FROM @temp WHERE ISNULL(InvoiceNumber,'') = '' AND ISNULL(InvoiceId,0) = 0 ORDER BY intId 
 	
-   EXEC dbo.uspSMGetStartingNumber @StartingNumberId_Invoice, @InvoiceNumber OUTPUT 
+   EXEC dbo.uspSMGetStartingNumber @StartingNumberId_Invoice, @InvoiceNumber OUTPUT, @intCompanyLocationId 
 
    IF @InvoiceNumber IS NULL 
    BEGIN 
@@ -76,6 +78,7 @@ BEGIN
 	   RETURN;
    END 
    UPDATE @temp SET InvoiceNumber = @InvoiceNumber WHERE intId = @incval 
+   SET @intCompanyLocationId = NULL
 END;	
 
 SELECT @EntityId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId;
