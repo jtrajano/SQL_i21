@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface ICategoryBl : IBusinessLayer<tblICCategory>
     {
-
+        CategoryBl.DuplicateCategorySaveResult DuplicateCategory(int intCategoryId);
     }
 }

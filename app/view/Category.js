@@ -96,6 +96,13 @@ Ext.define('Inventory.view.Category', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
+                                        itemId: 'btnDuplicate',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Duplicate'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
                                         itemId: 'btnDelete',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Delete'

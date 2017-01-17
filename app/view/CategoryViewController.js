@@ -706,6 +706,36 @@ Ext.define('Inventory.view.CategoryViewController', {
         }
     },
 
+    onDuplicateClick: function(button) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            iRely.Msg.showWait('Duplicating category...');
+            ic.utils.ajax({
+                timeout: 120000,
+                url: '../Inventory/api/Category/DuplicateCategory',
+                params: {
+                    intCategoryId: current.get('intCategoryId')
+                },
+                method: 'Get'  
+            })
+            .finally(function() { iRely.Msg.close(); })
+            .subscribe(
+                function (successResponse) {
+				    var jsonData = Ext.decode(successResponse.responseText);
+                    context.configuration.store.addFilter([{ column: 'intCategoryId', value: jsonData.message.id }]);
+                    context.configuration.paging.moveFirst();
+				},
+				function (failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+				}
+            );
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboDetailUnitMeasure": {
@@ -725,6 +755,9 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
             "#btnAddRequired": {
                 click: this.onAddRequiredClick
+            },
+            "#btnDuplicate": {
+                click: this.onDuplicateClick
             },
             // "#colStockUnit": {
             //     beforecheckchange: this.onUOMStockUnitCheckChange
