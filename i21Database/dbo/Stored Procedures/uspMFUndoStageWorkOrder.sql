@@ -59,6 +59,7 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intProductionStageLocationId INT
 		,@intProductionStagingId INT
+		,@strStagedLotNumber NVARCHAR(50)
 
 	SELECT @intLotId = intLotId
 		,@intInputItemId = intItemId
@@ -68,6 +69,10 @@ BEGIN TRY
 		,@intMachineId = intMachineId
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+	SELECT @strStagedLotNumber = strLotNumber
+	FROM tblICLot
+	WHERE intLotId = @intLotId
 
 	SELECT @strInventoryTracking = strInventoryTracking
 	FROM dbo.tblICItem
@@ -117,6 +122,8 @@ BEGIN TRY
 				AND intAttributeId = @intProductionStagingId
 		END
 
+		SELECT @strLotNumber = NULL
+
 		SELECT TOP 1 @strLotNumber = L.strLotNumber
 			,@intLocationId = L.intLocationId
 			,@intSubLocationId = L.intSubLocationId
@@ -144,8 +151,42 @@ BEGIN TRY
 							) --By location, then apply location filter
 					END
 				)
+			AND L.strLotNumber = @strStagedLotNumber
 		ORDER BY L.dblQty DESC
 			,L.dtmDateCreated ASC
+
+		IF @strLotNumber IS NULL
+		BEGIN
+			SELECT TOP 1 @strLotNumber = L.strLotNumber
+				,@intLocationId = L.intLocationId
+				,@intSubLocationId = L.intSubLocationId
+				,@intStorageLocationId = L.intStorageLocationId
+				,@intWeightUOMId = L.intWeightUOMId
+			FROM dbo.tblICLot L
+			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			WHERE L.intItemId = @intInputItemId
+				AND L.intLocationId = @intLocationId
+				AND L.intLotStatusId = 1
+				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND L.intStorageLocationId = (
+					CASE 
+						WHEN @intStorageLocationId IS NULL
+							AND @intProductionStageLocationId IS NULL
+							THEN L.intStorageLocationId
+						ELSE (
+								CASE 
+									WHEN @intConsumptionMethodId = 1
+										THEN @intProductionStageLocationId
+									WHEN @intConsumptionMethodId = 2
+										THEN @intStorageLocationId
+									ELSE L.intStorageLocationId
+									END
+								) --By location, then apply location filter
+						END
+					)
+			ORDER BY L.dblQty DESC
+				,L.dtmDateCreated ASC
+		END
 
 		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
 				CASE 
