@@ -13,6 +13,7 @@ Ext.define('Inventory.view.StockDetailViewController', {
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strType', text: 'Item Type', flex: 1, dataType: 'string' },
+                { dataIndex: 'strCommodityCode', text: 'Commodity', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCategoryCode', text: 'Category', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewCategory' },
                 { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewLocation' },
                 { dataIndex: 'strStockUOM', text: 'Stock UOM', flex: 1, dataType: 'string', drillDownText: 'View UOM', drillDownClick: 'onViewUOM'},
