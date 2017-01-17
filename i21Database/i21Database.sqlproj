@@ -4834,6 +4834,7 @@
     <Build Include="dbo\Tables\tblETExportTaxCodeMapping.sql" />
     <Build Include="dbo\Tables\tblLGETATracking.sql" />
     <Build Include="dbo\Views\vyuLGETATracking.sql" />
+    <Build Include="dbo\Tables\tblSMScreenLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
