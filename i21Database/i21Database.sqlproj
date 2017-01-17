@@ -4835,6 +4835,8 @@
     <Build Include="dbo\Tables\tblLGETATracking.sql" />
     <Build Include="dbo\Views\vyuLGETATracking.sql" />
     <Build Include="dbo\Tables\tblSMScreenLabel.sql" />
+    <Build Include="dbo\Views\vyuCFVehicleAccountCustomer.sql" />
+    <Build Include="dbo\Views\vyuCFCardAccountCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
