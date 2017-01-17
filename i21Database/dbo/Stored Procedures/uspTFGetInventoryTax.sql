@@ -446,9 +446,9 @@ BEGIN TRY
 			, dtmReportingPeriodEnd
 			, leaf)
 		VALUES(@Guid
-			, 0
+			, NULL
 			, (SELECT TOP 1 strFormCode FROM tblTFReportingComponent WHERE intReportingComponentId = @RCId)
-			, 0
+			, NULL
 			, 'No record found.'
 			, GETDATE()
 			, @DateFrom
