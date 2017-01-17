@@ -76,8 +76,8 @@ BEGIN TRY
 		SELECT TOP 1 @TA = intTaxAuthorityId
 			, @TACode = strTaxAuthorityCode
 			, @DatePeriod = dtmDate
-			, @DateBegin = dtmReportingPeriodBegin
-			, @DateEnd = dtmReportingPeriodEnd
+			, @DateBegin = CAST(FLOOR(CAST(dtmReportingPeriodBegin AS FLOAT)) AS DATETIME)
+			, @DateEnd = CAST(FLOOR(CAST(dtmReportingPeriodEnd AS FLOAT)) AS DATETIME)
 		FROM vyuTFGetTransaction
 		WHERE uniqTransactionGuid = @Guid
 			AND strFormCode = @FormCodeParam
