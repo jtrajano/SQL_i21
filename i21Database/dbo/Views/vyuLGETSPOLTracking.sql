@@ -1,19 +1,22 @@
-﻿CREATE VIEW vyuLGETATracking
+﻿CREATE VIEW vyuLGETSPOLTracking
 AS
 	SELECT DISTINCT L.strLoadNumber
+		,ETA.strTrackingType
 		,(
-			SELECT TOP 1 dtmETAPOD
+			SELECT TOP 1 dtmETSPOL
 			FROM tblLGETATracking ETA
 			WHERE ETA.intLoadId = L.intLoadId
+				AND ETA.strTrackingType = 'ETS POL'
 			ORDER BY intETATrackingId
-			) AS dtmFirstETAPOD
+			) AS dtmFirstETSPOL
 		,(
-			SELECT TOP 1 dtmETAPOD
+			SELECT TOP 1 dtmETSPOL
 			FROM tblLGETATracking ETA
 			WHERE ETA.intLoadId = L.intLoadId
+				AND ETA.strTrackingType = 'ETS POL'
 			ORDER BY intETATrackingId DESC
-			) AS dtmFinalETAPOD
-		,COUNT(*) - 1 intNoOfTimesETAPODModified
+			) AS dtmFinalETSPOL
+		,COUNT(*) - 1 intNoOfTimesETSPOLModified
 		,L.strBLNumber
 		,L.dtmBLDate
 		,ShippingLine.strName AS strShippingLine
@@ -26,6 +29,7 @@ AS
 	FROM tblLGETATracking ETA
 	JOIN tblLGLoad L ON L.intLoadId = ETA.intLoadId
 	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+	WHERE ETA.strTrackingType = 'ETS POL'
 	GROUP BY L.strLoadNumber
 		,L.strBLNumber
 		,L.intShippingLineEntityId
@@ -38,3 +42,4 @@ AS
 		,L.dtmBLDate
 		,ShippingLine.strName
 		,L.intLoadId
+		,ETA.strTrackingType

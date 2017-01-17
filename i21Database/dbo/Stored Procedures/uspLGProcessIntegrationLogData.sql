@@ -76,7 +76,7 @@ BEGIN TRY
 			,@intMinLoadLogId
 			,@intMaxLoadLogId
 			,NULL
-			,@intMinLoadLogId
+			,@intMaxLoadLogId
 			,0
 			,0
 

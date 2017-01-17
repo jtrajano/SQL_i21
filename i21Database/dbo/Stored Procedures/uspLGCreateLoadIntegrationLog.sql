@@ -9,8 +9,11 @@ BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @dtmCurrentETAPOD DATETIME
 	DECLARE @dtmMaxETAPOD DATETIME
+	DECLARE @dtmCurrentETSPOL DATETIME
+	DECLARE @dtmMaxETSPOL DATETIME
 
-	SELECT @dtmCurrentETAPOD = dtmETAPOD
+	SELECT @dtmCurrentETAPOD = dtmETAPOD,
+		   @dtmCurrentETSPOL = dtmETSPOL
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -256,22 +259,24 @@ BEGIN TRY
 				,@strRowState
 			FROM vyuLGLoadContainerView LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-			JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 			WHERE LC.intLoadId = @intLoadId
 		END
 	END
 
 	IF (@intShipmentType = 1 AND @dtmCurrentETAPOD IS NOT NULL)
 	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId)
+		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId AND strTrackingType = 'ETA POD')
 		BEGIN
 			INSERT INTO tblLGETATracking (
 				intLoadId
+				,strTrackingType
 				,dtmETAPOD
 				,dtmModifiedOn
 				,intConcurrencyId
 				)
 			SELECT @intLoadId
+				,'ETA POD'
 				,@dtmCurrentETAPOD
 				,GETDATE()
 				,1
@@ -280,19 +285,63 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @dtmMaxETAPOD = dtmETAPOD
 			FROM tblLGETATracking
-			WHERE intLoadId = @intLoadId
-			ORDER BY 1 DESC
+			WHERE intLoadId = @intLoadId AND strTrackingType = 'ETA POD'
+			ORDER BY intETATrackingId DESC
 
 			IF (@dtmMaxETAPOD <> @dtmCurrentETAPOD)
 			BEGIN
 				INSERT INTO tblLGETATracking (
 					intLoadId
+					,strTrackingType
 					,dtmETAPOD
 					,dtmModifiedOn
 					,intConcurrencyId
 					)
 				SELECT @intLoadId
+					,'ETA POD'
 					,@dtmCurrentETAPOD
+					,GETDATE()
+					,1
+			END
+		END
+	END
+
+	IF (@intShipmentType = 1 AND @dtmCurrentETSPOL IS NOT NULL)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId AND strTrackingType = 'ETS POL')
+		BEGIN
+			INSERT INTO tblLGETATracking (
+				 intLoadId
+				,strTrackingType
+				,dtmETSPOL
+				,dtmModifiedOn
+				,intConcurrencyId
+				)
+			SELECT @intLoadId
+				,'ETS POL'
+				,@dtmCurrentETSPOL
+				,GETDATE()
+				,1
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @dtmMaxETSPOL = dtmETSPOL
+			FROM tblLGETATracking
+			WHERE intLoadId = @intLoadId AND strTrackingType = 'ETS POL'
+			ORDER BY intETATrackingId DESC
+
+			IF (@dtmMaxETSPOL <> @dtmCurrentETSPOL)
+			BEGIN
+				INSERT INTO tblLGETATracking (
+					intLoadId
+					,strTrackingType
+					,dtmETSPOL
+					,dtmModifiedOn
+					,intConcurrencyId
+					)
+				SELECT @intLoadId
+					,'ETS POL'
+					,@dtmCurrentETSPOL
 					,GETDATE()
 					,1
 			END
