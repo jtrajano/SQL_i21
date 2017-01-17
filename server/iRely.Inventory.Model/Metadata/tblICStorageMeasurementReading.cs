@@ -48,6 +48,27 @@ namespace iRely.Inventory.Model
         public int? intDiscountSchedule { get; set; }
         public int? intSort { get; set; }
 
+        private string _unitMeasure;
+
+        [NotMapped]
+        public string strUnitMeasure
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_unitMeasure))
+                    if (vyuICGetStorageMeasurementReadingConversion != null)
+                        return vyuICGetStorageMeasurementReadingConversion.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _unitMeasure;
+            }
+            set
+            {
+                _unitMeasure = value;
+            }
+        }
+
         private string _commodity;
         [NotMapped]
         public string strCommodity
@@ -199,6 +220,8 @@ namespace iRely.Inventory.Model
         public decimal? dblCashPrice { get; set; }
         public int? intDiscountSchedule { get; set; }
         public string strDiscountSchedule { get; set; }
+        public string strUnitMeasure { get; set; }
+        public int? intUnitMeasureId { get; set; }
 
         public tblICStorageMeasurementReadingConversion tblICStorageMeasurementReadingConversion { get; set; }
     }

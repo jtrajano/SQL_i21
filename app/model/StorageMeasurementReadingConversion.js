@@ -40,7 +40,8 @@ Ext.define('Inventory.model.StorageMeasurementReadingConversion', {
         { name: 'strItemNo', type: 'string' },
         { name: 'strStorageLocationName', type: 'string' },
         { name: 'strSubLocationName', type: 'string' },
-        { name: 'dblEffectiveDepth', type: 'float' }
+        { name: 'dblEffectiveDepth', type: 'float' },
+        { name: 'strUnitMeasure', type: 'string' }
     ],
 
     validators: [

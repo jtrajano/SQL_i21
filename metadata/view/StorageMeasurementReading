@@ -757,6 +757,21 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "dataIndex": "strUnitMeasure",
+                                                "itemId": "colUnitMeasure",
+                                                "text": "Stock UOM"
+                                            },
+                                            "name": "MyColumn2",
+                                            "designerId": "a0466433-fabd-46f6-ba7c-c2253ec18805"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "itemId": "colDiscountSchedule",
                                                 "text": "Discount Schedule",
                                                 "width": 120

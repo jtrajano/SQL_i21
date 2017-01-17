@@ -78,6 +78,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblCashPrice).HasColumnName("dblCashPrice").HasPrecision(18, 6);
             this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.strDiscountSchedule).HasColumnName("strDiscountSchedule");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
         }
     }
 }
