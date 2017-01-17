@@ -4830,6 +4830,7 @@
     <Build Include="dbo\Views\vyuPATEquityPayDetail.sql" />
     <Build Include="dbo\Views\vyuPATEquityPaymentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDuplicateCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
