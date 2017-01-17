@@ -4837,6 +4837,7 @@
     <Build Include="dbo\Tables\tblSMScreenLabel.sql" />
     <Build Include="dbo\Views\vyuCFVehicleAccountCustomer.sql" />
     <Build Include="dbo\Views\vyuCFCardAccountCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryBySummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
