@@ -58,7 +58,7 @@ DECLARE  @strAsOfDateTo				AS NVARCHAR(50)
 		,@begingroup				AS NVARCHAR(50)
 		,@endgroup					AS NVARCHAR(50)
 		,@datatype					AS NVARCHAR(50)
-		,@strSourceTransaction	    AS NVARCHAR(50)
+		,@strSourceTransaction	    AS NVARCHAR(100)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -104,7 +104,6 @@ WHERE	[fieldname] = 'dtmAsOfDate'
 SELECT  @strSourceTransaction = ISNULL([from], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSourceTransaction'
-
 
 SET @strAsOfDateFrom = CASE WHEN @strAsOfDateFrom IS NULL THEN '''''' ELSE ''''+@strAsOfDateFrom+'''' END
 SET @strAsOfDateTo   = CASE WHEN @strAsOfDateTo IS NULL THEN '''''' ELSE ''''+@strAsOfDateTo+'''' END
@@ -168,9 +167,9 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-	
+ 
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, @strSourceTransaction
+EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, NULL, @strSourceTransaction
 
 SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
      , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
