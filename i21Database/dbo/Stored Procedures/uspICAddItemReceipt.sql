@@ -863,7 +863,9 @@ BEGIN
 			DEALLOCATE loopReceiptItems;
 		END 
 		
-		-- Add lot/s to receipt item
+		-- Add lot/s to receipt item if @LotEntries contains a value
+		IF EXISTS (SELECT TOP 1 1 FROM @LotEntries)
+
 		BEGIN
 			DECLARE @intCountItems INT
 					,@counterItem INT = 0
