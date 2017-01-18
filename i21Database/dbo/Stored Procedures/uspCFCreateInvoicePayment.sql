@@ -107,7 +107,6 @@ BEGIN
 	DECLARE @ApplytoBudget		BIT				= 0						--0
 	DECLARE @ApplyOnAccount		BIT				= 0						--0
 	DECLARE @Notes				NVARCHAR(250)	= ''					--''
-	DECLARE @EntityId			INT										--SET
 	DECLARE @AllowPrepayment	BIT				= 0						--0
 	DECLARE @AllowOverpayment	BIT				= 0						--0
 	DECLARE @RaiseError			BIT				= 0						--0
@@ -145,7 +144,6 @@ BEGIN
 			,@DatePaid			= dtmInvoiceDate
 			,@AccountId			= @accountId
 			,@PaymentMethodId	= 1
-			,@EntityId			= @entityId
 			FROM #tblCFInvoiceDiscount 
 			WHERE intTransactionId = @id
 			AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
@@ -167,7 +165,7 @@ BEGIN
 				@ApplytoBudget							= @ApplytoBudget,
 				@ApplyOnAccount							= @ApplyOnAccount, 
 				@Notes									= @Notes,
-				@EntityId								= @EntityId,
+				@EntityId								= @entityId,
 				@AllowPrepayment						= @AllowPrepayment,
 				@AllowOverpayment						= @AllowOverpayment,
 				@RaiseError								= 1,
