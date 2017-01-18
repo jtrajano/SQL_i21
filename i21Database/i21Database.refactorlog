@@ -5621,4 +5621,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnByProducer" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="9640eebc-3990-4a4c-9a21-bfdace1d54ee" ChangeDateTime="01/18/2017 08:35:32">
+    <Property Name="ElementName" Value="[dbo].[tblEMEntitySMTPInformation].[imgEmailSignature ]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEMEntitySMTPInformation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[imgEmailSignature]" />
+  </Operation>
 </Operations>
