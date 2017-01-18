@@ -682,12 +682,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     return true;
                     break;
                 default:
-                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
-                        return false;
-                    }
-                    else {
-                        return true;
-                    }
+                    // Commenting this out. User should be able to enter the lots even if the IR is a purchase contract. 
+                    // if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
+                    //     return false;
+                    // }
+                    // else {
+                    //     return true;
+                    // }
+                    return false;
                     break;
             };
         },
