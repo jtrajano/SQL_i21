@@ -293,14 +293,6 @@ BEGIN TRY
 			, @intTaxCategoryId INT
 			, @count INT
 
-		SELECT @count = COUNT(*) FROM #tmpReceiptTransaction
-		print 'receipt count'
-		print @count
-
-		SELECT @count = count(*) FROM @TFTransaction
-		print 'transaction count'
-		print @count
-
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpReceiptTransaction) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
 			SELECT TOP 1 @intReceiptTransactionId = intId, @InventoryReceiptItemId = intInventoryReceiptItemId FROM #tmpReceiptTransaction
@@ -342,12 +334,17 @@ BEGIN TRY
 							BREAK
 						END
 					END
+
+					DROP TABLE #tmpReceiptItem
 				END
 				DELETE FROM #tmpTaxCategory WHERE intId = @intTaxCategoryId
 			END
 			
+			DROP TABLE #tmpTaxCategory
 			DELETE FROM #tmpReceiptTransaction WHERE intId = @intReceiptTransactionId
 		END
+
+		DROP TABLE #tmpReceiptTransaction
 			
 		IF (@ReportingComponentId <> '')
 		BEGIN
@@ -433,6 +430,8 @@ BEGIN TRY
 	
 		DELETE FROM #tmpRC WHERE @RCId = intReportingComponentId
 	END
+
+	DROP TABLE #tmpRC
 	
 	IF (NOT EXISTS(SELECT TOP 1 1 FROM @TFTransaction) AND @IsEdi = 0)
 	BEGIN
