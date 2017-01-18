@@ -18,6 +18,8 @@
 	strPurchasingGroup		NVARCHAR(150) COLLATE Latin1_General_CI_AS, 
 	strContractNumber		NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	strERPPONumber			NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
+	strERPItemNumber		NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
+	strERPBatchNumber		NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	intContractSeq			INT, --PO_ITEM 
 	strItemNo				NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	strStorageLocation		NVARCHAR(50) COLLATE Latin1_General_CI_AS, --STGE_LOC 

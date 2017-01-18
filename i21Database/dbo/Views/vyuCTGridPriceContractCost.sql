@@ -26,7 +26,8 @@ AS
 			CC.intUnitMeasureId,
 			CC.intContractSeq,
 			CC.strCurrency,
-			CC.strContractSeq
+			CC.strContractSeq,
+			CC.ysnBasis
 
 	FROM	tblCTPriceFixation		PF
 	JOIN	vyuCTContractCostView	CC	ON	CC.intContractDetailId	=	PF.intContractDetailId
@@ -58,7 +59,8 @@ AS
 			CC.intUnitMeasureId,
 			CC.intContractSeq,
 			CC.strCurrency,
-			CC.strContractSeq
+			CC.strContractSeq,
+			CC.ysnBasis
 
 	FROM	tblCTPriceFixation		PF
 	JOIN	vyuCTContractCostView	CC	ON	CC.intContractHeaderId	=	PF.intContractHeaderId
