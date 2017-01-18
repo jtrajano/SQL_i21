@@ -13,7 +13,7 @@
 	intConcurrencyId INT NOT NULL, 
 
 	CONSTRAINT PK_tblCTAOPDetail_intAOPDetailId PRIMARY KEY CLUSTERED (intAOPDetailId ASC),
-	CONSTRAINT UQ_tblCTAOPDetail_intAOPId_intBasisItemId UNIQUE (intAOPId,intBasisItemId),
+	CONSTRAINT UQ_tblCTAOPDetail_intAOPId_intItemId_intBasisItemId UNIQUE (intAOPId,intItemId,intBasisItemId),
 	CONSTRAINT FK_tblCTAOPDetail_tblCTAOP_intAOPId FOREIGN KEY (intAOPId) REFERENCES tblCTAOP(intAOPId) ON DELETE CASCADE,
 	
 	CONSTRAINT FK_tblCTAOPDetail_tblICCommodity_intCommodityId FOREIGN KEY (intCommodityId) REFERENCES tblICCommodity(intCommodityId),
