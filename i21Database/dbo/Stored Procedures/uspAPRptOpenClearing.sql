@@ -132,6 +132,8 @@ SET @innerQuery = 'SELECT DISTINCT
 						,dblQtyToVoucher
 						,dblAmountToVoucher
 						,dblChargeAmount
+						,strContainer
+						,strVendorId
 				  FROM dbo.vyuAPClearables'
 
 IF @dateFrom IS NOT NULL
@@ -256,7 +258,7 @@ SELECT * FROM (
 	,'''' AS strOrderNumber
 	,A.dtmDate
 	,A.dtmDueDate
-	,IR.strVendorId
+	,tmpAgingSummaryTotal.strVendorId
 	,B.[intEntityVendorId]
 	,tmpAgingSummaryTotal.intBillId
 	,strBillId = ISNULL(A.strBillId, ''New Voucher'')
@@ -283,12 +285,15 @@ SELECT * FROM (
 	 ,tmpAgingSummaryTotal.dblQtyToVoucher
 	 ,tmpAgingSummaryTotal.dblAmountToVoucher
 	 ,tmpAgingSummaryTotal.dblChargeAmount
+	 ,tmpAgingSummaryTotal.strContainer
 	FROM  
 	(
 		SELECT DISTINCT
 		 tmpAPClearables.intInventoryReceiptId
 		,tmpAPClearables.intBillId
 		,tmpAPClearables.strVendorIdName
+		,tmpAPClearables.strContainer
+		,tmpAPClearables.strVendorId
 		,SUM(tmpAPClearables.dblVoucherAmount) as dblVoucherAmount
 		,SUM(tmpAPClearables.dblTotal) AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
@@ -301,7 +306,7 @@ SELECT * FROM (
 		FROM ('
 				+ @innerQuery +
 			   ') tmpAPClearables 
-		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue,strVendorIdName
+		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue,strVendorIdName,strContainer,strVendorId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
