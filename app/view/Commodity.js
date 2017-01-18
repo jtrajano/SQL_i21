@@ -686,7 +686,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colOrigin',
-                                                                width: 68,
+                                                                width: 90,
                                                                 dataIndex: 'string',
                                                                 text: 'Origin',
                                                                 editor: {
@@ -713,9 +713,9 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colDefaultPackingUOM',
-                                                                width: 123,
+                                                                width: 100,
                                                                 dataIndex: 'string',
-                                                                text: 'Default Packing UOM',
+                                                                text: 'Packing UOM',
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
