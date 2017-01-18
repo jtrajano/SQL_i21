@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @intMinLoadContainerLogId INT
 	DECLARE @intMaxLoadContainerLogId INT
 	DECLARE @intMinLoadContainerRecordId INT
+	DECLARE @intLoadStdId INT
 
 	DECLARE @strErrMsg NVARCHAR(MAX)
 
@@ -136,13 +137,50 @@ BEGIN TRY
 		FROM @tblLoadContainerRecord
 		WHERE intLoadContainerId = @intLoadContainerId
 
-		EXEC uspLGProcessLoadToIntegration 'tblLGLoadContainerLog'
-			,@intMinLoadContainerLogId
-			,@intMaxLoadContainerLogId
-			,'intLoadLogId,strRowState'
-			,0
-			,0
-			,@intMaxLoadContainerLogId
+		SELECT @intLoadStdId = MAX(LS.intLoadStgId)
+		FROM tblLGLoadStg LS
+		JOIN tblLGLoadContainer LC ON LC.intLoadId = LS.intLoadId
+		JOIN @tblLoadContainerRecord LCR ON LCR.intLoadContainerId = LC.intLoadContainerId
+			AND LCR.intLoadContainerId = @intLoadContainerId
+
+		IF(@intMaxLoadContainerLogId = @intMinLoadContainerLogId)
+		BEGIN
+			INSERT INTO tblLGLoadContainerStg
+			SELECT @intLoadStdId
+				,LC.intLoadId
+				,LC.intLoadContainerId
+				,LC.strContainerNumber
+				,CASE 
+					WHEN CT.strContainerType LIKE '%20%'
+						THEN '000000000010003243'
+					WHEN CT.strContainerType LIKE '%40%'
+						THEN '000000000010003244'
+					ELSE CT.strContainerType
+					END
+				,'0002'
+				,L.strExternalShipmentNumber
+				,ROW_NUMBER() OVER (
+					PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
+					) AS Seq
+				,LC.dblQuantity
+				,LC.strItemUOM
+				,'Added'
+				,GETDATE()
+			FROM vyuLGLoadContainerView LC
+			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+			JOIN @tblLoadContainerRecord R ON R.intLoadContainerId = LC.intLoadContainerId
+			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+		END
+		ELSE
+		BEGIN
+			EXEC uspLGProcessLoadToIntegration 'tblLGLoadContainerLog'
+				,@intMinLoadContainerLogId
+				,@intMaxLoadContainerLogId
+				,'intLoadLogId,strRowState'
+				,0
+				,0
+				,@intMaxLoadContainerLogId
+		END
 
 		DELETE FROM @tblLoadContainerRecord WHERE intLoadContainerId = @intLoadContainerId
 
