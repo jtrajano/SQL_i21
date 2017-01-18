@@ -385,6 +385,19 @@ BEGIN
 		RETURN -11;
 	END 
 
+	----------------------------------------------
+	-- Special process on the Item Qty and Weight
+	-- If there is weight and item qty is fractional, convert item uom into weight uom. 
+	IF	@intWeightUOMId IS NOT NULL 
+		AND ISNULL(@dblWeight, 0) <> 0 
+		AND ISNULL(@dblQty, 0) <> 0 
+		AND @intItemUOMId <> @intWeightUOMId
+		AND @dblQty % 1 <> 0 
+	BEGIN 
+		SET @intItemUOMId = @intWeightUOMId
+		SET	@dblQty = @dblWeight
+	END 
+
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  
 		SET @intInsertedLotId = NULL 
