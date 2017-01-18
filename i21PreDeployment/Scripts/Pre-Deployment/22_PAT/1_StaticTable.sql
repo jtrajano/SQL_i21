@@ -5,8 +5,8 @@ BEGIN
 	CREATE TABLE [dbo].[tblPATTransferType]
 	(
 		[intTransferTypeId] INT NOT NULL IDENTITY,
-		[intTransferType] INT NOT NULL,
-		[strTransferType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[intTransferType] INT NULL,
+		[strTransferType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		CONSTRAINT [PK_intTransferTypeId] PRIMARY KEY ([intTransferTypeId])
 	)
 END
