@@ -20,8 +20,16 @@ BEGIN TRY
 			@intContractHeaderId	INT,
 			@xmlDocumentId			INT,
 			@strContractDocuments	NVARCHAR(MAX),
-			@strContractConditions	NVARCHAR(MAX)
-			
+			@strContractConditions	NVARCHAR(MAX),
+			@intScreenId			INT,
+			@intTransactionId       INT,
+			@strApprovalText		NVARCHAR(MAX),
+			@FirstApprovalId		INT,
+			@SecondApprovalId       INT,
+			@FirstApprovalSign      VARBINARY(MAX),
+			@SecondApprovalSign     VARBINARY(MAX),
+			@IsFullApproved         BIT = 0
+						
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
       
@@ -56,7 +64,24 @@ BEGIN TRY
     
 	SELECT	@intContractHeaderId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intContractHeaderId' 
+	WHERE	[fieldname] = 'intContractHeaderId'
+	
+	SELECT @intScreenId=intScreenId FROM tblSMScreen WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'--ContractManagement.view.ContractAmendment
+	SELECT @intTransactionId=intTransactionId FROM tblSMTransaction WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
+
+	IF (SELECT COUNT(1) FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved') >1	
+	BEGIN	
+		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one signed original by registered mail and one PDF-copy of the signed original by e-mail.'	
+		SET @IsFullApproved=1    
+	END
+	ELSE
+		SET @strApprovalText='This document concerns an unconfirmed agreement. Please check this unconfirmed agreement and let us know if you find any discrepancies; If no notification of discrepancy has been received by us from you within 24 hours after receipt of this document, this unconfirmed agreement becomes confirmed from Supplier side. Once confirmed from Supplier side, KDE will check the document on discrepancies. If no discrepancies are found, a confirmed agreement will be issued by KDE, replacing the unconfirmed agreement. A confirmed agreement will only be binding for KDE once it has been signed by the authorized KDE representatives. Upon receipt of the confirmed agreement signed by KDE, Supplier shall sign the confirmed agreement and return it to KDE'
+
+    SELECT TOP 1 @FirstApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
+	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId ORDER BY intApprovalId
+
+	SELECT @FirstApprovalSign =  [imgEmailSignature ] FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@FirstApprovalId)
+	SELECT @SecondApprovalSign = [imgEmailSignature ] FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@SecondApprovalId)
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
@@ -168,8 +193,10 @@ BEGIN TRY
 			TX.strText+' '+CH.strPrintableRemarks AS strText,
 			SQ.strContractCompanyName,
 			SQ.strContractPrintSignOff,
-			LTRIM(RTRIM(EY.strEntityName))AS strCompanyName
-
+			LTRIM(RTRIM(EY.strEntityName))AS strCompanyName,
+			@strApprovalText AS strApprovalText,
+			CASE WHEN @IsFullApproved=1 THEN @FirstApprovalSign ELSE NULL END AS FirstApprovalSign,
+			CASE WHEN @IsFullApproved=1 THEN @SecondApprovalSign ELSE NULL END AS SecondApprovalSign
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
