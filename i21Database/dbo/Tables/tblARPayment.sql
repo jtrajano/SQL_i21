@@ -40,20 +40,21 @@ ON tblARPayment
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intPaymentId INT)
+DECLARE @inserted TABLE(intPaymentId INT, intCompanyLocationId INT)
 DECLARE @count INT = 0
 DECLARE @intPaymentId INT
+DECLARE @intCompanyLocationId INT
 DECLARE @PaymentId NVARCHAR(50)
 DECLARE @intMaxCount INT = 0
 
 INSERT INTO @inserted
-SELECT intPaymentId FROM INSERTED ORDER BY intPaymentId
+SELECT intPaymentId, intLocationId FROM INSERTED ORDER BY intPaymentId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
-BEGIN
-	EXEC uspSMGetStartingNumber 17, @PaymentId OUT
+BEGIN	
+	SELECT TOP 1 @intPaymentId = intPaymentId, @intCompanyLocationId = intCompanyLocationId FROM @inserted
 
-	SELECT TOP 1 @intPaymentId = intPaymentId FROM @inserted
+	EXEC uspSMGetStartingNumber 17, @PaymentId OUT, @intCompanyLocationId
 	
 	IF(@PaymentId IS NOT NULL)
 	BEGIN
@@ -62,7 +63,7 @@ BEGIN
 				SET @PaymentId = NULL
 				SELECT @intMaxCount = MAX(CONVERT(INT, SUBSTRING(strRecordNumber, 5, 10))) FROM tblARPayment
 				UPDATE tblSMStartingNumber SET intNumber = @intMaxCount + 1 WHERE intStartingNumberId = 17
-				EXEC uspSMGetStartingNumber 17, @PaymentId OUT				
+				EXEC uspSMGetStartingNumber 17, @PaymentId OUT, @intCompanyLocationId		
 			END
 		
 		UPDATE tblARPayment
