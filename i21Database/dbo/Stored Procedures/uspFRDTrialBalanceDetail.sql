@@ -115,10 +115,10 @@ BEGIN
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1
 
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
+			--EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
 								
-			SET @intRefNo = @intRefNo + 1
-			SET @intSort = @intSort + 1	
+			--SET @intRefNo = @intRefNo + 1
+			--SET @intSort = @intSort + 1	
 			SET @strRelatedRows = ''
 
 		END
