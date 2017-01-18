@@ -29,7 +29,32 @@ SELECT
 	isnull(e.strZipCode,'') strZipCode,
 	isnull(e.strState,'') strState,
 	a.ysnPymtCtrlActive as ysnActive
-	
+	---
+	,
+	a.intVendorType, --get the actual text
+	strVendorType = case when a.intVendorType = 1 then 'Person' when a.intVendorType = '0' then 'Company' else '' end,
+	a.intGLAccountExpenseId, -- get the actual text
+	aa.strAccountId,
+	a.intCurrencyId, -- get the actual text,
+	ab.strCurrency,
+	a.dblCreditLimit,
+	a.strVendorPayToId, --get the name of this entity, do a sub query here instead
+	strVendorPayToEntityName = (select top 1 strName from tblEMEntity where strEntityNo = a.strVendorPayToId and strEntityNo <> ''),
+	e.intShipViaId, --get the location for this one
+	ac.strShipVia,
+	a.intBillToId, --get the name
+	strBillTo = ad.strLocationName,
+	a.intShipFromId, --get the name
+	strShipFrom = ae.strLocationName,
+	a.ysnTransportTerminal, --
+	a.ysnWithholding, --
+	a.strFLOId, 
+	a.strVendorId,
+	a.ysnPymtCtrlAlwaysDiscount,
+	a.ysnPymtCtrlEFTActive,
+	a.ysnPymtCtrlHold,
+	a.ysnOneBillPerPayment
+	---
 	FROM tblAPVendor a
 	join tblEMEntity b
 		on b.intEntityId = a.intEntityVendorId
@@ -51,3 +76,17 @@ SELECT
 		on h.intTaxCodeId = a.intTaxCodeId
 	left join tblSMPaymentMethod i
 		on i.intPaymentMethodID = a.intPaymentMethodId
+	--
+	left join tblGLAccount aa
+		on aa.intAccountId = a.intGLAccountExpenseId
+	left join tblSMCurrency ab
+		on ab.intCurrencyID = a.intCurrencyId
+	left join tblSMShipVia ac
+		on ac.intEntityShipViaId = e.intShipViaId
+	left join tblEMEntityLocation ad
+		on ad.intEntityLocationId = a.intBillToId
+	left join tblEMEntityLocation ae
+		on ae.intEntityLocationId = a.intShipFromId
+
+	
+
