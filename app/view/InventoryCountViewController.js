@@ -94,7 +94,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 hidden: '{hideUnpostButton}'
             },
             btnPostPreview: {
-                hidden: '{hideUnpostButton}'
+                hidden: '{hidePostButton}'
             },
             btnUnpostPreview: {
                 hidden: '{hideUnpostButton}'
@@ -1163,6 +1163,32 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 }
             }
     },
+    onPrintPhysicalCount: function (button) {
+        var win = button.up('window');
+        var me = win.controller;
+        var vm = win.getViewModel();
+        var current = vm.data.current;
+
+        // Save has data changes first before doing the post.
+        win.context.data.saveRecord({
+            callbackFn: function() {
+                var filters = [{
+                    Name: 'strCountNo',
+                    Type: 'string',
+                    Condition: 'EQUAL TO',
+                    From: current.get('strCountNo'),
+                    Operator: 'AND'
+                }];
+
+                iRely.Functions.openScreen('Reporting.view.ReportViewer', {
+                    selectedReport: 'PhysicalInventoryCount',
+                    selectedGroup: 'Inventory',
+                    selectedParameters: filters,
+                    viewConfig: { maximized: true }
+                });
+            }
+        });
+    },
 
     init: function (application) {
         this.control({
@@ -1180,6 +1206,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#btnPrintVariance": {
                 click: this.onPrintVarianceClick
+            },
+            "#btnPrintPhysicalCount": {
+                click: this.onPrintPhysicalCount
             },
             "#btnLockInventory": {
                 click: this.onLockInventoryClick

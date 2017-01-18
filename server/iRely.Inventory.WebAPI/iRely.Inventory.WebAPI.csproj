@@ -453,6 +453,12 @@
     <Compile Include="Reports\InventoryShipment.designer.cs">
       <DependentUpon>InventoryShipment.cs</DependentUpon>
     </Compile>
+    <Compile Include="Reports\PhysicalInventoryCount.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Reports\PhysicalInventoryCount.Designer.cs">
+      <DependentUpon>PhysicalInventoryCount.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reports\WorkingInstruction.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -596,6 +602,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reports\InventoryShipment.resx">
       <DependentUpon>InventoryShipment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reports\PhysicalInventoryCount.resx">
+      <DependentUpon>PhysicalInventoryCount.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reports\WorkingInstruction.resx">
       <DependentUpon>WorkingInstruction.cs</DependentUpon>

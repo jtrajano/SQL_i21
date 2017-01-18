@@ -113,6 +113,13 @@ Ext.define('Inventory.view.InventoryCount', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
+                            itemId: 'btnPrintPhysicalCount',
+                            ui: 'i21-button-toolbar-small',
+                            text: 'Print Physical Count'
+                        },
+                        {
+                            xtype: 'button',
+                            tabIndex: -1,
                             itemId: 'btnLockInventory',
                             ui: 'i21-button-toolbar-small',
                             text: 'Lock Inventory'
