@@ -131,7 +131,7 @@ BEGIN
 				,strItemNo = ISNULL(O.strItemNo, I.strItemNo)
 				,J.dtmRequestedDate
 				,strTerm = L.strTerm 
-				,dblARBalance = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0) 
+				,dblARBalance = ISNULL(Cus.dblARBalance,0.0)
 				,J.dblPrice
 				,dblTaxRate = dbo.[fnGetItemTotalTaxForCustomer](
 																	ISNULL(O.intItemId, I.intItemId)
