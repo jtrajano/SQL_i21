@@ -29,6 +29,7 @@
     [dtmMaintenanceDate]    DATETIME        NULL, 
     [dblMaintenanceAmount]  NUMERIC(18, 6)  NULL, 
     [dblLicenseAmount]      NUMERIC(18, 6)  NULL,     
+	[strVFDDocumentNumber]	NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
     [intContractHeaderId]	INT				NULL, 
     [intContractDetailId]	INT				NULL,
 	[dblContractBalance]	NUMERIC(18, 6)	NOT NULL DEFAULT 0, 

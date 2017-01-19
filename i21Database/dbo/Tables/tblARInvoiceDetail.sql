@@ -48,6 +48,7 @@
 	[strShipmentNumber]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[intSalesOrderDetailId]					INT												NULL,
 	[strSalesOrderNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
+	[strVFDDocumentNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
 	[intContractHeaderId]					INT												NULL,
 	[intContractDetailId]					INT												NULL, 
 	[dblContractBalance]					NUMERIC(18, 6)									NOT NULL DEFAULT 0, 
