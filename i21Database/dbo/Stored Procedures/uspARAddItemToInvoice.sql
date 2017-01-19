@@ -400,6 +400,9 @@ INNER JOIN (SELECT ARI.intInvoiceId, ARID.strDocumentNumber, strInvoiceNumber, i
 ) ABC ON tblARInvoiceDetail.intInvoiceId = ABC.intInvoiceId
 WHERE tblARInvoiceDetail.intInvoiceId = @InvoiceId
 
+
+EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId
+
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION
 SET @ErrorMessage = NULL;
