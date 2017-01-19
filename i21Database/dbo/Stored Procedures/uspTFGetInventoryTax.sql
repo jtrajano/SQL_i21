@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspTFGetInventoryTax]
+﻿ALTER PROCEDURE [dbo].[uspTFGetInventoryTax]
 	@Guid NVARCHAR(50)
 	, @ReportingComponentId NVARCHAR(MAX)
 	, @DateFrom DATETIME
@@ -97,11 +97,9 @@ BEGIN TRY
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
-				, strTaxCategory
 				, dblGross
 				, dblNet
 				, dblBillQty
-				, dblTax
 				, dtmReceiptDate
 				, strShipVia
 				, strTransporterLicense
@@ -130,11 +128,9 @@ BEGIN TRY
 				, RCPC.strProductCode
 				, Receipt.strBillOfLading
 				, ReceiptItem.dblReceived
-				, NULL
 				, ReceiptItem.dblGross
 				, ReceiptItem.dblNet
 				, ReceiptItem.dblBillQty
-				, ReceiptItemTax.dblTax
 				, Receipt.dtmReceiptDate
 				, ShipVia.strShipVia
 				, ShipVia.strTransporterLicense
@@ -154,18 +150,22 @@ BEGIN TRY
 				, Origin.strState AS strOriginState
 				, Destination.strStateProvince
 				, TCN.strTerminalControlNumber
-			FROM tblICInventoryReceiptItem ReceiptItem
+			FROM tblTRSupplyPoint
+			INNER JOIN tblTFTerminalControlNumber TCN ON tblTRSupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
+			FULL OUTER JOIN tblEMEntityLocation Origin
+			INNER JOIN tblICInventoryReceiptItem ReceiptItem
 			INNER JOIN tblICInventoryReceipt Receipt ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 			INNER JOIN tblICInventoryReceiptItemTax ReceiptItemTax ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
-			INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
-			INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
 			INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
-			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
-			INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
-			INNER JOIN tblSMShipVia ShipVia ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
-			INNER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId 
-			INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND SupplyPoint.intEntityLocationId = Receipt.intShipFromId
-			INNER JOIN tblTFTerminalControlNumber TCN ON SupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
+			INNER JOIN tblICItemMotorFuelTax
+			INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON tblICItemMotorFuelTax.intProductCodeId = RCPC.intProductCodeId
+			INNER JOIN tblTFReportingComponent ON RCPC.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON ReceiptItem.intItemId = tblICItemMotorFuelTax.intItemId
+			INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
+			INNER JOIN tblTFTaxCategory ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId ON Origin.intEntityLocationId = Receipt.intShipFromId
+			LEFT OUTER JOIN tblSMTaxCode ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId AND tblSMTaxCode.intTaxCodeId = ReceiptItemTax.intTaxCodeId ON tblTRSupplyPoint.intEntityVendorId = Receipt.intShipFromId
+			FULL OUTER JOIN tblSMShipVia ShipVia
+			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
 			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
 			WHERE Receipt.ysnPosted = 1
 				AND RCPC.intReportingComponentId = @RCId
@@ -196,11 +196,9 @@ BEGIN TRY
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
-				, strTaxCategory
 				, dblGross
 				, dblNet
 				, dblBillQty
-				, dblTax
 				, dtmReceiptDate
 				, strShipVia
 				, strTransporterLicense
@@ -229,11 +227,9 @@ BEGIN TRY
 				, RCPC.strProductCode
 				, Receipt.strBillOfLading
 				, ReceiptItem.dblReceived
-				, TaxCategory.strTaxCategory
 				, ReceiptItem.dblGross
 				, ReceiptItem.dblNet
 				, ReceiptItem.dblBillQty
-				, ReceiptItemTax.dblTax
 				, Receipt.dtmReceiptDate
 				, ShipVia.strShipVia
 				, ShipVia.strTransporterLicense
@@ -253,20 +249,21 @@ BEGIN TRY
 				, Origin.strState AS strOriginState
 				, Destination.strStateProvince
 				, TCN.strTerminalControlNumber
-			FROM tblICInventoryReceiptItem ReceiptItem
+			FROM tblTRSupplyPoint
+			INNER JOIN tblTFTerminalControlNumber TCN ON tblTRSupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
+			RIGHT OUTER JOIN tblSMTaxCode
+			INNER JOIN tblTFTaxCategory TaxCategory ON tblSMTaxCode.intTaxCategoryId = TaxCategory.intTaxCategoryId
+			INNER JOIN tblICInventoryReceiptItem ReceiptItem
 			INNER JOIN tblICInventoryReceipt Receipt ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 			INNER JOIN tblICInventoryReceiptItemTax ReceiptItemTax ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
-			INNER JOIN tblSMTaxCode TaxCode ON ReceiptItemTax.intTaxCodeId = TaxCode.intTaxCodeId
-			INNER JOIN tblTFTaxCategory TaxCategory ON TaxCategory.intTaxCategoryId = TaxCode.intTaxCategoryId
-			INNER JOIN tblICItemMotorFuelTax ItemTax ON ItemTax.intItemId = ReceiptItem.intItemId
-			INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON RCPC.intProductCodeId = ItemTax.intProductCodeId
 			INNER JOIN tblSMCompanyLocation Destination ON Receipt.intLocationId = Destination.intCompanyLocationId
-			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId
-			INNER JOIN tblEMEntityLocation Origin ON Origin.intEntityLocationId = Receipt.intShipFromId
-			INNER JOIN tblSMShipVia ShipVia ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
-			INNER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId 
-			INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND SupplyPoint.intEntityLocationId = Receipt.intShipFromId
-			INNER JOIN tblTFTerminalControlNumber TCN ON SupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
+			INNER JOIN tblICItemMotorFuelTax
+			INNER JOIN vyuTFGetReportingComponentProductCode RCPC ON tblICItemMotorFuelTax.intProductCodeId = RCPC.intProductCodeId
+			INNER JOIN tblTFReportingComponent ON RCPC.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON ReceiptItem.intItemId = tblICItemMotorFuelTax.intItemId ON tblSMTaxCode.intTaxCodeId = ReceiptItemTax.intTaxCodeId
+			INNER JOIN tblEMEntityLocation Origin ON Receipt.intShipFromId = Origin.intEntityLocationId
+			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId ON tblTRSupplyPoint.intEntityLocationId = Receipt.intShipFromId
+			FULL OUTER JOIN tblSMShipVia ShipVia
+			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
 			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
 			WHERE Receipt.ysnPosted = 1
 				AND RCPC.intReportingComponentId = @RCId
