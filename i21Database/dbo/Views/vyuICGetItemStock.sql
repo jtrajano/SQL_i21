@@ -113,7 +113,9 @@ SELECT
 	Item.strLifeTimeType,
 	Item.ysnListBundleSeparately,
 	dblExtendedCost = ISNULL(ItemStock.dblUnitOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0),
-	Item.strRequired
+	Item.strRequired,
+	Item.intTonnageTaxUOMId,
+	strTonnageTaxUOM = TonnageUOM.strUnitMeasure
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation 
 	ON ItemLocation.intItemId = Item.intItemId
@@ -158,3 +160,4 @@ LEFT JOIN vyuAPVendor Vendor
 LEFT JOIN vyuICGetItemUOM StockUOM 
 	ON StockUOM.intItemId = Item.intItemId 
 	AND StockUOM.ysnStockUnit = 1
+LEFT JOIN tblICUnitMeasure TonnageUOM ON TonnageUOM.intUnitMeasureId = Item.intTonnageTaxUOMId

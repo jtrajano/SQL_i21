@@ -34,6 +34,8 @@ SELECT Item.intItemId
 , Item.ysnBasisContract
 , Item.intM2MComputationId
 , M2M.strM2MComputation
+, strTonnageTaxUOM = TonnageUOM.strUnitMeasure
+, Item.intTonnageTaxUOMId
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -42,5 +44,6 @@ LEFT JOIN tblICBrand Brand ON Brand.intBrandId = Item.intBrandId
 LEFT JOIN tblICItem OnCostType ON OnCostType.intItemId = Item.intOnCostTypeId
 LEFT JOIN tblICItemUOM CostItemUOM ON CostItemUOM.intItemUOMId = Item.intCostUOMId
 LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = CostItemUOM.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure TonnageUOM ON TonnageUOM.intUnitMeasureId = Item.intTonnageTaxUOMId
 LEFT JOIN tblICCommodityAttribute CommodityAttrib ON CommodityAttrib.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblICM2MComputation M2M ON M2M.intM2MComputationId = Item.intM2MComputationId
