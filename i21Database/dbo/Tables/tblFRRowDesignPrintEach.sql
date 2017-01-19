@@ -14,6 +14,7 @@
     [ysnShowOthers]				BIT             DEFAULT 1 NULL,
     [ysnLinktoGL]				BIT             NULL,
 	[ysnPrintEach]				BIT             NULL,
+	[ysnPercentage]				BIT             NULL,
 	[ysnHidden]					BIT             NULL,
     [dblHeight]					NUMERIC (18, 6) NULL,
     [strFontName]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
