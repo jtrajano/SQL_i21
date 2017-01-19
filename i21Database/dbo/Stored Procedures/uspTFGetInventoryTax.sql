@@ -324,6 +324,7 @@ BEGIN TRY
 					IF EXISTS(SELECT TOP 1 1  FROM #tmpReceiptItem)
 					BEGIN
 						DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
+						DROP TABLE #tmpReceiptItem
 						BREAK
 					END
 					ELSE
@@ -331,6 +332,7 @@ BEGIN TRY
 						IF(@TaxCriteria = '<> 0')
 						BEGIN
 							DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
+							DROP TABLE #tmpReceiptItem
 							BREAK
 						END
 					END
@@ -340,10 +342,10 @@ BEGIN TRY
 				DELETE FROM #tmpTaxCategory WHERE intId = @intTaxCategoryId
 			END
 			
-			DROP TABLE #tmpTaxCategory
 			DELETE FROM #tmpReceiptTransaction WHERE intId = @intReceiptTransactionId
 		END
 
+		DROP TABLE #tmpTaxCategory
 		DROP TABLE #tmpReceiptTransaction
 			
 		IF (@ReportingComponentId <> '')

@@ -2,17 +2,20 @@
 	AS
 	
 SELECT intReportingComponentConfigurationId
-	, intReportingComponentId
+	, RC.intReportingComponentId
+	, RC.strFormCode
+	, RC.strType
 	, strTemplateItemId
 	, strReportSection
 	, intReportItemSequence
 	, intTemplateItemNumber
 	, strDescription = REPLACE(strDescription, '<value>', ISNULL(strConfiguration, ''))
-	, strScheduleCode
+	, RCC.strScheduleCode
 	, strConfiguration
 	, ysnConfiguration
 	, ysnDynamicConfiguration
 	, strLastIndexOf
 	, strSegment
 	, intConfigurationSequence
-FROM tblTFReportingComponentConfiguration
+FROM tblTFReportingComponentConfiguration RCC
+LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
