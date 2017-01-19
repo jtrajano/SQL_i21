@@ -2,6 +2,7 @@
 	@intTransferId INT = NULL,
 	@ysnPosted BIT = NULL,
 	@intUserId INT = NULL,
+	@postPreview BIT = NULL,
 	@batchIdUsed NVARCHAR(40) = NULL OUTPUT,
 	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
@@ -78,11 +79,74 @@ SET @batchIdUsed = @batchId;
 		AND strModuleName = @MODULE_NAME AND strTransactionForm = @SCREEN_NAME
 	END
 	---------------- END - GET GL ENTRIES ----------------
-
+	
 	---------------- BEGIN - BOOK GL ----------------
 	BEGIN TRY
+	IF(@postPreview = 0)
+	BEGIN
 		SELECT * FROM @GLEntries
 		EXEC uspGLBookEntries @GLEntries, @ysnPosted
+	END
+	ELSE
+	BEGIN
+		SELECT * FROM @GLEntries
+			INSERT INTO tblGLPostRecap(
+			 [strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strJournalLineDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[dblExchangeRate]
+			,[intUserId]
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]
+			,[strModuleName]
+			,[strTransactionForm]
+			,[strTransactionType]
+			,[strAccountId]
+			,[strAccountGroup]
+		)
+		SELECT
+			[strTransactionId]
+			,A.[intTransactionId]
+			,A.[intAccountId]
+			,A.[strDescription]
+			,A.[strJournalLineDescription]
+			,A.[strReference]	
+			,A.[dtmTransactionDate]
+			,A.[dblDebit]
+			,A.[dblCredit]
+			,A.[dblDebitUnit]
+			,A.[dblCreditUnit]
+			,A.[dtmDate]
+			,A.[ysnIsUnposted]
+			,A.[intConcurrencyId]	
+			,A.[dblExchangeRate]
+			,A.[intUserId]
+			,A.[dtmDateEntered]
+			,A.[strBatchId]
+			,A.[strCode]
+			,A.[strModuleName]
+			,A.[strTransactionForm]
+			,A.[strTransactionType]
+			,B.strAccountId
+			,C.strAccountGroup
+		FROM @GLEntries A
+		INNER JOIN dbo.tblGLAccount B 
+			ON A.intAccountId = B.intAccountId
+		INNER JOIN dbo.tblGLAccountGroup C
+			ON B.intAccountGroupId = C.intAccountGroupId
+	END
 	END TRY
 	BEGIN CATCH
 		SET @error = ERROR_MESSAGE()
@@ -90,6 +154,9 @@ SET @batchIdUsed = @batchId;
 		GOTO Post_Rollback
 	END CATCH
 	---------------- END - BOOK GL ----------------
+	
+	IF(@postPreview = 1)
+		GOTO Post_Commit;
 
 	---------------- BEGIN - UPDATE TABLES ----------------
 	UPDATE tblPATTransfer SET ysnPosted = @ysnPosted

@@ -96,10 +96,8 @@ BEGIN
 
 	----------------------------------PAYMENT PARAMETERS-----------------------------
 	DECLARE @EntityCustomerId	INT										--QUERY
-	DECLARE @CompanyLocationId	INT										--SET
 	DECLARE @CurrencyId			INT				= NULL					--NULL
 	DECLARE @DatePaid			DATETIME								--QUERY
-	DECLARE @AccountId			INT				= NULL					--SET
 	DECLARE @BankAccountId		INT				= NULL					--NULL
 	DECLARE @AmountPaid			NUMERIC(18,6)	= 0.000000				--QUERY
 	DECLARE @PaymentMethodId	INT										--1 AS TEMP (SHOULD BE CF INVOICE)
@@ -107,7 +105,6 @@ BEGIN
 	DECLARE @ApplytoBudget		BIT				= 0						--0
 	DECLARE @ApplyOnAccount		BIT				= 0						--0
 	DECLARE @Notes				NVARCHAR(250)	= ''					--''
-	DECLARE @EntityId			INT										--SET
 	DECLARE @AllowPrepayment	BIT				= 0						--0
 	DECLARE @AllowOverpayment	BIT				= 0						--0
 	DECLARE @RaiseError			BIT				= 0						--0
@@ -141,11 +138,10 @@ BEGIN
 			,@AmountPaid		= dblTotalAmount
 			,@InvoiceId			= intInvoiceId
 			,@Payment			= dblTotalAmount
-			,@CompanyLocationId	= @companyLocationId
+			,@companyLocationId	= @companyLocationId
 			,@DatePaid			= dtmInvoiceDate
-			,@AccountId			= @accountId
+			,@accountId			= @accountId
 			,@PaymentMethodId	= 1
-			,@EntityId			= @entityId
 			FROM #tblCFInvoiceDiscount 
 			WHERE intTransactionId = @id
 			AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
@@ -156,10 +152,10 @@ BEGIN
 				PRINT 'CREATE PAYMENT'
 				EXEC [dbo].[uspARCreateCustomerPayment]
 				@EntityCustomerId						= @EntityCustomerId,
-				@CompanyLocationId						= @CompanyLocationId,
+				@CompanyLocationId						= @companyLocationId,
 				@CurrencyId								= @CurrencyId,
 				@DatePaid								= @DatePaid,
-				@AccountId								= @AccountId,
+				@AccountId								= @accountId,
 				@BankAccountId							= @BankAccountId,
 				@AmountPaid								= @AmountPaid,
 				@PaymentMethodId						= @PaymentMethodId,
@@ -167,7 +163,7 @@ BEGIN
 				@ApplytoBudget							= @ApplytoBudget,
 				@ApplyOnAccount							= @ApplyOnAccount, 
 				@Notes									= @Notes,
-				@EntityId								= @EntityId,
+				@EntityId								= @entityId,
 				@AllowPrepayment						= @AllowPrepayment,
 				@AllowOverpayment						= @AllowOverpayment,
 				@RaiseError								= 1,

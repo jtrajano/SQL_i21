@@ -21,4 +21,24 @@ SELECT
 UNION ALL
 
 SELECT 
+	strSourceTransaction	= 'Service Charge'
+
+UNION ALL
+
+SELECT 
 	strSourceTransaction	= 'Transport Delivery'
+
+UNION ALL 
+
+SELECT 
+	strSourceTransaction	= 'Store'
+
+UNION ALL
+
+SELECT 
+	strSourceTransaction	= 'Meter Billing'
+
+UNION ALL
+
+SELECT 
+	strSourceTransaction	= 'Card Fueling'

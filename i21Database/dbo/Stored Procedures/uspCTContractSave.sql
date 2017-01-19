@@ -115,7 +115,7 @@ BEGIN TRY
 	IF ISNULL(@ysnMultiplePriceFixation,0) = 0
 	BEGIN
 		UPDATE	PF
-		SET		PF.[dblTotalLots] = CAST(CD.dblNoOfLots AS INT)
+		SET		PF.[dblTotalLots] = (SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractDetailId = CD.intContractDetailId OR ISNULL(intSplitFromId,0) = CD.intContractDetailId)
 		FROM	tblCTPriceFixation	PF
 		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 		WHERE	CD.intContractHeaderId = @intContractHeaderId

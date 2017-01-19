@@ -39,7 +39,7 @@ AS
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
 
-				CD.dblQuantity,
+				(SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE CD.intContractDetailId IN (intContractDetailId,intSplitFromId)) AS dblQuantity,
 				CD.strPriceUOM,
 				CD.strItemUOM,
 				CD.intItemUOMId,

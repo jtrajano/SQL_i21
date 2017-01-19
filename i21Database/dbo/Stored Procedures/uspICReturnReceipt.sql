@@ -226,7 +226,8 @@ BEGIN
 					,r.intInventoryReceiptId
 					,ri.intInventoryReceiptItemId
 					,r.strActualCostId
-				)
+				) 
+				* CASE WHEN ri.ysnSubCurrency = 1 THEN r.intSubCurrencyCents ELSE 1 END 
 				, ri.dblUnitCost
 			)
 			,ri.dblUnitRetail

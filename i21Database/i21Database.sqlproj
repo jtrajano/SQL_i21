@@ -4844,6 +4844,8 @@
     <Build Include="dbo\Views\vyuLGETAPODTracking.sql" />
     <Build Include="dbo\Views\vyuLGETSPOLTracking.sql" />
     <Build Include="dbo\Views\vyuICItemUOM.sql" />
+    <Build Include="dbo\Views\vyuCTGridPriceContractSplitSeq.sql" />
+    <Build Include="dbo\Tables\tblTMGenerateWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

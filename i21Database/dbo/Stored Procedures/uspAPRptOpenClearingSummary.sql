@@ -99,17 +99,18 @@ SET @innerQuery =
 			,dblInterest
 			,dtmDate
 			,dtmDueDate
+			,strContainer
 		FROM dbo.vyuAPClearables'
 
 IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 ELSE
@@ -146,12 +147,13 @@ SET @query = '
 		,SUM(dblAmountDue) as dblAmountDue
 	FROM (
 		SELECT DISTINCT
-		IR.strVendorId
-		,IR.intInventoryReceiptId
-		,IR.intBillId
-		,IR.strBillId
-		,IR.dtmDate
-		,ISNULL(IR.strVendorIdName,'''') as strVendorIdName 
+		--IR.strVendorId
+		--,IR.intInventoryReceiptId
+		--,IR.intBillId
+		--,IR.strBillId
+		--,IR.dtmDate
+		tmpAgingSummaryTotal.strContainer
+		,ISNULL(tmpAgingSummaryTotal.strVendorIdName,'''') as strVendorIdName 
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblVoucherAmount
 		,ISNULL(tmpAgingSummaryTotal.dblAmountDue,0) as dblAmountDue
@@ -193,6 +195,7 @@ SET @query = '
 			SELECT 
 		     tmpAPClearables.intInventoryReceiptId
 			,strVendorIdName
+			,strContainer
 			,tmpAPClearables.intBillId
 			,SUM(tmpAPClearables.dblTotal) AS dblTotal
 			,SUM(tmpAPClearables.dblVoucherAmount) AS dblVoucherAmount
@@ -200,17 +203,14 @@ SET @query = '
 			FROM (' 
 					+ @innerQuery +
 				') tmpAPClearables
-			GROUP BY intInventoryReceiptId, intBillId , strVendorIdName
+			GROUP BY intInventoryReceiptId, intBillId , strVendorIdName,strContainer
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A
 			ON A.intBillId = tmpAgingSummaryTotal.intBillId
-		LEFT JOIN vyuAPClearables  IR
-			ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
-		--WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) SubQuery
 	GROUP BY 
-		strVendorId
-		,strVendorIdName
+		--strVendorId
+		strVendorIdName
 		
 	) MainQuery
 '

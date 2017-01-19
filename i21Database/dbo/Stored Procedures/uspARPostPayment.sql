@@ -38,7 +38,8 @@ DECLARE @ARReceivablePostData TABLE (
 	intPaymentId			INT PRIMARY KEY,
 	strTransactionId		NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	intWriteOffAccountId	INT,
-	intEntityId				INT
+	intEntityId				INT,
+	intInterestAccountId	INT,
 	UNIQUE (intPaymentId)
 );
 
@@ -65,6 +66,7 @@ DECLARE @ZeroPayment TABLE (
 	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	intWriteOffAccountId INT,
 	intEntityId INT,
+	intInterestAccountId INT,
 	UNIQUE (intPaymentId)
 );
 
@@ -118,26 +120,38 @@ IF (@param IS NOT NULL)
 	BEGIN
 		IF(@param = 'all')
 			BEGIN
-				INSERT INTO @ARReceivablePostData SELECT intPaymentId, strRecordNumber, intWriteOffAccountId, intEntityId FROM tblARPayment WHERE ysnPosted = 0
+				INSERT INTO @ARReceivablePostData 
+				SELECT P.intPaymentId, P.strRecordNumber, P.intWriteOffAccountId, P.intEntityId, L.intInterestAccountId
+				FROM tblARPayment P
+					INNER JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
+				WHERE P.ysnPosted = 0
 			END
 		ELSE
 			BEGIN
-				INSERT INTO @ARReceivablePostData SELECT intPaymentId, strRecordNumber, intWriteOffAccountId, intEntityId FROM tblARPayment WHERE intPaymentId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
+				INSERT INTO @ARReceivablePostData 
+				SELECT P.intPaymentId, P.strRecordNumber, P.intWriteOffAccountId, P.intEntityId, L.intInterestAccountId
+				FROM tblARPayment P
+					INNER JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
+				WHERE P.intPaymentId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
 			END
 	END
 
 IF(@beginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO @ARReceivablePostData
-		SELECT intPaymentId, strRecordNumber, intWriteOffAccountId, intEntityId FROM tblARPayment
-		WHERE dtmDatePaid BETWEEN @beginDate AND @endDate AND ysnPosted = 0
+		SELECT P.intPaymentId, P.strRecordNumber, P.intWriteOffAccountId, P.intEntityId, L.intInterestAccountId
+		FROM tblARPayment P
+			INNER JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
+		WHERE P.dtmDatePaid BETWEEN @beginDate AND @endDate AND ysnPosted = 0
 	END
 
 IF(@beginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO @ARReceivablePostData
-		SELECT intPaymentId, strRecordNumber, intWriteOffAccountId, intEntityId FROM tblARPayment
-		WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
+		SELECT P.intPaymentId, P.strRecordNumber, P.intWriteOffAccountId, P.intEntityId, L.intInterestAccountId
+		FROM tblARPayment P
+			INNER JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
+		WHERE P.intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
 	END
 
 --Removed excluded payments to post/unpost
@@ -194,6 +208,7 @@ SET @batchIdUsed = @batchId
 			,A.strRecordNumber
 			,A.intWriteOffAccountId
 			,A.intEntityId
+			,P.intInterestAccountId
 		FROM
 			tblARPayment A 
 		INNER JOIN 
@@ -205,7 +220,7 @@ SET @batchIdUsed = @batchId
 		WHERE
 			A.dblAmountPaid = 0					
 		GROUP BY
-			A.intPaymentId, A.strRecordNumber, A.intWriteOffAccountId, A.intEntityId
+			A.intPaymentId, A.strRecordNumber, A.intWriteOffAccountId, A.intEntityId, P.intInterestAccountId
 		HAVING
 			SUM(B.dblPayment) = 0			
 		
@@ -453,7 +468,7 @@ SET @batchIdUsed = @batchId
 				INSERT INTO 
 					@ARReceivableInvalidData
 				SELECT 
-					'The Income Interest account in Company Configuration was not set.'
+					'The Income Interest account in Company Location or Company Configuration was not set.'
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId
@@ -468,7 +483,7 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId						 
 				WHERE
 					ISNULL(D.dblInterest,0) <> 0
-					AND (@IncomeInterestAccount IS NULL OR @IncomeInterestAccount = 0)
+					AND (P.intInterestAccountId IS NULL AND (@IncomeInterestAccount IS NULL OR @IncomeInterestAccount = 0))
 					
 				--Bank Account
 				INSERT INTO 
@@ -1675,12 +1690,12 @@ IF @post = 1
 		SELECT
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
-			,intAccountId				= @IncomeInterestAccount
+			,intAccountId				= ISNULL(P.intInterestAccountId, @IncomeInterestAccount)
 			,dblDebit					= 0
 			,dblCredit					= SUM(B.dblInterest) 
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
-			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @IncomeInterestAccount) 
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = ISNULL(P.intInterestAccountId, @IncomeInterestAccount)) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId  
@@ -1717,7 +1732,8 @@ IF @post = 1
 			,A.strRecordNumber
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,A.intCurrencyId								
+			,A.intCurrencyId
+			,P.intInterestAccountId
 			
 	END TRY
 	BEGIN CATCH	
@@ -1924,7 +1940,7 @@ IF @recap = 0
 			
 			-- Insert Zero Payments for updating
 			INSERT INTO @ARReceivablePostData
-			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, intEntityId FROM @ZeroPayment Z
+			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, intEntityId, Z.intInterestAccountId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)
 
 			UPDATE 
@@ -2098,7 +2114,7 @@ IF @recap = 0
 				
 			-- Insert Zero Payments for updating
 			INSERT INTO @ARReceivablePostData
-			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, Z.intEntityId FROM @ZeroPayment Z
+			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, Z.intEntityId, intInterestAccountId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)			
 			
 			--update payment record
@@ -2177,7 +2193,7 @@ IF @recap = 0
 
 			-- Insert Zero Payments for updating
 			INSERT INTO @ARReceivablePostData
-			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, Z.intEntityId FROM @ZeroPayment Z
+			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, Z.intEntityId, Z.intInterestAccountId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)		
 
 			-- Update the posted flag in the transaction table
@@ -2353,7 +2369,7 @@ IF @recap = 0
 											
 			-- Insert Zero Payments for updating
 			INSERT INTO @ARReceivablePostData
-			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, Z.intEntityId FROM @ZeroPayment Z
+			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, Z.intEntityId, Z.intInterestAccountId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)						
 			
 			-- Delete Invoice with Zero Payment

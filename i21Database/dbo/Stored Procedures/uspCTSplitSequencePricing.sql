@@ -24,7 +24,8 @@ BEGIN TRY
 				@strTradeNo					NVARCHAR(100),
 				@strContractSeq				NVARCHAR(100),
 				@strDateWithTime			NVARCHAR(100) = CONVERT(NVARCHAR(100),GETDATE(),126),
-				@strDate					NVARCHAR(100) = CONVERT(NVARCHAR(100),DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())),126)
+				@strDate					NVARCHAR(100) = CONVERT(NVARCHAR(100),DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())),126),
+				@ysnMultiSequencePricing	BIT
 				
 
 		SELECT	@dblNoOfLots		=	dblNoOfLots,
@@ -45,13 +46,20 @@ BEGIN TRY
 		IF	(SELECT COUNT(*) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId) > 1 AND 
 			EXISTS	(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
 		BEGIN
-			RAISERROR(110005,16,1,@strContractSeq,@strContractSeq)
+			SET @ysnMultiSequencePricing = 1
+			--RAISERROR(110005,16,1,@strContractSeq,@strContractSeq)
 		END
 
 		IF	EXISTS	(	SELECT	*	FROM	tblCTPriceFixation	WHERE	intPriceFixationId	=	@intPriceFixationId AND dblTotalLots <> dblLotsFixed) AND 
 			EXISTS	(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
 		BEGIN
-			RAISERROR(110006,16,1,@strContractSeq,@strContractSeq)
+			SET @ysnMultiSequencePricing = 1
+			--RAISERROR(110006,16,1,@strContractSeq,@strContractSeq)
+		END
+
+		IF(@ysnMultiSequencePricing = 1)
+		BEGIN
+			RETURN
 		END
 
 		SELECT	@intPriceFixationDetailId	=	intPriceFixationDetailId,

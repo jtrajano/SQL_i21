@@ -33,10 +33,18 @@
 	[strFLOId]						  NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,	
 	[intApprovalListId] INT NULL,
 	[intTermsId] INT NULL,
-
+	--risk
 	[intRiskVendorPriceFixationLimitId] INT NULL, --
 	[dblRiskTotalBusinessVolume] DECIMAL(18, 6) NULL,
 	[intRiskUnitOfMeasureId] INT NULL,--
+	--risk
+	--store
+	[strStoreFTPPath] NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
+	[strStoreFTPUsername] NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
+	[strStoreFTPPassword] NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
+	[intStoreStoreId] INT NULL,--
+
+	--store
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityVendorId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
     --CONSTRAINT [UK_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC),
@@ -49,6 +57,7 @@
 
 	CONSTRAINT [FK_tblAPVendor_tblRKVendorPriceFixationLimit_intRiskVendorPriceFixationLimitId] FOREIGN KEY ([intRiskVendorPriceFixationLimitId]) REFERENCES [dbo].[tblRKVendorPriceFixationLimit] ([intVendorPriceFixationLimitId]),
 	CONSTRAINT [FK_tblAPVendor_tblICUnitMeasure_intRiskUnitOfMeasureId] FOREIGN KEY ([intRiskUnitOfMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
+	CONSTRAINT [FK_tblAPVendor_tblSTStore] FOREIGN KEY ([intStoreStoreId]) REFERENCES [dbo].[tblSTStore] ([intStoreId]),
 
 
 	--CONSTRAINT [FK_tblAPVendor_tblAPVendorToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblAPVendorToContact]([intVendorToContactId])

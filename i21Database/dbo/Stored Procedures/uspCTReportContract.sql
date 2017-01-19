@@ -26,8 +26,8 @@ BEGIN TRY
 			@strApprovalText		NVARCHAR(MAX),
 			@FirstApprovalId		INT,
 			@SecondApprovalId       INT,
-			@FirstApprovalSign      varbinary(MAX),
-			@SecondApprovalSign     varbinary(MAX),
+			@FirstApprovalSign      VARBINARY(MAX),
+			@SecondApprovalSign     VARBINARY(MAX),
 			@IsFullApproved         BIT = 0
 						
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
@@ -80,8 +80,8 @@ BEGIN TRY
     SELECT TOP 1 @FirstApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId ORDER BY intApprovalId
 
-	SELECT @FirstApprovalSign = imgEmailSignature FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@FirstApprovalId)
-	SELECT @SecondApprovalSign = imgEmailSignature FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@SecondApprovalId)
+	SELECT @FirstApprovalSign =  [imgEmailSignature] FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@FirstApprovalId)
+	SELECT @SecondApprovalSign = [imgEmailSignature] FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@SecondApprovalId)
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,

@@ -265,7 +265,7 @@ BEGIN
 					WHEN ''N''	THEN	0
 					ELSE 0
 				  END)								--<ysnLocationActive, bit,>
-				,AG.[agloc_gl_profit_center]		--<intProfitCenter, int,>				--TODO
+				,GL.intAccountSegmentId AS intProfitCenter --AG.[agloc_gl_profit_center]		--<intProfitCenter, int,>				--TODO
 				,CA.[inti21Id]						--<agloc_cash, int,>
 				,0									--<intDepositAccount, int,>
 				,0									--<intARAccount, int,>
@@ -442,7 +442,10 @@ BEGIN
 					ON AG.[agloc_ccfee_percent] = CF.strExternalId
 			LEFT OUTER JOIN
 				tblSMCompanyLocation CL
-					ON RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))										
+					ON RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))	
+			LEFT JOIN
+				tblGLAccountSegment GL
+					ON AG.agloc_gl_profit_center = CAST(GL.strCode AS INT)									
 			WHERE
 				CL.[strLocationNumber] IS NULL
 				
@@ -650,7 +653,7 @@ BEGIN
     ,0        --<ysnDefaultCustomBlend, bit,>  
     ,0        --<ysnAgroguideInterface, bit,>  
     ,1        --<ysnLocationActive, bit,>  
-    ,PT.[ptloc_gl_profit_center]  --<intProfitCenter, int,>    --TODO  
+    ,GL.intAccountSegmentId AS intProfitCenter --PT.[ptloc_gl_profit_center]  --<intProfitCenter, int,>    --TODO  
     ,0      --<ptloc_cash, int,>  
     ,0         --<intDepositAccount, int,>  
     ,0         --<intARAccount, int,>  
@@ -746,6 +749,9 @@ BEGIN
    LEFT OUTER JOIN  
     tblSMCompanyLocation CL  
      ON RTRIM(LTRIM(PT.[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))            
+   LEFT JOIN
+	tblGLAccountSegment GL 
+	 ON PT.[ptloc_gl_profit_center] = CAST(GL.[strCode] AS INT)
    WHERE  
     CL.[strLocationNumber] IS NULL  
       

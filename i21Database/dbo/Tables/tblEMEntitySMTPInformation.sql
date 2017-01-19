@@ -12,7 +12,7 @@
 	[ysnUseProfileNameAndEmail]		BIT DEFAULT(1),
 	[ysnUseGlobalSMTPServer]		BIT DEFAULT(1),
 	[ysnRequiresAuthentication]		BIT DEFAULT(1),
-    [imgEmailSignature ]			VARBINARY (MAX) NULL,
+    [imgEmailSignature]			VARBINARY (MAX) NULL,
 	[strEmailSignature]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 	
 	[intConcurrencyId]				INT DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblEMEntitySMTPInformation] PRIMARY KEY CLUSTERED ([intSMTPInformationId] ASC),	
