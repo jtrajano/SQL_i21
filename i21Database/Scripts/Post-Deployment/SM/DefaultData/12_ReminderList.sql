@@ -303,9 +303,14 @@ GO
                                                 WHERE    ysnCurrent = 1 AND 
                                                         strStatus IN (''Waiting for Submit'') AND 
                                                         intSubmittedById= {0}',
-                [strNamespace]      =        N'i21.view.Approval?activeTab=Closed',
+                [strNamespace]      =        N'i21.view.Approval?activeTab=Unsubmitted',
                 [intSort]           =        14
-    END    
+    END 
+	ELSE
+	BEGIN
+		UPDATE tblSMReminderList SET strNamespace = N'i21.view.Approval?activeTab=Unsubmitted'
+		WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Transaction'
+	END  
   
     IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction')
     BEGIN
