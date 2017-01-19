@@ -963,8 +963,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colSpecialPricingUPC: 'strUPC',
                 colSpecialPricingQty: {
-                    dataIndex: 'dblUnit',
-                    hidden: true
+                    dataIndex: 'dblUnit'
                 },
                 colSpecialPricingDiscountBy: {
                     dataIndex: 'strDiscountBy',

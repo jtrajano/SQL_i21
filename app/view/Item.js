@@ -4420,6 +4420,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        hidden: true,
                                                                         itemId: 'colPricingLevelUnits',
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
@@ -4431,7 +4432,7 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 50,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Min',
+                                                                        text: 'Min Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -4441,10 +4442,10 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelMax',
-                                                                        width: 50,
+                                                                        width: 61,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Max',
+                                                                        text: 'Max Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -4681,10 +4682,10 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingQty',
-                                                                        width: 65,
+                                                                        width: 89,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit Qty',
+                                                                        text: 'Discount Units',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',

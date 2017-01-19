@@ -9642,6 +9642,7 @@
                                                             "userConfig": {
                                                                 "align": "right",
                                                                 "dataIndex": "strFieldName",
+                                                                "hidden": true,
                                                                 "itemId": "colPricingLevelUnits",
                                                                 "text": "Unit Qty"
                                                             },
@@ -9660,7 +9661,7 @@
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colPricingLevelMin",
-                                                                "text": "Min",
+                                                                "text": "Min Qty",
                                                                 "width": 50
                                                             },
                                                             "name": "MyNumberColumn24",
@@ -9695,8 +9696,8 @@
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colPricingLevelMax",
-                                                                "text": "Max",
-                                                                "width": 50
+                                                                "text": "Max Qty",
+                                                                "width": 61
                                                             },
                                                             "name": "MyNumberColumn39",
                                                             "designerId": "be51367e-69dd-4528-9227-b3e5a4ce8c94",
@@ -10245,8 +10246,8 @@
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colSpecialPricingQty",
-                                                                "text": "Unit Qty",
-                                                                "width": 65
+                                                                "text": "Discount Units",
+                                                                "width": 89
                                                             },
                                                             "name": "MyNumberColumn34",
                                                             "designerId": "c3cc12ee-de55-408a-98f6-b2f5bbb7e3b6",
