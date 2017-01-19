@@ -17,9 +17,11 @@ BEGIN TRY
 			@strState				NVARCHAR(500),
 			@strZip					NVARCHAR(500),
 			@strCountry				NVARCHAR(500),
-			@intPriceFixationId	INT,
+			@intPriceFixationId		INT,
 			@xmlDocumentId			INT,
-			@strContractDocuments	NVARCHAR(MAX)
+			@strContractDocuments	NVARCHAR(MAX),
+			@intLastModifiedUserId	INT,
+			@LastModifiedUserSign      VARBINARY(MAX)
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -55,7 +57,13 @@ BEGIN TRY
     
 	SELECT	@intPriceFixationId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intPriceFixationId' 
+	WHERE	[fieldname] = 'intPriceFixationId'
+	
+	SELECT @intLastModifiedUserId=ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract PC
+	JOIN tblCTPriceFixation PF ON PF.intPriceContractId=PC.intPriceContractId 
+	WHERE PF.intPriceFixationId=@intPriceFixationId
+	
+	SELECT @LastModifiedUserSign =  [imgEmailSignature] FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@intLastModifiedUserId) 
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
@@ -102,7 +110,28 @@ BEGIN TRY
 			) +  ' ' + 
 			CASE WHEN CD.intCurrencyId = TY.intCurrencyID THEN FY.strCurrency ELSE TY.strCurrency END + 
 			' per ' + FM.strUnitMeasure AS strFXFinalPrice,
-			CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE 'Final Price' END AS strFXFinalPriceLabel
+			CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE 'Final Price' END AS strFXFinalPriceLabel,
+			CASE 
+				WHEN UM.strUnitType='Weight' THEN LTRIM(FLOOR(CD.dblQuantity)) + ' ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL THEN  ' (' ELSE '' END + ISNULL(LTRIM(FLOOR(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
+				ELSE ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') 
+			END
+			AS  strQuantityDesc,
+			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106)+CASE WHEN PO.strPosition IS NOT NULL THEN  ' ('+PO.strPosition+') ' ELSE '' END strPeriodWithPosition,
+			CASE WHEN FLOOR((PF.dblTotalLots-PF.dblLotsFixed))=0 THEN '' ELSE 'Lots to be fixed :' END AS strLotsFixedLabel,
+			CASE WHEN FLOOR((PF.dblTotalLots-PF.dblLotsFixed))=0 THEN '' ELSE  LTRIM(FLOOR((PF.dblTotalLots-PF.dblLotsFixed))) END AS intLotsUnFixed,
+			LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(PF.dblPriceWORollArb,2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strTotalDesc,
+			LTRIM(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strDifferentialDesc,			
+			CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE 'Final Price :' END AS strFXFinalPriceLabelDesc,
+			LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(PF.dblFinalPrice,2))) + ' ' + CY.strCurrency + ' per ' +' :'+CM.strUnitMeasure strFinalPriceDesc,
+			FY.strCurrency + '/' + TY.strCurrency+ ' :' AS strCurrencyExchangeRateDesc,
+			dbo.fnRemoveTrailingZeroes(ROUND(CD.dblRate,2)) AS dblRateDesc,
+			LTRIM(
+				dbo.fnRemoveTrailingZeroes(ROUND(dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)*
+				dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)/CASE WHEN CY.ysnSubCurrency = 1 THEN ISNULL(CY.intCent,1) ELSE 1 END,2))
+			) +  ' ' + 
+			CASE WHEN CD.intCurrencyId = TY.intCurrencyID THEN FY.strCurrency ELSE TY.strCurrency END + 
+			' per ' + FM.strUnitMeasure AS strFXFinalPriceDesc,
+			@LastModifiedUserSign AS strLastModifiedUserSign
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
@@ -123,8 +152,11 @@ BEGIN TRY
 	JOIN	tblSMCurrency				TY	ON	TY.intCurrencyID				=	ER.intToCurrencyId		LEFT	
 	JOIN	tblICItemUOM				FU	ON	FU.intItemUOMId					=	CD.intFXPriceUOMId		LEFT
 	JOIN	tblICCommodityUnitMeasure	FC	ON	FC.intCommodityId				=	CH.intCommodityId		AND 
-												FC.intUnitMeasureId				=	FU.intUnitMeasureId		LEFT	
-	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId			
+												FC.intUnitMeasureId				=	FU.intUnitMeasureId		LEFT
+	JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId					=	CD.intNetWeightUOMId	LEFT
+	JOIN	tblICUnitMeasure			U7	ON	U7.intUnitMeasureId				=	WU.intUnitMeasureId		LEFT	
+	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId		LEFT
+	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId	
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 
