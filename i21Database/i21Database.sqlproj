@@ -4851,6 +4851,7 @@
     <Build Include="dbo\Tables\tblRKM2MConfiguration.sql" />
     <Build Include="dbo\Views\vyuRKGetOtherChargeItem.sql" />
     <Build Include="dbo\Views\vyuRKGetOtherChargeItemNotMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSamplePreShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
