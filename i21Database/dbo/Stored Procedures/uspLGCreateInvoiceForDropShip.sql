@@ -170,8 +170,8 @@ BEGIN
 		,[intShipmentId]						= NULL
 		,[intTransactionId]						= NULL
 		,[intOriginalInvoiceId]					= NULL
-		,[intEntityId]							= @intUserId
 		,[intLoadId]							= L.intLoadId
+		,[intEntityId]							= @intUserId		
 		,[ysnResetDetails]						= 1
 		,[ysnRecap]								= 0
 		,[ysnPost]								= @Post
