@@ -13,7 +13,8 @@ SELECT
 	intPayGroupIds = LEFT(ETP.intPayGroupIds, LEN(ETP.intPayGroupIds)-1),
 	strPayGroupIds = LEFT(ETP.strPayGroupIds, LEN(ETP.strPayGroupIds)-1),
 	ETP.dblHours,
-	ETP.dblTotal
+	ETP.dblTotal,
+	ETP.intConcurrencyId
 FROM
     (
         SELECT DISTINCT 
@@ -49,7 +50,8 @@ FROM
                 FOR XML PATH ('')
             ),
 			dblHours = SUM(PGD.dblHoursToProcess),
-			dblTotal = SUM(PGD.dblTotal)
+			dblTotal = SUM(PGD.dblTotal),
+			EMP.intConcurrencyId
         FROM 
 			tblPRPayGroup PG2
 			INNER JOIN tblPRPayGroupDetail PGD
@@ -67,7 +69,8 @@ FROM
 			PG2.dtmPayDate,
 			PG2.dtmBeginDate,
 			PG2.dtmEndDate,
-			PG2.ysnExcludeDeductions
+			PG2.ysnExcludeDeductions,
+			EMP.intConcurrencyId
     ) ETP
 WHERE 
 	ETP.intEntityEmployeeId IS NOT NULL
