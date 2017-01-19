@@ -9,26 +9,22 @@ CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
 )
 AS
 BEGIN
+
+	BEGIN TRY 
    
-	DECLARE @EntriesForInvoice		AS InvoiceIntegrationStagingTable
-	DECLARE @TaxDetails				AS LineItemTaxDetailStagingTable 
+		---------------VARIABLES--------------
+		DECLARE @companyLocationId		INT = 0
+		DECLARE @accountId				INT = 0
+		DECLARE @ysnAddPayment			BIT = 0
+		--------------------------------------
 
-	DECLARE @companyLocationId		INT = 0
-	DECLARE @accountId				INT = 0
-	DECLARE @ysnAddPayment			BIT = 0
-
-	SELECT TOP 1 
-	@companyLocationId = intARLocationId ,
-	@accountId = intGLAccountId
-	FROM tblCFCompanyPreference
-
-	CREATE TABLE #tblCFDisctinctCustomerInvoice	
+		----------TEMPORARY TABLE-------------
+		CREATE TABLE #tblCFDisctinctCustomerInvoice	
 	(
 		 intAccountId					INT
 		,intCustomerId					INT
 	)
-
-	CREATE TABLE #tblCFInvoiceDiscount	
+		CREATE TABLE #tblCFInvoiceDiscount	
 (
 		 intAccountId					INT
 		,intSalesPersonId				INT
@@ -71,11 +67,22 @@ BEGIN
 		,dtmTransactionDate				DATETIME
 		,dtmPostedDate					DATETIME
 )
+		--------------------------------------
 
-	INSERT INTO #tblCFInvoiceDiscount
+		----------COMPANY PREFERENCE----------
+		SELECT TOP 1 
+	@companyLocationId = intARLocationId ,
+	@accountId = intGLAccountId
+	FROM tblCFCompanyPreference
+		--------------------------------------
+	
+		-------------INVOICE LIST-------------
+		INSERT INTO #tblCFInvoiceDiscount
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+		--------------------------------------
 
-	INSERT INTO #tblCFDisctinctCustomerInvoice(
+		----------GROUP BY CUSTOMER-----------
+		INSERT INTO #tblCFDisctinctCustomerInvoice(
 		 intAccountId	
 		,intCustomerId	
 	)
@@ -84,131 +91,189 @@ BEGIN
 		,intCustomerId	
 	FROM #tblCFInvoiceDiscount
 	GROUP BY intAccountId,intCustomerId	
+		--------------------------------------
 
-	
-	----------------------------------LOOP VARIABLES---------------------------------
-	DECLARE @id							INT
-	DECLARE @loopAccountId				INT
-	DECLARE @loopCustomerId				INT
-	DECLARE @newPaymentId				INT				= NULL	
-	DECLARE @newPaymentDetailId			INT				= NULL	
-	---------------------------------------------------------------------------------
+		------------LOOP VARIABLES------------
+		DECLARE @id							INT
+		DECLARE @loopAccountId				INT
+		DECLARE @loopCustomerId				INT
+		DECLARE @newPaymentId				INT				= NULL	
+		DECLARE @newPaymentDetailId			INT				= NULL	
+		--------------------------------------
 
-	----------------------------------PAYMENT PARAMETERS-----------------------------
-	DECLARE @EntityCustomerId	INT										--QUERY
-	DECLARE @CurrencyId			INT				= NULL					--NULL
-	DECLARE @DatePaid			DATETIME								--QUERY
-	DECLARE @BankAccountId		INT				= NULL					--NULL
-	DECLARE @AmountPaid			NUMERIC(18,6)	= 0.000000				--QUERY
-	DECLARE @PaymentMethodId	INT										--1 AS TEMP (SHOULD BE CF INVOICE)
-	DECLARE @PaymentInfo		NVARCHAR(50)	= NULL					--NULL
-	DECLARE @ApplytoBudget		BIT				= 0						--0
-	DECLARE @ApplyOnAccount		BIT				= 0						--0
-	DECLARE @Notes				NVARCHAR(250)	= ''					--''
-	DECLARE @AllowPrepayment	BIT				= 0						--0
-	DECLARE @AllowOverpayment	BIT				= 0						--0
-	DECLARE @RaiseError			BIT				= 0						--0
-	DECLARE @InvoiceId			INT				= NULL					--QUERY
-	DECLARE @Payment			NUMERIC(18,6)	= 0.000000				--SAME AS AMOUNT PAID?? 
-	DECLARE @ApplyTermDiscount	BIT				= 1						--0
-	DECLARE @Discount			NUMERIC(18,6)	= 0.000000				--0.000000
-	DECLARE @Interest			NUMERIC(18,6)	= 0.000000				--0.000000
-	DECLARE @InvoicePrepayment	BIT				= 0						--0
-	---------------------------------------------------------------------------------
+		----------PAYMENT PARAMETERS-----------
+		DECLARE @EntityCustomerId		INT										--QUERY
+		DECLARE @CompanyLocationId		INT										--SET
+		DECLARE @CurrencyId				INT				= NULL					--NULL
+		DECLARE @DatePaid				DATETIME								--QUERY
+		DECLARE @AccountId				INT				= NULL					--SET
+		DECLARE @BankAccountId			INT				= NULL					--NULL
+		DECLARE @AmountPaid				NUMERIC(18,6)	= 0.000000				--QUERY
+		DECLARE @PaymentMethodId		INT										--1 AS TEMP (SHOULD BE CF INVOICE)
+		DECLARE @PaymentInfo			NVARCHAR(50)	= NULL					--NULL
+		DECLARE @ApplytoBudget			BIT				= 0						--0
+		DECLARE @ApplyOnAccount			BIT				= 0						--0
+		DECLARE @Notes					NVARCHAR(250)	= ''					--''
+		DECLARE @AllowPrepayment		BIT				= 0						--0
+		DECLARE @AllowOverpayment		BIT				= 0						--0
+		DECLARE @RaiseError				BIT				= 0						--0
+		DECLARE @InvoiceId				INT				= NULL					--QUERY
+		DECLARE @Payment				NUMERIC(18,6)	= 0.000000				--SAME AS AMOUNT PAID?? 
+		DECLARE @ApplyTermDiscount		BIT				= 1						--0
+		DECLARE @Discount				NUMERIC(18,6)	= 0.000000				--0.000000
+		DECLARE @Interest				NUMERIC(18,6)	= 0.000000				--0.000000
+		DECLARE @InvoicePrepayment		BIT				= 0						--0
+		DECLARE @InvoiceReportNumber	NVARCHAR(250)	= NULL
+		---------------------------------------
 
-	SELECT * FROM #tblCFInvoiceDiscount 
-	SELECT * FROM #tblCFDisctinctCustomerInvoice
-
-	WHILE (EXISTS(SELECT 1 FROM #tblCFDisctinctCustomerInvoice))
-	BEGIN
-
-		SELECT	@loopCustomerId = intCustomerId, 
-				@loopAccountId = intAccountId 
-		FROM #tblCFDisctinctCustomerInvoice
-
-		WHILE (EXISTS(SELECT 1 FROM #tblCFInvoiceDiscount WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId))
+		------------LOOP CUST GROUP------------
+		WHILE (EXISTS(SELECT 1 FROM #tblCFDisctinctCustomerInvoice))
+		---------------------------------------
 		BEGIN
 
-			SELECT	TOP 1 @id = intTransactionId
-			FROM #tblCFInvoiceDiscount
-			WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId
+			SELECT	@loopCustomerId = intCustomerId, 
+					@loopAccountId = intAccountId 
+			FROM #tblCFDisctinctCustomerInvoice
 
-			SELECT TOP 1
-			 @EntityCustomerId	= intCustomerId
-			,@AmountPaid		= dblTotalAmount
-			,@InvoiceId			= intInvoiceId
-			,@Payment			= dblTotalAmount
-			,@companyLocationId	= @companyLocationId
-			,@DatePaid			= dtmInvoiceDate
-			,@accountId			= @accountId
-			,@PaymentMethodId	= 1
-			FROM #tblCFInvoiceDiscount 
-			WHERE intTransactionId = @id
-			AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
-
-			IF (@ysnAddPayment = 0)
+			------------LOOP INVOICE------------
+			WHILE (EXISTS(SELECT 1 FROM #tblCFInvoiceDiscount WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId))
+			---------------------------------------
 			BEGIN
 
-				PRINT 'CREATE PAYMENT'
-				EXEC [dbo].[uspARCreateCustomerPayment]
-				@EntityCustomerId						= @EntityCustomerId,
-				@CompanyLocationId						= @companyLocationId,
-				@CurrencyId								= @CurrencyId,
-				@DatePaid								= @DatePaid,
-				@AccountId								= @accountId,
-				@BankAccountId							= @BankAccountId,
-				@AmountPaid								= @AmountPaid,
-				@PaymentMethodId						= @PaymentMethodId,
-				@PaymentInfo							= @PaymentInfo,
-				@ApplytoBudget							= @ApplytoBudget,
-				@ApplyOnAccount							= @ApplyOnAccount, 
-				@Notes									= @Notes,
-				@EntityId								= @entityId,
-				@AllowPrepayment						= @AllowPrepayment,
-				@AllowOverpayment						= @AllowOverpayment,
-				@RaiseError								= 1,
-				@ErrorMessage							= @ErrorMessage OUTPUT,
-				@NewPaymentId							= @newPaymentId OUTPUT,
-				@InvoiceId								= @InvoiceId,
-				@Payment								= @Payment,
-				@ApplyTermDiscount						= @ApplyTermDiscount,
-				@Discount								= @Discount,
-				@Interest								= @Interest,
-				@InvoicePrepayment						= @InvoicePrepayment
+				SELECT	TOP 1 @id = intTransactionId
+				FROM #tblCFInvoiceDiscount
+				WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId
 
-				SET @ysnAddPayment = 1
+				SELECT TOP 1
+				 @EntityCustomerId		= intCustomerId
+				,@AmountPaid			= dblTotalAmount
+				,@InvoiceId				= intInvoiceId
+				,@Payment				= dblTotalAmount
+				,@CompanyLocationId		= @companyLocationId
+				,@DatePaid				= dtmInvoiceDate
+				,@AccountId				= @accountId
+				,@PaymentMethodId		= 1
+				,@InvoiceReportNumber	= strInvoiceReportNumber 
+				FROM #tblCFInvoiceDiscount 
+				WHERE intTransactionId = @id
+				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
+
+				IF (@ysnAddPayment = 0)
+				BEGIN
+
+					PRINT 'CREATE PAYMENT'
+					EXEC [dbo].[uspARCreateCustomerPayment]
+					@EntityCustomerId						= @EntityCustomerId,
+					@CompanyLocationId						= @CompanyLocationId,
+					@CurrencyId								= @CurrencyId,
+					@DatePaid								= @DatePaid,
+					@AccountId								= @AccountId,
+					@BankAccountId							= @BankAccountId,
+					@AmountPaid								= @AmountPaid,
+					@PaymentMethodId						= @PaymentMethodId,
+					@PaymentInfo							= @PaymentInfo,
+					@ApplytoBudget							= @ApplytoBudget,
+					@ApplyOnAccount							= @ApplyOnAccount, 
+					@Notes									= @Notes,
+					@EntityId								= @entityId,
+					@AllowPrepayment						= @AllowPrepayment,
+					@AllowOverpayment						= @AllowOverpayment,
+					@RaiseError								= 1,
+					@ErrorMessage							= @ErrorMessage OUTPUT,
+					@NewPaymentId							= @newPaymentId OUTPUT,
+					@InvoiceId								= @InvoiceId,
+					@Payment								= @Payment,
+					@ApplyTermDiscount						= @ApplyTermDiscount,
+					@Discount								= @Discount,
+					@Interest								= @Interest,
+					@InvoicePrepayment						= @InvoicePrepayment
+					SET @ysnAddPayment = 1
+
+					IF (@CreatedIvoices IS NOT NULL)
+					BEGIN
+						SET @CreatedIvoices =  @CreatedIvoices + ',' + CONVERT(varchar(10), @newPaymentId)
+					END
+					ELSE
+					BEGIN
+						SET @CreatedIvoices = CONVERT(varchar(10), @newPaymentId)
+					END
+
+					INSERT INTO tblCFInvoiceProcessResult(
+						 strInvoiceProcessResultId
+						,intTransactionProcessId
+						,ysnStatus
+						,strRunProcessId
+						,intCustomerId
+						,strInvoiceReportNumber
+					)
+
+					SELECT TOP 1 
+					'Payment'
+					,@newPaymentId
+					,1
+					,''
+					,@EntityCustomerId
+					,@InvoiceReportNumber
+					
+
+				END
+				ELSE
+				BEGIN
+					PRINT 'ADD PAYMENT'
+					EXEC [dbo].[uspARAddInvoiceToPayment]
+					 @PaymentId								= @newPaymentId
+					,@InvoiceId								= @InvoiceId
+					,@Payment								= @Payment
+					,@ApplyTermDiscount						= @ApplyTermDiscount
+					,@Discount								= @Discount
+					,@Interest								= @Interest
+					,@AllowOverpayment						= @AllowOverpayment
+					,@RaiseError							= 1
+					,@ErrorMessage							= @ErrorMessage		  OUTPUT
+					,@NewPaymentDetailId					= @newPaymentDetailId OUTPUT
+
+				END
+
+				DELETE FROM #tblCFInvoiceDiscount 
+				WHERE intTransactionId = @id
+				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
 			END
-			ELSE
-			BEGIN
-				PRINT 'ADD PAYMENT'
-				EXEC [dbo].[uspARAddInvoiceToPayment]
-				 @PaymentId								= @newPaymentId
-				,@InvoiceId								= @InvoiceId
-				,@Payment								= @Payment
-				,@ApplyTermDiscount						= @ApplyTermDiscount
-				,@Discount								= @Discount
-				,@Interest								= @Interest
-				,@AllowOverpayment						= @AllowOverpayment
-				,@RaiseError							= 1
-				,@ErrorMessage							= @ErrorMessage		  OUTPUT
-				,@NewPaymentDetailId					= @newPaymentDetailId OUTPUT
-			END
-
-			DELETE FROM #tblCFInvoiceDiscount 
-			WHERE intTransactionId = @id
-			AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
+								
+			SET @ysnAddPayment = 0
+			DELETE FROM #tblCFDisctinctCustomerInvoice WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId
 
 		END
-								
-		SET @ysnAddPayment = 0
-		DELETE FROM #tblCFDisctinctCustomerInvoice WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId
 
-	END
+		DROP TABLE #tblCFInvoiceDiscount
+		DROP TABLE #tblCFDisctinctCustomerInvoice
 
+	END TRY
+	BEGIN CATCH
+
+		------------SET ERROR MESSAGE-----------
+		SET @ErrorMessage = ERROR_MESSAGE ()  
+		----------------------------------------
+
+		----------DROP TEMPORARY TABLE----------
+		DROP TABLE #tblCFInvoiceDiscount
+		DROP TABLE #tblCFDisctinctCustomerInvoice
+		----------------------------------------
+
+	END CATCH
 
 
 END
+
+
+
+
+
+
+
+
+
+
 
 
 
