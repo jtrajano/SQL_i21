@@ -94,7 +94,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 hidden: '{hideUnpostButton}'
             },
             btnPostPreview: {
-                hidden: '{hideUnpostButton}'
+                hidden: '{hidePostButton}'
             },
             btnUnpostPreview: {
                 hidden: '{hideUnpostButton}'
@@ -633,18 +633,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         } });
     },
 
-    onPrintCountSheetsClick: function (button) {
+    /*onPrintCountSheetsClick: function (button) {
         var win = button.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
         var current = vm.data.current;
         var CountId = current.get('intInventoryCountId');
-     /*   var filters = [
-            {
-                column: 'intInventoryCountId',
-                value: current.get('intInventoryCountId')
-            }
-        ];*/
         
         if (current) {
             var showAddScreen = function () {
@@ -725,7 +719,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 }
             });
         }
-    },
+    },*/
     
     onPrintVarianceClick: function (button) {
         var win = button.up('window');
@@ -1117,9 +1111,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('intSubLocationId', records[0].get('intSubLocationId'));
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     break;
-                case 'cboLot':
+                case 'cboLotNo':
                     current.set('strLotAlias', records[0].get('strLotAlias'));
-                    current.set('dblSystemCount', records[0].get('dblOnHand'));
+                    current.set('dblSystemCount', records[0].get('dblQty'));
                     break;
             }
         }
@@ -1163,6 +1157,35 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 }
             }
     },
+    onPrintPhysicalCount: function (button) {
+        var win = button.up('window');
+        var vm = win.getViewModel();
+        var current = vm.data.current;
+
+        // Save has data changes first before doing the post.
+        win.context.data.saveRecord({
+            callbackFn: function() { 
+                var filters = [{
+                    Name: 'strCountNo',
+                    Type: 'string',
+                    Condition: 'EQUAL TO',
+                    From: current.get('strCountNo'),
+                    Operator: 'AND'
+                }];
+
+                iRely.Functions.openScreen('Reporting.view.ReportViewer', {
+                    selectedReport: 'PhysicalInventoryCount',
+                    selectedGroup: 'Inventory',
+                    selectedParameters: filters,
+                    viewConfig: { maximized: true }
+                });
+            }
+        });
+
+         if (button.itemId === 'btnPrintCountSheets' && current.get('intStatus') !== 4) {
+                current.set('intStatus', 2);
+            }
+    },
 
     init: function (application) {
         this.control({
@@ -1176,7 +1199,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 click: this.onFetchClick
             },
             "#btnPrintCountSheets": {
-                click: this.onPrintCountSheetsClick
+                click: this.onPrintPhysicalCount
             },
             "#btnPrintVariance": {
                 click: this.onPrintVarianceClick
@@ -1205,7 +1228,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             "#cboStorageLocation": {
                 select: this.onInventoryCountDetailSelect
             },
-            "#cboLot": {
+            "#cboLotNo": {
                 select: this.onInventoryCountDetailSelect
             },
             "#grdPhysicalCount": {
