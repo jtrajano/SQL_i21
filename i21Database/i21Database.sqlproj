@@ -4846,6 +4846,7 @@
     <Build Include="dbo\Views\vyuICItemUOM.sql" />
     <Build Include="dbo\Views\vyuCTGridPriceContractSplitSeq.sql" />
     <Build Include="dbo\Tables\tblTMGenerateWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReportPhysicalInventoryCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
