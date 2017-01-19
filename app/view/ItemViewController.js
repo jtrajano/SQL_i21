@@ -156,7 +156,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
                         { dataIndex: 'intItemId', text: 'Item Id', width:100, flex: 1, dataType: 'numeric', key: true, hidden: true },
                         { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
-                        { dataIndex: 'strItemNo', text: 'Item No', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No', width:100, flex: 1, dataType: 'string', defaultSort: true, sortOrder: 'ASC' },
                         { dataIndex: 'strItemDescription', text: 'Item Description', width:100, flex: 1, dataType: 'string' },
                         { dataIndex: 'strType', text: 'Item Type', width:100, flex: 1, dataType: 'string' },
                         { dataIndex: 'intItemId', text: 'Item Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
