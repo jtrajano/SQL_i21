@@ -158,7 +158,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 								 tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN,
 								 NULL,
 								 NULL,
-								 tblTFTaxCategory.strTaxCategory,
+								 NULL,
 								 NULL,
 								 NULL,
 								 NULL,
