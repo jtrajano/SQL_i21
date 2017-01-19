@@ -230,73 +230,76 @@ IF @Refresh = 'true'
 							SET @Count = @Count - 1
 					END
 					IF (@ReportingComponentId <> '')
-						BEGIN
-							INSERT INTO tblTFTransaction (uniqTransactionGuid, 
-																		   intItemId, 
-																		   strBillOfLading,
-																		   intTaxAuthorityId,
-																		   strTaxAuthority,
-																		   strFormCode, 
-																		   intReportingComponentId, 
-																		   strScheduleCode,
-																		   strProductCode, 
-																		   dblGross,
-																		   dblTax,
-																		   dtmDate, 
-																		   strVendorName, 
-																		   strVendorFederalTaxId, 
-																		   strType,
-																		   strTerminalControlNumber,
-																		   dtmReportingPeriodBegin,
-																		   dtmReportingPeriodEnd,
-																		   strTaxPayerName,
-																		   strTaxPayerAddress,
-																		   strCity,
-																		   strState,
-																		   strZipCode,
-																		   strTelephoneNumber,
-																		   strTaxPayerIdentificationNumber,
-																		   strTaxPayerFEIN,
-																		   strOriginState, 
-																		   strDestinationState,
-																		   leaf)
-																		   SELECT DISTINCT @Guid,
-																		   intInventoryReceiptItemId, 
-																		   strBillOfLading,
-																		   intTaxAuthorityId,
-																		   (SELECT strTaxAuthorityCode FROM tblTFTaxAuthority WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM @TFTransaction)),
-																		   strFormCode, 
-																		   intReportingComponentId, 
-																		   strScheduleCode,
-																		   strProductCode, 
-																		   dblGross,
-																		   dblTax,
-																			dtmReceiptDate, 
-																			strVendorName, 
-																			strVendorFEIN, 
-																			strType,
-																			strTerminalControlNumber,
-																			@DateFrom,
-																			@DateTo,
-																			--HEADER
-																			strHeaderCompanyName,
-																			strHeaderAddress,
-																			strHeaderCity,
-																			strHeaderState,
-																			strHeaderZip,
-																			strHeaderPhone,
-																			strHeaderStateTaxID,
-																			strHeaderFederalTaxID,
-																			strOriginState, 
-																			strDestinationState,
-																			1
-																			FROM @TFTransaction
-						
-						END
+					BEGIN
+						INSERT INTO tblTFTransaction (uniqTransactionGuid
+							, intItemId
+							, strBillOfLading
+							, intTaxAuthorityId
+							, strTaxAuthority
+							, strFormCode
+							, intReportingComponentId
+							, strScheduleCode
+							, strProductCode
+							, dblGross
+							, dblNet
+							, dblBillQty
+							, dblTax
+							, dtmDate
+							, strVendorName
+							, strVendorFederalTaxId
+							, strType
+							, strTerminalControlNumber
+							, dtmReportingPeriodBegin
+							, dtmReportingPeriodEnd
+							, strTaxPayerName
+							, strTaxPayerAddress
+							, strCity
+							, strState
+							, strZipCode
+							, strTelephoneNumber
+							, strTaxPayerIdentificationNumber
+							, strTaxPayerFEIN
+							, strOriginState
+							, strDestinationState
+							, leaf)
+						SELECT DISTINCT @Guid
+							, intInventoryReceiptItemId
+							, strBillOfLading
+							, intTaxAuthorityId
+							, (SELECT strTaxAuthorityCode FROM tblTFTaxAuthority WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM @TFTransaction))
+							, strFormCode
+							, intReportingComponentId
+							, strScheduleCode
+							, strProductCode
+							, dblGross
+							, dblNet
+							, dblBillQty
+							, dblTax
+							, dtmReceiptDate
+							, strVendorName
+							, strVendorFEIN
+							, strType
+							, strTerminalControlNumber
+							, @DateFrom
+							, @DateTo
+							--HEADER
+							, strHeaderCompanyName
+							, strHeaderAddress
+							, strHeaderCity
+							, strHeaderState
+							, strHeaderZip
+							, strHeaderPhone
+							, strHeaderStateTaxID
+							, strHeaderFederalTaxID
+							, strOriginState
+							, strDestinationState
+							, 1
+						FROM @TFTransaction
+					END
 					ELSE
-						BEGIN
-							INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
-						END
+					BEGIN
+						INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
+					END
 				SET @CountRC = @CountRC - 1
 		END
 		DECLARE @HasResult INT
