@@ -1692,7 +1692,849 @@ BEGIN
 				,@AddedCount		int				= 0 OUTPUT
 				,@UpdatedCount		int				= 0 OUTPUT
 				AS
-			BEGIN
-				Return 0	
-			END	')
+	BEGIN  
+  
+	   IF (@ToOrigin = 1)  
+		BEGIN  
+		 SELECT intCompanyLocationId   
+		 INTO #Temp  
+		 FROM dbo.[tblSMCompanyLocation]   
+		 WHERE strLocationNumber IS NULL OR RTRIM(LTRIM(strLocationNumber)) = ''''
+		 ORDER BY intCompanyLocationId  
+
+		 CREATE TABLE #seq_table (seq int)
+		 DECLARE @seq_value INT;
+		 SET @seq_value = 0;
+		 
+		 WHILE @seq_value <= 999
+		 BEGIN
+			 INSERT INTO #seq_table VALUES(@seq_value)
+			 SET @seq_value = @seq_value + 1;
+		 END; 
+		        
+		 WHILE(EXISTS(SELECT TOP 1 1 FROM #Temp))  
+		  BEGIN  
+		   DECLARE @MaxNumber1 int  
+		   DECLARE @MaxNumber2 int  
+		   DECLARE @GreaterNumber int
+		   DECLARE @Unused int
+
+		   DECLARE @TopLocId int  
+		   SELECT @TopLocId = intCompanyLocationId FROM #Temp ORDER BY intCompanyLocationId  
+		   SELECT @MaxNumber1 = MAX([ptloc_loc_no]) FROM ptlocmst WHERE [ptloc_loc_no] NOT LIKE ''%[^0-9]%''
+		   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  WHERE [strLocationNumber] NOT LIKE ''%[^0-9]%''
+
+		   --SELECT l.ptloc_loc_no + 1 AS start INTO #Available FROM ptlocmst AS l LEFT OUTER JOIN ptlocmst AS r ON l.ptloc_loc_no = r.ptloc_loc_no AND r.ptloc_loc_no NOT LIKE ''%[^0-9]%'' WHERE l.[ptloc_loc_no] NOT LIKE ''%[^0-9]%'' AND l.ptloc_loc_no + 1 NOT IN (SELECT CAST(ISNULL(strLocationNumber, ''0'') AS INT) FROM tblSMCompanyLocation WHERE [strLocationNumber] NOT LIKE ''%[^0-9]%'') --r.ptloc_loc_no IS NULL
+		   SELECT CAST(ISNULL(strLocationNumber, ''0'') AS INT) AS number INTO #Existing FROM tblSMCompanyLocation WHERE [strLocationNumber] NOT LIKE ''%[^0-9]%''
+		   SELECT seq AS number  INTO #Available FROM #seq_table WHERE seq NOT IN 
+	       (
+	       		SELECT CAST(ptloc_loc_no AS INT) AS number 
+	       		FROM ptlocmst 
+	       		WHERE [ptloc_loc_no] NOT LIKE ''%[^0-9]%'' 
+	       		UNION ALL
+	       		SELECT number FROM #Existing
+	       )
+
+		   IF @MaxNumber2 IS NULL
+		   BEGIN
+			SET @MaxNumber2 = 0
+		   END
+
+		   SELECT TOP 1 @Unused = number FROM #Available WHERE number NOT IN (SELECT ptloc_loc_no FROM ptlocmst WHERE [ptloc_loc_no] NOT LIKE ''%[^0-9]%'')--SELECT TOP 1 @Unused = number FROM #Available WHERE number NOT IN (SELECT ptloc_loc_no FROM ptlocmst WHERE [ptloc_loc_no] NOT LIKE ''%[^0-9]%'')
+
+		   SELECT @GreaterNumber = CASE WHEN @MaxNumber1 > @MaxNumber2 THEN @MaxNumber1 ELSE @MaxNumber2 END
+		   SELECT @GreaterNumber = CASE WHEN @GreaterNumber >= 999 THEN @Unused - 1 ELSE @GreaterNumber END
+         
+		   --IF(EXISTS(SELECT NULL FROM ptlocmst WHERE ISNUMERIC([ptloc_loc_no]) = 0) OR @MaxNumber > 998)  
+		   -- BEGIN  
+  
+		   -- END  
+		   --ELSE  
+		   -- BEGIN  
+  
+			 UPDATE tblSMCompanyLocation -- Uncomment Once strLocationNumberhas been adde to strLocationNumber  
+			 SET strLocationNumber = RIGHT(''000'' + CAST(@GreaterNumber + 1 AS VARCHAR(3)),3)--@GreaterNumber + 1  
+			 WHERE intCompanyLocationId = @TopLocId  
+			--END  
+          
+		   DELETE FROM #Temp WHERE intCompanyLocationId = @TopLocId  
+		   DROP TABLE #Available
+		   DROP TABLE #Existing
+		  END   
+
+		 DROP TABLE #Temp
+		 DROP TABLE #seq_table         
+		END  
+      
+	   DECLARE @RecordsToProcess table(strNumber varchar(3), strName varchar(30))  
+	   DECLARE @RecordsToAdd table(strNumber varchar(3), strName varchar(30))  
+	   DECLARE @RecordsToUpdate table(strNumber varchar(3), strName varchar(30))  
+  
+	   DELETE FROM @RecordsToProcess  
+	   DELETE FROM @RecordsToAdd  
+	   DELETE FROM @RecordsToUpdate  
+  
+  
+  
+	   IF(LOWER(@LocationNumbers) = ''all'')
+		BEGIN
+		 IF (@ToOrigin = 1)
+		  INSERT INTO @RecordsToProcess(strName, strNumber)
+		  SELECT [strLocationName], [strLocationNumber]
+		  FROM tblSMCompanyLocation
+		 ELSE
+		  INSERT INTO @RecordsToProcess(strName, strNumber)
+		  SELECT [ptloc_name], [ptloc_loc_no]
+		  FROM ptlocmst
+		END
+	   ELSE
+		BEGIN
+		 IF (@ToOrigin = 1)
+		  INSERT INTO @RecordsToProcess(strName, strNumber)
+		  SELECT CL.[strLocationName], ISNULL(CL.[strLocationNumber], ''000'')
+		  FROM fnGetRowsFromDelimitedValues(@LocationNumbers) T
+		  INNER JOIN tblSMCompanyLocation CL ON T.[intID] = CL.[intCompanyLocationId]
+		 ELSE
+		  INSERT INTO @RecordsToProcess(strName, strNumber)
+		  SELECT PT.[ptloc_name], PT.[ptloc_loc_no]
+		  FROM fnGetRowsFromDelimitedValues(@LocationNumbers) T
+		  INNER JOIN ptlocmst PT ON T.[intID] = PT.[ptloc_loc_no]
+		END
+      
+	   IF (@ToOrigin = 1)  
+		INSERT INTO @RecordsToAdd  
+		SELECT P.*  
+		FROM @RecordsToProcess P  
+		LEFT OUTER JOIN ptlocmst PT ON P.[strNumber] = PT.[ptloc_loc_no]  
+		WHERE PT.[ptloc_loc_no] IS NULL  
+	   ELSE  
+		INSERT INTO @RecordsToAdd  
+		SELECT P.*  
+		FROM @RecordsToProcess P  
+		LEFT OUTER JOIN tblSMCompanyLocation CL ON P.[strNumber] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+		WHERE CL.[strLocationNumber] IS NULL           
+      
+	   INSERT INTO @RecordsToUpdate  
+	   SELECT P.*  
+	   FROM @RecordsToProcess P  
+	   LEFT JOIN @RecordsToAdd A ON P.[strNumber] = A.[strNumber]  
+	   WHERE A.strNumber IS NULL   
+  
+	   IF(@ToOrigin = 1)   
+		BEGIN  
+	 
+		 INSERT INTO [ptlocmst]  
+		  (ptloc_loc_no
+			,ptloc_name
+			,ptloc_addr
+			,ptloc_city
+			,ptloc_state
+			,ptloc_zip
+			,ptloc_phone
+			,ptloc_gl_profit_center
+			,ptloc_inv_by_loc_yn
+			,ptloc_frt_exp_acct_no
+			,ptloc_frt_inc_acct_no
+			--,ptloc_auto_assign_ivc_yn
+			,ptloc_csh_drwr_yn
+			,ptloc_csh_drwr_dev_id
+			,ptloc_reg_tape_yn
+			,ptloc_reg_tape_prtr
+			--,ptloc_upc_tic_yn				
+			--,ptloc_bar_code_yn
+			,ptloc_bar_code_prtr
+			--,ptloc_prt_co_name_yn
+			--,ptloc_use_loc_addr_yn
+			--,ptloc_dflt_batch_no		
+			--,ptloc_season_chng_rev_dt				
+			--,ptloc_dd_ivc_pgm_name		
+			--,ptloc_purch_default_carrier
+			,ptloc_last_ord_no
+			--,ptloc_ivc_prt_prompt_yn
+			--,ptloc_ivc_type_fpl
+			--,ptloc_use_ord_for_ivc_yn
+			,ptloc_last_ivc_no
+			--,ptloc_last_po_no
+			,ptloc_ivc_prtr_name
+			,ptloc_upc_rct_yn
+			,ptloc_upc_search_ui
+			--,ptloc_ivc_pgm_name
+			--,ptloc_pik_prtr_name
+			--,ptloc_pik_pgm_name
+			--,ptloc_bo_batch_no
+			,ptloc_cash_rcts_ynr
+			--,ptloc_qte_prtr_name
+			,ptloc_cash_tender_yn
+			,ptloc_dd_clock_loc_no
+			,ptloc_season_ind_sw
+			,ptloc_dlv_tic_prtr
+			,ptloc_dlv_tic_no
+			,ptloc_disc_taken
+			,ptloc_default_carrier
+			--,ptloc_credit_mgr_email
+			--,ptloc_local1_id
+			--,ptloc_local2_id
+			,ptloc_dflt_tic_type_oi
+			--,ptloc_dd_dflt_batch_no
+			,ptloc_merchant
+			--,ptloc_recalc_price_yn
+			--,ptloc_dlvry_pickup_ind
+			--,ptloc_upc_for_inv_yn
+			--,ptloc_bln_upd_gl_yn
+			--,ptloc_rcts_bal_pnd_dtl_yn
+			,ptloc_send_to_et_yn
+			--,ptloc_def_pay_type
+			--,ptloc_default_appl_mthd
+			--,A4GLIdentity
+		  )  
+		 SELECT   
+		  CL.[strLocationNumber]										--[ptloc_loc_no] 
+		  ,CL.[strLocationName]											--[ptloc_name]  
+		  ,CL.[strAddress]												--[ptloc_addr] 
+		  ,CL.[strCity]													--[ptloc_city]  
+		  ,CL.[strStateProvince]										--[ptloc_state]  
+		  ,CL.[strZipPostalCode]										--[ptloc_zip]  
+		  ,CL.[strPhone]												--[ptloc_phone]  
+		  ,CL.[intProfitCenter]											--[ptloc_gl_profit_center]  
+		  ,''N''															--[ptloc_inv_by_loc_ynd]
+		  ,FE.[strExternalId]											--[ptloc_frt_exp_acct_no]
+		  ,FI.[strExternalId]											--[ptloc_frt_inc_acct_no]
+		  --,ptloc_auto_assign_ivc_yn	  
+		  ,(CASE CL.[ysnUsingCashDrawer]  
+			   WHEN 1 THEN ''Y''  
+			   WHEN 0 THEN ''N''   
+			   ELSE ''N''  
+		   END)															--[ptloc_csh_drwr_yn]  
+		  ,CL.[strCashDrawerDeviceId]									--[ptloc_csh_drwr_dev_id]  
+		  ,(CASE CL.[ysnPrintRegisterTape]  
+			   WHEN 1 THEN ''Y''  
+			   WHEN 0 THEN ''N''  
+			   ELSE ''N''  
+		   END)															--[ptloc_reg_tape_yn]  
+		  ,NULL															--[ptloc_reg_tape_prtr] 
+		  --,ptloc_upc_tic_yn				
+		  --,ptloc_bar_code_yn 
+		  ,CL.[strBarCodePrinterName]									--[ptloc_bar_code_prtr]  
+		  --,ptloc_prt_co_name_yn
+		  --,ptloc_use_loc_addr_yn
+		  --,ptloc_dflt_batch_no		
+		  --,ptloc_season_chng_rev_dt				
+		  --,ptloc_dd_ivc_pgm_name		
+		  --,ptloc_purch_default_carrier
+		  ,dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])		--[ptloc_last_ord_no] 
+		  --,ptloc_ivc_prt_prompt_yn
+		  --,ptloc_ivc_type_fpl
+		  --,ptloc_use_ord_for_ivc_yn 
+		  ,dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])	--[ptloc_last_ivc_no]  
+		  --,ptloc_last_po_no
+		  ,CL.[strDefaultInvoicePrinter]								--[ptloc_ivc_prtr_name]
+		  ,NULL															--[ptloc_upc_rct_yn]  
+		  ,(CASE CL.[strUPCSearchSequence]  							   
+			   WHEN ''UPC Code''  THEN ''U''  								   
+			   WHEN ''Item Code'' THEN ''I''  								   
+			   ELSE ''''  												   
+		   END)															--[ptloc_upc_search_ui]  
+		   --,ptloc_ivc_pgm_name
+			--,ptloc_pik_prtr_name
+			--,ptloc_pik_pgm_name
+			--,ptloc_bo_batch_no
+		  ,(CASE CL.[strPrintCashReceipts]  
+			   WHEN ''Yes''    THEN ''Y''  
+			   WHEN ''No''    THEN ''N''  
+			   WHEN ''Register Tape'' THEN ''R''      
+			   ELSE ''''  
+		   END)															--[ptloc_cash_rcts_ynr]  
+		   --,ptloc_qte_prtr_name
+		  ,(CASE CL.[ysnPrintCashTendered]  
+			   WHEN 1 THEN ''Y''  
+			   WHEN 0 THEN ''N''  
+			   ELSE ''N''  
+		   END)															--[ptloc_cash_tender_yn]  
+		  ,NULL															--[ptloc_dd_clock_loc]  
+		  ,NULL															--[ptloc_season_ind_sw]  
+		  ,NULL															--[ptloc_dlv_tic_prtr]  
+		  ,NULL															--[ptloc_dlv_tic_no]  
+		  ,SD.[strExternalId]											--[ptloc_disc_taken]  
+		  ,CL.[strDefaultCarrier]										--[ptloc_default_carrier]
+		  --,ptloc_credit_mgr_email
+		  --,ptloc_local1_id
+		  --,ptloc_local2_id
+		  ,(CASE CL.[strOrderTypeDefault]  
+			   WHEN ''Order''  THEN ''O''  
+			   WHEN ''Invoice''  THEN ''I''  
+			   WHEN ''Cash Sale'' THEN ''S''      
+			   ELSE ''''  
+		   END)															--[ptloc_dflt_tic_type_oi]   
+		   --,ptloc_dd_dflt_batch_no 
+		  ,CL.[strJohnDeereMerchant]									--[ptloc_merchant] 
+		  --,ptloc_recalc_price_yn
+		  --,ptloc_dlvry_pickup_ind
+		  --,ptloc_upc_for_inv_yn
+		  --,ptloc_bln_upd_gl_yn
+		  --,ptloc_rcts_bal_pnd_dtl_yn 
+		  ,(CASE CL.[ysnSendtoEnergyTrac]  
+			   WHEN 1 THEN ''Y''  
+			   WHEN 0 THEN ''N''  
+			   ELSE ''N''  
+		   END)															--[ptloc_send_to_et_yn]  
+		   --,ptloc_def_pay_type
+		   --,ptloc_default_appl_mthd
+		   --,A4GLIdentity
+		 FROM   
+		  tblSMCompanyLocation CL  
+		 INNER JOIN
+		  @RecordsToAdd A  
+		   ON ISNULL(CL.[strLocationNumber], ''000'') = A.strNumber  COLLATE Latin1_General_CI_AS AND CL.strLocationName = A.strName COLLATE Latin1_General_CI_AS
+		 LEFT JOIN  
+		  tblGLCOACrossReference CA  
+		   ON CL.[intCashAccount] = CA.[inti21Id]  
+		 LEFT JOIN  
+		  tblGLCOACrossReference FE  
+		   ON CL.[intFreightExpenses] = FE.[inti21Id]  
+		 LEFT JOIN  
+		  tblGLCOACrossReference FI  
+		   ON CL.intFreightIncome = FI.[inti21Id]  
+		 LEFT JOIN  
+		  tblGLCOACrossReference SC  
+		   ON CL.intServiceCharges = SC.[inti21Id]   
+		 LEFT JOIN  
+		  tblGLCOACrossReference SD  
+		   ON CL.intSalesDiscounts = SD.[inti21Id]   
+		 LEFT JOIN  
+		  tblGLCOACrossReference OS  
+		   ON CL.intCashOverShort = OS.[inti21Id]  
+		 LEFT JOIN  
+		  tblGLCOACrossReference WO  
+		   ON CL.intWriteOff = WO.[inti21Id]   
+		 LEFT JOIN  
+		  tblGLCOACrossReference CF  
+		   ON CL.intCreditCardFee = CF.[inti21Id]  
+		 LEFT OUTER JOIN  
+		  tblSMCountry C  
+		   ON CL.strCountry = C.strCountry       
+        
+		 SET @AddedCount = @@ROWCOUNT  
+
+       
+		 UPDATE [ptlocmst]  
+		 SET   
+		  [ptloc_name] = CL.[strLocationName]  
+		  ,[ptloc_addr] = CL.[strAddress] --[ptloc_addr] 
+		  ,[ptloc_city] = CL.[strCity]   
+		  ,[ptloc_state] = CL.[strStateProvince]  
+		  ,[ptloc_zip] = CL.[strZipPostalCode]  
+		  ,[ptloc_inv_by_loc_yn] = [ptloc_inv_by_loc_yn]  
+		  ,[ptloc_csh_drwr_yn] =   
+			(CASE CL.[ysnUsingCashDrawer]  
+			 WHEN 1 THEN ''Y''  
+			 WHEN 0 THEN ''N''  
+			 ELSE ''N''  
+			END)  
+		  ,[ptloc_csh_drwr_dev_id] = CL.[strCashDrawerDeviceId]  
+		  ,[ptloc_reg_tape_yn] =   
+			(CASE CL.[ysnPrintRegisterTape]  
+			 WHEN 1 THEN ''Y''  
+			 WHEN 0 THEN ''N''  
+			 ELSE ''N''  
+			END)  
+		  ,[ptloc_reg_tape_prtr] = [ptloc_reg_tape_prtr]  
+		  ,[ptloc_bar_code_prtr] = CL.[strBarCodePrinterName]  
+		  ,[ptloc_ivc_prtr_name] = CL.[strDefaultInvoicePrinter]  
+		  ,[ptloc_last_ivc_no] = dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])
+		  ,[ptloc_last_ord_no] = dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])
+		  ,[ptloc_upc_rct_yn] = [ptloc_upc_rct_yn]  
+		  ,[ptloc_upc_search_ui] =  
+			(CASE CL.[strUPCSearchSequence]  
+			 WHEN ''UPC Code''  THEN ''U''  
+			 WHEN ''Item Code'' THEN ''I''  
+			 ELSE ''''  
+			  END)  
+		  ,[ptloc_cash_rcts_ynr] =  
+			(CASE CL.[strPrintCashReceipts]  
+			 WHEN ''Yes''    THEN ''Y''  
+			 WHEN ''No''    THEN ''N''  
+			 WHEN ''Register Tape'' THEN ''R''      
+			 ELSE ''''  
+			END)  
+		  ,[ptloc_cash_tender_yn] =  
+			(CASE CL.[ysnPrintCashTendered]  
+			 WHEN 1 THEN ''Y''  
+			 WHEN 0 THEN ''N''  
+			 ELSE ''N''  
+			END)  
+		  ,[ptloc_season_ind_sw] = [ptloc_season_ind_sw]  
+		  ,[ptloc_dlv_tic_prtr] = [ptloc_dlv_tic_prtr]  
+		  ,[ptloc_dlv_tic_no] = [ptloc_dlv_tic_no]            
+		  ,[ptloc_gl_profit_center] = GL.strCode --CL.[intProfitCenter]  
+		  ,[ptloc_frt_exp_acct_no] = FE.[strExternalId]  
+		  ,[ptloc_frt_inc_acct_no] = FI.[strExternalId]  
+		  ,[ptloc_disc_taken] = SD.[strExternalId]       
+		  ,[ptloc_default_carrier] = CL.[strDefaultCarrier]  
+		  ,[ptloc_merchant] = CL.[strJohnDeereMerchant]  
+		  ,[ptloc_send_to_et_yn] =  
+			(CASE CL.[ysnSendtoEnergyTrac]  
+			 WHEN 1 THEN ''Y''  
+			 WHEN 0 THEN ''N''  
+			 ELSE ''N''  
+			END)  
+		 FROM  
+		  tblSMCompanyLocation CL  
+		 INNER JOIN
+		  @RecordsToUpdate U  
+		   ON ISNULL(CL.[strLocationNumber], ''000'') = U.strNumber COLLATE Latin1_General_CI_AS AND CL.strLocationName = U.strName COLLATE Latin1_General_CI_AS  
+		 LEFT JOIN  
+		  tblGLCOACrossReference CA  
+		   ON CL.[intCashAccount] = CA.[inti21Id]  
+		 LEFT JOIN  
+		  tblGLCOACrossReference FE  
+		   ON CL.[intFreightExpenses] = FE.[inti21Id]  
+		 LEFT JOIN  
+		  tblGLCOACrossReference FI  
+		   ON CL.intFreightIncome = FI.[inti21Id]  
+		 LEFT JOIN  
+		  tblGLCOACrossReference SC  
+		   ON CL.intServiceCharges = SC.[inti21Id]   
+		 LEFT JOIN  
+		  tblGLCOACrossReference SD  
+		   ON CL.intSalesDiscounts = SD.[inti21Id]   
+		 LEFT JOIN  
+		  tblGLCOACrossReference OS  
+		   ON CL.intCashOverShort = OS.[inti21Id]  
+		 LEFT JOIN  
+		  tblGLCOACrossReference WO  
+		   ON CL.intWriteOff = WO.[inti21Id]   
+		 LEFT JOIN  
+		  tblGLCOACrossReference CF  
+		   ON CL.intCreditCardFee = CF.[inti21Id]  
+		 LEFT OUTER JOIN  
+		  tblSMCountry C  
+		   ON CL.strCountry = C.strCountry      
+		 LEFT JOIN
+			tblGLAccountSegment GL 
+			 ON CL.[intProfitCenter] = GL.[intAccountSegmentId]
+ 
+		 WHERE
+		  RTRIM(LTRIM([ptlocmst].[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))  
+         
+		 SET @UpdatedCount = @@ROWCOUNT  
+  
+		END  
+      
+	   ELSE  
+		BEGIN  
+		  INSERT INTO [tblSMCompanyLocation]  
+			([strLocationNumber]  
+			,[strLocationName]   
+			,[strLocationType]  
+			,[strAddress]  
+			,[strZipPostalCode]  
+			,[strCity]  
+			,[strStateProvince]  
+			,[strCountry]  
+			,[strPhone]  
+			,[strFax]  
+			,[strEmail]  
+			,[strWebsite]  
+			,[strInternalNotes]  
+			,[strUseLocationAddress]  
+			,[strSkipSalesmanDefault]  
+			,[ysnSkipTermsDefault]  
+			,[strOrderTypeDefault]  
+			,[strPrintCashReceipts]  
+			,[ysnPrintCashTendered]  
+			,[strSalesTaxByLocation]  
+			,[strDeliverPickupDefault]  
+			,[strTaxState]  
+			,[strTaxAuthorityId1]  
+			,[strTaxAuthorityId2]  
+			,[ysnOverridePatronage]  
+			,[strOutOfStockWarning]  
+			,[strLotOverdrawnWarning]  
+			,[strDefaultCarrier]  
+			,[ysnOrderSection2Required]  
+			,[strPrintonPO]  
+			,[dblMixerSize]  
+			,[ysnOverrideMixerSize]  
+			,[ysnEvenBatches]  
+			,[ysnDefaultCustomBlend]  
+			,[ysnAgroguideInterface]  
+			,[ysnLocationActive]  
+			,[intProfitCenter]  
+			,[intCashAccount]  
+			,[intDepositAccount]  
+			,[intARAccount]  
+			,[intAPAccount]  
+			,[intSalesAdvAcct]  
+			,[intPurchaseAdvAccount]  
+			,[intFreightAPAccount]  
+			,[intFreightExpenses]  
+			,[intFreightIncome]  
+			,[intServiceCharges]  
+			,[intSalesDiscounts]  
+			,[intCashOverShort]  
+			,[intWriteOff]  
+			,[intCreditCardFee]  
+			,[intSalesAccount]  
+			,[intCostofGoodsSold]  
+			,[intInventory]  
+			,[strInvoiceType]  
+			,[strDefaultInvoicePrinter]  
+			,[strPickTicketType]  
+			,[strDefaultTicketPrinter]  
+			,[strLastOrderNumber]  
+			,[strLastInvoiceNumber]  
+			,[strPrintonInvoice]  
+			,[ysnPrintContractBalance]  
+			,[strJohnDeereMerchant]  
+			,[strInvoiceComments]  
+			,[ysnUseOrderNumberforInvoiceNumber]  
+			,[ysnOverrideOrderInvoiceNumber]  
+			,[ysnPrintInvoiceMedTags]  
+			,[ysnPrintPickTicketMedTags]  
+			,[ysnSendtoEnergyTrac]  
+			,[strDiscountScheduleType]  
+			,[strLocationDiscount]  
+			,[strLocationStorage]  
+			,[strMarketZone]  
+			,[strLastTicket]  
+			,[ysnDirectShipLocation]  
+			,[ysnScaleInstalled]  
+			,[strDefaultScaleId]  
+			,[ysnActive]  
+			,[ysnUsingCashDrawer]  
+			,[strCashDrawerDeviceId]  
+			,[ysnPrintRegisterTape]  
+			,[ysnUseUPConOrders]  
+			,[ysnUseUPConPhysical]  
+			,[ysnUseUPConPurchaseOrders]  
+			,[strUPCSearchSequence]  
+			,[strBarCodePrinterName]  
+			,[strPriceLevel1]  
+			,[strPriceLevel2]  
+			,[strPriceLevel3]  
+			,[strPriceLevel4]  
+			,[strPriceLevel5]  
+			,[ysnOverShortEntries]  
+			,[strOverShortCustomer]  
+			,[strOverShortAccount]  
+			,[ysnAutomaticCashDepositEntries]  
+			,[intConcurrencyId])  
+		   SELECT  
+			PT.[ptloc_loc_no]  
+			,(CASE WHEN EXISTS(SELECT [ptloc_loc_no], [ptloc_name] FROM ptlocmst WHERE RTRIM(LTRIM([ptloc_loc_no])) <> RTRIM(LTRIM(PT.[ptloc_loc_no])) AND RTRIM(LTRIM([ptloc_name])) = RTRIM(LTRIM(PT.[ptloc_name])))  
+			 THEN   
+			  RTRIM(LTRIM(PT.[ptloc_name])) + '' - '' + RTRIM(LTRIM(PT.[ptloc_loc_no]))  
+			 ELSE  
+			  RTRIM(LTRIM(PT.[ptloc_name]))  
+			  END)										--<strLocationName, nvarchar(50),>  
+			,''Office''									--<strLocationType, nvarchar(50),>  
+			,RTRIM(LTRIM(ISNULL(PT.[ptloc_addr],'''')))   --<strAddress, nvarchar(max),>  
+			,[ptloc_zip]								--<strZipPostalCode, nvarchar(50),>  
+			,[ptloc_city]								--<strCity, nvarchar(50),>  
+			,[ptloc_state]								--<strStateProvince, nvarchar(50),>  
+			,''''											--<strCountry, nvarchar(50),>  
+			,(CASE   
+			 WHEN CHARINDEX(''x'', PT.[ptloc_phone]) > 0   
+			  THEN SUBSTRING(SUBSTRING(PT.[ptloc_phone],1,15), 0, CHARINDEX(''x'',PT.[ptloc_phone]))   
+			 ELSE   
+			  SUBSTRING(PT.[ptloc_phone],1,15)  
+			  END)										--<strPhone, nvarchar(50),>  
+			,''''											---<strFax, nvarchar(50),>  
+			,''''											--<strEmail, nvarchar(50),>  
+			,''''											--<strWebsite, nvarchar(50),>  
+			,''''											--<strInternalNotes, nvarchar(max),>  
+			,(CASE UPPER(PT.[ptloc_use_loc_addr_yn])  
+			 WHEN ''Y'' THEN ''Yes''  
+			 WHEN ''N'' THEN ''No''   
+			 ELSE ''''  
+			  END)									    --<strUseLocationAddress, nvarchar(50),>  
+			,''Yes''									    --<strSkipSalesmanDefault, nvarchar(50),>  
+			,0										    --<ysnSkipTermsDefault, bit,>  
+			,(CASE UPPER(PT.[ptloc_dflt_tic_type_oi])  
+			 WHEN ''O'' THEN ''Order''  
+			 WHEN ''I'' THEN ''Invoice''      
+			 ELSE ''''  
+			  END)										--<strOrderTypeDefault, nvarchar(50),>  
+			,(CASE UPPER(PT.[ptloc_cash_rcts_ynr])  
+			 WHEN ''Y'' THEN ''Yes''  
+			 WHEN ''N'' THEN ''No''  
+			 WHEN ''R'' THEN ''Cash Receipts Printer''      
+			 ELSE ''''  
+			  END)										--<strPrintCashReceipts, nvarchar(50),>  
+			,(CASE UPPER(PT.[ptloc_cash_tender_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)										--<ysnPrintCashTendered, bit,>  
+			,''No''										--<strSalesTaxByLocation, nvarchar(50),>  
+			,(CASE UPPER(PT.[ptloc_dlvry_pickup_ind])  
+			 WHEN ''P'' THEN ''Pickup''  
+			 WHEN ''D'' THEN ''Deliver''  
+			 ELSE ''''  
+			  END)										--<strDeliverPickupDefault, nvarchar(50),>  
+			,''''											--<strTaxState, nvarchar(50),>  
+			,''''											--<strTaxAuthorityId1, nvarchar(50),>  
+			,''''											--<strTaxAuthorityId2, nvarchar(50),>  
+			,0											--<ysnOverridePatronage, bit,>  
+			,''No''										--<strOutOfStockWarning, nvarchar(50),>  
+			,''No''										--<strLotOverdrawnWarning, nvarchar(50),>  
+			,PT.[ptloc_default_carrier]					--<strDefaultCarrier, nvarchar(50),>  
+			,0										    --<ysnOrderSection2Required, bit,>  
+			,''''										    --<strPrintonPO, nvarchar(50),>  
+			,0											--<dblMixerSize, numeric(18,6),>  
+			,0										    --<ysnOverrideMixerSize, bit,>  
+			,0										    --<ysnEvenBatches, bit,>  
+			,0										    --<ysnDefaultCustomBlend, bit,>  
+			,0										    --<ysnAgroguideInterface, bit,>  
+			,1										    --<ysnLocationActive, bit,>  
+			,PT.[ptloc_gl_profit_center]				--<intProfitCenter, int,>    --TODO  
+			,0							        		--<ptloc_cash, int,>  
+			,0							        	    --<intDepositAccount, int,>  
+			,0							        	    --<intARAccount, int,>  
+			,0							        	    --<intAPAccount, int,>  
+			,0							        	    --<intSalesAdvAcct, int,>  
+			,0							        	    --<intPurchaseAdvAccount, int,>  
+			,0							        	    --<intFreightAPAccount, int,>  
+			,FE.[inti21Id]								--<intFreightExpenses, int,>  
+			,FI.[inti21Id]								--<intFreightIncome, int,>  
+			,0											--<intServiceCharges, int,>  
+			,0											--<intSalesDiscounts, int,>  
+			,0											--<intCashOverShort, int,>  
+			,0											--<intWriteOff, int,>  
+			,0											--<intCreditCardFee, int,>  
+			,0											--<intSalesAccount, int,>  
+			,0											--<intCostofGoodsSold, int,>  
+			,0											--<intInventory, int,>  
+			,(CASE UPPER(PT.[ptloc_ivc_type_fpl])  
+			 WHEN ''F'' THEN ''Forms''  
+			 WHEN ''L'' THEN ''Laser''  
+			 WHEN ''P'' THEN ''Plain Paper''  
+			 ELSE ''''  
+			  END)										--<strInvoiceType, nvarchar(50),>  
+			,PT.[ptloc_ivc_prtr_name]					--<strDefaultInvoicePrinter, nvarchar(50),>  
+			,''''											--<strPickTicketType, nvarchar(50),>  
+			,PT.[ptloc_pik_prtr_name]					--<strDefaultTicketPrinter, nvarchar(50),>  
+			,PT.[ptloc_last_ord_no]					    --<strLastOrderNumber, nvarchar(50),>  
+			,PT.[ptloc_last_ivc_no]					    --<strLastInvoiceNumber, nvarchar(50),>  
+			,''''										    --<strPrintonInvoice, nvarchar(50),>  
+			,0										    --<ysnPrintContractBalance, bit,>  
+			,PT.[ptloc_merchant]						--<strJohnDeereMerchant, nvarchar(50),>  
+			,''''										    --<strInvoiceComments, nvarchar(50),>  
+			,0										    --<ysnUseOrderNumberforInvoiceNumber, bit,>  
+			,0											--<ysnOverrideOrderInvoiceNumber, bit,>  
+			,0										    --<ysnPrintInvoiceMedTags, bit,>  
+			,0										    --<ysnPrintPickTicketMedTags, bit,>  
+			,(CASE UPPER(PT.[ptloc_send_to_et_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)										--<ysnSendtoEnergyTrac, bit,>  
+			,''''											--<strDiscountScheduleType, nvarchar(50),>  
+			,''''											--<strLocationDiscount, nvarchar(50),>  
+			,''''											--<strLocationStorage, nvarchar(50),>  
+			,''''											--<strMarketZone, nvarchar(50),>  
+			,''''											--<strLastTicket, nvarchar(50),>  
+			,0											--<ysnDirectShipLocation, bit,>  
+			,0											--<ysnScaleInstalled, bit,>  
+			,''''											--<strDefaultScaleId, nvarchar(50),>  
+			,0											--<ysnActive, bit,>  
+			,(CASE UPPER(PT.[ptloc_csh_drwr_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)										--<ysnUsingCashDrawer, bit,>  
+			,[ptloc_csh_drwr_dev_id]					--<strCashDrawerDeviceId, nvarchar(50),>  
+			,(CASE UPPER(PT.[ptloc_reg_tape_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)										--<ysnPrintRegisterTape, bit,>  
+			,(CASE UPPER(PT.[ptloc_upc_for_inv_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)										--<ysnUseUPConOrders, bit,>  
+			,0											--<ysnUseUPConPhysical, bit,>  
+			,0											--<ysnUseUPConPurchaseOrders, bit,>  
+			,(CASE UPPER(PT.[ptloc_upc_search_ui])  
+			 WHEN ''U'' THEN ''UPC''  
+			 WHEN ''I'' THEN ''Item''  
+			 ELSE ''''  
+			  END)										--<strUPCSearchSequence, nvarchar(50),>  
+			,[ptloc_bar_code_prtr]						--<strBarCodePrinterName, nvarchar(50),>  
+			,''''											--<strPriceLevel1, nvarchar(50),>  
+			,''''											--<strPriceLevel2, nvarchar(50),>  
+			,''''											--<strPriceLevel3, nvarchar(50),>  
+			,''''											--<strPriceLevel4, nvarchar(50),>  
+			,''''											--<strPriceLevel5, nvarchar(50),>  
+			,0											--<ysnOverShortEntries, bit,>  
+			,''''											--<strOverShortCustomer, nvarchar(50),>  
+			,''''											--<strOverShortAccount, nvarchar(50),>  
+			,0											--<ysnAutomaticCashDepositEntries, bit,>  
+			,0  
+		   FROM  
+			ptlocmst PT   
+		   LEFT JOIN  
+			tblGLCOACrossReference FE  
+			 ON PT.[ptloc_frt_exp_acct_no] = FE.strExternalId  
+		   LEFT JOIN  
+			tblGLCOACrossReference FI  
+			 ON PT.[ptloc_frt_inc_acct_no] = FI.strExternalId        
+		   LEFT OUTER JOIN  
+			tblSMCompanyLocation CL  
+			 ON RTRIM(LTRIM(PT.[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))            
+		   WHERE  
+			CL.[strLocationNumber] IS NULL  
+      
+		   ORDER BY  
+			PT.[ptloc_loc_no]  
+			,PT.[ptloc_name]  
+        
+       
+		 SET @AddedCount = @@ROWCOUNT  
+        
+        
+		 UPDATE [tblSMCompanyLocation]  
+		 SET   
+		  [strLocationName] =   
+		   (CASE WHEN EXISTS(SELECT [ptloc_loc_no], [ptloc_name] FROM ptlocmst WHERE RTRIM(LTRIM([ptloc_loc_no])) <> RTRIM(LTRIM(PT.[ptloc_loc_no])) AND RTRIM(LTRIM([ptloc_name])) = RTRIM(LTRIM(PT.[ptloc_name])))  
+			THEN   
+			 RTRIM(LTRIM(PT.[ptloc_name])) + '' - '' + RTRIM(LTRIM(PT.[ptloc_loc_no]))  
+			ELSE  
+			 RTRIM(LTRIM(PT.[ptloc_name]))  
+		   END)  
+		  ,[strLocationType] = [strLocationType]  
+		  ,[strAddress] = ISNULL(PT.[ptloc_addr], '''')
+			--(CASE   
+			-- WHEN RTRIM(LTRIM(PT.[ptloc_addr])) = ''''   
+			--  THEN PT.[ptloc_addr2]  
+			-- ELSE  
+			--  RTRIM(LTRIM(PT.[ptloc_addr])) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(PT.[ptloc_addr2]))  
+			--  END)  
+		  ,[strZipPostalCode] = PT.[ptloc_zip]  
+		  ,[strCity] = PT.[ptloc_city]  
+		  ,[strStateProvince] = PT.[ptloc_state]  
+		  ,[strPhone] =   
+			(CASE   
+			 WHEN CHARINDEX(''x'', PT.[ptloc_phone]) > 0   
+			  THEN SUBSTRING(SUBSTRING(PT.[ptloc_phone],1,15), 0, CHARINDEX(''x'',PT.[ptloc_phone]))   
+			 ELSE   
+			  SUBSTRING(PT.[ptloc_phone],1,15)  
+			  END)  
+		  ,[strFax] = [strFax]  
+		  ,[strEmail] = [strEmail]  
+		  ,[strWebsite] = [strWebsite]  
+		  ,[strInternalNotes] = [strInternalNotes]  
+		  ,[strPrintCashReceipts] =   
+			(CASE UPPER(PT.[ptloc_cash_rcts_ynr])  
+			 WHEN ''Y'' THEN ''Yes''  
+			 WHEN ''N'' THEN ''No''  
+			 WHEN ''R'' THEN ''Register Tape''      
+			 ELSE ''''  
+			  END)  
+		  ,[ysnPrintCashTendered] =   
+			(CASE UPPER(PT.[ptloc_cash_tender_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)  
+		  ,[intProfitCenter] = GL.intAccountSegmentId --ISNULL(PT.[ptloc_gl_profit_center],0)  
+		  --,[intCashAccount] = ISNULL(CA.[inti21Id],0)  
+		  ,[intDepositAccount] = ISNULL([intDepositAccount],0)  
+		  ,[intARAccount] = ISNULL([intARAccount],0)  
+		  ,[intAPAccount] = ISNULL([intAPAccount],0)  
+		  ,[intSalesAdvAcct] = ISNULL([intSalesAdvAcct],0)  
+		  ,[intPurchaseAdvAccount] = ISNULL([intPurchaseAdvAccount],0)  
+		  ,[intFreightAPAccount] = ISNULL([intFreightAPAccount],0)  
+		  ,[intFreightExpenses] = ISNULL(FE.[inti21Id],0)  
+		  ,[intFreightIncome] = ISNULL(FI.[inti21Id],0)  
+		  --,[intServiceCharges] = ISNULL(SC.[inti21Id],0)  
+		  --,[intSalesDiscounts] = ISNULL(SD.[inti21Id],0)  
+		  --,[intCashOverShort] = ISNULL(OS.[inti21Id],0)  
+		  --,[intWriteOff] = ISNULL(WO.[inti21Id],0)  
+		  --,[intCreditCardFee] = ISNULL(CF.[inti21Id],0)  
+		  ,[intSalesAccount] = ISNULL([intSalesAccount],0)  
+		  ,[intCostofGoodsSold] = ISNULL([intCostofGoodsSold],0)  
+		  ,[intInventory] = ISNULL([intInventory],0)      
+		  ,[strDefaultInvoicePrinter] = PT.[ptloc_ivc_prtr_name]  
+		  ,[strLastOrderNumber] = PT.[ptloc_last_ord_no]  
+		  ,[strLastInvoiceNumber] = PT.[ptloc_last_ivc_no]       
+		  ,[strJohnDeereMerchant] = PT.[ptloc_merchant]       
+		  ,[ysnSendtoEnergyTrac] =   
+			(CASE UPPER(PT.[ptloc_send_to_et_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)  
+		  ,[strDiscountScheduleType] = [strDiscountScheduleType]  
+		  ,[strLocationDiscount] = [strLocationDiscount]  
+		  ,[strLocationStorage] = [strLocationStorage]  
+		  ,[strMarketZone] = [strMarketZone]  
+		  ,[strLastTicket] = [strLastTicket]  
+		  ,[ysnDirectShipLocation] = [ysnDirectShipLocation]  
+		  ,[ysnScaleInstalled] = [ysnScaleInstalled]  
+		  ,[strDefaultScaleId] = [strDefaultScaleId]  
+		  --,[ysnActive] = [ysnActive]  
+		  ,[ysnUsingCashDrawer] =   
+			(CASE UPPER(PT.[ptloc_csh_drwr_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)  
+		  ,[strCashDrawerDeviceId] = PT.[ptloc_csh_drwr_dev_id]  
+		  ,[ysnPrintRegisterTape] =   
+			(CASE UPPER(PT.[ptloc_reg_tape_yn])  
+			 WHEN ''Y'' THEN 1  
+			 WHEN ''N'' THEN 0  
+			 ELSE 0  
+			  END)     
+		  ,[strUPCSearchSequence] =   
+			(CASE UPPER(PT.[ptloc_upc_search_ui])  
+			 WHEN ''U'' THEN ''UPC Code''  
+			 WHEN ''I'' THEN ''Item Code''  
+			 ELSE ''''  
+			  END)   
+		  ,[strBarCodePrinterName] = PT.[ptloc_bar_code_prtr]       
+		  ,[strOverShortCustomer] = [strOverShortCustomer]  
+		  ,[strOverShortAccount] = [strOverShortAccount]  
+		 FROM  
+		  ptlocmst PT  
+		  INNER JOIN  
+		   @RecordsToUpdate A  
+			ON PT.[ptloc_loc_no] = A.[strNumber]     
+		  --LEFT JOIN  
+		  -- tblGLCOACrossReference CA  
+		  --  ON PT.[ptloc_cash] = CA.[strExternalId]  
+		  LEFT JOIN  
+		   tblGLCOACrossReference FE  
+			ON PT.[ptloc_frt_exp_acct_no] = FE.[strExternalId]  
+		  LEFT JOIN  
+		   tblGLCOACrossReference FI  
+			ON PT.[ptloc_frt_inc_acct_no] = FI.[strExternalId]  
+		  --LEFT JOIN  
+		  -- tblGLCOACrossReference SC  
+		  --  ON PT.[ptloc_srvchr] = SC.[strExternalId]   
+		  LEFT JOIN  
+		   tblGLCOACrossReference SD  
+			ON PT.[ptloc_disc_taken] = SD.[strExternalId]   
+		  --LEFT JOIN  
+		  -- tblGLCOACrossReference OS  
+		  --  ON PT.[ptloc_over_short] = OS.[strExternalId]  
+		  --LEFT JOIN  
+		  -- tblGLCOACrossReference WO  
+		  --  ON PT.[ptloc_write_off] = WO.[strExternalId]   
+		  --LEFT JOIN  
+		  -- tblGLCOACrossReference CF  
+		  --  ON PT.[ptloc_ccfee_percent] = CF.[strExternalId] 
+		  LEFT JOIN
+			tblGLAccountSegment GL 
+			 ON PT.[ptloc_gl_profit_center] = CAST(GL.[strCode] AS INT) 	
+		  WHERE          
+		  RTRIM(LTRIM([strLocationNumber])) COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(PT.[ptloc_loc_no])) COLLATE Latin1_General_CI_AS  
+        
+		 SET @UpdatedCount = @@ROWCOUNT  
+		END    
+         
+	END  	
+			')
 END
