@@ -110,7 +110,7 @@ BEGIN TRY
 					CD.dblTotalCost			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
-			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
+			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
@@ -308,7 +308,7 @@ BEGIN TRY
 					CD.intFutureMonthId		=	@intNewFutureMonthId,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
-			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
+			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 		END
 		ELSE
@@ -319,7 +319,7 @@ BEGIN TRY
 					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
-			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
+			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 		END
 
@@ -336,7 +336,7 @@ BEGIN TRY
 					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 THEN 5 ELSE CD.intContractStatusId END
 			FROM	tblCTContractDetail	CD
 			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
-			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
+			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 		END
 		ELSE
@@ -348,7 +348,7 @@ BEGIN TRY
 					CD.dblTotalCost			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
-			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
+			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 		END
 
