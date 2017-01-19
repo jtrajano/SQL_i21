@@ -11,6 +11,8 @@
 	strCreatedBy			NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	strCreatedByNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	strEntityNo				NVARCHAR (100) COLLATE Latin1_General_CI_AS, --VENDOR 
+	strSubmittedBy			NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	strSubmittedByNo		NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	strTerm					NVARCHAR (100)  COLLATE Latin1_General_CI_AS, --PMNTTRMS / VEND_PART 
 	dtmContractDate			DATETIME, 
 	dtmStartDate			DATETIME, 

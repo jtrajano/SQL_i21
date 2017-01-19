@@ -51,7 +51,7 @@ BEGIN TRY
 				strStorageLocation,			dblQuantity,				dblCashPrice,		strQuantityUOM,
 				dtmPlannedAvailabilityDate,	dblBasis,					strCurrency,		dblUnitCashPrice,
 				strPriceUOM,				strRowState,				dtmContractDate,	dtmStartDate,	
-				dtmEndDate,					dtmFeedCreated
+				dtmEndDate,					dtmFeedCreated,				strSubmittedBy,		strSubmittedByNo
 		)
 		SELECT	intContractHeaderId,		intContractDetailId,		strCommodityCode,	strCommodityDesc,
 				strContractBasis,			strContractBasisDesc,		strSubLocation,		strCreatedBy,
@@ -60,7 +60,7 @@ BEGIN TRY
 				strStorageLocation,			dblQuantity,				dblCashPrice,		strQuantityUOM,
 				dtmPlannedAvailabilityDate,	dblBasis,					strCurrency,		dblUnitCashPrice,	
 				strPriceUOM,				'Added',					dtmContractDate,	dtmStartDate,	
-				dtmEndDate,					GETDATE()
+				dtmEndDate,					GETDATE(),					strSubmittedBy,		strSubmittedByNo
 		FROM	vyuCTContractFeed
 		WHERE	intContractDetailId = @intContractDetailId
 
