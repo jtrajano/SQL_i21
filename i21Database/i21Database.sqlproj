@@ -4848,6 +4848,8 @@
     <Build Include="dbo\Tables\tblTMGenerateWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICReportPhysicalInventoryCount.sql" />
     <Build Include="dbo\Views\vyuPREmployeeToProcess.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceProcessResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceProcess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
