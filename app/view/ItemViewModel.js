@@ -221,6 +221,13 @@ Ext.define('Inventory.view.ItemViewModel', {
         uomUnitMeasure: {
             type: 'icbuffereduom'
         },
+        uomTonnageTax: {
+            type: 'icbuffereduom',
+            sorters: {
+                direction: 'ASC',
+                property: 'strUnitMeasure'
+            }
+        },
         uomConversion: {
             autoLoad: true,
             type: 'icbuffereduom'

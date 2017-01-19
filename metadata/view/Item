@@ -2710,21 +2710,92 @@
                                                             "designerId": "ecdf7343-592f-423c-9c94-72c2e8789103",
                                                             "cn": [
                                                                 {
-                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "type": "Ext.container.Container",
                                                                     "reference": {
                                                                         "name": "items",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "boxLabel": null,
-                                                                        "fieldLabel": "Tonnage Tax",
-                                                                        "itemId": "chkTonnageTax",
-                                                                        "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "container|align": "stretch",
+                                                                        "layout": "hbox",
+                                                                        "layout|flex": 1
                                                                     },
-                                                                    "name": "MyCheckbox8",
-                                                                    "designerId": "419bbb07-3286-4ae8-9db2-cf457734a23e"
+                                                                    "name": "MyContainer3",
+                                                                    "designerId": "5dfe6297-1310-4a46-a4b1-7e74b9f76324",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Checkbox",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "boxLabel": null,
+                                                                                "fieldLabel": "Tonnage Tax",
+                                                                                "itemId": "chkTonnageTax",
+                                                                                "labelWidth": 115,
+                                                                                "layout|flex": 1
+                                                                            },
+                                                                            "name": "MyCheckbox8",
+                                                                            "designerId": "419bbb07-3286-4ae8-9db2-cf457734a23e"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "columns": [
+                                                                                    "[",
+                                                                                    "    {",
+                                                                                    "        dataIndex: 'intUnitMeasureId',",
+                                                                                    "        hidden: true",
+                                                                                    "    },",
+                                                                                    "    {",
+                                                                                    "        dataIndex: 'strUnitMeasure',",
+                                                                                    "        text: 'Unit Measure',",
+                                                                                    "        flex: 1",
+                                                                                    "    },",
+                                                                                    "    {",
+                                                                                    "        dataIndex: 'strSymbol',",
+                                                                                    "        text: 'Symbol',",
+                                                                                    "        flex: 1",
+                                                                                    "    },",
+                                                                                    "    {",
+                                                                                    "        dataIndex: 'strUnitType',",
+                                                                                    "        text: 'Type',",
+                                                                                    "        flex: 1",
+                                                                                    "    }",
+                                                                                    "]"
+                                                                                ],
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strUnitMeasure",
+                                                                                "fieldLabel": "UOM",
+                                                                                "itemId": "cboTonnageTaxUOM",
+                                                                                "labelWidth": 35,
+                                                                                "layout|flex": 1,
+                                                                                "padding": "0 0 0 10",
+                                                                                "valueField": "intUnitMeasureId",
+                                                                                "width": 121
+                                                                            },
+                                                                            "name": "MyComboBox27",
+                                                                            "configAlternates": {
+                                                                                "columns": "object"
+                                                                            },
+                                                                            "designerId": "06c0d7c9-6033-4453-9341-7a57d8caf1ce",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "columns",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.form.field.Checkbox",
@@ -2737,7 +2808,7 @@
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Load tracking",
                                                                         "itemId": "chkLoadTracking",
-                                                                        "labelWidth": 125,
+                                                                        "labelWidth": 115,
                                                                         "layout|flex": null
                                                                     },
                                                                     "name": "MyCheckbox9",
@@ -2755,7 +2826,7 @@
                                                                         "fieldStyle": "text-align:right",
                                                                         "hideTrigger": true,
                                                                         "itemId": "txtMixOrder",
-                                                                        "labelWidth": 125,
+                                                                        "labelWidth": 115,
                                                                         "layout|flex": null
                                                                     },
                                                                     "name": "MyNumberField17",
@@ -2772,7 +2843,7 @@
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Hand Add Ingredients",
                                                                         "itemId": "chkHandAddIngredients",
-                                                                        "labelWidth": 125,
+                                                                        "labelWidth": 115,
                                                                         "layout|flex": null
                                                                     },
                                                                     "name": "MyCheckbox10",
@@ -2813,7 +2884,7 @@
                                                                         "enableDrillDown": "true",
                                                                         "fieldLabel": "Medication Tag",
                                                                         "itemId": "cboMedicationTag",
-                                                                        "labelWidth": 125,
+                                                                        "labelWidth": 115,
                                                                         "layout|flex": null,
                                                                         "valueField": "intTagId"
                                                                     },
@@ -2870,7 +2941,7 @@
                                                                         "enableDrillDown": "true",
                                                                         "fieldLabel": "Ingredient Tag",
                                                                         "itemId": "cboIngredientTag",
-                                                                        "labelWidth": 125,
+                                                                        "labelWidth": 115,
                                                                         "layout|flex": null,
                                                                         "valueField": "intTagId"
                                                                     },
@@ -2902,7 +2973,7 @@
                                                                     "userConfig": {
                                                                         "fieldLabel": "Volume Rebate Group",
                                                                         "itemId": "txtVolumeRebateGroup",
-                                                                        "labelWidth": 125,
+                                                                        "labelWidth": 115,
                                                                         "layout|flex": null
                                                                     },
                                                                     "name": "MyTextField6",

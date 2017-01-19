@@ -154,7 +154,7 @@ namespace iRely.Inventory.Model
         public int? intLotStatusId { get; set; }
         public string strRequired { get; set; }
         public bool? ysnBasisContract { get; set; }
-
+        public int? intTonnageTaxUOMId { get; set; }
         private string _strM2MComputation;
         [NotMapped]
         public string strM2MComputation
@@ -307,6 +307,8 @@ namespace iRely.Inventory.Model
         public string strShortName { get; set; }
         public string strRequired { get; set; }
         public bool? ysnBasisContract { get; set; }
+        public int? intTonnageTaxUOMId { get; set; }
+        public string strTonnageTaxUOM { get; set; }
 
     }
 
@@ -463,6 +465,8 @@ namespace iRely.Inventory.Model
         public bool? ysnListBundleSeparately { get; set; }
         public decimal? dblExtendedCost { get; set; }
         public string strRequired { get; set; }
+        public int? intTonnageTaxUOMId { get; set; }
+        public string strTonnageTaxUOM { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }

@@ -521,6 +521,17 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             txtPercentDenaturant: '{current.dblDenaturantPercent}',
             chkTonnageTax: '{current.ysnTonnageTax}',
+            cboTonnageTaxUOM: {
+                store: '{uomTonnageTax}',
+                disabled: '{!current.ysnTonnageTax}',
+                value: '{current.intTonnageTaxUOMId}',
+                defaultFilters: [
+                    {
+                        column: 'strUnitType',
+                        value: 'Weight'
+                    }
+                ]
+            },
             chkLoadTracking: '{current.ysnLoadTracking}',
             txtMixOrder: '{current.dblMixOrder}',
             chkHandAddIngredients: '{current.ysnHandAddIngredient}',
