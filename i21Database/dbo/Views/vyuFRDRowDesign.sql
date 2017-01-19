@@ -21,6 +21,7 @@ intRowDetailId
 ,ysnShowOthers
 ,ysnLinktoGL
 ,ysnPrintEach
+,ysnPercentage
 ,ysnHidden
 ,dblHeight
 ,strFontName
