@@ -111,5 +111,17 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public async Task<SearchResult> GetUOMs(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICItemUOM>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "strItemNo", "ASC").ToListAsync();
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

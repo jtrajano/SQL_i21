@@ -174,4 +174,30 @@ namespace iRely.Inventory.Model
         public bool ysnAllowPurchase { get; set; }
         public bool ysnAllowSale { get; set; }
     }
+
+    public class vyuICItemUOM
+    {
+        public int intItemUOMId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strType { get; set; }
+        public int intItemId { get; set; }
+        public string strCategoryCode { get; set; }
+        public string strCategory { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCommodity { get; set; }
+        public string strCommodityCode { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strStockUOM { get; set; }
+        public string strUnitMeasure { get; set; }
+        public bool ysnStockUnit { get; set; }
+        public bool ysnAllowPurchase { get; set; }
+        public bool ysnAllowSale { get; set; }
+        public decimal? dblMaxQty { get; set; }
+        public decimal? dblUnitQty { get; set; }
+        public decimal? dblHeight { get; set; }
+        public decimal? dblLength { get; set; }
+        public decimal? dblWeight { get; set; }
+        public decimal? dblVolume { get; set; }
+    }
 }

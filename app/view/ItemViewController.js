@@ -146,6 +146,38 @@ Ext.define('Inventory.view.ItemViewController', {
                         {dataIndex: 'dblEndMonthCost', text: 'End Month Cost', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
                         {dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
                     ]
+                },
+                {
+                    title: 'Item UOM',
+                    api: {
+                        read: '../Inventory/api/ItemUOM/GetUOMs'
+                    },
+                    columns: [
+                        { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'intItemId', text: 'Item Id', width:100, flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strItemNo', text: 'Item No', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strItemDescription', text: 'Item Description', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strType', text: 'Item Type', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'intItemId', text: 'Item Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strCategory', text: 'Category', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strCategoryCode', text: 'Category Code', width:100, flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'intCategoryId', text: 'Category Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strCommodity', text: 'Commodity', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strCommodityCode', text: 'Commodity Code', width:100, flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'intCommodityId', text: 'Commodity Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strUnitMeasure', text: 'Unit Measure', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strStockUOM', text: 'Stock UOM', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'ysnStockUnit', text: 'Is Stock Unit', xtype: 'checkcolumn', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'ysnAllowPurchase', text: 'Allow Purchase', xtype: 'checkcolumn', width:100, flex: 1, dataType: 'boolean' },
+                        { dataIndex: 'ysnAllowSale', text: 'Allow Sale', xtype: 'checkcolumn', width:100, flex: 1, dataType: 'boolean' },
+                        { dataIndex: 'dblMaxQty', text: 'Max Qty', width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblUnitQty', text: 'Unit Qty', width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblHeight', text: 'Height', hidden: true, width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblLength', text: 'Length', hidden: true, width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblWeight', text: 'Weight', hidden: true, width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblVolume', text: 'Volume', hidden: true, width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' }
+                    ]
                 }
             ],
             buttons: [
