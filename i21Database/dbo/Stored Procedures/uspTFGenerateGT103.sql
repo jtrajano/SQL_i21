@@ -46,10 +46,10 @@ DECLARE @EIN NVARCHAR(50)
 		WHERE uniqTransactionGuid = @Guid 
 		AND strFormCode = @FormCodeParam
 
-		SET @TaxID = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND strTemplateItemId = 'GT-103-TID')
+		SET @TaxID = (SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'GT-103-TID')-- strFormCode = @FormCodeParam AND
 		SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 
-		INSERT INTO tblTFTransactionSummary (strSummaryGuid, 
+		INSERT INTO tblTFTaxReportSummary (strSummaryGuid, 
 					intTaxAuthorityId, 
 					strFormCode, 
 					strScheduleCode, 
@@ -103,14 +103,14 @@ DECLARE @EIN NVARCHAR(50)
 					-- GET SCHEDULE CODE PARAMETERS FOR FILTERING
 					SET @ReportTemplateId = (SELECT intTransactionSummaryItemId FROM TFTransactionSummaryItem WHERE intId = @TemplateItemCount)
 
-					SET @TemplateScheduleCodeParam = (SELECT strScheduleCode FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
-					SET @TemplateItemId = (SELECT strTemplateItemId FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
-
-					SET @TemplateDescription = (SELECT strDescription FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
-						SET @ReportItemSequence = (SELECT intReportItemSequence FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
-						SET @TemplateItemNumber = (SELECT intTemplateItemNumber FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
-						SET @ReportSection = (SELECT strReportSection FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
-						SET @TemplateConfiguration = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ReportTemplateId AND strFormCode = @FormCodeParam)
+					SELECT @TemplateScheduleCodeParam = strScheduleCode, 
+							@TemplateItemId = strTemplateItemId,
+							@TemplateDescription = strDescription,
+							@ReportItemSequence = intReportItemSequence,
+							@TemplateItemNumber = intTemplateItemNumber,
+							@ReportSection = strReportSection,
+							@TemplateConfiguration = strConfiguration
+							FROM tblTFReportingComponentConfiguration WHERE intReportingComponentConfigurationId = @ReportTemplateId 
 
 					SELECT @TemplateScheduleCodeParam = config.strScheduleCode,
 							@TemplateItemId = strTemplateItemId,
@@ -148,14 +148,14 @@ DECLARE @EIN NVARCHAR(50)
 							ELSE IF @TemplateItemId = 'GT-103-Summary-003'
 							BEGIN
 						--3. Total Taxable Gallons Sold (Line 1 minus Line 2)
-								SET @QueryTransaction = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+								SET @QueryTransaction = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 								INSERT INTO TFTransactionSummaryTotal
 								EXEC(@QueryTransaction)
 							END
 						ELSE IF @TemplateItemId = 'GT-103-Summary-004'
 							BEGIN
 						--4. Gasoline Use Tax Due. (Line 3 multiplied by the current rate. See Departmental Notice #2
-								SET @QueryTransaction = 'SELECT strColumnValue * ' + CONVERT(NVARCHAR(50), @TemplateConfiguration) + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @QueryTransaction = 'SELECT strColumnValue * ' + CONVERT(NVARCHAR(50), @TemplateConfiguration) + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO TFTransactionSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -165,13 +165,13 @@ DECLARE @EIN NVARCHAR(50)
 						--5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 0.73%
 								IF(@ScheduleCodeParam <> '')
 									BEGIN
-										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
+										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
 									ELSE
 									BEGIN
-										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFTaxReportTemplate'  
+										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
@@ -181,13 +181,13 @@ DECLARE @EIN NVARCHAR(50)
 						--6. Net Gasoline Use Tax Due. Subtotal of use tax and collection allowance. (Line 4 minus Line 5)
 								IF(@ScheduleCodeParam <> '')
 									BEGIN
-										SET @QueryTransaction  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+										SET @QueryTransaction  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
 									ELSE
 									BEGIN
-										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFTaxReportTemplate'  
+										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
@@ -197,13 +197,13 @@ DECLARE @EIN NVARCHAR(50)
 						--7. Penalty Due. If late, the penalty is 10% of the tax due on Line 6 or $5, whichever is greater.
 								IF(@ScheduleCodeParam <> '')
 									BEGIN
-										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
+										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
 									ELSE
 									BEGIN
-										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFTaxReportTemplate'  
+										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
@@ -213,13 +213,13 @@ DECLARE @EIN NVARCHAR(50)
 						--8. Interest Due. If late, multiply Line 6 by the interest rate (see Departmental Notice #3)
 								IF(@ScheduleCodeParam <> '')
 									BEGIN
-										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
 									ELSE
 									BEGIN
-										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFTaxReportTemplate'  
+										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
@@ -229,13 +229,13 @@ DECLARE @EIN NVARCHAR(50)
 						--9. Electronic Funds Transfer Credit
 								IF(@ScheduleCodeParam <> '')
 									BEGIN
-										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
 									ELSE
 									BEGIN
-										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFTaxReportTemplate'  
+										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
@@ -246,13 +246,13 @@ DECLARE @EIN NVARCHAR(50)
 						--10. Adjustments. If negative entry, use a negative sign. (You must provide an explanation and
 								IF(@ScheduleCodeParam <> '')
 									BEGIN
-										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
+										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
 									ELSE
 									BEGIN
-										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFTaxReportTemplate'  
+										SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
 										INSERT INTO TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END
@@ -260,9 +260,9 @@ DECLARE @EIN NVARCHAR(50)
 						ELSE IF @TemplateItemId = 'GT-103-Summary-011'
 							BEGIN
 						--11. Total Amount Due. (Add Lines 6 through 8, subtract Line 9, add Line 10).
-								SET @QueryTransaction = 'SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + '''' 
+								SET @QueryTransaction = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + '''' 
 								DECLARE @Value NVARCHAR(MAX) = ''
-								SET @Value = ((SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN('6','7','8') AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid) - (SELECT strColumnValue FROM tblTFTransactionSummary WHERE intItemNumber IN('9') AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid)) + (SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN('10') AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid)
+								SET @Value = ((SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN('6','7','8') AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid) - (SELECT strColumnValue FROM tblTFTaxReportSummary WHERE intItemNumber IN('9') AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid)) + (SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN('10') AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid)
 			
 								INSERT INTO TFTransactionSummaryTotal(dbLColumnValue)values(@Value)
 								EXEC(@QueryTransaction)
@@ -423,7 +423,7 @@ DECLARE @EIN NVARCHAR(50)
 												AND strFormCode = @FormCodeParam
 										END
 										-- REFACTOR THIS
-										INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strSection,strDescription, dtmDateRun)		
+										INSERT INTO tblTFTaxReportSummary (strSummaryGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strSection,strDescription, dtmDateRun)		
 										SELECT @Guid,@TA,@FormCodeParam,@TemplateScheduleCode, @CountTemplateItem, 'Details', 'Total Gallons Purchased', '',@ReceiptTotalGallsPurchased, @TemplateSection, @TemplateItemDescription, CAST(GETDATE() AS DATE)
 										UNION
 										SELECT @Guid,@TA,@FormCodeParam,@TemplateScheduleCode, @CountTemplateItem, 'Details','Gasoline Use Tax Paid', '',@GasolineUseTaxPaid, @TemplateSection, @TemplateItemDescription, CAST(GETDATE() AS DATE)
@@ -439,6 +439,6 @@ DECLARE @EIN NVARCHAR(50)
 				AND strFormCode = @FormCodeParam
 				IF(@isTransactionEmpty = 'No record found.')
 					BEGIN
-						UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
+						UPDATE tblTFTaxReportSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
 					END
 END

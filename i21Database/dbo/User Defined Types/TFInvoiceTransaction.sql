@@ -14,6 +14,7 @@
 	[dblNet] [numeric](18, 6) NULL,
 	[dblBillQty] [numeric](18, 6) NULL,
 	[dblTax] [numeric](18, 2) NULL,
+	[dblTaxExempt] [numeric](18, 2) NULL,
 	[strInvoiceNumber] [nvarchar](50) NULL,
 	[strPONumber] [nvarchar](50) NULL,
 	[strBillOfLading] [nvarchar](50) NULL,

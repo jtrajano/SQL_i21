@@ -107,6 +107,7 @@ BEGIN TRY
 				, dblNet
 				, dblBillQty
 				, dblTax
+				, dblTaxExempt
 				, strInvoiceNumber
 				, strPONumber
 				, strBillOfLading
@@ -154,6 +155,7 @@ BEGIN TRY
 					, tblARInvoiceDetail.dblQtyShipped AS dblGross
 					, tblARInvoiceDetail.dblQtyShipped AS dblBillQty
 					, tblARInvoiceDetailTax.dblTax
+					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
 					, tblARInvoice.strBOLNumber
@@ -172,7 +174,7 @@ BEGIN TRY
 					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
-					, tblSMTaxCode.strTaxCode
+					, tblTFTaxCategory.strTaxCategory
 					, NULL AS strTerminalControlNumber
 					, NULL AS strVendorName
 					, NULL AS strVendorFederalTaxId
@@ -236,6 +238,7 @@ BEGIN TRY
 				, dblNet
 				, dblBillQty
 				, dblTax
+				, dblTaxExempt
 				, strInvoiceNumber
 				, strPONumber
 				, strBillOfLading
@@ -283,6 +286,7 @@ BEGIN TRY
 					, tblARInvoiceDetail.dblQtyShipped AS dblGross
 					, tblARInvoiceDetail.dblQtyShipped AS dblBillQty
 					, tblARInvoiceDetailTax.dblTax
+					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
 					, tblARInvoice.strBOLNumber
@@ -301,7 +305,7 @@ BEGIN TRY
 					, tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
-					, tblSMTaxCode.strTaxCode
+					, tblTFTaxCategory.strTaxCategory
 					, NULL AS strTerminalControlNumber
 					, NULL AS strVendorName
 					, NULL AS strVendorFederalTaxId
@@ -407,6 +411,7 @@ BEGIN TRY
 				, dblNet
 				, dblBillQty
 				, dblTax
+				, dblTaxExempt
 				, strInvoiceNumber
 				, strPONumber
 				, strBillOfLading
@@ -454,6 +459,7 @@ BEGIN TRY
 					, tblICInventoryTransferDetail.dblQuantity AS dblNet
 					, tblICInventoryTransferDetail.dblQuantity
 					, NULL AS dblTax
+					, NULL AS dblTaxExempt
 					, NULL AS strInvoiceNumber
 					, NULL AS strPONumber
 					, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
@@ -472,7 +478,7 @@ BEGIN TRY
 					, tblEMEntity.strFederalTaxId AS strTransporterFEIN
 					, tblEMEntity.strName AS strConsignorName
 					, tblEMEntity.strFederalTaxId AS strConsignorFEIN
-					, NULL AS strTaxCode
+					, tblTFTaxCategory.strTaxCategory
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, EntityAPVendor.strName AS strVendorName
 					, EntityAPVendor.strFederalTaxId AS strVendorFEIN
@@ -538,6 +544,7 @@ BEGIN TRY
 				, dblNet
 				, dblBillQty
 				, dblTax
+				, dblTaxExempt
 				, strInvoiceNumber
 				, strPONumber
 				, strBillOfLading
@@ -585,6 +592,7 @@ BEGIN TRY
 					, tblICInventoryTransferDetail.dblQuantity AS dblNet
 					, tblICInventoryTransferDetail.dblQuantity
 					, NULL AS dblTax
+					, NULL AS dblTaxExempt
 					, NULL AS strInvoiceNumber
 					, NULL AS strPONumber
 					, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
@@ -603,7 +611,7 @@ BEGIN TRY
 					, tblEMEntity.strFederalTaxId AS strTransporterFEIN
 					, tblEMEntity.strName AS strConsignorName
 					, tblEMEntity.strFederalTaxId AS strConsignorFEIN
-					, NULL AS strTaxCode
+					, tblTFTaxCategory.strTaxCategory
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, EntityAPVendor.strName AS strVendorName
 					, EntityAPVendor.strFederalTaxId AS strVendorFEIN
@@ -687,7 +695,7 @@ BEGIN TRY
 				, strTransporterFederalTaxId
 				, strConsignorName
 				, strConsignorFederalTaxId
-				, strType
+				, strTaxCode
 				, strTerminalControlNumber
 				, strVendorName
 				, strVendorFederalTaxId
@@ -732,7 +740,7 @@ BEGIN TRY
 				, strTransporterFEIN
 				, strConsignorName
 				, strConsignorFEIN
-				, strType
+				, strTaxCode
 				, strTerminalControlNumber
 				, strVendorName
 				, strVendorFederalTaxId

@@ -1,4 +1,5 @@
 ﻿CREATE TYPE [dbo].[TFReportingComponent] AS TABLE (
+	[intId] INT IDENTITY(1,1) NOT NULL,
 	[intReportingComponentId] INT           NOT NULL,
     [strFormCode]             NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strFormName]             NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,

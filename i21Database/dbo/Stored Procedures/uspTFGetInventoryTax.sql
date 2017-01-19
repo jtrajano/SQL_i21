@@ -97,9 +97,11 @@ BEGIN TRY
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
+				, strTaxCategory
 				, dblGross
 				, dblNet
 				, dblBillQty
+				, dblTax
 				, dtmReceiptDate
 				, strShipVia
 				, strTransporterLicense
@@ -128,9 +130,11 @@ BEGIN TRY
 				, RCPC.strProductCode
 				, Receipt.strBillOfLading
 				, ReceiptItem.dblReceived
+				, NULL
 				, ReceiptItem.dblGross
 				, ReceiptItem.dblNet
 				, ReceiptItem.dblBillQty
+				, ReceiptItemTax.dblTax
 				, Receipt.dtmReceiptDate
 				, ShipVia.strShipVia
 				, ShipVia.strTransporterLicense
@@ -192,9 +196,11 @@ BEGIN TRY
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
+				, strTaxCategory
 				, dblGross
 				, dblNet
 				, dblBillQty
+				, dblTax
 				, dtmReceiptDate
 				, strShipVia
 				, strTransporterLicense
@@ -223,9 +229,11 @@ BEGIN TRY
 				, RCPC.strProductCode
 				, Receipt.strBillOfLading
 				, ReceiptItem.dblReceived
+				, TaxCategory.strTaxCategory
 				, ReceiptItem.dblGross
 				, ReceiptItem.dblNet
 				, ReceiptItem.dblBillQty
+				, ReceiptItemTax.dblTax
 				, Receipt.dtmReceiptDate
 				, ShipVia.strShipVia
 				, ShipVia.strTransporterLicense
@@ -361,9 +369,11 @@ BEGIN TRY
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
+				, strTaxCode
 				, dblGross
 				, dblNet
 				, dblBillQty
+				, dblTax
 				, dtmDate
 				, strShipVia
 				, strTransporterLicense
@@ -397,9 +407,11 @@ BEGIN TRY
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
+				, strTaxCategory
 				, dblGross
 				, dblNet
 				, dblBillQty
+				, dblTax
 				, dtmReceiptDate
 				, strShipVia
 				, strTransporterLicense
