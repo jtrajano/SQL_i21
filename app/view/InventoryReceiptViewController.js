@@ -186,7 +186,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         },
         binding: {
             bind: {
-                title: 'Inventory Receipt - {receiptTitle}'
+                title: '{receiptTitle}'
             },
             btnSave: {
                 disabled: '{isOriginOrPosted}'
@@ -378,10 +378,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // btnshowOtherCharges: {
             //     hidden: '{current.ysnPosted}'
             // },
-            btnBill: {
-                hidden: '{!current.ysnPosted}',
+            btnVoucher: {
+                hidden: '{hideVoucherButton}',
                 disabled: '{current.ysnOrigin}'
             },
+            btnDebitMemo: {
+                hidden: '{hideDebitMemoButton}',
+                disabled: '{current.ysnOrigin}'
+            },           
             btnQuality: {
                 hidden: '{current.ysnPosted}',
                 disabled: '{isOriginOrInventoryReturn}'
@@ -2920,7 +2924,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     // },
 
-    onBillClick: function (button, e, eOpts) {
+    onVoucherClick: function (button, e, eOpts) {
         var win = button.up('window'),
             current = win.viewModel.data.current,
             me = this,
@@ -2969,6 +2973,55 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onDebitMemoClick: function (button, e, eOpts) {
+        var win = button.up('window'),
+            current = win.viewModel.data.current,
+            me = this,
+		    receiptItems = current.tblICInventoryReceiptItems(),
+            countReceiptItems = receiptItems.getRange().length,
+            countPerLine = 0,
+            countItemsToProcess = 0;
+            countItemsWithZeroCost = 0;
+		
+        if (current) {
+            Ext.Array.each(receiptItems.data.items, function (item) {
+                if (!item.dummy) {
+                    countPerLine++;
+
+                    if (item.get('dblUnitCost') == 0) {
+                        countItemsWithZeroCost++;
+                    }
+                    else {
+                        countItemsToProcess++;
+                    }
+
+					if(countPerLine == countReceiptItems - 1) {
+                       var buttonAction = function (button) {
+                            if (button == 'yes') {
+                                // Create Voucher for receipt containing items with cost and ignore items with zero cost
+                                me.receiptToDebitMemoClick(current, button, win);	
+                            }
+                        }
+
+						if(countItemsToProcess > 0) {
+                            if (countItemsWithZeroCost > 0) {
+                                iRely.Functions.showCustomDialog('question','yesno','Items with zero cost will not be processed to debit memo. Continue?', buttonAction);
+                            }
+                            else {
+                                 // Create voucher for receipt containing cost for all items
+                                 me.receiptToDebitMemoClick(current, button, win);
+                            }
+                        }
+
+                        if(countItemsToProcess == 0 && countItemsWithZeroCost > 0) {
+                            iRely.Functions.showCustomDialog('information','ok','Cannot process debit memo for items with zero cost.');
+                        }
+					}
+                }         
+            }); 
+        }
+    },    
+
     processReceiptToVoucher: function (receiptId, callback) {
         ic.utils.ajax({
             url: '../Inventory/api/InventoryReceipt/ProcessBill',
@@ -2990,6 +3043,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         );          
     },
 
+    processReceiptToDebitMemo: function (receiptId, callback) {
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryReceipt/ProcessBill',
+            params:{
+                id: receiptId
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                callback(jsonData);
+            }
+            ,function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                var message = jsonData.message; 
+                iRely.Functions.showErrorDialog(message.statusText);
+            }
+        );          
+    },    
+
     receiptToVoucherClick: function (receipt, button, win) {
         this.processReceiptToVoucher(receipt.get('intInventoryReceiptId'), function (data) {
             var buttonAction = function (button) {
@@ -3007,7 +3081,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     win.close();
                 }
             };
-            iRely.Functions.showCustomDialog('question', 'yesno', 'Voucher successfully processed. Do you want to view this voucher?', buttonAction);
+            iRely.Functions.showCustomDialog('question', 'yesno', 'Voucher successfully processed. Do you want to view it?', buttonAction);
+        });
+    },
+
+    receiptToDebitMemoClick: function (receipt, button, win) {
+        this.processReceiptToDebitMemo(receipt.get('intInventoryReceiptId'), function (data) {
+            var buttonAction = function (button) {
+                if (button === 'yes') {
+                    iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                        filters: [
+                            {
+                                column: 'intBillId',
+                                value: data.message.BillId
+                            }
+                        ],
+                        action: 'view',
+                        showAddReceipt: false
+                    });
+                    win.close();
+                }
+            };
+            iRely.Functions.showCustomDialog('question', 'yesno', 'Debit Memo successfully processed. Do you want to view it?', buttonAction);
         });
     },
 
@@ -6193,9 +6288,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnReturn": {
                 click: this.onReturnClick
             },
-            "#btnBill": {
-                click: this.onBillClick
+            "#btnVoucher": {
+                click: this.onVoucherClick
             },
+            "#btnDebitMemo": {
+                click: this.onDebitMemoClick
+            },            
             "#btnViewItem": {
                 click: this.onInventoryClick
             },
