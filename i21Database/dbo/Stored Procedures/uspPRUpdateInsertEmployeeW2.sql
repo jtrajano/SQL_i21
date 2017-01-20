@@ -42,9 +42,9 @@ BEGIN
 		@intEntityEmployeeId
 		,@intYear
 		,strControlNumber = ''
-		,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
+		,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0) - ISNULL(PRETAX.dblTotal, 0)
 		,dblFIT = ISNULL(FIT.dblTotal, 0)
-		,dblTaxableSS = ISNULL(SSTAX.dblTotal, 0) / 0.062
+		,dblTaxableSS = CASE WHEN ((ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) > ISNULL(TAXTABLEREF.dblSSLimit, 0)) THEN ISNULL(TAXTABLEREF.dblSSLimit, 0) ELSE (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) END
 		,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
 		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
 		,dblSSTax = ISNULL(SSTAX.dblTotal, 0)
@@ -97,9 +97,11 @@ BEGIN
 				LEFT JOIN tblPRTypeTaxLocal lc ON tax.intTypeTaxLocalId = lc.intTypeTaxLocalId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 			AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' GROUP BY st.strCode, lc.strLocalName) LOCALTAX OUTER APPLY
-		(SELECT dblGrossSum = SUM(dblAdjustedGross) 
+		(SELECT dblGrossSum = SUM(dblGross) 
 			FROM tblPRPaycheck 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnPosted = 1 AND ysnVoid = 0) PCHK
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnPosted = 1 AND ysnVoid = 0) PCHK OUTER APPLY
+		(SELECT intYear, dblSSLimit FROM tblPRTaxTableReference 
+			WHERE intYear = @intYear) TAXTABLEREF
 
 		/* Get created Employee W-2 941 Id */
 		SET @intEmployeeW2Id = SCOPE_IDENTITY()
@@ -108,9 +110,9 @@ ELSE
 BEGIN
 	/* If it exists, update the values */
 	UPDATE tblPREmployeeW2
-	SET dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
+	SET dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0) - ISNULL(PRETAX.dblTotal, 0)
 		,dblFIT = ISNULL(FIT.dblTotal, 0)
-		,dblTaxableSS = ISNULL(SSTAX.dblTotal, 0) / 0.062
+		,dblTaxableSS = CASE WHEN ((ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) > ISNULL(TAXTABLEREF.dblSSLimit, 0)) THEN ISNULL(TAXTABLEREF.dblSSLimit, 0) ELSE (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) END
 		,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
 		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
 		,dblSSTax = ISNULL(SSTAX.dblTotal, 0)
@@ -151,10 +153,12 @@ BEGIN
 				LEFT JOIN tblPRTypeTaxLocal lc ON tax.intTypeTaxLocalId = lc.intTypeTaxLocalId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 			AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' GROUP BY st.strCode, lc.strLocalName) LOCALTAX OUTER APPLY
-		(SELECT dblGrossSum = SUM(dblAdjustedGross) 
+		(SELECT dblGrossSum = SUM(dblGross) 
 			FROM tblPRPaycheck 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnPosted = 1 AND ysnVoid = 0) PCHK
-	WHERE intYear = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnPosted = 1 AND ysnVoid = 0) PCHK OUTER APPLY
+		(SELECT intYear, dblSSLimit FROM tblPRTaxTableReference 
+			WHERE intYear = @intYear) TAXTABLEREF
+	WHERE tblPREmployeeW2.intYear = @intYear AND tblPREmployeeW2.intEntityEmployeeId = @intEntityEmployeeId 
 
 	/* Get the updated Employee W-2 941 Id */
 	SELECT TOP 1 @intEmployeeW2Id = intEmployeeW2Id FROM tblPREmployeeW2 WHERE intYear = @intYear AND intEntityEmployeeId = @intEntityEmployeeId
