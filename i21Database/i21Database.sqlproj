@@ -4854,6 +4854,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSamplePreShipment.sql" />
     <Build Include="dbo\Views\vyuCRMAgent.sql" />
     <Build Include="dbo\Views\vyuCRMHoursWorkedSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentIDOC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
