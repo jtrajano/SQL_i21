@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuGLDetail]
 AS
-     SELECT 
+        SELECT 
 		  A.intGLDetailId,
 		  A.intAccountId,
 		  A.dtmDate,
@@ -45,9 +45,17 @@ AS
 			J.strComments,
 			U.strUOMCode
      FROM tblGLDetail AS A
-		  LEFT JOIN tblGLJournalDetail J ON A.intJournalLineNo = J.intJournalDetailId
-          LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
-		  LEFT JOIN tblGLAccountUnit AS U ON B.intAccountUnitId = U.intAccountUnitId
-          LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
-          LEFT JOIN tblSMCurrency AS D ON D.intCurrencyID = A.intCurrencyId
-          LEFT JOIN [tblEMEntityCredential] AS E ON E.intEntityId = A.intEntityId
+	 INNER JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
+	 INNER JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
+	 OUTER APPLY(
+		SELECT TOP 1 strComments, strDocument FROM tblGLJournalDetail WHERE intJournalDetailId = A.intJournalLineNo
+	 ) J
+	 OUTER APPLY (
+		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
+	 )U
+	 OUTER APPLY(
+		SELECT TOP 1 intEntityId,strUserName FROM [tblEMEntityCredential] WHERE intEntityId = A.intEntityId
+	 )E
+	 OUTER APPLY(
+		SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = A.intCurrencyId
+	 )D
