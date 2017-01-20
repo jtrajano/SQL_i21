@@ -1,5 +1,5 @@
 ﻿CREATE TYPE [dbo].[TFInvoiceTransaction] AS TABLE(
-	[intId] [int] NOT NULL,
+	[intId] [int] IDENTITY(1,1) NOT NULL,
 	[intInvoiceDetailId] [int] NULL,
 	[intTaxAuthorityId] [int] NULL,
 	[strFormCode] [nvarchar](50) NULL,
