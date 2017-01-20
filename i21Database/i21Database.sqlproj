@@ -4852,6 +4852,8 @@
     <Build Include="dbo\Views\vyuRKGetOtherChargeItem.sql" />
     <Build Include="dbo\Views\vyuRKGetOtherChargeItemNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSamplePreShipment.sql" />
+    <Build Include="dbo\Views\vyuCRMAgent.sql" />
+    <Build Include="dbo\Views\vyuCRMHoursWorkedSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
