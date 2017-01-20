@@ -2407,3 +2407,8 @@ UPDATE tblMFCompanyPreference
 SET ysnPickByItemOwner = 0
 WHERE ysnPickByItemOwner IS NULL
 GO
+GO
+UPDATE tblMFCompanyPreference
+SET ysnDisplayLotIdAsPalletId = 0
+WHERE ysnDisplayLotIdAsPalletId IS NULL
+GO
