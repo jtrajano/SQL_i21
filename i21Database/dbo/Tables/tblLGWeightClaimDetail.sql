@@ -18,6 +18,7 @@
 [intPriceItemUOMId] INT NULL,
 [ysnNoClaim] [bit] NULL,
 [intContractDetailId] INT NULL,
+[intBillId] INT NULL,
 [dblFranchise] NUMERIC(18, 6) NULL,
 
 CONSTRAINT [PK_tblLGWeightClaimDetail] PRIMARY KEY ([intWeightClaimDetailId]), 

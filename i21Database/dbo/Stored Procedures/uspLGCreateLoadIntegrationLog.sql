@@ -44,20 +44,22 @@ BEGIN TRY
 				ELSE ''
 				END COLLATE Latin1_General_CI_AS
 			,strLoadNumber
-			,strContractBasis = (
-				SELECT TOP 1 CB.strContractBasis
-				FROM tblCTContractHeader CH
-				JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
-				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CH.intContractHeaderId
-				WHERE LD.intLoadId = L.intLoadId
-				)
-			,strContractBasisDesc = (
-				SELECT TOP 1 CB.strContractBasis
-				FROM tblCTContractHeader CH
-				JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
-				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CH.intContractHeaderId
-				WHERE LD.intLoadId = L.intLoadId
-				)
+            ,strContractBasis = (
+                SELECT TOP 1 CB.strContractBasis
+                FROM tblCTContractHeader CH
+                JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+                JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+                JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+                WHERE LD.intLoadId = L.intLoadId
+                )
+            ,strContractBasisDesc = (
+                SELECT TOP 1 CB.strDescription
+                FROM tblCTContractHeader CH
+                JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+                JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+                JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+                WHERE LD.intLoadId = L.intLoadId
+                )
 			,L.strBLNumber
 			,L.strShippingLine
 			,L.strExternalShipmentNumber
