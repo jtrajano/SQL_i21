@@ -126,7 +126,6 @@ BEGIN TRY
 				, strTransporterFEIN
 				, strConsignorName
 				, strConsignorFEIN
-				, strTaxCode
 				, strTerminalControlNumber
 				, strVendorName
 				, strVendorFederalTaxId
@@ -174,7 +173,6 @@ BEGIN TRY
 					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
-					, tblTFTaxCategory.strTaxCategory
 					, NULL AS strTerminalControlNumber
 					, NULL AS strVendorName
 					, NULL AS strVendorFederalTaxId
@@ -257,7 +255,6 @@ BEGIN TRY
 				, strTransporterFEIN
 				, strConsignorName
 				, strConsignorFEIN
-				, strTaxCode
 				, strTerminalControlNumber
 				, strVendorName
 				, strVendorFederalTaxId
@@ -305,7 +302,6 @@ BEGIN TRY
 					, tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
-					, tblTFTaxCategory.strTaxCategory
 					, NULL AS strTerminalControlNumber
 					, NULL AS strVendorName
 					, NULL AS strVendorFederalTaxId
@@ -430,7 +426,6 @@ BEGIN TRY
 				, strTransporterFEIN
 				, strConsignorName
 				, strConsignorFEIN
-				, strTaxCode
 				, strTerminalControlNumber
 				, strVendorName
 				, strVendorFederalTaxId
@@ -478,7 +473,7 @@ BEGIN TRY
 					, tblEMEntity.strFederalTaxId AS strTransporterFEIN
 					, tblEMEntity.strName AS strConsignorName
 					, tblEMEntity.strFederalTaxId AS strConsignorFEIN
-					, tblTFTaxCategory.strTaxCategory
+					--, tblTFTaxCategory.strTaxCategory
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, EntityAPVendor.strName AS strVendorName
 					, EntityAPVendor.strFederalTaxId AS strVendorFEIN
