@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSOSalesOrder] (
     [intSalesOrderId]			INT             IDENTITY (1, 1) NOT NULL,
     [strSalesOrderNumber]		NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
-    [strSalesOrderOriginId]		NVARCHAR (8)    COLLATE Latin1_General_CI_AS NULL,
+    [strSalesOrderOriginId]		NVARCHAR (25)	COLLATE Latin1_General_CI_AS NULL,
     [intEntityCustomerId]       INT             NULL,
     [dtmDate]					DATETIME        NOT NULL,
     [dtmDueDate]				DATETIME        NOT NULL,
