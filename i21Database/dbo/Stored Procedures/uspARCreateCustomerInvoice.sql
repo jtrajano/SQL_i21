@@ -272,7 +272,7 @@ IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Ca
 		RETURN 0;
 	END
 
-IF (@Type NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling'))
+IF (@Type NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120069, 16, 1, @TransactionType);		
