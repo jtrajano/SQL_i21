@@ -4856,6 +4856,7 @@
     <Build Include="dbo\Views\vyuCRMHoursWorkedSearch.sql" />
     <Build Include="dbo\Tables\tblSMScreenLabelStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentIDOC.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCommitLabelListing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
