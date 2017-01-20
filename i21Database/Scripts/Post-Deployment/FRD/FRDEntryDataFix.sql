@@ -572,3 +572,18 @@ UPDATE tblFRColumn SET strColumnType = 'User Defined' WHERE strColumnType IS NUL
 GO
 	PRINT N'Set existing data (strColumnType) to User Defined'
 GO
+
+--=====================================================================================================================================
+-- 	ROW DESIGNER: Set existing data (strRowType) value from 'Percentage' to 'Filter Accounts' with (ysnPercentage) = True
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (ysnPercentage) = True'
+GO
+
+UPDATE tblFRRowDesign SET ysnPercentage = 1 WHERE strRowType = 'Percentage'
+UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Percentage'
+
+GO
+	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (ysnPercentage) = True'
+GO
