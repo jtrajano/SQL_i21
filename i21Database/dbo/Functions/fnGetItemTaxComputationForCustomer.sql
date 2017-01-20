@@ -45,6 +45,9 @@ BEGIN
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
 	SET @ZeroDecimal = 0.000000
+
+	DECLARE @ItemType NVARCHAR(50)
+	SET @ItemType = ISNULL((SELECT strType FROM tblICItem WHERE [intItemId] = @ItemId),'')
 	
 	DECLARE @ItemTaxes AS TABLE(
 			 [Id]							INT IDENTITY(1,1)
@@ -269,6 +272,9 @@ BEGIN
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
 
 			IF(@ExcludeCheckOff = 1 AND @CheckoffTax = 1)
+				SET @ItemTaxAmount = @ZeroDecimal;
+
+			IF @ItemType = 'Comment'
 				SET @ItemTaxAmount = @ZeroDecimal;
 			
 			UPDATE
