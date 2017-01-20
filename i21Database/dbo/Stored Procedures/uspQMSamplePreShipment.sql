@@ -67,6 +67,111 @@ BEGIN TRY
 			,strSampleNote NVARCHAR(512)
 			)
 
+	-- Existing sample update
+	IF (ISNULL(@strSampleNumber, '') <> '')
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM tblQMSample
+				WHERE strSampleNumber = @strSampleNumber
+				)
+		BEGIN
+			IF (ISNULL(@strSampleStatus, '') <> '')
+			BEGIN
+				SELECT @intSampleStatusId = intSampleStatusId
+				FROM tblQMSampleStatus
+				WHERE strStatus = @strSampleStatus
+
+				IF @intSampleStatusId IS NULL
+					RAISERROR (
+							'Sample Status is not available. '
+							,16
+							,1
+							)
+			END
+
+			IF (ISNULL(@strSampleUOM, '') <> '')
+			BEGIN
+				SELECT @intSampleUOMId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strSampleUOM
+
+				IF @intSampleUOMId IS NULL
+					RAISERROR (
+							'Sample UOM is not available. '
+							,16
+							,1
+							)
+			END
+
+			SELECT @intSampleId = intSampleId
+			FROM tblQMSample
+			WHERE strSampleNumber = @strSampleNumber
+
+			BEGIN TRAN
+
+			UPDATE tblQMSample
+			SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+				,dblSampleQty = CASE 
+					WHEN @dblSampleQty IS NOT NULL
+						THEN @dblSampleQty
+					ELSE dblSampleQty
+					END
+				,intSampleUOMId = CASE 
+					WHEN @intSampleUOMId IS NOT NULL
+						THEN @intSampleUOMId
+					ELSE intSampleUOMId
+					END
+				,strRefNo = CASE 
+					WHEN @strRefNo IS NOT NULL
+						THEN @strRefNo
+					ELSE strRefNo
+					END
+				,intSampleStatusId = CASE 
+					WHEN @intSampleStatusId IS NOT NULL
+						THEN @intSampleStatusId
+					ELSE intSampleStatusId
+					END
+				,strSampleNote = CASE 
+					WHEN @strSampleNote IS NOT NULL
+						THEN @strSampleNote
+					ELSE strSampleNote
+					END
+				,dtmSampleReceivedDate = CASE 
+					WHEN @dtmSampleReceivedDate IS NOT NULL
+						THEN @dtmSampleReceivedDate
+					ELSE dtmSampleReceivedDate
+					END
+				,dtmTestedOn = CASE 
+					WHEN @dtmSampleReceivedDate IS NOT NULL
+						THEN @dtmSampleReceivedDate
+					ELSE dtmSampleReceivedDate
+					END
+				,dtmTestingStartDate = CASE 
+					WHEN @dtmSampleReceivedDate IS NOT NULL
+						THEN @dtmSampleReceivedDate
+					ELSE dtmSampleReceivedDate
+					END
+				,dtmTestingEndDate = CASE 
+					WHEN @dtmSampleReceivedDate IS NOT NULL
+						THEN @dtmSampleReceivedDate
+					ELSE dtmSampleReceivedDate
+					END
+				,dtmSamplingEndDate = CASE 
+					WHEN @dtmSampleReceivedDate IS NOT NULL
+						THEN @dtmSampleReceivedDate
+					ELSE dtmSampleReceivedDate
+					END
+			FROM tblQMSample
+			WHERE intSampleId = @intSampleId
+
+			COMMIT TRAN
+
+			RETURN;
+		END
+	END
+
+	-- New Sample Create
 	IF ISNULL(@strSampleStatus, '') = ''
 		RAISERROR (
 				'Sample Status cannot be empty. '
@@ -246,6 +351,9 @@ BEGIN TRY
 	WHERE intLocationId = @intLocationId
 		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+	IF ISNULL(@dtmSampleReceivedDate, '') = ''
+		SET @dtmSampleReceivedDate = GETDATE()
 
 	BEGIN TRAN
 
