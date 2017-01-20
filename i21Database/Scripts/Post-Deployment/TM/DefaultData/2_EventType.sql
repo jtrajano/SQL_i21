@@ -25,6 +25,7 @@ BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = 'Event-021' AND ysnDefault = 1) INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault) VALUES ('Event-021','Tank Monitor Reading', 1)
 	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = 'Event-020' AND ysnDefault = 1) INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault) VALUES ('Event-020','Device Lease Billed', 1)
 	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = 'Event-022' AND ysnDefault = 1) INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault) VALUES ('Event-022','Season Change', 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = 'Event-023' AND ysnDefault = 1) INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault) VALUES ('Event-023','Device Bought', 1)
 	
 END
 
