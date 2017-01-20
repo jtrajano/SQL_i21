@@ -26,6 +26,10 @@ BEGIN TRY
 			,'' AS 'dblPallets'
 			,'' AS 'dblQtyPerPallet'
 			,'' AS 'strCountLine'
+			,'' AS 'ysnScannedCountEntry'
+			,'' AS 'ysnCountByLots'
+			,'' AS 'ysnCountByPallets'
+			,'' AS 'dblPhysicalCount'
 		RETURN
 	END
 
@@ -95,6 +99,10 @@ BEGIN TRY
 				   ,InvCountDetail.dblPallets
 				   ,InvCountDetail.dblQtyPerPallet
 				   ,InvCountDetail.strCountLine
+				   ,InvCount.ysnScannedCountEntry
+				   ,InvCount.ysnCountByLots
+				   ,InvCount.ysnCountByPallets
+				   ,dblPhysicalCount = ISNULL(InvCountDetail.dblPallets, 0) * ISNULL(InvCountDetail.dblQtyPerPallet, 0) 
 			FROM tblICInventoryCount InvCount 
 				 LEFT JOIN tblICInventoryCountDetail InvCountDetail ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
 				 LEFT JOIN tblICItem Item ON InvCountDetail.intItemId = Item.intItemId
@@ -107,6 +115,7 @@ BEGIN TRY
 				
 			) AS a
 		WHERE strCountNo = @strCountNo 
+		ORDER BY strSubLocationName ASC, strStorageLocationName ASC
 	END
 END TRY
 
