@@ -346,6 +346,8 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
+			,@ItemTermDiscount				= @ItemTermDiscount
+			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@RecomputeTax					= @RecomputeTax
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
