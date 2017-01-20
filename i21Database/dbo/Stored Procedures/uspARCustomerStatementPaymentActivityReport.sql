@@ -64,6 +64,7 @@ DECLARE @temp_aging_table TABLE(
     ,[dblPrepaids]              NUMERIC(18,6)
     ,[dtmAsOfDate]              DATETIME
     ,[strSalespersonName]       NVARCHAR(100)
+	,[strSourceTransaction]		NVARCHAR(100)
 )
 
 DECLARE @temp_statement_table TABLE(
