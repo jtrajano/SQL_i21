@@ -4859,6 +4859,8 @@
     <Build Include="dbo\Stored Procedures\uspSMCommitLabelListing.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWeightClaims.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPostWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
