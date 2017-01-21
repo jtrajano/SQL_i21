@@ -587,3 +587,20 @@ UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Per
 GO
 	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (ysnPercentage) = True'
 GO
+
+--=====================================================================================================================================
+-- 	SEGMENT FILTER GROUP: Insert System Data
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'Insert System Data'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblFRSegmentFilterGroup WHERE strSegmentFilterGroup = 'All Segment') 
+BEGIN
+	INSERT INTO tblFRSegmentFilterGroup (strSegmentFilterGroup,strFilterString,strSegmentString) values ('All Segment','','')
+END
+
+GO
+	PRINT N'Insert System Data'
+GO
