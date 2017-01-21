@@ -4858,6 +4858,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCommitLabelListing.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostWeightClaims.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
