@@ -4861,6 +4861,8 @@
     <Build Include="dbo\Stored Procedures\uspLGPostWeightClaims.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForShipment.sql" />
+    <Build Include="dbo\Functions\fnCTContractApprovalExist.sql" />
+    <Build Include="dbo\Views\vyuCTNotification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
