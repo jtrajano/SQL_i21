@@ -4848,6 +4848,7 @@
     <Build Include="dbo\Tables\tblTMGenerateWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICReportPhysicalInventoryCount.sql" />
     <Build Include="dbo\Views\vyuPREmployeeToProcess.sql" />
+    <Build Include="dbo\Views\vyuICLotHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
