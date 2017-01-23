@@ -24,7 +24,7 @@ BEGIN TRY
 		,@strSampleNote NVARCHAR(512)
 		,@intSampleUOMId INT
 		,@intSampleStatusId INT
-	DECLARE @intControlPointId INT = 5 -- Inbound Sample
+	DECLARE @intControlPointId INT = 2 -- Approval Sample
 		,@intProductId INT
 		,@intCategoryId INT
 		,@intProductTypeId INT
