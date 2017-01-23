@@ -21,7 +21,8 @@ Ext.Loader.setConfig({
 
 Ext.application({
     views: [
-        'RebuildInventory'
+        'RebuildInventory',
+        'LotDetailHistory'
     ],
     name: 'Inventory',
 

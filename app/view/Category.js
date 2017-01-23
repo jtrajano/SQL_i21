@@ -46,6 +46,70 @@ Ext.define('Inventory.view.Category', {
     title: 'Category',
     maximizable: true,
 
+    dockedItems: [
+        {
+            xtype: 'toolbar',
+            dock: 'top',
+            ui: 'i21-toolbar',
+            width: 588,
+            layout: {
+                type: 'hbox',
+                padding: '0 0 0 1'
+            },
+            items: [
+                {
+                    xtype: 'button',
+                    tabIndex: -1,
+                    itemId: 'btnNew',
+                    ui: 'i21-button-toolbar-small',
+                    text: 'New'
+                },
+                {
+                    xtype: 'button',
+                    tabIndex: -1,
+                    itemId: 'btnSave',
+                    ui: 'i21-button-toolbar-small',
+                    text: 'Save'
+                },
+                {
+                    xtype: 'button',
+                    tabIndex: -1,
+                    itemId: 'btnFind',
+                    ui: 'i21-button-toolbar-small',
+                    text: 'Search'
+                },
+                {
+                    xtype: 'button',
+                    tabIndex: -1,
+                    itemId: 'btnDuplicate',
+                    ui: 'i21-button-toolbar-small',
+                    text: 'Duplicate'
+                },
+                {
+                    xtype: 'button',
+                    tabIndex: -1,
+                    itemId: 'btnDelete',
+                    ui: 'i21-button-toolbar-small',
+                    text: 'Delete'
+                },
+                {
+                    xtype: 'button',
+                    tabIndex: -1,
+                    itemId: 'btnUndo',
+                    ui: 'i21-button-toolbar-small',
+                    text: 'Undo'
+                },
+                {
+                    xtype: 'button',
+                    tabIndex: -1,
+                    itemId: 'btnClose',
+                    ui: 'i21-button-toolbar-small',
+                    text: 'Close'
+                }
+            ]
+        }
+    ],
+
     initConfig: function(instanceConfig) {
         var me = this,
             config = {
@@ -61,75 +125,6 @@ Ext.define('Inventory.view.Category', {
                             type: 'vbox',
                             align: 'stretch'
                         },
-                        dockedItems: [
-                            {
-                                xtype: 'toolbar',
-                                dock: 'top',
-                                ui: 'i21-toolbar',
-                                width: 588,
-                                layout: {
-                                    type: 'hbox',
-                                    padding: '0 0 0 1'
-                                },
-                                items: [
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        itemId: 'btnNew',
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'New'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        itemId: 'btnSave',
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'Save'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        itemId: 'btnFind',
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'Search'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        itemId: 'btnDuplicate',
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'Duplicate'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        itemId: 'btnDelete',
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'Delete'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        itemId: 'btnUndo',
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'Undo'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        itemId: 'btnClose',
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'Close'
-                                    }
-                                ]
-                            },
-                            {
-                                xtype: 'ipagingstatusbar',
-                                itemId: 'tlbStatusbarPaging',
-                                flex: 1,
-                                dock: 'bottom'
-                            }
-                        ],
                         items: [
                             {
                                 xtype: 'tabpanel',
@@ -1398,6 +1393,14 @@ Ext.define('Inventory.view.Category', {
                                         ]
                                     }
                                 ]
+                            }
+                        ],
+                        dockedItems: [
+                            {
+                                xtype: 'ipagingstatusbar',
+                                itemId: 'tlbStatusbarPaging',
+                                flex: 1,
+                                dock: 'bottom'
                             }
                         ]
                     }

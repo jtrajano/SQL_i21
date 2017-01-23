@@ -28,6 +28,11 @@ Ext.define('Inventory.view.LotDetailViewController', {
                     itemId: 'btnTrace',
                     text: 'Trace',
                     clickHandler: 'onTraceClick'
+                },
+                {
+                    itemId: 'btnHistory',
+                    text: 'History',
+                    clickHandler: 'onHistoryClick'
                 }
             ]
         }
@@ -45,6 +50,14 @@ Ext.define('Inventory.view.LotDetailViewController', {
             iRely.Functions.openScreen('Manufacturing.view.TraceabilityDiagram',config);
         } else {
             iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, "Please select a lot.");
+        }
+    },
+
+    onHistoryClick: function(e, grid) {
+        if(grid.view.selection) {
+            iRely.Functions.openScreen('Inventory.view.LotDetailHistory', grid.view.selection.get('intLotId'));
+        } else {
+            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, "Please select a lot.");  
         }
     },
 

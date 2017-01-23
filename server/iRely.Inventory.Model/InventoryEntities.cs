@@ -24,6 +24,7 @@ namespace iRely.Inventory.Model
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Configurations.Add(new vyuICLotHistoryMap());
             modelBuilder.Configurations.Add(new tblICBrandMap());
             modelBuilder.Configurations.Add(new tblICCategoryMap());
             modelBuilder.Configurations.Add(new tblICCategoryTaxMap());

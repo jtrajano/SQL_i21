@@ -1289,7 +1289,6 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'gridcombobox',
-                                                                                        flex: 1,
                                                                                         columns: [
                                                                                             {
                                                                                                 dataIndex: 'intUnitMeasureId',
@@ -1311,6 +1310,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                 flex: 1
                                                                                             }
                                                                                         ],
+                                                                                        flex: 1,
                                                                                         itemId: 'cboTonnageTaxUOM',
                                                                                         padding: '0 0 0 10',
                                                                                         width: 121,
