@@ -92,8 +92,7 @@ BEGIN TRY
 		
 		IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId)
 		BEGIN
-			INSERT INTO @tmpInvoiceTransaction(intId
-				, intInvoiceDetailId
+			INSERT INTO @tmpInvoiceTransaction(intInvoiceDetailId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -137,8 +136,7 @@ BEGIN TRY
 				, strHeaderPhone
 				, strHeaderStateTaxID
 				, strHeaderFederalTaxID)
-			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId, intProductCodeId DESC) AS intId
-				, *
+			SELECT *
 			FROM (
 				SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -221,8 +219,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @tmpInvoiceTransaction(intId
-				, intInvoiceDetailId
+			INSERT INTO @tmpInvoiceTransaction(intInvoiceDetailId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -266,8 +263,7 @@ BEGIN TRY
 				, strHeaderPhone
 				, strHeaderStateTaxID
 				, strHeaderFederalTaxID)
-			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId, intProductCodeId DESC) AS intId
-				, *
+			SELECT *
 			FROM (
 				SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -392,8 +388,7 @@ BEGIN TRY
 		--INVENTORY TRANSFER
 		IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '= 0') 
 		BEGIN
-			INSERT INTO @tmpInvoiceTransaction(intId
-				, intInvoiceDetailId
+			INSERT INTO @tmpInvoiceTransaction(intInvoiceDetailId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -437,8 +432,7 @@ BEGIN TRY
 				, strHeaderPhone
 				, strHeaderStateTaxID
 				, strHeaderFederalTaxID)
-			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
-				, *
+			SELECT *
 			FROM (
 				SELECT DISTINCT NULL AS intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -524,8 +518,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @tmpInvoiceTransaction(intId
-				, intInvoiceDetailId
+			INSERT INTO @tmpInvoiceTransaction(intInvoiceDetailId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -570,8 +563,7 @@ BEGIN TRY
 				, strHeaderPhone
 				, strHeaderStateTaxID
 				, strHeaderFederalTaxID)
-			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
-				, *
+			SELECT *
 			FROM (
 				SELECT DISTINCT NULL AS intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
