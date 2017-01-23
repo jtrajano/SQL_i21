@@ -12,10 +12,10 @@ SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
-		,@AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Auto-Variance'
+		,@AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will not use Inventory Adjustment. 
 
-		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'AP Clearing' --'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
-		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' -- 'Revalue WIP' -- As per Ajith, we should not add another category. Thus, I'm diverting it to reuse 'Work In Progress'. 
+		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'AP Clearing' 
+		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' 
 
 		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Cost of Goods'
 		,@AccountCategory_Revalue_Shipment AS NVARCHAR(30) = 'Inventory In-Transit'
@@ -411,6 +411,7 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -463,6 +464,7 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto-Variance 
@@ -519,6 +521,7 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -571,6 +574,7 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Auto_Variance
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 
 -----------------------------------------------------------------------------------
 -- This part is for the Cost Adjustment
@@ -681,7 +685,6 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Cost_Adjustment
-
 
 /*----------------------------------------------------------------------------------
 	This part is for Revalue Consume

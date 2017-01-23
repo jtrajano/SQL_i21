@@ -14,8 +14,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
-DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory';
-DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Auto-Variance';
+DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
+DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will not use Inventory Adjustment. 
 
 -- Get the default currency ID
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -372,6 +372,8 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
+
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -419,6 +421,7 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto-Variance 
@@ -470,7 +473,8 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
-		AND (Debit.Value <> 0 OR Credit.Value <> 0)
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
+
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -518,5 +522,5 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_AutoNegative
-		AND (Debit.Value <> 0 OR Credit.Value <> 0)
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 ;
