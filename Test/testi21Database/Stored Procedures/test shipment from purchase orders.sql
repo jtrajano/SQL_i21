@@ -7,6 +7,9 @@ BEGIN
 	CREATE TABLE actual_tblICInventoryShipmentItem (intItemId INT, intOwnershipType INT, 
 		dblQuantity NUMERIC(38, 20), intItemUOMId INT)
 
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipment', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentItem', @Identity = 1;	
+
 	DECLARE 
 		@ExpectedShipmentNumber VARCHAR(50) = 'IS-75',
 		@ActualShipmentNumber VARCHAR(50),
@@ -64,6 +67,12 @@ BEGIN
 		intLineNo = 100,
 		dblUnitPrice = 10.0,
 		intWeightUOMId = 7
+
+	-- Setup the next starting number for the shipment 
+	UPDATE	s
+	SET		intNumber = 75
+	FROM	tblSMStartingNumber s
+	where	strTransactionType = 'Inventory Shipment'
 
 	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @intUserId
 

@@ -7,6 +7,10 @@ BEGIN
 			intInventoryShipmentId INT
 		)
 	END
+
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipment', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentItem', @Identity = 1;	
+
 	DECLARE 
 		@ExpectedShipmentNumber VARCHAR(50) = 'IS-75',
 		@ActualShipmentNumber VARCHAR(50),
@@ -59,6 +63,12 @@ BEGIN
 		intSourceId = NULL,
 		intLineNo = NULL
 
+	-- Setup the next starting number for the shipment 
+	UPDATE	s
+	SET		intNumber = 75
+	FROM	tblSMStartingNumber s
+	where	strTransactionType = 'Inventory Shipment'
+	
 	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @intUserId
 
 	IF NOT EXISTS(SELECT * FROM #tmpAddItemShipmentResult)
