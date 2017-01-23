@@ -29,13 +29,13 @@ FROM
 SET NOCOUNT OFF;
 
 DECLARE @temp_aging_table TABLE(
-	 [strInvoiceNumber]			NVARCHAR(100)
-	,[strRecordNumber]			NVARCHAR(100)
+	 [strInvoiceNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	,[strRecordNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	,[intInvoiceId]				INT
-	,[strCustomerName]			NVARCHAR(100)
-	,[strBOLNumber]				NVARCHAR(100)
+	,[strCustomerName]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	,[strBOLNumber]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	,[intEntityCustomerId]		INT
-	,[strCustomerNumber]		NVARCHAR(15)			
+	,[strCustomerNumber]		NVARCHAR(15)	COLLATE Latin1_General_CI_AS			
 	,[dblCreditLimit]			NUMERIC(18,6)
 	,[dblTotalAR]				NUMERIC(18,6)
 	,[dblFuture]				NUMERIC(18,6)
@@ -54,7 +54,7 @@ DECLARE @temp_aging_table TABLE(
 	,[dtmDate]					DATETIME
 	,[dtmDueDate]				DATETIME
 	,[dtmAsOfDate]				DATETIME
-	,[strSalespersonName]		NVARCHAR(100)
+	,[strSalespersonName]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	,[intCompanyLocationId]		INT
 )
 
@@ -65,6 +65,10 @@ DECLARE @temp_availablecustomer_table TABLE(
 INSERT INTO 
 	@temp_aging_table
 EXEC uspARCollectionOverdueDetailReport NULL, NULL, NULL  
+
+
+DELETE FROM @temp_aging_table
+WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WHERE strType IN ('Card Fueling'))
 
 DELETE FROM tblARCollectionOverdueDetail
 INSERT INTO tblARCollectionOverdueDetail
