@@ -56,6 +56,12 @@ SELECT Receipt.intInventoryReceiptId
 	, strEntityName = Entity.strName
 	, Receipt.strActualCostId
 	, Receipt.strWarehouseRefNo
+	, dblSubTotal = ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 1),0)
+	, dblTotalTax = ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 2),0)
+	, dblTotalCharges = ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 3),0)
+	, dblTotalGross = ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 4),0)
+	, dblTotalNet =  ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 5),0)
+	, dblGrandTotal =  ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 6),0)
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = Receipt.intEntityVendorId

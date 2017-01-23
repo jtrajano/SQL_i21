@@ -4880,6 +4880,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPReceiptIDOC.sql" />
     <Build Include="dbo\Tables\tblSMStartingNumberParameter.sql" />
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
+    <Build Include="dbo\Functions\fnICGetReceiptTotals.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
