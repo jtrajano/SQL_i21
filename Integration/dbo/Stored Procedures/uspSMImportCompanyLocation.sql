@@ -453,7 +453,160 @@ BEGIN
 				AG.[agloc_loc_no]
 				,AG.[agloc_name]
 
-				
+			--IMPORTS AG PRICE LEVELS FOR EACH LOCATION
+			-- AG PRICE LEVEL 1--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationId]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc1_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc1_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc1_desc COLLATE Latin1_General_CI_AS) 
+			-- AG PRICE LEVEL 2--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationId]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc2_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc2_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc2_desc COLLATE Latin1_General_CI_AS) 
+			-- AG PRICE LEVEL 3--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationId]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc3_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc3_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc3_desc COLLATE Latin1_General_CI_AS) 
+			-- AG PRICE LEVEL 4--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationId]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc4_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc4_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc4_desc COLLATE Latin1_General_CI_AS)
+			-- AG PRICE LEVEL 5--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationId]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc5_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc5_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc5_desc COLLATE Latin1_General_CI_AS) 
+			-- AG PRICE LEVEL 6--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationId]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc6_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc6_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc6_desc COLLATE Latin1_General_CI_AS) 
+			-- AG PRICE LEVEL 7--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationId]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc7_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc7_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc7_desc COLLATE Latin1_General_CI_AS) 
+			-- AG PRICE LEVEL 8--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationd]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc8_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc8_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc8_desc COLLATE Latin1_General_CI_AS) 
+			-- AG PRICE LEVEL 9--
+			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+					   ([intCompanyLocationId]
+					   ,[strPricingLevelName]
+					   ,[intSort]
+					   ,[intConcurrencyId])
+			SELECT  CL.[intCompanyLocationId], 
+					AL.agloc_prc9_desc,
+					1,
+					1
+			FROM  
+				tblSMCompanyLocation CL 
+			   INNER JOIN  
+				  aglocmst AL 
+				  ON RTRIM(LTRIM(AL.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+				WHERE AL.agloc_prc9_desc IS NOT NULL AND [intCompanyLocationId] NOT IN (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc9_desc COLLATE Latin1_General_CI_AS)
 		END
 		')
 END
@@ -759,6 +912,60 @@ BEGIN
     PT.[ptloc_loc_no]  
     ,PT.[ptloc_name]  
   
-      
-  END')
+    --IMPORT PRICE LEVEL FOR EACH LOCATION
+
+	--PRICE LEVEL 1
+	INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+           ([intCompanyLocationId]
+           ,[strPricingLevelName]
+           ,[intSort]
+           ,[intConcurrencyId])
+	SELECT  CL.[intCompanyLocationId], 
+	        PT.pt3cf_prc1,
+			1,
+			1
+	FROM  tblSMCompanyLocation CL 
+	INNER JOIN ptlocmst PL 
+		ON RTRIM(LTRIM(PL.[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+	LEFT OUTER JOIN ptctlmst PT 
+		ON  PT.ptctl_key = 3
+	where [intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc1 COLLATE Latin1_General_CI_AS) 
+	--PRICE LEVEL 2
+	INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+           ([intCompanyLocationId]
+           ,[strPricingLevelName]
+           ,[intSort]
+           ,[intConcurrencyId])
+	SELECT  CL.[intCompanyLocationId], 
+	        PT.pt3cf_prc1,
+			1,
+			1
+	FROM  tblSMCompanyLocation CL 
+	INNER JOIN ptlocmst PL 
+		ON RTRIM(LTRIM(PL.[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+	LEFT OUTER JOIN ptctlmst PT 
+		ON  PT.ptctl_key = 3
+	where [intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc1 COLLATE Latin1_General_CI_AS) 
+
+	--PRICE LEVEL 3
+	INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
+           ([intCompanyLocationId]
+           ,[strPricingLevelName]
+           ,[intSort]
+           ,[intConcurrencyId])
+	SELECT  CL.[intCompanyLocationId], 
+	        PT.pt3cf_prc1,
+			1,
+			1
+	FROM  tblSMCompanyLocation CL 
+	INNER JOIN ptlocmst PL 
+		ON RTRIM(LTRIM(PL.[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS) )        
+	LEFT OUTER JOIN ptctlmst PT 
+		ON  PT.ptctl_key = 3
+	where [intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc1 COLLATE Latin1_General_CI_AS)   
+  END'
+  )
 END
