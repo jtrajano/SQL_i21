@@ -19,6 +19,7 @@
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
+	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -130,6 +131,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@ItemPrice						= @ItemPrice
 			,@ItemPricing					= @ItemPricing
+			,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 			,@RefreshPrice					= @RefreshPrice
 			,@ItemMaintenanceType			= @ItemMaintenanceType
 			,@ItemFrequency					= @ItemFrequency
@@ -228,6 +230,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblLicenseAmount]
 				,[dblPrice]
 				,[strPricing]
+				,[strVFDDocumentNumber]
 				,[intSiteId]
 				,[strBillingBy]
 				,[dblNewMeterReading]
@@ -274,6 +277,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemLicenseAmount
 				,@ItemPrice
 				,@ItemPricing
+				,@ItemVFDDocumentNumber
 				,@ItemSiteId
 				,@ItemBillingBy
 				,@ItemNewMeterReading

@@ -193,6 +193,7 @@ DECLARE  @Id									INT
 		,@ItemTermDiscountBy					NVARCHAR(50)
 		,@ItemPrice								NUMERIC(18, 6)
 		,@ItemPricing							NVARCHAR(250)
+		,@ItemVFDDocumentNumber					NVARCHAR(100)
 		,@RefreshPrice							BIT
 		,@ItemMaintenanceType					NVARCHAR(25)
 		,@ItemFrequency							NVARCHAR(25)
@@ -343,6 +344,7 @@ BEGIN
 		,@ItemTermDiscountBy			= (CASE WHEN @GroupingOption = 0 THEN [strItemTermDiscountBy] ELSE NULL END)
 		,@ItemPrice						= (CASE WHEN @GroupingOption = 0 THEN [dblPrice] ELSE NULL END)
 		,@ItemPricing					= (CASE WHEN @GroupingOption = 0 THEN [strPricing] ELSE NULL END)
+		,@ItemVFDDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strVFDDocumentNumber] ELSE NULL END)
 		,@RefreshPrice					= (CASE WHEN @GroupingOption = 0 THEN [ysnRefreshPrice] ELSE 0 END)
 		,@ItemMaintenanceType			= (CASE WHEN @GroupingOption = 0 THEN [strMaintenanceType] ELSE NULL END)
 		,@ItemFrequency					= (CASE WHEN @GroupingOption = 0 THEN [strFrequency] ELSE NULL END)
@@ -690,6 +692,7 @@ BEGIN
 					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 					,@ItemPrice						= [dblPrice]
 					,@ItemPricing					= [strPricing]
+					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
@@ -771,6 +774,7 @@ BEGIN
 						,@ItemTermDiscountBy			= @ItemTermDiscountBy
 						,@ItemPrice						= @ItemPrice
 						,@ItemPricing					= @ItemPricing
+						,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 						,@RefreshPrice					= @RefreshPrice
 						,@ItemMaintenanceType			= @ItemMaintenanceType
 						,@ItemFrequency					= @ItemFrequency
@@ -1302,6 +1306,7 @@ BEGIN TRY
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
 						,@ItemPricing					= [strPricing] 
+						,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 						,@RefreshPrice					= [ysnRefreshPrice]
 						,@ItemMaintenanceType			= [strMaintenanceType]
 						,@ItemFrequency					= [strFrequency]
@@ -1379,6 +1384,7 @@ BEGIN TRY
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
 							,@ItemPricing					= @ItemPricing
+							,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 							,@RefreshPrice					= @RefreshPrice
 							,@ItemMaintenanceType			= @ItemMaintenanceType
 							,@ItemFrequency					= @ItemFrequency
@@ -1555,6 +1561,7 @@ BEGIN TRY
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
 					,@ItemPricing					= [strPricing] 
+					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
@@ -1670,6 +1677,7 @@ BEGIN TRY
 																		[dblPrice]
 																  END
 						,[strPricing]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPricing ELSE [strPricing] END							
+						,[strVFDDocumentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVFDDocumentNumber ELSE [strVFDDocumentNumber] END
 						,[strMaintenanceType]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceType ELSE [strMaintenanceType] END
 						,[strFrequency]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemFrequency ELSE [strFrequency] END					
 						,[dtmMaintenanceDate]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceDate ELSE [dtmMaintenanceDate] END			

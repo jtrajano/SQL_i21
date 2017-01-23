@@ -17,6 +17,7 @@
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
+	,@ItemVFDDocumentNumber			NVARCHAR(100)   = NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -216,6 +217,7 @@ BEGIN TRY
 				,[strItemTermDiscountBy]
 				,[dblPrice]
 				,[strPricing]
+				,[strVFDDocumentNumber]
 				,[dblTotalTax]
 				,[dblTotal]
 				,[intSubCurrencyId]
@@ -293,7 +295,8 @@ BEGIN TRY
 				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
 				,[strItemTermDiscountBy]			= @ItemTermDiscountBy
 				,[dblPrice]							= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
-				,[strPricing]						= @ItemPricing 
+				,[strPricing]						= @ItemPricing
+				,[strVFDDocumentNumber]				= @ItemVFDDocumentNumber
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
 				,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)

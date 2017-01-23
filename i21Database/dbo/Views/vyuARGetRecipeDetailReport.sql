@@ -14,6 +14,7 @@ SELECT RECIPEITEMS.*
 	 , UOM.strUnitMeasure 
 FROM
 	(SELECT strTransactionType		= 'Sales Order'
+		  , strVFDDocumentNumber
 		  , intTransactionId		= intSalesOrderId
 		  , intTransactionDetailId	= intSalesOrderDetailId
 		  , intCommentTypeId
@@ -33,6 +34,7 @@ FROM
 	UNION ALL
 
 	SELECT strTransactionType		= 'Invoice'
+	     , strVFDDocumentNumber
 		 , intTransactionId			= intInvoiceId
 		 , intTransactionDetailId	= intInvoiceDetailId
 		 , intCommentTypeId

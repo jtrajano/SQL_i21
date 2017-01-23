@@ -145,6 +145,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intItemWeightUOMId]
 	,[dblPrice]
 	,[strPricing]
+	,[strVFDDocumentNumber]
 	,[ysnRefreshPrice]
 	,[strMaintenanceType]
 	,[strFrequency]
@@ -253,6 +254,7 @@ SELECT
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
 	,[dblPrice]								= ARSI.[dblShipmentUnitPrice] 
 	,[strPricing]							= ARSI.[strPricing]
+	,[strVFDDocumentNumber]					= ARSI.[strVFDDocumentNumber]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
 	,[strFrequency]							= NULL
@@ -368,6 +370,7 @@ SELECT
 	,[intItemWeightUOMId]					= @ZeroDecimal
 	,[dblPrice]								= @ZeroDecimal
 	,[strPricing]							= SOD.[strPricing]
+	,[strVFDDocumentNumber]					= SOD.[strVFDDocumentNumber]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
 	,[strFrequency]							= NULL
@@ -486,6 +489,7 @@ INSERT INTO @EntriesForInvoice
 	,[intItemWeightUOMId]
 	,[dblPrice]
 	,[strPricing]
+	,[strVFDDocumentNumber]
 	,[ysnRefreshPrice]
 	,[strMaintenanceType]
 	,[strFrequency]
@@ -592,6 +596,7 @@ SELECT
 	,[intItemWeightUOMId]
 	,[dblPrice]
 	,[strPricing]
+	,[strVFDDocumentNumber]
 	,[ysnRefreshPrice]
 	,[strMaintenanceType]
 	,[strFrequency]
