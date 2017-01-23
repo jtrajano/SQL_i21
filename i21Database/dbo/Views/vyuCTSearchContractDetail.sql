@@ -54,6 +54,7 @@ AS
 			DP.strCity						AS	strDestinationPoint,
 			OG.strCountry					AS	strOrigin,
 			CA.strDescription				AS	strProductType,
+			dbo.fnCTGetApprovedSampleQuantity(CD.intContractDetailId) AS dblApprovedQty,
 			--Required by other modules
 		
 			IM.strLotTracking,				

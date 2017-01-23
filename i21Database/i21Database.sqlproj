@@ -4871,6 +4871,7 @@
     <Build Include="dbo\Views\vyuLGNoOfContainerPerShippingLine.sql" />
     <Build Include="dbo\Views\vyuLGContractWithoutShippingInstruction.sql" />
     <Build Include="dbo\Views\vyuLGLateShipmentView.sql" />
+    <Build Include="dbo\Functions\fnCTGetApprovedSampleQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
