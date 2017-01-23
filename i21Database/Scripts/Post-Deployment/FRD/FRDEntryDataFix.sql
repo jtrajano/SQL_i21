@@ -574,18 +574,19 @@ GO
 GO
 
 --=====================================================================================================================================
--- 	ROW DESIGNER: Set existing data (strRowType) value from 'Percentage' to 'Filter Accounts' with (ysnPercentage) = True
+-- 	ROW DESIGNER: Set existing data (strRowType) value from 'Percentage' to 'Filter Accounts' with (strPercentage) = (strRelatedRows)
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 GO
-	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (ysnPercentage) = True'
+	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (strPercentage) = (strRelatedRows)'
 GO
 
-UPDATE tblFRRowDesign SET ysnPercentage = 1 WHERE strRowType = 'Percentage'
+UPDATE tblFRRowDesign SET strPercentage = strRelatedRows WHERE strRowType = 'Percentage'
+UPDATE tblFRRowDesign SET strRelatedRows = '' WHERE strRowType = 'Percentage'
 UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Percentage'
 
 GO
-	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (ysnPercentage) = True'
+	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (strPercentage) = (strRelatedRows)'
 GO
 
 --=====================================================================================================================================
