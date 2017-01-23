@@ -4863,6 +4863,7 @@
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForShipment.sql" />
     <Build Include="dbo\Functions\fnCTContractApprovalExist.sql" />
     <Build Include="dbo\Views\vyuCTNotification.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateInventoryCountDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
