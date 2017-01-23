@@ -16,13 +16,13 @@ AS
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
 	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]
 	DECLARE @temp_aging_table TABLE(
-		 [strInvoiceNumber]			NVARCHAR(100)
-		,[strRecordNumber]			NVARCHAR(100)
+		 [strInvoiceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,[strRecordNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,[intInvoiceId]				INT
-		,[strCustomerName]			NVARCHAR(100)
-		,[strBOLNumber]				NVARCHAR(100)
+		,[strCustomerName]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,[strBOLNumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,[intEntityCustomerId]		INT
-		,[strCustomerNumber]		NVARCHAR(100)			
+		,[strCustomerNumber]		NVARCHAR(100) COLLATE Latin1_General_CI_AS		
 		,[dblCreditLimit]			NUMERIC(18,6)
 		,[dblTotalAR]				NUMERIC(18,6)
 		,[dblFuture]				NUMERIC(18,6)
@@ -41,7 +41,7 @@ AS
 		,[dtmDate]					DATETIME
 		,[dtmDueDate]				DATETIME
 		,[dtmAsOfDate]				DATETIME
-		,[strSalespersonName]		NVARCHAR(100)
+		,[strSalespersonName]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,[intCompanyLocationId]		INT
 	)
 	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
