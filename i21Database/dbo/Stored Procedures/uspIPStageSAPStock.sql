@@ -33,15 +33,15 @@ BEGIN TRY
 		,WERKS
 		,DELKZ
 		,MNG01
-	FROM OPENXML(@idoc, 'LOISTD01/IDOC/E1MDSTL/E1MDPSL', 2) WITH (
-			 MATNR NVARCHAR(100) '../../E1MDSTL/MATNR'
-			,WERKS NVARCHAR(100) '../../E1MDSTL/WERKS'
-			,DELKZ NVARCHAR(50)
-			,MNG01 NUMERIC(38,20)
+	FROM OPENXML(@idoc, 'LOISTD01/IDOC/E1MDSTL', 2) WITH (
+			 MATNR NVARCHAR(100) 
+			,WERKS NVARCHAR(100) 
+			,DELKZ NVARCHAR(50) 'E1PLSEL/E1MDPSL/DELKZ'
+			,MNG01 NUMERIC(38,20) 'E1PLSEL/E1MDPSL/MNG01'
 			)
 
 	If NOT Exists (Select 1 From @tblStock)
-		RaisError('Unable to process. Xml tag (LOISTD01/IDOC/E1MDSTL/E1MDPSL) not found.',16,1)
+		RaisError('Unable to process. Xml tag (LOISTD01/IDOC/E1MDSTL) not found.',16,1)
 
 	--Add to Staging tables
 	Insert into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId)
