@@ -15,13 +15,13 @@ intRowDetailId
 ,strSource
 ,strRelatedRows
 ,strAccountsUsed
+,strPercentage
 ,strAccountsType
 ,ysnShowCredit
 ,ysnShowDebit
 ,ysnShowOthers
 ,ysnLinktoGL
 ,ysnPrintEach
-,ysnPercentage
 ,ysnHidden
 ,dblHeight
 ,strFontName

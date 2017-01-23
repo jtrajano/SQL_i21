@@ -25,7 +25,7 @@ SELECT
 , dblPrepaids				= CAR.dblPrepaids + CAR.dblPrepayments
 , dblFuture					= CAR.dblFuture
 , dblBudgetAmount			= ISNULL(dbo.fnARGetCustomerBudget(CAR.intEntityCustomerId, GETDATE()), 0.000000) 
-, dblBudgetMonth			= ISNULL((SELECT dblMonthlyBudget FROM tblARCustomer WHERE intEntityCustomerId = CAR.intEntityCustomerId), 0.000000)
+, dtmBudgetMonth			= (SELECT TOP 1 dtmBudgetDate FROM tblARCustomerBudget WHERE (GETDATE() >= dtmBudgetDate AND GETDATE() < DATEADD(MONTH, 1, dtmBudgetDate)) AND intEntityCustomerId = CAR.intEntityCustomerId)
 , dblThru					= 0.000000
 , dblPendingInvoice			= (SELECT ISNULL(SUM(CASE WHEN strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0))))
 , dblPendingPayment			= (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0)
@@ -43,7 +43,3 @@ FROM vyuARCustomerAgingReport CAR
 LEFT JOIN tblARCustomerBudget CB 
 	ON CAR.intEntityCustomerId = CB.intEntityCustomerId 
 	AND DATEADD(MONTH, 1, GETDATE()) BETWEEN CB.dtmBudgetDate AND DATEADD(MONTH, 1, CB.dtmBudgetDate)
-
-
-
-	

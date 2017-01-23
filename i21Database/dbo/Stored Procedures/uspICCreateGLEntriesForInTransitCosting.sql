@@ -14,9 +14,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
-DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory';
-DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Auto-Variance';
-DECLARE @AccountCategory_Inventory_In_Transit AS NVARCHAR(30) = 'Inventory In-Transit';
+DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
+DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will not use Inventory Adjustment. 
+DECLARE @AccountCategory_Inventory_In_Transit AS NVARCHAR(30) = 'Inventory In-Transit'
 
 
 -- Get the default currency ID
@@ -374,9 +374,8 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
-WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
-				@InventoryTransactionTypeId_AutoNegative
-			)
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 
 UNION ALL  
 SELECT	
@@ -425,3 +424,4 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 

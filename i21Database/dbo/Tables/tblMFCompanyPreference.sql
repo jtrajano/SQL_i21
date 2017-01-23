@@ -31,5 +31,6 @@
     [intLotCodeNoOfDigits] INT NULL, 
 	ysnDisplayRecipeTitleByItem BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnDisplayRecipeTitleByItem] DEFAULT 0,
 	ysnPickByItemOwner BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnPickByItemOwner] DEFAULT 0,
+	ysnDisplayLotIdAsPalletId BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnDisplayLotIdAsPalletId] DEFAULT 0,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

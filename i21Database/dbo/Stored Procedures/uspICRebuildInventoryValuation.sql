@@ -1708,17 +1708,25 @@ END
 BEGIN 
 	DELETE [dbo].[tblGLSummary]
 
-	INSERT INTO tblGLSummary
-	(intAccountId,dtmDate,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strCode,intConcurrencyId)
+	INSERT INTO tblGLSummary(
+		intAccountId
+		,dtmDate
+		,dblDebit
+		,dblCredit
+		,dblDebitUnit
+		,dblCreditUnit
+		,strCode
+		,intConcurrencyId
+	)
 	SELECT
-			intAccountId
-			,dtmDate
-			,SUM(ISNULL(dblDebit,0)) as dblDebit
-			,SUM(ISNULL(dblCredit,0)) as dblCredit
-			,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
-			,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
-			,strCode
-			,0 as intConcurrencyId
+		intAccountId
+		,dtmDate
+		,dblDebit = SUM(ISNULL(dblDebit,0)) 
+		,dblCredit = SUM(ISNULL(dblCredit,0)) 
+		,dblDebitUnit = SUM(ISNULL(dblDebitUnit,0))
+		,dblCreditUnit = SUM(ISNULL(dblCreditUnit,0)) 
+		,strCode
+		,intConcurrencyId = 1 
 	FROM
 		tblGLDetail
 	WHERE ysnIsUnposted = 0	

@@ -9,15 +9,16 @@ CREATE PROCEDURE [dbo].[uspCFCreateDebitMemo](
 )
 AS
 BEGIN
-   
-DECLARE @EntriesForInvoice		AS InvoiceIntegrationStagingTable
-DECLARE @TaxDetails				AS LineItemTaxDetailStagingTable 
 
-DECLARE @companyLocationId		INT = 0
+	BEGIN TRY 
+		----------------VARIABLES---------------
+		DECLARE @EntriesForInvoice		AS InvoiceIntegrationStagingTable
+		DECLARE @TaxDetails				AS LineItemTaxDetailStagingTable 
+		DECLARE @companyLocationId		INT = 0
+		----------------------------------------
 
-SELECT TOP 1 @companyLocationId = intARLocationId FROM tblCFCompanyPreference
-
-CREATE TABLE #tblCFInvoiceDiscount	
+		---------CREATE TEMPORARY TABLE---------
+		CREATE TABLE #tblCFInvoiceDiscount	
 (
 		 intAccountId					INT
 		,intSalesPersonId				INT
@@ -60,13 +61,24 @@ CREATE TABLE #tblCFInvoiceDiscount
 		,dtmTransactionDate				DATETIME
 		,dtmPostedDate					DATETIME
 )
+		CREATE TABLE #tblCFInvoiceResult	
+		(
+			 intId							INT
+			,intDebitMemoId					INT
+		)
+		----------------------------------------
 
-INSERT INTO #tblCFInvoiceDiscount
-EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+		-----------COMPANY PREFERENCE-----------
+		SELECT TOP 1 @companyLocationId = intARLocationId FROM tblCFCompanyPreference
+		----------------------------------------
 
-BEGIN TRANSACTION
+		--------------INVOICE LIST--------------
+		INSERT INTO #tblCFInvoiceDiscount
+	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+		----------------------------------------
 
-INSERT INTO @EntriesForInvoice(
+		----------ENTRIES FOR INVOICE-----------
+		INSERT INTO @EntriesForInvoice(
 	 [strTransactionType]
 	,[strSourceTransaction]
 	,[intSourceId]
@@ -191,7 +203,7 @@ SELECT
 	,[intItemUOMId]							= NULL
 	,[dblQtyOrdered]						= NULL
 	,[dblQtyShipped]						= SUM(dblQuantity)
-	,[dblDiscount]							= dblDiscountRate
+	,[dblDiscount]							= NULL
 	,[dblPrice]								= dblAccountTotalAmount / SUM(dblQuantity)
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= ''
@@ -224,9 +236,9 @@ SELECT
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= NULL
 	,[strType]								= 'Card Fueling'
-	,[ysnUpdateAvailableDiscount]			= NULL
-	,[strItemTermDiscountBy]				= NULL
-	,[dblItemTermDiscount]					= NULL
+	,[ysnUpdateAvailableDiscount]			= 1
+	,[strItemTermDiscountBy]				= 'Amount'
+	,[dblItemTermDiscount]					= dblDiscount
 FROM #tblCFInvoiceDiscount
 GROUP BY 
 intCustomerId
@@ -234,43 +246,101 @@ intCustomerId
 ,dblAccountTotalAmount
 ,dblTotalQuantity
 ,dblAccountTotalDiscount
-,dblDiscountRate
+,dblDiscount
 ,intTermID
 ,dtmInvoiceDate
 ,intSalesPersonId
-	
+		----------------------------------------
 
-SELECT * FROM @EntriesForInvoice -------TEST
+		----------CREATE DEBIT MEMOS------------
+		EXEC [dbo].[uspARProcessInvoices]
+		 @InvoiceEntries	 = @EntriesForInvoice
+		,@LineItemTaxEntries = @TaxDetails
+		,@UserId			= 1
+		,@GroupingOption	= 11
+		,@RaiseError		= 1
+		,@ErrorMessage		= @ErrorMessage		OUTPUT
+		,@CreatedIvoices	= @CreatedIvoices	OUTPUT
+		,@UpdatedIvoices	= @UpdatedIvoices	OUTPUT
+		----------------------------------------
 
-EXEC [dbo].[uspARProcessInvoices]
-		@InvoiceEntries	 = @EntriesForInvoice
-	,@LineItemTaxEntries = @TaxDetails
-	,@UserId			= 1
-	,@GroupingOption	= 11
-	,@RaiseError		= 1
-	,@ErrorMessage		= @ErrorMessage		OUTPUT
-	,@CreatedIvoices	= @CreatedIvoices	OUTPUT
-	,@UpdatedIvoices	= @UpdatedIvoices	OUTPUT
+		DECLARE @intInvoiceResultId	INT
+		---------INVOICE PROCESS RESULT---------
+		INSERT INTO #tblCFInvoiceResult
+		(
+			intId,
+			intDebitMemoId
+		)
+		SELECT RecordKey , Record 
+		FROM fnCFSplitString(@CreatedIvoices,',')
+
+		------------LOOP CUST GROUP------------
+		WHILE (EXISTS(SELECT 1 FROM #tblCFInvoiceResult))
+		---------------------------------------
+		BEGIN
+
+			SELECT	TOP 1 
+			@intInvoiceResultId = intDebitMemoId
+			FROM #tblCFInvoiceResult
+
+			
+			INSERT INTO tblCFInvoiceProcessResult(
+				 strInvoiceProcessResultId
+				,intTransactionProcessId
+				,ysnStatus
+				,strRunProcessId
+				,intCustomerId
+				,strInvoiceReportNumber
+			)
+
+			SELECT TOP 1 
+			'Debit Memo'
+			,@intInvoiceResultId
+			,1
+			,''
+			,intEntityCustomerId
+			,(SELECT TOP 1 strInvoiceReportNumber FROM #tblCFInvoiceDiscount WHERE intCustomerId = arInv.intEntityCustomerId)
+			FROM tblARInvoice AS arInv WHERE intInvoiceId = @intInvoiceResultId
+
+			DELETE FROM #tblCFInvoiceResult 
+			WHERE intDebitMemoId = @intInvoiceResultId
+		END
 
 
-SELECT @ErrorMessage	
-SELECT @CreatedIvoices
-SELECT @UpdatedIvoices
-
-
-IF (@ErrorMessage IS NULL)
-	BEGIN
-		COMMIT TRANSACTION
-	END
-ELSE
-	BEGIN
-		ROLLBACK TRANSACTION
-	END
-
+		----------------------------------------
 		
-DROP TABLE #tblCFInvoiceDiscount
+		----------DROP TEMPORARY TABLE----------
+		DROP TABLE #tblCFInvoiceDiscount
+		----------------------------------------
+
+	END TRY
+	BEGIN CATCH
+		
+		------------SET ERROR MESSAGE-----------
+		SET @ErrorMessage = ERROR_MESSAGE ()  
+		----------------------------------------
+
+		----------DROP TEMPORARY TABLE----------
+		DROP TABLE #tblCFInvoiceDiscount
+		----------------------------------------
+	
+	END CATCH
 
 END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

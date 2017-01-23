@@ -145,6 +145,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intItemWeightUOMId]
 	,[dblPrice]
 	,[strPricing]
+	,[strVFDDocumentNumber]
 	,[ysnRefreshPrice]
 	,[strMaintenanceType]
 	,[strFrequency]
@@ -153,7 +154,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[dblLicenseAmount]
 	,[intTaxGroupId]
 	,[intStorageLocationId]
-	--,[intCompanyLocationSubLocationId]
+	,[intCompanyLocationSubLocationId]
 	,[ysnRecomputeTax]
 	,[intSCInvoiceId]
 	,[strSCInvoiceNumber]
@@ -253,6 +254,7 @@ SELECT
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
 	,[dblPrice]								= ARSI.[dblShipmentUnitPrice] 
 	,[strPricing]							= ARSI.[strPricing]
+	,[strVFDDocumentNumber]					= ARSI.[strVFDDocumentNumber]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
 	,[strFrequency]							= NULL
@@ -261,6 +263,7 @@ SELECT
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
 	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
+	,[intCompanyLocationSubLocationId]		= ARSI.[intSubLocationId]
 	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(ARSI.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)	
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
@@ -367,6 +370,7 @@ SELECT
 	,[intItemWeightUOMId]					= @ZeroDecimal
 	,[dblPrice]								= @ZeroDecimal
 	,[strPricing]							= SOD.[strPricing]
+	,[strVFDDocumentNumber]					= SOD.[strVFDDocumentNumber]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
 	,[strFrequency]							= NULL
@@ -374,7 +378,8 @@ SELECT
 	,[dblMaintenanceAmount]					= @ZeroDecimal 
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= NULL
-	,[intStorageLocationId]					= NULL
+	,[intStorageLocationId]					= SOD.[intStorageLocationId] 
+	,[intCompanyLocationSubLocationId]		= SOD.[intSubLocationId] 
 	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(SOD.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
@@ -484,6 +489,7 @@ INSERT INTO @EntriesForInvoice
 	,[intItemWeightUOMId]
 	,[dblPrice]
 	,[strPricing]
+	,[strVFDDocumentNumber]
 	,[ysnRefreshPrice]
 	,[strMaintenanceType]
 	,[strFrequency]
@@ -590,6 +596,7 @@ SELECT
 	,[intItemWeightUOMId]
 	,[dblPrice]
 	,[strPricing]
+	,[strVFDDocumentNumber]
 	,[ysnRefreshPrice]
 	,[strMaintenanceType]
 	,[strFrequency]

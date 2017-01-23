@@ -18,9 +18,9 @@ AS
 					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
-					dblQuantity AS dblQuantity,
+					(SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE intContractDetailId = CD.intContractDetailId OR ISNULL(intSplitFromId,0) = CD.intContractDetailId) AS dblQuantity,
 					strItemUOM AS strUOM,
-					dblNoOfLots,
+					(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractDetailId = CD.intContractDetailId OR ISNULL(intSplitFromId,0) = CD.intContractDetailId) dblNoOfLots,
 					strLocationName,
 					CD.intItemId,
 					CD.intItemUOMId,
@@ -57,6 +57,7 @@ AS
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 		AND			intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
 		AND			CD.intContractStatusId <> 3
+		AND			CD.intSplitFromId	IS NULL
 		
 		UNION ALL
 		

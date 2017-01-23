@@ -61,7 +61,7 @@ BEGIN TRY
 	WHERE 
 		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 		OR
-		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice')) 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
 	CREATE TABLE #EntriesForProcessing(
@@ -138,6 +138,7 @@ DECLARE  @Id									INT
 		,@InvoiceId								INT
 		,@EntityCustomerId						INT
 		,@CompanyLocationId						INT
+		,@AccountId								INT
 		,@CurrencyId							INT
 		,@TermId								INT
 		,@Date									DATETIME
@@ -192,6 +193,7 @@ DECLARE  @Id									INT
 		,@ItemTermDiscountBy					NVARCHAR(50)
 		,@ItemPrice								NUMERIC(18, 6)
 		,@ItemPricing							NVARCHAR(250)
+		,@ItemVFDDocumentNumber					NVARCHAR(100)
 		,@RefreshPrice							BIT
 		,@ItemMaintenanceType					NVARCHAR(25)
 		,@ItemFrequency							NVARCHAR(25)
@@ -287,6 +289,7 @@ BEGIN
 		,@InvoiceId						= [intInvoiceId]
 		,@EntityCustomerId				= [intEntityCustomerId]
 		,@CompanyLocationId				= [intCompanyLocationId]
+		,@AccountId						= [intAccountId]
 		,@CurrencyId					= [intCurrencyId]
 		,@TermId						= [intTermId]
 		,@Date							= CAST(ISNULL([dtmDate], @DateNow) AS DATE)
@@ -313,7 +316,7 @@ BEGIN
 		,@LoadDistributionHeaderId		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
 		,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
 		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
-		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
+		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Card Fueling Transaction', 'CF Tran') THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@ContractHeaderId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Sales Contract' THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
 		,@LoadId						= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Load Schedule' THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
@@ -341,6 +344,7 @@ BEGIN
 		,@ItemTermDiscountBy			= (CASE WHEN @GroupingOption = 0 THEN [strItemTermDiscountBy] ELSE NULL END)
 		,@ItemPrice						= (CASE WHEN @GroupingOption = 0 THEN [dblPrice] ELSE NULL END)
 		,@ItemPricing					= (CASE WHEN @GroupingOption = 0 THEN [strPricing] ELSE NULL END)
+		,@ItemVFDDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strVFDDocumentNumber] ELSE NULL END)
 		,@RefreshPrice					= (CASE WHEN @GroupingOption = 0 THEN [ysnRefreshPrice] ELSE 0 END)
 		,@ItemMaintenanceType			= (CASE WHEN @GroupingOption = 0 THEN [strMaintenanceType] ELSE NULL END)
 		,@ItemFrequency					= (CASE WHEN @GroupingOption = 0 THEN [strFrequency] ELSE NULL END)
@@ -400,7 +404,7 @@ BEGIN
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
 		AND ([intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
+		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
 		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (ISNULL([intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST([dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -427,7 +431,7 @@ BEGIN
 						SET @SourceColumn = 'intShipmentId'
 						SET @SourceTable = 'tblLGShipment'
 					END
-				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction'
+				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
 					BEGIN
 						SET @SourceColumn = 'intTransactionId'
 						SET @SourceTable = 'tblCFTransaction'
@@ -460,7 +464,7 @@ BEGIN
 						SET @SourceTable = 'tblLGLoad'
 					END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
+				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
 					BEGIN
 						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 					END
@@ -494,6 +498,7 @@ BEGIN
 		EXEC [dbo].[uspARCreateCustomerInvoice]
 			 @EntityCustomerId				= @EntityCustomerId
 			,@CompanyLocationId				= @CompanyLocationId
+			,@AccountId						= @AccountId
 			,@CurrencyId					= @CurrencyId
 			,@TermId						= @TermId
 			,@EntityId						= @EntityId
@@ -648,7 +653,7 @@ BEGIN
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -687,6 +692,7 @@ BEGIN
 					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 					,@ItemPrice						= [dblPrice]
 					,@ItemPricing					= [strPricing]
+					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
@@ -768,6 +774,7 @@ BEGIN
 						,@ItemTermDiscountBy			= @ItemTermDiscountBy
 						,@ItemPrice						= @ItemPrice
 						,@ItemPricing					= @ItemPricing
+						,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 						,@RefreshPrice					= @RefreshPrice
 						,@ItemMaintenanceType			= @ItemMaintenanceType
 						,@ItemFrequency					= @ItemFrequency
@@ -941,7 +948,7 @@ BEGIN
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -1056,6 +1063,7 @@ BEGIN TRY
 			,@InvoiceId						= [intInvoiceId]
 			,@EntityCustomerId				= [intEntityCustomerId]
 			,@CompanyLocationId				= [intCompanyLocationId]
+			,@AccountId						= [intAccountId] 
 			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurreny]([intEntityCustomerId]))
 			,@TermId						= [intTermId]
 			,@Date							= CAST([dtmDate] AS DATE)
@@ -1110,7 +1118,7 @@ BEGIN TRY
 					SET @SourceColumn = 'intShipmentId'
 					SET @SourceTable = 'tblLGShipment'
 				END
-			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction'
+			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
 				BEGIN
 					SET @SourceColumn = 'intTransactionId'
 					SET @SourceTable = 'tblCFTransaction'
@@ -1144,7 +1152,7 @@ BEGIN TRY
 						SET @SourceTable = 'tblLGLoad'
 					END
 
-			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
+			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
 				BEGIN
 					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 				END
@@ -1167,6 +1175,7 @@ BEGIN TRY
 			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling') THEN [tblARInvoice].[strType] ELSE @Type END
 			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
+			--,[intAccountId]				= @AccountId 
 			,[intCurrencyId]			= @CurrencyId
 			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
 			,[intSourceId] 				= @NewSourceId
@@ -1297,6 +1306,7 @@ BEGIN TRY
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
 						,@ItemPricing					= [strPricing] 
+						,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 						,@RefreshPrice					= [ysnRefreshPrice]
 						,@ItemMaintenanceType			= [strMaintenanceType]
 						,@ItemFrequency					= [strFrequency]
@@ -1374,6 +1384,7 @@ BEGIN TRY
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
 							,@ItemPricing					= @ItemPricing
+							,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 							,@RefreshPrice					= @RefreshPrice
 							,@ItemMaintenanceType			= @ItemMaintenanceType
 							,@ItemFrequency					= @ItemFrequency
@@ -1550,6 +1561,7 @@ BEGIN TRY
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
 					,@ItemPricing					= [strPricing] 
+					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
@@ -1665,6 +1677,7 @@ BEGIN TRY
 																		[dblPrice]
 																  END
 						,[strPricing]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPricing ELSE [strPricing] END							
+						,[strVFDDocumentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVFDDocumentNumber ELSE [strVFDDocumentNumber] END
 						,[strMaintenanceType]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceType ELSE [strMaintenanceType] END
 						,[strFrequency]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemFrequency ELSE [strFrequency] END					
 						,[dtmMaintenanceDate]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceDate ELSE [dtmMaintenanceDate] END			

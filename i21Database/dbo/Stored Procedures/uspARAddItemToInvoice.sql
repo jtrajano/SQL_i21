@@ -19,6 +19,7 @@
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
+	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -130,6 +131,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@ItemPrice						= @ItemPrice
 			,@ItemPricing					= @ItemPricing
+			,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 			,@RefreshPrice					= @RefreshPrice
 			,@ItemMaintenanceType			= @ItemMaintenanceType
 			,@ItemFrequency					= @ItemFrequency
@@ -228,6 +230,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblLicenseAmount]
 				,[dblPrice]
 				,[strPricing]
+				,[strVFDDocumentNumber]
 				,[intSiteId]
 				,[strBillingBy]
 				,[dblNewMeterReading]
@@ -274,6 +277,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemLicenseAmount
 				,@ItemPrice
 				,@ItemPricing
+				,@ItemVFDDocumentNumber
 				,@ItemSiteId
 				,@ItemBillingBy
 				,@ItemNewMeterReading
@@ -346,6 +350,8 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
+			,@ItemTermDiscount				= @ItemTermDiscount
+			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@RecomputeTax					= @RecomputeTax
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
@@ -399,6 +405,9 @@ INNER JOIN (SELECT ARI.intInvoiceId, ARID.strDocumentNumber, strInvoiceNumber, i
 						WHERE strDocumentNumber IS NOT NULL AND ISNULL(strDocumentNumber,'') <> '' AND ARI.intInvoiceId = @InvoiceId ) ARI ON ICIS.strShipmentNumber = ARI.strDocumentNumber AND ICISI.intItemId = ARI.intItemId AND ICISI.intItemUOMId = ARI.intItemUOMId
 ) ABC ON tblARInvoiceDetail.intInvoiceId = ABC.intInvoiceId
 WHERE tblARInvoiceDetail.intInvoiceId = @InvoiceId
+
+
+EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION

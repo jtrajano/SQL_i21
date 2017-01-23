@@ -4849,6 +4849,24 @@
     <Build Include="dbo\Stored Procedures\uspICReportPhysicalInventoryCount.sql" />
     <Build Include="dbo\Views\vyuPREmployeeToProcess.sql" />
     <Build Include="dbo\Views\vyuICLotHistory.sql" />
+    <Build Include="dbo\Tables\tblRKM2MConfiguration.sql" />
+    <Build Include="dbo\Views\vyuRKGetOtherChargeItem.sql" />
+    <Build Include="dbo\Views\vyuRKGetOtherChargeItemNotMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSamplePreShipment.sql" />
+    <Build Include="dbo\Views\vyuCRMAgent.sql" />
+    <Build Include="dbo\Views\vyuCRMHoursWorkedSearch.sql" />
+    <Build Include="dbo\Tables\tblSMScreenLabelStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentIDOC.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCommitLabelListing.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForShipment.sql" />
+    <Build Include="dbo\Functions\fnCTContractApprovalExist.sql" />
+    <Build Include="dbo\Views\vyuCTNotification.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateInventoryCountDetail.sql" />
+    <Build Include="dbo\Tables\tblGLSegmentType.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1o_SegmentType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

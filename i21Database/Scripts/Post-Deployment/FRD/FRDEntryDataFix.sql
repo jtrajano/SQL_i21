@@ -572,3 +572,36 @@ UPDATE tblFRColumn SET strColumnType = 'User Defined' WHERE strColumnType IS NUL
 GO
 	PRINT N'Set existing data (strColumnType) to User Defined'
 GO
+
+--=====================================================================================================================================
+-- 	ROW DESIGNER: Set existing data (strRowType) value from 'Percentage' to 'Filter Accounts' with (strPercentage) = (strRelatedRows)
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (strPercentage) = (strRelatedRows)'
+GO
+
+UPDATE tblFRRowDesign SET strPercentage = strRelatedRows WHERE strRowType = 'Percentage'
+UPDATE tblFRRowDesign SET strRelatedRows = '' WHERE strRowType = 'Percentage'
+UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Percentage'
+
+GO
+	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (strPercentage) = (strRelatedRows)'
+GO
+
+--=====================================================================================================================================
+-- 	SEGMENT FILTER GROUP: Insert System Data
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'Insert System Data'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblFRSegmentFilterGroup WHERE strSegmentFilterGroup = 'All Segment') 
+BEGIN
+	INSERT INTO tblFRSegmentFilterGroup (strSegmentFilterGroup,strFilterString,strSegmentString) values ('All Segment','','')
+END
+
+GO
+	PRINT N'Insert System Data'
+GO

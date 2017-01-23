@@ -128,17 +128,26 @@ WHERE
 	AND tblARInvoiceDetail.[intInvoiceId] = @InvoiceIdLocal
 
 UPDATE
-	tblARInvoiceDetail
+	ARID
 SET
-	[dblTotal]		= (	CASE WHEN ((ISNULL([intShipmentId],0) <> 0 OR ISNULL([intShipmentPurchaseSalesContractId],0) <> 0 OR ISNULL(intLoadDetailId,0) <> 0) AND ISNULL([intItemWeightUOMId],0) <> 0)
-							THEN
-								[dbo].fnRoundBanker([dbo].fnRoundBanker((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker(((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+	ARID.[dblTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN @ZeroDecimal
 							ELSE
-								[dbo].fnRoundBanker([dbo].fnRoundBanker((([dblPrice] / [dblSubCurrencyRate]) * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker(((([dblPrice] / [dblSubCurrencyRate]) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
-						END							
-					  )
+								(	CASE WHEN ((ISNULL(ARID.[intShipmentId],0) <> 0 OR ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) <> 0 OR ISNULL(ARID.[intLoadDetailId],0) <> 0) AND ISNULL(ARID.[intItemWeightUOMId],0) <> 0)
+										THEN
+											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * (ARID.[dblItemWeight] * ARID.[dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * (ARID.[dblItemWeight] * ARID.[dblShipmentNetWt])) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+										ELSE
+											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+									END							
+								  )
+							END)
+	
+FROM
+	tblARInvoiceDetail ARID
+LEFT OUTER JOIN
+	tblICItem ICI
+		ON ARID.[intItemId] = ICI.[intItemId] 
 WHERE
-	tblARInvoiceDetail.[intInvoiceId] = @InvoiceIdLocal
+	ARID.[intInvoiceId] = @InvoiceIdLocal
 		
 	
 UPDATE

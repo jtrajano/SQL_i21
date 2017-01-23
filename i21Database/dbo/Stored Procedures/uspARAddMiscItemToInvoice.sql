@@ -12,6 +12,8 @@
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL	
 	,@ItemTaxGroupId				INT				= NULL
 	,@EntitySalespersonId			INT				= NULL	
@@ -155,7 +157,9 @@ BEGIN TRY
 		,[intConcurrencyId]
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
-		,[intDestinationWeightId])
+		,[intDestinationWeightId]
+		,[dblItemTermDiscount]
+		,[strItemTermDiscountBy])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -218,6 +222,8 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
 		,[intDestinationGradeId]			= @ItemDestinationGradeId
 		,[intDestinationWeightId]			= @ItemDestinationWeightId
+		,[dblItemTermDiscount]				= @ItemTermDiscount
+		,[strItemTermDiscountBy]			= @ItemTermDiscountBy
 			
 END TRY
 BEGIN CATCH
@@ -255,4 +261,3 @@ RETURN 1;
 	
 	
 END
-

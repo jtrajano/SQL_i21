@@ -553,3 +553,54 @@ GO
 --	DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal'
 
 --GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unconfirmed' AND [strType] = N'Contract')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT [strReminder]        =        N'Unconfirmed',
+			[strType]        	=        N'Contract',
+			[strMessage]		=        N'{0} {1} {2} unconfirmed.',
+			[strQuery]  		=        N'	SELECT	intContractHeaderId 
+											FROM	tblCTContractDetail CD,	
+													tblCTEvent EV
+											JOIN	tblCTAction	AC	ON	AC.intActionId = EV.intActionId
+											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+											WHERE	intContractStatusId = 2 AND AC.strInternalCode = ''Unconfirmed Sequence'' AND ER.intEntityId = {0}
+											',
+			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Unconfirmed', 
+			[intSort]            =        18
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strMessage] = N'{0} {1} {2} unconfirmed.'
+	WHERE [strReminder] = N'Unconfirmed' AND [strType] = N'Contract' 
+END
+
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Empty' AND [strType] = N'Contract')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT [strReminder]        =        N'Empty',
+			[strType]        	=        N'Contract',
+			[strMessage]		=        N'{0} {1} {2} without sequence.',
+			[strQuery]  		=        N'	SELECT	CH.intContractHeaderId 
+											FROM	tblCTContractHeader CH	CROSS	
+											JOIN	tblCTEvent			EV	
+											JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+											JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
+											JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+											WHERE	CD.intContractHeaderId IS NULL AND AC.strInternalCode = ''Contract without Sequence'' AND ER.intEntityId = {0}
+											GROUP BY CH.intContractHeaderId',
+			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Empty', 
+			[intSort]            =        19
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strMessage] = N'{0} {1} {2} unconfirmed.'
+	WHERE [strReminder] = N'Empty' AND [strType] = N'Contract' 
+END
+
+GO

@@ -30,7 +30,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 3. "Transport Load"
 																											-- 4. "Inbound Shipment"
 																											-- 5. "Inventory Shipment"
-																											-- 6. "Card Fueling Transaction"
+																											-- 6. "Card Fueling Transaction" / "CF Tran"
 																											-- 7. "Transfer Storage"
 																											-- 8. "Sale OffSite"
 																											-- 9. "Settle Storage"
@@ -41,11 +41,13 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 14. "Credit Card Reconciliation"
 																											-- 15. "Sales Contract"
 																											-- 16. "Load Schedule"
+																											-- 17. "CF Invoice"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
 	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer (tblARCustomer.intEntityCustomerId)	
 	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
+	,[intAccountId]							INT												NULL		-- Key Value from tblGLAccount
 	,[intCurrencyId]						INT												NULL		-- Currency Id (tblSMCurrency.intCurrencyID)
 	,[intTermId]							INT												NULL		-- Term Id(If NULL, customer's default will be used)	
 	,[intPeriodsToAccrue]					INT												NULL		-- Default(1) Period to Accrue	
@@ -111,6 +113,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intItemWeightUOMId]					INT												NULL	
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
     ,[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
+	,[strVFDDocumentNumber]					NVARCHAR(100) 	COLLATE Latin1_General_CI_AS	NULL
     ,[ysnRefreshPrice]						BIT												NULL		-- Indicate whether to recompute for Price based on the available pricing setup	
 	,[strMaintenanceType]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
     ,[strFrequency]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
@@ -165,7 +168,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnBlended]							BIT												NULL		-- Indicates if a Finished Good item is already blended
 	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
 	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
-    ,[intConversionAccountId]                INT                                            NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
+    ,[intConversionAccountId]               INT												NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
 
 	,[intStorageScheduleTypeId]				INT												NULL		-- Indicates the Grain Bank of an Item
 	,[intDestinationGradeId]				INT												NULL		-- Key Value from tblCTWeightGrade (Grain Destination - Grade)

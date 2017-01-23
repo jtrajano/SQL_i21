@@ -28,8 +28,10 @@ BEGIN TRY
 			MO.strFutureMonth,
 			PD.[dblNoOfLots],
 			LTRIM(PD.dblFutures) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPrice,
-			PD.strNotes
-	
+			PD.strNotes,
+			LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(PD.dblFutures,2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPriceDesc,
+			FLOOR(PD.[dblNoOfLots]) AS intNoOfLots
+				
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId	LEFT

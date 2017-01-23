@@ -68,6 +68,7 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							strItemTermDiscountBy		NVARCHAR(50),
 							dblPrice					NUMERIC(18,6),
 							strPricing					NVARCHAR(250),
+							strVFDDocumentNumber		NVARCHAR(100),
 							intTaxGroupId				INT,
 							intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -89,8 +90,8 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							dblContractAvailable		INT,
 							intEntityContactId			INT,
 							intStorageScheduleTypeId	INT,
-							[intSubCurrencyId]			INT,
-							[dblSubCurrencyRate]		NUMERIC(18,6))
+							intSubCurrencyId			INT,
+							dblSubCurrencyRate		    NUMERIC(18,6))
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
@@ -109,6 +110,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							strItemTermDiscountBy		NVARCHAR(50),
 							dblPrice					NUMERIC(18,6),
 							strPricing					NVARCHAR(250),
+							strVFDDocumentNumber		NVARCHAR(100),
 							intTaxGroupId				INT,
 							intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -130,8 +132,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							dblContractAvailable		INT,
 							intEntityContactId			INT,
 							intStorageScheduleTypeId	INT,
-							[intSubCurrencyId]			INT,
-							[dblSubCurrencyRate]		NUMERIC(18,6))
+							intSubCurrencyId			INT,
+							dblSubCurrencyRate			NUMERIC(18,6))
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -161,6 +163,7 @@ SELECT intItemId					= SI.intItemId
 	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
 	 , strPricing					= SOD.strPricing 
+	 , strVFDDocumentNumber		    = SOD.strVFDDocumentNumber
 	 , intTaxGroupId				= SI.intTaxGroupId
 	 , intSalesOrderDetailId		= SI.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
@@ -213,6 +216,7 @@ SELECT intItemId					= SOD.intItemId
 	 , strItemTermDiscountBy		= 0
 	 , dblPrice						= 0
 	 , strPricing					= SOD.strPricing 
+	 , strVFDDocumentNumber		    = NULL
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
@@ -259,6 +263,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= ICSI.dblUnitPrice
 	 , strPricing					= SOD.strPricing 
+	 , strVFDDocumentNumber		    = SOD.strVFDDocumentNumber
 	 , intTaxGroupId				= SOD.intTaxGroupId
 	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= ICSI.intInventoryShipmentItemId
@@ -582,6 +587,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblDiscount]
 					,[dblPrice]
 					,[strPricing]
+					,[strVFDDocumentNumber]
 					,[dblTotalTax]
 					,[dblTotal]
 					,[intAccountId]
@@ -612,6 +618,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,0							--[dblDiscount]
 					,[dblMaintenanceAmount]		--[dblPrice]
 					,[strPricing] 
+					,[strVFDDocumentNumber]
 					,0							--[dblTotalTax]
 					,[dblMaintenanceAmount] * [dblQtyOrdered] --[dblTotal]
 					,[intAccountId]				--[intAccountId]
@@ -721,6 +728,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemLicenseAmount		NUMERIC(18,6),
 						@ItemPrice				NUMERIC(18,6),
 						@ItemPricing			NVARCHAR(250),
+						@ItemVFDDocumentNumber	NVARCHAR(100),
 						@ItemTaxGroupId			INT,		
 						@ItemSalesOrderDetailId	INT,
 						@ItemShipmentDetailId	INT,
@@ -760,6 +768,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemLicenseAmount      = dblLicenseAmount,
 						@ItemPrice				= dblPrice,
 						@ItemPricing			= strPricing,
+						@ItemVFDDocumentNumber  = strVFDDocumentNumber,
 						@ItemTaxGroupId			= intTaxGroupId,
 						@ItemSalesOrderDetailId	= intSalesOrderDetailId,						
 						@ItemShipmentDetailId	= intInventoryShipmentItemId,
@@ -806,6 +815,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemLicenseAmount				= @ItemLicenseAmount
 							,@ItemPrice						= @ItemPrice
 							,@ItemPricing					= @ItemPricing
+							,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 							,@RefreshPrice					= 0
 							,@ItemTaxGroupId				= @ItemTaxGroupId
 							,@RecomputeTax					= 0
