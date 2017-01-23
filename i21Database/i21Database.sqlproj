@@ -4868,6 +4868,9 @@
     <Build Include="dbo\Tables\tblGLSegmentType.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1o_SegmentType.sql" />
     <Build Include="dbo\Tables\tblARCustomerMasterLicense.sql" />
+    <Build Include="dbo\Views\vyuLGNoOfContainerPerShippingLine.sql" />
+    <Build Include="dbo\Views\vyuLGContractWithoutShippingInstruction.sql" />
+    <Build Include="dbo\Views\vyuLGLateShipmentView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
