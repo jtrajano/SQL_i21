@@ -1,7 +1,8 @@
 ﻿CREATE PROC [dbo].[uspRKPostMatchPnS]
 		@intMatchNo int,
 		@dblGrossPL numeric(24,10),
-		@dblNetPnL numeric(24,10)
+		@dblNetPnL numeric(24,10),
+		@strUserName nvarchar(100) = null
 
 AS
 BEGIN TRY
@@ -30,11 +31,11 @@ BEGIN TRY
 
  BEGIN TRANSACTION    
 	INSERT INTO tblRKStgMatchPnS (intConcurrencyId,intMatchFuturesPSHeaderId,intMatchNo,dtmMatchDate,strCurrency,intCompanyLocationId,intCommodityId,intFutureMarketId,intFutureMonthId,
-									intEntityId,intBrokerageAccountId,dblMatchQty,dblNetPnL,dblGrossPnL,strStatus,strBrokerName,strBrokerAccount,dtmPostingDate)
+									intEntityId,intBrokerageAccountId,dblMatchQty,dblNetPnL,dblGrossPnL,strStatus,strBrokerName,strBrokerAccount,dtmPostingDate,strUsername)
 
 	SELECT 0,intMatchFuturesPSHeaderId,intMatchNo,dtmMatchDate,@strCurrency,intCompanyLocationId,intCommodityId,intFutureMarketId,intFutureMonthId,intEntityId,intBrokerageAccountId,
 	ISNULL((SELECT SUM(ISNULL(dblMatchQty,0)) FROM tblRKMatchFuturesPSDetail m WHERE intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId),0) dblMatchQty
-	,@dblNetPnL,@dblGrossPL,'',@BrokerName,@BrokerAccount,getdate()  FROM tblRKMatchFuturesPSHeader h WHERE intMatchNo=@intMatchNo
+	,@dblNetPnL,@dblGrossPL,'',@BrokerName,@BrokerAccount,getdate(),@strUsername  FROM tblRKMatchFuturesPSHeader h WHERE intMatchNo=@intMatchNo
 
 	UPDATE tblRKMatchFuturesPSHeader SET ysnPosted = 1 WHERE intMatchNo=@intMatchNo
 

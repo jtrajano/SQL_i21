@@ -20,7 +20,7 @@
 	   [strBrokerAccount] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL,
 	   [dtmPostingDate] datetime null,
        [strStatus] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL,
-	   [strMessage] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL
-
+	   [strMessage] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
+	[strUsername] nvarchar(100) COLLATE Latin1_General_CI_AS  NULL
     CONSTRAINT [PK_tblRKStgMatchPnS_intStgMatchPnSId] PRIMARY KEY (intStgMatchPnSId),  	  
 )
