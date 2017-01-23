@@ -100,6 +100,9 @@ AS
 		BEGIN
 			INSERT INTO @temp_aging_table
 			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDate, NULL
+
+			DELETE FROM @temp_aging_table
+			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('Card Fueling'))
 		END
 
 	--PROCESS EACH CUSTOMER
