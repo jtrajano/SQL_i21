@@ -145,7 +145,7 @@ BEGIN
 			,strStockStatus
 			,strPatronClass
 			,dtmDeceasedDate
-			,ysnSubjectToFWT
+			--,ysnSubjectToFWT
 			,ysnHDBillableSupport
 			,intTaxCodeId
 			,intContractGroupId
@@ -219,7 +219,7 @@ BEGIN
 			,strStockStatus						= ''
 			,strPatronClass						= ''
 			,dtmDeceasedDate					= NULL 
-			,ysnSubjectToFWT					= 0 
+			--,ysnSubjectToFWT					= 0 
 			,ysnHDBillableSupport				= 0 
 			,intTaxCodeId						= NULL
 			,intContractGroupId					= NULL
