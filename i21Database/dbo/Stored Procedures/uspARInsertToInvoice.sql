@@ -313,6 +313,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , strItemTermDiscountBy		= NULL
 	 , dblPrice						= ARSI.dblPrice 
 	 , strPricing					= ARSI.strPricing
+	 , strVFDDocumentNumber		    = ARSI.strVFDDocumentNumber
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= ARSI.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
