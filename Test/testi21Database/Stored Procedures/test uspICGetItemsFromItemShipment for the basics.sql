@@ -58,7 +58,7 @@ BEGIN
 			,[intOrderId]
 			,[intSourceId]
 			,[intLineNo]
-			,[intStorageScheduleId]
+			--,[intStorageScheduleId]
 		)
 		SELECT 
 			-- Header
@@ -90,7 +90,7 @@ BEGIN
 			,[intOrderId]
 			,[intSourceId]
 			,[intLineNo]
-			,[intStorageScheduleId]
+			--,[intStorageScheduleId]
 		FROM @result
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
