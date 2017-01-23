@@ -876,5 +876,39 @@ namespace iRely.Inventory.BusinessLayer
             }
             return saveResult;
         }
+
+        public async Task<SearchResult> SearchReceiptCharges(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryReceiptCharge>()
+                .Filter(param, true);
+
+            var sorts = new List<SearchSort>();
+
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "strreceiptnumber" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryReceiptId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "strreceiptnumber" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryReceiptId", direction = "DESC" });
+                }
+            }
+
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+
+            var data = await query.ExecuteProjection(param, "intInventoryReceiptId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
     }
 }

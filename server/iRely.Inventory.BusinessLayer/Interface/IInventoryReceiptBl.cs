@@ -26,5 +26,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> GetChargeTaxDetails(GetParameter param, int ChargeId, int ReceiptId);
         SaveResult GetStatusUnitCost(int receiptId, out int? newStatus);
         SaveResult ReturnReceipt(int receiptId, out int? inventoryReturnId);
+        Task<SearchResult> SearchReceiptCharges(GetParameter param);
     }
 }

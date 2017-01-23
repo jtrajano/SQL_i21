@@ -1282,7 +1282,12 @@ namespace iRely.Inventory.Model
         public string strCurrency { get; set; }
      //   public int? intCent { get; set; }
         public string strTaxGroup { get; set; }
-
+        public decimal? dblTax { get; set; }
+        public string strReceiptNumber { get; set; }
+        public DateTime? dtmReceiptDate { get; set; }
+        public string strLocationName { get; set; }
+        public string strBillOfLading { get; set; }
+        public string strReceiptVendor { get; set; }
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }
 

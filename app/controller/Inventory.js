@@ -488,6 +488,18 @@ Ext.define('Inventory.controller.Inventory', {
                 screen: 'Inventory.view.InventoryReceipt',
                 valueField: 'intInventoryReceiptId',
                 displayField: 'strReceiptNumber',
+                displayTitle: 'Inventory Receipt Charges',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryReceipt/SearchReceiptCharges',
+                fields: [
+                    {name: 'intInventoryReceiptId', type: 'int'},
+                    {name: 'strReceiptNumber', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryReceipt',
+                valueField: 'intInventoryReceiptId',
+                displayField: 'strReceiptNumber',
                 displayTitle: 'Inventory Receipt Lots',
                 screenIcon: 'maintenance',
                 url: '../Inventory/api/InventoryReceipt/SearchReceiptItemLots',
