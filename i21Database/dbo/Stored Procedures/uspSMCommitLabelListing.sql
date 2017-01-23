@@ -16,7 +16,7 @@ BEGIN TRANSACTION
 	SELECT DISTINCT A.strLabel
 	FROM tblSMScreenLabelStage A LEFT JOIN tblSMScreenLabel B
 		ON A.strLabel = B.strLabel
-	WHERE ISNULL(B.strLabel, '') = ''
+	WHERE ISNULL(B.strLabel, '') = '' AND A.strLabel <> 'Attachment' AND A.strLabel <> 'Audit Logs'
 	
 	-- DELETE Label Stage
 	DELETE FROM tblSMScreenLabelStage
