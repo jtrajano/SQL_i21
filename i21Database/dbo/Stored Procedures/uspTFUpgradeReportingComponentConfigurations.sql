@@ -50,7 +50,6 @@ BEGIN TRY
 			, intTemplateItemNumber		= SOURCE.intTemplateItemNumber
 			, strDescription			= SOURCE.strDescription
 			, strScheduleCode			= SOURCE.strScheduleList
-			, strConfiguration			= SOURCE.strConfiguration
 			, ysnConfiguration			= SOURCE.ysnConfiguration
 			, ysnDynamicConfiguration	= SOURCE.ysnDynamicConfiguration
 			, strLastIndexOf			= SOURCE.strLastIndexOf
