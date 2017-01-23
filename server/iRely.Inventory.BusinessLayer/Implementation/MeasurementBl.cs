@@ -27,7 +27,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
     }
