@@ -72,6 +72,7 @@ SELECT Trans.intTransactionId
 	, strTaxPayerAddress = CASE WHEN Exception.intTransactionExceptionId IS NULL THEN Trans.strTaxPayerAddress ELSE Exception.strTaxPayerAddress END
 	, Trans.intIntegrationError
 	, Trans.leaf
+	, Exception.intTransactionExceptionId
 FROM tblTFTransaction Trans
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Trans.intProductCodeId
