@@ -19,7 +19,17 @@ DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 DECLARE @ysnRemoteTransaction INT
 
+DECLARE @companyConfigTermId	INT = NULL
 
+SELECT TOP 1 @companyConfigTermId = intTermsCode FROM tblCFCompanyPreference
+IF(ISNULL(@companyConfigTermId,0) = 0)
+BEGIN
+	SET @ErrorMessage = 'Term code is required.'
+	SET @CreatedIvoices = NULL
+	SET @UpdatedIvoices = NULL
+
+	RETURN
+END
 
 SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId),@UserId)
 
@@ -127,14 +137,14 @@ END
 					,[strType]	
 				)
 				SELECT
-					 [strSourceTransaction]					= 'Card Fueling Transaction'
+					 [strSourceTransaction]					= 'CF Tran'
 					,[intSourceId]							= cfTrans.intTransactionId
 					,[strSourceId]							= cfTrans.strTransactionId
 					,[intInvoiceId]							= cfTrans.intInvoiceId --NULL Value will create new invoice
 					,[intEntityCustomerId]					= cfCardAccount.intCustomerId
 					,[intCompanyLocationId]					= cfSiteItem.intARLocationId
 					,[intCurrencyId]						= 1
-					,[intTermId]							= cfCardAccount.intTermsCode
+					,[intTermId]							= @companyConfigTermId
 					,[dtmDate]								= cfTrans.dtmTransactionDate
 					,[dtmDueDate]							= NULL
 					,[dtmShipDate]							= cfTrans.dtmTransactionDate
@@ -208,7 +218,7 @@ END
 					,[ysnVirtualMeterReading]				= NULL
 					,[ysnClearDetailTaxes]					= 0
 					,[intTempDetailIdForTaxes]				= @strRecord
-					,[strType]								= 'Card Fueling'
+					,[strType]								= 'CF Tran'
 				FROM tblCFTransaction cfTrans
 				INNER JOIN tblCFNetwork cfNetwork
 				ON cfTrans.intNetworkId = cfNetwork.intNetworkId
