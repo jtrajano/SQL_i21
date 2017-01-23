@@ -58,7 +58,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -474,7 +475,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -487,7 +489,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -520,7 +523,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -560,7 +564,8 @@ namespace iRely.Inventory.BusinessLayer
                 return new SearchResult()
                 {
                     data = data.AsQueryable(),
-                    total = await query.CountAsync()
+                    total = await query.CountAsync(),
+                    summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }
             else if (ReceiptType == "Purchase Contract" && SourceType == 0)
@@ -595,7 +600,8 @@ namespace iRely.Inventory.BusinessLayer
 
                 return new SearchResult() {
                     data = data.AsQueryable(),
-                    total = await query.CountAsync()
+                    total = await query.CountAsync(),
+                    summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }
             else if (ReceiptType == "Purchase Contract" && SourceType == 2)
@@ -631,7 +637,8 @@ namespace iRely.Inventory.BusinessLayer
                 return new SearchResult()
                 {
                     data = data.AsQueryable(),
-                    total = await query.CountAsync()
+                    total = await query.CountAsync(),
+                    summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }
             else 
@@ -667,7 +674,8 @@ namespace iRely.Inventory.BusinessLayer
                 return new SearchResult()
                 {
                     data = data.AsQueryable(),
-                    total = await query.CountAsync()
+                    total = await query.CountAsync(),
+                    summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }
 
@@ -794,7 +802,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
