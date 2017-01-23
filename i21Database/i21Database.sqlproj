@@ -4864,6 +4864,8 @@
     <Build Include="dbo\Functions\fnCTContractApprovalExist.sql" />
     <Build Include="dbo\Views\vyuCTNotification.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateInventoryCountDetail.sql" />
+    <Build Include="dbo\Tables\tblGLSegmentType.sql" />
+    <Build Include="Scripts\Post-Deployment\GL\DefaultData\1o_SegmentType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
