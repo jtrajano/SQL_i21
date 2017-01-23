@@ -15,6 +15,7 @@ BEGIN
 		DECLARE @EntriesForInvoice		AS InvoiceIntegrationStagingTable
 		DECLARE @TaxDetails				AS LineItemTaxDetailStagingTable 
 		DECLARE @companyLocationId		INT = 0
+		DECLARE @accountId				INT = 0
 		----------------------------------------
 
 		---------CREATE TEMPORARY TABLE---------
@@ -69,7 +70,10 @@ BEGIN
 		----------------------------------------
 
 		-----------COMPANY PREFERENCE-----------
-		SELECT TOP 1 @companyLocationId = intARLocationId FROM tblCFCompanyPreference
+		SELECT TOP 1 
+		 @companyLocationId = intARLocationId 
+		,@accountId = intGLAccountId
+		FROM tblCFCompanyPreference
 		----------------------------------------
 
 		--------------INVOICE LIST--------------
@@ -80,6 +84,7 @@ BEGIN
 		----------ENTRIES FOR INVOICE-----------
 		INSERT INTO @EntriesForInvoice(
 	 [strTransactionType]
+	,[intAccountId]
 	,[strSourceTransaction]
 	,[intSourceId]
 	,[strSourceId]
@@ -161,7 +166,8 @@ BEGIN
 )
 SELECT
 	 [strTransactionType]					= 'Debit Memo'
-	,[strSourceTransaction]					= 'CF INV'
+	,[intAccountId]							= @accountId
+	,[strSourceTransaction]					= 'CF Invoice'
 	,[intSourceId]							= 1											-- TEMPORARY
 	,[strSourceId]							= strInvoiceReportNumber
 	,[intInvoiceId]							= NULL 
@@ -235,10 +241,10 @@ SELECT
 	,[ysnVirtualMeterReading]				= NULL
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= NULL
-	,[strType]								= 'Card Fueling'
+	,[strType]								= 'CF Invoice'
 	,[ysnUpdateAvailableDiscount]			= 1
 	,[strItemTermDiscountBy]				= 'Amount'
-	,[dblItemTermDiscount]					= dblDiscount
+	,[dblItemTermDiscount]					= dblAccountTotalDiscount
 FROM #tblCFInvoiceDiscount
 GROUP BY 
 intCustomerId
@@ -246,11 +252,12 @@ intCustomerId
 ,dblAccountTotalAmount
 ,dblTotalQuantity
 ,dblAccountTotalDiscount
-,dblDiscount
 ,intTermID
 ,dtmInvoiceDate
 ,intSalesPersonId
 		----------------------------------------
+
+		--SELECT * FROM @EntriesForInvoice
 
 		----------CREATE DEBIT MEMOS------------
 		EXEC [dbo].[uspARProcessInvoices]
@@ -263,6 +270,8 @@ intCustomerId
 		,@CreatedIvoices	= @CreatedIvoices	OUTPUT
 		,@UpdatedIvoices	= @UpdatedIvoices	OUTPUT
 		----------------------------------------
+
+		
 
 		DECLARE @intInvoiceResultId	INT
 		---------INVOICE PROCESS RESULT---------
@@ -325,6 +334,9 @@ intCustomerId
 		----------------------------------------
 	
 	END CATCH
+
+
+	SELECT @ErrorMessage,@CreatedIvoices
 
 END
 

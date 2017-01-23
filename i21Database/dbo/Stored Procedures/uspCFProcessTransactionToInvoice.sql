@@ -26,6 +26,18 @@ DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 DECLARE @ysnRemoteTransaction INT
 DECLARE @strItemTermDiscountBy NVARCHAR(MAX)
 
+DECLARE @companyConfigTermId	INT = NULL
+
+SELECT TOP 1 @companyConfigTermId = intTermsCode FROM tblCFCompanyPreference
+IF(ISNULL(@companyConfigTermId,0) = 0)
+BEGIN
+	SET @ErrorMessage = 'Term code is required.'
+	SET @CreatedIvoices = NULL
+	SET @UpdatedIvoices = NULL
+
+	RETURN
+END
+
 IF (@UpdateAvailableDiscount = 1)
 BEGIN
 	SET @ysnRemoteTransaction = 0
@@ -128,7 +140,7 @@ INSERT INTO @EntriesForInvoice(
 	,[dblItemTermDiscount]
 )
 SELECT
-	 [strSourceTransaction]					= 'Card Fueling Transaction'
+	 [strSourceTransaction]					= 'CF Tran'
 	,[intSourceId]							= cfTrans.intTransactionId
 	,[strSourceId]							= cfTrans.strTransactionId
 	,[intInvoiceId]							= @InvoiceId --NULL Value will create new invoice
@@ -138,7 +150,7 @@ SELECT
 											  end)
 	,[intCompanyLocationId]					= cfSiteItem.intARLocationId
 	,[intCurrencyId]						= NULL
-	,[intTermId]							= cfCardAccount.intTermsCode
+	,[intTermId]							= @companyConfigTermId
 	,[dtmDate]								= cfTrans.dtmTransactionDate
 	,[dtmDueDate]							= NULL
 	,[dtmShipDate]							= cfTrans.dtmTransactionDate
@@ -212,7 +224,7 @@ SELECT
 	,[ysnVirtualMeterReading]				= NULL
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @TransactionId
-	,[strType]								= 'Card Fueling'
+	,[strType]								= 'CF Tran'
 	,[ysnUpdateAvailableDiscount]			= @UpdateAvailableDiscount
 	,[strItemTermDiscountBy]				= @strItemTermDiscountBy
 	,[dblItemTermDiscount]					= @Discount
