@@ -4877,6 +4877,7 @@
     <Build Include="dbo\Tables\tblIPPreShipmentSampleError.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPPreShipmentSample.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPPreShipmentSample.sql" />
+    <Build Include="dbo\Views\vyuQMSampleTypeCategoryControlPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
