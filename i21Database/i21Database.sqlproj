@@ -4878,6 +4878,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPPreShipmentSample.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPPreShipmentSample.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeCategoryControlPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPReceiptIDOC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
