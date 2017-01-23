@@ -51,7 +51,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 { dataIndex: 'dtmReceiveTime', text: 'Receive Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 { dataIndex: 'dblActualTempReading', text: 'Actual Temp Reading', flex: 1, dataType: 'float', hidden: true },
                 { dataIndex: 'strEntityName', text: 'Entity Name', flex: 1, dataType: 'string', hidden: true },
-                { dataIndex: 'strActualCostId', text: 'Actual Cost Id', flex: 1, dataType: 'string', hidden: true }
+                { dataIndex: 'strActualCostId', text: 'Actual Cost Id', flex: 1, dataType: 'string', hidden: true },
+
+                { xtype: 'numbercolumn', dataIndex: 'dblSubTotal', text: 'Sub Total', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotalTax', text: 'Tax', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotalCharges', text: 'Charges', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotalGross', text: 'Gross', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotalNet', text: 'Net', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblGrandTotal', text: 'Total', flex: 1, dataType: 'float' },
             ],
             buttons: [
                 {

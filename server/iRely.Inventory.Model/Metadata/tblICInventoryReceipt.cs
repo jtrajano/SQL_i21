@@ -191,6 +191,12 @@ namespace iRely.Inventory.Model
         public string strEntityName { get; set; }
         public string strActualCostId { get; set; }
         public string strWarehouseRefNo { get; set; }
+        public decimal? dblSubTotal { get; set; }
+        public decimal? dblTotalTax { get; set; }
+        public decimal? dblTotalCharges { get; set; }
+        public decimal? dblTotalGross { get; set; }
+        public decimal? dblTotalNet { get; set; }
+        public decimal? dblGrandTotal { get; set; }
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
     }

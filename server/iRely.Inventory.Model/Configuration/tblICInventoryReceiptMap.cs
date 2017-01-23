@@ -122,6 +122,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strEntityName).HasColumnName("strEntityName");
             this.Property(t => t.strActualCostId).HasColumnName("strActualCostId");
             this.Property(t => t.strWarehouseRefNo).HasColumnName("strWarehouseRefNo");
+            this.Property(t => t.dblSubTotal).HasColumnName("dblSubTotal");
+            this.Property(t => t.dblTotalTax).HasColumnName("dblTotalTax");
+            this.Property(t => t.dblTotalCharges).HasColumnName("dblTotalCharges");
+            this.Property(t => t.dblTotalGross).HasColumnName("dblTotalGross");
+            this.Property(t => t.dblTotalNet).HasColumnName("dblTotalNet");
+            this.Property(t => t.dblGrandTotal).HasColumnName("dblGrandTotal");
         }
     }
 
