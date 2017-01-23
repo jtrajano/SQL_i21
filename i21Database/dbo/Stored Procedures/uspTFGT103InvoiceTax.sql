@@ -124,7 +124,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 					BEGIN
 						SET @ExcludeDestinationState = ''
 					END
-							SET @QueryInvoice1 = 'SELECT DISTINCT 0,
+							SET @QueryInvoice1 = 'SELECT DISTINCT
 								tblARInvoiceDetail.intInvoiceDetailId,
 								tblTFReportingComponent.intTaxAuthorityId,
 								tblTFReportingComponent.strFormCode,
@@ -189,7 +189,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 								 tblARAccountStatus ON tblARCustomer.intAccountStatusId = tblARAccountStatus.intAccountStatusId CROSS JOIN
 								 tblSMCompanySetup
 								 WHERE (tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ')) 
-									 AND dtmDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
+									 AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 									 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
 									 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND tblARInvoice.ysnPosted = 1'
 
@@ -246,7 +246,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 								SET @Criteria = 'AND tblTFReportingComponentCriteria.strCriteria <> ''= 0'' AND tblTFReportingComponentCriteria.strCriteria <> ''<> 0'''
 							END
 
-						SET @InvQueryPart1 = 'SELECT DISTINCT 0, 
+						SET @InvQueryPart1 = 'SELECT DISTINCT
 								 tblICInventoryTransferDetail.intInventoryTransferDetailId, 
 								 tblTFReportingComponent.intTaxAuthorityId, 
 								 tblTFReportingComponent.strFormCode,
@@ -320,7 +320,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 							WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + ')) 
 							AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 							AND (tblARInvoice.strBOLNumber IS NULL)
-							AND (tblTRLoadHeader.dtmLoadDateTime BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
+							AND (CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
 							AND (tblICInventoryTransfer.ysnPosted = 1) ' + @Criteria + ''
 
 							SET @InvTransferQuery = @InvQueryPart1 + @InvQueryPart2
