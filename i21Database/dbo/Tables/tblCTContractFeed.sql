@@ -34,8 +34,6 @@
 	strCurrency				NVARCHAR(50) COLLATE Latin1_General_CI_AS,--CURRENCY 
 	strPriceUOM				NVARCHAR(50) COLLATE Latin1_General_CI_AS, --COND_UNIT 
 	strRowState				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	strERPBatchNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	strERPLineNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strMessage				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strFeedStatus			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dtmFeedCreated			DATETIME,
