@@ -50,6 +50,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
 		,@ACH AS INT = 22
+		,@DIRECT_DEPOSIT AS INT = 23
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -104,7 +105,7 @@ ELSE
 
 		/** Clean-up Reversing Date parameter **/
 		SELECT @dtmReversalDate = ISNULL(@dtmReverseDate, dtmDate), @intTransactionId = intTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP ON F.strTransactionId = TMP.strTransactionId
-		WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK) AND F.strReferenceNo NOT IN (@CASH_PAYMENT) AND F.dtmCheckPrinted IS NOT NULL 
+		WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT) AND F.strReferenceNo NOT IN (@CASH_PAYMENT) AND F.dtmCheckPrinted IS NOT NULL 
 
 		/** Insert Reversal Entry Header **/
 		INSERT INTO tblCMBankTransaction
@@ -113,13 +114,13 @@ ELSE
 			ysnCheckVoid, ysnPosted, strLink, ysnClr, dtmDateReconciled, intBankStatementImportId, intBankFileAuditId, strSourceSystem, intEntityId, 
 			intCreatedUserId, intCompanyLocationId, dtmCreated, intLastModifiedUserId)
 		SELECT
-			F.strTransactionId + 'V', 19, intBankAccountId, intCurrencyId, dblExchangeRate, @dtmReversalDate, strPayee, intPayeeId, strAddress, 
+			F.strTransactionId + 'V', intBankTransactionTypeId + 100, intBankAccountId, intCurrencyId, dblExchangeRate, @dtmReversalDate, strPayee, intPayeeId, strAddress, 
 			strZipCode, strCity, strState, strCountry, dblAmount, strAmountInWords, 'Void Transaction for ' + F.strTransactionId, 'Voided-' + strReferenceNo, @dtmReversalDate, ysnCheckToBePrinted,
 			1, 0, strLink, 0, @dtmReversalDate, intBankStatementImportId, intBankFileAuditId, strSourceSystem, intEntityId, 
 			@intUserId, intCompanyLocationId, getdate(), @intUserId
 		FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 					ON F.strTransactionId = TMP.strTransactionId
-		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT)		
 				-- Condition #1:
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
@@ -150,7 +151,7 @@ ELSE
 		SELECT strTransactionId, intEntityId, intBankTransactionTypeId INTO #tmpCMBankTransactionReversal FROM 
 			(SELECT F.strTransactionId + 'V' AS strTransactionId, F.intEntityId, F.intBankTransactionTypeId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 				ON F.strTransactionId = TMP.strTransactionId
-				WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
+				WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT)		
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
 				AND F.dtmCheckPrinted IS NOT NULL) X
 
@@ -166,13 +167,13 @@ ELSE
 							,@intVoidBankTransactionTypeId = intBankTransactionTypeId 
 				FROM #tmpCMBankTransactionReversal
 
-				IF (@intVoidBankTransactionTypeId = @AP_PAYMENT)
+				IF (@intVoidBankTransactionTypeId = @AP_PAYMENT OR @intVoidBankTransactionTypeId = @PAYCHECK OR @intVoidBankTransactionTypeId = @DIRECT_DEPOSIT)
 					BEGIN
 						/* If Void Check entry for AP Payment, do not post the reversal*/
 						UPDATE tblCMBankTransaction 
 							SET ysnPosted = 1, ysnCheckVoid = 1, ysnClr = 1, 
 								dtmDateReconciled = dtmDate, dtmCheckPrinted = dtmDate, @isPostingSuccessful = 1 
-						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = @VOID_CHECK
+						WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				ELSE
 					BEGIN
@@ -184,7 +185,7 @@ ELSE
 				IF (@isPostingSuccessful = 1) 
 					BEGIN
 						UPDATE tblCMBankTransaction SET ysnClr = 1 
-						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = @VOID_CHECK
+						WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				/* Otherwise Delete the Void Check entry and abort the reversal */
 				ELSE 

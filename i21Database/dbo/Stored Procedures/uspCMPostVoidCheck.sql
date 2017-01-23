@@ -100,7 +100,7 @@ SELECT	TOP 1
 		,@intCreatedEntityId = intEntityId
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
-		AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
+		--AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
 IF @@ERROR <> 0	GOTO Post_Rollback				
 
 -- Read the user preference
