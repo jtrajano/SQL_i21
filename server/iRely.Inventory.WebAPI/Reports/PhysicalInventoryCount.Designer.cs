@@ -36,12 +36,10 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PhysicalInventoryCount));
             this.Detail = new DevExpress.XtraReports.UI.DetailBand();
             this.xrTable3 = new DevExpress.XtraReports.UI.XRTable();
-            this.valueSubLocation = new DevExpress.XtraReports.UI.XRTableCell();
             this.xrTableRow3 = new DevExpress.XtraReports.UI.XRTableRow();
             this.valueCountLineNo = new DevExpress.XtraReports.UI.XRTableCell();
             this.valueItemNo = new DevExpress.XtraReports.UI.XRTableCell();
             this.valueDesc = new DevExpress.XtraReports.UI.XRTableCell();
-            this.valueLocation = new DevExpress.XtraReports.UI.XRTableCell();
             this.valueStorageLocation = new DevExpress.XtraReports.UI.XRTableCell();
             this.valueLotID = new DevExpress.XtraReports.UI.XRTableCell();
             this.valueUnitOfMeasure = new DevExpress.XtraReports.UI.XRTableCell();
@@ -58,8 +56,6 @@
             this.lblCountLineNo = new DevExpress.XtraReports.UI.XRTableCell();
             this.lblItemNo = new DevExpress.XtraReports.UI.XRTableCell();
             this.lblDesc = new DevExpress.XtraReports.UI.XRTableCell();
-            this.lblLocation = new DevExpress.XtraReports.UI.XRTableCell();
-            this.lblSubLocation = new DevExpress.XtraReports.UI.XRTableCell();
             this.lblStorageLocation = new DevExpress.XtraReports.UI.XRTableCell();
             this.lblLotID = new DevExpress.XtraReports.UI.XRTableCell();
             this.lblUnitOfMeasure = new DevExpress.XtraReports.UI.XRTableCell();
@@ -87,6 +83,10 @@
             this.xrLabel1 = new DevExpress.XtraReports.UI.XRLabel();
             this.GroupHeader2 = new DevExpress.XtraReports.UI.GroupHeaderBand();
             this.xrLabel2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel3 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel4 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel5 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel6 = new DevExpress.XtraReports.UI.XRLabel();
             ((System.ComponentModel.ISupportInitialize)(this.xrTable3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTable1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xpDataView1)).BeginInit();
@@ -108,7 +108,6 @@
             // 
             // xrTable3
             // 
-            this.xrTable3.BookmarkParent = this.valueSubLocation;
             this.xrTable3.BorderColor = System.Drawing.Color.DimGray;
             this.xrTable3.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -120,7 +119,7 @@
             this.xrTable3.Padding = new DevExpress.XtraPrinting.PaddingInfo(8, 5, 11, 5, 254F);
             this.xrTable3.Rows.AddRange(new DevExpress.XtraReports.UI.XRTableRow[] {
             this.xrTableRow3});
-            this.xrTable3.SizeF = new System.Drawing.SizeF(1950F, 150.8125F);
+            this.xrTable3.SizeF = new System.Drawing.SizeF(1950.001F, 150.8125F);
             this.xrTable3.StylePriority.UseBorderColor = false;
             this.xrTable3.StylePriority.UseBorders = false;
             this.xrTable3.StylePriority.UseBorderWidth = false;
@@ -129,22 +128,12 @@
             this.xrTable3.StylePriority.UseTextAlignment = false;
             this.xrTable3.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             // 
-            // valueSubLocation
-            // 
-            this.valueSubLocation.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
-            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strSubLocationName")});
-            this.valueSubLocation.Dpi = 254F;
-            this.valueSubLocation.Name = "valueSubLocation";
-            this.valueSubLocation.Weight = 0.14992924784623346D;
-            // 
             // xrTableRow3
             // 
             this.xrTableRow3.Cells.AddRange(new DevExpress.XtraReports.UI.XRTableCell[] {
             this.valueCountLineNo,
             this.valueItemNo,
             this.valueDesc,
-            this.valueLocation,
-            this.valueSubLocation,
             this.valueStorageLocation,
             this.valueLotID,
             this.valueUnitOfMeasure,
@@ -161,7 +150,7 @@
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strCountLine")});
             this.valueCountLineNo.Dpi = 254F;
             this.valueCountLineNo.Name = "valueCountLineNo";
-            this.valueCountLineNo.Weight = 0.12271191207213592D;
+            this.valueCountLineNo.Weight = 0.10714862545537884D;
             // 
             // valueItemNo
             // 
@@ -169,7 +158,7 @@
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strItemNo")});
             this.valueItemNo.Dpi = 254F;
             this.valueItemNo.Name = "valueItemNo";
-            this.valueItemNo.Weight = 0.12465593460755156D;
+            this.valueItemNo.Weight = 0.13088116488487883D;
             // 
             // valueDesc
             // 
@@ -177,15 +166,7 @@
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strItemDesc")});
             this.valueDesc.Dpi = 254F;
             this.valueDesc.Name = "valueDesc";
-            this.valueDesc.Weight = 0.16136075961121127D;
-            // 
-            // valueLocation
-            // 
-            this.valueLocation.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
-            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strLocationName")});
-            this.valueLocation.Dpi = 254F;
-            this.valueLocation.Name = "valueLocation";
-            this.valueLocation.Weight = 0.135869499235636D;
+            this.valueDesc.Weight = 0.17069881595064107D;
             // 
             // valueStorageLocation
             // 
@@ -202,7 +183,7 @@
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strLotName")});
             this.valueLotID.Dpi = 254F;
             this.valueLotID.Name = "valueLotID";
-            this.valueLotID.Weight = 0.11536042587210048D;
+            this.valueLotID.Weight = 0.13870491151169459D;
             // 
             // valueUnitOfMeasure
             // 
@@ -210,7 +191,7 @@
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strUnitMeasure")});
             this.valueUnitOfMeasure.Dpi = 254F;
             this.valueUnitOfMeasure.Name = "valueUnitOfMeasure";
-            this.valueUnitOfMeasure.Weight = 0.1145102986172106D;
+            this.valueUnitOfMeasure.Weight = 0.091165812977616487D;
             // 
             // valueNoOfPallets
             // 
@@ -218,7 +199,7 @@
             this.valueNoOfPallets.Dpi = 254F;
             this.valueNoOfPallets.Name = "valueNoOfPallets";
             this.valueNoOfPallets.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
-            this.valueNoOfPallets.Weight = 0.11071925846578884D;
+            this.valueNoOfPallets.Weight = 0.11470179815790066D;
             // 
             // valueQtyPerPallet
             // 
@@ -226,14 +207,14 @@
             this.valueQtyPerPallet.Dpi = 254F;
             this.valueQtyPerPallet.Name = "valueQtyPerPallet";
             this.valueQtyPerPallet.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
-            this.valueQtyPerPallet.Weight = 0.12418980197643151D;
+            this.valueQtyPerPallet.Weight = 0.11470207077457759D;
             // 
             // valuePhysicalCount
             // 
             this.valuePhysicalCount.Dpi = 254F;
             this.valuePhysicalCount.Name = "valuePhysicalCount";
             this.valuePhysicalCount.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
-            this.valuePhysicalCount.Weight = 0.12163961081319855D;
+            this.valuePhysicalCount.Weight = 0.12714480232294065D;
             // 
             // TopMargin
             // 
@@ -254,6 +235,10 @@
             // PageHeader
             // 
             this.PageHeader.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
+            this.xrLabel6,
+            this.xrLabel5,
+            this.xrLabel4,
+            this.xrLabel3,
             this.lblCountID2,
             this.valueCountNo2,
             this.xrTable1,
@@ -269,7 +254,7 @@
             this.lblDate,
             this.xrLabel17});
             this.PageHeader.Dpi = 254F;
-            this.PageHeader.HeightF = 560.9167F;
+            this.PageHeader.HeightF = 664.1042F;
             this.PageHeader.Name = "PageHeader";
             // 
             // lblCountID2
@@ -331,12 +316,12 @@
             this.xrTable1.BorderWidth = 2F;
             this.xrTable1.Dpi = 254F;
             this.xrTable1.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.xrTable1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 447.1458F);
+            this.xrTable1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 551.5208F);
             this.xrTable1.Name = "xrTable1";
             this.xrTable1.Padding = new DevExpress.XtraPrinting.PaddingInfo(8, 5, 11, 5, 254F);
             this.xrTable1.Rows.AddRange(new DevExpress.XtraReports.UI.XRTableRow[] {
             this.xrTableRow1});
-            this.xrTable1.SizeF = new System.Drawing.SizeF(1950F, 112.5833F);
+            this.xrTable1.SizeF = new System.Drawing.SizeF(1949.999F, 112.5833F);
             this.xrTable1.StylePriority.UseBackColor = false;
             this.xrTable1.StylePriority.UseBorderColor = false;
             this.xrTable1.StylePriority.UseBorders = false;
@@ -350,8 +335,6 @@
             this.lblCountLineNo,
             this.lblItemNo,
             this.lblDesc,
-            this.lblLocation,
-            this.lblSubLocation,
             this.lblStorageLocation,
             this.lblLotID,
             this.lblUnitOfMeasure,
@@ -367,35 +350,21 @@
             this.lblCountLineNo.Dpi = 254F;
             this.lblCountLineNo.Name = "lblCountLineNo";
             this.lblCountLineNo.Text = "Count Line No.";
-            this.lblCountLineNo.Weight = 0.12271191207213592D;
+            this.lblCountLineNo.Weight = 0.10714868751650225D;
             // 
             // lblItemNo
             // 
             this.lblItemNo.Dpi = 254F;
             this.lblItemNo.Name = "lblItemNo";
             this.lblItemNo.Text = "Item No.";
-            this.lblItemNo.Weight = 0.12465595703124999D;
+            this.lblItemNo.Weight = 0.13088124505840923D;
             // 
             // lblDesc
             // 
             this.lblDesc.Dpi = 254F;
             this.lblDesc.Name = "lblDesc";
             this.lblDesc.Text = "Description";
-            this.lblDesc.Weight = 0.16136075961121127D;
-            // 
-            // lblLocation
-            // 
-            this.lblLocation.Dpi = 254F;
-            this.lblLocation.Name = "lblLocation";
-            this.lblLocation.Text = "Location";
-            this.lblLocation.Weight = 0.13586954408303284D;
-            // 
-            // lblSubLocation
-            // 
-            this.lblSubLocation.Dpi = 254F;
-            this.lblSubLocation.Name = "lblSubLocation";
-            this.lblSubLocation.Text = "Sub Location";
-            this.lblSubLocation.Weight = 0.14992920299883658D;
+            this.lblDesc.Weight = 0.17069869613968569D;
             // 
             // lblStorageLocation
             // 
@@ -410,14 +379,14 @@
             this.lblLotID.Dpi = 254F;
             this.lblLotID.Name = "lblLotID";
             this.lblLotID.Text = "Lot ID";
-            this.lblLotID.Weight = 0.11536042026617588D;
+            this.lblLotID.Weight = 0.13870535134207296D;
             // 
             // lblUnitOfMeasure
             // 
             this.lblUnitOfMeasure.Dpi = 254F;
             this.lblUnitOfMeasure.Name = "lblUnitOfMeasure";
             this.lblUnitOfMeasure.Text = "Unit of Measure";
-            this.lblUnitOfMeasure.Weight = 0.11451044437125039D;
+            this.lblUnitOfMeasure.Weight = 0.091165513295353315D;
             // 
             // lblNoOfPallets
             // 
@@ -430,7 +399,7 @@
             this.lblNoOfPallets.StylePriority.UsePadding = false;
             this.lblNoOfPallets.Text = "No. of Pallets";
             this.lblNoOfPallets.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
-            this.lblNoOfPallets.Weight = 0.11071916877099511D;
+            this.lblNoOfPallets.Weight = 0.11470221358256573D;
             // 
             // lblQtyPerPallet
             // 
@@ -441,7 +410,7 @@
             this.lblQtyPerPallet.StylePriority.UsePadding = false;
             this.lblQtyPerPallet.Text = "Qty Per Pallet";
             this.lblQtyPerPallet.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
-            this.lblQtyPerPallet.Weight = 0.12418980197643151D;
+            this.lblQtyPerPallet.Weight = 0.11470220844277847D;
             // 
             // lblPhysicalCount
             // 
@@ -451,7 +420,7 @@
             this.lblPhysicalCount.StylePriority.UsePadding = false;
             this.lblPhysicalCount.Text = "Physical Count";
             this.lblPhysicalCount.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
-            this.lblPhysicalCount.Weight = 0.12163961081319855D;
+            this.lblPhysicalCount.Weight = 0.127144159535281D;
             // 
             // valScannedCountEntry
             // 
@@ -518,7 +487,7 @@
             this.valueCountDesc.LocationFloat = new DevExpress.Utils.PointFloat(246.38F, 228.4109F);
             this.valueCountDesc.Name = "valueCountDesc";
             this.valueCountDesc.Padding = new DevExpress.XtraPrinting.PaddingInfo(11, 11, 11, 0, 254F);
-            this.valueCountDesc.SizeF = new System.Drawing.SizeF(701.1456F, 119.2742F);
+            this.valueCountDesc.SizeF = new System.Drawing.SizeF(701.1456F, 98.11006F);
             this.valueCountDesc.StylePriority.UseBorderColor = false;
             this.valueCountDesc.StylePriority.UseBorderDashStyle = false;
             this.valueCountDesc.StylePriority.UseBorders = false;
@@ -588,7 +557,7 @@
             this.lblCountDesc.LocationFloat = new DevExpress.Utils.PointFloat(0F, 228.4109F);
             this.lblCountDesc.Name = "lblCountDesc";
             this.lblCountDesc.Padding = new DevExpress.XtraPrinting.PaddingInfo(11, 11, 11, 0, 254F);
-            this.lblCountDesc.SizeF = new System.Drawing.SizeF(246.38F, 119.2741F);
+            this.lblCountDesc.SizeF = new System.Drawing.SizeF(246.38F, 98.11F);
             this.lblCountDesc.StylePriority.UseBackColor = false;
             this.lblCountDesc.StylePriority.UseBorderColor = false;
             this.lblCountDesc.StylePriority.UseBorders = false;
@@ -741,6 +710,92 @@
             this.xrLabel2.Text = "xrLabel2";
             this.xrLabel2.Visible = false;
             // 
+            // xrLabel3
+            // 
+            this.xrLabel3.BackColor = System.Drawing.Color.Gainsboro;
+            this.xrLabel3.BorderColor = System.Drawing.Color.DimGray;
+            this.xrLabel3.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel3.BorderWidth = 2F;
+            this.xrLabel3.Dpi = 254F;
+            this.xrLabel3.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.xrLabel3.LocationFloat = new DevExpress.Utils.PointFloat(0F, 326.5209F);
+            this.xrLabel3.Name = "xrLabel3";
+            this.xrLabel3.Padding = new DevExpress.XtraPrinting.PaddingInfo(11, 11, 11, 0, 254F);
+            this.xrLabel3.SizeF = new System.Drawing.SizeF(246.38F, 98.10745F);
+            this.xrLabel3.StylePriority.UseBackColor = false;
+            this.xrLabel3.StylePriority.UseBorderColor = false;
+            this.xrLabel3.StylePriority.UseBorders = false;
+            this.xrLabel3.StylePriority.UseBorderWidth = false;
+            this.xrLabel3.StylePriority.UseFont = false;
+            this.xrLabel3.StylePriority.UsePadding = false;
+            this.xrLabel3.StylePriority.UseTextAlignment = false;
+            this.xrLabel3.Text = "Location:";
+            this.xrLabel3.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
+            // 
+            // xrLabel4
+            // 
+            this.xrLabel4.BorderColor = System.Drawing.Color.DimGray;
+            this.xrLabel4.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel4.BorderWidth = 2F;
+            this.xrLabel4.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
+            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strLocationName")});
+            this.xrLabel4.Dpi = 254F;
+            this.xrLabel4.Font = new System.Drawing.Font("Arial", 9F);
+            this.xrLabel4.LocationFloat = new DevExpress.Utils.PointFloat(246.38F, 326.5209F);
+            this.xrLabel4.Name = "xrLabel4";
+            this.xrLabel4.Padding = new DevExpress.XtraPrinting.PaddingInfo(11, 11, 11, 0, 254F);
+            this.xrLabel4.SizeF = new System.Drawing.SizeF(701.1458F, 98.10745F);
+            this.xrLabel4.StylePriority.UseBorderColor = false;
+            this.xrLabel4.StylePriority.UseBorders = false;
+            this.xrLabel4.StylePriority.UseBorderWidth = false;
+            this.xrLabel4.StylePriority.UseFont = false;
+            this.xrLabel4.StylePriority.UsePadding = false;
+            this.xrLabel4.Text = "xrLabel4";
+            // 
+            // xrLabel5
+            // 
+            this.xrLabel5.BackColor = System.Drawing.Color.Gainsboro;
+            this.xrLabel5.BorderColor = System.Drawing.Color.DimGray;
+            this.xrLabel5.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel5.BorderWidth = 2F;
+            this.xrLabel5.Dpi = 254F;
+            this.xrLabel5.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.xrLabel5.LocationFloat = new DevExpress.Utils.PointFloat(0F, 424.6284F);
+            this.xrLabel5.Name = "xrLabel5";
+            this.xrLabel5.Padding = new DevExpress.XtraPrinting.PaddingInfo(11, 11, 11, 0, 254F);
+            this.xrLabel5.SizeF = new System.Drawing.SizeF(246.38F, 98.10745F);
+            this.xrLabel5.StylePriority.UseBackColor = false;
+            this.xrLabel5.StylePriority.UseBorderColor = false;
+            this.xrLabel5.StylePriority.UseBorders = false;
+            this.xrLabel5.StylePriority.UseBorderWidth = false;
+            this.xrLabel5.StylePriority.UseFont = false;
+            this.xrLabel5.StylePriority.UsePadding = false;
+            this.xrLabel5.StylePriority.UseTextAlignment = false;
+            this.xrLabel5.Text = "Sub Location:";
+            this.xrLabel5.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
+            // 
+            // xrLabel6
+            // 
+            this.xrLabel6.BorderColor = System.Drawing.Color.DimGray;
+            this.xrLabel6.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel6.BorderWidth = 2F;
+            this.xrLabel6.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
+            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportPhysicalInventoryCount.strSubLocationName")});
+            this.xrLabel6.Dpi = 254F;
+            this.xrLabel6.Font = new System.Drawing.Font("Arial", 9F);
+            this.xrLabel6.LocationFloat = new DevExpress.Utils.PointFloat(246.38F, 424.6284F);
+            this.xrLabel6.Name = "xrLabel6";
+            this.xrLabel6.Padding = new DevExpress.XtraPrinting.PaddingInfo(11, 11, 11, 0, 254F);
+            this.xrLabel6.SizeF = new System.Drawing.SizeF(701.1458F, 98.10745F);
+            this.xrLabel6.StylePriority.UseBorderColor = false;
+            this.xrLabel6.StylePriority.UseBorders = false;
+            this.xrLabel6.StylePriority.UseBorderWidth = false;
+            this.xrLabel6.StylePriority.UseFont = false;
+            this.xrLabel6.StylePriority.UsePadding = false;
+            this.xrLabel6.Text = "xrLabel6";
+            // 
             // PhysicalInventoryCount
             // 
             this.Bands.AddRange(new DevExpress.XtraReports.UI.Band[] {
@@ -796,8 +851,6 @@
         private DevExpress.XtraReports.UI.XRTableCell valueCountLineNo;
         private DevExpress.XtraReports.UI.XRTableCell valueItemNo;
         private DevExpress.XtraReports.UI.XRTableCell valueDesc;
-        private DevExpress.XtraReports.UI.XRTableCell valueLocation;
-        private DevExpress.XtraReports.UI.XRTableCell valueSubLocation;
         private DevExpress.XtraReports.UI.XRTableCell valueStorageLocation;
         private DevExpress.XtraReports.UI.XRTableCell valueLotID;
         private DevExpress.XtraReports.UI.XRTableCell valueUnitOfMeasure;
@@ -809,8 +862,6 @@
         private DevExpress.XtraReports.UI.XRTableCell lblCountLineNo;
         private DevExpress.XtraReports.UI.XRTableCell lblItemNo;
         private DevExpress.XtraReports.UI.XRTableCell lblDesc;
-        private DevExpress.XtraReports.UI.XRTableCell lblLocation;
-        private DevExpress.XtraReports.UI.XRTableCell lblSubLocation;
         private DevExpress.XtraReports.UI.XRTableCell lblStorageLocation;
         private DevExpress.XtraReports.UI.XRTableCell lblLotID;
         private DevExpress.XtraReports.UI.XRTableCell lblUnitOfMeasure;
@@ -826,5 +877,9 @@
         private DevExpress.XtraReports.UI.XRLabel xrLabel1;
         private DevExpress.XtraReports.UI.GroupHeaderBand GroupHeader2;
         private DevExpress.XtraReports.UI.XRLabel xrLabel2;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel6;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel5;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel4;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel3;
     }
 }
