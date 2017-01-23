@@ -171,6 +171,8 @@ DECLARE  @Id									INT
 		,@LoadId								INT
 		,@OriginalInvoiceId						INT
 		,@EntityId								INT
+		,@TruckDriverId							INT
+		,@TruckDriverReferenceId				INT
 		,@ResetDetails							BIT
 		,@Recap									BIT
 		,@Post									BIT
@@ -322,6 +324,8 @@ BEGIN
 		,@LoadId						= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Load Schedule' THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
 		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional Invoice' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
+		,@TruckDriverId					= [intTruckDriverId]
+		,@TruckDriverReferenceId		= [intTruckDriverReferenceId]
 		,@ResetDetails					= [ysnResetDetails]
 		,@Recap							= [ysnRecap]
 		,@Post							= [ysnPost]
@@ -501,7 +505,7 @@ BEGIN
 			,@AccountId						= @AccountId
 			,@CurrencyId					= @CurrencyId
 			,@TermId						= @TermId
-			,@EntityId						= @EntityId
+			,@EntityId						= @EntityId			
 			,@InvoiceDate					= @Date
 			,@DueDate						= @DueDate
 			,@ShipDate						= @ShipDate
@@ -538,6 +542,8 @@ BEGIN
 			,@PeriodsToAccrue				= @PeriodsToAccrue
 			,@SourceId						= @NewSourceId
 			,@ImportFormat					= @ImportFormat
+			,@TruckDriverId					= @TruckDriverId
+			,@TruckDriverReferenceId		= @TruckDriverReferenceId
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -1096,6 +1102,8 @@ BEGIN TRY
 			,@LoadId						= [intLoadId] 
 			,@OriginalInvoiceId				= [intOriginalInvoiceId]
 			,@EntityId						= [intEntityId]
+			,@TruckDriverId					= [intTruckDriverId]
+			,@TruckDriverReferenceId		= [intTruckDriverReferenceId]
 			,@ResetDetails					= [ysnResetDetails]
 			,@Recap							= [ysnRecap] 
 			,@Post							= [ysnPost]
@@ -1229,6 +1237,8 @@ BEGIN TRY
 			,[intLoadId]				= @LoadId
 			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
 			,[intEntityId]				= @EntityId
+			,[intTruckDriverId]			= @TruckDriverId
+			,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
 		FROM
 			tblARCustomer C

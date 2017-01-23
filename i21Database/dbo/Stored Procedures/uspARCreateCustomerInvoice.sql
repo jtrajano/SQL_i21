@@ -43,6 +43,8 @@
 	,@PeriodsToAccrue				INT				= 1
 	,@SourceId						INT				= 0
 	,@ImportFormat                  NVARCHAR(50)    = NULL		
+	,@TruckDriverId					INT				= NULL
+	,@TruckDriverReferenceId		INT				= NULL
 	,@ItemId						INT				= NULL
 	,@ItemPrepayTypeId				INT				= 0
 	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
@@ -359,6 +361,8 @@ BEGIN TRY
 		,[intOriginalInvoiceId]
 		,[intLoadId]
 		,[intEntityId]
+		,[intTruckDriverId]
+		,[intTruckDriverReferenceId]
 		,[intConcurrencyId])
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
@@ -424,7 +428,9 @@ BEGIN TRY
 		,[intContractHeaderId]			= @ItemContractHeaderId
 		,[intOriginalInvoiceId]			= @OriginalInvoiceId
 		,[intLoadId]                    = @LoadId
-		,[intEntityId]					= @EntityId 
+		,[intEntityId]					= @EntityId
+		,[intTruckDriverId]				= @TruckDriverId
+		,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
 		,[intConcurrencyId]				= 0
 	FROM	
 		tblARCustomer C

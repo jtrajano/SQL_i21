@@ -74,6 +74,8 @@
 	[dblTotalWeight]				NUMERIC(18, 6)									NULL DEFAULT 0,	
 	[intDocumentMaintenanceId]      INT												NULL,
 	[dblTotalTermDiscount]			NUMERIC(18, 6)									NULL DEFAULT 0,	
+	[intTruckDriverId]				INT												NULL,        	
+	[intTruckDriverReferenceId]		INT												NULL,        	
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
@@ -93,7 +95,9 @@
 	CONSTRAINT [FK_tblARInvoice_tblCFTransaction_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [tblCFTransaction]([intTransactionId]),
 	CONSTRAINT [FK_tblARInvoice_tblMBMeterReading_intMeterReadingId] FOREIGN KEY ([intMeterReadingId]) REFERENCES [tblMBMeterReading]([intMeterReadingId]),
 	CONSTRAINT [FK_tblARInvoice_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]),
-	CONSTRAINT [FK_tblARInvoice_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId])
+	CONSTRAINT [FK_tblARInvoice_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]),
+	CONSTRAINT [FK_tblARInvoice_tblSCTruckDriverReference_intTruckDriverReferenceId] FOREIGN KEY ([intTruckDriverReferenceId]) REFERENCES [tblSCTruckDriverReference]([intTruckDriverReferenceId]),
+	CONSTRAINT [FK_tblARInvoice_tblARSalesperson_intTruckDriverId] FOREIGN KEY ([intTruckDriverId]) REFERENCES [tblARSalesperson]([intEntitySalespersonId])
 );
 
 

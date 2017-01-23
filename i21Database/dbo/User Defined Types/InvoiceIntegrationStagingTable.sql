@@ -81,6 +81,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intLoadId]							INT												NULL		-- Key Value from tblLGLoad (Load Schedule)
 	,[intOriginalInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Provisional Invoice/ Duplicate/ Import/ Recurring) 	
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity			
+	,[intTruckDriverId]						INT												NULL		-- Key Value([intEntitySalespersonId]) from [tblARSalesperson] : strType = 'Driver'	
+	,[intTruckDriverReferenceId]			INT												NULL		-- Key Value  from [tblSCTruckDriverReference]
 	,[ysnResetDetails]						BIT												NULL		-- Indicate whether detail records will be deleted and recreated
 	,[ysnRecap]								BIT												NULL		-- If [ysnRecap] = 1 > Recap Invoices
 	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Invoices will be posted
