@@ -39,6 +39,8 @@ VALUES (
 	,SegmentTypeCodedValues.name
 	,1
 );
+GO
 
 --GL-31477 make segment type location which are named location in account structure
 UPDATE tblGLAccountStructure set strType = 'Location' where  rtrim(lower(strStructureName)) = 'location'
+GO
