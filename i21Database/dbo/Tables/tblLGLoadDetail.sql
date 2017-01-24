@@ -39,6 +39,7 @@
 	[intPSubLocationId] INT NULL, 
 	[intSSubLocationId] INT NULL, 
 	[strExternalShipmentItemNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strExternalBatchNo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 
