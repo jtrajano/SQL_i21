@@ -81,7 +81,12 @@ BEGIN
 
 	SET @counter = @counter + 1;
 	SELECT TOP(1) @receiptId = intInventoryReceiptId FROM #tmpReceiptIds
-	EXEC uspSMGetStartingNumber 9, @generatedBillRecordId OUT
+	--CHECK THE INVENTORY TYPE
+	SELECT @receiptType = (CASE WHEN strReceiptType = 'Inventory Return' THEN 18 ELSE 9 END) 
+	FROM tblICInventoryReceipt 
+	WHERE intInventoryReceiptId = @receiptId
+
+	EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
 
 	--PRIORITIZE RECEIPT LOCATION
 	SET @receiptLocation = (SELECT intLocationId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId)
