@@ -9,9 +9,9 @@ GO
 	BEGIN
 		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (2, N'Hypen/Separator', N'Divider', 1, N'-', 1, 0, 1, 0, NULL, NULL)
 	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Segment' and strStructureName = N'Location') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE (strType = N'Segment' or strType = N'Location') and strStructureName = N'Location') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
 	BEGIN
-		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Segment', 4, N'0', 2, 1, 1, 5, NULL, NULL)
+		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Location', 4, N'0', 2, 1, 1, 5, NULL, NULL)
 	END
 	
 GO
