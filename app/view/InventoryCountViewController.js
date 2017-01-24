@@ -507,10 +507,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     iRely.Functions.showErrorDialog(val);
                 } else {
                     record.set('dblSystemCount', val);
-                }
-                action(record);
+                } 
             });
         }
+        action(record);
     },
 
     onCountGroupSelect: function (combo, records, eOpts) {
@@ -910,7 +910,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         };
         
         var validatePost = function() {
-            Ext.Array.each(currentCountItems.tblICInventoryCountDetails().data.items, function (item) {
+            if(countDetail.length == 1) {
+                //Show error message if there are no items in the grid except for the dummy
+                iRely.Functions.showErrorDialog('There are no items to post.');
+                return;
+            }
+            else {
+                Ext.Array.each(currentCountItems.tblICInventoryCountDetails().data.items, function (item) {
                         
                     itemIndex++;
                         
@@ -957,7 +963,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                                         doPost();
                                 }
                         }
-             });   
+                });   
+            }
         };
 
         // If there is no data change, do the post.
@@ -1078,15 +1085,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('dblSystemCount', null);
                     current.set('intItemUOMId', records[0].get('intStockUOMId'));
                     current.set('strUnitMeasure', records[0].get('strStockUOM'));
-                    if(!iRely.Functions.isEmpty(current.get('strItemNo'))) {
-                        me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
-                            if (err) {
-                                iRely.Functions.showErrorDialog(val);
-                            } else {
-                                current.set('dblSystemCount', val);
-                            }
-                        });
-                    }
+                    me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
+                        if (err) {
+                            iRely.Functions.showErrorDialog(val);
+                        } else {
+                            current.set('dblSystemCount', val);
+                        }
+                    });
                     if (current.get('strCountLine') === '' || current.get('strCountLine') === null) {
                         var win = combo.up('window');
                         var currentItems = win.viewModel.data.current;
