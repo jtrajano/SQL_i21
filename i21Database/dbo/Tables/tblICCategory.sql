@@ -17,7 +17,7 @@ Type the overview for the table here.
 		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strInventoryType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intLineOfBusinessId] INT NULL, 
-		[intCostingMethod] INT NOT NULL DEFAULT 1,
+		[intCostingMethod] INT NULL DEFAULT 1,
 		[strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dblStandardQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intUOMId] INT NULL, 
