@@ -575,7 +575,7 @@ BEGIN
 				WHERE [strPricingLevelName] COLLATE Latin1_General_CI_AS = AL.agloc_prc7_desc COLLATE Latin1_General_CI_AS) 
 			-- AG PRICE LEVEL 8--
 			INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
-					   ([intCompanyLocationd]
+					   ([intCompanyLocationId]
 					   ,[strPricingLevelName]
 					   ,[intSort]
 					   ,[intConcurrencyId])
