@@ -4882,6 +4882,7 @@
     <Build Include="dbo\Tables\tblSMStartingNumberParameter.sql" />
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotals.sql" />
+    <Build Include="dbo\Tables\tblSMAlternateApproverGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
