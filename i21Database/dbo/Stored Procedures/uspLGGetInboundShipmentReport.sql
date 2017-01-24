@@ -19,7 +19,8 @@ BEGIN
 			@strUserName				NVARCHAR(100),
 			@strLogisticsCompanyName	NVARCHAR(MAX),
 			@strLogisticsPrintSignOff	NVARCHAR(MAX),
-			@intCompanyLocationId		INT
+			@intCompanyLocationId		INT,
+			@strInstoreTo				NVARCHAR(MAX)
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -71,6 +72,10 @@ BEGIN
 	SELECT	@intCompanyLocationId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intCompanyLocationId' 
+	
+	SELECT	@strInstoreTo = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strInstoreTo' 
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
 				,@strCompanyAddress = strAddress
@@ -213,7 +218,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				CType.strContainerType,
 				@strLogisticsCompanyName AS strLogisticsCompanyName,
 				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
-				WETC.strName AS strWarehouseContact
+				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
+				@strInstoreTo AS strInstoreTo
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -236,6 +242,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN   tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
 		LEFT JOIN   tblEMEntity WETC ON WETC .intEntityId = WEC.intEntityContactId
+		LEFT JOIN   tblEMEntityToContact SLEC ON SLEC.intEntityId = SLEntity.intEntityId
+		LEFT JOIN   tblEMEntity SLETC ON SLETC .intEntityId = SLEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		WHERE L.strLoadNumber = @strTrackingNumber
@@ -363,7 +371,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				CType.strContainerType,
 				@strLogisticsCompanyName AS strLogisticsCompanyName,
 				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
-				WETC.strName AS strWarehouseContact
+				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
+				@strInstoreTo AS strInstoreTo
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -387,6 +396,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN   tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
 		LEFT JOIN   tblEMEntity WETC ON WETC .intEntityId = WEC.intEntityContactId
+		LEFT JOIN   tblEMEntityToContact SLEC ON SLEC.intEntityId = SLEntity.intEntityId
+		LEFT JOIN   tblEMEntity SLETC ON SLETC .intEntityId = SLEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
