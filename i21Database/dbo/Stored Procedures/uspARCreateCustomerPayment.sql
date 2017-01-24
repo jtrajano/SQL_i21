@@ -23,6 +23,7 @@
 	,@Discount			NUMERIC(18,6)	= 0.000000	
 	,@Interest			NUMERIC(18,6)	= 0.000000			
 	,@InvoicePrepayment	BIT				= 0
+	,@WriteOffAccountId	INT				= NULL
 AS
 
 BEGIN
@@ -142,6 +143,8 @@ BEGIN TRY
 		,[ysnApplyOnAccount]
 		,[intEntityId]
 		,[ysnInvoicePrepayment]
+		,[strPaymentMethod]
+		,[intWriteOffAccountId]
 		,[intConcurrencyId])
 	SELECT
 		 [intEntityCustomerId]			= ARC.[intEntityCustomerId]
@@ -161,6 +164,8 @@ BEGIN TRY
 		,[ysnApplyOnAccount]			= @ApplyOnAccount
 		,[intEntityId]					= @EntityId
 		,[ysnInvoicePrepayment]			= @InvoicePrepayment
+		,[strPaymentMethod]				= (SELECT [strPaymentMethod] FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId)
+		,[intWriteOffAccountId]			= @WriteOffAccountId
 		,[intConcurrencyId]				= 0		
 	FROM	
 		tblARCustomer ARC	

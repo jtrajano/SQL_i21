@@ -1270,7 +1270,8 @@ IF @post = 1
 							ON P.intLocationId = C.intCompanyLocationId
 					WHERE
 						P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-						AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+						AND ISNULL(C.intUndepositedFundsId,0) <> 0
+						AND ISNULL(P.strPaymentMethod, '') <> 'CF Invoice'
 				END
 			ELSE
 				BEGIN
@@ -1286,7 +1287,8 @@ IF @post = 1
 							ON P.intLocationId = C.intCompanyLocationId
 					WHERE
 						P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-						AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+						AND ISNULL(C.intUndepositedFundsId,0) <> 0
+						AND ISNULL(P.strPaymentMethod, '') <> 'CF Invoice'
 				END
 		END 
 	ELSE
@@ -1365,9 +1367,12 @@ IF @post = 1
 		SELECT
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId			
-			,intAccountId			=	CASE WHEN (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0) THEN 
-											CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
-										ELSE A.intAccountId END
+			,intAccountId				= CASE WHEN A.strPaymentMethod = '' THEN A.intWriteOffAccountId 
+											ELSE
+												(CASE WHEN (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0) THEN 
+													CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
+												ELSE A.intAccountId END)
+											END
 			,dblDebit					= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
