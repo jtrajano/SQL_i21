@@ -144,8 +144,15 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                 return 'Unpost';
             }
             else return 'Post';
+        },
+        disableCountGridFields: function (get) {
+            if(iRely.Functions.isEmpty(get('grdPhysicalCount.selection.strItemNo')) || get('current.ysnPosted')) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
-
     }
 
 });

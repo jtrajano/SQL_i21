@@ -226,6 +226,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
+                        readOnly: '{disableCountGridFields}',
                         store: '{fromSubLocation}',
                         origValueField: 'intSubLocationId',
                         origUpdateField: 'intSubLocationId',
@@ -258,6 +259,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colStorageLocation: {
                     dataIndex: 'strStorageLocationName',
                     editor: {
+                        readOnly: '{disableCountGridFields}',
                         store: '{fromStorageLocation}',
                         origValueField: 'intStorageLocationId',
                         origUpdateField: 'intStorageLocationId',
@@ -290,6 +292,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     dataIndex: 'strLotNumber',
                     hidden: '{!current.ysnCountByLots}',
                     editor: {
+                        readOnly: '{disableCountGridFields}',
                         store: '{lot}',
                         origValueField: 'intLotId',
                         origUpdateField: 'intLotId',
@@ -326,21 +329,28 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colCountLineNo: 'strCountLine',
                 colNoPallets: {
                     dataIndex: 'dblPallets',
-                    hidden: '{!current.ysnCountByPallets}'
+                    hidden: '{!current.ysnCountByPallets}',
+                    editor: {
+                        readOnly: '{disableCountGridFields}',
+                    }
                 },
                 colQtyPerPallet: {
                     dataIndex: 'dblQtyPerPallet',
-                    hidden: '{!current.ysnCountByPallets}'
+                    hidden: '{!current.ysnCountByPallets}',
+                    editor: {
+                        readOnly: '{disableCountGridFields}',
+                    }
                 },
                 colPhysicalCount: {
                     dataIndex: 'dblPhysicalCount',
                     editor: {
-                        readOnly: '{current.ysnPosted}'
+                        readOnly: '{disableCountGridFields}'
                     }
                 },
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        readOnly: '{disableCountGridFields}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intItemUOMId',
                         store: '{itemUOM}',
@@ -361,7 +371,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 },
                 colPhysicalCountStockUnit: 'dblPhysicalCountStockUnit',
                 colVariance: 'dblVariance',
-                colRecount: 'ysnRecount',
+                colRecount: {
+                    dataIndex: 'ysnRecount',
+                    disabled: '{disableCountGridFields}'
+                },
                 colEnteredBy: 'strUserName'
             }
         }
@@ -488,14 +501,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         record.set('strCountLine', strCountLine);
         record.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
         record.set('strUserName', iRely.config.Security.UserName);
-        config.createRecord.$owner.prototype.getTotalLocationStockOnHand(config.dummy.intInventoryCount.data.intLocationId, config.dummy.data.intItemId, function (val, err) {
-            if (err) {
-                iRely.Functions.showErrorDialog(val);
-            } else {
-                record.set('dblSystemCount', val);
-            }
-            action(record);
-        });
+        if(!iRely.Functions.isEmpty(record.get('strItemNo'))) {
+            config.createRecord.$owner.prototype.getTotalLocationStockOnHand(config.dummy.intInventoryCount.data.intLocationId, config.dummy.data.intItemId, function (val, err) {
+                if (err) {
+                    iRely.Functions.showErrorDialog(val);
+                } else {
+                    record.set('dblSystemCount', val);
+                }
+                action(record);
+            });
+        }
     },
 
     onCountGroupSelect: function (combo, records, eOpts) {
@@ -1063,14 +1078,15 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('dblSystemCount', null);
                     current.set('intItemUOMId', records[0].get('intStockUOMId'));
                     current.set('strUnitMeasure', records[0].get('strStockUOM'));
-                    me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
-                        if (err) {
-                            iRely.Functions.showErrorDialog(val);
-                        } else {
-                            current.set('dblSystemCount', val);
-                        }
-                    });
-
+                    if(!iRely.Functions.isEmpty(current.get('strItemNo'))) {
+                        me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
+                            if (err) {
+                                iRely.Functions.showErrorDialog(val);
+                            } else {
+                                current.set('dblSystemCount', val);
+                            }
+                        });
+                    }
                     if (current.get('strCountLine') === '' || current.get('strCountLine') === null) {
                         var win = combo.up('window');
                         var currentItems = win.viewModel.data.current;
