@@ -159,4 +159,5 @@ LEFT OUTER JOIN
 		, strInvoiceReportNumber
 	 FROM
 		dbo.tblCFTransaction) CFT ON ARI.intInvoiceId = CFT.intInvoiceId
+WHERE ISNULL(CFT.strInvoiceReportNumber, '') = ''
 GO
