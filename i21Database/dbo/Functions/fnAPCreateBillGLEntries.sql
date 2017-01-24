@@ -511,7 +511,7 @@ BEGIN
 	AND D.dblTax != 0
 	AND 1 = (
 		--create tax only from item receipt if it is adjusted / Cost is Adjusted
-		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL THEN 0 --AP-2792
+		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NOT NULL THEN 0 --AP-2792
 		ELSE 1 END
 	)
 	GROUP BY A.dtmDate
