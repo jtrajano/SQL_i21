@@ -14,6 +14,36 @@ BEGIN
 	UPDATE tblCMBankAccount set strMICRBankAccountNo = strBankAccountNo WHERE strMICRBankAccountNo IS NULL
 END
 
+--This will correctly update the Bank Routing No to encrypted value
+IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) > 20) --Greater than 20 means value is already encrypted
+BEGIN
+	DECLARE @strRTN AS NVARCHAR(100),
+			@intBankId AS INT
+
+	SELECT * INTO #tmpCMBank FROM tblCMBank
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCMBank)
+	BEGIN
+			OPEN SYMMETRIC KEY i21EncryptionSymKey
+			   DECRYPTION BY CERTIFICATE i21EncryptionCert
+			   WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+
+				SELECT TOP 1
+				@intBankId = intBankId,
+				@strRTN = dbo.fnAESDecrypt(strRTN)
+			    FROM #tmpCMBank
+
+			IF @strRTN IS NOT NULL OR @strRTN <> ''
+			BEGIN
+				UPDATE tblCMBank SET strRTN = @strRTN WHERE intBankId = @intBankId
+			END
+
+			DELETE FROM #tmpCMBank WHERE intBankId = @intBankId
+			
+			CLOSE SYMMETRIC KEY i21EncryptionSymKey
+	END	
+END
+
 --This will update the Bank Routing No to encrypted value
 IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) < 20)
 BEGIN
