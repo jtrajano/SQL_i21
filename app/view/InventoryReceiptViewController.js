@@ -51,7 +51,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 { dataIndex: 'dtmReceiveTime', text: 'Receive Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 { dataIndex: 'dblActualTempReading', text: 'Actual Temp Reading', flex: 1, dataType: 'float', hidden: true },
                 { dataIndex: 'strEntityName', text: 'Entity Name', flex: 1, dataType: 'string', hidden: true },
-                { dataIndex: 'strActualCostId', text: 'Actual Cost Id', flex: 1, dataType: 'string', hidden: true }
+                { dataIndex: 'strActualCostId', text: 'Actual Cost Id', flex: 1, dataType: 'string', hidden: true },
+
+                { xtype: 'numbercolumn', dataIndex: 'dblSubTotal', text: 'Sub Total', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotalTax', text: 'Tax', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotalCharges', text: 'Charges', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotalGross', text: 'Gross', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotalNet', text: 'Net', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblGrandTotal', text: 'Total', flex: 1, dataType: 'float' },
             ],
             buttons: [
                 {
@@ -121,6 +128,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strVendorRefNo', text: 'Vendor Reference No.', flex: 1, dataType: 'string', hidden: false },
                         { dataIndex: 'strShipFrom', text: 'Ship From', flex: 1, dataType: 'string', hidden: false },
                         { dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string', hidden: false },
+                    ]
+                },
+                {
+                    title: 'Charges',
+                    api: {
+                        read: '../Inventory/api/InventoryReceipt/SearchReceiptCharges'
+                    },
+                    columns: [
+                        { dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
+                        { dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
+                        { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                        { dataIndex: 'strLocationName', text: 'Location', flex: 1, dataType: 'string'},
+                        { dataIndex: 'strReceiptVendor', text: 'Receipt Vendor', flex: 1, dataType: 'string'},
+                        { dataIndex: 'strBillOfLading', text: 'BOL No.', flex: 1, dataType: 'string'},
+                        { dataIndex: 'strContractNumber', text: 'Contract No.', flex: 1, dataType: 'string'},
+                        { dataIndex: 'strItemNo', text: 'Other Charges', flex: 1, dataType: 'string'},
+                        { dataIndex: 'strOnCostType', text: 'On Cost', flex: 1, dataType: 'string'},
+                        { dataIndex: 'strCostMethod', text: 'Cost Method', flex: 1, dataType: 'string'},
+                        { dataIndex: 'strCurrency', text: 'Cost Currency', flex: 1, dataType: 'string'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', flex: 1, dataType: 'float' },
+                        { dataIndex: 'strCostUOM', text: 'UOM', flex: 1, dataType: 'string'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblAmount', text: 'Amount', flex: 1, dataType: 'float' },
+                        { dataIndex: 'ysnAccrue', text: 'Accrue', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'},
+                        { dataIndex: 'strVendorName', text: 'Other Charge Vendor', flex: 1, dataType: 'string'},
+                        { dataIndex: 'ysnInventoryCost', text: 'Inventory Cost', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'},
+                        { dataIndex: 'strAllocateCostBy', text: 'Allocate Cost By', flex: 1, dataType: 'string'},
+                        { dataIndex: 'ysnPrice', text: 'Price Down', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'},
+                        { dataIndex: 'strTaxGroup', text: 'Tax Group', flex: 1, dataType: 'string'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float' }
                     ]
                 },
                 {

@@ -255,5 +255,12 @@ namespace iRely.Inventory.WebApi
                 }
             });
         }
+
+        [HttpGet]
+        [ActionName("SearchReceiptCharges")]
+        public async Task<HttpResponseMessage> SearchReceiptCharges(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchReceiptCharges(param));
+        }
     }
 }
