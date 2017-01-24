@@ -2,7 +2,7 @@
     [intAccountStructureId]  INT            IDENTITY (1, 1) NOT NULL,
     [intStructureType]       INT            NOT NULL,
     [strStructureName]       NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
-    [strType]                NVARCHAR (7)   COLLATE Latin1_General_CI_AS NULL,
+    [strType]                NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
     [intLength]              INT            NULL,
     [strMask]                NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [intSort]                INT            NULL,
