@@ -370,6 +370,20 @@ namespace iRely.Inventory.BusinessLayer
             }
         }
 
+        public async Task<SearchResult> ShipmentInvoice(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICShipmentInvoice>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
         public SaveResult CalculateCharges(int shipmentId)
         {
             SaveResult saveResult = new SaveResult();

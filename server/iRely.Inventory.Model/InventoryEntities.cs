@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-            : base(iRely.Common.Security.GetCompanyName())
+            : base(Common.Security.GetCompanyName())
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
@@ -132,6 +132,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentChargeMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemLotMap());
+            modelBuilder.Configurations.Add(new vyuICShipmentInvoiceMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentMap());
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentDetailMap());

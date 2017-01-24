@@ -140,6 +140,31 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         { xtype: 'numbercolumn', dataIndex: 'dblTareWeight', text: 'Tare Wgt', flex: 1, dataType: 'float'},
                         { xtype: 'numbercolumn', dataIndex: 'dblNetWeight', text: 'Net Wgt', flex: 1, dataType: 'float'}
                     ]
+                },
+                {
+                    title: 'Invoices',
+                    api: {
+                        read: '../Inventory/api/InventoryShipment/ShipmentInvoice'
+                    },
+                    columns: [
+                        { dataIndex: 'intInventoryShipmentItemId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
+                        { dataIndex: 'strShipmentNumber', text: 'Shipment No', flex: 1, dataType: 'string', drillDownText: 'View Shipment', drillDownClick: 'onViewShipmentNo'},
+                        { dataIndex: 'strInvoiceNumber', text: 'Invoice No', flex: 1, dataType: 'string', drillDownText: 'View Invoice', drillDownClick: 'onViewInvoice' },
+                        { dataIndex: 'dtmDateInvoiced', text: 'Date Invoiced', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                        { dataIndex: 'strCustomerName', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerName' },
+                        { dataIndex: 'strDestination', text: 'Destination', flex: 1, dataType: 'string' },
+                        { dataIndex: 'dtmShipDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+                        { dataIndex: 'strItemNo', text: 'Item', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblQtyShipped', text: 'Qty Shipped', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblShipmentAmount', text: 'Shipment Amount', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblInTransitAmount', text: 'In Transit Amount', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblCOGSAmount', text: 'COGS Amount', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblQtyToInvoice', text: 'Qty to Invoice', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblQtyInvoiced', text: 'Qty Invoiced', flex: 1, dataType: 'float'},
+                        { dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strBOLNumber', text: 'BOL No', flex: 1, dataType: 'string' }
+                    ]
                 }
             ]
         },
@@ -1476,6 +1501,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onViewShipmentNo: function (value, record) {
         i21.ModuleMgr.Inventory.showScreen(value, 'ShipmentNo');
+    },
+
+    onViewInvoice: function (value, record) {
+        var strName = record.get('strInvoiceNumber');
+        i21.ModuleMgr.Inventory.showScreen(strName, 'Invoice');
     },
 
     onViewCustomerNo: function (value, record) {
