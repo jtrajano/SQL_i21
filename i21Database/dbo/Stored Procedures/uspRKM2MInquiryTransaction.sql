@@ -271,10 +271,9 @@ END AS dblAdjustedContractPrice,
                                          AND cd1.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd1.intCompanyLocationId else @intLocationId end
                                          AND isnull(cd1.intMarketZoneId,0)= case when isnull(@intMarketZoneId,0)=0 then isnull(cd1.intMarketZoneId,0) else @intMarketZoneId end
                      AND convert(datetime,convert(varchar, ir.dtmReceiptDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10) )     as dblShipQty,                    
-dblDetailQuantity as dblContractOriginalQty,cur.ysnSubCurrency,cur.intMainCurrencyId,cur.intCent
-			
+dblDetailQuantity as dblContractOriginalQty,cur.ysnSubCurrency,cur.intMainCurrencyId,cur.intCent			
 FROM vyuCTContractDetailView  cd
-JOIN tblSMCurrency cur on cur.intCurrencyID=cd.intCurrencyId and cd.intContractStatusId <> 3
+JOIN tblSMCurrency cur on cur.intCurrencyID=cd.intCurrencyId and cd.intContractStatusId not in(3,6)
 JOIN tblICItem i on cd.intItemId= i.intItemId and cd.dblBalance > 0 
 JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId
 JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId=@intQuantityUOMId
