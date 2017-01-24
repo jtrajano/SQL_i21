@@ -701,6 +701,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchasin
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 26, strCommand = N'i21.view.PurchasingGroup' WHERE strMenuName = 'Purchasing Groups' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Alternate Approver Groups' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Alternate Approver Groups', N'System Manager', @CommonInfoParentMenuId, N'Alternate Approver Groups', N'Maintenance', N'Screen', N'i21.view.AlternateApproverGroup', N'small-menu-maintenance', 0, 0, 0, 1, 27, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 27, strCommand = N'i21.view.AlternateApproverGroup' WHERE strMenuName = 'Alternate Approver Groups' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
 /* Start Delete */
 --DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reminder List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
