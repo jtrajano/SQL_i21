@@ -40,7 +40,7 @@ BEGIN
 
 			DELETE FROM #tmpCMBank WHERE intBankId = @intBankId
 			
-			CLOSE SYMMETRIC KEY i21EncryptionSymKey
+			--CLOSE SYMMETRIC KEY i21EncryptionSymKey
 	END	
 END
 
