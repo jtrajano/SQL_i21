@@ -291,7 +291,6 @@ intCustomerId
 			SELECT	TOP 1 
 			@intInvoiceResultId = intDebitMemoId
 			FROM #tblCFInvoiceResult
-
 			
 			INSERT INTO tblCFInvoiceProcessResult(
 				 strInvoiceProcessResultId
@@ -303,7 +302,7 @@ intCustomerId
 			)
 
 			SELECT TOP 1 
-			'Debit Memo'
+			(SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceResultId)
 			,@intInvoiceResultId
 			,1
 			,''

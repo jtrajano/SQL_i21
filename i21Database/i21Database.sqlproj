@@ -4887,6 +4887,8 @@
     <Build Include="dbo\Tables\tblSMTransactionLockHistory.sql" />
     <Build Include="dbo\Tables\tblSMSignature.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotTextInReport.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceProcessResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceProcess.sql" />
     <Build Include="dbo\Tables\tblEMEntitySignature.sql" />
     <Build Include="dbo\Functions\fnICSplitStringToTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICCopyItemLocation.sql" />

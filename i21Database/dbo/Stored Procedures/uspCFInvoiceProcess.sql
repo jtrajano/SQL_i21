@@ -9,32 +9,65 @@
 AS
 BEGIN
 
-DECLARE	@return_value int
+BEGIN TRANSACTION CFMainInvoiceProcess
 
-EXEC	@return_value = [dbo].[uspCFCreateInvoicePayment]
-		@xmlParam = @xmlParam,
-		@entityId = @entityId,
-		@ErrorMessage = @ErrorMessage OUTPUT,
-		@CreatedIvoices = @CreatedIvoices OUTPUT,
-		@UpdatedIvoices = @UpdatedIvoices OUTPUT,
-		@ysnDevMode = @ysnDevMode
+BEGIN TRY
 
-SELECT	@ErrorMessage as N'@ErrorMessage',
-		@CreatedIvoices as N'@CreatedIvoices',
-		@UpdatedIvoices as N'@UpdatedIvoices'
+	DECLARE	@return_value int
 
-EXEC	@return_value = [dbo].[uspCFCreateDebitMemo]
-		@xmlParam = @xmlParam,
-		@entityId = @entityId,
-		@ErrorMessage = @ErrorMessage OUTPUT,
-		@CreatedIvoices = @CreatedIvoices OUTPUT,
-		@UpdatedIvoices = @UpdatedIvoices OUTPUT,
-		@ysnDevMode = @ysnDevMode
+	----------RESET INVOICE RESULTS-----------
+	DELETE FROM tblCFInvoiceProcessResult
+	------------------------------------------
 
-SELECT	@ErrorMessage as N'@ErrorMessage',
-		@CreatedIvoices as N'@CreatedIvoices',
-		@UpdatedIvoices as N'@UpdatedIvoices'
+	EXEC	@return_value = [dbo].[uspCFCreateInvoicePayment]
+			@xmlParam = @xmlParam,
+			@entityId = @entityId,
+			@ErrorMessage = @ErrorMessage OUTPUT,
+			@CreatedIvoices = @CreatedIvoices OUTPUT,
+			@UpdatedIvoices = @UpdatedIvoices OUTPUT,
+			@ysnDevMode = @ysnDevMode
+
+	SELECT	@ErrorMessage as N'@ErrorMessage',
+			@CreatedIvoices as N'@CreatedIvoices',
+			@UpdatedIvoices as N'@UpdatedIvoices'
+
+	EXEC	@return_value = [dbo].[uspCFCreateDebitMemo]
+			@xmlParam = @xmlParam,
+			@entityId = @entityId,
+			@ErrorMessage = @ErrorMessage OUTPUT,
+			@CreatedIvoices = @CreatedIvoices OUTPUT,
+			@UpdatedIvoices = @UpdatedIvoices OUTPUT,
+			@ysnDevMode = @ysnDevMode
+
+	SELECT	@ErrorMessage as N'@ErrorMessage',
+			@CreatedIvoices as N'@CreatedIvoices',
+			@UpdatedIvoices as N'@UpdatedIvoices'
+
+	COMMIT TRANSACTION CFMainInvoiceProcess
+
+END TRY
+BEGIN CATCH
+	
+	ROLLBACK TRANSACTION CFMainInvoiceProcess
+
+	SELECT ERROR_MESSAGE()
+
+END CATCH
 
 
 
 END
+
+
+
+
+
+
+
+
+
+
+
+INSERT INTO tblCFLog (strProcessid,strProcess,strCallStack,intSortId) SELECT 'TEST','TEST','TEST',1
+
+DELETE FROM tblCFLog

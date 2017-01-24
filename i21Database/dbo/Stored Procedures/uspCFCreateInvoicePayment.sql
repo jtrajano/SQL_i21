@@ -204,7 +204,7 @@ BEGIN
 					)
 
 					SELECT TOP 1 
-					'Payment'
+					(SELECT TOP 1 strRecordNumber FROM tblARPayment WHERE intPaymentId = @newPaymentId)
 					,@newPaymentId
 					,1
 					,''
