@@ -43,6 +43,12 @@ BEGIN TRY
 			RETURN
 		END
 
+		IF	NOT EXISTS(SELECT * FROM tblCTPriceFixationDetail WHERE intPriceFixationId = ISNULL(@intPriceFixationId,0))
+		BEGIN
+			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
+			RETURN
+		END
+
 		IF NOT EXISTS(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
 			RETURN 
 
