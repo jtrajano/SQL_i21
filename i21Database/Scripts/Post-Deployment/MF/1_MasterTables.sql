@@ -2412,3 +2412,8 @@ UPDATE tblMFCompanyPreference
 SET ysnDisplayLotIdAsPalletId = 0
 WHERE ysnDisplayLotIdAsPalletId IS NULL
 GO
+GO
+UPDATE tblMFCompanyPreference
+SET strLotTextInReport = 'Lot No'
+WHERE strLotTextInReport IS NULL
+GO
