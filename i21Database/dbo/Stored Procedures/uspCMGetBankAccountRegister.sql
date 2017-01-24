@@ -21,6 +21,8 @@ DECLARE @openingBalance AS NUMERIC(18,6),
 		@dtmDateReconciled AS DATETIME,
 		@ysnCheckVoid AS BIT,
 		@ysnClr AS BIT,
+		@intCompanyLocationId AS INT,
+		@strLocationName AS NVARCHAR(100),
 		@intBankTransactionTypeId AS INT,
 		@strBankTransactionTypeName AS NVARCHAR(100),
 		@strReferenceNo AS NVARCHAR(50),
@@ -48,6 +50,8 @@ SET @runningBalance = ISNULL(@openingBalance,0)
 DECLARE @BankAccountRegister TABLE (
 intTransactionId INT 
 ,intBankAccountId INT
+,intCompanyLocationId INT
+,strLocationName NVARCHAR(100)
 ,intBankTransactionTypeId INT
 ,strBankTransactionTypeName NVARCHAR(100)
 ,strMemo NVARCHAR(250)
@@ -66,6 +70,8 @@ intTransactionId INT
 SELECT 
 intTransactionId
 ,strTransactionId
+,intCompanyLocationId
+,strLocationName = ISNULL((SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = A.intCompanyLocationId),'')
 ,intBankTransactionTypeId
 ,strBankTransactionTypeName = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = A.intBankTransactionTypeId)
 ,strReferenceNo
@@ -94,7 +100,7 @@ INTO #tempTransaction
 FROM tblCMBankTransaction A
 WHERE intBankAccountId = @intBankAccountId
 AND (ysnPosted = 1 OR ysnCheckVoid = 1)
-ORDER BY dtmDate
+ORDER BY dtmDate, intTransactionId
 
 WHILE EXISTS (SELECT TOP 1 1 FROM #tempTransaction)
 BEGIN
@@ -102,6 +108,8 @@ BEGIN
 	SELECT TOP 1 
 		@intTransactionId = intTransactionId
 		,@strTransactionId = strTransactionId
+		,@intCompanyLocationId = intCompanyLocationId
+		,@strLocationName = strLocationName
 		,@intBankTransactionTypeId = intBankTransactionTypeId
 		,@strBankTransactionTypeName = strBankTransactionTypeName
 		,@strReferenceNo = strReferenceNo
@@ -114,7 +122,7 @@ BEGIN
 		,@ysnCheckVoid = ysnCheckVoid
 		,@ysnClr = ysnClr
 	FROM #tempTransaction 
-	ORDER BY dtmDate
+	ORDER BY dtmDate, intTransactionId
 
 	IF @ysnCheckVoid = 0 AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(GETDATE(),@dtmDate) AS FLOAT)) AS DATETIME)	
 	BEGIN
@@ -133,6 +141,8 @@ BEGIN
 	(
 	intTransactionId
 	,strTransactionId
+	,intCompanyLocationId
+	,strLocationName
 	,intBankTransactionTypeId
 	,strBankTransactionTypeName
 	,strReferenceNo
@@ -151,6 +161,8 @@ BEGIN
 	(
 	@intTransactionId
 	,@strTransactionId
+	,@intCompanyLocationId
+	,@strLocationName
 	,@intBankTransactionTypeId
 	,@strBankTransactionTypeName
 	,@strReferenceNo

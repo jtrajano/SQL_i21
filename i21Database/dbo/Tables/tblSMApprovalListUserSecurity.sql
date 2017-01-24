@@ -5,7 +5,7 @@
     [intEntityUserSecurityId]				INT				NOT NULL, 
 	[intApproverLevel]						INT				NOT NULL DEFAULT 1,
 	[intAlternateEntityUserSecurityId]		INT				NULL, 
-	[intAlternateGroupApproverListId]		INT				NULL, 
+	[intAlternateApproverGroupId]			INT				NULL, 
 	[dblAmountOver]							NUMERIC(18, 6)	NOT NULL DEFAULT 0,
 	[dblAmountLessThanEqual]				NUMERIC(18, 6)	NOT NULL DEFAULT 0,
 	[ysnEmailApprovalRequest]				BIT				NOT NULL DEFAULT 0,

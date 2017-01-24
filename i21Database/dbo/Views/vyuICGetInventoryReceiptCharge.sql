@@ -26,6 +26,12 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.ysnPrice
 	, Currency.intCent
 	, strTaxGroup = SMTaxGroup.strTaxGroup
+	, ReceiptCharge.dblTax
+	, Receipt.strReceiptNumber
+	, Receipt.dtmReceiptDate
+	, Location.strLocationName
+	, Receipt.strBillOfLading
+	, strReceiptVendor = ReceiptVendor.strName
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -34,3 +40,6 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ReceiptCharge.intContractId
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ReceiptCharge.intCurrencyId
 	LEFT JOIN tblSMTaxGroup SMTaxGroup ON SMTaxGroup.intTaxGroupId = ReceiptCharge.intTaxGroupId
+	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Receipt.intLocationId
+	LEFT JOIN tblEMEntity ReceiptVendor ON ReceiptVendor.intEntityId = Receipt.intEntityVendorId
