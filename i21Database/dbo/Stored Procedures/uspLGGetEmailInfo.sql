@@ -2,6 +2,7 @@
 	 @intTransactionId INT
 	,@strReportName NVARCHAR(100)
 	,@strHyperLink NVARCHAR(MAX)
+	,@strInstoreTo NVARCHAR(MAX) = NULL
 AS
 BEGIN
 	DECLARE @strLoadNumber NVARCHAR(100)
@@ -206,12 +207,20 @@ BEGIN
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		WHERE LW.intLoadWarehouseId = @intTransactionId
 
-		SELECT @intEntityId = (SELECT EM.intEntityId FROM tblLGLoadWarehouse LW
+		IF(@strInstoreTo = 'Warehouse')
+		BEGIN
+				SELECT @intEntityId = (SELECT EM.intEntityId FROM tblLGLoadWarehouse LW
 							   JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 							   JOIN tblEMEntity EM ON EM.intEntityId = CLSL.intVendorId
 							   WHERE LW.intLoadWarehouseId = @intTransactionId)
-
-
+		END
+		ELSE 
+		BEGIN
+				SELECT @intEntityId = (SELECT EM.intEntityId FROM tblLGLoad L
+								JOIN tblLGLoadWarehouse LW ON L.intLoadId = LW.intLoadId
+								JOIN tblEMEntity EM ON EM.intEntityId = L.intShippingLineEntityId
+								WHERE intLoadWarehouseId = @intTransactionId)
+		END
 
 		SELECT @strEntityName = strName
 		FROM tblEMEntity
