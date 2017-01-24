@@ -78,8 +78,9 @@ Declare @tblAcknowledgement AS TABLE
 
 		If @strStatus=51 --Success
 		Begin
-			Update tblCTContractDetail Set strERPPONumber=@strParam
-			Where intContractHeaderId=@intContractHeaderId AND intContractSeq IN (Select strTrackingNo From @tblAcknowledgement)
+			Update d Set d.strERPPONumber=@strParam,d.strERPItemNumber=a.strPOItemNo,d.strERPBatchNumber=a.strLineItemBatchNo 
+			From tblCTContractDetail d Join @tblAcknowledgement a on d.intContractSeq=a.strTrackingNo
+			Where d.intContractHeaderId=@intContractHeaderId
 
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='SUCCESS',strERPPONumber=@strParam
 			Where intContractHeaderId=@intContractHeaderId AND intContractSeq IN (Select strTrackingNo From @tblAcknowledgement) 
