@@ -17,6 +17,11 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@dtmDateFrom				AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
+		,@strLocationName			AS NVARCHAR(100)
+		,@ysnPrintZeroBalance		AS BIT
+		,@ysnPrintCreditBalance		AS BIT
+		,@ysnIncludeBudget			AS BIT
+		,@ysnPrintOnlyPastDue		AS BIT
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)		
 		,@joinQuery                 AS NVARCHAR(MAX) = ''
@@ -85,7 +90,9 @@ DECLARE @temp_statement_table TABLE(
     ,[dtmDatePaid]				DATETIME
     ,[dblPayment]				NUMERIC(18,6)
     ,[dblBalance]				NUMERIC(18,6)
-    ,[strSalespersonName]		NVARCHAR(100)    
+    ,[strSalespersonName]		NVARCHAR(100)
+	,[strAccountStatusCode]		NVARCHAR(5)	
+	,[strLocationName]			NVARCHAR(100)    
     ,[strFullAddress]			NVARCHAR(MAX)
     ,[strCompanyName]			NVARCHAR(MAX)
     ,[strCompanyAddress]		NVARCHAR(MAX)
@@ -116,6 +123,26 @@ SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 
+SELECT @strLocationName = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strLocationName'
+
+SELECT @ysnPrintZeroBalance = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintZeroBalance'
+
+SELECT @ysnPrintCreditBalance = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintCreditBalance'
+
+SELECT @ysnIncludeBudget = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnIncludeBudget'
+
+SELECT @ysnPrintOnlyPastDue = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintOnlyPastDue'
+
 SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
@@ -130,7 +157,7 @@ IF @dtmDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 	
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmAsOfDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
 
 SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 
@@ -148,9 +175,9 @@ BEGIN
 END
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName 
 
-SET @query = 'SELECT * FROM
+SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
 	  , C.strCustomerNumber
 	  , strCustomerName		= C.strName
@@ -169,6 +196,8 @@ SET @query = 'SELECT * FROM
 	  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
 	  , dblBalance			= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
 	  , strSalespersonName  = ESP.strName
+	  , strAccountStatusCode = ACS.strAccountStatusCode
+	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= [dbo].fnARFormatCustomerAddress('''', '''', C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	  , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	  , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
@@ -192,6 +221,8 @@ FROM vyuARCustomer C
 	LEFT JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 	LEFT JOIN tblEMEntity ESP ON C.intSalespersonId = ESP.intEntityId	
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARCustomerAccountStatus CAS INNER JOIN tblARAccountStatus ACS ON CAS.intAccountStatusId = ACS.intAccountStatusId) ON CAS.intEntityCustomerId = C.intEntityCustomerId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 ) MainQuery'
 
 IF ISNULL(@filter,'') != ''

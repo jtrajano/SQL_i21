@@ -54,6 +54,8 @@ BEGIN
 							WHEN UPPER('Less Than Or Equal') THEN ' <= ' + @from END
 				WHEN 'Bool'
 					THEN ' = ' + (CASE WHEN @from = 1 THEN 'TRUE' ELSE 'FALSE' END)
+				WHEN 'Boolean'
+					THEN ' = ' + (CASE WHEN @from = 1 THEN 'TRUE' ELSE 'FALSE' END)
 				END
 
 	RETURN @filter

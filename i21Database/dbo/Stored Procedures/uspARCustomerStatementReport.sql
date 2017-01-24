@@ -17,6 +17,11 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@dtmDateFrom				AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
+		,@strLocationName			AS NVARCHAR(100)
+		,@ysnPrintZeroBalance		AS BIT
+		,@ysnPrintCreditBalance		AS BIT
+		,@ysnIncludeBudget			AS BIT
+		,@ysnPrintOnlyPastDue		AS BIT
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)		
 		,@innerQuery				AS NVARCHAR(MAX) = ''
@@ -69,25 +74,27 @@ DECLARE @temp_aging_table TABLE(
 )
 
 DECLARE @temp_statement_table TABLE(
-	 [strReferenceNumber]	 NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,[strTransactionType]	 NVARCHAR(100)
-	,[intEntityCustomerId]	 INT
-	,[dtmDueDate]			 DATETIME
-	,[dtmDate]				 DATETIME
-	,[intDaysDue]			 INT
-	,[dblTotalAmount]		 NUMERIC(18,6)
-	,[dblAmountPaid]		 NUMERIC(18,6)
-	,[dblAmountDue]			 NUMERIC(18,6)
-	,[dblPastDue]			 NUMERIC(18,6)
-	,[dblMonthlyBudget]		 NUMERIC(18,6)
-	,[strCustomerNumber]	 NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,[strName]				 NVARCHAR(100)
-	,[strBOLNumber]			 NVARCHAR(100)
-	,[dblCreditLimit]		 NUMERIC(18,6)
-	,[strFullAddress]		 NVARCHAR(MAX)
-	,[strStatementFooterComment] NVARCHAR(MAX)	
-	,[strCompanyName]		 NVARCHAR(MAX)
-	,[strCompanyAddress]	 NVARCHAR(MAX)
+	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,[strTransactionType]			NVARCHAR(100)
+	,[intEntityCustomerId]			INT
+	,[dtmDueDate]					DATETIME
+	,[dtmDate]						DATETIME
+	,[intDaysDue]					INT
+	,[dblTotalAmount]				NUMERIC(18,6)
+	,[dblAmountPaid]				NUMERIC(18,6)
+	,[dblAmountDue]					NUMERIC(18,6)
+	,[dblPastDue]					NUMERIC(18,6)
+	,[dblMonthlyBudget]				NUMERIC(18,6)
+	,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,[strName]						NVARCHAR(100)
+	,[strBOLNumber]					NVARCHAR(100)
+	,[dblCreditLimit]				NUMERIC(18,6)
+	,[strAccountStatusCode]			NVARCHAR(5)	
+	,[strLocationName]				NVARCHAR(100)
+	,[strFullAddress]				NVARCHAR(MAX)
+	,[strStatementFooterComment]	NVARCHAR(MAX)	
+	,[strCompanyName]				NVARCHAR(MAX)
+	,[strCompanyAddress]			NVARCHAR(MAX)
 )
 
 DECLARE @temp_cf_table TABLE(
@@ -121,6 +128,26 @@ SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmDate'
 
+SELECT @strLocationName = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strLocationName'
+
+SELECT @ysnPrintZeroBalance = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintZeroBalance'
+
+SELECT @ysnPrintCreditBalance = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintCreditBalance'
+
+SELECT @ysnIncludeBudget = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnIncludeBudget'
+
+SELECT @ysnPrintOnlyPastDue = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintOnlyPastDue'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -145,10 +172,9 @@ ELSE
 	END
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName
 
-
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmDate', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
 
 SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 
@@ -165,7 +191,7 @@ BEGIN
 	END
 END
 
-SET @query = 'SELECT * FROM
+SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
 	 , C.intEntityCustomerId
@@ -184,6 +210,8 @@ SET @query = 'SELECT * FROM
 	 , C.strName
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
+	 , ACS.strAccountStatusCode
+	 , CL.strLocationName
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
@@ -204,7 +232,9 @@ FROM vyuARCustomer C
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND P.ysnInvoicePrepayment = 0 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= '+ @strDateTo +'
 			GROUP BY intInvoiceId)
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
-	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
+	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID
+	LEFT JOIN (tblARCustomerAccountStatus CAS INNER JOIN tblARAccountStatus ACS ON CAS.intAccountStatusId = ACS.intAccountStatusId) ON CAS.intEntityCustomerId = C.intEntityCustomerId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 ) MainQuery'
 
 IF ISNULL(@filter,'') != ''

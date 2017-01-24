@@ -1,23 +1,25 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
-	@dtmDateFrom		DATETIME = NULL,
-	@dtmDateTo			DATETIME = NULL,
-	@strSalesperson		NVARCHAR(100) = NULL,
+	@dtmDateFrom			DATETIME = NULL,
+	@dtmDateTo				DATETIME = NULL,
+	@strSalesperson			NVARCHAR(100) = NULL,
 	@intEntityCustomerId	INT = NULL,
-	@strSourceTransaction	NVARCHAR(100)	= NULL
+	@strSourceTransaction	NVARCHAR(100) = NULL,
+	@strCompanyLocation		NVARCHAR(100) = NULL
 AS
 
 DECLARE @dtmDateFromLocal			DATETIME		= NULL,
 	    @dtmDateToLocal				DATETIME		= NULL,
 	    @strSalespersonLocal		NVARCHAR(100)	= NULL,
 	    @intEntityCustomerIdLocal	INT				= NULL,
-		@strSourceTransactionLocal	NVARCHAR(100)	= NULL
+		@strSourceTransactionLocal	NVARCHAR(100)	= NULL,
+		@strCompanyLocationLocal    NVARCHAR(100)	= NULL
 
 SET @dtmDateFromLocal			= @dtmDateFrom
 SET	@dtmDateToLocal				= @dtmDateTo
 SET @strSalespersonLocal		= @strSalesperson
 SET @intEntityCustomerIdLocal   = @intEntityCustomerId
 SET @strSourceTransactionLocal  = @strSourceTransaction
-
+SET @strCompanyLocationLocal  = @strCompanyLocation
 
 IF @dtmDateFromLocal IS NULL
     SET @dtmDateFromLocal = CAST(-53690 AS DATETIME)
@@ -30,6 +32,9 @@ IF RTRIM(LTRIM(@strSalespersonLocal)) = ''
 
 IF RTRIM(LTRIM(@strSourceTransactionLocal)) = ''
     SET @strSourceTransactionLocal = NULL
+
+IF RTRIM(LTRIM(@strCompanyLocationLocal)) = ''
+	SET @strCompanyLocationLocal = NULL
 
 SELECT A.strCustomerName
      , A.strEntityNo
@@ -81,11 +86,13 @@ FROM tblARInvoice I
     INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId 
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Invoice', 'Debit Memo')
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+	AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
@@ -132,11 +139,13 @@ FROM tblARInvoice I
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId	
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+	AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
@@ -177,11 +186,13 @@ FROM tblARInvoice I
 			GROUP BY PD.intInvoiceId) 
 		) PD ON I.intInvoiceId = PD.intInvoiceId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType = 'Customer Prepayment'
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+	AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')                                   
 
@@ -222,9 +233,11 @@ FROM tblARPayment P
     INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+  AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
   AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
                                      
 UNION ALL      
@@ -283,11 +296,12 @@ FROM tblARInvoice I
 				GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber)
 			) PC ON I.intInvoiceId = PC.intInvoiceId
         LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+		LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
-    --AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	    
 	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 	) AS A  
 
@@ -329,11 +343,13 @@ FROM
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Invoice', 'Debit Memo')
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+	AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
@@ -365,11 +381,13 @@ FROM tblARInvoice I
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+	AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
@@ -395,11 +413,13 @@ FROM tblARInvoice I
 			GROUP BY PD.intInvoiceId) 
 		) PD ON I.intInvoiceId = PD.intInvoiceId 
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType = 'Customer Prepayment'
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+	AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
     AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
                                           
@@ -425,9 +445,11 @@ FROM tblARPayment P
 				AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal   
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
+  AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
   AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 UNION ALL      
@@ -472,11 +494,12 @@ FROM tblARInvoice I
 			GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber)
 		) PC ON I.intInvoiceId = PC.intInvoiceId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted  = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
     AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
-    --AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
+	AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	    
 	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
 	) AS TBL) AS B
           

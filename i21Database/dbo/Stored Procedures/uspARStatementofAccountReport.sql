@@ -19,6 +19,12 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@strDateFrom				AS NVARCHAR(50)
 		,@strCustomerName           AS NVARCHAR(100)
 		,@strStatementFormat        AS NVARCHAR(50)
+		,@strAccountStatusCode		AS NVARCHAR(5)
+		,@strLocationName			AS NVARCHAR(50)
+		,@ysnPrintZeroBalance		AS BIT
+		,@ysnPrintCreditBalance		AS BIT
+		,@ysnIncludeBudget			AS BIT
+		,@ysnPrintOnlyPastDue		AS BIT
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)
 		,@filter					AS NVARCHAR(MAX) = ''
@@ -46,12 +52,16 @@ DECLARE @temp_xml_table TABLE (
 )
 
 DECLARE @temp_SOA_table TABLE(
-	 [intEntityCustomerId]	 INT
-	,[strCustomerNumber]	 NVARCHAR(100)
-	,[strCustomerName]		 NVARCHAR(100)
-	,[strStatementFormat]	 NVARCHAR(100)	
-	,[dtmDateFrom]			 DATETIME
-	,[dtmDateTo]			 DATETIME
+	 [strCustomerName]			NVARCHAR(100)
+	,[strAccountStatusCode]		NVARCHAR(5)
+	,[strLocationName]			NVARCHAR(50)
+	,[ysnPrintZeroBalance]		BIT
+	,[ysnPrintCreditBalance]	BIT
+	,[ysnIncludeBudget]			BIT
+	,[ysnPrintOnlyPastDue]		BIT
+	,[strStatementFormat]		NVARCHAR(100)	
+	,[dtmDateFrom]				DATETIME
+	,[dtmDateTo]				DATETIME
 )
 
 -- Prepare the XML 
@@ -83,6 +93,30 @@ SELECT @strCustomerName = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strCustomerName'
 
+SELECT @strAccountStatusCode = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strAccountStatusCode'
+
+SELECT @strLocationName = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strLocationName'
+
+SELECT @ysnPrintZeroBalance = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintZeroBalance'
+
+SELECT @ysnPrintCreditBalance = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintCreditBalance'
+
+SELECT @ysnIncludeBudget = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnIncludeBudget'
+
+SELECT @ysnPrintOnlyPastDue = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnPrintOnlyPastDue'
+
 SELECT @strStatementFormat = CASE WHEN ISNULL([from], '') = '' THEN 'Open Item' ELSE [from] END
 FROM @temp_xml_table
 WHERE [fieldname] = 'strStatementFormat'
@@ -105,6 +139,15 @@ IF CHARINDEX('''', @strCustomerName) > 0
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 
 INSERT INTO @temp_SOA_table
-SELECT NULL, NULL, @strCustomerName, ISNULL(@strStatementFormat, 'Open Item'), @dtmDateFrom, @dtmDateTo
+SELECT @strCustomerName
+     , @strAccountStatusCode
+	 , @strLocationName
+	 , ISNULL(@ysnPrintZeroBalance, 0)
+	 , ISNULL(@ysnPrintCreditBalance, 1)
+	 , ISNULL(@ysnIncludeBudget, 0)
+	 , ISNULL(@ysnPrintOnlyPastDue, 1)
+	 , ISNULL(@strStatementFormat, 'Open Item')
+	 , @dtmDateFrom
+	 , @dtmDateTo
 
 SELECT * FROM @temp_SOA_table
