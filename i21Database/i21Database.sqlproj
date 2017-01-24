@@ -4883,6 +4883,7 @@
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotals.sql" />
     <Build Include="dbo\Tables\tblSMAlternateApproverGroup.sql" />
+    <Build Include="dbo\Tables\tblSMAlternateApproverGroupUserSecurity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
