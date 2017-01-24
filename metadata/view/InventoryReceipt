@@ -1542,7 +1542,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "container|align": "stretch",
-                                        "designer|displayName": "container",
+                                        "designer|displayName": "Grids",
                                         "layout": "vbox",
                                         "layout|flex": 1
                                     },
@@ -1622,6 +1622,27 @@
                                                                     "designerId": "5dc423e8-6af6-4c6e-88bd-93d0fc8447ec",
                                                                     "cn": [
                                                                         {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "cls": null,
+                                                                                "layout|flex": null,
+                                                                                "layout|margins": null,
+                                                                                "margin": "0 7 0 5",
+                                                                                "style": [
+                                                                                    "'font-weight: bold;'"
+                                                                                ],
+                                                                                "text": "Items",
+                                                                                "weight": null
+                                                                            },
+                                                                            "name": "MyLabel9",
+                                                                            "designerId": "7d53841b-1ead-4f62-995e-71b5e697cdfc"
+                                                                        },
+                                                                        {
                                                                             "type": "Ext.button.Button",
                                                                             "reference": {
                                                                                 "name": "items",
@@ -1638,6 +1659,24 @@
                                                                             },
                                                                             "name": "MyButton7",
                                                                             "designerId": "6f0e12ec-eeb1-4083-847e-e3305baa0d63"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-remove",
+                                                                                "itemId": "btnRemoveInventoryReceipt",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Remove"
+                                                                            },
+                                                                            "name": "MyButton22",
+                                                                            "designerId": "8a532acd-c7b9-4abf-9e5d-00f65003ec37"
                                                                         },
                                                                         {
                                                                             "type": "Ext.button.Button",
@@ -1676,24 +1715,6 @@
                                                                             "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
                                                                         },
                                                                         {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
-                                                                                "iconCls": "small-remove",
-                                                                                "itemId": "btnRemoveInventoryReceipt",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "Remove"
-                                                                            },
-                                                                            "name": "MyButton22",
-                                                                            "designerId": "8a532acd-c7b9-4abf-9e5d-00f65003ec37"
-                                                                        },
-                                                                        {
                                                                             "type": "Ext.container.Container",
                                                                             "reference": {
                                                                                 "name": "items",
@@ -1719,14 +1740,14 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Wgt or Vol Gain/Loss:",
-                                                                                        "fieldStyle": "color:red",
+                                                                                        "fieldStyle": null,
                                                                                         "inputWrapCls": null,
                                                                                         "itemId": "txtWeightLossMsgValue",
                                                                                         "labelAlign": null,
                                                                                         "labelWidth": 120,
                                                                                         "layout|flex": null,
                                                                                         "readOnly": true,
-                                                                                        "readOnlyCls": "color: black",
+                                                                                        "readOnlyCls": null,
                                                                                         "tabIndex": -1,
                                                                                         "value": [
                                                                                             "0.00"
@@ -1748,7 +1769,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter124",
+                                                                            "name": "filter11",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3452,12 +3473,17 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "cls": null,
+                                                                                "designer|displayName": null,
                                                                                 "layout|flex": null,
                                                                                 "margin": "0 7 0 5",
+                                                                                "style": [
+                                                                                    "'font-weight: bold;'"
+                                                                                ],
                                                                                 "text": "Lot Tracking"
                                                                             },
-                                                                            "name": "MyLabel2",
-                                                                            "designerId": "fe86f567-023a-44c6-a4c2-c748f9cd937d"
+                                                                            "name": "MyLabel8",
+                                                                            "designerId": "68aa3bb8-5dc6-4cba-af31-03d82b8165ae"
                                                                         },
                                                                         {
                                                                             "type": "Ext.button.Button",
@@ -3486,14 +3512,14 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-insert",
-                                                                                "itemId": "btnReplicateBalanceLots",
+                                                                                "iconCls": "small-remove",
+                                                                                "itemId": "btnRemoveLot",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
-                                                                                "text": "Replicate Balance Lots"
+                                                                                "text": "Remove"
                                                                             },
-                                                                            "name": "MyButton24",
-                                                                            "designerId": "5be25fe0-8328-4217-95ed-d159a227c18c"
+                                                                            "name": "MyButton22",
+                                                                            "designerId": "131ac682-4590-4809-87d1-be3759f028c3"
                                                                         },
                                                                         {
                                                                             "type": "Ext.button.Button",
@@ -3504,14 +3530,14 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-remove",
-                                                                                "itemId": "btnRemoveLot",
+                                                                                "iconCls": "small-insert",
+                                                                                "itemId": "btnReplicateBalanceLots",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
-                                                                                "text": "Remove"
+                                                                                "text": "Replicate Balance Lots"
                                                                             },
-                                                                            "name": "MyButton22",
-                                                                            "designerId": "131ac682-4590-4809-87d1-be3759f028c3"
+                                                                            "name": "MyButton24",
+                                                                            "designerId": "5be25fe0-8328-4217-95ed-d159a227c18c"
                                                                         },
                                                                         {
                                                                             "type": "Ext.button.Button",
@@ -3541,7 +3567,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter125",
+                                                                            "name": "filter12",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4837,6 +4863,24 @@
                                                             "designerId": "19ff3e58-3869-483b-aea2-77879a0461b1",
                                                             "cn": [
                                                                 {
+                                                                    "type": "Ext.form.Label",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "layout|flex": null,
+                                                                        "margin": "0 7 0 5",
+                                                                        "style": [
+                                                                            "'font-weight: bold;'"
+                                                                        ],
+                                                                        "text": "Charges"
+                                                                    },
+                                                                    "name": "MyLabel10",
+                                                                    "designerId": "59dd8a66-48db-40bd-a4a4-f75c2313d6a1"
+                                                                },
+                                                                {
                                                                     "type": "Ext.button.Button",
                                                                     "reference": {
                                                                         "name": "items",
@@ -4917,7 +4961,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter126",
+                                                                    "name": "filter13",
                                                                     "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6000,7 +6044,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter14",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6469,7 +6513,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter15",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7032,7 +7076,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

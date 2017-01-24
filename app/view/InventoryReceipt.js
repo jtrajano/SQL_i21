@@ -26,12 +26,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.form.field.Date',
         'Ext.form.field.Number',
         'Ext.grid.Panel',
+        'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Check',
         'Ext.grid.column.Number',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
-        'Ext.form.Label',
         'Ext.grid.column.Date',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Time',
@@ -762,21 +762,34 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'toolbar',
                                                                                 dock: 'top',
-                                                                                weight: 1,
                                                                                 border: 1,
                                                                                 height: 30,
                                                                                 itemId: 'tlbItemGrid',
+                                                                                weight: 1,
                                                                                 layout: {
                                                                                     type: 'hbox',
                                                                                     padding: '0 0 0 1'
                                                                                 },
                                                                                 items: [
                                                                                     {
+                                                                                        xtype: 'label',
+                                                                                        margin: '0 7 0 5',
+                                                                                        style: 'font-weight: bold;',
+                                                                                        text: 'Items'
+                                                                                    },
+                                                                                    {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnInsertInventoryReceipt',
                                                                                         iconCls: 'small-insert',
                                                                                         text: 'Insert'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnRemoveInventoryReceipt',
+                                                                                        iconCls: 'small-remove',
+                                                                                        text: 'Remove'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
@@ -793,13 +806,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         text: 'View Tax Details'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnRemoveInventoryReceipt',
-                                                                                        iconCls: 'small-remove',
-                                                                                        text: 'Remove'
-                                                                                    },
-                                                                                    {
                                                                                         xtype: 'container',
                                                                                         layout: {
                                                                                             type: 'hbox',
@@ -813,9 +819,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                                 fieldLabel: 'Wgt or Vol Gain/Loss:',
                                                                                                 labelWidth: 120,
                                                                                                 value: 0.00,
-                                                                                                fieldStyle: 'color:red',
-                                                                                                readOnly: true,
-                                                                                                readOnlyCls: 'color: black'
+                                                                                                readOnly: true
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -1677,6 +1681,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     {
                                                                                         xtype: 'label',
                                                                                         margin: '0 7 0 5',
+                                                                                        style: 'font-weight: bold;',
                                                                                         text: 'Lot Tracking'
                                                                                     },
                                                                                     {
@@ -1689,16 +1694,16 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
-                                                                                        itemId: 'btnReplicateBalanceLots',
-                                                                                        iconCls: 'small-insert',
-                                                                                        text: 'Replicate Balance Lots'
+                                                                                        itemId: 'btnRemoveLot',
+                                                                                        iconCls: 'small-remove',
+                                                                                        text: 'Remove'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
-                                                                                        itemId: 'btnRemoveLot',
-                                                                                        iconCls: 'small-remove',
-                                                                                        text: 'Remove'
+                                                                                        itemId: 'btnReplicateBalanceLots',
+                                                                                        iconCls: 'small-insert',
+                                                                                        text: 'Replicate Balance Lots'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
@@ -2303,6 +2308,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
+                                                                            {
+                                                                                xtype: 'label',
+                                                                                margin: '0 7 0 5',
+                                                                                style: 'font-weight: bold;',
+                                                                                text: 'Charges'
+                                                                            },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
