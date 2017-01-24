@@ -249,6 +249,7 @@ DECLARE  @Id									INT
 		,@ItemSubCurrencyRate					NUMERIC(18, 8)
 		,@ItemIsBlended							BIT
 		,@ItemConversionAccountId				INT
+		,@ItemSalesAccountId					INT
 		,@ItemStorageScheduleTypeId				INT
 		,@ItemDestinationGradeId				INT
 		,@ItemDestinationWeightId				INT
@@ -400,6 +401,7 @@ BEGIN
 		,@ItemSubCurrencyRate			= (CASE WHEN @GroupingOption = 0 THEN [dblSubCurrencyRate] ELSE 1 END)
 		,@ItemIsBlended					= (CASE WHEN @GroupingOption = 0 THEN [ysnBlended] ELSE 0 END)
 		,@ItemConversionAccountId		= (CASE WHEN @GroupingOption = 0 THEN [intConversionAccountId] ELSE NULL END)
+		,@ItemSalesAccountId			= (CASE WHEN @GroupingOption = 0 THEN [intSalesAccountId] ELSE NULL END)
 		,@ItemStorageScheduleTypeId		= (CASE WHEN @GroupingOption = 0 THEN [intStorageScheduleTypeId] ELSE NULL END)
 		,@ItemDestinationGradeId		= (CASE WHEN @GroupingOption = 0 THEN [intDestinationGradeId] ELSE NULL END)
 		,@ItemDestinationWeightId		= (CASE WHEN @GroupingOption = 0 THEN [intDestinationWeightId] ELSE NULL END)
@@ -608,6 +610,7 @@ BEGIN
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@ItemConversionAccountId		= @ItemConversionAccountId
+			,@ItemSalesAccountId			= @ItemSalesAccountId
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
 			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId

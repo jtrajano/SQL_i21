@@ -61,6 +61,7 @@
 	,@ItemLoadDetailId				INT				= NULL			
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemConversionAccountId		INT				= NULL
+	,@ItemSalesAccountId			INT				= NULL
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
 	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
@@ -188,6 +189,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 			,@ItemDestinationGradeId		= @ItemDestinationGradeId
 			,@ItemDestinationWeightId		= @ItemDestinationWeightId
+			,@ItemSalesAccountId			= @ItemSalesAccountId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -257,7 +259,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblRecipeQuantity]
 				,[intStorageScheduleTypeId]
 				,[intDestinationGradeId]
-				,[intDestinationWeightId])
+				,[intDestinationWeightId]
+				,[intSalesAccountId])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -305,6 +308,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemStorageScheduleTypeId
 				,@ItemDestinationGradeId
 				,@ItemDestinationWeightId
+				,@ItemSalesAccountId
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -367,6 +371,7 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemMargin					= @ItemMargin
 			,@ItemRecipeQty					= @ItemRecipeQty
 			,@ItemConversionAccountId		= @ItemConversionAccountId
+			,@ItemSalesAccountId			= @ItemSalesAccountId
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0

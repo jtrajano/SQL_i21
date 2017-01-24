@@ -29,6 +29,7 @@
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@RecomputeTax					BIT				= 1
 	,@ItemConversionAccountId		INT				= NULL
+	,@ItemSalesAccountId			INT				= NULL
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
@@ -114,7 +115,6 @@ BEGIN TRY
 		,[dblSubCurrencyRate]
 		,[intAccountId]
 		,[intCOGSAccountId]
-		,[intSalesAccountId]
 		,[intInventoryAccountId]
 		,[intServiceChargeAccountId]
 		,[strMaintenanceType]
@@ -154,6 +154,7 @@ BEGIN TRY
 		,[dblMargin]
 		,[dblRecipeQuantity]
 		,[intConversionAccountId]
+		,[intSalesAccountId]
 		,[intConcurrencyId]
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
@@ -178,7 +179,6 @@ BEGIN TRY
 		,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 		,[intAccountId]						= NULL 
 		,[intCOGSAccountId]					= NULL
-		,[intSalesAccountId]				= NULL
 		,[intInventoryAccountId]			= NULL
 		,[intServiceChargeAccountId]		= NULL
 		,[strMaintenanceType]				= NULL
@@ -218,6 +218,7 @@ BEGIN TRY
 		,[dblMargin]						= @ItemMargin
 		,[dblRecipeQuantity]				= @ItemRecipeQty
 		,[intConversionAccountId]			= @ItemConversionAccountId
+		,[intSalesAccountId]				= @ItemSalesAccountId
 		,[intConcurrencyId]					= 0
 		,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
 		,[intDestinationGradeId]			= @ItemDestinationGradeId

@@ -74,6 +74,7 @@
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
+	,@ItemSalesAccountId			INT				= NULL
 AS
 
 BEGIN
@@ -304,7 +305,7 @@ BEGIN TRY
 				,[ysnBlended]						= @ItemIsBlended
 				,[intAccountId]						= Acct.[intAccountId] 
 				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
-				,[intSalesAccountId]				= Acct.[intSalesAccountId]
+				,[intSalesAccountId]				= ISNULL(@ItemSalesAccountId, Acct.[intSalesAccountId])
 				,[intInventoryAccountId]			= Acct.[intInventoryAccountId]
 				,[intServiceChargeAccountId]		= Acct.[intAccountId]
 				,[strMaintenanceType]				= @ItemMaintenanceType

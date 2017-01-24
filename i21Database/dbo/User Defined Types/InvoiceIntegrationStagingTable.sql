@@ -171,6 +171,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
 	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
     ,[intConversionAccountId]               INT												NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
+	,[intSalesAccountId]					INT												NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Sales'
 
 	,[intStorageScheduleTypeId]				INT												NULL		-- Indicates the Grain Bank of an Item
 	,[intDestinationGradeId]				INT												NULL		-- Key Value from tblCTWeightGrade (Grain Destination - Grade)

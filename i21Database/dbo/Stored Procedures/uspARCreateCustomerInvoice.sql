@@ -108,6 +108,7 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@ItemConversionAccountId		INT				= NULL
+	,@ItemSalesAccountId			INT				= NULL
 	,@ItemSubCurrencyId				INT				= NULL
 	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@DocumentMaintenanceId			INT				= NULL
@@ -584,6 +585,7 @@ BEGIN TRY
 		,@ItemLeaseBilling				= @ItemLeaseBilling
 		,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 		,@ItemConversionAccountId		= @ItemConversionAccountId
+		,@ItemSalesAccountId			= @ItemSalesAccountId
 		,@ItemSubCurrencyId				= @ItemSubCurrencyId
 		,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 		,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
