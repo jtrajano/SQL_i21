@@ -25,6 +25,7 @@ DECLARE @receiptAmount DECIMAL(18,6);
 DECLARE @totalReceiptAmount DECIMAL(18,6);
 DECLARE @totalLineItem DECIMAL(18,6);
 DECLARE @totalCharges DECIMAL(18,6);
+DECLARE @receiptType INT
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
