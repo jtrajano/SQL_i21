@@ -29,7 +29,7 @@ BEGIN TRY
 			PD.[dblNoOfLots],
 			LTRIM(PD.dblFutures) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPrice,
 			PD.strNotes,
-			LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(PD.dblFutures,2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPriceDesc,
+			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPriceDesc,
 			FLOOR(PD.[dblNoOfLots]) AS intNoOfLots
 				
 	FROM	tblCTPriceFixation			PF
