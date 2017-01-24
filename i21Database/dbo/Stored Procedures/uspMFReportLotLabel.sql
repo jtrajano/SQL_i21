@@ -59,7 +59,8 @@ BEGIN TRY
 			   l.strLotNumber, 
 			   i.strItemNo, 
 			   i.strDescription,
-			   pl.strParentLotNumber
+			   pl.strParentLotNumber,
+			   l.strVendorLotNo
 		FROM tblICLot l
 		JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
@@ -81,7 +82,8 @@ BEGIN TRY
 			   l.strLotNumber, 
 			   i.strItemNo, 
 			   i.strDescription,
-			   pl.strParentLotNumber
+			   pl.strParentLotNumber,
+			   l.strVendorLotNo
 		FROM tblICLot l
 		JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId

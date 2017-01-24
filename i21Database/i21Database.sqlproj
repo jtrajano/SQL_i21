@@ -4886,6 +4886,7 @@
     <Build Include="dbo\Tables\tblSMAlternateApproverGroupUserSecurity.sql" />
     <Build Include="dbo\Tables\tblSMTransactionLockHistory.sql" />
     <Build Include="dbo\Tables\tblSMSignature.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotTextInReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
