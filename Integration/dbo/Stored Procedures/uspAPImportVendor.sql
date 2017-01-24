@@ -581,10 +581,10 @@ BEGIN
 					0
 	 from ssvndmst  where ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to and rtrim(ltrim(ssvnd_pay_to)) = @originVendor
 
-
-
-
-
+	 -- Enable ysnTransportTerminal for the Vendors with Transport Terminal
+	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityVendorId
+      WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trhstmst
+	  INNER JOIN ssvndmst on ssvnd_vnd_no = trhst_pur_vnd_no)
 
 		EXEC uspAPImportVendorContact @originVendor
 
