@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSMAlternateApproverGroupUserSecurity]
 (
-	[inttAlternateApproverGroupUserSecurityId]			INT				NOT NULL PRIMARY KEY IDENTITY, 
+	[intAlternateApproverGroupUserSecurityId]			INT				NOT NULL PRIMARY KEY IDENTITY, 
     [intAlternateApproverGroupId]						INT				NOT NULL, 
     [intEntityUserSecurityId]				INT				NOT NULL, 
 	[intApproverLevel]						INT				NOT NULL DEFAULT 1,
