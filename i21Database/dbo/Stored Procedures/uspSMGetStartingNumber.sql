@@ -7,6 +7,9 @@ AS
 DECLARE @locationNumber VARCHAR(5)
 SET @locationNumber = ''
 
+DECLARE @parameters VARCHAR(150)
+SET @parameters = ''
+
 IF @intCompanyLocationId IS NOT NULL
 BEGIN
 	-- Check if starting number does not requires company location id
@@ -23,8 +26,49 @@ BEGIN
 	END
 END
 
+-- IF MODULE IS CONTRACT MANAGEMENT
+IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId AND strModule = 'Contract Management')
+BEGIN
+
+	-- Generate Parameters
+	DECLARE @currentRow INT
+	DECLARE @totalRows INT
+
+	SET @currentRow = 1
+	SELECT @totalRows = Count(*) FROM tblSMStartingNumberParameter WHERE intStartingNumberId = @intStartingNumberId
+
+	WHILE (@currentRow <= @totalRows)
+	BEGIN
+
+	Declare @param NVARCHAR(50)
+	SELECT @param = strParameter FROM (  
+		SELECT ROW_NUMBER() OVER(ORDER BY strParameter ASC) AS 'ROWID', *
+		FROM tblSMStartingNumberParameter WHERE intStartingNumberId = @intStartingNumberId
+	) a
+	WHERE ROWID = @currentRow 
+	ORDER BY intSort ASC
+
+	SET @parameters += 
+	CASE @param
+		WHEN 'Company Location' THEN CASE WHEN @intCompanyLocationId IS NULL THEN '' ELSE (SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId) END
+		WHEN 'Company Location Number' THEN CASE WHEN @intCompanyLocationId IS NULL THEN '' ELSE (SELECT strLocationNumber FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId) END
+		WHEN 'MMYYYY' THEN FORMAT(GETDATE(),'MMyyyy')
+		WHEN 'YY' THEN FORMAT(GETDATE(),'yy')
+		WHEN 'YYYY' THEN FORMAT(GETDATE(),'yyyy')
+		WHEN 'MON-YYYY' THEN UPPER(LEFT(DATENAME(MONTH, GETDATE()), 3) + FORMAT(GETDATE(),'-yyyy'))
+		WHEN 'MON-YY' THEN UPPER(LEFT(DATENAME(MONTH, GETDATE()), 3) + FORMAT(GETDATE(),'-yy'))
+		WHEN 'DD-MM-YY' THEN DATENAME(DD, GETDATE()) + FORMAT(GETDATE(),'-MM-yy')
+		WHEN 'DD-MMM-YYYY' THEN DATENAME(DD, GETDATE()) + '-' + UPPER(LEFT(DATENAME(MONTH, GETDATE()), 3) + FORMAT(GETDATE(),'-yyyy'))
+		ELSE @param
+    END
+
+	SET @currentRow = @currentRow + 1
+	END
+
+END
+
 -- Assemble the string ID. 
-SELECT	@strID = @locationNumber + strPrefix + CAST(intNumber AS NVARCHAR(20))
+SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(intNumber AS NVARCHAR(20))
 FROM	tblSMStartingNumber
 WHERE	intStartingNumberId = @intStartingNumberId
 
