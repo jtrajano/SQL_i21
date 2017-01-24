@@ -2186,6 +2186,33 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     getDefaultUOM: function(win) {
+        return this.getDefaultUOMFromCommodity(win);
+    },
+
+    getDefaultUOMFromCommodity: function(win) {
+        var vm = win.getViewModel();
+        var cboCommodity = win.down('#cboCommodity');
+        var intCommodityId = cboCommodity.getValue();
+
+        if (!iRely.Functions.isEmpty(intCommodityId)) {
+            var commodity = vm.storeInfo.commodityList.findRecord('intCommodityId', intCommodityId);
+            if (commodity) {
+                var uoms = commodity.data.tblICCommodityUnitMeasures;
+                if(uoms && uoms.length > 0) {
+                    var defUom = _.findWhere(uoms, { ysnDefault: true });
+                    if(defUom) {
+                        var itemUOMs = _.map(vm.data.current.tblICItemUOMs().data.items, function(rec) { return rec.data; });
+                        var defaultUOM = _.findWhere(itemUOMs, { intUnitMeasureId: defUom.intUnitMeasureId });
+                        if (defaultUOM) {
+                            win.defaultUOM = defaultUOM;
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    getDefaultUOMFroMCategory: function(win) {
         var vm = win.getViewModel();
         var cboCategory = win.down('#cboCategory');
         var intCategoryId = cboCategory.getValue();
@@ -2295,7 +2322,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         if (!exists) {
                             var defaultUOMId = null;
                             if (win.defaultUOM) {
-                                defaultUOMId = win.defaultUOM.get('intItemUOMId');
+                                defaultUOMId = win.defaultUOM.intItemUOMId;
                             }
                             var newRecord = {
                                 intItemId: location.data.intItemId,
