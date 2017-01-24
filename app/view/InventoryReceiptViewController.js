@@ -426,10 +426,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{current.ysnPosted}',
                 disabled: '{isOriginOrInventoryReturn}'
             },
-            // lblWeightLossMsg: {
-            //     text: '{getWeightLossText}'
-            // },
-            // txtWeightLossMsgValue: '{current.strVessel}',
             grdInventoryReceipt: {
                 readOnly: '{readOnlyReceiptItemGrid}',
                 colOrderNumber: {
@@ -1290,7 +1286,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     updateWeightLossText: function(window, clear, weightLoss) {
         if(clear) {
             window.down("#txtWeightLossMsgValue").setValue("");
-            window.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
         } else {
             window.down("#txtWeightLossMsgValue").setValue(Ext.util.Format.number(weightLoss, '0,000.00'));
 
@@ -1306,7 +1301,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     createRecord: function (config, action) {
         var win = config.window;
         win.down("#txtWeightLossMsgValue").setValue("");
-        win.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
         
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');

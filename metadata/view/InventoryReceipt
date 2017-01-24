@@ -889,6 +889,7 @@
                                                 "readOnly": true,
                                                 "readOnlyCls": null,
                                                 "style": null,
+                                                "tabIndex": -1,
                                                 "width": 100
                                             },
                                             "name": "MyTextField1",
@@ -1556,8 +1557,9 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "border": null,
                                                 "container|align": "stretch",
-                                                "designer|displayName": "container",
+                                                "designer|displayName": "Item and Lot grid",
                                                 "layout": "vbox",
                                                 "layout|flex": 1,
                                                 "width": 100
@@ -1573,7 +1575,9 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "border": null,
                                                         "container|align": "stretch",
+                                                        "designer|displayName": "Item Grid",
                                                         "layout": "vbox",
                                                         "layout|flex": 3
                                                     },
@@ -1600,6 +1604,157 @@
                                                             "designerId": "1ae48ae0-1fcc-4da7-846c-76a32c898e23",
                                                             "cn": [
                                                                 {
+                                                                    "type": "Ext.toolbar.Toolbar",
+                                                                    "reference": {
+                                                                        "name": "dockedItems",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "border": 1,
+                                                                        "container|padding": "0 0 0 1",
+                                                                        "dock": "top",
+                                                                        "height": 30,
+                                                                        "itemId": "tlbItemGrid",
+                                                                        "weight": 1
+                                                                    },
+                                                                    "name": "MyToolbar6",
+                                                                    "designerId": "5dc423e8-6af6-4c6e-88bd-93d0fc8447ec",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-insert",
+                                                                                "itemId": "btnInsertInventoryReceipt",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Insert"
+                                                                            },
+                                                                            "name": "MyButton7",
+                                                                            "designerId": "6f0e12ec-eeb1-4083-847e-e3305baa0d63"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-open",
+                                                                                "itemId": "btnQuality",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Quality"
+                                                                            },
+                                                                            "name": "MyButton42",
+                                                                            "designerId": "4a07c3e9-046f-47b0-acb7-863b7d4c1c51"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-open",
+                                                                                "itemId": "btnTaxDetails",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "View Tax Details"
+                                                                            },
+                                                                            "name": "MyButton43",
+                                                                            "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-remove",
+                                                                                "itemId": "btnRemoveInventoryReceipt",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Remove"
+                                                                            },
+                                                                            "name": "MyButton22",
+                                                                            "designerId": "8a532acd-c7b9-4abf-9e5d-00f65003ec37"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.container.Container",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "border": null,
+                                                                                "container|align": "stretch",
+                                                                                "designer|displayName": "weight loss msg",
+                                                                                "layout": "hbox",
+                                                                                "layout|flex": null
+                                                                            },
+                                                                            "name": "MyContainer4",
+                                                                            "designerId": "bb937937-c95f-4d6e-a62b-99902107d1ca",
+                                                                            "cn": [
+                                                                                {
+                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "fieldLabel": "Wgt or Vol Gain/Loss:",
+                                                                                        "fieldStyle": "color:red",
+                                                                                        "inputWrapCls": null,
+                                                                                        "itemId": "txtWeightLossMsgValue",
+                                                                                        "labelAlign": null,
+                                                                                        "labelWidth": 120,
+                                                                                        "layout|flex": null,
+                                                                                        "readOnly": true,
+                                                                                        "readOnlyCls": "color: black",
+                                                                                        "tabIndex": -1,
+                                                                                        "value": [
+                                                                                            "0.00"
+                                                                                        ],
+                                                                                        "width": null
+                                                                                    },
+                                                                                    "name": "MyTextField3",
+                                                                                    "designerId": "db399a20-19e2-4ee7-a199-addee148f115"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "type": "linkedinstance",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "layout|flex": null
+                                                                            },
+                                                                            "name": "filter124",
+                                                                            "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
+                                                                            "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
                                                                     "type": "Ext.selection.CheckboxModel",
                                                                     "reference": {
                                                                         "name": "selModel",
@@ -1612,176 +1767,6 @@
                                                                     },
                                                                     "name": "MyCheckboxSelectionModel2",
                                                                     "designerId": "ce852480-76ec-459e-abce-97f5745b94ac"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.panel.Panel",
-                                                                    "reference": {
-                                                                        "name": "dockedItems",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "container|align": "stretch",
-                                                                        "dock": "top",
-                                                                        "header": false,
-                                                                        "layout": "vbox",
-                                                                        "shrinkWrap": 0,
-                                                                        "title": "My Panel",
-                                                                        "width": 100
-                                                                    },
-                                                                    "name": "MyPanel6",
-                                                                    "designerId": "2cac0f31-55ad-4415-b203-4cc3662f18ba",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.toolbar.Toolbar",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "border": 0,
-                                                                                "container|padding": "0 0 0 1",
-                                                                                "dock": null,
-                                                                                "itemId": "tlbToolbarGrid",
-                                                                                "layout|flex": null,
-                                                                                "weight": 1
-                                                                            },
-                                                                            "name": "MyToolbar6",
-                                                                            "designerId": "5dc423e8-6af6-4c6e-88bd-93d0fc8447ec",
-                                                                            "cn": [
-                                                                                {
-                                                                                    "type": "Ext.button.Button",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "icon": null,
-                                                                                        "iconCls": "small-insert",
-                                                                                        "itemId": "btnInsertInventoryReceipt",
-                                                                                        "layout|flex": null,
-                                                                                        "tabIndex": -1,
-                                                                                        "text": "Insert"
-                                                                                    },
-                                                                                    "name": "MyButton7",
-                                                                                    "designerId": "6f0e12ec-eeb1-4083-847e-e3305baa0d63"
-                                                                                },
-                                                                                {
-                                                                                    "type": "Ext.button.Button",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "icon": null,
-                                                                                        "iconCls": "small-open",
-                                                                                        "itemId": "btnQuality",
-                                                                                        "layout|flex": null,
-                                                                                        "tabIndex": -1,
-                                                                                        "text": "Quality"
-                                                                                    },
-                                                                                    "name": "MyButton42",
-                                                                                    "designerId": "4a07c3e9-046f-47b0-acb7-863b7d4c1c51"
-                                                                                },
-                                                                                {
-                                                                                    "type": "Ext.button.Button",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "icon": null,
-                                                                                        "iconCls": "small-open",
-                                                                                        "itemId": "btnTaxDetails",
-                                                                                        "layout|flex": null,
-                                                                                        "tabIndex": -1,
-                                                                                        "text": "View Tax Details"
-                                                                                    },
-                                                                                    "name": "MyButton43",
-                                                                                    "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
-                                                                                },
-                                                                                {
-                                                                                    "type": "Ext.button.Button",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "icon": null,
-                                                                                        "iconCls": "small-remove",
-                                                                                        "itemId": "btnRemoveInventoryReceipt",
-                                                                                        "layout|flex": null,
-                                                                                        "tabIndex": -1,
-                                                                                        "text": "Remove"
-                                                                                    },
-                                                                                    "name": "MyButton22",
-                                                                                    "designerId": "8a532acd-c7b9-4abf-9e5d-00f65003ec37"
-                                                                                },
-                                                                                {
-                                                                                    "type": "Ext.form.Label",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "itemId": "lblWeightLossMsg",
-                                                                                        "layout|flex": null,
-                                                                                        "padding": "0 0 0 64",
-                                                                                        "style": null,
-                                                                                        "text": "Wgt or Vol Gain/Loss:"
-                                                                                    },
-                                                                                    "name": "MyLabel8",
-                                                                                    "configAlternates": {
-                                                                                        "style": "string"
-                                                                                    },
-                                                                                    "designerId": "ab69e307-c7ba-4fe7-8807-5c496262f7dd"
-                                                                                },
-                                                                                {
-                                                                                    "type": "Ext.form.field.Text",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "fieldLabel": null,
-                                                                                        "fieldStyle": "color:red",
-                                                                                        "inputWrapCls": "''",
-                                                                                        "itemId": "txtWeightLossMsgValue",
-                                                                                        "layout|flex": null,
-                                                                                        "readOnly": true,
-                                                                                        "readOnlyCls": "color: black",
-                                                                                        "value": [
-                                                                                            "0.00"
-                                                                                        ],
-                                                                                        "width": 172
-                                                                                    },
-                                                                                    "name": "MyTextField3",
-                                                                                    "designerId": "db399a20-19e2-4ee7-a199-addee148f115"
-                                                                                },
-                                                                                {
-                                                                                    "type": "linkedinstance",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "layout|flex": null
-                                                                                    },
-                                                                                    "name": "filter124",
-                                                                                    "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
-                                                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                                                                }
-                                                                            ]
-                                                                        }
-                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -3262,137 +3247,145 @@
                                                                     },
                                                                     "name": "MyGridView2",
                                                                     "designerId": "8e2c5111-0905-47f1-9aa8-877b2ea634b9"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.panel.Panel",
+                                                                    "reference": {
+                                                                        "name": "dockedItems",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "border": false,
+                                                                        "container|align": "stretch",
+                                                                        "container|pack": "end",
+                                                                        "designer|displayName": "bottom total container",
+                                                                        "dock": "bottom",
+                                                                        "layout": "hbox",
+                                                                        "maxHeight": 20,
+                                                                        "title": null,
+                                                                        "width": 100
+                                                                    },
+                                                                    "name": "MyPanel3",
+                                                                    "designerId": "b54d233a-fc4b-47bc-b647-a9c6c4f0fe19",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblSubTotal",
+                                                                                "tabIndex": -1,
+                                                                                "text": "SubTotal",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel3",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "9ba8112e-0fa8-44bf-ad27-d1520bdc3d1b"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblTax",
+                                                                                "tabIndex": -1,
+                                                                                "text": "Tax",
+                                                                                "width": 120
+                                                                            },
+                                                                            "name": "MyLabel4",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "88e675af-5bb4-4d70-ad8b-87142159bf41"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblCharges",
+                                                                                "tabIndex": -1,
+                                                                                "text": "Charges",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel2",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "48d243a0-7a3b-40f1-96e6-7d7740146292"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblGrossWgt",
+                                                                                "tabIndex": -1,
+                                                                                "text": "Gross",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel5",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "c00e8cdb-e6d8-4c4e-b87f-d325a95e2dda"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblNetWgt",
+                                                                                "tabIndex": -1,
+                                                                                "text": "Net",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel6",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "49af459f-3b52-4cac-bfdb-a520d09919c6"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblTotal",
+                                                                                "tabIndex": -1,
+                                                                                "text": "Total",
+                                                                                "width": 180
+                                                                            },
+                                                                            "name": "MyLabel7",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "487a9fc8-82d0-48c1-8743-4ab7194a24d0"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.panel.Panel",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "border": false,
-                                                        "container|align": "stretch",
-                                                        "container|pack": "end",
-                                                        "layout": "hbox",
-                                                        "layout|flex": 1,
-                                                        "maxHeight": 20,
-                                                        "title": null
-                                                    },
-                                                    "name": "MyPanel3",
-                                                    "designerId": "b54d233a-fc4b-47bc-b647-a9c6c4f0fe19",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.Label",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "itemId": "lblSubTotal",
-                                                                "text": "SubTotal",
-                                                                "width": 150
-                                                            },
-                                                            "name": "MyLabel3",
-                                                            "configAlternates": {
-                                                                "style": "string"
-                                                            },
-                                                            "designerId": "9ba8112e-0fa8-44bf-ad27-d1520bdc3d1b"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.Label",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "itemId": "lblTax",
-                                                                "text": "Tax",
-                                                                "width": 120
-                                                            },
-                                                            "name": "MyLabel4",
-                                                            "configAlternates": {
-                                                                "style": "string"
-                                                            },
-                                                            "designerId": "88e675af-5bb4-4d70-ad8b-87142159bf41"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.Label",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "itemId": "lblCharges",
-                                                                "text": "Charges",
-                                                                "width": 150
-                                                            },
-                                                            "name": "MyLabel2",
-                                                            "configAlternates": {
-                                                                "style": "string"
-                                                            },
-                                                            "designerId": "48d243a0-7a3b-40f1-96e6-7d7740146292"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.Label",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "itemId": "lblGrossWgt",
-                                                                "text": "Gross",
-                                                                "width": 150
-                                                            },
-                                                            "name": "MyLabel5",
-                                                            "configAlternates": {
-                                                                "style": "string"
-                                                            },
-                                                            "designerId": "c00e8cdb-e6d8-4c4e-b87f-d325a95e2dda"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.Label",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "itemId": "lblNetWgt",
-                                                                "text": "Net",
-                                                                "width": 150
-                                                            },
-                                                            "name": "MyLabel6",
-                                                            "configAlternates": {
-                                                                "style": "string"
-                                                            },
-                                                            "designerId": "49af459f-3b52-4cac-bfdb-a520d09919c6"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.Label",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "itemId": "lblTotal",
-                                                                "text": "Total",
-                                                                "width": 180
-                                                            },
-                                                            "name": "MyLabel7",
-                                                            "configAlternates": {
-                                                                "style": "string"
-                                                            },
-                                                            "designerId": "487a9fc8-82d0-48c1-8743-4ab7194a24d0"
                                                         }
                                                     ]
                                                 },
@@ -3404,7 +3397,9 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "autoDestroy": false,
                                                         "container|align": "stretch",
+                                                        "designer|displayName": "Lot Grid (pnlLotTracking)",
                                                         "hidden": true,
                                                         "itemId": "pnlLotTracking",
                                                         "layout": "hbox",
@@ -4788,880 +4783,909 @@
                                     "designerId": "69db433c-4fea-4770-8c7d-255d06831e03",
                                     "cn": [
                                         {
-                                            "type": "Ext.grid.Panel",
+                                            "type": "Ext.container.Container",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "columnLines": true,
-                                                "designer|createAlias": "frmadvancesearchgrid",
-                                                "itemId": "grdCharges",
-                                                "layout|flex": 1,
-                                                "reference": "grdCharges",
-                                                "title": "Charges"
+                                                "border": 1,
+                                                "container|align": "stretch",
+                                                "designer|displayName": "charges grid",
+                                                "layout": "vbox",
+                                                "layout|flex": 1
                                             },
-                                            "name": "MyGridPanel1",
-                                            "designerId": "0438a394-4749-4971-9585-08e9b6010121",
+                                            "name": "MyContainer12",
+                                            "designerId": "c5c18530-bca5-448f-8584-f1b8ec3cd9c5",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.toolbar.Toolbar",
+                                                    "type": "Ext.grid.Panel",
                                                     "reference": {
-                                                        "name": "dockedItems",
+                                                        "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "container|padding": "0 0 0 1",
-                                                        "dock": "top",
-                                                        "itemId": "tlbGridOptions"
+                                                        "columnLines": true,
+                                                        "designer|createAlias": "frmadvancesearchgrid",
+                                                        "designer|displayName": null,
+                                                        "itemId": "grdCharges",
+                                                        "layout|flex": 1,
+                                                        "margin": "1 0 0 0",
+                                                        "reference": "grdCharges",
+                                                        "title": null
                                                     },
-                                                    "name": "MyToolbar51",
-                                                    "designerId": "19ff3e58-3869-483b-aea2-77879a0461b1",
+                                                    "name": "MyGridPanel1",
+                                                    "designerId": "0438a394-4749-4971-9585-08e9b6010121",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.button.Button",
+                                                            "type": "Ext.toolbar.Toolbar",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "dockedItems",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "icon": null,
-                                                                "iconCls": "small-insert",
-                                                                "itemId": "btnInsertCharge",
-                                                                "layout|flex": null,
-                                                                "tabIndex": -1,
-                                                                "text": "Insert"
+                                                                "border": 1,
+                                                                "container|padding": "0 0 0 1",
+                                                                "dock": "top",
+                                                                "itemId": "tlbChargesGrid",
+                                                                "weight": 1
                                                             },
-                                                            "name": "MyButton10",
-                                                            "designerId": "b0566f83-b124-4db3-9815-61c15df70f45"
+                                                            "name": "MyToolbar51",
+                                                            "designerId": "19ff3e58-3869-483b-aea2-77879a0461b1",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-insert",
+                                                                        "itemId": "btnInsertCharge",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Insert"
+                                                                    },
+                                                                    "name": "MyButton10",
+                                                                    "designerId": "b0566f83-b124-4db3-9815-61c15df70f45"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-remove",
+                                                                        "itemId": "btnRemoveCharge",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Remove"
+                                                                    },
+                                                                    "name": "MyButton23",
+                                                                    "designerId": "fb0f5848-4a90-43aa-ac34-d1edbf65c90c"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-calculator",
+                                                                        "itemId": "btnCalculateCharges",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Calculate"
+                                                                    },
+                                                                    "name": "MyButton8",
+                                                                    "designerId": "51028879-90a1-4d8d-a1b8-fb85b197cb79"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "iconCls": "small-open",
+                                                                        "itemId": "btnChargeTaxDetails",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "View Tax Details"
+                                                                    },
+                                                                    "name": "MyButton9",
+                                                                    "designerId": "26191809-9210-430d-8198-0b02605b760a"
+                                                                },
+                                                                {
+                                                                    "type": "linkedinstance",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "filter126",
+                                                                    "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
+                                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                                }
+                                                            ]
                                                         },
                                                         {
-                                                            "type": "Ext.button.Button",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "icon": null,
-                                                                "iconCls": "small-remove",
-                                                                "itemId": "btnRemoveCharge",
-                                                                "layout|flex": null,
-                                                                "tabIndex": -1,
-                                                                "text": "Remove"
+                                                                "defaultWidth": null,
+                                                                "flex": null,
+                                                                "itemId": "colContract",
+                                                                "text": "Contract No",
+                                                                "width": 103
                                                             },
-                                                            "name": "MyButton23",
-                                                            "designerId": "fb0f5848-4a90-43aa-ac34-d1edbf65c90c"
+                                                            "name": "MyColumn70",
+                                                            "designerId": "92e805a8-908c-4509-8c03-a632763ffc09",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "{",
+                                                                            "dataIndex: 'strContractNumber',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Contract Number',",
+                                                                            "flex: 1",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'intContractHeaderId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strContractNumber",
+                                                                        "itemId": "cboContract",
+                                                                        "valueField": "strContractNumber"
+                                                                    },
+                                                                    "name": "MyComboBox22",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "a687b55c-ffd7-4ef8-81fc-368977bfb100",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
                                                         },
                                                         {
-                                                            "type": "Ext.button.Button",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "icon": null,
-                                                                "iconCls": "small-calculator",
-                                                                "itemId": "btnCalculateCharges",
-                                                                "layout|flex": null,
-                                                                "tabIndex": -1,
-                                                                "text": "Calculate"
+                                                                "flex": null,
+                                                                "headerDrillDownClick": "onItemHeaderClick",
+                                                                "headerDrillDownText": "Open Item",
+                                                                "itemId": "colOtherCharge",
+                                                                "text": "Other Charges"
                                                             },
-                                                            "name": "MyButton8",
-                                                            "designerId": "51028879-90a1-4d8d-a1b8-fb85b197cb79"
+                                                            "name": "MyColumn5",
+                                                            "designerId": "6a241270-7605-401f-9c42-aa318999ab90",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownText",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownClick",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intItemId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Item Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strItemNo',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Item Number',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Description',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strItemNo",
+                                                                        "itemId": "cboOtherCharge",
+                                                                        "valueField": "strItemNo"
+                                                                    },
+                                                                    "name": "MyComboBox22",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "87db55dc-dfbd-48e9-8595-7864e8dec44f",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
                                                         },
                                                         {
-                                                            "type": "Ext.button.Button",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "iconCls": "small-open",
-                                                                "itemId": "btnChargeTaxDetails",
-                                                                "layout|flex": null,
-                                                                "tabIndex": -1,
-                                                                "text": "View Tax Details"
+                                                                "flex": null,
+                                                                "itemId": "colOnCostType",
+                                                                "text": "On Cost"
                                                             },
-                                                            "name": "MyButton9",
-                                                            "designerId": "26191809-9210-430d-8198-0b02605b760a"
+                                                            "name": "MyColumn46",
+                                                            "designerId": "1e4be1c3-9c82-4374-adce-c39a14bcecc9"
                                                         },
                                                         {
-                                                            "type": "linkedinstance",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "layout|flex": null
+                                                                "flex": null,
+                                                                "itemId": "colCostMethod",
+                                                                "text": "Cost Method"
                                                             },
-                                                            "name": "filter126",
-                                                            "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
-                                                            "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colContract",
-                                                        "text": "Contract No"
-                                                    },
-                                                    "name": "MyColumn70",
-                                                    "designerId": "92e805a8-908c-4509-8c03-a632763ffc09",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "{",
-                                                                    "dataIndex: 'strContractNumber',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Contract Number',",
-                                                                    "flex: 1",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'intContractHeaderId',",
-                                                                    "dataType: 'numeric',",
-                                                                    "hidden: true",
-                                                                    "},",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strContractNumber",
-                                                                "itemId": "cboContract",
-                                                                "valueField": "strContractNumber"
-                                                            },
-                                                            "name": "MyComboBox22",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "a687b55c-ffd7-4ef8-81fc-368977bfb100",
-                                                            "customConfigs": [
+                                                            "name": "MyColumn11",
+                                                            "designerId": "2ebceaa3-4fd9-4a5b-a4e3-1d53cae99fec",
+                                                            "cn": [
                                                                 {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "        dataIndex: 'strDescription',",
+                                                                            "        dataType: 'string',",
+                                                                            "        text: 'Cost Method',",
+                                                                            "        flex: 1",
+                                                                            "    }",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strDescription",
+                                                                        "itemId": "cboCostMethod",
+                                                                        "valueField": "strDescription"
+                                                                    },
+                                                                    "name": "MyComboBox81",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "68977bc2-bd53-4024-b43f-e8d94bee20f9",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1.2,
-                                                        "headerDrillDownClick": "onItemHeaderClick",
-                                                        "headerDrillDownText": "Open Item",
-                                                        "itemId": "colOtherCharge",
-                                                        "text": "Other Charges"
-                                                    },
-                                                    "name": "MyColumn5",
-                                                    "designerId": "6a241270-7605-401f-9c42-aa318999ab90",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "headerDrillDownText",
-                                                            "type": "string"
                                                         },
                                                         {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "headerDrillDownClick",
-                                                            "type": "string"
-                                                        }
-                                                    ],
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
+                                                                "name": "columns",
+                                                                "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intItemId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Item Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strItemNo',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Item Number',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strDescription',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Description',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strItemNo",
-                                                                "itemId": "cboOtherCharge",
-                                                                "valueField": "strItemNo"
+                                                                "itemId": "colChargeCurrency",
+                                                                "text": "Cost Currency"
                                                             },
-                                                            "name": "MyComboBox22",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "87db55dc-dfbd-48e9-8595-7864e8dec44f",
-                                                            "customConfigs": [
+                                                            "name": "MyColumn35",
+                                                            "designerId": "11978d9a-f652-4779-8e35-91f0c65b23c0",
+                                                            "cn": [
                                                                 {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "{",
+                                                                            "dataIndex: 'intCurrencyID',",
+                                                                            "dataType: 'numeric',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strCurrency',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Currency',",
+                                                                            "flex: 1",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strDescription',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Description',",
+                                                                            "flex: 1",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'ysnSubCurrency',",
+                                                                            "dataType: 'boolean',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'intMainCurrencyId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "hidden: true",
+                                                                            "}, ",
+                                                                            "{",
+                                                                            "dataIndex: 'intCent',",
+                                                                            "dataType: 'numeric',",
+                                                                            "hidden: true",
+                                                                            "}\t",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strCurrency",
+                                                                        "itemId": "cboChargeCurrency",
+                                                                        "valueField": "strCurrency"
+                                                                    },
+                                                                    "name": "MyComboBox",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "37a053d5-ab58-4998-aefa-31985f86a6a4",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colOnCostType",
-                                                        "text": "On Cost"
-                                                    },
-                                                    "name": "MyColumn46",
-                                                    "designerId": "1e4be1c3-9c82-4374-adce-c39a14bcecc9"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colCostMethod",
-                                                        "text": "Cost Method"
-                                                    },
-                                                    "name": "MyColumn11",
-                                                    "designerId": "2ebceaa3-4fd9-4a5b-a4e3-1d53cae99fec",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "        dataIndex: 'strDescription',",
-                                                                    "        dataType: 'string',",
-                                                                    "        text: 'Cost Method',",
-                                                                    "        flex: 1",
-                                                                    "    }",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "itemId": "cboCostMethod",
-                                                                "valueField": "strDescription"
-                                                            },
-                                                            "name": "MyComboBox81",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "68977bc2-bd53-4024-b43f-e8d94bee20f9",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "colChargeCurrency",
-                                                        "text": "Cost Currency"
-                                                    },
-                                                    "name": "MyColumn35",
-                                                    "designerId": "11978d9a-f652-4779-8e35-91f0c65b23c0",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "{",
-                                                                    "dataIndex: 'intCurrencyID',",
-                                                                    "dataType: 'numeric',",
-                                                                    "hidden: true",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strCurrency',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Currency',",
-                                                                    "flex: 1",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strDescription',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Description',",
-                                                                    "flex: 1",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'ysnSubCurrency',",
-                                                                    "dataType: 'boolean',",
-                                                                    "hidden: true",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'intMainCurrencyId',",
-                                                                    "dataType: 'numeric',",
-                                                                    "hidden: true",
-                                                                    "}, ",
-                                                                    "{",
-                                                                    "dataIndex: 'intCent',",
-                                                                    "dataType: 'numeric',",
-                                                                    "hidden: true",
-                                                                    "}\t",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strCurrency",
-                                                                "itemId": "cboChargeCurrency",
-                                                                "valueField": "strCurrency"
-                                                            },
-                                                            "name": "MyComboBox",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "37a053d5-ab58-4998-aefa-31985f86a6a4",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Number",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "format": "0,000.000000",
-                                                        "itemId": "colRate",
-                                                        "modelValidation": true,
-                                                        "text": "Rate"
-                                                    },
-                                                    "name": "MyNumberColumn45",
-                                                    "designerId": "238379ca-17ad-4da0-a364-1891c68233fe",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Number",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "designer|createAlias": "numericfield",
-                                                                "modelValidation": true
-                                                            },
-                                                            "name": "MyNumberField60",
-                                                            "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colChargeUOM",
-                                                        "text": "UOM"
-                                                    },
-                                                    "name": "MyColumn45",
-                                                    "designerId": "98ed099e-cb6a-4d6e-9f30-aa13eb8e16ee",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intItemUOMId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Unit Of Measure Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strUnitMeasure',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Unit Measure',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strUnitType',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Unit Type',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\txtype: 'checkcolumn',",
-                                                                    "\t\tdataIndex: 'ysnStockUnit',",
-                                                                    "\t\tdataType: 'boolean',",
-                                                                    "\t\ttext: 'Stock Unit',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strUnitMeasure",
-                                                                "itemId": "cboChargeUOM",
-                                                                "valueField": "strUnitMeasure"
-                                                            },
-                                                            "name": "MyComboBox82",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "d108ae3d-55d8-4b59-8d67-e0c9595fa027",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Number",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "dataIndex": "dblAmount",
-                                                        "flex": 1,
-                                                        "format": "0,000.00####",
-                                                        "itemId": "colChargeAmount",
-                                                        "text": "Amount"
-                                                    },
-                                                    "name": "MyNumberColumn46",
-                                                    "designerId": "6f2f7675-ad09-49ce-b5c5-1f84bb703780",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Number",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "designer|createAlias": "numericfield",
-                                                                "modelValidation": true
-                                                            },
-                                                            "name": "MyNumberField61",
-                                                            "designerId": "2eeba050-620f-45cf-bce8-33840e54938d"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Check",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 0.7,
-                                                        "itemId": "colAccrue",
-                                                        "text": "Accrue"
-                                                    },
-                                                    "name": "MyCheck",
-                                                    "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "name": "MyCheckbox40",
-                                                            "designerId": "a5f086a9-b6da-494d-9cec-144ca0999d8c"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 2,
-                                                        "headerDrillDownClick": "onVendorHeaderClick",
-                                                        "headerDrillDownText": "Open Vendor",
-                                                        "itemId": "colCostVendor",
-                                                        "text": "Vendor"
-                                                    },
-                                                    "name": "MyColumn47",
-                                                    "designerId": "8fa09d01-4ad2-4906-8b40-26d1b9471f60",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "headerDrillDownClick",
-                                                            "type": "string"
                                                         },
                                                         {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "headerDrillDownText",
-                                                            "type": "string"
-                                                        }
-                                                    ],
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
+                                                            "type": "Ext.grid.column.Number",
                                                             "reference": {
-                                                                "name": "editor",
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": null,
+                                                                "format": "0,000.000000",
+                                                                "itemId": "colRate",
+                                                                "modelValidation": true,
+                                                                "text": "Rate"
+                                                            },
+                                                            "name": "MyNumberColumn45",
+                                                            "designerId": "238379ca-17ad-4da0-a364-1891c68233fe",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "numericfield",
+                                                                        "modelValidation": true
+                                                                    },
+                                                                    "name": "MyNumberField60",
+                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": null,
+                                                                "itemId": "colChargeUOM",
+                                                                "text": "UOM"
+                                                            },
+                                                            "name": "MyColumn45",
+                                                            "designerId": "98ed099e-cb6a-4d6e-9f30-aa13eb8e16ee",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intItemUOMId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Unit Of Measure Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Unit Measure',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strUnitType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Unit Type',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\txtype: 'checkcolumn',",
+                                                                            "\t\tdataIndex: 'ysnStockUnit',",
+                                                                            "\t\tdataType: 'boolean',",
+                                                                            "\t\ttext: 'Stock Unit',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strUnitMeasure",
+                                                                        "itemId": "cboChargeUOM",
+                                                                        "valueField": "strUnitMeasure"
+                                                                    },
+                                                                    "name": "MyComboBox82",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "d108ae3d-55d8-4b59-8d67-e0c9595fa027",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "dblAmount",
+                                                                "flex": null,
+                                                                "format": "0,000.00####",
+                                                                "itemId": "colChargeAmount",
+                                                                "text": "Amount"
+                                                            },
+                                                            "name": "MyNumberColumn46",
+                                                            "designerId": "6f2f7675-ad09-49ce-b5c5-1f84bb703780",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "numericfield",
+                                                                        "modelValidation": true
+                                                                    },
+                                                                    "name": "MyNumberField61",
+                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Check",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": null,
+                                                                "itemId": "colAccrue",
+                                                                "text": "Accrue",
+                                                                "width": 50
+                                                            },
+                                                            "name": "MyCheck",
+                                                            "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "name": "MyCheckbox40",
+                                                                    "designerId": "a5f086a9-b6da-494d-9cec-144ca0999d8c"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": null,
+                                                                "headerDrillDownClick": "onVendorHeaderClick",
+                                                                "headerDrillDownText": "Open Vendor",
+                                                                "itemId": "colCostVendor",
+                                                                "text": "Vendor"
+                                                            },
+                                                            "name": "MyColumn47",
+                                                            "designerId": "8fa09d01-4ad2-4906-8b40-26d1b9471f60",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownClick",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownText",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intEntityVendorId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Vendor Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strVendorId',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Vendor No',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strName',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Vendor Name',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strName",
+                                                                        "itemId": "cboCostVendor",
+                                                                        "valueField": "strName"
+                                                                    },
+                                                                    "name": "MyComboBox83",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "62fb327d-d2f9-4ca7-aa2d-67d8c9cd54d6",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Check",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": null,
+                                                                "itemId": "colInventoryCost",
+                                                                "text": "Inventory Cost",
+                                                                "width": 90
+                                                            },
+                                                            "name": "MyCheck8",
+                                                            "designerId": "fb289591-d8ec-4b4c-a3a5-1aa240c36f8a",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "name": "MyCheckbox33",
+                                                                    "designerId": "ea026dfa-cb33-4229-9f80-1845697f703d"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": null,
+                                                                "itemId": "colAllocateCostBy",
+                                                                "text": "Allocate Cost By"
+                                                            },
+                                                            "name": "MyColumn57",
+                                                            "designerId": "313f4cab-6a60-45c0-bf38-58d1fb28b7c8",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "        dataIndex: 'strDescription',",
+                                                                            "        dataType: 'string',",
+                                                                            "        text: 'Allocate Cost By',",
+                                                                            "        flex: 1",
+                                                                            "    }",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strDescription",
+                                                                        "itemId": "cboAllocateCostBy",
+                                                                        "valueField": "strDescription"
+                                                                    },
+                                                                    "name": "MyComboBox84",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "3c0bddb1-f948-4a92-9847-f75776dba50c",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Check",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": null,
+                                                                "itemId": "colPrice",
+                                                                "text": "Price Down",
+                                                                "width": 70
+                                                            },
+                                                            "name": "MyCheck5",
+                                                            "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "name": "MyCheckbox41",
+                                                                    "designerId": "e9588d15-d8e5-4963-ae13-302dd76eb483"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.View",
+                                                            "reference": {
+                                                                "name": "viewConfig",
                                                                 "type": "object"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intEntityVendorId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Vendor Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strVendorId',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Vendor No',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strName',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Vendor Name',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strName",
-                                                                "itemId": "cboCostVendor",
-                                                                "valueField": "strName"
+                                                                "itemId": "grvCharges"
                                                             },
-                                                            "name": "MyComboBox83",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "62fb327d-d2f9-4ca7-aa2d-67d8c9cd54d6",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Check",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1.2,
-                                                        "itemId": "colInventoryCost",
-                                                        "text": "Inventory Cost"
-                                                    },
-                                                    "name": "MyCheck8",
-                                                    "designerId": "fb289591-d8ec-4b4c-a3a5-1aa240c36f8a",
-                                                    "cn": [
+                                                            "name": "MyGridView41",
+                                                            "designerId": "35ec9921-8e71-403d-a2df-e935efd8b448"
+                                                        },
                                                         {
-                                                            "type": "Ext.form.field.Checkbox",
+                                                            "type": "Ext.grid.plugin.CellEditing",
                                                             "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
+                                                                "name": "plugins",
+                                                                "type": "array"
                                                             },
                                                             "codeClass": null,
-                                                            "name": "MyCheckbox33",
-                                                            "designerId": "ea026dfa-cb33-4229-9f80-1845697f703d"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1.2,
-                                                        "itemId": "colAllocateCostBy",
-                                                        "text": "Allocate Cost By"
-                                                    },
-                                                    "name": "MyColumn57",
-                                                    "designerId": "313f4cab-6a60-45c0-bf38-58d1fb28b7c8",
-                                                    "cn": [
+                                                            "userConfig": {
+                                                                "clicksToEdit": 1,
+                                                                "designer|displayName": "cepCharges",
+                                                                "pluginId": "cepCharges"
+                                                            },
+                                                            "name": "MyCellEditingPlugin22",
+                                                            "designerId": "d4d001eb-e5f6-4c8b-8e51-b6fe63af09e0"
+                                                        },
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
+                                                            "type": "Ext.selection.CheckboxModel",
                                                             "reference": {
-                                                                "name": "editor",
+                                                                "name": "selModel",
                                                                 "type": "object"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "        dataIndex: 'strDescription',",
-                                                                    "        dataType: 'string',",
-                                                                    "        text: 'Allocate Cost By',",
-                                                                    "        flex: 1",
-                                                                    "    }",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "itemId": "cboAllocateCostBy",
-                                                                "valueField": "strDescription"
+                                                                "allowDeselect": null,
+                                                                "mode": "SINGLE"
                                                             },
-                                                            "name": "MyComboBox84",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "3c0bddb1-f948-4a92-9847-f75776dba50c",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Check",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 0.7,
-                                                        "itemId": "colPrice",
-                                                        "text": "Price Down"
-                                                    },
-                                                    "name": "MyCheck5",
-                                                    "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514",
-                                                    "cn": [
+                                                            "name": "MyCheckboxSelectionModel12",
+                                                            "designerId": "e87981ce-4c10-408f-86a5-0ad0052c0bb2"
+                                                        },
                                                         {
-                                                            "type": "Ext.form.field.Checkbox",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "name": "MyCheckbox41",
-                                                            "designerId": "e9588d15-d8e5-4963-ae13-302dd76eb483"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.View",
-                                                    "reference": {
-                                                        "name": "viewConfig",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "grvCharges"
-                                                    },
-                                                    "name": "MyGridView41",
-                                                    "designerId": "35ec9921-8e71-403d-a2df-e935efd8b448"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.plugin.CellEditing",
-                                                    "reference": {
-                                                        "name": "plugins",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "clicksToEdit": 1,
-                                                        "designer|displayName": "cepCharges",
-                                                        "pluginId": "cepCharges"
-                                                    },
-                                                    "name": "MyCellEditingPlugin22",
-                                                    "designerId": "d4d001eb-e5f6-4c8b-8e51-b6fe63af09e0"
-                                                },
-                                                {
-                                                    "type": "Ext.selection.CheckboxModel",
-                                                    "reference": {
-                                                        "name": "selModel",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "allowDeselect": null,
-                                                        "mode": "SINGLE"
-                                                    },
-                                                    "name": "MyCheckboxSelectionModel12",
-                                                    "designerId": "e87981ce-4c10-408f-86a5-0ad0052c0bb2"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "dataIndex": "strTaxGroup",
-                                                        "itemId": "colChargeTaxGroup",
-                                                        "text": "Tax Group"
-                                                    },
-                                                    "name": "MyColumn52",
-                                                    "designerId": "24351ab0-a4bd-4321-adb9-115eb6957926",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
+                                                                "name": "columns",
+                                                                "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "{",
-                                                                    "dataIndex: 'intTaxGroupId',",
-                                                                    "dataType: 'numeric',",
-                                                                    "hidden: true",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strTaxGroup',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Tax Group',",
-                                                                    "flex: 1",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strDescription',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Description',",
-                                                                    "flex: 1",
-                                                                    "}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strTaxGroup",
-                                                                "itemId": "cboChargeTaxGroup",
-                                                                "valueField": "strTaxGroup"
+                                                                "dataIndex": "strTaxGroup",
+                                                                "itemId": "colChargeTaxGroup",
+                                                                "text": "Tax Group",
+                                                                "width": null
                                                             },
-                                                            "name": "MyComboBox24",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "398fde24-ff79-4931-ab26-04c957b7477a",
-                                                            "customConfigs": [
+                                                            "name": "MyColumn52",
+                                                            "designerId": "24351ab0-a4bd-4321-adb9-115eb6957926",
+                                                            "cn": [
                                                                 {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "{",
+                                                                            "dataIndex: 'intTaxGroupId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strTaxGroup',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Tax Group',",
+                                                                            "flex: 1",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strDescription',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Description',",
+                                                                            "flex: 1",
+                                                                            "}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strTaxGroup",
+                                                                        "itemId": "cboChargeTaxGroup",
+                                                                        "valueField": "strTaxGroup"
+                                                                    },
+                                                                    "name": "MyComboBox24",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "398fde24-ff79-4931-ab26-04c957b7477a",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "dblChargeTax",
+                                                                "itemId": "colChargeTax",
+                                                                "text": "Tax",
+                                                                "width": 85
+                                                            },
+                                                            "name": "MyNumberColumn58",
+                                                            "designerId": "cb6f6cd3-a68a-40db-8faf-6b51cd8294e7"
                                                         }
                                                     ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Number",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "dataIndex": "dblChargeTax",
-                                                        "itemId": "colChargeTax",
-                                                        "text": "Tax",
-                                                        "width": 85
-                                                    },
-                                                    "name": "MyNumberColumn58",
-                                                    "designerId": "cb6f6cd3-a68a-40db-8faf-6b51cd8294e7"
                                                 }
                                             ]
                                         },
