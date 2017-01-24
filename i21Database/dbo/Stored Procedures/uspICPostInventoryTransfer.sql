@@ -106,7 +106,11 @@ BEGIN
 		FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 			INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = ri.intOrderId
-		WHERE t.intInventoryTransferId = @intTransactionId
+			INNER JOIN tblICInventoryTransferDetail td ON td.intInventoryTransferId = t.intInventoryTransferId
+				AND td.intInventoryTransferDetailId = ri.intLineNo
+			INNER JOIN tblICItem i ON i.intItemId = td.intItemId
+		WHERE r.strReceiptType = 'Transfer Order'
+			AND t.intInventoryTransferId = @intTransactionId
 	)
 	BEGIN
 		DECLARE @TR VARCHAR(50)
