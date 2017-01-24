@@ -581,6 +581,51 @@ BEGIN
 					0
 	 from ssvndmst  where ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to and rtrim(ltrim(ssvnd_pay_to)) = @originVendor
 
+	 --INSERT Vendor Location to Origin Pay to Vendor		
+		INSERT [dbo].[tblEMEntityLocation]    
+		([intEntityId], 
+		 [strLocationName], 
+		 [strAddress], 
+		 [strCity], 
+		 [strCountry], 
+		 [strState], 
+		 [strZipCode], 
+		 [strNotes],  
+		 [intShipViaId], 
+		 [intTermsId], 
+		 [intWarehouseId], 
+		 [ysnDefaultLocation])
+		select 				
+					ENT.intEntityId, 
+					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+								END,'')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
+					dbo.fnTrim(ISNULL(ssvnd_addr_1,'')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'')),
+					ssvnd_city,
+					''United States'',
+					ssvnd_st,
+					dbo.fnTrim(ssvnd_zip),
+					NULL,
+					NULL,
+					CASE WHEN ssvnd_terms_disc_pct = 0 AND ssvnd_terms_due_day = 0
+							   AND ssvnd_terms_disc_day = 0 AND ssvnd_terms_cutoff_day = 0 THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'')
+							   WHEN ssvnd_terms_type = ''D'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
+															WHERE dblDiscountEP = ssvnd_terms_disc_pct
+															AND intBalanceDue = ssvnd_terms_due_day
+															AND intDiscountDay = ssvnd_terms_disc_day)
+											WHEN ssvnd_terms_type = ''P'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
+															WHERE intBalanceDue = ssvnd_terms_due_day
+															AND intDiscountDay = ssvnd_terms_disc_day
+															AND intDayofMonthDue = ssvnd_terms_cutoff_day)
+											ELSE (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') END,
+					NULL,
+					0
+	 from ssvndmst  
+	 inner join tblEMEntity ENT on ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
+	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
+	 where ssvnd_vnd_no = @originVendor and ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
+
 	 -- Enable ysnTransportTerminal for the Vendors with Transport Terminal
 	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityVendorId
       WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trhstmst
