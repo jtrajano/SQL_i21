@@ -99,6 +99,33 @@ BEGIN
 	GOTO Post_Exit  
 END
 
+-- Don't allow unpost when there's a receipt
+IF @ysnPost = 0
+BEGIN
+	IF EXISTS(SELECT TOP 1 1
+		FROM tblICInventoryReceipt r
+			INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+			INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = ri.intOrderId
+		WHERE t.intInventoryTransferId = @intTransactionId
+	)
+	BEGIN
+		DECLARE @TR VARCHAR(50)
+		DECLARE @R VARCHAR(50)
+		SELECT TOP 1 @TR = t.strTransferNo, @R = r.strReceiptNumber
+		FROM tblICInventoryReceipt r
+			INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+			INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = ri.intOrderId
+			INNER JOIN tblICInventoryTransferDetail td ON td.intInventoryTransferId = t.intInventoryTransferId
+				AND td.intInventoryTransferDetailId = ri.intLineNo
+			INNER JOIN tblICItem i ON i.intItemId = td.intItemId
+		WHERE r.strReceiptType = 'Transfer Order'
+			AND t.intInventoryTransferId = @intTransactionId
+
+		RAISERROR(80107, 11, 1, @TR, @R)
+	GOTO Post_Exit	
+	END
+END
+
 -- Check if all Items are available under the To Location
 SELECT TOP 1 
 		Detail.intItemId, 

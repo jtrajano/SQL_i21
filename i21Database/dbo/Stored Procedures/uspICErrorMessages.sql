@@ -503,3 +503,7 @@ EXEC sp_addmessage 80105,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80106) EXEC sp_dropmessage 80106, 'us_english'	
 SET @strmessage = 'Internal Error. The Adjust By Quantity is required to be a negative value.'
 EXEC sp_addmessage 80106,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80107) EXEC sp_dropmessage 80107, 'us_english'	
+SET @strmessage = 'Unable to unpost the Inventory Transfer. The %s already have a receipt. Please remove it from the receipt "%s"'
+EXEC sp_addmessage 80107,11,@strmessage,'us_english','False'
