@@ -45,8 +45,8 @@ AS
 			J.strComments,
 			U.strUOMCode
      FROM tblGLDetail AS A
-	 INNER JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
-	 INNER JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
+	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
+	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
 	 OUTER APPLY(
 		SELECT TOP 1 strComments, strDocument FROM tblGLJournalDetail WHERE intJournalDetailId = A.intJournalLineNo
 	 ) J
