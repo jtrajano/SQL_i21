@@ -45,17 +45,18 @@ SELECT e.strName,strContractNumber,
                                                                                                 WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ),0))
               as dblUnPriced
 
-              ,(SELECT 
+              ,(SELECT distinct
                dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, @intUnitMeasureId,ic.intUnitMeasureId,
-              (((isnull(detcd.dblNoOfLots,0) * SUM(dblFixationPrice) OVER (PARTITION BY det.intContractDetailId )  +
+              (((SUM(dblFixationPrice) OVER (PARTITION BY det.intContractDetailId )  * SUM(dblFixationPrice) OVER (PARTITION BY det.intContractDetailId )  +
                      (isnull(dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,getdate()),0)))
                      /cd.dblNoOfLots)+det.dblBasis)*
-                     dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cd.intUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) - isnull((SELECT dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cd.intUnitMeasureId, @intUnitMeasureId,ri.dblOpenReceive) 
-                                                                                                FROM tblICInventoryReturned r
-                                                                                                       JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
-                                                                                                       JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
-                                                                                                       JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
-                                                                                                WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ),0))/
+                     dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cd.intUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) 
+					 - isnull((SELECT dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cd.intUnitMeasureId, @intUnitMeasureId,ri.dblOpenReceive) 
+                                        FROM tblICInventoryReturned r
+                                                JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
+                                                JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
+                                                JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
+                                        WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ),0))/
                      case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
 
 
