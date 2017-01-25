@@ -126,7 +126,7 @@ BEGIN
 				NULL, -- [dtmShipDate]
 				NULL, --to do [intShipViaId]
 				agivc_po_no, --[strPONumber]
-				ISNULL(Term.intTermID,0),-- [intTermId]
+				ISNULL(Term.intTermID,1),-- [intTermId]
 				0,--[dblInvoiceSubtotal]
 				0,--[dblShipping]
 				0,--[dblTax]
