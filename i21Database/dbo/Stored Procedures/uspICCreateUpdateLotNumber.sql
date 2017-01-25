@@ -525,7 +525,7 @@ BEGIN
 														LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
-														AND ISNULL(LotMaster.intWeightUOMId, LotToUpdate.intWeightUOMId) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+														AND COALESCE(LotMaster.intWeightUOMId, LotToUpdate.intWeightUOMId, 0) = COALESCE(LotToUpdate.intWeightUOMId, 0)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 													) THEN 
@@ -542,7 +542,7 @@ BEGIN
 														LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
-														AND ISNULL(LotMaster.intWeightUOMId, LotToUpdate.intWeightUOMId) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+														AND COALESCE(LotMaster.intWeightUOMId, LotToUpdate.intWeightUOMId, 0) = COALESCE(LotToUpdate.intWeightUOMId, 0)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 													) THEN 
