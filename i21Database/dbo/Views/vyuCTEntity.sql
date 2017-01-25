@@ -16,6 +16,7 @@ AS
 					ELSE CAST(1 AS BIT)
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
+			CAST(ISNULL(V.intEntityVendorId	,0) AS BIT) ysnVendor,
 			L.intTermsId AS intTermId
 	FROM	tblEMEntity				E
 	JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
