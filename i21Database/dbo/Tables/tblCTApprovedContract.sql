@@ -16,6 +16,7 @@
 	[dtmEndDate] [datetime],
 	[dtmPlannedAvailabilityDate] [datetime],
 	[intItemId] [int],
+	strOrigin	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	[dblQuantity] [numeric](18, 6),
 	[intQtyUOMId] [int], -- From tblICUnitMeasure not tblICItemUOM
 	[intFutureMarketId] [int],

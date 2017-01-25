@@ -24,6 +24,7 @@
 	strERPBatchNumber		NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	intContractSeq			INT, --PO_ITEM 
 	strItemNo				NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
+	strOrigin				NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	strStorageLocation		NVARCHAR(50) COLLATE Latin1_General_CI_AS, --STGE_LOC 
 	dblQuantity				NUMERIC(18,6),
 	strQuantityUOM			NVARCHAR(50) COLLATE Latin1_General_CI_AS, --PO_UNIT

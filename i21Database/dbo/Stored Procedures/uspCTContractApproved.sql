@@ -20,7 +20,8 @@ BEGIN TRY
 			intFutureMarketId,		intFutureMonthId,		dblFutures,
 			dblBasis,				dblCashPrice,			intCurrencyId,
 			intPriceUOMId,			intSubLocationId,		intStorageLocationId,
-			intPurchasingGroupId,	intApprovedById,		dtmApproved
+			intPurchasingGroupId,	intApprovedById,		dtmApproved,
+			strOrigin
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -49,11 +50,16 @@ BEGIN TRY
 			CD.intStorageLocationId,
 			CD.intPurchasingGroupId,
 			@intApprovedById,
-			GETDATE()
+			GETDATE(),
+			OG.strCountry AS strOrigin
 
-	FROM	tblCTContractDetail CD 
-	JOIN	tblCTContractHeader CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
-	JOIN	tblICItemUOM		PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId
+	FROM	tblCTContractDetail		CD 
+	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
+	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId			LEFT
+	JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId	LEFT
+	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId			
+										AND	CA.strType					=	'Origin'				LEFT
+	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 
 	SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY

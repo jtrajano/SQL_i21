@@ -240,11 +240,12 @@ GO
 			WHERE strNamespace = 'Manufacturing.view.ProcessProductionConsume'
 		END
 
+	UPDATE tblSMScreen SET strNamespace = 'ContractManagement.view.ContractAmendments' WHERE strNamespace = 'ContractManagement.view.ContractAmendment'
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.ContractAmendment') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.ContractAmendments') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],[ysnApproval], [ysnActivity], [intConcurrencyId]) 
-			VALUES (N'Contract', N'Contract Amendment ', N'ContractManagement.view.ContractAmendment', N'Contract Management', N'tblCTContractHeader',  1,  1,  0)
+			VALUES (N'Contract', N'Contract Amendment ', N'ContractManagement.view.ContractAmendments', N'Contract Management', N'tblCTContractHeader',  1,  1,  0)
 		END
 	ELSE
 		BEGIN
@@ -252,7 +253,7 @@ GO
 			SET strTableName = 'tblCTContractHeader',
 				ysnApproval = 1,
 				ysnActivity = 1
-			WHERE strNamespace = 'ContractManagement.view.ContractAmendment'
+			WHERE strNamespace = 'ContractManagement.view.ContractAmendments'
 		END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
