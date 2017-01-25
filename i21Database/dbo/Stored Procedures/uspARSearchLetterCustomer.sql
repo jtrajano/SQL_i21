@@ -68,7 +68,7 @@ EXEC uspARCollectionOverdueDetailReport NULL, NULL, NULL
 
 
 DELETE FROM @temp_aging_table
-WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WHERE strType IN ('Card Fueling'))
+WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WHERE strType IN ('CF Tran'))
 
 DELETE FROM tblARCollectionOverdueDetail
 INSERT INTO tblARCollectionOverdueDetail

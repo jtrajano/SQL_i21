@@ -245,6 +245,17 @@ END
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
+DELETE 
+FROM 
+	@temp_statement_table
+WHERE 
+	strReferenceNumber IN (SELECT 
+								strInvoiceNumber 
+						   FROM 
+								tblARInvoice 
+					       WHERE 
+								strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
+
 INSERT INTO @temp_cf_table
 (
 	intInvoiceId
@@ -266,7 +277,12 @@ INNER JOIN
 		,CFT.strInvoiceReportNumber
 		,CFT.dtmInvoiceDate
 	FROM 
-		tblARInvoice ARI
+		(SELECT 
+			intInvoiceId
+			, strInvoiceNumber
+		FROM 
+			tblARInvoice
+		WHERE strType NOT IN ('CF Tran')) ARI
 	INNER JOIN
 		(SELECT 
 			intInvoiceId

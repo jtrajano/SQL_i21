@@ -584,6 +584,7 @@ GO
 UPDATE tblFRRowDesign SET strPercentage = strRelatedRows WHERE strRowType = 'Percentage'
 UPDATE tblFRRowDesign SET strRelatedRows = '' WHERE strRowType = 'Percentage'
 UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Percentage'
+UPDATE tblFRRowDesign SET strPercentage = '' WHERE strPercentage IS NULL
 
 GO
 	PRINT N'Set existing data (strRowType) value from Percentage to Filter Accounts with (strPercentage) = (strRelatedRows)'
