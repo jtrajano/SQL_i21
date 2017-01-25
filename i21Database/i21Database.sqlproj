@@ -4890,6 +4890,12 @@
     <Build Include="dbo\Tables\tblEMEntitySignature.sql" />
     <Build Include="dbo\Functions\fnICSplitStringToTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICCopyItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportVolumeDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportStockDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportStockClassification.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportRefundRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportPatronageCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportEstateCorporation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
