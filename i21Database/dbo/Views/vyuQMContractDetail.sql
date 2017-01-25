@@ -29,6 +29,7 @@ SELECT CD.intContractDetailId
 	,S.strContainerNumber
 	,S.strSampleTypeName
 	,ISNULL(S.ysnFinalApproval, 'false') AS ysnFinalApproval
+	,CD.intContractStatusId
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
