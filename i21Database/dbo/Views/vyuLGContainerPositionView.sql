@@ -22,7 +22,6 @@ SELECT * FROM (
 		,strPriceCurrency = CU.strCurrency
 		,dblSeqQuantity = SUM(CD.dblQuantity)
 		,dblContractQuantity = CH.dblQuantity
-		,strQuantityUOM = MAX(UM.strUnitMeasure)
 		,dblWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), CD.dblQuantity), 0))
 		,dblShippedWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(LoadDetail.intWeightItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), LoadDetail.dblNet), 0))
 		,intNoOfContainers = COUNT(CD.intContractDetailId)
@@ -37,7 +36,7 @@ SELECT * FROM (
 				AND Seq.intContractStatusId <> 5
 			)
 		,strRemarks = CH.strInternalComment
-		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, CD.dtmEndDate), 2)
+        ,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, MAX(CD.dtmEndDate)), 2)
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
@@ -87,10 +86,10 @@ SELECT * FROM (
 			,Seq.intContractHeaderId
 		) RSamp ON RSamp.intContractHeaderId = CH.intContractHeaderId
 		AND RSamp.intItemId = CD.intItemId
-	WHERE ISNULL(LC.ysnRejected, 0) = 0
-	GROUP BY CD.intItemId,I.strItemNo,I.strDescription,CH.strContractNumber,CH.intContractHeaderId
-		,CH.strCustomerContract,Pos.strPosition,EY.strName,CB.strDescription,PT.strPricingType
-		,U2.strUnitMeasure,CU.strCurrency,CH.dblQuantity,UM.strUnitMeasure,CD.intNetWeightUOMId
-		,Samp.intApprovalCount,RSamp.intApprovalCount,CH.strInternalComment,CD.dtmEndDate
-	) tbl
+        WHERE ISNULL(LC.ysnRejected, 0) = 0
+        GROUP BY CD.intItemId,I.strItemNo,I.strDescription,CH.strContractNumber,CH.intContractHeaderId
+                        ,CH.strCustomerContract,Pos.strPosition,EY.strName,CB.strDescription,PT.strPricingType
+                        ,U2.strUnitMeasure,CU.strCurrency,CH.dblQuantity
+                        ,Samp.intApprovalCount,RSamp.intApprovalCount,CH.strInternalComment
+        ) tbl
 WHERE intTrucksRemaining > 0 
