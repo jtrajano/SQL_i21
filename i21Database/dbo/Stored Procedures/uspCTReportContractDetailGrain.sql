@@ -9,7 +9,11 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	SELECT	strItemNo,dblDetailQuantity,
-			ISNULL(dblCashPrice,ISNULL(dblBasis,ISNULL(dblFutures,0)))	dblPrice,
+			CASE	WHEN intPricingTypeId IN (1,6)	THEN	ISNULL(dblCashPrice,0)
+					WHEN intPricingTypeId = 2		THEN	ISNULL(dblBasis,0)
+					WHEN intPricingTypeId = 3		THEN	ISNULL(dblCashPrice,0)
+					ELSE 0
+			END	dblPrice,
 			dtmStartDate,
 			dtmEndDate,
 			strPricingType,
