@@ -18,6 +18,7 @@ WITH	(HOLDLOCK)
 AS		SegmentTypeTable
 USING	(
 select id=1, name='Primary' union all
+select id=2, name='Divider' union all
 select id=3, name='Location' union all
 select id=4, name='Segment' union all
 select id=5, name='Line Of Business'
