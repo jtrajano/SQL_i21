@@ -98,6 +98,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			@InvoiceDate = @DateOnly,
 			@CompanyLocationId = @ComLocationId,
 			@EntityId = @UserId,
+			@RaiseError = 1,
 			@NewInvoiceId = @NewInvoiceId OUTPUT,
 			@ErrorMessage = @ErrorMessage OUTPUT,
 			@DocumentMaintenanceId = @DocumentMaintenanceId
