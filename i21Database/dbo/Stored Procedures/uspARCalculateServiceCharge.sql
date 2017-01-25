@@ -102,7 +102,7 @@ AS
 			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDate, NULL
 
 			DELETE FROM @temp_aging_table
-			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('Card Fueling'))
+			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('CF Tran'))
 		END
 
 	--PROCESS EACH CUSTOMER
