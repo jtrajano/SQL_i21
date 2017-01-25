@@ -14,7 +14,7 @@ BEGIN
 		VALUES( 1, ''Origin'',1)
 		SET IDENTITY_INSERT tblGLAccountSystem OFF
 	END
-
+	DELETE FROM dbo.tblGLCrossReferenceMapping WHERE intAccountId IS NULL
 	MERGE dbo.tblGLCrossReferenceMapping as map
 	USING dbo.tblGLCOACrossReference AS coa
 	ON map.intAccountId = coa.inti21Id
