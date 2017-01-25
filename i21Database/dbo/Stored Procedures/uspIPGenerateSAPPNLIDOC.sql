@@ -32,10 +32,10 @@ Declare @tblOutput AS Table
 	strXml NVARCHAR(MAX)
 )
 
-Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PO')
+Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PROFIT AND LOSS')
 Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
-Select @strCostCenter=dbo.[fnIPGetSAPIDOCTagValue]('PNL','COSTCENTER')
-Select @strGLAccount=dbo.[fnIPGetSAPIDOCTagValue]('PNL','GL_ACCOUNT')
+Select @strCostCenter=dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS','COSTCENTER')
+Select @strGLAccount=dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS','GL_ACCOUNT')
 
 Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where ISNULL(strStatus,'')=''
 

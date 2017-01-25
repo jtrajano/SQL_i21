@@ -116,7 +116,7 @@ Begin
 			+ '<LGORT>'  +  ISNULL(strStorageLocation,'') + '</LGORT>' 
 			+ '<CHARG>'  +  ISNULL(strContainerNo,'') + '</CHARG>' 
 			+ '<LFIMG>'  +  ISNULL(CONVERT(VARCHAR,dblQuantity),'') + '</LFIMG>' 
-			+ '<VRKME>'  +  ISNULL(strUOM,'') + '</VRKME>' 
+			+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(strUOM,'')) + '</VRKME>' 
 			+ '</E1EDL24>'
 		From @tblReceiptDetail
 	End
@@ -132,7 +132,7 @@ Begin
 			+ '<LGORT>'  +  ISNULL(strStorageLocation,'') + '</LGORT>' 
 			+ '<CHARG>'  +  ISNULL(strContainerNo,'') + '</CHARG>' 
 			+ '<LFIMG>'  +  ISNULL(CONVERT(VARCHAR,dblQuantity),'') + '</LFIMG>' 
-			+ '<VRKME>'  +  ISNULL(strUOM,'') + '</VRKME>' 
+			+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(strUOM,'')) + '</VRKME>' 
 			+ '</E1EDL24>'
 		From @tblReceiptDetail
 	End

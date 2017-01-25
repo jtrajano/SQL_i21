@@ -4896,6 +4896,8 @@
     <Build Include="dbo\Stored Procedures\uspPATImportRefundRate.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportPatronageCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportEstateCorporation.sql" />
+    <Build Include="dbo\Functions\fnIPConvertSAPUOMToi21.sql" />
+    <Build Include="dbo\Functions\fnIPConverti21UOMToSAP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -14,6 +14,8 @@ BEGIN TRY
 	DECLARE @strEntityName NVARCHAR(100)
 	DECLARE @intStageEntityId int
 
+	Set @strXml= REPLACE(@strXml,'utf-8','utf-16')
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 	,@strXml
 

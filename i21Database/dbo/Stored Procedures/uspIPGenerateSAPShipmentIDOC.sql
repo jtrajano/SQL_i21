@@ -67,8 +67,8 @@ Declare @tblOutput AS Table
 	strXml NVARCHAR(MAX)
 )
 
-Select @strInstructionIDOCHeader=dbo.fnIPGetSAPIDOCHeader('SHIPMENT INSTRUCTION')
-Select @strAdviceIDOCHeader=dbo.fnIPGetSAPIDOCHeader('SHIPMENT ADVICE')
+Select @strInstructionIDOCHeader=dbo.fnIPGetSAPIDOCHeader('SHIPMENT')
+Select @strAdviceIDOCHeader=dbo.fnIPGetSAPIDOCHeader('SHIPMENT')
 Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 
 --Shipping Instruction
@@ -147,7 +147,7 @@ Begin
 			@strStorageLocation			=	strStorageLocation,
 			@strContainerNo				=	strContainerNo,
 			@dblQuantity				=	dblQuantity,
-			@strUOM						=	strUOM,
+			@strUOM						=	dbo.fnIPConverti21UOMToSAP(strUOM),
 			@strPONo					=	strPONo,
 			@strPOLineItemNo			=	strPOLineItemNo,
 			@strShipItemRefNo			=	strShipItemRefNo
@@ -287,7 +287,7 @@ Begin
 			@strStorageLocation			=	strStorageLocation,
 			@strContainerNo				=	strContainerNo,
 			@dblQuantity				=	dblQuantity,
-			@strUOM						=	strUOM,
+			@strUOM						=	dbo.fnIPConverti21UOMToSAP(strUOM),
 			@strPONo					=	strPONo,
 			@strPOLineItemNo			=	strPOLineItemNo,
 			@strShipItemRefNo			=	strShipItemRefNo

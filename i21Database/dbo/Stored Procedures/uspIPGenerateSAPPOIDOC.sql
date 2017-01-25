@@ -90,7 +90,7 @@ Begin
 		@strItemNo					= strItemNo  ,
 		@strStorageLocation			= strStorageLocation , --STGE_LOC 
 		@dblQuantity				= dblQuantity,
-		@strQuantityUOM				= strQuantityUOM , --PO_UNIT
+		@strQuantityUOM				= dbo.fnIPConverti21UOMToSAP(strQuantityUOM) , --PO_UNIT
 		@dblCashPrice				= dblCashPrice, --NET_PRICE
 		@dblUnitCashPrice			= dblUnitCashPrice, --PRICE_UNIT 
 		@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate, --DELIVERY_DATE 
@@ -99,7 +99,7 @@ Begin
 		@dtmEndDate					= dtmEndDate, --VPER_END
 		@dblBasis					= dblBasis, --COND_VALUE,
 		@strCurrency				= strCurrency ,--CURRENCY 
-		@strPriceUOM				= strPriceUOM , --COND_UNIT 
+		@strPriceUOM				= dbo.fnIPConverti21UOMToSAP(strPriceUOM) , --COND_UNIT 
 		@strRowState				= strRowState ,
 		@strFeedStatus				= strFeedStatus
 	From tblCTContractFeed Where intContractFeedId=@intMinSeq
@@ -191,7 +191,7 @@ Begin
 		From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
 		Where cc.intContractDetailId=@intContractDetailId
 
-		Set @strXml += @strCertificates
+		Set @strXml += ISNULL(@strCertificates,'')
 
 		Set @strXml +=	'</E1PORDCR1>'
 
@@ -362,7 +362,7 @@ Begin
 		From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
 		Where cc.intContractDetailId=@intContractDetailId
 
-		Set @strXml += @strCertificates
+		Set @strXml += ISNULL(@strCertificates,'')
 
 		--CertificateX
 		Select @strCertificates=COALESCE(@strCertificates, '') 
@@ -373,7 +373,7 @@ Begin
 		From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
 		Where cc.intContractDetailId=@intContractDetailId
 
-		Set @strXml += @strCertificates
+		Set @strXml += ISNULL(@strCertificates,'')
 
 		Set @strXml +=	'</E1PORDCH>'
 
@@ -510,7 +510,7 @@ Begin
 			@strItemNo					= strItemNo  ,
 			@strStorageLocation			= strStorageLocation , --STGE_LOC 
 			@dblQuantity				= dblQuantity,
-			@strQuantityUOM				= strQuantityUOM , --PO_UNIT
+			@strQuantityUOM				= dbo.fnIPConverti21UOMToSAP(strQuantityUOM) , --PO_UNIT
 			@dblCashPrice				= dblCashPrice, --NET_PRICE
 			@dblUnitCashPrice			= dblUnitCashPrice, --PRICE_UNIT 
 			@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate, --DELIVERY_DATE 
@@ -519,7 +519,7 @@ Begin
 			@dtmEndDate					= dtmEndDate, --VPER_END
 			@dblBasis					= dblBasis, --COND_VALUE,
 			@strCurrency				= strCurrency ,--CURRENCY 
-			@strPriceUOM				= strPriceUOM , --COND_UNIT 
+			@strPriceUOM				= dbo.fnIPConverti21UOMToSAP(strPriceUOM) , --COND_UNIT 
 			@strRowState				= strRowState ,
 			@strFeedStatus				= strFeedStatus
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq

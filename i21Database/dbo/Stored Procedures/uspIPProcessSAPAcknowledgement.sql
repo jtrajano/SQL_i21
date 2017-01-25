@@ -26,6 +26,8 @@ DECLARE @strLineItemBatchNo NVARCHAR(50)
 DECLARE @strDeliveryItemNo NVARCHAR(50)
 DECLARE @intContractHeaderId INT
 
+Set @strXml= REPLACE(@strXml,'utf-8','utf-16')
+
 EXEC sp_xml_preparedocument @idoc OUTPUT
 ,@strXml
 

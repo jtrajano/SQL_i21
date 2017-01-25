@@ -37,7 +37,7 @@ Begin
 				@strPOItemNo=strPOItemNo,
 				@strItemNo=strItemNo,
 				@dblQuantity=dblQuantity,
-				@strUOM=strUOM,
+				@strUOM=dbo.fnIPConvertSAPUOMToi21(strUOM),
 				@strSampleNo=strSampleNo,
 				@strReferenceNo=strReferenceNo,
 				@strStatus=strStatus,
