@@ -69,7 +69,7 @@ DECLARE @temp_aging_table TABLE(
 )
 
 DECLARE @temp_statement_table TABLE(
-	 [strReferenceNumber]	 NVARCHAR(100)
+	 [strReferenceNumber]	 NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,[strTransactionType]	 NVARCHAR(100)
 	,[intEntityCustomerId]	 INT
 	,[dtmDueDate]			 DATETIME
@@ -213,6 +213,18 @@ END
 
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
+
+DELETE 
+FROM 
+	@temp_statement_table
+WHERE 
+	strReferenceNumber IN (SELECT 
+								strInvoiceNumber 
+						   FROM 
+								tblARInvoice 
+					       WHERE 
+								strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
+
 
 SELECT STATEMENTREPORT.strReferenceNumber
       ,STATEMENTREPORT.strTransactionType
