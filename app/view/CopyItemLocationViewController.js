@@ -37,14 +37,38 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
     },
 
     copyLocation: function(selectedItems, sourceItem) {
-        console.log(selectedItems);
-        console.log(sourceItem);
-        var context = this.getView().context;
-        context.data.saveRecord({
-            successFn: function() {
-                console.log(arguments);
+        var destinationItems = _.map(selectedItems, function(o) { return o.data; });
+        var destinationItemIds = _.map(destinationItems, function(r) { return r.intItemId; });
+        //destinationItemIds = _.filter(destinationItemIds, function(e) { return e !== sourceItem.get('intItemId'); });
+        if(destinationItemIds.length === 1 && destinationItemIds[0] === sourceItem.get('intItemId')) {
+            i21.functions.showCustomDialog('info', 'ok', 'Cannot copy locations when the source and destination items are the same.');    
+            return;
+        }
+        ic.utils.ajax({
+            url: '../Inventory/api/Item/CopyItemLocation',
+            params: {
+                intSourceItemId: sourceItem.get('intItemId'),
+                strDestinationItemIds: destinationItemIds.join()
+            },
+            method: 'post'
+        })
+        .subscribe(
+            function(successResponse) {
+                var json = JSON.parse(successResponse.responseText);
+                if(json.success) {
+                    i21.functions.showCustomDialog('info', 'ok', 'Location(s) copied successfully.');   
+                } else {
+                    i21.functions.showCustomDialog('error', 'ok', json.message.statusText);   
+                }
+            },
+            function(failedResponse) {
+                var json = JSON.parse(successResponse.responseText);
+                if(json.success)
+                    i21.functions.showCustomDialog('error', 'ok', json.message.statusText);
+                else
+                    i21.functions.showCustomDialog('error', 'ok', json.Message);
             }
-        });
+        );
     },
 
     setupContext: function(config) {

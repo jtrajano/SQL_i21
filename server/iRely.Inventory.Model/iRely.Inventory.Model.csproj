@@ -276,6 +276,7 @@
     <Compile Include="Metadata\tblSMCompanyLocationPricingLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\ConvertToStockUnit.cs" />
+    <Compile Include="Stored Procedures\CopyItemLocation.cs" />
     <Compile Include="Stored Procedures\DuplicateCategory.cs" />
     <Compile Include="Stored Procedures\LockInventory.cs" />
     <Compile Include="Stored Procedures\DuplicateItem.cs" />

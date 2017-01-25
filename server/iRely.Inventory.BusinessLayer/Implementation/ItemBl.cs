@@ -980,6 +980,24 @@ namespace iRely.Inventory.BusinessLayer
             return saveResult;
         }
 
+        public SaveResult CopyItemLocation(int intSourceItemId, string strDestinationItemIds)
+        {
+            var result = new SaveResult();
+            try
+            {
+                var db = (InventoryEntities)_db.ContextManager;
+                db.CopyItemLocation(intSourceItemId, strDestinationItemIds);
+                result = _db.Save(false);
+                result.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                result.BaseException = ex;
+                result.HasError = true;
+                result.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return result;
+        }
 
         public SaveResult ConvertItemToNewStockUnit(int ItemId, int ItemUOMId)
         {

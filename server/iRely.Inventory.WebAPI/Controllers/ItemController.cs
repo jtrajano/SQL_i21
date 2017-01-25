@@ -167,6 +167,29 @@ namespace iRely.Inventory.WebApi
             });
         }
 
+        public struct CopyItemLocationParam
+        {
+            public int intSourceItemId { get; set; }
+            public string strDestinationItemIds { get; set; }
+        }
+
+        [HttpPost]
+        [ActionName("CopyItemLocation")]
+        public HttpResponseMessage CopyItemLocation(CopyItemLocationParam param)
+        {
+            var result = _bl.CopyItemLocation(param.intSourceItemId, param.strDestinationItemIds);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
 
         [HttpPost]
         [ActionName("ConvertItemToNewStockUnit")]

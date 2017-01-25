@@ -105,8 +105,8 @@ Ext.define('Inventory.view.CopyItemLocation', {
                                         },
                                         {
                                             xtype: 'gridcolumn',
-                                            dataIndex: 'strItemNo',
                                             itemId: 'colStrItemNo',
+                                            dataIndex: 'strItemNo',
                                             text: 'Item No',
                                             flex: 1
                                         },
@@ -160,7 +160,7 @@ Ext.define('Inventory.view.CopyItemLocation', {
                                                     reference: 'cboItem',
                                                     itemId: 'cboItem',
                                                     width: 402,
-                                                    fieldLabel: 'Copy Location From Item',
+                                                    fieldLabel: 'Copy Location(s) from',
                                                     labelWidth: 150,
                                                     displayField: 'strItemNo',
                                                     valueField: 'intItemId'
