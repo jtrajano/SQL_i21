@@ -600,8 +600,8 @@ BEGIN
 					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
 						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
 									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-								END,'')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
-					dbo.fnTrim(ISNULL(ssvnd_addr_1,'')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'')),
+								END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
+					dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
 					ssvnd_city,
 					''United States'',
 					ssvnd_st,
