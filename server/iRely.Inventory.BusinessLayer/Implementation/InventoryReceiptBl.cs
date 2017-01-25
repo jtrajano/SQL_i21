@@ -723,7 +723,7 @@ namespace iRely.Inventory.BusinessLayer
             {
                 data = data.AsQueryable(),
                 total = await query.CountAsync(),
-                summaryData = query.ToAggregate(param.aggregates)
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 

@@ -1290,11 +1290,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 if (current.dummy) {
                     vm.data.currentShipmentItem = null;
                 }
-                else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual'){
-                    vm.data.currentShipmentItem = current;
+                else if (current.get('strLotTracking') === 'No'){                    
+                    vm.data.currentShipmentItem = null;
                 }
                 else {
-                    vm.data.currentShipmentItem = null;
+                    vm.data.currentShipmentItem = current;
                 }
             }
             else {

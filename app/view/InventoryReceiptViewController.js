@@ -114,10 +114,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', drillDownText: 'View Source', drillDownClick: 'onViewSource'},
                         { dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string' },
 
-                        { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float' },
-                        { xtype: 'numbercolumn', format: '0,000.000##', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float' },
-                        { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float' },
-                        { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', flex: 1, dataType: 'float' },
+                        { dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float' },
+                        { xtype: 'numbercolumn', format: '0,000.000##', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.000##' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
+                        { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', flex: 1, dataType: 'float', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
 
                         { dataIndex: 'strCostUOM', text: 'Cost UOM', flex: 1, dataType: 'string', hidden: true },
                         { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
@@ -210,7 +210,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strOrderNumber', text: 'Order No', flex: 1, dataType: 'string' },
                         { dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
                         { dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        { dataIndex: 'dblQtyToReceive', text: 'Qty Received', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblQtyToReceive', text: 'Qty Received', flex: 1, dataType: 'float'},
                         { dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
                         { dataIndex: 'dblQtyVouchered', text: 'Qty Vouchered', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
                         { dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
@@ -426,10 +426,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{current.ysnPosted}',
                 disabled: '{isOriginOrInventoryReturn}'
             },
-            // lblWeightLossMsg: {
-            //     text: '{getWeightLossText}'
-            // },
-            // txtWeightLossMsgValue: '{current.strVessel}',
             grdInventoryReceipt: {
                 readOnly: '{readOnlyReceiptItemGrid}',
                 colOrderNumber: {
@@ -1290,7 +1286,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     updateWeightLossText: function(window, clear, weightLoss) {
         if(clear) {
             window.down("#txtWeightLossMsgValue").setValue("");
-            window.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
         } else {
             window.down("#txtWeightLossMsgValue").setValue(Ext.util.Format.number(weightLoss, '0,000.00'));
 
@@ -1306,7 +1301,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     createRecord: function (config, action) {
         var win = config.window;
         win.down("#txtWeightLossMsgValue").setValue("");
-        win.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
         
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');

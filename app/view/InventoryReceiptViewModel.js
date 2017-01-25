@@ -937,6 +937,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
 
             var posted = get('current.ysnPosted');
             return !posted; 
-        }
+       }
     }
 });
