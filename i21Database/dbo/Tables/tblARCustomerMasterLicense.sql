@@ -9,5 +9,5 @@
 	[ysnAcvite] BIT DEFAULT(0),
 	[intConcurrencyId] INT NOT NULL DEFAULT(0),
     CONSTRAINT [FK_tblARCustomerMasterLicense_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblARCustomerMasterLicense_tblSMLicenseType] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblSMLicenseType] ([intLicenseTypeId]),
+    CONSTRAINT [FK_tblARCustomerMasterLicense_tblSMLicenseType] FOREIGN KEY ([intLicenseTypeId]) REFERENCES [dbo].[tblSMLicenseType] ([intLicenseTypeId]),
 )
