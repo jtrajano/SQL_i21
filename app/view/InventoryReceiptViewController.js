@@ -109,7 +109,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
                         { dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
-                        { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
+                        { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string'},
                         { dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string', drillDownText: 'View Order', drillDownClick: 'onViewOrder'},
                         { dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', drillDownText: 'View Source', drillDownClick: 'onViewSource'},
                         { dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string' },
@@ -169,7 +169,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
                         { dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
-                        { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
+                        { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string'},
 
                         { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
                         { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
@@ -1803,7 +1803,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('dblWeightUOMConvFactor', 0);
             }
 
-            if (records[0].get('strLotTracking') === 'No') {
+            if (!!records[0].get('strLotTracking') && records[0].get('strLotTracking') === 'No') {
                 current.set('intWeightUOMId', null);
                 current.set('strWeightUOM', null);
             }
@@ -1965,9 +1965,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var pnlLotTracking = win.down("#pnlLotTracking");
 
         //if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
-        if (current.get('strLotTracking') === 'No') {            
+        if (!!current.get('strLotTracking') && current.get('strLotTracking') == 'No'){
             pnlLotTracking.setVisible(false);
-        } 
+        }
         else {
             pnlLotTracking.setVisible(true);
         }
@@ -4809,33 +4809,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         };
     },
 
-    onSpecialKeyTab: function (component, e, eOpts) {
-        var win = component.up('window');
-        if (win) {
-            if (e.getKey() === Ext.event.Event.TAB) {
-                var gridObj = win.query('#grdInventoryReceipt')[0],
-                    sel = gridObj.getStore().getAt(0);
+    // onSpecialKeyTab: function (component, e, eOpts) {
+    //     var win = component.up('window');
+    //     if (win) {
+    //         if (e.getKey() === Ext.event.Event.TAB) {
+    //             var gridObj = win.query('#grdInventoryReceipt')[0],
+    //                 sel = gridObj.getStore().getAt(0);
 
-                if (sel && gridObj) {
-                    gridObj.setSelection(sel);
+    //             if (sel && gridObj) {
+    //                 gridObj.setSelection(sel);
 
-                    var column = 1;
-                    if (win.viewModel.data.current.get('strReceiptType') === 'Direct') {
-                        column = 2
-                    }
+    //                 var column = 1;
+    //                 if (win.viewModel.data.current.get('strReceiptType') === 'Direct') {
+    //                     column = 2
+    //                 }
 
-                    var task = new Ext.util.DelayedTask(function () {
-                        gridObj.plugins[0].startEditByPosition({
-                            row: 0,
-                            column: column
-                        });
-                    });
+    //                 var task = new Ext.util.DelayedTask(function () {
+    //                     gridObj.plugins[0].startEditByPosition({
+    //                         row: 0,
+    //                         column: column
+    //                     });
+    //                 });
 
-                    task.delay(10);
-                }
-            }
-        }
-    },
+    //                 task.delay(10);
+    //             }
+    //         }
+    //     }
+    // },
 
     onItemSelectionChange: function (selModel, selected, eOpts) {
         if (selModel) {
@@ -4859,24 +4859,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     vm.data.currentReceiptItem = null;
                     pnlLotTracking.setVisible(false);
                 }
-                else if (current.get('strLotTracking') === 'No') {
+                else if (!!current.get('strLotTracking') && current.get('strLotTracking') == 'No'){
                     pnlLotTracking.setVisible(false);
                     vm.data.currentReceiptItem = null;
                 }
                 else {
                     vm.data.currentReceiptItem = current;
                     pnlLotTracking.setVisible(true);
-                }
+                }               
 
-                // else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
-                //     vm.data.currentReceiptItem = current;
-                //     pnlLotTracking.setVisible(true);
-                // }
-                // else {
-                //     pnlLotTracking.setVisible(false);
-                //     vm.data.currentReceiptItem = null;
-                // }
-                
                 if(!current.phantom && !current.dirty) {
                     win.down("#grdLotTracking").setLoading("Loading lots...");
                     current.tblICInventoryReceiptItemLots().load({
@@ -5306,7 +5297,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             });
                         }
 
-                        if (order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
+                        if (!!order.get('strLotTracking') && order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
                             //Set default value for Gross/Net UOM
                             newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
                             newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
@@ -6254,7 +6245,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         iRely.Functions.showCustomDialog('question','yesno','Do you want to return this inventory receipt?', buttonAction);         
-    },        
+    },
+
+    onSpecialKeyTab: function(component, e, eOpts) {
+        var win = component.up('window');
+        if(win) {
+            if (e.getKey() === Ext.event.Event.TAB) {
+                var gridObj = win.down('#grdInventoryReceipt'),
+                    sel = gridObj.getStore().getAt(0);
+                    
+                if (sel && gridObj) {
+                    gridObj.setSelection(sel);
+                    var cepItem = gridObj.getPlugin('cepItem');
+                    if (cepItem){
+                        var task = new Ext.util.DelayedTask(function () {
+                            cepItem.startEditByPosition({row: 0, column: 1});
+                        });
+                        task.delay(10);
+                    }
+                }
+            }
+        }
+    },    
 
     init: function (application) {
         this.control({
@@ -6486,7 +6498,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboCostVendor": {
                 select: this.onChargeSelect
-            },
+            }
         })
     }
 

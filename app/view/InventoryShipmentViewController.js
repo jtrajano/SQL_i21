@@ -99,7 +99,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
-                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string'},
 
                         {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string'},
                         {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string'},
@@ -126,7 +126,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
-                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string'},
                         {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string', hidden: true },
                         {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', hidden: true },
                         {dataIndex: 'strUnitMeasure', text: 'Ship UOM', flex: 1, dataType: 'string', hidden: true },
@@ -1054,7 +1054,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             return;
 
         var win = combo.up('window');
-        var grdLotTracking = win.down('#grdLotTracking');
+        var pnlLotTracking = win.down('#pnlLotTracking');
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
@@ -1081,15 +1081,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
-                    switch(records[0].get('strLotTracking')) {
-                        case 'Yes - Serial Number':
-                        case 'Yes - Manual':
-                            grdLotTracking.setHidden(false);
-                            break;
-                        default:
-                            grdLotTracking.setHidden(true);
-                            break;
+                    if (!!records[0].get('strLotTracking') && records[0].get('strLotTracking') === 'No'){
+                        pnlLotTracking.setHidden(true);
                     }
+                    else {
+                        pnlLotTracking.setHidden(false);
+                    }
+
                     break;
                 case 2:
                     current.set('intOrderId', records[0].get('intSalesOrderId'));
@@ -1108,15 +1106,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
-                    switch(records[0].get('strLotTracking')) {
-                        case 'Yes - Serial Number':
-                        case 'Yes - Manual':
-                            grdLotTracking.setHidden(false);
-                            break;
-                        default:
-                            grdLotTracking.setHidden(true);
-                            break;
+                    if (!!records[0].get('strLotTracking') && records[0].get('strLotTracking') === 'No'){
+                        pnlLotTracking.setHidden(true);
                     }
+                    else {
+                        pnlLotTracking.setHidden(false);
+                    }                    
                     break;
                 case 3:
 
@@ -1142,7 +1137,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        var grdLotTracking = win.down('#grdLotTracking');
+        var pnlLotTracking = win.down('#pnlLotTracking');
         
         if (combo.itemId === 'cboItemNo') {
             current.set('intItemId', records[0].get('intItemId'));
@@ -1162,15 +1157,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
             current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
             
-            switch(records[0].get('strLotTracking')) {
-                        case 'Yes - Serial Number':
-                        case 'Yes - Manual':
-                            grdLotTracking.setHidden(false);
-                            break;
-                        default:
-                            grdLotTracking.setHidden(true);
-                            break;
-                    }
+            if (!!records[0].get('strLotTracking') && records[0].get('strLotTracking') === 'No'){
+                pnlLotTracking.setHidden(true);
+            }
+            else {
+                pnlLotTracking.setHidden(false);
+            }                    
                     
         }
         else if (combo.itemId === 'cboUOM') {
@@ -1283,14 +1275,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 return;
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
-            var grdLotTracking = win.down('#grdLotTracking');
+            var pnlLotTracking = win.down('#pnlLotTracking');
 
             if (selected.length > 0) {
                 var current = selected[0];
                 if (current.dummy) {
                     vm.data.currentShipmentItem = null;
                 }
-                else if (current.get('strLotTracking') === 'No'){                    
+                else if (!!current.get('strLotTracking') && current.get('strLotTracking') === 'No'){                    
                     vm.data.currentShipmentItem = null;
                 }
                 else {
@@ -1301,10 +1293,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 vm.data.currentShipmentItem = null;
             }
             if (vm.data.currentShipmentItem !== null){
-                grdLotTracking.setHidden(false);
+                pnlLotTracking.setHidden(false);
             }
             else {
-                grdLotTracking.setHidden(true);
+                pnlLotTracking.setHidden(true);
             }
 
         }
@@ -2774,6 +2766,89 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onItemHeaderClick: function (menu, column) {
+        // var grid = column.initOwnerCt.grid; 
+        var grid = column.$initParent.grid;
+
+        if (grid.itemId === 'grdInventoryShipment') {
+            i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intChargeId');
+        }
+    },    
+
+    onVendorHeaderClick: function (menu, column) {
+        // var grid = column.initOwnerCt.grid;
+        var grid = column.$initParent.grid;
+
+        if (grid.itemId === 'grdCharges') {
+            var selectedObj = grid.getSelectionModel().getSelection();
+            var vendorId = '';
+
+            if (selectedObj.length == 0) {
+                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
+            }
+
+            else {
+                for (var x = 0; x < selectedObj.length; x++) {
+                    vendorId += selectedObj[x].data.intEntityVendorId + '|^|';
+                }
+
+                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+                    filters: [{
+                        column: 'intEntityId',
+                        value: vendorId
+                    }]
+                });
+            }
+        }
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityVendor', grid, 'intEntityVendorId');
+        if (grid.itemId === 'grdCharges') {
+            var selectedObj = grid.getSelectionModel().getSelection();
+            var vendorId = '';
+
+            if (selectedObj.length == 0) {
+                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
+            }
+
+            else {
+                for (var x = 0; x < selectedObj.length; x++) {
+                    vendorId += selectedObj[x].data.intEntityVendorId + '|^|';
+                }
+
+                iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+                    filters: [{
+                        column: 'intEntityId',
+                        value: vendorId
+                    }]
+                });
+            }
+        }
+    },   
+
+    onSpecialKeyTab: function(component, e, eOpts) {
+        var win = component.up('window');
+        if(win) {
+            if (e.getKey() === Ext.event.Event.TAB) {
+                var gridObj = win.down('#grdInventoryShipment'),
+                    sel = gridObj.getStore().getAt(0);
+                    
+                if (sel && gridObj) {
+                    gridObj.setSelection(sel);
+                    var cepItem = gridObj.getPlugin('cepItem');
+                    if (cepItem){
+                        var task = new Ext.util.DelayedTask(function () {
+                            cepItem.startEditByPosition({row: 0, column: 1});
+                        });
+                        task.delay(10);
+                    }
+                }
+            }
+        }
+    },      
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -2873,7 +2948,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#colAccrue": {
                 beforecheckchange: this.onAccrueCheckChange
-            }
+            },
+            "#txtComments": {
+                specialKey: this.onSpecialKeyTab
+            }            
         })
     }
 

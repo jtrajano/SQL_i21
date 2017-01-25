@@ -813,7 +813,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         },
                                                                                         items: [
                                                                                             {
-                                                                                                xtype: 'textfield',
+                                                                                                xtype: 'numberfield',
                                                                                                 tabIndex: -1,
                                                                                                 itemId: 'txtWeightLossMsgValue',
                                                                                                 fieldLabel: 'Wgt or Vol Gain/Loss:',
@@ -1013,7 +1013,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 headerDrillDownClick: 'onItemHeaderClick',
-                                                                                headerDrillDownText: 'Open Item',
+                                                                                headerDrillDownText: 'Open',
                                                                                 itemId: 'colItemNo',
                                                                                 width: 100,
                                                                                 dataIndex: 'strItemNo',
@@ -1140,8 +1140,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                headerDrillDownText: 'Open Item',
-                                                                                headerDrillDownClick: 'onItemHeaderClick',
                                                                                 itemId: 'colDescription',
                                                                                 width: 175,
                                                                                 dataIndex: 'strDescription',
@@ -2377,7 +2375,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        headerDrillDownText: 'Open Item',
+                                                                        headerDrillDownText: 'Open',
                                                                         headerDrillDownClick: 'onItemHeaderClick',
                                                                         itemId: 'colOtherCharge',
                                                                         text: 'Other Charges',
@@ -2549,7 +2547,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         headerDrillDownClick: 'onVendorHeaderClick',
-                                                                        headerDrillDownText: 'Open Vendor',
+                                                                        headerDrillDownText: 'Open',
                                                                         itemId: 'colCostVendor',
                                                                         text: 'Vendor',
                                                                         editor: {

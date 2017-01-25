@@ -27,6 +27,7 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.form.field.Date',
         'Ext.form.field.TextArea',
         'Ext.grid.Panel',
+        'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
         'Ext.form.field.Number',
@@ -371,6 +372,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
+                                                                tabIndex: -1,
                                                                 itemId: 'txtShipmentNo',
                                                                 fieldLabel: 'Shipment No',
                                                                 labelAlign: 'top',
@@ -757,19 +759,22 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 ]
                                             },
                                             {
-                                                xtype: 'tabpanel',
-                                                flex: 2,
+                                                xtype: 'container',
+                                                flex: 1,
+                                                border: 1,
                                                 itemId: 'tabItemLot',
                                                 margin: '5 0 0 0',
-                                                bodyCls: 'i21-tab',
-                                                activeTab: 0,
-                                                plain: true,
+                                                layout: {
+                                                    type: 'vbox',
+                                                    align: 'stretch'
+                                                },
                                                 items: [
                                                     {
-                                                        xtype: 'panel',
-                                                        title: 'Items',
+                                                        xtype: 'container',
+                                                        flex: 3,
+                                                        border: 1,
                                                         layout: {
-                                                            type: 'vbox',
+                                                            type: 'hbox',
                                                             align: 'stretch'
                                                         },
                                                         items: [
@@ -778,24 +783,39 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 flex: 2,
                                                                 reference: 'grdInventoryShipment',
                                                                 itemId: 'grdInventoryShipment',
-                                                                margin: -1,
+                                                                margin: '7 0 0 0',
                                                                 columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        border: 1,
                                                                         itemId: 'tlbToolbarGrid',
+                                                                        weight: 1,
                                                                         layout: {
                                                                             type: 'hbox',
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
                                                                             {
+                                                                                xtype: 'label',
+                                                                                margin: '0 7 0 5',
+                                                                                style: 'font-weight: bold;',
+                                                                                text: 'Items'
+                                                                            },
+                                                                            {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertItem',
                                                                                 iconCls: 'small-insert',
                                                                                 text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnRemoveItem',
+                                                                                iconCls: 'small-remove',
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
@@ -807,23 +827,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
-                                                                                itemId: 'btnViewItem',
-                                                                                iconCls: 'small-open',
-                                                                                text: 'View Item'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
                                                                                 itemId: 'btnQuality',
                                                                                 iconCls: 'small-open',
                                                                                 text: 'Quality'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnRemoveItem',
-                                                                                iconCls: 'small-remove',
-                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -940,6 +946,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        headerDrillDownText: 'Open',
+                                                                        headerDrillDownClick: 'onItemHeaderClick',
                                                                         itemId: 'colItemNumber',
                                                                         width: 100,
                                                                         dataIndex: 'strItemNumber',
@@ -1442,14 +1450,25 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 viewConfig: {
                                                                     itemId: 'grvInventoryShipment'
                                                                 }
-                                                            },
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 2,
+                                                        hidden: true,
+                                                        itemId: 'pnlLotTracking',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 1,
                                                                 reference: 'grdLotTracking',
-                                                                hidden: true,
                                                                 itemId: 'grdLotTracking',
-                                                                margin: -1,
+                                                                margin: '7 0 0 0',
                                                                 columnLines: true,
                                                                 dockedItems: [
                                                                     {
@@ -1461,6 +1480,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
+                                                                            {
+                                                                                xtype: 'label',
+                                                                                margin: '0 7 0 5',
+                                                                                style: 'font-weight: bold;',
+                                                                                text: 'Lot Tracking'
+                                                                            },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
@@ -1665,105 +1690,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 }
                                                             }
                                                         ]
-                                                    },
-                                                    {
-                                                        xtype: 'panel',
-                                                        layout: 'fit',
-                                                        title: 'Split Lots',
-                                                        tabConfig: {
-                                                            xtype: 'tab',
-                                                            hidden: true
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'advancefiltergrid',
-                                                                reference: 'grdLotSplit',
-                                                                itemId: 'grdLotSplit',
-                                                                margin: -1,
-                                                                columnLines: true,
-                                                                dockedItems: [
-                                                                    {
-                                                                        xtype: 'toolbar',
-                                                                        dock: 'top',
-                                                                        itemId: 'tlbToolbarGrid',
-                                                                        layout: {
-                                                                            type: 'hbox',
-                                                                            padding: '0 0 0 1'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnRemoveSplit',
-                                                                                iconCls: 'small-remove',
-                                                                                text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'filter1'
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ],
-                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                                    selType: 'checkboxmodel'
-                                                                }),
-                                                                columns: [
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colNewLotID',
-                                                                        width: 100,
-                                                                        dataIndex: 'strNewLotID',
-                                                                        text: 'New Lot ID',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        dataType: 'numeric',
-                                                                        itemId: 'colQuantity',
-                                                                        width: 80,
-                                                                        align: 'right',
-                                                                        dataIndex: 'dblQuantity',
-                                                                        text: 'Quantity',
-                                                                        flex: 1,
-                                                                        format: '0,000.##'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colLotID',
-                                                                        width: 100,
-                                                                        dataIndex: 'strLotID',
-                                                                        text: 'Lot ID',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        dataType: 'numeric',
-                                                                        itemId: 'colBalanceQuantity',
-                                                                        width: 111,
-                                                                        align: 'right',
-                                                                        dataIndex: 'dblBalanceQuantity',
-                                                                        text: 'Balance Quantity',
-                                                                        format: '0,000.##'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colUOM',
-                                                                        width: 75,
-                                                                        dataIndex: 'strUOM',
-                                                                        text: 'UOM',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                plugins: [
-                                                                    Ext.create('Ext.grid.plugin.CellEditing', {
-                                                                        clicksToEdit: 1
-                                                                    })
-                                                                ],
-                                                                viewConfig: {
-                                                                    itemId: 'grvLotSplit'
-                                                                }
-                                                            }
-                                                        ]
                                                     }
                                                 ]
                                             }
@@ -1784,7 +1710,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 flex: 1,
                                                 reference: 'grdCharges',
                                                 itemId: 'grdCharges',
-                                                title: 'Charges',
+                                                margin: '7 0 0 0',
                                                 columnLines: true,
                                                 dockedItems: [
                                                     {
@@ -1796,6 +1722,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             padding: '0 0 0 1'
                                                         },
                                                         items: [
+                                                            {
+                                                                xtype: 'label',
+                                                                margin: '0 7 0 5',
+                                                                style: 'font-weight: bold;',
+                                                                text: 'Charges'
+                                                            },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
@@ -1853,6 +1785,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownClick: 'onItemHeaderClick',
+                                                        headerDrillDownText: 'Open',
                                                         itemId: 'colOtherCharge',
                                                         text: 'Other Charges',
                                                         flex: 1,
@@ -2018,6 +1952,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownText: 'Open',
+                                                        headerDrillDownClick: 'onVendorHeaderClick',
                                                         itemId: 'colCostVendor',
                                                         text: 'Vendor',
                                                         flex: 1,
