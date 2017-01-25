@@ -87,7 +87,7 @@ BEGIN
 	BEGIN
 		SELECT @intCategoryId = intCategoryId
 		FROM dbo.tblICItem
-		WHERE intCategoryId = @intCategoryId
+		WHERE intItemId = @intItemId
 	END
 
 	INSERT INTO @tblMFPatternDetail (
