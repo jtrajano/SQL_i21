@@ -305,6 +305,48 @@
 	BEGIN
 		SET @Sucess = 0
 		SET @Message = 'There is a discrepancy on Term records.'
+		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
+		 BEGIN
+			INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT DISTINCT (CAST(Cast(agivc_terms_code AS INTEGER) AS VARCHAR)) 
+				,'Term'
+				,'Term code Missing in i21'
+				,@UserId
+				,@logDate
+				,@key  
+			FROM agivcmst WHERE agivc_terms_code  IS NOT NULL AND CAST(Cast(agivc_terms_code AS INTEGER) AS VARCHAR) COLLATE SQL_Latin1_General_CP1_CS_AS 
+			NOT IN (select strTermCode SQL_Latin1_General_CP1_CS_AS from tblSMTerm)
+		 END
+
+		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
+		 BEGIN
+			INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT DISTINCT (CAST(Cast(ptivc_terms_code AS INTEGER) AS VARCHAR)) 
+				,'Term'
+				,'Term code Missing in i21'
+				,@UserId
+				,@logDate
+				,@key  
+			FROM ptivcmst WHERE ptivc_terms_code  IS NOT NULL AND CAST(Cast(ptivc_terms_code AS INTEGER) AS VARCHAR) COLLATE SQL_Latin1_General_CP1_CS_AS 
+			NOT IN (select strTermCode SQL_Latin1_General_CP1_CS_AS from tblSMTerm)				
+		 END
+			
 		RETURN;	
 	END
 
