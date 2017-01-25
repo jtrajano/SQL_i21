@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @strModifiedColumns NVARCHAR(MAX)
 	DECLARE @strSQL NVARCHAR(MAX)
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @intLoadStgId INT
 
 	EXEC uspCTCompareRecords @strTblName = @strTblName
 		,@intCompareWith = @intCompareWith
@@ -18,12 +19,16 @@ BEGIN TRY
 		,@strColumnsToIgnore = @strColumnsToIgnore
 		,@strModifiedColumns = @strModifiedColumns OUTPUT
 
-	IF (@strTblName = 'tblLGLoadLog' AND LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) <> '')
+	IF (@strTblName = 'tblLGLoadLog' )
 	BEGIN
-		SELECT @strSQL = 'INSERT INTO  tblLGLoadStg (' + @strModifiedColumns + ' ,intLoadId,strRowState,dtmFeedCreated)
-										SELECT	' + @strModifiedColumns + ',intLoadId,''Modified'',GETDATE()
+		IF LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) = ''
+			SET @strModifiedColumns = NULL
+
+		SELECT @strSQL = 'INSERT INTO  tblLGLoadStg (' + ISNULL(@strModifiedColumns + ',','') + ' intLoadId,strRowState,strTransactionType,dtmFeedCreated)
+										SELECT	' + ISNULL(@strModifiedColumns + ',','') + 'intLoadId,''Modified'',strTransactionType,GETDATE()
 										FROM	tblLGLoadLog
 										WHERE	intLoadLogId = @intLoadLogId '
+
 
 		EXEC sp_executesql @strSQL
 			,N'@intLoadLogId INT'
@@ -31,8 +36,12 @@ BEGIN TRY
 		END
 	ELSE IF (@strTblName = 'tblLGLoadDetailLog' AND LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) <> '')
 	BEGIN
-		SELECT @strSQL = 'INSERT INTO  tblLGLoadDetailStg (' + @strModifiedColumns + ',strRowState)
-										SELECT	' + @strModifiedColumns + ',''Modified''
+		SELECT @intLoadStgId = MAX(intLoadStgId) FROM tblLGLoadStg
+		IF LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) = ''
+			SET @strModifiedColumns = NULL
+
+		SELECT @strSQL = 'INSERT INTO  tblLGLoadDetailStg (' + ISNULL(@strModifiedColumns + ',','') + 'intLoadStgId,strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strRowState,dtmFeedCreated)
+										SELECT	' + ISNULL(@strModifiedColumns + ',','') + CONVERT(NVARCHAR,@intLoadStgId)  + ',strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,''Modified'',GETDATE()
 										FROM	tblLGLoadDetailLog
 										WHERE	intLGLoadDetailLogId = @intLoadDetailLogId '
 
@@ -42,8 +51,9 @@ BEGIN TRY
 	END
 	ELSE IF (@strTblName = 'tblLGLoadContainerLog' AND LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) <> '')
 	BEGIN
-		SELECT @strSQL = 'INSERT INTO  tblLGLoadContainerStg (' + @strModifiedColumns + ',strRowState)
-										SELECT	' + @strModifiedColumns + ',''Modified''
+		SELECT @intLoadStgId = MAX(intLoadStgId) FROM tblLGLoadStg
+		SELECT @strSQL = 'INSERT INTO  tblLGLoadContainerStg (' + ISNULL(@strModifiedColumns + ',','') + 'intLoadStgId,strRowState,dtmFeedCreated)
+										SELECT	' + ISNULL(@strModifiedColumns + ',','') + CONVERT(NVARCHAR,@intLoadStgId) + ',''Modified'',GETDATE()
 										FROM	tblLGLoadContainerLog
 										WHERE	intLoadContainerLogId = @intLoadContainerLogId '
 

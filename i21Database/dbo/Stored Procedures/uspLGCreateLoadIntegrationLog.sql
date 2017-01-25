@@ -17,6 +17,12 @@ BEGIN TRY
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
+	IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE ISNULL(strFeedStatus,'') = '' AND intLoadId = @intLoadId AND strRowState = 'Added')
+	BEGIN
+		DELETE FROM tblLGLoadStg WHERE intLoadId = @intLoadId AND strRowState = 'Added'
+		SET @strRowState = 'Added'
+	END
+
 	IF (@strRowState = 'Added')
 	BEGIN
 		INSERT INTO tblLGLoadStg (
@@ -72,7 +78,30 @@ BEGIN TRY
 
 		SELECT @intLoadStgId = SCOPE_IDENTITY()
 
-		INSERT INTO tblLGLoadDetailStg
+		INSERT INTO tblLGLoadDetailStg(
+			 intLoadStgId
+			,intLoadId
+			,intLoadDetailId
+			,intRowNumber
+			,strItemNo
+			,strSubLocationName
+			,strStorageLocationName
+			,strBatchNumber
+			,dblDeliveredQty
+			,strUnitOfMeasure
+			,intHigherPositionRef
+			,strDocumentCategory
+			,strReferenceDataInfo
+			,strSeq
+			,strLoadNumber
+			,strExternalPONumber
+			,strExternalPOItemNumber
+			,strExternalPOBatchNumber
+			,strExternalShipmentItemNumber
+			,strExternalBatchNo
+			,strChangeType
+			,strRowState
+			,dtmFeedCreated)
 		SELECT @intLoadStgId
 			,@intLoadId
 			,LD.intLoadDetailId
@@ -108,14 +137,24 @@ BEGIN TRY
 				)
 			,'C' AS strDocumentCategory
 			,'001' AS strRefDataInfo
-			,LD.strExternalLoadNumber
 			,0 AS strSeq
 			,LD.strLoadNumber
+			,CD.strERPPONumber
+			,CD.strERPItemNumber
+			,CD.strERPBatchNumber
+			,D.strExternalShipmentItemNumber
+			,D.strExternalBatchNo
 			,'QUA' AS strChangeType
 			,@strRowState AS strRowState
 			,GETDATE()
 		FROM vyuLGLoadDetailView LD
-		WHERE intLoadId = @intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+				WHEN LD.intPurchaseSale = 1
+					THEN LD.intPContractDetailId
+				ELSE LD.intSContractDetailId
+				END
+		JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
+		WHERE LD.intLoadId = @intLoadId
 
 		IF (@intShipmentType = 1)
 		BEGIN
@@ -197,12 +236,36 @@ BEGIN TRY
 
 		SELECT @intLoadStgId = SCOPE_IDENTITY()
 
-		INSERT INTO tblLGLoadDetailLog
+		INSERT INTO tblLGLoadDetailLog(
+			 intLoadLogId
+			,intLoadId
+			,intLoadDetailId
+			,intRowNumber
+			,strItemNo
+			,strSubLocationName
+			,strStorageLocationName
+			,strBatchNumber
+			,dblDeliveredQty
+			,strUnitOfMeasure
+			,intHigherPositionRef
+			,strDocumentCategory
+			,strReferenceDataInfo
+			,strSeq
+			,strLoadNumber
+			,strExternalPONumber
+			,strExternalPOItemNumber
+			,strExternalPOBatchNumber
+			,strExternalShipmentItemNumber
+			,strExternalBatchNo
+			,strChangeType
+			,strRowState)
 		SELECT @intLoadStgId
 			,@intLoadId
 			,LD.intLoadDetailId
-			,Row_NUMBER() OVER (PARTITION BY LD.intLoadId ORDER BY LD.intLoadId) AS intRowNumber
-			,strItemNo
+			,Row_NUMBER() OVER (
+				PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
+				) AS intRowNumber
+			,LD.strItemNo
 			,strSubLocationName = (
 				SELECT CLSL.strSubLocationName AS strStorageLocationName
 				FROM tblCTContractDetail CD
@@ -226,16 +289,28 @@ BEGIN TRY
 			,LD.strLoadNumber
 			,LD.dblQuantity
 			,LD.strItemUOM
-			,Row_NUMBER() OVER (PARTITION BY LD.intLoadId ORDER BY LD.intLoadId)
+			,Row_NUMBER() OVER (
+				PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
+				)
 			,'C' AS strDocumentCategory
 			,'001' AS strRefDataInfo
-			,LD.strExternalLoadNumber
 			,0 AS strSeq
 			,LD.strLoadNumber
+			,CD.strERPPONumber
+			,CD.strERPItemNumber
+			,CD.strERPBatchNumber
+			,D.strExternalShipmentItemNumber
+			,D.strExternalBatchNo
 			,'QUA' AS strChangeType
 			,@strRowState AS strRowState
 		FROM vyuLGLoadDetailView LD
-		WHERE intLoadId = @intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+				WHEN LD.intPurchaseSale = 1
+					THEN LD.intPContractDetailId
+				ELSE LD.intSContractDetailId
+				END
+		JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
+		WHERE LD.intLoadId = @intLoadId
 
 		IF (@intShipmentType = 1)
 		BEGIN
