@@ -254,12 +254,13 @@
       <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=17.1.6222.20333, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\iRely.Common.17.1.6222.20333\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=17.1.6228.17271, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\iRely.Common.17.1.6228.17271\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="iRely.Reports.Helper">
-      <HintPath>..\..\..\resources\references\iRely.Reports.Helper.dll</HintPath>
+    <Reference Include="iRely.Reports.Helper, Version=17.1.6226.1563, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\iRely.Reports.Helper.17.1.6226.1563\lib\net45\iRely.Reports.Helper.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\iTextSharp.5.5.10\lib\itextsharp.dll</HintPath>
@@ -452,6 +453,12 @@
     <Compile Include="Reports\InventoryShipment.designer.cs">
       <DependentUpon>InventoryShipment.cs</DependentUpon>
     </Compile>
+    <Compile Include="Reports\PhysicalInventoryCount.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Reports\PhysicalInventoryCount.Designer.cs">
+      <DependentUpon>PhysicalInventoryCount.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reports\WorkingInstruction.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -595,6 +602,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reports\InventoryShipment.resx">
       <DependentUpon>InventoryShipment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reports\PhysicalInventoryCount.resx">
+      <DependentUpon>PhysicalInventoryCount.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reports\WorkingInstruction.resx">
       <DependentUpon>WorkingInstruction.cs</DependentUpon>

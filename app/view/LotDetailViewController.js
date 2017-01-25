@@ -17,11 +17,47 @@ Ext.define('Inventory.view.LotDetailViewController', {
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblWeight', text: 'Weight', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { dataIndex: 'strItemUOM', text: 'UOM', flex: 1, dataType: 'string' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblWeightPerQty', text: 'Weight Per Qty', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
-                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.usMoney(value); } }
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.usMoney(value); } },
+                { dataIndex: 'intLotId', text: 'Lot Id', flex: 1, dataType: 'numeric', key: true, hidden: true }
             ],
             showNew: false,
             showOpenSelected: false,
-            enableDblClick: false
+            enableDblClick: false,
+            buttons: [
+                {
+                    itemId: 'btnTrace',
+                    text: 'Trace',
+                    clickHandler: 'onTraceClick'
+                },
+                {
+                    itemId: 'btnHistory',
+                    text: 'History',
+                    clickHandler: 'onHistoryClick'
+                }
+            ]
+        }
+    },
+
+    onTraceClick: function(e, grid) {
+        if(grid.view.selection) {
+            var intLotId = grid.view.selection.get('intLotId');
+
+            var config = {
+                intObjectTypeId: 4,
+                intObjectId: intLotId
+            };
+
+            iRely.Functions.openScreen('Manufacturing.view.TraceabilityDiagram',config);
+        } else {
+            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, "Please select a lot.");
+        }
+    },
+
+    onHistoryClick: function(e, grid) {
+        if(grid.view.selection) {
+            iRely.Functions.openScreen('Inventory.view.LotDetailHistory', grid.view.selection.get('intLotId'));
+        } else {
+            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, "Please select a lot.");  
         }
     },
 

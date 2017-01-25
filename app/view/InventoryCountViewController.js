@@ -94,7 +94,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 hidden: '{hideUnpostButton}'
             },
             btnPostPreview: {
-                hidden: '{hideUnpostButton}'
+                hidden: '{hidePostButton}'
             },
             btnUnpostPreview: {
                 hidden: '{hideUnpostButton}'
@@ -226,6 +226,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
+                        readOnly: '{disableCountGridFields}',
                         store: '{fromSubLocation}',
                         origValueField: 'intSubLocationId',
                         origUpdateField: 'intSubLocationId',
@@ -258,6 +259,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colStorageLocation: {
                     dataIndex: 'strStorageLocationName',
                     editor: {
+                        readOnly: '{disableCountGridFields}',
                         store: '{fromStorageLocation}',
                         origValueField: 'intStorageLocationId',
                         origUpdateField: 'intStorageLocationId',
@@ -290,6 +292,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     dataIndex: 'strLotNumber',
                     hidden: '{!current.ysnCountByLots}',
                     editor: {
+                        readOnly: '{disableCountGridFields}',
                         store: '{lot}',
                         origValueField: 'intLotId',
                         origUpdateField: 'intLotId',
@@ -326,21 +329,28 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colCountLineNo: 'strCountLine',
                 colNoPallets: {
                     dataIndex: 'dblPallets',
-                    hidden: '{!current.ysnCountByPallets}'
+                    hidden: '{!current.ysnCountByPallets}',
+                    editor: {
+                        readOnly: '{disableCountGridFields}',
+                    }
                 },
                 colQtyPerPallet: {
                     dataIndex: 'dblQtyPerPallet',
-                    hidden: '{!current.ysnCountByPallets}'
+                    hidden: '{!current.ysnCountByPallets}',
+                    editor: {
+                        readOnly: '{disableCountGridFields}',
+                    }
                 },
                 colPhysicalCount: {
                     dataIndex: 'dblPhysicalCount',
                     editor: {
-                        readOnly: '{current.ysnPosted}'
+                        readOnly: '{disableCountGridFields}'
                     }
                 },
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        readOnly: '{disableCountGridFields}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intItemUOMId',
                         store: '{itemUOM}',
@@ -361,7 +371,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 },
                 colPhysicalCountStockUnit: 'dblPhysicalCountStockUnit',
                 colVariance: 'dblVariance',
-                colRecount: 'ysnRecount',
+                colRecount: {
+                    dataIndex: 'ysnRecount',
+                    disabled: '{disableCountGridFields}'
+                },
                 colEnteredBy: 'strUserName'
             }
         }
@@ -488,14 +501,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         record.set('strCountLine', strCountLine);
         record.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
         record.set('strUserName', iRely.config.Security.UserName);
-        config.createRecord.$owner.prototype.getTotalLocationStockOnHand(config.dummy.intInventoryCount.data.intLocationId, config.dummy.data.intItemId, function (val, err) {
-            if (err) {
-                iRely.Functions.showErrorDialog(val);
-            } else {
-                record.set('dblSystemCount', val);
-            }
-            action(record);
-        });
+        if(!iRely.Functions.isEmpty(record.get('strItemNo'))) {
+            config.createRecord.$owner.prototype.getTotalLocationStockOnHand(config.dummy.intInventoryCount.data.intLocationId, config.dummy.data.intItemId, function (val, err) {
+                if (err) {
+                    iRely.Functions.showErrorDialog(val);
+                } else {
+                    record.set('dblSystemCount', val);
+                } 
+            });
+        }
+        action(record);
     },
 
     onCountGroupSelect: function (combo, records, eOpts) {
@@ -633,18 +648,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         } });
     },
 
-    onPrintCountSheetsClick: function (button) {
+    /*onPrintCountSheetsClick: function (button) {
         var win = button.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
         var current = vm.data.current;
         var CountId = current.get('intInventoryCountId');
-     /*   var filters = [
-            {
-                column: 'intInventoryCountId',
-                value: current.get('intInventoryCountId')
-            }
-        ];*/
         
         if (current) {
             var showAddScreen = function () {
@@ -725,7 +734,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 }
             });
         }
-    },
+    },*/
     
     onPrintVarianceClick: function (button) {
         var win = button.up('window');
@@ -901,7 +910,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         };
         
         var validatePost = function() {
-            Ext.Array.each(currentCountItems.tblICInventoryCountDetails().data.items, function (item) {
+            if(countDetail.length == 1) {
+                //Show error message if there are no items in the grid except for the dummy
+                iRely.Functions.showErrorDialog('There are no items to post.');
+                return;
+            }
+            else {
+                Ext.Array.each(currentCountItems.tblICInventoryCountDetails().data.items, function (item) {
                         
                     itemIndex++;
                         
@@ -948,7 +963,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                                         doPost();
                                 }
                         }
-             });   
+                });   
+            }
         };
 
         // If there is no data change, do the post.
@@ -1076,7 +1092,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                             current.set('dblSystemCount', val);
                         }
                     });
-
                     if (current.get('strCountLine') === '' || current.get('strCountLine') === null) {
                         var win = combo.up('window');
                         var currentItems = win.viewModel.data.current;
@@ -1117,9 +1132,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('intSubLocationId', records[0].get('intSubLocationId'));
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     break;
-                case 'cboLot':
+                case 'cboLotNo':
                     current.set('strLotAlias', records[0].get('strLotAlias'));
-                    current.set('dblSystemCount', records[0].get('dblOnHand'));
+                    current.set('dblSystemCount', records[0].get('dblQty'));
                     break;
             }
         }
@@ -1163,6 +1178,35 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 }
             }
     },
+    onPrintPhysicalCount: function (button) {
+        var win = button.up('window');
+        var vm = win.getViewModel();
+        var current = vm.data.current;
+
+        // Save has data changes first before doing the post.
+        win.context.data.saveRecord({
+            callbackFn: function() { 
+                var filters = [{
+                    Name: 'strCountNo',
+                    Type: 'string',
+                    Condition: 'EQUAL TO',
+                    From: current.get('strCountNo'),
+                    Operator: 'AND'
+                }];
+
+                iRely.Functions.openScreen('Reporting.view.ReportViewer', {
+                    selectedReport: 'PhysicalInventoryCount',
+                    selectedGroup: 'Inventory',
+                    selectedParameters: filters,
+                    viewConfig: { maximized: true }
+                });
+            }
+        });
+
+         if (button.itemId === 'btnPrintCountSheets' && current.get('intStatus') !== 4) {
+                current.set('intStatus', 2);
+            }
+    },
 
     init: function (application) {
         this.control({
@@ -1176,7 +1220,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 click: this.onFetchClick
             },
             "#btnPrintCountSheets": {
-                click: this.onPrintCountSheetsClick
+                click: this.onPrintPhysicalCount
             },
             "#btnPrintVariance": {
                 click: this.onPrintVarianceClick
@@ -1205,7 +1249,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             "#cboStorageLocation": {
                 select: this.onInventoryCountDetailSelect
             },
-            "#cboLot": {
+            "#cboLotNo": {
                 select: this.onInventoryCountDetailSelect
             },
             "#grdPhysicalCount": {

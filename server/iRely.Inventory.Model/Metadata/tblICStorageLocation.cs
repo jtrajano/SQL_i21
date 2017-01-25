@@ -367,6 +367,8 @@ namespace iRely.Inventory.Model
         public string strStorageLocation { get; set; }
         public string strCommodityCode { get; set; }
         public decimal dblEffectiveDepth { get; set; }
+        public int? intUnitMeasureId { get; set; }
+        public string strUnitMeasure { get; set; }
     }
 
     public class vyuICGetStorageLocation

@@ -181,7 +181,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
             
         }
@@ -200,7 +201,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -219,7 +221,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -242,7 +245,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -269,7 +273,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -298,7 +303,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -335,7 +341,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -353,7 +360,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -371,7 +379,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -389,7 +398,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -409,7 +419,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -648,7 +659,7 @@ namespace iRely.Inventory.BusinessLayer
             var reverseSort = ExpressionBuilder.GetSortSelector(enReverseSort);
             var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
 
-            // Assemble the query. 
+            // Assemble the query
             var query = (
                 from v in _db.GetQuery<vyuICGetInventoryValuation>()
                 select v
@@ -660,6 +671,10 @@ namespace iRely.Inventory.BusinessLayer
             decimal? dblBeginningQty = 0;
             decimal? dblRunningQty = 0;
             string locationFromPreviousPage = "";
+            string itemFromPreviousPage = "";
+
+            decimal? dblRootBalance = 0;
+            decimal? dblRootQty = 0;
 
             // If it is not the starting page, retrieve the previous page data. 
             if (param.start > 0)
@@ -667,10 +682,132 @@ namespace iRely.Inventory.BusinessLayer
                 // Get the last location used from the previous page. 
                 var previousPage = query.OrderBySelector(sort).Skip(0).Take(param.start.Value).OrderBySelector(reverseSort).FirstOrDefault();
                 locationFromPreviousPage = previousPage.strLocationName;
+                itemFromPreviousPage = previousPage.strItemNo;
 
                 // Get the beginning qty and balances
-                dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblValue);
-                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stokc Qty. 
+                dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage && w.strItemNo == itemFromPreviousPage).Sum(s => s.dblValue);
+                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage && w.strItemNo == itemFromPreviousPage).Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stock Qty. 
+            }
+
+            // Get the beginning balances before the date filter. 
+            {
+                // Create a new filter. 
+                List<SearchFilter> priorBalanceFilter = new List<SearchFilter>();
+                var dateExists = false;
+                var itemExists = false;
+                var locationExists = false; 
+
+                foreach (var pf in param.filter)
+                {
+                    switch (pf.c.ToString().ToLower())
+                    {
+                        case "dtmdate":
+                            switch (pf.co.ToString().ToLower())
+                            {
+                                case "gte":
+                                case "noteq":
+                                    if (pf.v.ToString() != "")
+                                    {
+                                        priorBalanceFilter.Add(
+                                            new SearchFilter()
+                                            {
+                                                c = pf.c,
+                                                v = pf.v,
+                                                co = "lt",
+                                                cj = pf.cj
+                                            }
+                                        );
+                                    }
+                                    dateExists = true;                                
+                                    break;
+                                case "gt":                                
+                                    if (pf.v.ToString() != "")
+                                    {
+                                        priorBalanceFilter.Add(
+                                            new SearchFilter()
+                                            {
+                                                c = pf.c,
+                                                v = pf.v,
+                                                co = "lte",
+                                                cj = pf.cj
+                                            }
+                                        );
+                                    }
+                                    dateExists = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            priorBalanceFilter.Add(
+                                new SearchFilter()
+                                {
+                                    c = pf.c,
+                                    v = pf.v,
+                                    co = pf.co,
+                                    cj = pf.cj
+                                }
+                            );
+
+                            if (pf.c.ToString().ToLower() == "stritemno") {
+                                itemExists = true; 
+                            }
+
+                            if (pf.c.ToString().ToLower() == "strlocationname")
+                            {
+                                locationExists = true;
+                            }
+
+                            break;
+                    }
+                }
+
+                // Add the item filter if it does not exists. 
+                if (!itemExists && itemFromPreviousPage != "")
+                {
+                    priorBalanceFilter.Add(
+                        new SearchFilter()
+                        {
+                            c = "strItemNo",
+                            v = itemFromPreviousPage,
+                            cj = "And"
+                        }
+                    );
+                    itemExists = true; 
+                }
+
+                // Add the location filter if it does not exists. 
+                if (!locationExists && locationFromPreviousPage != "")
+                {
+                    priorBalanceFilter.Add(
+                        new SearchFilter()
+                        {
+                            c = "strLocationName",
+                            v = locationFromPreviousPage,
+                            cj = "And"
+                        }
+                    );
+                }
+
+                // Get the previous Qty and Balance if date and item exists. 
+                if (dateExists && itemExists) {                    
+                    // Create a new param 
+                    var priorBalanceParam = new GetParameter()
+                    {
+                        filter = priorBalanceFilter
+                    };
+
+                    // Create a new query for the Prior Balance
+                    var priorBalanceQuery = (
+                        from v in _db.GetQuery<vyuICGetInventoryValuation>()
+                        select v
+                    ).Filter(priorBalanceParam, true);
+
+                    // Get the beginning qty and balances
+                    dblBeginningBalance = priorBalanceQuery.Sum(s => s.dblValue);
+                    dblBeginningQty = priorBalanceQuery.Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stock Qty. 
+                }
             }
 
             // Get the page. Convert it into a list for the loop below. 
@@ -685,7 +822,7 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     // Check if we need to rest the beginning qty and balance. It will reset if the location changed. 
                     currentLocation = row.strLocationName;
-                    if (lastLocation != currentLocation)
+                    if (lastLocation != currentLocation && param.start > 0 )
                     {
                         // Reset the qty and balances back to zero. 
                         dblBeginningBalance = 0;
@@ -710,7 +847,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = paged_data.AsQueryable().Select(selector),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -736,7 +874,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 
@@ -885,7 +1024,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
     }

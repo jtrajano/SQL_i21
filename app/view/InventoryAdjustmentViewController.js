@@ -643,37 +643,37 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         currentItemIndex = 0,
                         countLineNumber = 0,
                         duplicateLotDetected = 0;
+                        eachLotId = [];
                     //Validate Lot Id
                     if(countLineItems > 1) {
                         Ext.Array.each(current.tblICInventoryAdjustmentDetails().data.items, function (item) {
                             if (!item.dummy) {
-                                countLineNumber++;
-
-                                if(currentItemIndex == 0) {
-                                    currentItemIndex = 1;
-                                }
-                                else {
-                                    if(countLineNumber == countLineItems) {
-                                        currentItemIndex++;
-                                    }
-                                }
-
-                                if(currentItemIndex == countLineNumber) {
-                                    currentLotId = item.get('intLotId');
-                                }
-                                else{
-                                    if(item.get('intLotId') == currentLotId) {
-                                        iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
-                                        duplicateLotDetected = 1;
-                                    }
-                                }
+                                eachLotId[currentItemIndex] = item.get('intLotId');
+                                currentItemIndex++;
                             }
                         });
 
+                        for (var i=0; i < countLineItems-1; i++) {
+                            currentLotId = eachLotId[i];
+
+                            for (var j=0; j < countLineItems-1; j++) {
+                                if(i !== j) {
+                                    if(eachLotId[j] == currentLotId && currentLotId !== null) {
+                                        duplicateLotDetected = 1;
+                                        j = countLineItems;
+                                        i = countLineItems;
+                                    }
+                                }
+                            }
+                        }
+
                         if(duplicateLotDetected == 1) {
+                            iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
                             return;
                         }
                     }
+
+                    
                    /* var lotIds = [];
                     _.each(lineItems.data.items, function (value, key, list) {
                         if(!value.dummy)

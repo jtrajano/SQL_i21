@@ -8,6 +8,7 @@ using System.Web.Http;
 
 using iRely.Inventory.Model;
 using iRely.Inventory.BusinessLayer;
+using System.Threading.Tasks;
 
 namespace iRely.Inventory.WebApi
 {
@@ -21,5 +22,10 @@ namespace iRely.Inventory.WebApi
             _bl = bl;
         }
 
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetHistory(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetHistory(param));
+        }
     }
 }

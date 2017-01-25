@@ -1382,4 +1382,27 @@ namespace iRely.Inventory.Model
         public string strDestinationWeights { get; set; }
         public string strDestinationGrades { get; set; }
     }
+
+    public class vyuICShipmentInvoice
+    {
+        public int? intInventoryShipmentItemId { get; set;}
+        public string strInvoiceNumber { get; set; }
+        public DateTime? dtmDateInvoiced { get; set; }
+        public string strCustomerName { get; set; }
+        public string strDestination { get; set; }
+        public string strShipmentNumber { get; set; }
+        public DateTime? dtmShipDate { get; set; }
+        public string strBOLNumber { get; set; }
+        public int? intOrderType { get; set; }
+        public string strOrderType { get; set; }
+        public string strItemNo { get; set; }
+        public decimal? dblUnitCost { get; set; }
+        public decimal? dblShipmentAmount { get; set; }
+        public decimal? dblTotal { get; set; }
+        public decimal? dblQtyInvoiced { get; set; }
+        public decimal? dblQtyShipped { get; set; }
+        public decimal? dblCOGSAmount { get; set; }
+        public decimal? dblQtyToInvoice { get; set; }
+        public decimal? dblInTransitAmount { get; set; }
+    }
 }

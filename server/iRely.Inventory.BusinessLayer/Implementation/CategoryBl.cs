@@ -31,8 +31,35 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
+        }
+
+        public class DuplicateCategorySaveResult : SaveResult
+        {
+            public int? Id { get; set; }
+        }
+
+        public DuplicateCategorySaveResult DuplicateCategory(int intCategoryId)
+        {
+            int? newCategoryId = 0;
+            var duplicationResult = new DuplicateCategorySaveResult();
+            try
+            {
+                var db = (InventoryEntities)_db.ContextManager;
+                newCategoryId = db.DuplicateCategory(intCategoryId);
+                var res = _db.Save(false);
+                duplicationResult.Id = newCategoryId;
+                duplicationResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                duplicationResult.BaseException = ex;
+                duplicationResult.HasError = true;
+                duplicationResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return duplicationResult;
         }
 
         public override async Task<BusinessResult<tblICCategory>> SaveAsync(bool continueOnConflict)

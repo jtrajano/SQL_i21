@@ -18,7 +18,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewModel', {
             type: 'icbufferedcommodity'
         },
         item: {
-            type: 'icbuffereditemstockview'
+            type: 'icbuffereditemstockview',
         },
         storageLocation: {
             type: 'icbufferedstoragelocation'

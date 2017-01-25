@@ -154,6 +154,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strPickListComments).HasColumnName("strPickListComments");
             this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
             this.Property(t => t.ysnBasisContract).HasColumnName("ysnBasisContract");
+            this.Property(t => t.intTonnageTaxUOMId).HasColumnName("intTonnageTaxUOMId");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)
@@ -288,6 +289,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCostType).HasColumnName("strCostType");
             this.Property(t => t.strShortName).HasColumnName("strShortName");
             this.Property(t => t.ysnBasisContract).HasColumnName("ysnBasisContract");
+            this.Property(t => t.intTonnageTaxUOMId).HasColumnName("intTonnageTaxUOMId");
+            this.Property(t => t.strTonnageTaxUOM).HasColumnName("strTonnageTaxUOM");
+
         }
     }
 
@@ -464,6 +468,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
             this.Property(t => t.ysnListBundleSeparately).HasColumnName("ysnListBundleSeparately");
             this.Property(t => t.dblExtendedCost).HasColumnName("dblExtendedCost");
+            this.Property(t => t.strRequired).HasColumnName("strRequired");
+            this.Property(t => t.intTonnageTaxUOMId).HasColumnName("intTonnageTaxUOMId");
+            this.Property(t => t.strTonnageTaxUOM).HasColumnName("strTonnageTaxUOM");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)

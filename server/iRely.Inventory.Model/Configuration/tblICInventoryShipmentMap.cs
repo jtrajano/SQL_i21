@@ -54,6 +54,33 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICShipmentInvoiceMap: EntityTypeConfiguration<vyuICShipmentInvoice>
+    {
+        public vyuICShipmentInvoiceMap()
+        {
+            this.HasKey(t => t.intInventoryShipmentItemId);
+            this.ToTable("vyuICShipmentInvoice");
+            this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
+            this.Property(t => t.strInvoiceNumber).HasColumnName("strInvoiceNumber");
+            this.Property(t => t.dtmDateInvoiced).HasColumnName("dtmDateInvoiced");
+            this.Property(t => t.strCustomerName).HasColumnName("strCustomerName");
+            this.Property(t => t.strDestination).HasColumnName("strDestination");
+            this.Property(t => t.strShipmentNumber).HasColumnName("strShipmentNumber");
+            this.Property(t => t.dtmShipDate).HasColumnName("dtmShipDate");
+            this.Property(t => t.strBOLNumber).HasColumnName("strBOLNumber");
+            this.Property(t => t.intOrderType).HasColumnName("intOrderType");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strOrderType).HasColumnName("strOrderType");
+            this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost ");
+            this.Property(t => t.dblQtyInvoiced).HasColumnName("dblQtyInvoiced");
+            this.Property(t => t.dblQtyShipped).HasColumnName("dblQtyShipped");
+            this.Property(t => t.dblCOGSAmount).HasColumnName("dblCOGSAmount");
+            this.Property(t => t.dblQtyToInvoice).HasColumnName("dblQtyToInvoice");
+            this.Property(t => t.dblInTransitAmount).HasColumnName("dblInTransitAmount");
+            this.Property(t => t.dblShipmentAmount).HasColumnName("dblShipmentAmount");
+        }
+    }
+
     public class vyuICGetInventoryShipmentMap : EntityTypeConfiguration<vyuICGetInventoryShipment>
     {
         public vyuICGetInventoryShipmentMap()

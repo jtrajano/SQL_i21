@@ -110,6 +110,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                 colEffectiveDepth: 'dblEffectiveDepth',
                 colAirSpaceReading: 'dblAirSpaceReading',
                 colCashPrice: 'dblCashPrice',
+                colUnitMeasure: 'strUnitMeasure',
                 colDiscountSchedule: {
                      dataIndex: 'strDiscountDescription',
                      editor: {
@@ -222,7 +223,9 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                             strStorageLocationName: item.strStorageLocation,
                             strSubLocationName: item.strSubLocation,
                             strItemNo: item.strItemNo,
-                            strCommodity: item.strCommodityCode
+                            strCommodity: item.strCommodityCode,
+                            strUnitMeasure: item.strUnitMeasure,
+                            intUnitMeasureId: item.intUnitMeasureId
                         };
                         data.push(i);
                     });
@@ -256,6 +259,18 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         current.set('intSubLocationId', records[0].get('intSubLocationId'));
         current.set('strSubLocationName', records[0].get('strSubLocationName'));
         current.set('dblEffectiveDepth', records[0].get('dblEffectiveDepth'));
+    },
+
+    onItemSelect: function(combo, records, opts) {
+        if(records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var win = combo.up('window');
+        var plugin = grid.getPlugin('cepStorageMeasurementReading');
+        var current = plugin.getActiveRecord();
+
+        current.set('strUnitMeasure', records[0].get('strStockUOM'));
     },
 
     onQualityClick: function(button, e, eOpts) {
@@ -306,6 +321,9 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         this.control({
             "#cboStorageLocation": {
                 select: this.onStorageLocationSelect
+            },
+            "#cboItem": {
+                select: this.onItemSelect
             },
             "#btnQuality": {
                 click: this.onQualityClick

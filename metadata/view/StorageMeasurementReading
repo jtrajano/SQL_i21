@@ -553,7 +553,13 @@
                                                             "\t\tdataIndex: 'strLotTracking',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\thidden: true",
-                                                            "\t}",
+                                                            "\t},",
+                                                            "    {",
+                                                            "        dataIndex: 'strStockUOM',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Stock UOM',",
+                                                            "        hidden: true",
+                                                            "    }",
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
@@ -748,6 +754,21 @@
                                                     "designerId": "c70110f0-5839-464c-a493-45e069e2d246"
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strUnitMeasure",
+                                                "itemId": "colUnitMeasure",
+                                                "text": "Stock UOM"
+                                            },
+                                            "name": "MyColumn2",
+                                            "designerId": "a0466433-fabd-46f6-ba7c-c2253ec18805"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",

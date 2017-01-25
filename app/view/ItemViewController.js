@@ -159,6 +159,38 @@ Ext.define('Inventory.view.ItemViewController', {
                         {dataIndex: 'dblEndMonthCost', text: 'End Month Cost', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
                         {dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
                     ]
+                },
+                {
+                    title: 'Item UOM',
+                    api: {
+                        read: '../Inventory/api/ItemUOM/GetUOMs'
+                    },
+                    columns: [
+                        { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'intItemId', text: 'Item Id', width:100, flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strItemNo', text: 'Item No', width:100, flex: 1, dataType: 'string', defaultSort: true, sortOrder: 'ASC' },
+                        { dataIndex: 'strItemDescription', text: 'Item Description', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strType', text: 'Item Type', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'intItemId', text: 'Item Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strCategory', text: 'Category', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strCategoryCode', text: 'Category Code', width:100, flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'intCategoryId', text: 'Category Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strCommodity', text: 'Commodity', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strCommodityCode', text: 'Commodity Code', width:100, flex: 1, dataType: 'string', hidden: true },
+                        { dataIndex: 'intCommodityId', text: 'Commodity Id', width:100, flex: 1, dataType: 'numeric', hidden: true },
+                        { dataIndex: 'strUnitMeasure', text: 'Unit Measure', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'strStockUOM', text: 'Stock UOM', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'ysnStockUnit', text: 'Is Stock Unit', xtype: 'checkcolumn', width:100, flex: 1, dataType: 'string' },
+                        { dataIndex: 'ysnAllowPurchase', text: 'Allow Purchase', xtype: 'checkcolumn', width:100, flex: 1, dataType: 'boolean' },
+                        { dataIndex: 'ysnAllowSale', text: 'Allow Sale', xtype: 'checkcolumn', width:100, flex: 1, dataType: 'boolean' },
+                        { dataIndex: 'dblMaxQty', text: 'Max Qty', width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblUnitQty', text: 'Unit Qty', width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblHeight', text: 'Height', hidden: true, width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblLength', text: 'Length', hidden: true, width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblWeight', text: 'Weight', hidden: true, width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblVolume', text: 'Volume', hidden: true, width:100, flex: 1, dataType: 'float', xtype: 'numbercolumn' }
+                    ]
                 }
             ],
             buttons: [
@@ -502,6 +534,17 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             txtPercentDenaturant: '{current.dblDenaturantPercent}',
             chkTonnageTax: '{current.ysnTonnageTax}',
+            cboTonnageTaxUOM: {
+                store: '{uomTonnageTax}',
+                disabled: '{!current.ysnTonnageTax}',
+                value: '{current.intTonnageTaxUOMId}',
+                defaultFilters: [
+                    {
+                        column: 'strUnitType',
+                        value: 'Weight'
+                    }
+                ]
+            },
             chkLoadTracking: '{current.ysnLoadTracking}',
             txtMixOrder: '{current.dblMixOrder}',
             chkHandAddIngredients: '{current.ysnHandAddIngredient}',
@@ -912,6 +955,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUOM: {
+                    hidden: true,
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{pricingLevelUOM}',
@@ -922,7 +966,10 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUPC: 'strUPC',
-                colPricingLevelUnits: 'dblUnit',
+                colPricingLevelUnits: {
+                    dataIndex: 'dblUnit',
+                    hidden: true
+                },
                 colPricingLevelMin: 'dblMin',
                 colPricingLevelMax: 'dblMax',
                 colPricingLevelMethod: {
@@ -960,6 +1007,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colSpecialPricingUnit: {
+                    hidden: true,
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{specialPricingUOM}',
@@ -970,7 +1018,9 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colSpecialPricingUPC: 'strUPC',
-                colSpecialPricingQty: 'dblUnit',
+                colSpecialPricingQty: {
+                    dataIndex: 'dblUnit'
+                },
                 colSpecialPricingDiscountBy: {
                     dataIndex: 'strDiscountBy',
                     editor: {
@@ -2149,6 +2199,33 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     getDefaultUOM: function(win) {
+        return this.getDefaultUOMFromCommodity(win);
+    },
+
+    getDefaultUOMFromCommodity: function(win) {
+        var vm = win.getViewModel();
+        var cboCommodity = win.down('#cboCommodity');
+        var intCommodityId = cboCommodity.getValue();
+
+        if (!iRely.Functions.isEmpty(intCommodityId)) {
+            var commodity = vm.storeInfo.commodityList.findRecord('intCommodityId', intCommodityId);
+            if (commodity) {
+                var uoms = commodity.data.tblICCommodityUnitMeasures;
+                if(uoms && uoms.length > 0) {
+                    var defUom = _.findWhere(uoms, { ysnDefault: true });
+                    if(defUom) {
+                        var itemUOMs = _.map(vm.data.current.tblICItemUOMs().data.items, function(rec) { return rec.data; });
+                        var defaultUOM = _.findWhere(itemUOMs, { intUnitMeasureId: defUom.intUnitMeasureId });
+                        if (defaultUOM) {
+                            win.defaultUOM = defaultUOM;
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    getDefaultUOMFroMCategory: function(win) {
         var vm = win.getViewModel();
         var cboCategory = win.down('#cboCategory');
         var intCategoryId = cboCategory.getValue();
@@ -2258,7 +2335,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         if (!exists) {
                             var defaultUOMId = null;
                             if (win.defaultUOM) {
-                                defaultUOMId = win.defaultUOM.get('intItemUOMId');
+                                defaultUOMId = win.defaultUOM.intItemUOMId;
                             }
                             var newRecord = {
                                 intItemId: location.data.intItemId,
@@ -2682,7 +2759,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
-                me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
+                //me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
                 //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
                 //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
@@ -2695,7 +2772,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
-                me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
+                //me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
                 //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
                 //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
@@ -2707,7 +2784,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
-                me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
+                //me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
                 //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
                 //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;

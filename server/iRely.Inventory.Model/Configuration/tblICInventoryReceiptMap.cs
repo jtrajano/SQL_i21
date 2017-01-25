@@ -122,6 +122,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strEntityName).HasColumnName("strEntityName");
             this.Property(t => t.strActualCostId).HasColumnName("strActualCostId");
             this.Property(t => t.strWarehouseRefNo).HasColumnName("strWarehouseRefNo");
+            this.Property(t => t.dblSubTotal).HasColumnName("dblSubTotal");
+            this.Property(t => t.dblTotalTax).HasColumnName("dblTotalTax");
+            this.Property(t => t.dblTotalCharges).HasColumnName("dblTotalCharges");
+            this.Property(t => t.dblTotalGross).HasColumnName("dblTotalGross");
+            this.Property(t => t.dblTotalNet).HasColumnName("dblTotalNet");
+            this.Property(t => t.dblGrandTotal).HasColumnName("dblGrandTotal");
         }
     }
 
@@ -451,8 +457,14 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
-          //  this.Property(t => t.strCurrency).HasColumnName("strCurrency");
-         //   this.Property(t => t.intCent).HasColumnName("intCent");
+            this.Property(t => t.dblTax).HasColumnName("dblTax");
+            this.Property(t => t.strReceiptNumber).HasColumnName("strReceiptNumber");
+            this.Property(t => t.dtmReceiptDate).HasColumnName("dtmReceiptDate");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.strBillOfLading).HasColumnName("strBillOfLading");
+            this.Property(t => t.strReceiptVendor).HasColumnName("strReceiptVendor");
+            //  this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+            //   this.Property(t => t.intCent).HasColumnName("intCent");
 
         }
     }

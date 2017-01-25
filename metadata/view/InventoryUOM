@@ -528,7 +528,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "format": "0,000.000000",
+                                                "format": "0,000.000000000000000",
                                                 "itemId": "colConversionToStockUOM",
                                                 "minWidth": 110,
                                                 "text": "Conversion To",
@@ -545,6 +545,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "decimalPrecision": 20,
                                                         "itemId": "txtConvertToStock"
                                                     },
                                                     "name": "MyNumberField",

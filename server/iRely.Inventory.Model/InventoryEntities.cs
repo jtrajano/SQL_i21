@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-            : base(iRely.Common.Security.GetCompanyName())
+            : base(Common.Security.GetCompanyName())
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
@@ -24,6 +24,7 @@ namespace iRely.Inventory.Model
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Configurations.Add(new vyuICLotHistoryMap());
             modelBuilder.Configurations.Add(new tblICBrandMap());
             modelBuilder.Configurations.Add(new tblICCategoryMap());
             modelBuilder.Configurations.Add(new tblICCategoryTaxMap());
@@ -75,6 +76,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICLotStatusMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
             modelBuilder.Configurations.Add(new tblICM2MComputationMap());
+            modelBuilder.Configurations.Add(new vyuICItemUOMMap());
 
             modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());    
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());
@@ -130,6 +132,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentChargeMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemLotMap());
+            modelBuilder.Configurations.Add(new vyuICShipmentInvoiceMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentMap());
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentDetailMap());

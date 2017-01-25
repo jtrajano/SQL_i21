@@ -333,10 +333,18 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
 
     formulas: {
         receiptTitle: function(get) {
-            if(get('current.ysnOrigin')) {
-                return get('current.strReceiptNumber') + ' (Origin)';
+            var screenTitle = 'Inventory Receipt - ';
+            if (get('current.strReceiptType') === 'Inventory Return'){
+                screenTitle = 'Inventory Return - '
             }
-            return get('current.strReceiptNumber');
+
+            screenTitle += get('current.strReceiptNumber');
+            
+            if(get('current.ysnOrigin')) {
+                screenTitle += ' (Origin)';
+            }
+            
+            return screenTitle;
         },
         hidePostButton: function(get) {
             var posted = get('current.ysnPosted');
@@ -682,12 +690,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     return true;
                     break;
                 default:
-                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
-                        return false;
-                    }
-                    else {
-                        return true;
-                    }
+                    // Commenting this out. User should be able to enter the lots even if the IR is a purchase contract. 
+                    // if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
+                    //     return false;
+                    // }
+                    // else {
+                    //     return true;
+                    // }
+                    return false;
                     break;
             };
         },
@@ -910,6 +920,23 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return 'Qty to Return';
            }
            return 'Qty to Receive';
-       }
+       },
+       hideVoucherButton: function(get) {
+            if (get('current.strReceiptType') == 'Inventory Return') {
+                return true; 
+            }
+
+            var posted = get('current.ysnPosted');
+            return !posted; 
+       },
+       hideDebitMemoButton: function(get) {
+            if (get('current.strReceiptType') != 'Inventory Return') 
+            {
+                return true; 
+            }
+
+            var posted = get('current.ysnPosted');
+            return !posted; 
+        }
     }
 });

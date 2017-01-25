@@ -191,6 +191,12 @@ namespace iRely.Inventory.Model
         public string strEntityName { get; set; }
         public string strActualCostId { get; set; }
         public string strWarehouseRefNo { get; set; }
+        public decimal? dblSubTotal { get; set; }
+        public decimal? dblTotalTax { get; set; }
+        public decimal? dblTotalCharges { get; set; }
+        public decimal? dblTotalGross { get; set; }
+        public decimal? dblTotalNet { get; set; }
+        public decimal? dblGrandTotal { get; set; }
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
     }
@@ -1276,7 +1282,12 @@ namespace iRely.Inventory.Model
         public string strCurrency { get; set; }
      //   public int? intCent { get; set; }
         public string strTaxGroup { get; set; }
-
+        public decimal? dblTax { get; set; }
+        public string strReceiptNumber { get; set; }
+        public DateTime? dtmReceiptDate { get; set; }
+        public string strLocationName { get; set; }
+        public string strBillOfLading { get; set; }
+        public string strReceiptVendor { get; set; }
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }
 

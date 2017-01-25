@@ -1273,22 +1273,65 @@ Ext.define('Inventory.view.Item', {
                                                                         },
                                                                         items: [
                                                                             {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkTonnageTax',
-                                                                                fieldLabel: 'Tonnage Tax',
-                                                                                labelWidth: 125
+                                                                                xtype: 'container',
+                                                                                flex: 1,
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        flex: 1,
+                                                                                        itemId: 'chkTonnageTax',
+                                                                                        fieldLabel: 'Tonnage Tax',
+                                                                                        labelWidth: 115
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'gridcombobox',
+                                                                                        columns: [
+                                                                                            {
+                                                                                                dataIndex: 'intUnitMeasureId',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strUnitMeasure',
+                                                                                                text: 'Unit Measure',
+                                                                                                flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strSymbol',
+                                                                                                text: 'Symbol',
+                                                                                                flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strUnitType',
+                                                                                                text: 'Type',
+                                                                                                flex: 1
+                                                                                            }
+                                                                                        ],
+                                                                                        flex: 1,
+                                                                                        itemId: 'cboTonnageTaxUOM',
+                                                                                        padding: '0 0 0 10',
+                                                                                        width: 121,
+                                                                                        fieldLabel: 'UOM',
+                                                                                        labelWidth: 35,
+                                                                                        displayField: 'strUnitMeasure',
+                                                                                        valueField: 'intUnitMeasureId'
+                                                                                    }
+                                                                                ]
                                                                             },
                                                                             {
                                                                                 xtype: 'checkboxfield',
                                                                                 itemId: 'chkLoadTracking',
                                                                                 fieldLabel: 'Load tracking',
-                                                                                labelWidth: 125
+                                                                                labelWidth: 115
                                                                             },
                                                                             {
                                                                                 xtype: 'numberfield',
                                                                                 itemId: 'txtMixOrder',
                                                                                 fieldLabel: 'Mix Order',
-                                                                                labelWidth: 125,
+                                                                                labelWidth: 115,
                                                                                 fieldStyle: 'text-align:right',
                                                                                 hideTrigger: true
                                                                             },
@@ -1296,7 +1339,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'checkboxfield',
                                                                                 itemId: 'chkHandAddIngredients',
                                                                                 fieldLabel: 'Hand Add Ingredients',
-                                                                                labelWidth: 125
+                                                                                labelWidth: 115
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcombobox',
@@ -1323,7 +1366,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 enableDrillDown: 'true',
                                                                                 itemId: 'cboMedicationTag',
                                                                                 fieldLabel: 'Medication Tag',
-                                                                                labelWidth: 125,
+                                                                                labelWidth: 115,
                                                                                 displayField: 'strTagNumber',
                                                                                 valueField: 'intTagId'
                                                                             },
@@ -1352,7 +1395,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 enableDrillDown: 'true',
                                                                                 itemId: 'cboIngredientTag',
                                                                                 fieldLabel: 'Ingredient Tag',
-                                                                                labelWidth: 125,
+                                                                                labelWidth: 115,
                                                                                 displayField: 'strTagNumber',
                                                                                 valueField: 'intTagId'
                                                                             },
@@ -1360,7 +1403,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'textfield',
                                                                                 itemId: 'txtVolumeRebateGroup',
                                                                                 fieldLabel: 'Volume Rebate Group',
-                                                                                labelWidth: 125
+                                                                                labelWidth: 115
                                                                             }
                                                                         ]
                                                                     }
@@ -4420,6 +4463,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        hidden: true,
                                                                         itemId: 'colPricingLevelUnits',
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
@@ -4431,7 +4475,7 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 50,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Min',
+                                                                        text: 'Min Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -4441,10 +4485,10 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelMax',
-                                                                        width: 50,
+                                                                        width: 61,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Max',
+                                                                        text: 'Max Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -4681,10 +4725,10 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingQty',
-                                                                        width: 65,
+                                                                        width: 89,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit Qty',
+                                                                        text: 'Discount Units',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',

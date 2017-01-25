@@ -90,7 +90,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
 
     formulas: {
         checkPrintCountSheet: function (get) {
-            if (get('current.intStatus') !== 1) {
+            if (get('current.intStatus') == 4) {
                 return true;
             }
             else return false;
@@ -116,10 +116,10 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
         hideUnpostButton: function (get) {
             var posted = get('current.ysnPosted');
-            if (get('current.intStatus') === 3 || get('current.intStatus') === 4) {
-                return true;
+            if (get('current.intStatus') === 4) {
+                return false;
             }
-            else return !posted;
+            else return true;
         },
         checkRecount: function (get) {
             if (get('current.intStatus') !== 4) {
@@ -144,8 +144,15 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                 return 'Unpost';
             }
             else return 'Post';
+        },
+        disableCountGridFields: function (get) {
+            if(iRely.Functions.isEmpty(get('grdPhysicalCount.selection.strItemNo')) || get('current.ysnPosted')) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
-
     }
 
 });

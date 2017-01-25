@@ -68,6 +68,30 @@ namespace iRely.Inventory.Model
 
     }
 
+    public class vyuICLotHistory
+    {
+        public string strLotNumber { get; set; }
+        public int intLotId { get; set; }
+        public string strParentLotNumber { get; set; }
+        public string strLotUOM { get; set; }
+        public decimal? dblWeightPerQty { get; set; }
+        public DateTime? dtmExpiryDate { get; set; }
+        public string strEntityName { get; set; }
+        public int? intEntityId { get; set; }
+        public string strTransactionType { get; set; }
+        public int? intTransactionId { get; set; }
+        public string strTransactionId { get; set; }
+        public DateTime? dtmDate { get; set; }
+        public decimal? dblQty { get; set; }
+        public decimal? dblCost { get; set; }
+        public decimal? dblAmount { get; set; }
+        public decimal? dblWeight { get; set; }
+        public string strLocationName { get; set; }
+        public int? intLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+    }
+
     public class vyuICGetPostedLot
     {
         public int intLotId { get; set; }

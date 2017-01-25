@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 
 using iRely.Inventory.Model;
+using System.Threading.Tasks;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -20,5 +21,18 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+
+        public async Task<SearchResult> GetHistory(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICLotHistory>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "dtmDate", "DESC").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }
