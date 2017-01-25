@@ -24,6 +24,7 @@ WITH INT1099 (
 	intTotalForm
 	,intYear
 	,dblTotal
+	,strYear
 )
 AS
 (
@@ -31,6 +32,7 @@ AS
 		COUNT(*) AS intTotalForm
 		,A.intYear
 		,SUM(dbl1099INT) dblTotal
+		,(SELECT RIGHT(@yearParam,2)) AS strYear
 	FROM vyuAP1099INT A
 	OUTER APPLY
 	(
@@ -57,6 +59,7 @@ B1099 (
 	intTotalForm
 	,intYear
 	,dblTotal
+	,strYear
 )
 AS
 (
@@ -64,6 +67,7 @@ AS
 		COUNT(*) AS intTotalForm
 		,A.intYear
 		,SUM(dbl1099B) dblTotal
+		,(SELECT RIGHT(@yearParam,2)) AS strYear
 	FROM vyuAP1099B A
 	OUTER APPLY 
 	(
@@ -90,6 +94,7 @@ MISC1099 (
 	intTotalForm
 	,intYear
 	,dblTotal
+	,strYear
 )
 AS
 (
@@ -97,6 +102,7 @@ AS
 		COUNT(*) AS intTotalForm
 		,A.intYear
 		,SUM(dblTotalPayment) dblTotal
+		,(SELECT RIGHT(@yearParam,2)) AS strYear
 	FROM vyuAP1099MISC A
 	OUTER APPLY
 	(
@@ -127,6 +133,7 @@ SELECT
 	,A.strCity + ', ' + A.strState + ' ' + A.strZip as strCityZipCode  
 	,SUM(intTotalForm) intTotalForm
 	,SUM(dblTotal) dblTotal
+	,(SELECT RIGHT(@yearParam,2)) AS strYear
 	,str1099MISC = CASE WHEN EXISTS(SELECT 1 FROM MISC1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 1 THEN 1 ELSE 0 END)) THEN 'X' ELSE NULL END
 	,str1099INT = CASE WHEN EXISTS(SELECT 1 FROM INT1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 2 THEN 1 ELSE 0 END)) THEN 'X' ELSE NULL END
 	,str1099B = CASE WHEN EXISTS(SELECT 1 FROM B1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 3 THEN 1 ELSE 0 END)) THEN 'X' ELSE NULL END
@@ -151,3 +158,4 @@ GROUP BY intYear
 ,strState
 ,strZip
 ,strCompanyName
+,strYear

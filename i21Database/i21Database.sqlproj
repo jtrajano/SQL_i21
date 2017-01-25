@@ -4665,6 +4665,7 @@
     <Build Include="dbo\Stored Procedures\uspTFSF401InvoiceTax.sql" />
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
     <Build Include="dbo\Tables\tblPRTaxTableReference.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1096.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
