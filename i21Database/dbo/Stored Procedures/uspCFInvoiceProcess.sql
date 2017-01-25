@@ -1,9 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@entityId					INT			   = NULL
-	,@ErrorMessage				NVARCHAR(250)  = NULL OUTPUT
-	,@CreatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
-	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
+	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
+	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
+	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
+	,@SuccessfulPostCount		INT			   = 0		OUTPUT
+	,@InvalidPostCount			INT			   = 0		OUTPUT
 	,@ysnDevMode				BIT = 0
 )
 AS
@@ -20,16 +22,21 @@ BEGIN TRY
 	------------------------------------------
 
 	EXEC	@return_value = [dbo].[uspCFCreateInvoicePayment]
-			@xmlParam = @xmlParam,
-			@entityId = @entityId,
-			@ErrorMessage = @ErrorMessage OUTPUT,
-			@CreatedIvoices = @CreatedIvoices OUTPUT,
-			@UpdatedIvoices = @UpdatedIvoices OUTPUT,
-			@ysnDevMode = @ysnDevMode
+			@xmlParam				= @xmlParam
+			,@entityId				= @entityId
+			,@ErrorMessage			= @ErrorMessage			OUTPUT
+			,@CreatedIvoices		= @CreatedIvoices		OUTPUT
+			,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
+			,@SuccessfulPostCount	= @SuccessfulPostCount	OUTPUT
+			,@InvalidPostCount		= @InvalidPostCount		OUTPUT
+			,@ysnDevMode			= @ysnDevMode
 
-	SELECT	@ErrorMessage as N'@ErrorMessage',
-			@CreatedIvoices as N'@CreatedIvoices',
-			@UpdatedIvoices as N'@UpdatedIvoices'
+	SELECT	'PAYMENT'				AS 'Process'
+			,@ErrorMessage			AS 'ErrorMessage'
+			,@CreatedIvoices		AS 'CreatedIvoices'
+			,@UpdatedIvoices		AS 'UpdatedIvoices'
+			,@SuccessfulPostCount	AS 'SuccessfulPostCount'
+			,@InvalidPostCount		AS 'InvalidPostCount'
 
 	EXEC	@return_value = [dbo].[uspCFCreateDebitMemo]
 			@xmlParam = @xmlParam,
@@ -39,9 +46,10 @@ BEGIN TRY
 			@UpdatedIvoices = @UpdatedIvoices OUTPUT,
 			@ysnDevMode = @ysnDevMode
 
-	SELECT	@ErrorMessage as N'@ErrorMessage',
-			@CreatedIvoices as N'@CreatedIvoices',
-			@UpdatedIvoices as N'@UpdatedIvoices'
+	SELECT	'DEBIT MEMO'			AS 'Process'
+			,@ErrorMessage			AS 'ErrorMessage'
+			,@CreatedIvoices		AS 'CreatedIvoices'
+			,@UpdatedIvoices		AS 'UpdatedIvoices'
 
 	COMMIT TRANSACTION CFMainInvoiceProcess
 
@@ -64,10 +72,3 @@ END
 
 
 
-
-
-
-
-INSERT INTO tblCFLog (strProcessid,strProcess,strCallStack,intSortId) SELECT 'TEST','TEST','TEST',1
-
-DELETE FROM tblCFLog

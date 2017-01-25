@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFCreateDebitMemo](
+﻿CREATE PROCEDURE [dbo].[uspCFCreateDebitMemo](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL OUTPUT
@@ -201,7 +200,7 @@ SELECT
 	,[intTransactionId]						= NULL
 	,[intEntityId]							= @entityId											-- TEMPORARY
 	,[ysnResetDetails]						= 0
-	,[ysnPost]								= NULL
+	,[ysnPost]								= 1
 	,[intInvoiceDetailId]					= NULL
 	,[intItemId]							= NULL
 	,[ysnInventory]							= 0
@@ -334,9 +333,6 @@ intCustomerId
 	
 	END CATCH
 
-
-	SELECT @ErrorMessage,@CreatedIvoices
-
 END
 
 
@@ -403,3 +399,4 @@ END
 --,dblAccountTotalDiscount
 --,dblDiscountRate
 --,intTermID
+

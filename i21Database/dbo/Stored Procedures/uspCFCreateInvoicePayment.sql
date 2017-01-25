@@ -2,9 +2,11 @@
 CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@entityId					INT			   = NULL
-	,@ErrorMessage				NVARCHAR(250)  = NULL OUTPUT
-	,@CreatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
-	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
+	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
+	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
+	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
+	,@SuccessfulPostCount		INT			   = 0		OUTPUT
+	,@InvalidPostCount			INT			   = 0		OUTPUT
 	,@ysnDevMode				BIT = 0
 )
 AS
@@ -117,7 +119,7 @@ BEGIN
 		DECLARE @RaiseError				BIT				= 0						--0
 		DECLARE @InvoiceId				INT				= NULL					--QUERY
 		DECLARE @Payment				NUMERIC(18,6)	= 0.000000				--SAME AS AMOUNT PAID?? 
-		DECLARE @ApplyTermDiscount		BIT				= 1						--0
+		DECLARE @ApplyTermDiscount		BIT				= 0						--0
 		DECLARE @Discount				NUMERIC(18,6)	= 0.000000				--0.000000
 		DECLARE @Interest				NUMERIC(18,6)	= 0.000000				--0.000000
 		DECLARE @InvoicePrepayment		BIT				= 0						--0
@@ -148,7 +150,7 @@ BEGIN
 				,@InvoiceId				= intInvoiceId
 				,@Payment				= dblTotalAmount
 				,@DatePaid				= dtmInvoiceDate
-				,@PaymentMethodId		= 1
+				,@PaymentMethodId		= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
 				,@InvoiceReportNumber	= strInvoiceReportNumber 
 				FROM #tblCFInvoiceDiscount 
 				WHERE intTransactionId = @id
@@ -235,11 +237,20 @@ BEGIN
 				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
 			END
-								
+	
 			SET @ysnAddPayment = 0
 			DELETE FROM #tblCFDisctinctCustomerInvoice WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId
 
 		END
+
+		-----------------POST PAYMENT--------------
+		EXEC dbo.uspARPostPayment
+		@post = 1,
+		@recap = 0,
+		@param = @CreatedIvoices,
+		@successfulCount = @SuccessfulPostCount OUTPUT,
+		@invalidCount = @InvalidPostCount OUTPUT
+		--------------------------------------------
 
 		DROP TABLE #tblCFInvoiceDiscount
 		DROP TABLE #tblCFDisctinctCustomerInvoice
