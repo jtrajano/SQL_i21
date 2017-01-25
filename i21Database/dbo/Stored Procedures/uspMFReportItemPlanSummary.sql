@@ -275,7 +275,7 @@ BEGIN
 	INSERT INTO @tblMFQtyOnHand
 	SELECT L.intLocationId AS intCompanyLocationId
 		,I.intItemId
-		,Sum(L.dblWeight) AS dblWeight
+		,Sum(Case When L.intWeightUOMId is not null then L.dblWeight Else L.dblQty end) AS dblWeight
 	FROM @tblMFItemPlanSummary I
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
