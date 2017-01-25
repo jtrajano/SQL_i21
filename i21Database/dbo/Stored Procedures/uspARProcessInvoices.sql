@@ -757,6 +757,7 @@ BEGIN
 					,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
 					,@ItemDestinationGradeId		= [intDestinationGradeId]
 					,@ItemDestinationWeightId		= [intDestinationWeightId]
+					,@ItemSalesAccountId			= [intSalesAccountId]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -837,6 +838,7 @@ BEGIN
 						,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 						,@ItemDestinationGradeId		= @ItemDestinationGradeId
 						,@ItemDestinationWeightId		= @ItemDestinationWeightId
+						,@ItemSalesAccountId			= @ItemSalesAccountId
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1373,6 +1375,7 @@ BEGIN TRY
 						,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
 						,@ItemDestinationGradeId		= [intDestinationGradeId]
 						,@ItemDestinationWeightId		= [intDestinationWeightId]
+						,@ItemSalesAccountId			= [intSalesAccountId]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1447,6 +1450,7 @@ BEGIN TRY
 							,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 							,@ItemDestinationGradeId		= @ItemDestinationGradeId
 							,@ItemDestinationWeightId		= @ItemDestinationWeightId
+							,@ItemSalesAccountId			= @ItemSalesAccountId
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
