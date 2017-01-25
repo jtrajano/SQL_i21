@@ -18,9 +18,8 @@ WITH	(HOLDLOCK)
 AS		SegmentTypeTable
 USING	(
 select id=1, name='Primary' union all
-select id=2, name='Divider' union all
-select id=3, name='Segment' union all
-select id=4, name='Location' union all
+select id=3, name='Location' union all
+select id=4, name='Segment' union all
 select id=5, name='Line Of Business'
 ) AS SegmentTypeCodedValues
 		ON  SegmentTypeTable.intSegmentTypeId = SegmentTypeCodedValues.id
@@ -42,5 +41,5 @@ VALUES (
 GO
 
 --GL-31477 make segment type location which are named location in account structure
-UPDATE tblGLAccountStructure set strType = 'Location' where  rtrim(lower(strStructureName)) = 'location'
+UPDATE tblGLAccountStructure set strType = 'Segment' where  rtrim(lower(strStructureName)) = 'location'
 GO
