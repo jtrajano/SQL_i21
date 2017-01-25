@@ -92,6 +92,7 @@ SELECT l.intLotId
 	,CA.strDescription as strGrade
 	,LI.intItemOwnerId
 	,R.strDisplayMember As strRestrictionType
+	,'' As strBondStatus
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
