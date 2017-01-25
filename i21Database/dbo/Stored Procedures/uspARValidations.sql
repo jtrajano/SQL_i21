@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARValidations]
+	@UserId INT = 0 ,
 	@Sucess BIT = 0 OUTPUT,
 	@Message NVARCHAR(100) = '' OUTPUT,
 	@StartDate DATETIME = NULL,
@@ -13,6 +14,8 @@
 	DECLARE @originCustomerCount INT
 	DECLARE @ysnAG BIT = 0
     DECLARE @ysnPT BIT = 0
+	DECLARE @key NVARCHAR(100) = NEWID()
+	DECLARE @logDate DATETIME = GETDATE()
 
 	SELECT TOP 1 @ysnAG = CASE WHEN ISNULL(coctl_ag, '') = 'Y' THEN 1 ELSE 0 END
 			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
@@ -107,6 +110,48 @@
 	BEGIN
 		SET @Sucess = 0
 		SET @Message = 'There is a discrepancy on Customer records.'
+		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
+		 BEGIN
+			INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT DISTINCT (agivc_bill_to_cus) 
+				,'Customer'
+				,'Customers Missing in i21'
+				,@UserId
+				,@logDate
+				,@key 
+			FROM agivcmst WHERE agivc_bill_to_cus COLLATE Latin1_General_CI_AS  NOT IN 
+					(select strCustomerNumber COLLATE Latin1_General_CI_AS FROM tblARCustomer)
+		 END
+
+		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
+		 BEGIN
+			INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT DISTINCT (ptivc_sold_to) 
+				,'Customer'
+				,'Customers Missing in i21'
+				,@UserId
+				,@logDate
+				,@key 
+			FROM ptivcmst WHERE ptivc_sold_to COLLATE Latin1_General_CI_AS  NOT IN 
+					(select strCustomerNumber COLLATE Latin1_General_CI_AS FROM tblARCustomer)
+		 END
+			
 		RETURN;
 	END
 	

@@ -1,5 +1,7 @@
 CREATE TABLE [dbo].[tblARImportInvoiceLog](
 	[intImportLogId] [int] IDENTITY(1,1) NOT NULL,
+	[strData] [nvarchar](20) NULL,
+	[strDataType] [nvarchar](10) NULL,	
 	[strDescription] [nvarchar](200) NULL,
 	[intEntityId] [int] NOT NULL,
 	[strLogKey] [nvarchar](100) NOT NULL,
