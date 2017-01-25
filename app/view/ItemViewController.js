@@ -111,6 +111,19 @@ Ext.define('Inventory.view.ItemViewController', {
                         {dataIndex: 'ysnCountedDaily', text: 'Counted Daily', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
                         {dataIndex: 'ysnLockedInventory', text: 'Locked Inventory', width: 100, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
                         {dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
+                    ],
+                    customControl: [
+                        {
+                            xtype: 'button',
+                            text: 'Copy Location',
+                            itemId: 'btnCopyLocation',
+                            iconCls: 'small-import',
+                            listeners: {
+                                click: function(e) {
+                                    iRely.Functions.openScreen('Inventory.view.CopyItemLocation');
+                                }
+                            }
+                        }
                     ]
                 },
                 {
