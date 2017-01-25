@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFUpgradeReportingComponentOutputDesigners]
+	@TaxAuthorityCode NVARCHAR(10),
 	@ReportingComponentOutputDesigners TFReportingComponentOutputDesigners READONLY
 
 AS
@@ -14,16 +15,27 @@ DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
 
 BEGIN TRY
+	
+	DECLARE @TaxAuthorityId INT
+	SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+	IF (ISNULL(@TaxAuthorityId, 0) = 0)
+	BEGIN
+		RAISERROR('Tax Authority code does not exist.', 16, 1)
+	END
+
+	SELECT RCOD.*, RC.intReportingComponentId
+	INTO #tmpRCOD
+	FROM @ReportingComponentOutputDesigners RCOD
+	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCOD.strFormCode COLLATE Latin1_General_CI_AS
+		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCOD.strScheduleCode COLLATE Latin1_General_CI_AS
+		AND RC.strType COLLATE Latin1_General_CI_AS = RCOD.strType COLLATE Latin1_General_CI_AS
 
 	MERGE	
 	INTO	tblTFReportingComponentField
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT RCOD.*, RC.intReportingComponentId FROM @ReportingComponentOutputDesigners RCOD
-		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCOD.strFormCode COLLATE Latin1_General_CI_AS
-			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCOD.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND RC.strType COLLATE Latin1_General_CI_AS = RCOD.strType COLLATE Latin1_General_CI_AS
+		SELECT * FROM #tmpRCOD
 	) AS SOURCE
 		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
 			AND TARGET.strColumn = SOURCE.strColumn
@@ -53,9 +65,20 @@ BEGIN TRY
 			, SOURCE.strFormat
 			, SOURCE.strFooter
 			, SOURCE.intWidth
-		)
-	WHEN NOT MATCHED BY SOURCE THEN 
-		DELETE;
+		);
+
+	-- Delete existing Reporting Component Output Designers that is not within Source
+	DELETE FROM tblTFReportingComponentField
+	WHERE intReportingComponentFieldId IN (
+		SELECT DISTINCT RCF.intReportingComponentFieldId FROM tblTFReportingComponentField RCF
+		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCF.intReportingComponentId
+		LEFT JOIN #tmpRCOD tmp ON tmp.intReportingComponentId = RCF.intReportingComponentId
+			AND tmp.strColumn = RCF.strColumn
+		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
+			AND ISNULL(tmp.strColumn, '') = ''
+	)
+
+	DROP TABLE #tmpRCOD
 
 END TRY
 BEGIN CATCH

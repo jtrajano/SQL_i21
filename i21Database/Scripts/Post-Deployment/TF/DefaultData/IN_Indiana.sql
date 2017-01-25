@@ -1508,7 +1508,7 @@ UNION ALL SELECT intValidOriginStateId = 16, strFormCode = 'SF-401', strSchedule
 UNION ALL SELECT intValidOriginStateId = 18, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strState = 'IN', strStatus = '', strFilter = 'Include'
 UNION ALL SELECT intValidOriginStateId = 19, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
 UNION ALL SELECT intValidOriginStateId = 23, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 25, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'IN', strStatus = NULL, strFilter = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 25, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'IN', strStatus = '', strFilter = 'Exclude'
 UNION ALL SELECT intValidOriginStateId = 26, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Exclude'
 UNION ALL SELECT intValidOriginStateId = 27, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Exclude'
 UNION ALL SELECT intValidOriginStateId = 28, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Exclude'
@@ -1540,6 +1540,22 @@ UNION ALL SELECT intValidOriginStateId = 53, strFormCode = 'SF-900', strSchedule
 UNION ALL SELECT intValidOriginStateId = 54, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
 UNION ALL SELECT intValidOriginStateId = 55, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
 UNION ALL SELECT intValidOriginStateId = 56, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strState = 'IN', strStatus = '', strFilter = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 82, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 83, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 84, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 85, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 86, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 87, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 88, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 89, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 90, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 91, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 92, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 93, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 94, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 95, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 96, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
+UNION ALL SELECT intValidOriginStateId = 97, strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
 
 INSERT INTO @ValidDestinationStates(
 	intValidDestinationStateId
@@ -1589,10 +1605,26 @@ UNION ALL SELECT intValidDestinationStateId = 52, strFormCode = 'SF-900', strSch
 UNION ALL SELECT intValidDestinationStateId = 53, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strState = 'MI', strStatus = 'Include'
 UNION ALL SELECT intValidDestinationStateId = 54, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strState = 'OH', strStatus = 'Include'
 UNION ALL SELECT intValidDestinationStateId = 55, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 81, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 82, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 83, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 84, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 85, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 86, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 87, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 88, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 89, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 90, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 91, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 92, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 93, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 94, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 95, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 96, strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strState = 'IN', strStatus = 'Include'
 
-EXEC uspTFUpgradeValidProductCodes @ValidProductCodes = @ValidProductCodes
-EXEC uspTFUpgradeValidOriginStates @ValidOriginStates = @ValidOriginStates
-EXEC uspTFUpgradeValidDestinationStates @ValidDestinationStates = @ValidDestinationStates
+EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
+EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
+EXEC uspTFUpgradeValidDestinationStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidDestinationStates = @ValidDestinationStates
 
 
 -- Reporting Component - Configuration
@@ -2860,7 +2892,7 @@ UNION ALL SELECT intScheduleColumnId = 9830, strFormCode = 'SF-900', strSchedule
 UNION ALL SELECT intScheduleColumnId = 9831, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = '0'
 UNION ALL SELECT intScheduleColumnId = 9832, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = '0'
 
-EXEC uspTFUpgradeReportingComponentOutputDesigners @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
+EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 
 
 -- Filing Packet

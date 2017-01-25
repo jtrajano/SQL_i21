@@ -358,42 +358,42 @@ SELECT intValidProductCodeId = 1105, strProductCode = '061', strFormCode = 'Form
 UNION ALL SELECT intValidProductCodeId = 1106, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '1', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1107, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '1', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1108, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '1', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1109, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '2', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1110, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '2', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1111, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '2', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1112, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '2', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1113, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '3', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1114, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '3', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1115, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '3', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1116, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '3', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1117, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '5', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1118, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '5', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1119, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '5', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1120, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '5', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1121, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '6', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1122, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '6', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1123, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '6', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1124, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '6', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1125, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '7', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1126, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '7', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1127, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '7', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1128, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '7', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1129, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '8', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1130, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '8', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1131, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '8', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1132, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '8', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1133, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '10', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1134, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '10', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1135, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '10', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1136, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '10', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1137, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '13C', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1138, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '13C', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1139, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '13C', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1140, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '13C', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1141, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '13J', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1142, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '13J', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1143, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '13J', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1144, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '13J', strType = 'Gasoline / Gasohol / Ethanol', strFilter = NULL
+UNION ALL SELECT intValidProductCodeId = 1109, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '2', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1110, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '2', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1111, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '2', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1112, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '2', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1113, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '3', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1114, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '3', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1115, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '3', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1116, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '3', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1117, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '5', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1118, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '5', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1119, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '5', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1120, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '5', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1121, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '6', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1122, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '6', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1123, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '6', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1124, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '6', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1125, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '7', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1126, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '7', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1127, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '7', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1128, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '7', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1129, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '8', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1130, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '8', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1131, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '8', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1132, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '8', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1133, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '10', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1134, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '10', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1135, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '10', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1136, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '10', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1137, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '13C', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1138, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '13C', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1139, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '13C', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1140, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '13C', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1141, strProductCode = '061', strFormCode = 'Form 73', strScheduleCode = '13J', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1142, strProductCode = '065', strFormCode = 'Form 73', strScheduleCode = '13J', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1143, strProductCode = '123', strFormCode = 'Form 73', strScheduleCode = '13J', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1144, strProductCode = '124', strFormCode = 'Form 73', strScheduleCode = '13J', strType = 'Gasoline / Gasohol / Ethanol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1145, strProductCode = '160', strFormCode = 'Form 73', strScheduleCode = '1', strType = 'Undyed Diesel / Biodiesel', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1146, strProductCode = 'B00', strFormCode = 'Form 73', strScheduleCode = '1', strType = 'Undyed Diesel / Biodiesel', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1147, strProductCode = '170', strFormCode = 'Form 73', strScheduleCode = '1', strType = 'Undyed Diesel / Biodiesel', strFilter = ''
@@ -560,9 +560,9 @@ UNION ALL SELECT intValidDestinationStateId = 78, strFormCode = 'Form 83', strSc
 UNION ALL SELECT intValidDestinationStateId = 79, strFormCode = 'Form 83', strScheduleCode = '7', strType = 'Ethanol', strState = 'NE', strStatus = 'Exclude'
 UNION ALL SELECT intValidDestinationStateId = 80, strFormCode = 'Form 83', strScheduleCode = '7', strType = 'Biodiesel', strState = 'NE', strStatus = 'Exclude'
 
-EXEC uspTFUpgradeValidProductCodes @ValidProductCodes = @ValidProductCodes
-EXEC uspTFUpgradeValidOriginStates @ValidOriginStates = @ValidOriginStates
-EXEC uspTFUpgradeValidDestinationStates @ValidDestinationStates = @ValidDestinationStates
+EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
+EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
+EXEC uspTFUpgradeValidDestinationStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidDestinationStates = @ValidDestinationStates
 
 
 -- Reporting Component - Configuration
@@ -587,30 +587,52 @@ from tblTFTaxReportTemplate Config
 left join tblTFReportingComponent RC ON RC.intReportingComponentId = Config.intReportingComponentId
 WHERE RC.intTaxAuthorityId =
 */
---DECLARE @ReportingComponentConfigurations AS TFReportingComponentConfigurations
+DECLARE @ReportingComponentConfigurations AS TFReportingComponentConfigurations
 
---INSERT INTO @ReportingComponentConfigurations(
---	intReportTemplateId
---	, strFormCode
---	, strScheduleCode
---	, strType
---	, strTemplateItemId
---	, strReportSection
---	, intReportItemSequence
---	, intTemplateItemNumber
---	, strDescription
---	, strScheduleList
---	, strConfiguration
---	, ysnConfiguration
---	, ysnDynamicConfiguration
---	, strLastIndexOf
---	, strSegment
---	, intSort
---)
--- Insert generated script here. Remove first instance of "UNION ALL "
+INSERT INTO @ReportingComponentConfigurations(
+	intReportTemplateId
+	, strFormCode
+	, strScheduleCode
+	, strType
+	, strTemplateItemId
+	, strReportSection
+	, intReportItemSequence
+	, intTemplateItemNumber
+	, strDescription
+	, strScheduleList
+	, strConfiguration
+	, ysnConfiguration
+	, ysnDynamicConfiguration
+	, strLastIndexOf
+	, strSegment
+	, intSort
+)
+SELECT intReportingComponentConfigurationId = 156, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-001', strReportSection = 'I. RECEIPTS (Gross Gallons)', intReportItemSequence = '1', intTemplateItemNumber = '1', strDescription = '1. Tax-paid gallons, total of MFR Schedule Code 1', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '200'
+UNION ALL SELECT intReportingComponentConfigurationId = 157, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-002', strReportSection = 'I. RECEIPTS (Gross Gallons)', intReportItemSequence = '2', intTemplateItemNumber = '2', strDescription = '2. Tax-free gallons (without PRF), total of MFR Schedule Codes 2 and 3', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '210'
+UNION ALL SELECT intReportingComponentConfigurationId = 158, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-003', strReportSection = 'II. DISBURSEMENTS (Gross Gallons)', intReportItemSequence = '3', intTemplateItemNumber = '3', strDescription = '3. Tax-paid gallons, total of MFD Schedule Code 5', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '220'
+UNION ALL SELECT intReportingComponentConfigurationId = 159, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-004', strReportSection = 'II. DISBURSEMENTS (Gross Gallons)', intReportItemSequence = '4', intTemplateItemNumber = '4', strDescription = '4. Other gallons disbursed tax-paid, used in a taxable manner, or blended with undyed diesel', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '230'
+UNION ALL SELECT intReportingComponentConfigurationId = 160, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-005', strReportSection = 'II. DISBURSEMENTS (Gross Gallons)', intReportItemSequence = '5', intTemplateItemNumber = '5', strDescription = '5. Gallons of biodiesel or kerosene blended with dyed diesel', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '240'
+UNION ALL SELECT intReportingComponentConfigurationId = 161, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-006', strReportSection = 'II. DISBURSEMENTS (Gross Gallons)', intReportItemSequence = '6', intTemplateItemNumber = '6', strDescription = '6. Tax-free gallons (without PRF), total of MFD Schedule Codes 6', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '250'
+UNION ALL SELECT intReportingComponentConfigurationId = 162, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-007', strReportSection = 'II. DISBURSEMENTS (Gross Gallons)', intReportItemSequence = '7', intTemplateItemNumber = '7', strDescription = '7. Tax-free gallons sold to Native Americans, total of MFD Schedule Code 10', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '260'
+UNION ALL SELECT intReportingComponentConfigurationId = 163, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-008', strReportSection = 'II. DISBURSEMENTS (Gross Gallons)', intReportItemSequence = '8', intTemplateItemNumber = '8', strDescription = '8. Gallons disbursed tax-free pursuant to a Form 91EX', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '270'
+UNION ALL SELECT intReportingComponentConfigurationId = 164, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-009', strReportSection = 'II. DISBURSEMENTS (Gross Gallons)', intReportItemSequence = '9', intTemplateItemNumber = '9', strDescription = '9. Credit gallons supported by MFD Schedule Codes 13C and 13J', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '280'
+UNION ALL SELECT intReportingComponentConfigurationId = 165, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-010', strReportSection = 'III. TAX COMPUTATION', intReportItemSequence = '10', intTemplateItemNumber = '10', strDescription = '10. Gallons subject to tax: Columns A, B, G, & H (line 2 minus lines 5, 6, 7, 8, & 9) Column D (line 3 plus line 4) Columns E & F (from line 4)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '290'
+UNION ALL SELECT intReportingComponentConfigurationId = 166, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-011', strReportSection = 'III. TAX COMPUTATION', intReportItemSequence = '11', intTemplateItemNumber = '11', strDescription = '11. Tax rate', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '300'
+UNION ALL SELECT intReportingComponentConfigurationId = 167, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-012', strReportSection = 'III. TAX COMPUTATION', intReportItemSequence = '12', intTemplateItemNumber = '12', strDescription = '12. Gross tax due by fuel type (line 10 multiplied by line 11)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '310'
+UNION ALL SELECT intReportingComponentConfigurationId = 168, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-013', strReportSection = 'III. TAX COMPUTATION', intReportItemSequence = '13', intTemplateItemNumber = '13', strDescription = '13. Gross tax due for motor vehicle fuels (line 12, column A); diesel fuel (line 12, total of columns B & D); compressed fuel (line 12, total of columns E & F); & aircraft fuels (line 12, total of columns G & H)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '320'
+UNION ALL SELECT intReportingComponentConfigurationId = 169, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-014', strReportSection = 'III. TAX COMPUTATION', intReportItemSequence = '14', intTemplateItemNumber = '14', strDescription = '14. Commissions allowed: Columns A & G (.0500 on first $5,000 plus .0250 on excess over $5,000) Columns B & E (.0200 on first $5,000 plus .0050 on excess over $5,000)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '330'
+UNION ALL SELECT intReportingComponentConfigurationId = 170, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-015', strReportSection = 'III. TAX COMPUTATION', intReportItemSequence = '15', intTemplateItemNumber = '15', strDescription = '15. Net tax due (line 13 minus line 14)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '340'
+UNION ALL SELECT intReportingComponentConfigurationId = 171, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-016', strReportSection = 'IV. PETROLEUM RELEASE REMEDIAL ACTION FEE', intReportItemSequence = '16', intTemplateItemNumber = '16', strDescription = '16. Gallons subject to fee: Columns A, B, D, G, & H (line 10 plus lines 5, 7, 8, & 9) Column C (line 2 minus line 6)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '350'
+UNION ALL SELECT intReportingComponentConfigurationId = 172, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-017', strReportSection = 'IV. PETROLEUM RELEASE REMEDIAL ACTION FEE', intReportItemSequence = '17', intTemplateItemNumber = '17', strDescription = '17. Fee rate', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '360'
+UNION ALL SELECT intReportingComponentConfigurationId = 173, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-018', strReportSection = 'IV. PETROLEUM RELEASE REMEDIAL ACTION FEE', intReportItemSequence = '18', intTemplateItemNumber = '18', strDescription = '18. Total fee due (line 16 multiplied by line 17)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '370'
+UNION ALL SELECT intReportingComponentConfigurationId = 174, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-019', strReportSection = 'SUMMARY OF MOTOR FUEL TAXES AND FEES DUE', intReportItemSequence = '19', intTemplateItemNumber = '19', strDescription = '19. Net tax due – motor fuels, line 15, columns A and B', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '380'
+UNION ALL SELECT intReportingComponentConfigurationId = 175, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-020', strReportSection = 'SUMMARY OF MOTOR FUEL TAXES AND FEES DUE', intReportItemSequence = '20', intTemplateItemNumber = '20', strDescription = '20. Net tax due - compressed fuels, line 15, column E', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '390'
+UNION ALL SELECT intReportingComponentConfigurationId = 176, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-021', strReportSection = 'SUMMARY OF MOTOR FUEL TAXES AND FEES DUE', intReportItemSequence = '21', intTemplateItemNumber = '21', strDescription = '21. Net tax due – aircraft fuels, line 15, column G', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '400'
+UNION ALL SELECT intReportingComponentConfigurationId = 177, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-022', strReportSection = 'SUMMARY OF MOTOR FUEL TAXES AND FEES DUE', intReportItemSequence = '22', intTemplateItemNumber = '22', strDescription = '22. Petroleum Release Remedial Action Fee, line 18, column A through column H', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '410'
+UNION ALL SELECT intReportingComponentConfigurationId = 178, strFormCode = 'Form 73', strScheduleCode = '', strType = '', strTemplateItemId = 'Form-73-Summary-023', strReportSection = 'SUMMARY OF MOTOR FUEL TAXES AND FEES DUE', intReportItemSequence = '23', intTemplateItemNumber = '23', strDescription = '23. Total taxes and fees due (total of lines 19 through 22)', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = NULL, ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = '420'
 
 
---EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
+EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
 
 -- Reporting Component - Output Designer
 /* Generate script for Reporting Component - Output Designer. Specify Tax Authority Id to filter out specific Reporting Component - Output Designer only.
@@ -1282,7 +1304,7 @@ UNION ALL SELECT intScheduleColumnId = 11398, strFormCode = 'Form 83', strSchedu
 UNION ALL SELECT intScheduleColumnId = 11399, strFormCode = 'Form 83', strScheduleCode = '10', strType = 'Biodiesel', strColumn = 'strBillOfLading', strCaption = 'Bill of Lading', strFormat = '', strFooter = 'No', intWidth = 0
 UNION ALL SELECT intScheduleColumnId = 11400, strFormCode = 'Form 83', strScheduleCode = '10', strType = 'Biodiesel', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
 
-EXEC uspTFUpgradeReportingComponentOutputDesigners @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
+EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 
 
 -- Filing Packet

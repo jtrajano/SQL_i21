@@ -23,22 +23,23 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 
+	SELECT RCC.*, RC.intReportingComponentId
+	INTO #tmpRCC
+	FROM @ReportingComponentConfigurations RCC
+	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
+		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
+		AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
 
 	MERGE	
 	INTO	tblTFReportingComponentConfiguration
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT RCC.*, RC.intReportingComponentId FROM @ReportingComponentConfigurations RCC
-		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
-			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
-			AND RC.intTaxAuthorityId = @TaxAuthorityId
-
-
+		SELECT * FROM #tmpRCC
 	) AS SOURCE
-			ON TARGET.strTemplateItemId = SOURCE.strTemplateItemId
-			
+		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
+			AND TARGET.strTemplateItemId = SOURCE.strTemplateItemId
+		
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -85,9 +86,21 @@ BEGIN TRY
 			, SOURCE.strLastIndexOf
 			, SOURCE.strSegment
 			, SOURCE.intSort
-		)
-		WHEN NOT MATCHED BY SOURCE THEN 
-		DELETE;
+		);
+
+	
+	-- Delete existing Reporting Component Configuration that is not within Source
+	DELETE FROM tblTFReportingComponentConfiguration
+	WHERE intReportingComponentConfigurationId IN (
+		SELECT DISTINCT RCC.intReportingComponentConfigurationId FROM tblTFReportingComponentConfiguration RCC
+		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
+		LEFT JOIN #tmpRCC tmp ON tmp.intReportingComponentId = RCC.intReportingComponentId
+			AND tmp.strTemplateItemId = RCC.strTemplateItemId
+		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
+			AND ISNULL(tmp.strTemplateItemId, '') = ''
+	)
+
+	DROP TABLE #tmpRCC
 
 END TRY
 BEGIN CATCH
