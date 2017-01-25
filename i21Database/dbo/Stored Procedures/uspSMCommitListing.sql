@@ -27,7 +27,7 @@ BEGIN TRANSACTION
 	
 	-- DELETE Screens
 	DELETE FROM tblSMScreen 
-	WHERE strNamespace IN (SELECT strNamespace FROM tblSMScreenStage WHERE strChange = 'Deleted')
+	WHERE strNamespace IN (SELECT strNamespace FROM tblSMScreenStage WHERE strChange = 'Deleted') AND strNamespace <> 'ContractManagement.view.ContractAmendment'
 	
 	-- INSERT Controls
 	INSERT INTO tblSMControl (
