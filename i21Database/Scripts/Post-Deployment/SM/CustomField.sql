@@ -99,7 +99,7 @@ END
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('cstICInventoryReceipt'))
 BEGIN
-    print('/*******************  BEGIN Creating Site Custom Table *******************/')
+    print('/*******************  BEGIN Creating Inventory Receipt Custom Table *******************/')
     EXEC('
         CREATE TABLE [dbo].[cstICInventoryReceipt]
         (
@@ -108,12 +108,12 @@ BEGIN
             CONSTRAINT [FK_cstICInventoryReceipt_tblICInventoryReceipt] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblICInventoryReceipt] ([intInventoryReceiptId]) ON DELETE CASCADE
         );
     ')
-    print('/*******************  END Creating Site Custom Table *******************/')
+    print('/*******************  END Creating Inventory Receipt Custom Table *******************/')
 END
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('cstICItem'))
 BEGIN
-    print('/*******************  BEGIN Creating Site Custom Table *******************/')
+    print('/*******************  BEGIN Creating Item Custom Table *******************/')
     EXEC('
         CREATE TABLE [dbo].[cstICItem]
         (
@@ -122,7 +122,7 @@ BEGIN
             CONSTRAINT [FK_cstICItem_tblICItem] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblICItem] ([intItemId]) ON DELETE CASCADE
         );
     ')
-    print('/*******************  END Creating Site Custom Table *******************/')
+    print('/*******************  END Creating Item Custom Table *******************/')
 END
 
 GO
