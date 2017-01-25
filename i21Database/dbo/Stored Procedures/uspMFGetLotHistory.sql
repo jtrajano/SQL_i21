@@ -431,5 +431,5 @@ BEGIN
 	END
 
 	SELECT *
-	FROM #tempLotHistoryFinal
+	FROM #tempLotHistoryFinal Order by dtmDateTime
 END
