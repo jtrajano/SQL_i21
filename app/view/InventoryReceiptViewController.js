@@ -1260,6 +1260,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
 
+            // Default control focus 
+            var task = new Ext.util.DelayedTask(function(){
+                var cboReceiptType = win.down('#cboReceiptType');
+                if (cboReceiptType) cboReceiptType.focus();
+            });
+            task.delay(500);         
+
             me.setupAdditionalBinding(win);
         }
     },

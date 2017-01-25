@@ -230,11 +230,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             }
                                                         ],
                                                         flex: 0.7,
+                                                        tabIndex: 0,
                                                         itemId: 'cboReceiptType',
                                                         margin: '0 5 0 0',
                                                         fieldLabel: 'Order Type',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
+                                                        selectOnFocus: true,
                                                         displayField: 'strDescription',
                                                         valueField: 'strDescription'
                                                     },

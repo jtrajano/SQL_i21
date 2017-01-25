@@ -840,6 +840,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     filters: config.filters
                 });
             }
+
+            // Default control focus 
+            var task = new Ext.util.DelayedTask(function(){
+                var cboOrderType = win.down('#cboOrderType');
+                if (cboOrderType) cboOrderType.focus();
+            });
+            task.delay(500);
+            
         }
     },
 

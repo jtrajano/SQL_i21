@@ -247,6 +247,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 fieldLabel: 'Order Type',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
+                                                                selectOnFocus: true,
                                                                 displayField: 'strOrderType',
                                                                 valueField: 'intOrderType'
                                                             },
