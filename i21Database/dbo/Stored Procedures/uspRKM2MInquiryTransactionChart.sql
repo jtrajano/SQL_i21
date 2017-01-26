@@ -51,6 +51,10 @@ DECLARE @tblFinalDetail TABLE (
 	,dblMarketFuturesResult NUMERIC(24, 10)
 	,dblResultCash NUMERIC(24, 10)
 	,dblContractPrice NUMERIC(24, 10)
+	,intQuantityUOMId INT
+	,intCommodityUnitMeasureId INT
+	,intPriceUOMId INT
+	,intCent int
 	)
 
 INSERT INTO @tblFinalDetail

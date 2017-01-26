@@ -888,7 +888,8 @@ SELECT intContractHeaderId,
               dblCashPrice as dblCashPrice,
               dblResult as dblResult1,
               dblResultBasis as dblResultBasis1,
-              dblMarketFuturesResult as dblMarketFuturesResult1   
+              dblMarketFuturesResult as dblMarketFuturesResult1,
+			  intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent   
 FROM @tblFinalDetail ORDER BY intCommodityId
 END
 ELSE
@@ -898,7 +899,7 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
               convert(decimal(24,2),((round(isnull(dblContractBasis,0),4)+round(isnull(dblCosts,0),4))-round(isnull(dblMarketBasis,0),4))*round(isnull(dblResultBasis1,0),4)) dblResultBasis,
               convert(decimal(24,2),((round(isnull(dblFutures,0),4)- round(isnull(dblFuturePrice,0),4))*round(isnull(dblMarketFuturesResult1,0),4))) dblMarketFuturesResult,
               case when strPricingType='Cash' THEN convert(decimal(24,2),(round(isnull(dblAdjustedContractPrice,0),4)-round(isnull(dblMarketPrice,0),4))*round(isnull(dblResult1,0),4))
-              else null end as dblResultCash   into #Temp   
+              else null end as dblResultCash into #Temp   
  FROM(
       SELECT intContractHeaderId,
                      intContractDetailId,strContractOrInventoryType,
@@ -942,6 +943,7 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
                      case when  ysnSubCurrency=1 then dblResult/isnull(intCent,0) else dblResult end as dblResult1,
                      case when  ysnSubCurrency=1 then dblResultBasis/isnull(intCent,0) else dblResultBasis end as dblResultBasis1,
                      case when  ysnSubCurrency=1 then dblMarketFuturesResult/isnull(intCent,0) else dblMarketFuturesResult end  as dblMarketFuturesResult1            
+					 ,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent
       FROM @tblFinalDetail )t 
       ORDER BY intCommodityId,strContractSeq desc    
 END
@@ -997,5 +999,5 @@ round(dblContractBasis,2) dblContractBasis,round(dblFutures,2) dblFutures, round
 round(dblMarketBasis,2) dblMarketBasis,round(dblFuturePrice,2) dblFuturePrice,intContractTypeId,round(dblAdjustedContractPrice,2) dblAdjustedContractPrice ,
 round(dblCashPrice,2) dblCashPrice,round(dblMarketPrice,2) dblMarketPrice,round(dblResult,2) dblResult,round(dblResultBasis,2) dblResultBasis,
 round(dblMarketFuturesResult,2) dblMarketFuturesResult,round(dblResultCash,2) dblResultCash,
-round(dblContractBasis,2) + round(dblFutures,2) + round(dblCash,2) dblContractPrice from #Temp where dblOpenQty > 0
+round(dblContractBasis,2) + round(dblFutures,2) + round(dblCash,2) dblContractPrice,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent from #Temp where dblOpenQty > 0
 GO
