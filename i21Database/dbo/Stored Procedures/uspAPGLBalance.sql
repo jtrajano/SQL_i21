@@ -30,7 +30,7 @@ CREATE TABLE #tmpAPGLAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMA
 INSERT INTO #tmpAPGLAccountBalance
 SELECT
 	B.strAccountId,
-	SUM(ISNULL(A.dblCredit,0)) - SUM(ISNULL(A.dblDebit, 0))
+	CAST(SUM(ISNULL(A.dblCredit,0)) - SUM(ISNULL(A.dblDebit, 0)) AS DECIMAL(18,2))
 FROM tblGLDetail A
 INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId

@@ -24,12 +24,19 @@ IF OBJECT_ID(N'tempdb..#tmpAPAccountBalance') IS NOT NULL DROP TABLE #tmpAPAccou
 CREATE TABLE #tmpAPAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMAL(18,6))
 
 INSERT INTO #tmpAPAccountBalance
-SELECT
-	B.strAccountId,
-	CAST(SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount)AS DECIMAL(18,2)) AS dblBalance
-FROM vyuAPPayables A
-INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-GROUP BY B.strAccountId
+SELECT 
+	C.strAccountId
+	,SUM(dblBalance)
+FROM (
+	SELECT
+		intBillId,
+		CAST(SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount) AS DECIMAL(18,2)) AS dblBalance
+	FROM vyuAPPayables A
+	GROUP BY intBillId
+) tmpBalance
+INNER JOIN tblAPBill B ON B.intBillId = tmpBalance.intBillId
+INNER JOIN tblGLAccount C ON B.intAccountId = C.intAccountId
+GROUP BY C.strAccountId
 
 SELECT @balance = SUM(ISNULL(dblBalance, 0)) FROM #tmpAPAccountBalance
 
