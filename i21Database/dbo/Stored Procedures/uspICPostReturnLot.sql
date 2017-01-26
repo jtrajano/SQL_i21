@@ -60,6 +60,8 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @intInventoryLotOutId AS INT 
 
+DECLARE @intReturnValue AS INT 
+
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
 -------------------------------------------------
@@ -113,7 +115,7 @@ BEGIN
 		-- Repeat call on uspICReduceStockInLot until @dblReduceQty is completely distributed to all available Lot buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC dbo.uspICReturnStockInLot
+			EXEC @intReturnValue = dbo.uspICReturnStockInLot
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -132,12 +134,14 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedInventoryLotId OUTPUT 
 
+			IF @intReturnValue < 0 GOTO _Exit_With_Error
+
 			IF @UpdatedInventoryLotId IS NOT NULL 
 			BEGIN 
 				------------------------------------------------------------
 				-- Create the Inventory Transaction 
 				------------------------------------------------------------
-				EXEC [dbo].[uspICPostInventoryTransaction]
+				EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
 						,@intItemUOMId = @intItemUOMId
@@ -165,10 +169,12 @@ BEGIN
 						,@intCostingMethod = @AVERAGECOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 
+				IF @intReturnValue < 0 GOTO _Exit_With_Error
+
 				------------------------------------------------------------
 				-- Update the Stock Quantity
 				------------------------------------------------------------
-				EXEC [dbo].[uspICPostStockQuantity]
+				EXEC @intReturnValue = [dbo].[uspICPostStockQuantity]
 					@intItemId
 					,@intItemLocationId
 					,@intSubLocationId
@@ -177,6 +183,8 @@ BEGIN
 					,@QtyOffset
 					,@dblUOMQty
 					,@intLotId
+
+				IF @intReturnValue < 0 GOTO _Exit_With_Error
 
 				--------------------------------------
 				-- Update the Lot's Qty and Weights. 
@@ -235,3 +243,9 @@ BEGIN
 		END 
 	END
 END 
+
+_Exit: 
+RETURN 1
+
+_Exit_With_Error: 
+RETURN @intReturnValue

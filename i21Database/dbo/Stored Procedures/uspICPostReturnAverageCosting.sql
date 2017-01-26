@@ -88,6 +88,8 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @intInventoryFIFOOutId AS INT 
 
+DECLARE @intReturnValue AS INT 
+
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
 -------------------------------------------------
@@ -101,7 +103,7 @@ BEGIN
 		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC dbo.uspICReturnStockInFIFO
+			EXEC @intReturnValue = dbo.uspICReturnStockInFIFO
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -117,12 +119,14 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
 
+			IF @intReturnValue < 0 GOTO _Exit_With_Error
+
 			IF @UpdatedFifoId IS NOT NULL 
 			BEGIN 
 				------------------------------------------------------------
 				-- Create the Inventory Transaction 
 				------------------------------------------------------------
-				EXEC [dbo].[uspICPostInventoryTransaction]
+				EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
 						,@intItemUOMId = @intItemUOMId
@@ -150,10 +154,12 @@ BEGIN
 						,@intCostingMethod = @AVERAGECOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 
+				IF @intReturnValue < 0 GOTO _Exit_With_Error
+
 				------------------------------------------------------------
 				-- Update the Stock Quantity
 				------------------------------------------------------------
-				EXEC [dbo].[uspICPostStockQuantity]
+				EXEC @intReturnValue = [dbo].[uspICPostStockQuantity]
 					@intItemId
 					,@intItemLocationId
 					,@intSubLocationId
@@ -162,6 +168,8 @@ BEGIN
 					,@QtyOffset
 					,@dblUOMQty
 					,NULL --,@intLotId
+
+				IF @intReturnValue < 0 GOTO _Exit_With_Error
 
 				SET @QtyOffset = -@QtyOffset
 				-- Insert the record to the fifo-out table
@@ -208,3 +216,9 @@ BEGIN
 		END 
 	END
 END 
+
+_Exit: 
+RETURN 1
+
+_Exit_With_Error: 
+RETURN @intReturnValue

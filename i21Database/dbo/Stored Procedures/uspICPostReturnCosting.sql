@@ -70,6 +70,8 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@WRITE_OFF_SOLD AS INT = 2
 		,@REVALUE_SOLD AS INT = 3
 
+DECLARE @intReturnValue AS INT 
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
@@ -165,7 +167,7 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostReturnAverageCosting
+		EXEC @intReturnValue = dbo.uspICPostReturnAverageCosting
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -185,12 +187,14 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId
+
+		IF @intReturnValue < 0 GOTO _Exit_With_Error
 	END
 
 	-- FIFO 
 	IF (@CostingMethod = @FIFO AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostReturnFIFO
+		EXEC @intReturnValue = dbo.uspICPostReturnFIFO
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -210,12 +214,14 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId;
+
+		IF @intReturnValue < 0 GOTO _Exit_With_Error
 	END
 
 	-- LIFO 
 	IF (@CostingMethod = @LIFO AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostReturnLIFO
+		EXEC @intReturnValue = dbo.uspICPostReturnLIFO
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -235,12 +241,14 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId;
+
+		IF @intReturnValue < 0 GOTO _Exit_With_Error
 	END
 
 	-- LOT 
 	IF (@CostingMethod = @LOTCOST AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostReturnLot
+		EXEC @intReturnValue = dbo.uspICPostReturnLot
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -261,12 +269,14 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId;
+
+		IF @intReturnValue < 0 GOTO _Exit_With_Error
 	END
 
 	-- ACTUAL COST 
 	IF (@strActualCostId IS NOT NULL)
 	BEGIN 
-		EXEC dbo.uspICPostReturnActualCost
+		EXEC @intReturnValue = dbo.uspICPostReturnActualCost
 			@strActualCostId 
 			,@intItemId 
 			,@intItemLocationId 
@@ -286,8 +296,9 @@ BEGIN
 			,@strBatchId 
 			,@intTransactionTypeId 
 			,@strTransactionForm 
-			,@intEntityUserSecurityId 
-			;
+			,@intEntityUserSecurityId;
+
+		IF @intReturnValue < 0 GOTO _Exit_With_Error
 	END
 
 	--------------------------------------------------
@@ -480,4 +491,8 @@ BEGIN
 	;
 END 
 
+_Exit: 
+RETURN 1
 
+_Exit_With_Error: 
+RETURN @intReturnValue

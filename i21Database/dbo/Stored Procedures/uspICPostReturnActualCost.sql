@@ -60,6 +60,8 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @intInventoryActualCostOutId AS INT 
 
+DECLARE @intReturnValue AS INT 
+
 -------------------------------------------------
 -- 1. Process the Actual Cost buckets
 -------------------------------------------------
@@ -72,7 +74,7 @@ BEGIN
 		-- Repeat call on uspICReduceStockInActual until @dblReduceQty is completely distributed to all available Actual buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC dbo.uspICReturnStockInActualCost
+			EXEC @intReturnValue = dbo.uspICReturnStockInActualCost
 				@strActualCostId	
 				,@intItemId
 				,@intItemLocationId
@@ -89,12 +91,14 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedActualCostId OUTPUT 
 
+			IF @intReturnValue < 0 GOTO _Exit_With_Error
+
 			IF @UpdatedActualCostId IS NOT NULL 
 			BEGIN 
 				------------------------------------------------------------
 				-- Create the Inventory Transaction 
 				------------------------------------------------------------
-				EXEC [dbo].[uspICPostInventoryTransaction]
+				EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
 						,@intItemUOMId = @intItemUOMId
@@ -122,10 +126,12 @@ BEGIN
 						,@intCostingMethod = @AVERAGECOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 
+				IF @intReturnValue < 0 GOTO _Exit_With_Error
+
 				------------------------------------------------------------
 				-- Update the Stock Quantity
 				------------------------------------------------------------
-				EXEC [dbo].[uspICPostStockQuantity]
+				EXEC @intReturnValue = [dbo].[uspICPostStockQuantity]
 					@intItemId
 					,@intItemLocationId
 					,@intSubLocationId
@@ -134,6 +140,8 @@ BEGIN
 					,@QtyOffset
 					,@dblUOMQty
 					,NULL --,@intLotId
+
+				IF @intReturnValue < 0 GOTO _Exit_With_Error
 
 				SET @QtyOffset = -@QtyOffset
 				-- Insert the record to the fifo-out table
@@ -180,3 +188,9 @@ BEGIN
 		END 
 	END
 END 
+
+_Exit: 
+RETURN 1
+
+_Exit_With_Error: 
+RETURN @intReturnValue
