@@ -33,7 +33,7 @@ SELECT
 	,vwcus_budget_end_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),0) AS INT)
 	,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN 'Y' ELSE 'N' END
 	,vwcus_ar_future = CAST(ISNULL(CI.dblFuture,0.0) AS NUMERIC(18,6))
-	,vwcus_ar_per1 = ISNULL(CI.dbl10Days,0.0) 
+	,vwcus_ar_per1 = ISNULL(CI.dbl10Days,0.0) +  ISNULL(CI.dbl0Days,0.0)
 	,vwcus_ar_per2 = ISNULL(CI.dbl30Days,0.0)
 	,vwcus_ar_per3 = ISNULL(CI.dbl60Days,0.0)
 	,vwcus_ar_per4 = ISNULL(CI.dbl90Days,0.0)
@@ -67,7 +67,7 @@ SELECT
 	,vwcus_ptd_sls = ISNULL(CI.dblYTDSales,0.0)
 	,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
 	,vwcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId)
-	,dblFutureCurrent = 0.0
+	,dblFutureCurrent = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl0Days,0.0)
 	,intConcurrencyId = 0
 	,strFullLocation =  ISNULL(Loc.strLocationName ,'')
 	,intTaxId = CAST(NULL AS INT)
