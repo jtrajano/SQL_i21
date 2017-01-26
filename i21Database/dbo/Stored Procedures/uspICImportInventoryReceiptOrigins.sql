@@ -1,0 +1,6 @@
+﻿CREATE PROCEDURE [dbo].[uspICImportInventoryReceiptOrigins]
+AS
+
+EXEC dbo.uspICImportInventoryReceipts
+EXEC dbo.uspICImportInventoryReceiptsAGItemTax
+EXEC dbo.uspICImportInventoryReceiptsPTItemTax
