@@ -103,7 +103,13 @@ BEGIN
 	IF	@ReceiptType = @RECEIPT_TYPE_INVENTORY_RETURN 
 	BEGIN 
 		-- Check if the source IR is a purchase contract 
-		IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt r WHERE r.intSourceInventoryReceiptId = @intTransactionId AND r.strReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT)
+		IF EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryReceipt rtn INNER JOIN tblICInventoryReceipt r
+						ON rtn.intSourceInventoryReceiptId = r.intInventoryReceiptId
+			WHERE	rtn.intInventoryReceiptId = @intTransactionId 
+					AND r.strReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT
+		)
 		BEGIN 
 			EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 		END 		
