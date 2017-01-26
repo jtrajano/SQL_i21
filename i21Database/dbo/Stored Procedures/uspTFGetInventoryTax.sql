@@ -447,7 +447,8 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
 		END
-	
+
+		DELETE FROM @TFTransaction
 		DELETE FROM #tmpRC WHERE @RCId = intReportingComponentId
 	END
 

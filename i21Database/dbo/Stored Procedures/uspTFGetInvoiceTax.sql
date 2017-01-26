@@ -668,6 +668,7 @@ BEGIN TRY
 				, strFormCode
 				, intReportingComponentId
 				, strScheduleCode
+				, strType
 				, intProductCodeId
 				, strProductCode
 				, intItemId
@@ -713,6 +714,7 @@ BEGIN TRY
 				, strFormCode
 				, intReportingComponentId
 				, strScheduleCode
+				, strType
 				, intProductCode
 				, strProductCode
 				, intItemId
@@ -758,7 +760,7 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
 		END
-
+		DELETE FROM @tmpInvoiceTransaction
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 	END
 

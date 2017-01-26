@@ -488,6 +488,7 @@ BEGIN TRY
 			INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
 					VALUES(@Guid,@TA,@TACode,@FormCodeParam,@tplScheduleCode, 4, 'Details','TOTAL', '',@ItemTotal, @ItemDescription, CAST(GETDATE() AS DATE))
 		END
+		SET @paramScheduleCode = NULL
 		SET @CountItems = @CountItems - 1
 	END
 			
