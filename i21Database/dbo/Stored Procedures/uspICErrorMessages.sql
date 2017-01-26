@@ -513,7 +513,7 @@ SET @strmessage = 'Check the return date on the transaction. Return date is %s, 
 EXEC sp_addmessage 80108,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80109) EXEC sp_dropmessage 80109, 'us_english'	
-SET @strmessage = 'Unable to do the return. All the stocks in %s from %s are fully returned already.'
+SET @strmessage = 'Return is stopped. All the stocks %s from %s are already returned or over-return is going to happen.'
 EXEC sp_addmessage 80109,11,@strmessage,'us_english','False'
 
 
