@@ -6,12 +6,12 @@
     },
     "codeClass": null,
     "userConfig": {
+        "collapsible": true,
         "designer|userAlias": "iccopyitemlocation",
         "designer|userClassName": "CopyItemLocation",
         "height": 594,
         "layout": "fit",
         "maximizable": true,
-        "minimizable": true,
         "title": "Copy Item Location",
         "width": 715
     },
@@ -312,7 +312,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter123",
                                                     "designerId": "1b885772-e34a-4003-b7b3-9be92390c320",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

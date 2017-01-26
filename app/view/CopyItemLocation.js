@@ -34,9 +34,9 @@ Ext.define('Inventory.view.CopyItemLocation', {
     height: 594,
     width: 715,
     layout: 'fit',
+    collapsible: true,
     title: 'Copy Item Location',
     maximizable: true,
-    minimizable: true,
 
     dockedItems: [
         {
