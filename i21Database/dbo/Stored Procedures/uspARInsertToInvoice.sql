@@ -141,7 +141,8 @@ DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							dblDiscount					NUMERIC(18,6), 
 							dblTotalTax					NUMERIC(18,6), 
 							dblPrice					NUMERIC(18,6), 
-							dblTotal					NUMERIC(18,6))
+							dblTotal					NUMERIC(18,6),
+							dtmMaintenanceDate			DATETIME)
 
 SELECT @DateOnly = CAST(GETDATE() AS DATE), @dblZeroAmount = 0.000000
 
@@ -399,12 +400,13 @@ ELSE
 --GET SOFTWARE ITEMS
 IF @FromShipping = 0
 	BEGIN --MAINTENANCE/SAAS/LICENSEORMAINTENANCE SOFTWARE ITEMS
-		INSERT INTO @tblSODSoftware (intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)
+		INSERT INTO @tblSODSoftware (intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal, dtmMaintenanceDate)
 		SELECT intSalesOrderDetailId
 				, @dblZeroAmount
 				, @dblZeroAmount
 				, dblMaintenanceAmount
 				, dblMaintenanceAmount * dblQtyRemaining				
+				, dtmMaintenanceDate
 		FROM @tblItemsToInvoice 
 		WHERE strItemType = 'Software' AND strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License/Maintenance')
 			ORDER BY intSalesOrderDetailId
@@ -470,6 +472,76 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				  , strType				= 'Software'
 				  , ysnPosted			= 0
 				WHERE intInvoiceId = @SoftwareInvoiceId
+				
+				--CHECK IF NEW SOFTWARE ITEM MAINTENANCE DATE IS LESS THAN A MONTH FROM EXISTING RECURRING INVOICE
+				DECLARE @dtmSOMaintenanceDate			DATETIME = NULL,
+				        @intAccrualPeriod				INT = NULL,
+						@intNewSoftwareInvoiceId		INT = NULL,
+
+						@intNewSoftwareItemId			INT = NULL,
+						@intNewSoftwareUOMId			INT = NULL,
+						@strNewSoftwareItemDescription	NVARCHAR(500) = NULL,
+						@strNewSoftwareItemMaintType    NVARCHAR(100) = NULL,
+						@strNewSoftwareItemMainFreq     NVARCHAR(100) = NULL,						
+						@dblNewSoftwareOrderedQty		NUMERIC(18, 6),
+						@dblNewSoftwareMaintAmt			NUMERIC(18, 6)
+
+				SELECT TOP 1 @dtmSOMaintenanceDate			= SOD.dtmMaintenanceDate
+				           , @intNewSoftwareItemId			= SOD.intItemId
+						   , @intNewSoftwareUOMId			= SOD.intItemUOMId
+						   , @strNewSoftwareItemDescription = SOD.strItemDescription
+						   , @strNewSoftwareItemMaintType	= SOD.strMaintenanceType
+						   , @strNewSoftwareItemMainFreq    = SOD.strFrequency
+						   , @dblNewSoftwareOrderedQty		= SOD.dblQtyOrdered
+						   , @dblNewSoftwareMaintAmt		= SOD.dblMaintenanceAmount
+				FROM @tblSODSoftware SODS 
+					INNER JOIN tblSOSalesOrderDetail SOD ON SODS.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+					
+				IF @dtmSOMaintenanceDate IS NOT NULL AND EXISTS (SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @SoftwareInvoiceId AND DATEDIFF(MONTH, @dtmSOMaintenanceDate, dtmDate) >= 1)
+					BEGIN
+						SELECT @intAccrualPeriod = DATEDIFF(MONTH, @dtmSOMaintenanceDate, dtmDate) FROM tblARInvoice WHERE intInvoiceId = @SoftwareInvoiceId AND DATEDIFF(MONTH, @dtmSOMaintenanceDate, dtmDate) >= 1
+
+						EXEC dbo.uspARCreateCustomerInvoice
+							@EntityCustomerId		=	@EntityCustomerId,
+							@CompanyLocationId		=	@CompanyLocationId,
+							@CurrencyId				=	@CurrencyId,
+							@TermId					=	@TermId,
+							@EntityId				=	@UserId,
+							@InvoiceDate			=	@dtmSOMaintenanceDate,
+							@DueDate				=	@DueDate,
+							@ShipDate				=	@dtmSOMaintenanceDate,
+							@NewInvoiceId			=	@intNewSoftwareInvoiceId OUT,
+							@ErrorMessage			=   @ErrorMessage OUT,
+							@RaiseError             =   1,
+							@EntitySalespersonId	=	@EntitySalespersonId,
+							@EntityContactId		=	@EntityContactId,
+							@Comment				=	@SalesOrderComment,
+							@FreightTermId			=	@FreightTermId,
+							@ShipViaId				=	@ShipViaId,  	   
+							@PONumber				=	@PONumber,
+							@BOLNumber				=	@BOLNumber,
+							@DeliverPickup			=	@DeliverPickup,							
+							@ShipToLocationId		=	@ShipToLocationId,
+							@BillToLocationId		=	@BillToLocationId,
+							@PeriodsToAccrue		=	@intAccrualPeriod,
+							
+							@ItemId					= 	@intNewSoftwareItemId,
+							@ItemDescription		=	@strNewSoftwareItemDescription,
+							@OrderUOMId				=	@intNewSoftwareUOMId,
+							@ItemQtyOrdered			=	@dblNewSoftwareOrderedQty,
+							@ItemQtyShipped			=	@dblNewSoftwareOrderedQty,							
+							@ItemMaintenanceType	=	@strNewSoftwareItemMaintType,
+							@ItemFrequency			=	@strNewSoftwareItemMainFreq,
+							@ItemMaintenanceDate	=	@dtmSOMaintenanceDate,
+							@ItemMaintenanceAmount	=	@dblNewSoftwareMaintAmt,
+							@ItemLicenseAmount		=	0,
+							@ItemPrice				=	@dblNewSoftwareMaintAmt
+							
+						DECLARE @softwareToPost NVARCHAR(MAX)
+						SET @softwareToPost = CONVERT(NVARCHAR(MAX), @intNewSoftwareInvoiceId)
+
+						EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @softwareToPost, @userId = @UserId, @transType = N'Invoice'							
+					END
 			END
 		ELSE
 			BEGIN

@@ -106,8 +106,8 @@ FROM
 INNER JOIN
 	dbo.tblARCustomer AS C 
 		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
-LEFT OUTER JOIN
-	(SELECT strName, strEmail, intEntityContactId FROM vyuEMEntityContact) EC ON I.intEntityContactId = EC.intEntityContactId	
+OUTER APPLY
+	(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact WHERE intEntityContactId = I.intEntityContactId) EC	
 INNER JOIN
 	dbo.tblEMEntity AS CE 
 		ON C.[intEntityCustomerId] = CE.intEntityId 
