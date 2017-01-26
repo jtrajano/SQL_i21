@@ -87,73 +87,70 @@ WHERE intItemId = @intSourceItemId
 
 UPDATE d
 SET 
-       [intLocationId] = x.intLocationId
-      ,[intVendorId] = x.intVendorId
-      ,[strDescription] = x.strDescription
-      ,[intCostingMethod] = x.intCostingMethod
-      ,[intAllowNegativeInventory] = x.intAllowNegativeInventory
-      ,[intSubLocationId] = x.intSubLocationId
-      ,[intStorageLocationId] = x.intStorageLocationId
-      ,[intIssueUOMId] = x.intIssueUOMId
-      ,[intReceiveUOMId] = x.intReceiveUOMId
-      ,[intFamilyId] = x.intFamilyId
-      ,[intClassId] = x.intClassId
-      ,[intProductCodeId] = x.intProductCodeId
-      ,[intFuelTankId] = x.intFuelTankId
-      ,[strPassportFuelId1] = x.strPassportFuelId1
-      ,[strPassportFuelId2] = x.strPassportFuelId2
-      ,[strPassportFuelId3] = x.strPassportFuelId3
-      ,[ysnTaxFlag1] = x.ysnTaxFlag1
-      ,[ysnTaxFlag2] = x.ysnTaxFlag2
-      ,[ysnTaxFlag3] = x.ysnTaxFlag3
-      ,[ysnTaxFlag4] = x.ysnTaxFlag4
-      ,[ysnPromotionalItem] = x.ysnPromotionalItem
-      ,[intMixMatchId] = x.intMixMatchId
-      ,[ysnDepositRequired] = x.ysnDepositRequired
-      ,[intDepositPLUId] = x.intDepositPLUId
-      ,[intBottleDepositNo] = x.intBottleDepositNo
-      ,[ysnSaleable] = x.ysnSaleable
-      ,[ysnQuantityRequired] = x.ysnQuantityRequired
-      ,[ysnScaleItem] = x.ysnScaleItem
-      ,[ysnFoodStampable] = x.ysnFoodStampable
-      ,[ysnReturnable] = x.ysnReturnable
-      ,[ysnPrePriced] = x.ysnPrePriced
-      ,[ysnOpenPricePLU] = x.ysnOpenPricePLU
-      ,[ysnLinkedItem] = x.ysnLinkedItem
-      ,[strVendorCategory] = x.strVendorCategory
-      ,[ysnCountBySINo] = x.ysnCountBySINo
-      ,[strSerialNoBegin] = x.strSerialNoBegin
-      ,[strSerialNoEnd] = x.strSerialNoEnd
-      ,[ysnIdRequiredLiquor] = x.ysnIdRequiredLiquor
-      ,[ysnIdRequiredCigarette] = x.ysnIdRequiredCigarette
-      ,[intMinimumAge] = x.intMinimumAge
-      ,[ysnApplyBlueLaw1] = x.ysnApplyBlueLaw1
-      ,[ysnApplyBlueLaw2] = x.ysnApplyBlueLaw2
-      ,[ysnCarWash] = x.ysnCarWash
-      ,[intItemTypeCode] = x.intItemTypeCode
-      ,[intItemTypeSubCode] = x.intItemTypeSubCode
-      ,[ysnAutoCalculateFreight] = x.ysnAutoCalculateFreight
-      ,[intFreightMethodId] = x.intFreightMethodId
-      ,[dblFreightRate] = x.dblFreightRate
-      ,[intShipViaId] = x.intShipViaId
-      ,[intNegativeInventory] = x.intNegativeInventory
-      ,[dblReorderPoint] = x.dblReorderPoint
-      ,[dblMinOrder] = x.dblMinOrder
-      ,[dblSuggestedQty] = x.dblSuggestedQty
-      ,[dblLeadTime] = x.dblLeadTime
-      ,[strCounted] = x.strCounted
-      ,[intCountGroupId] = x.intCountGroupId
-      ,[ysnCountedDaily] = x.ysnCountedDaily
-      ,[ysnLockedInventory] = x.ysnLockedInventory
-      ,[intSort] = x.intSort
+       [intLocationId] = s.intLocationId
+      ,[intVendorId] = s.intVendorId
+      ,[strDescription] = s.strDescription
+      ,[intCostingMethod] = s.intCostingMethod
+      ,[intAllowNegativeInventory] = s.intAllowNegativeInventory
+      ,[intSubLocationId] = s.intSubLocationId
+      ,[intStorageLocationId] = s.intStorageLocationId
+      ,[intIssueUOMId] = s.intIssueUOMId
+      ,[intReceiveUOMId] = s.intReceiveUOMId
+      ,[intFamilyId] = s.intFamilyId
+      ,[intClassId] = s.intClassId
+      ,[intProductCodeId] = s.intProductCodeId
+      ,[intFuelTankId] = s.intFuelTankId
+      ,[strPassportFuelId1] = s.strPassportFuelId1
+      ,[strPassportFuelId2] = s.strPassportFuelId2
+      ,[strPassportFuelId3] = s.strPassportFuelId3
+      ,[ysnTaxFlag1] = s.ysnTaxFlag1
+      ,[ysnTaxFlag2] = s.ysnTaxFlag2
+      ,[ysnTaxFlag3] = s.ysnTaxFlag3
+      ,[ysnTaxFlag4] = s.ysnTaxFlag4
+      ,[ysnPromotionalItem] = s.ysnPromotionalItem
+      ,[intMixMatchId] = s.intMixMatchId
+      ,[ysnDepositRequired] = s.ysnDepositRequired
+      ,[intDepositPLUId] = s.intDepositPLUId
+      ,[intBottleDepositNo] = s.intBottleDepositNo
+      ,[ysnSaleable] = s.ysnSaleable
+      ,[ysnQuantityRequired] = s.ysnQuantityRequired
+      ,[ysnScaleItem] = s.ysnScaleItem
+      ,[ysnFoodStampable] = s.ysnFoodStampable
+      ,[ysnReturnable] = s.ysnReturnable
+      ,[ysnPrePriced] = s.ysnPrePriced
+      ,[ysnOpenPricePLU] = s.ysnOpenPricePLU
+      ,[ysnLinkedItem] = s.ysnLinkedItem
+      ,[strVendorCategory] = s.strVendorCategory
+      ,[ysnCountBySINo] = s.ysnCountBySINo
+      ,[strSerialNoBegin] = s.strSerialNoBegin
+      ,[strSerialNoEnd] = s.strSerialNoEnd
+      ,[ysnIdRequiredLiquor] = s.ysnIdRequiredLiquor
+      ,[ysnIdRequiredCigarette] = s.ysnIdRequiredCigarette
+      ,[intMinimumAge] = s.intMinimumAge
+      ,[ysnApplyBlueLaw1] = s.ysnApplyBlueLaw1
+      ,[ysnApplyBlueLaw2] = s.ysnApplyBlueLaw2
+      ,[ysnCarWash] = s.ysnCarWash
+      ,[intItemTypeCode] = s.intItemTypeCode
+      ,[intItemTypeSubCode] = s.intItemTypeSubCode
+      ,[ysnAutoCalculateFreight] = s.ysnAutoCalculateFreight
+      ,[intFreightMethodId] = s.intFreightMethodId
+      ,[dblFreightRate] = s.dblFreightRate
+      ,[intShipViaId] = s.intShipViaId
+      ,[intNegativeInventory] = s.intNegativeInventory
+      ,[dblReorderPoint] = s.dblReorderPoint
+      ,[dblMinOrder] = s.dblMinOrder
+      ,[dblSuggestedQty] = s.dblSuggestedQty
+      ,[dblLeadTime] = s.dblLeadTime
+      ,[strCounted] = s.strCounted
+      ,[intCountGroupId] = s.intCountGroupId
+      ,[ysnCountedDaily] = s.ysnCountedDaily
+      ,[ysnLockedInventory] = s.ysnLockedInventory
+      ,[intSort] = s.intSort
 FROM tblICItemLocation d
-	INNER JOIN (
-		SELECT s.*
-		FROM @Source s
-			CROSS JOIN tblICItemLocation d
-		WHERE d.intLocationId = s.intLocationId			AND d.intItemId <> @intSourceItemId
-	) x ON x.intLocationId = d.intLocationId
+	INNER JOIN @Source s ON s.intLocationId = d.intLocationId
 WHERE d.intItemId IN (SELECT Value FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ','))
+
+DECLARE @intItemId INT
 
 DECLARE @New TABLE([intItemId] [int] NOT NULL,
 	[intLocationId] [int] NULL,
@@ -215,50 +212,52 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 	[ysnCountedDaily] [bit] NULL DEFAULT ((0)),
 	[ysnLockedInventory] [bit] NULL DEFAULT ((0)),
 	[intSort] [int] NULL)
-INSERT INTO @New(intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
+
+DECLARE cur CURSOR
+FOR
+	SELECT DISTINCT Value
+	FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ',')
+
+OPEN cur
+
+FETCH NEXT FROM cur INTO @intItemId
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+	INSERT INTO @New(intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
+		, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
+		, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
+		, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
+		, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
+		, ysnLockedInventory, intSort)
+	SELECT
+		  @intItemId, s.intLocationId, s.intVendorId, s.strDescription, s.intCostingMethod, s.intAllowNegativeInventory, s.intSubLocationId, s.intStorageLocationId, s.intIssueUOMId, s.intReceiveUOMId, s.intFamilyId
+		, s.intClassId, s.intProductCodeId, s.intFuelTankId, s.strPassportFuelId1, s.strPassportFuelId2, s.strPassportFuelId3, s.ysnTaxFlag1, s.ysnTaxFlag2, s.ysnTaxFlag3, s.ysnTaxFlag4, s.ysnPromotionalItem, s.intMixMatchId
+		, s.ysnDepositRequired, s.intDepositPLUId, s.intBottleDepositNo, s.ysnSaleable, s.ysnQuantityRequired, s.ysnScaleItem, s.ysnFoodStampable, s.ysnReturnable, s.ysnPrePriced, s.ysnOpenPricePLU, s.ysnLinkedItem, s.strVendorCategory
+		, s.ysnCountBySINo, s.strSerialNoBegin, s.strSerialNoEnd, s.ysnIdRequiredLiquor, s.ysnIdRequiredCigarette, s.intMinimumAge, s.ysnApplyBlueLaw1, s.ysnApplyBlueLaw2, s.ysnCarWash, s.intItemTypeCode, s.intItemTypeSubCode
+		, s.ysnAutoCalculateFreight, s.intFreightMethodId, s.dblFreightRate, s.intShipViaId, s.intNegativeInventory, s.dblReorderPoint, s.dblMinOrder, s.dblSuggestedQty, s.dblLeadTime, s.strCounted, s.intCountGroupId, s.ysnCountedDaily
+		, s.ysnLockedInventory, s.intSort
+	FROM @Source s
+		LEFT OUTER JOIN tblICItemLocation d ON d.intLocationId = s.intLocationId
+			AND d.intItemId = @intItemId
+	WHERE d.intItemId IS NULL
+	
+	FETCH NEXT FROM cur INTO @intItemId
+END
+
+CLOSE cur
+DEALLOCATE cur
+
+INSERT INTO tblICItemLocation(intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
 	, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
 	, ysnLockedInventory, intSort)
-SELECT DISTINCT 
-	 d.[intItemId]
-	, s.intLocationId, s.intVendorId, s.strDescription, s.intCostingMethod, s.intAllowNegativeInventory, s.intSubLocationId, s.intStorageLocationId, s.intIssueUOMId, s.intReceiveUOMId, s.intFamilyId
-	, s.intClassId, s.intProductCodeId, s.intFuelTankId, s.strPassportFuelId1, s.strPassportFuelId2, s.strPassportFuelId3, s.ysnTaxFlag1, s.ysnTaxFlag2, s.ysnTaxFlag3, s.ysnTaxFlag4, s.ysnPromotionalItem, s.intMixMatchId
-	, s.ysnDepositRequired, s.intDepositPLUId, s.intBottleDepositNo, s.ysnSaleable, s.ysnQuantityRequired, s.ysnScaleItem, s.ysnFoodStampable, s.ysnReturnable, s.ysnPrePriced, s.ysnOpenPricePLU, s.ysnLinkedItem, s.strVendorCategory
-	, s.ysnCountBySINo, s.strSerialNoBegin, s.strSerialNoEnd, s.ysnIdRequiredLiquor, s.ysnIdRequiredCigarette, s.intMinimumAge, s.ysnApplyBlueLaw1, s.ysnApplyBlueLaw2, s.ysnCarWash, s.intItemTypeCode, s.intItemTypeSubCode
-	, s.ysnAutoCalculateFreight, s.intFreightMethodId, s.dblFreightRate, s.intShipViaId, s.intNegativeInventory, s.dblReorderPoint, s.dblMinOrder, s.dblSuggestedQty, s.dblLeadTime, s.strCounted, s.intCountGroupId, s.ysnCountedDaily
-	, s.ysnLockedInventory, s.intSort
-FROM @Source s
-	CROSS JOIN tblICItemLocation d
-WHERE s.intLocationId <> d.intLocationId
-	AND d.intLocationId NOT IN (
-		SELECT d.intLocationId
-		FROM tblICItemLocation d
-			INNER JOIN (
-				SELECT s.*
-				FROM @Source s
-					CROSS JOIN tblICItemLocation d
-				WHERE d.intLocationId = s.intLocationId
-					AND d.intItemId <> @intSourceItemId
-					AND d.intItemId IN (SELECT Value FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ','))
-			) x ON x.intLocationId = d.intLocationId
-	)
-	AND d.intItemId IN (SELECT Value FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ','))
-
-DELETE n
-FROM @New n
-	INNER JOIN (
-		SELECT d.*
-		FROM @Source s
-			CROSS JOIN tblICItemLocation d
-		WHERE d.intLocationId = s.intLocationId
-			AND d.intItemId <> @intSourceItemId
-			AND d.intItemId IN (SELECT Value FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ','))
-	) x ON x.intItemId = n.intItemId
-		AND x.intLocationId = n.intLocationId
-
-INSERT INTO tblICItemLocation(intItemId,  intLocationId, strDescription)
-SELECT intItemId, intLocationId, strDescription
+SELECT intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
+	, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
+	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
+	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
+	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
+	, ysnLockedInventory, intSort
 FROM @New
-WHERE intItemId <> @intSourceItemId
