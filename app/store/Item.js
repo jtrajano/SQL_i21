@@ -17,6 +17,8 @@ Ext.define('Inventory.store.Item', {
             timeout: 120000,
             storeId: 'Item',
             pageSize: 50,
+            remoteFilter: true,
+            remoteSort: true,
             batchActions: true,
             proxy: {
                 type: 'rest',
