@@ -40,8 +40,8 @@ BEGIN TRY
 		IF LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) = ''
 			SET @strModifiedColumns = NULL
 
-		SELECT @strSQL = 'INSERT INTO  tblLGLoadDetailStg (' + ISNULL(@strModifiedColumns + ',','') + 'intLoadStgId,strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strRowState,dtmFeedCreated)
-										SELECT	' + ISNULL(@strModifiedColumns + ',','') + CONVERT(NVARCHAR,@intLoadStgId)  + ',strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,''Modified'',GETDATE()
+		SELECT @strSQL = 'INSERT INTO  tblLGLoadDetailStg (' + ISNULL(@strModifiedColumns + ',','') + 'intLoadStgId,intLoadDetailId,strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strCommodityCode,strRowState,dtmFeedCreated)
+										SELECT	' + ISNULL(@strModifiedColumns + ',','') + CONVERT(NVARCHAR,@intLoadStgId)  + ',intLoadDetailId,strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strCommodityCode,''Modified'',GETDATE()
 										FROM	tblLGLoadDetailLog
 										WHERE	intLGLoadDetailLogId = @intLoadDetailLogId '
 
@@ -52,8 +52,8 @@ BEGIN TRY
 	ELSE IF (@strTblName = 'tblLGLoadContainerLog' AND LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) <> '')
 	BEGIN
 		SELECT @intLoadStgId = MAX(intLoadStgId) FROM tblLGLoadStg
-		SELECT @strSQL = 'INSERT INTO  tblLGLoadContainerStg (' + ISNULL(@strModifiedColumns + ',','') + 'intLoadStgId,strRowState,dtmFeedCreated)
-										SELECT	' + ISNULL(@strModifiedColumns + ',','') + CONVERT(NVARCHAR,@intLoadStgId) + ',''Modified'',GETDATE()
+		SELECT @strSQL = 'INSERT INTO  tblLGLoadContainerStg (' + ISNULL(@strModifiedColumns + ',','') + 'intLoadStgId,intLoadId,intLoadContainerId,strRowState,dtmFeedCreated)
+										SELECT	' + ISNULL(@strModifiedColumns + ',','') + CONVERT(NVARCHAR,@intLoadStgId) + ',intLoadId,intLoadContainerId,''Modified'',GETDATE()
 										FROM	tblLGLoadContainerLog
 										WHERE	intLoadContainerLogId = @intLoadContainerLogId '
 

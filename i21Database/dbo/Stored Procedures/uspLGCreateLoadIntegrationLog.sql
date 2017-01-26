@@ -101,7 +101,8 @@ BEGIN TRY
 			,strExternalBatchNo
 			,strChangeType
 			,strRowState
-			,dtmFeedCreated)
+			,dtmFeedCreated
+			,strCommodityCode)
 		SELECT @intLoadStgId
 			,@intLoadId
 			,LD.intLoadDetailId
@@ -147,6 +148,7 @@ BEGIN TRY
 			,'QUA' AS strChangeType
 			,@strRowState AS strRowState
 			,GETDATE()
+			,C.strCommodityCode
 		FROM vyuLGLoadDetailView LD
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
 				WHEN LD.intPurchaseSale = 1
@@ -154,6 +156,11 @@ BEGIN TRY
 				ELSE LD.intSContractDetailId
 				END
 		JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
+		JOIN tblICCommodity C ON C.intCommodityId = CASE 
+				WHEN LD.intPurchaseSale = 1
+					THEN LD.intPCommodityId
+				ELSE LD.intSCommodityId
+				END
 		WHERE LD.intLoadId = @intLoadId
 
 		IF (@intShipmentType = 1)
@@ -258,7 +265,8 @@ BEGIN TRY
 			,strExternalShipmentItemNumber
 			,strExternalBatchNo
 			,strChangeType
-			,strRowState)
+			,strRowState
+			,strCommodityCode)
 		SELECT @intLoadStgId
 			,@intLoadId
 			,LD.intLoadDetailId
@@ -303,6 +311,7 @@ BEGIN TRY
 			,D.strExternalBatchNo
 			,'QUA' AS strChangeType
 			,@strRowState AS strRowState
+			,C.strCommodityCode
 		FROM vyuLGLoadDetailView LD
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
 				WHEN LD.intPurchaseSale = 1
@@ -310,6 +319,11 @@ BEGIN TRY
 				ELSE LD.intSContractDetailId
 				END
 		JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
+		JOIN tblICCommodity C ON C.intCommodityId = CASE 
+				WHEN LD.intPurchaseSale = 1
+					THEN LD.intPCommodityId
+				ELSE LD.intSCommodityId
+				END
 		WHERE LD.intLoadId = @intLoadId
 
 		IF (@intShipmentType = 1)

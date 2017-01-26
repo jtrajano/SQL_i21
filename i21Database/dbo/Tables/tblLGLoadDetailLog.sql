@@ -21,6 +21,7 @@
 	[strExternalPOBatchNumber]	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	[strExternalShipmentItemNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strExternalBatchNo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strCommodityCode] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strChangeType] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strRowState] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 )
