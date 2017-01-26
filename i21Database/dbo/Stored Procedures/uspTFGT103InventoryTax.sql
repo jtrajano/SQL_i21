@@ -117,7 +117,7 @@ IF @Refresh = 'true'
 				DECLARE @QueryInventory1 NVARCHAR(MAX)
 				DECLARE @QueryInventory2 NVARCHAR(MAX)
 	     
-				SET @QueryInventory1 = 'SELECT DISTINCT 
+				SET @QueryInventory1 = 'SELECT DISTINCT 0,
 							 tblICInventoryReceiptItem.intInventoryReceiptItemId, 
 							 tblTFReportingComponent.intTaxAuthorityId, 
 							 tblTFReportingComponent.strFormCode,
@@ -180,7 +180,7 @@ IF @Refresh = 'true'
 				SET @QueryInvReceiptRecord = @QueryInventory1 + @QueryInventory2
 
 					DELETE FROM @TFTransaction
-					INSERT INTO @TFTransaction(
+					INSERT INTO @TFTransaction(intId,
 								[intInventoryReceiptItemId],
 								[intTaxAuthorityId],
 								[strFormCode],
@@ -216,8 +216,8 @@ IF @Refresh = 'true'
 								[strTerminalControlNumber])
 							EXEC(@QueryInvReceiptRecord)
 			-- SET INCREMENT PRIMARY ID FOR TEMP @TFTransaction
-			--DECLARE @tblTempTransaction_intId INT
-			--SET @tblTempTransaction_intId = 0 UPDATE @TFTransaction SET @tblTempTransaction_intId = intId = @tblTempTransaction_intId + 1
+			DECLARE @tblTempTransaction_intId INT
+			SET @tblTempTransaction_intId = 0 UPDATE @TFTransaction SET @tblTempTransaction_intId = intId = @tblTempTransaction_intId + 1
 
 			SET @Count = (SELECT count(intId) FROM @TFTransaction)
 					WHILE(@Count > 0) -- LOOP ON INVENTORY RECEIPT ITEM ID/S

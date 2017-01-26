@@ -88,7 +88,8 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId)
 		BEGIN
-			INSERT INTO @TFTransaction(intInventoryReceiptItemId
+			INSERT INTO @TFTransaction(intId
+				, intInventoryReceiptItemId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -119,6 +120,9 @@ BEGIN TRY
 				, strOriginState
 				, strDestinationState
 				, strTerminalControlNumber)
+			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId
+				, *
+			FROM (
 			SELECT DISTINCT ReceiptItem.intInventoryReceiptItemId
 				, RCPC.intTaxAuthorityId
 				, RCPC.strFormCode
@@ -183,11 +187,12 @@ BEGIN TRY
 					OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
 				AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId) = 0
 					OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
-
+				)tblTFTransaction
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @TFTransaction(intInventoryReceiptItemId
+			INSERT INTO @TFTransaction(intId
+				, intInventoryReceiptItemId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -218,6 +223,9 @@ BEGIN TRY
 				, strOriginState
 				, strDestinationState
 				, strTerminalControlNumber)
+			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId
+				, *
+			FROM (
 			SELECT DISTINCT ReceiptItem.intInventoryReceiptItemId
 				, RCPC.intTaxAuthorityId
 				, RCPC.strFormCode
@@ -281,8 +289,9 @@ BEGIN TRY
 					OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
 				AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId) = 0
 					OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
+				)tblTransactions
 		END
-		
+	
 		-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
 		SELECT ROW_NUMBER() OVER(ORDER BY tblSMTaxCode.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria DESC) AS intId
 			, tblSMTaxCode.intTaxCodeId

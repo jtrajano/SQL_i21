@@ -7,11 +7,6 @@
 
 AS
 
-
-DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM tblTFTransaction WHERE strFormCode = @FormCodeParam AND uniqTransactionGuid = @Guid)
-IF (@FCode IS NOT NULL)
-BEGIN
-
 DECLARE @TFTransactionSummaryItem TFTransactionSummaryItem
 DECLARE @TFTransactionSummaryTotal TFTransactionSummaryTotal
 
@@ -445,4 +440,3 @@ DECLARE @EIN NVARCHAR(50)
 					BEGIN
 						UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
 					END
-END

@@ -125,6 +125,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 						SET @ExcludeDestinationState = ''
 					END
 							SET @QueryInvoice1 = 'SELECT DISTINCT
+								0,
 								tblARInvoiceDetail.intInvoiceDetailId,
 								tblTFReportingComponent.intTaxAuthorityId,
 								tblTFReportingComponent.strFormCode,
@@ -199,8 +200,8 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 							EXEC(@QueryInvoice)
 
 				-- SET INCREMENT PRIMARY ID FOR TEMP @TFTransaction
-				--DECLARE @tblTempTransaction_intId INT
-				--SET @tblTempTransaction_intId = 0 UPDATE @TFTransaction SET @tblTempTransaction_intId = intId = @tblTempTransaction_intId + 1
+				DECLARE @tblTempTransaction_intId INT
+				SET @tblTempTransaction_intId = 0 UPDATE @TFTransaction SET @tblTempTransaction_intId = intId = @tblTempTransaction_intId + 1
 				SET @Count = (SELECT COUNT(intId) FROM @TFTransaction) 				
 						WHILE(@Count > 0) -- LOOP ON INVOICE ID/S
 							BEGIN
@@ -247,6 +248,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 							END
 
 						SET @InvQueryPart1 = 'SELECT DISTINCT
+								 0,
 								 tblICInventoryTransferDetail.intInventoryTransferDetailId, 
 								 tblTFReportingComponent.intTaxAuthorityId, 
 								 tblTFReportingComponent.strFormCode,
@@ -365,6 +367,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 																			   strFormCode,
 																			   intReportingComponentId,
 																			   strScheduleCode,
+																			   strType,
 																			   intProductCodeId,
 																			   strProductCode,
 																			   intItemId,
@@ -414,6 +417,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 																				strFormCode,
 																				intReportingComponentId,
 																				strScheduleCode,
+																				strType,
 																				intProductCode,
 																				strProductCode,
 																				intItemId,

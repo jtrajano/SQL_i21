@@ -1,5 +1,5 @@
 ﻿CREATE TYPE [dbo].[TFTransaction] AS TABLE(
-	[intId] [int] IDENTITY(1,1) NOT NULL,
+	[intId] [int] NOT NULL,
 	[intInventoryReceiptItemId] [int] NULL,
 	[intTaxAuthorityId] [int] NULL,
 	[strFormCode] [nvarchar](20) NULL,
@@ -34,3 +34,4 @@
 	[strDestinationState] [nvarchar](250) NULL,
 	[strTerminalControlNumber] [nvarchar](30) NULL
 )
+GO
