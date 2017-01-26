@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
+﻿CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
@@ -271,64 +270,3 @@ BEGIN
 
 
 END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
------------------------------------
---			  NOTES				 --
------------------------------------
-
---DECLARE @total					INT = 0
---DECLARE @counter				INT = 0
---DECLARE @customerId				INT
-
---Declare @ErrorMessage			NVARCHAR(250) 
---Declare @CreatedIvoices			NVARCHAR(MAX) 
---Declare @UpdatedIvoices			NVARCHAR(MAX) 
-
-
---SELECT @total = count(*) from #tblCFInvoiceDiscount
---SET @counter = 1 
-
---WHILE @counter <= @total 
---BEGIN
---	SELECT TOP 1 @customerId = intCustomerId FROM #tblCFInvoiceDiscount
-	
-	
---SET @counter = @counter + 1;
---DELETE FROM #tblCFInvoiceDiscount WHERE intCustomerId = @customerId
-
---SELECT 
--- intCustomerId 
---,strInvoiceReportNumber
---,dblAccountTotalAmount	AS dblTotalAmount
---,dblTotalQuantity		AS dblTotalQuantity
---,dblAccountTotalDiscount 
---,dblDiscountRate
---,'need to implement' AS intEntityId
---,intTermID
---,'need to implement' AS dtmInvoiceDate
---,'need to implement' AS intSalespersonId
---,'need to implement' AS intLocationId
---,'need to implement' AS intGLAccountId
---FROM #tblCFInvoiceDiscount
-----WHERE strInvoiceReportNumber = 'CFSI-4805'
---GROUP BY 
---intCustomerId
---,strInvoiceReportNumber
---,dblAccountTotalAmount
---,dblTotalQuantity
---,dblAccountTotalDiscount
---,dblDiscountRate
---,intTermID
