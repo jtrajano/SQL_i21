@@ -80,8 +80,15 @@ BEGIN TRY
     SELECT TOP 1 @FirstApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId ORDER BY intApprovalId
 
-	SELECT @FirstApprovalSign =  [imgEmailSignature] FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@FirstApprovalId)
-	SELECT @SecondApprovalSign = [imgEmailSignature] FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@SecondApprovalId)
+	SELECT @FirstApprovalSign =  Sig.blbDetail 
+								 FROM tblSMSignature Sig 
+								 JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
+								 WHERE ESig.intEntityId=@FirstApprovalId
+
+	SELECT @SecondApprovalSign =Sig.blbDetail 
+								FROM tblSMSignature Sig 
+								JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
+								WHERE ESig.intEntityId=@SecondApprovalId
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,

@@ -63,7 +63,10 @@ BEGIN TRY
 	JOIN tblCTPriceFixation PF ON PF.intPriceContractId=PC.intPriceContractId 
 	WHERE PF.intPriceFixationId=@intPriceFixationId
 	
-	SELECT @LastModifiedUserSign =  [imgEmailSignature] FROM tblEMEntitySMTPInformation WHERE intEntityId=(SELECT TOP 1 intEntityContactId FROM tblEMEntityToContact WHERE intEntityId=@intLastModifiedUserId) 
+	SELECT @LastModifiedUserSign = Sig.blbDetail 
+								   FROM tblSMSignature Sig 
+								   JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
+								   WHERE ESig.intEntityId=@intLastModifiedUserId 
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
