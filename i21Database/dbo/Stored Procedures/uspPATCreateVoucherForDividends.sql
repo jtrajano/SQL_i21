@@ -53,7 +53,7 @@ BEGIN TRY
 		SELECT TOP 1 
 			@intDivCustId = T.intDividendCustomerId,
 			@intCustomerId = T.intCustomerId, 
-			@dblDividentAmt = T.dblDividendAmount,
+			@dblDividentAmt = ROUND(T.dblDividendAmount,2),
 			@strVenderOrderNumber = '' + T.strDividendNo + '' + CONVERT(NVARCHAR(MAX),T.intDividendCustomerId)
 			FROM @dividendCustomerIds Div INNER JOIN #tempDivCust T ON T.intDividendCustomerId = Div.intId
 
@@ -95,7 +95,6 @@ BEGIN TRY
 	END
 
 	UPDATE tblPATDividends SET ysnVoucherProcessed = 1 WHERE intDividendId = @intDividendId
-		
 	
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

@@ -55,9 +55,9 @@ SELECT  id = NEWID(),
 		dblCashPayout,
 		ysnQualified,
 		dtmLastActivityDate,
-		dblRefundAmount = SUM(dblRefundAmount),
-		dblCashRefund = SUM(dblCashRefund),
-		dblEquityRefund = SUM(dblEquityRefund)
+		dblRefundAmount = SUM(ROUND(dblRefundAmount,2)),
+		dblCashRefund = SUM(ROUND(dblCashRefund,2)),
+		dblEquityRefund = SUM(ROUND(dblEquityRefund,2))
 	FROM Refunds
 	CROSS APPLY ComPref
 	GROUP BY intCustomerId,

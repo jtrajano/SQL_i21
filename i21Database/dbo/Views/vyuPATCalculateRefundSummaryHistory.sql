@@ -37,10 +37,10 @@ SELECT	NEWID() as id,
 		dblCashPayout,
 		ysnQualified,
 		dblVolume = SUM(dblVolume),
-		dblRefundAmount = SUM(dblRefundAmount),
-		dblNonRefundAmount  = SUM(dblNonRefundAmount),
-		dblCashRefund = SUM(dblCashRefund),
-		dblEquityRefund = SUM(dblEquityRefund)
+		dblRefundAmount = SUM(ROUND(dblRefundAmount,2)),
+		dblNonRefundAmount  = SUM(ROUND(dblNonRefundAmount,2)),
+		dblCashRefund = SUM(ROUND(dblCashRefund,2)),
+		dblEquityRefund = SUM(ROUND(dblEquityRefund,2))
 FROM Refund
 GROUP BY intRefundId,
 		intFiscalYearId,

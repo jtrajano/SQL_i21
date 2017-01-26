@@ -45,12 +45,12 @@ BEGIN TRY
 		,[dblCost]
 		,[intTaxGroupId])
 	VALUES
-		(@intAPClearingGLAccount											
-		,0					
+		(@intAPClearingGLAccount
+		,0
 		,'Patronage Refund'		
-		,1												
-		,0												
-		,@dblRefundAmount								
+		,1
+		,0
+		,ROUND(@dblRefundAmount,2)
 		,NULL),
 		(@intServiceFeeIncomeId
 		,0

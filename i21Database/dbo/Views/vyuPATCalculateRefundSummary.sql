@@ -51,10 +51,10 @@ SELECT	id = NEWID(),
 		dblCashPayout,
 		ysnQualified,
 		dblVolume = SUM(dblVolume),
-		dblRefundAmount = SUM(dblRefundAmount),
-		dblNonRefundAmount = SUM(dblNonRefundAmount),
-		dblCashRefund = SUM(dblRefundAmount * (dblCashPayout/100)),
-		dblEquityRefund = SUM(dblRefundAmount - (dblRefundAmount * (dblCashPayout/100))) 
+		dblRefundAmount = SUM(ROUND(dblRefundAmount,2)),
+		dblNonRefundAmount = SUM(ROUND(dblNonRefundAmount,2)),
+		dblCashRefund = SUM(ROUND(dblRefundAmount * (dblCashPayout/100),2)),
+		dblEquityRefund = SUM(ROUND(dblRefundAmount - (dblRefundAmount * (dblCashPayout/100)),2)) 
 	FROM Refunds
 	GROUP BY intRefundTypeId,
 		strRefundType,

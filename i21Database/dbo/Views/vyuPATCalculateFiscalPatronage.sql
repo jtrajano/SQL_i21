@@ -6,8 +6,8 @@ SELECT	DISTINCT RRD.intPatronageCategoryId,
 		PC.strDescription,
 		PC.strCategoryCode,
 		RRD.dblRate,
-		dblVolume = SUM(CV.dblVolume),
-		dblRefundAmount = SUM(ISNULL((RRD.dblRate * CV.dblVolume),0))
+		dblVolume = SUM(ROUND(CV.dblVolume, 2)),
+		dblRefundAmount = SUM(ROUND(ISNULL((RRD.dblRate * CV.dblVolume),0),2))
 		FROM tblPATRefundRate RR
 INNER JOIN tblPATRefundRateDetail RRD
 		ON RRD.intRefundTypeId = RR.intRefundTypeId

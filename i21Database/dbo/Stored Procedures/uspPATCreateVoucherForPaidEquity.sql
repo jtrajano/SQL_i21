@@ -78,7 +78,7 @@ END
 			@intEquityPaySummaryId = tEP.intEquityPaySummaryId,
 			@intCustomerPatronId = tEP.dblEquityPaid,
 			@intCustomerPatronId = tEP.intCustomerPatronId,
-			@dblEquityPay = tEP.dblEquityPaid,
+			@dblEquityPay = ROUND(tEP.dblEquityPaid,2),
 			@strVenderOrderNumber = tEP.strPaymentNumber + '' + CONVERT(NVARCHAR(MAX), tEP.intEquityPaySummaryId)
 		FROM @equityPayments dEP INNER JOIN #tempEquityPayments tEP ON tEP.intEquityPaySummaryId = dEP.intId
 

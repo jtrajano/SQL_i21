@@ -7,7 +7,7 @@ SELECT	NEWID() as id,
 		PC.strDescription,
 		RCat.dblVolume,
 		RCat.dblRefundRate AS dblRate,
-		dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate
+		dblRefundAmount = ROUND(RCat.dblVolume * RCat.dblRefundRate,2)
 		FROM tblPATRefundCategory RCat
 	INNER JOIN tblPATRefundCustomer RCus
 		ON RCus.intRefundCustomerId = RCat.intRefundCustomerId

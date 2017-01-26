@@ -53,7 +53,7 @@ SET ANSI_WARNINGS OFF
 				RR.strRefundType,
 				RR.ysnQualified,
 				tempEP.dblEquityAvailable,
-				dblEquityPay = tempEP.dblEquityAvailable * (@equityPayout/100)
+				dblEquityPay = ROUND(tempEP.dblEquityAvailable * (@equityPayout/100),2)
 		FROM #tempEquityDetails tempEP
 		INNER JOIN tblGLFiscalYear FY
 			ON FY.intFiscalYearId = tempEP.intFiscalYearId
@@ -81,9 +81,9 @@ SET ANSI_WARNINGS OFF
 					RR.strRefundType,
 					RR.ysnQualified,
 					tempEP.dblEquityAvailable,
-					dblEquityPay =	CASE WHEN @totalPayout < @customerEquityPay THEN 
+					dblEquityPay =	ROUND(CASE WHEN @totalPayout < @customerEquityPay THEN 
 											CASE WHEN  tempEP.dblEquityAvailable < @customerEquityPay THEN tempEP.dblEquityAvailable ELSE @customerEquityPay - @totalPayout END
-									ELSE 0 END
+									ELSE 0 END,2)
 			FROM #tempEquityDetails tempEP
 			INNER JOIN tblGLFiscalYear FY
 				ON FY.intFiscalYearId = tempEP.intFiscalYearId

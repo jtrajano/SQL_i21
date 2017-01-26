@@ -45,10 +45,10 @@ SELECT	id = NEWID(),
 		intRefundTypeId,
 		strStockStatus,
 		ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) < ComPref.dblMinimumRefund THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
-		dblTotalPurchases = SUM(dblTotalPurchases),
-		dblTotalSales = SUM(dblTotalSales),
-		dblRefundAmount = SUM(dblRefundAmount),
-		dblEquityRefund = SUM(dblEquityRefund)
+		dblTotalPurchases = SUM(ROUND(dblTotalPurchases,2)),
+		dblTotalSales = SUM(ROUND(dblTotalSales,2)),
+		dblRefundAmount = SUM(ROUND(dblRefundAmount,2)),
+		dblEquityRefund = SUM(ROUND(dblEquityRefund,2))
 	FROM Refunds
 	CROSS APPLY ComPref
 	GROUP BY intCustomerId,

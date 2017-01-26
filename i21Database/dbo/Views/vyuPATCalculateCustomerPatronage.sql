@@ -8,7 +8,7 @@ SELECT	RR.intRefundTypeId,
 		PC.strCategoryCode,
 		RRD.dblRate,
 		dblVolume = CV.dblVolume,
-		dblRefundAmount = (RRD.dblRate * CV.dblVolume)
+		dblRefundAmount = ROUND((RRD.dblRate * CV.dblVolume),2)
 FROM tblPATRefundRate RR
 INNER JOIN tblPATRefundRateDetail RRD
 	ON RRD.intRefundTypeId = RR.intRefundTypeId
