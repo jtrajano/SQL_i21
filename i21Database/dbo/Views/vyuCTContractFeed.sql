@@ -3,9 +3,9 @@
 AS 
 
 
-	SELECT	CD.intContractHeaderId,			CD.intContractDetailId,		CH.strCommodityCode,	CH.strCommodityDescription AS strCommodityDesc,
-			CH.strContractBasis,			CD.strSubLocation,			CH.strCreatedBy,		CH.strContractBasisDescription AS strContractBasisDesc,	
-			CD.strCreatedByNo,				CH.strTerm,					CD.strPurchasingGroup,	CH.strEntityNumber AS strEntityNo,	
+	SELECT	CD.intContractHeaderId,			CD.intContractDetailId,		CH.strCommodityCode,	CH.strCommodityDescription		AS strCommodityDesc,
+			CH.strContractBasis,			CD.strSubLocation,			CH.strCreatedBy,		CH.strContractBasisDescription	AS strContractBasisDesc,	
+			CD.strCreatedByNo,				CH.strTerm,					CD.strPurchasingGroup,	VE.strVendorAccountNum			AS strEntityNo,	
 			CH.strContractNumber,			CD.strERPPONumber,			CD.intContractSeq,		CD.strItemNo,
 			CD.strStorageLocation,			CD.dblQuantity,				CD.dblCashPrice,		CD.strItemUOM	AS strQuantityUOM,
 			CD.dtmPlannedAvailabilityDate,	CD.dblBasis,				CD.strCurrency,			CD.dblCashPrice / 100.0	AS dblUnitCashPrice,	
@@ -33,4 +33,5 @@ AS
 					ORDER BY intApprovalId DESC
 			) AP ON AP.intRecordId = CD.intContractDetailId											LEFT
 	JOIN	tblEMEntity	AE	ON	AE.intEntityId	=	AP.intSubmittedById
-	JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)
+	JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)LEFT
+	JOIN	tblAPVendor	VE	ON	VE.intEntityVendorId	=	CH.intEntityId
