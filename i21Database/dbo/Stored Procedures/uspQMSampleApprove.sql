@@ -71,6 +71,24 @@ BEGIN TRY
 	FROM tblICItem
 	WHERE intItemId = @intSampleItemId
 
+	IF @ysnRequireCustomerApproval = 1
+		AND @intProductTypeId = 6 and @intSampleControlPointId=14
+	BEGIN
+		UPDATE tblMFLotInventory
+		SET intBondStatusId = @intLotStatusId
+		WHERE intLotId = @intProductValueId
+	END
+	ELSE IF @ysnRequireCustomerApproval = 1
+		AND @intProductTypeId = 11 and @intSampleControlPointId=14
+	BEGIN
+		UPDATE LI
+		SET intBondStatusId = @intLotStatusId
+		FROM dbo.tblICParentLot AS PL
+		JOIN dbo.tblICLot AS L ON PL.intParentLotId = L.intParentLotId
+			AND PL.intParentLotId = @intProductValueId
+		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
+	END
+
 	-- Wholesome Sweetener -- JIRA QC-240
 	IF @ysnRequireCustomerApproval = 1
 	BEGIN
@@ -212,7 +230,16 @@ BEGIN TRY
 	UPDATE dbo.tblQMSample
 	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 		,intSampleStatusId = 3 -- Approved
-		,intLotStatusId = (CASE WHEN @intProductTypeId IN (6, 11) THEN @intLotStatusId ELSE intLotStatusId END)
+		,intLotStatusId = (
+			CASE 
+				WHEN @intProductTypeId IN (
+						6
+						,11
+						)
+					THEN @intLotStatusId
+				ELSE intLotStatusId
+				END
+			)
 		,intTestedById = x.intLastModifiedUserId
 		,dtmTestedOn = x.dtmLastModified
 		,intLastModifiedUserId = x.intLastModifiedUserId
@@ -240,7 +267,7 @@ BEGIN TRY
 				SET @intLotStatusId = @intCurrentLotStatusId
 		END
 
-		IF @intCurrentLotStatusId <> @intLotStatusId
+		IF @intCurrentLotStatusId <> @intLotStatusId and (@intSampleControlPointId<>14 or @intSampleControlPointId=14 and @intCurrentLotStatusId=6)
 		BEGIN
 			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
 				,@intNewLotStatusId = @intLotStatusId
@@ -302,7 +329,7 @@ BEGIN TRY
 					SET @intLotStatusId = @intCurrentLotStatusId
 			END
 
-			IF @intCurrentLotStatusId <> @intLotStatusId
+			IF @intCurrentLotStatusId <> @intLotStatusId and (@intSampleControlPointId<>14 or @intSampleControlPointId=14 and @intCurrentLotStatusId=6)
 			BEGIN
 				EXEC uspMFSetLotStatus @intLotId = @intLotId
 					,@intNewLotStatusId = @intLotStatusId

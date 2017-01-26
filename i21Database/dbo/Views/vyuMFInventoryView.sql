@@ -92,7 +92,7 @@ SELECT l.intLotId
 	,CA.strDescription as strGrade
 	,LI.intItemOwnerId
 	,R.strDisplayMember As strRestrictionType
-	,'' As strBondStatus
+	,LS1.strSecondaryStatus As strBondStatus
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -115,3 +115,4 @@ Left JOIN dbo.tblICCommodityAttribute CA on CA.intCommodityAttributeId =l.intGra
 LEFT JOIN tblMFLotInventory LI ON LI.intLotId = l.intLotId
 LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = LI.intItemOwnerId 
 LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
+Left JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId =LI.intBondStatusId

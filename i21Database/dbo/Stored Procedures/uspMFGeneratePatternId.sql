@@ -37,6 +37,7 @@ BEGIN
 		,@intRecordId INT
 		,@intPatternId INT
 		,@dtmBusinessDate DATETIME
+		,@ysnPaddingZero BIT
 
 	IF @dtmDate IS NULL
 		SET @dtmCurrentDate = GetDate()
@@ -303,6 +304,7 @@ BEGIN
 			END
 
 			SELECT @strSequence = convert(NVARCHAR, intSequenceNo)
+				,@ysnPaddingZero = IsNULL(ysnPaddingZero, 1)
 			FROM dbo.tblMFPatternSequence
 			WHERE intPatternId = @intPatternId
 				AND strPatternSequence = @strPatternString
@@ -311,7 +313,14 @@ BEGIN
 			BEGIN
 				SELECT @strSequence = 0
 
-				SELECT @strSequence = replicate('0', @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1)))) + convert(VARCHAR(32), (@strSequence + 1))
+				IF @ysnPaddingZero = 1
+				BEGIN
+					SELECT @strSequence = replicate('0', @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1)))) + convert(VARCHAR(32), (@strSequence + 1))
+				END
+				ELSE
+				BEGIN
+					SELECT @strSequence = @strSequence + 1
+				END
 
 				IF @ysnProposed = 0
 				BEGIN
@@ -333,7 +342,14 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				SELECT @strSequence = replicate('0', @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1)))) + convert(VARCHAR(32), (@strSequence + 1))
+				IF @ysnPaddingZero = 1
+				BEGIN
+					SELECT @strSequence = replicate('0', @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1)))) + convert(VARCHAR(32), (@strSequence + 1))
+				END
+				ELSE
+				BEGIN
+					SELECT @strSequence = @strSequence + 1
+				END
 
 				IF @ysnProposed = 0
 				BEGIN

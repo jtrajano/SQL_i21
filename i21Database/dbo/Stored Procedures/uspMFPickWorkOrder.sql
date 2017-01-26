@@ -603,10 +603,11 @@ BEGIN TRY
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 					AND R.strInternalCode = 'STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
+				JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
-					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
@@ -620,7 +621,7 @@ BEGIN TRY
 				ORDER BY CASE 
 						WHEN @ysnPickByLotCode = 0
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
-						ELSE CONVERT(INT, Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+						ELSE CONVERT(INT, Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
 						END ASC
 			END
 
@@ -705,10 +706,11 @@ BEGIN TRY
 				AND SL.ysnAllowConsume = 1
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 				AND R.strInternalCode = 'STOCK'
+				JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
-				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.intStorageLocationId = (
 					CASE 
 						WHEN @intConsumptionMethodId = 1
@@ -722,7 +724,7 @@ BEGIN TRY
 			ORDER BY CASE 
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
-					ELSE CONVERT(INT, Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+					ELSE CONVERT(INT, Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
 					END ASC
 
 			IF NOT EXISTS (
@@ -815,7 +817,7 @@ BEGIN TRY
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
-					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
@@ -1113,10 +1115,11 @@ BEGIN TRY
 					AND SL.ysnAllowConsume = 1
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 					AND R.strInternalCode = 'STOCK'
+					JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
-					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
@@ -1130,7 +1133,7 @@ BEGIN TRY
 				ORDER BY CASE 
 						WHEN @ysnPickByLotCode = 0
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
-						ELSE CONVERT(INT, Substring(L.strLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+						ELSE CONVERT(INT, Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
 						END ASC
 			END
 		END

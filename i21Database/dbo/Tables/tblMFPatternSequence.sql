@@ -5,6 +5,7 @@
 	,intSequenceNo INT NULL
 	,intMaximumSequence INT NULL
 	,ysnNotified BIT NOT NULL CONSTRAINT DF_tblMFPatternSequence_ysnNotified DEFAULT((0))
+	,ysnPaddingZero bit
 	,CONSTRAINT PK_tblMFPatternSequence_intPatternSequenceId PRIMARY KEY (intPatternSequenceId)
 	,CONSTRAINT FK_tblMFPatternSequence_tblMFPattern_intPatternId FOREIGN KEY (intPatternId) REFERENCES dbo.tblMFPattern(intPatternId)
 	)

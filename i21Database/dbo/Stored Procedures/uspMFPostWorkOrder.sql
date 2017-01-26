@@ -89,13 +89,13 @@ BEGIN TRY
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 			AND intLocationId = @intLocationId
-			AND intAttributeId = 87--3rd Party Pallets (e.g. iGPS) - Mandatory
+			AND intAttributeId = 87 --3rd Party Pallets (e.g. iGPS) - Mandatory
 
 		SELECT @str3rdPartyPalletsItemId = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 			AND intLocationId = @intLocationId
-			AND intAttributeId = 88--3rd Party Pallets (e.g. iGPS) Item Id
+			AND intAttributeId = 88 --3rd Party Pallets (e.g. iGPS) Item Id
 
 		IF @strInstantConsumption = 'False'
 		BEGIN
@@ -202,7 +202,7 @@ BEGIN TRY
 							,@strPickPreference = 'Substitute Item'
 							,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
 							,@dblUnitQty = NULL
-							,@ysnFillPartialPallet=1
+							,@ysnFillPartialPallet = 1
 					END
 				END
 				ELSE
@@ -293,7 +293,7 @@ BEGIN TRY
 							,@strPickPreference = 'Substitute Item'
 							,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
 							,@dblUnitQty = NULL
-							,@ysnFillPartialPallet=1
+							,@ysnFillPartialPallet = 1
 					END
 				END
 				ELSE
@@ -321,28 +321,47 @@ BEGIN TRY
 
 			EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
 
-			If @str3rdPartyPalletsMandatory='False' and @str3rdPartyPalletsItemId<>''
-			Begin
-				Declare @int3rdPartyPalletsItemId int,@intRecordId int,@intLotId int
-				Select @int3rdPartyPalletsItemId=intItemId from tblICItem Where strItemNo=@str3rdPartyPalletsItemId
+			IF @str3rdPartyPalletsMandatory = 'False'
+				AND @str3rdPartyPalletsItemId <> ''
+			BEGIN
+				DECLARE @int3rdPartyPalletsItemId INT
+					,@intRecordId INT
+					,@intLotId INT
 
-				Declare @tblMFWorkOrderConsumedLot table(intRecordId int,intLotId int)
+				SELECT @int3rdPartyPalletsItemId = intItemId
+				FROM tblICItem
+				WHERE strItemNo = @str3rdPartyPalletsItemId
 
-				Insert into @tblMFWorkOrderConsumedLot(intLotId)
-				Select intLotId from tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId and intItemId=@int3rdPartyPalletsItemId
+				DECLARE @tblMFWorkOrderConsumedLot TABLE (
+					intRecordId INT
+					,intLotId INT
+					)
 
-				Select @intRecordId=Min(intRecordId) from @tblMFWorkOrderConsumedLot
-				While @intRecordId is not null
-				Begin
-					Select @intLotId=intLotId from @tblMFWorkOrderConsumedLot Where intRecordId =@intRecordId
+				INSERT INTO @tblMFWorkOrderConsumedLot (intLotId)
+				SELECT intLotId
+				FROM tblMFWorkOrderConsumedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intItemId = @int3rdPartyPalletsItemId
 
-					Update tblMFWorkOrderProducedLot 
-					Set intSpecialPalletLotId=@intLotId
-					Where intWorkOrderId=@intWorkOrderId and intSpecialPalletLotId is null
+				SELECT @intRecordId = Min(intRecordId)
+				FROM @tblMFWorkOrderConsumedLot
 
-					Select @intRecordId=Min(intRecordId) from @tblMFWorkOrderConsumedLot Where intRecordId >@intRecordId
-				end
-			End
+				WHILE @intRecordId IS NOT NULL
+				BEGIN
+					SELECT @intLotId = intLotId
+					FROM @tblMFWorkOrderConsumedLot
+					WHERE intRecordId = @intRecordId
+
+					UPDATE tblMFWorkOrderProducedLot
+					SET intSpecialPalletLotId = @intLotId
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intSpecialPalletLotId IS NULL
+
+					SELECT @intRecordId = Min(intRecordId)
+					FROM @tblMFWorkOrderConsumedLot
+					WHERE intRecordId > @intRecordId
+				END
+			END
 		END
 	END
 
@@ -686,6 +705,12 @@ BEGIN TRY
 		SET strCostAdjustmentBatchId = @strBatchId
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
+
+	DELETE T
+	FROM dbo.tblMFTask T
+	JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
+	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
+	WHERE SW.intWorkOrderId = @intWorkOrderId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

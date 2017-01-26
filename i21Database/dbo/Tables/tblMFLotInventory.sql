@@ -4,7 +4,7 @@
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFLotInventory_intConcurrencyId] DEFAULT 0, 
 	[intLotId] INT NOT NULL, 
 	[intItemOwnerId] INT, 
-
+	intBondStatusId int,
 	CONSTRAINT [PK_tblMFLotInventory] PRIMARY KEY ([intLotInventoryId]), 
 	CONSTRAINT [AK_tblMFLotInventory_intLotId] UNIQUE ([intLotId]), 
 	CONSTRAINT [FK_tblMFLotInventory_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]) ON DELETE CASCADE,

@@ -11,9 +11,16 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@intOldItemOwnerId INT
 		,@intOwnerId INT
+		,@intSourceId INT
+		,@intSourceTransactionTypeId INT
+		,@intInventoryAdjustmentId INT
+		,@intStorageLocationId INT
+		,@intSubLocationId INT
 
 	SELECT @strLotNumber = strLotNumber
 		,@intItemId = intItemId
+		,@intStorageLocationId = intStorageLocationId
+		,@intSubLocationId = intSubLocationId
 		,@intLocationId = intLocationId
 		,@dtmDate = GETDATE()
 	FROM tblICLot
@@ -25,7 +32,7 @@ BEGIN TRY
 
 	SELECT @intOwnerId = intOwnerId
 	FROM tblICItemOwner
-	WHERE intItemOwnerId=@intNewItemOwnerId
+	WHERE intItemOwnerId = @intNewItemOwnerId
 
 	IF ISNULL(@strLotNumber, '') = ''
 	BEGIN
@@ -68,7 +75,7 @@ BEGIN TRY
 			,@dtmDate
 
 		EXEC uspMFAdjustInventory @dtmDate = @dtmDate
-			,@intTransactionTypeId = 41
+			,@intTransactionTypeId = 43
 			,@intItemId = @intItemId
 			,@intSourceLotId = @intLotId
 			,@intDestinationLotId = NULL
@@ -113,7 +120,7 @@ BEGIN TRY
 				,@dtmDate
 
 			EXEC uspMFAdjustInventory @dtmDate = @dtmDate
-				,@intTransactionTypeId = 41
+				,@intTransactionTypeId = 43
 				,@intItemId = @intItemId
 				,@intSourceLotId = @intLotId
 				,@intDestinationLotId = NULL
@@ -133,6 +140,22 @@ BEGIN TRY
 				,@intNewItemOwnerId = @intNewItemOwnerId
 		END
 	END
+
+	--SELECT @intSourceId = 1
+	--	,@intSourceTransactionTypeId = 8
+
+	--EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
+	--	,@dtmDate = @dtmDate
+	--	,@intLocationId = @intLocationId
+	--	,@intSubLocationId = @intSubLocationId
+	--	,@intStorageLocationId = @intStorageLocationId
+	--	,@strLotNumber = @strLotNumber
+	--	,@intNewOwnerId = @intNewItemOwnerId
+	--	,@intSourceId = @intSourceId
+	--	,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+	--	,@intEntityUserSecurityId = @intUserId
+	--	,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	--	,@strDescription = NULL
 END TRY
 
 BEGIN CATCH
