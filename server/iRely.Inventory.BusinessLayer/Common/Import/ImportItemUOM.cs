@@ -102,15 +102,18 @@ namespace iRely.Inventory.BusinessLayer
                             fc.intWeightUOMId = (int)lu;
                         else
                         {
-                            dr.Messages.Add(new ImportDataMessage()
+                            if (!string.IsNullOrEmpty(value.Trim()))
                             {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = "Can't find Unit of Measurement item for Weight: " + value + '.',
-                                Status = REC_SKIP
-                            });
-                            dr.Info = INFO_WARN;
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Status = STAT_INNER_COL_SKIP,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Can't find Unit of Measurement item for Weight: " + value + '.'
+                                });
+                                dr.Info = INFO_WARN;
+                            }
                         }
                         break;
                     case "upc code":
@@ -147,15 +150,18 @@ namespace iRely.Inventory.BusinessLayer
                             fc.intDimensionUOMId = (int)lu;
                         else
                         {
-                            dr.Messages.Add(new ImportDataMessage()
+                            if (!string.IsNullOrEmpty(value.Trim()))
                             {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = "Can't find Unit of Measurement item for Dimension: " + value + '.',
-                                Status = REC_SKIP
-                            });
-                            dr.Info = INFO_WARN;
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Status = STAT_INNER_COL_SKIP,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Can't find Unit of Measurement item for Dimension: " + value + '.'
+                                });
+                                dr.Info = INFO_WARN;
+                            }
                         }
                         break;
                     case "volume":
@@ -171,16 +177,18 @@ namespace iRely.Inventory.BusinessLayer
                             fc.intVolumeUOMId = (int)lu;
                         else
                         {
-                            dr.Messages.Add(new ImportDataMessage()
+                            if (!string.IsNullOrEmpty(value.Trim()))
                             {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = "Can't find Unit of Measurement item for Volume: " + value + '.',
-                                Status = REC_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                            valid = false;
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Message = "Can't find Unit of Measurement item for Volume: " + value + '.',
+                                    Status = STAT_INNER_COL_SKIP,
+                                    Type = TYPE_INNER_WARN,
+                                });
+                                dr.Info = INFO_WARN;
+                            }
                         }
                         break;
                     case "max qty":
