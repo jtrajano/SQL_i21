@@ -39,10 +39,12 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<ImportDataResult> ImportOrigins(string type)
         {
             var sql = string.Empty;
-            if(type == "ItemsOrigins")
+            if (type == "ItemsOrigins")
                 sql = "EXEC uspICDCItemMigration";
             else if (type == "GLAccountsOrigins")
                 sql = "uspICDCGLAcctsMigration";
+            else if (type == "InventoryReceipts")
+                sql = "uspICImportInventoryReceiptOrigins";
 
             var res = new ImportDataResult()
             {

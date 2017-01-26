@@ -462,7 +462,7 @@
                 "bodyPadding": 10,
                 "border": false,
                 "container|align": "stretch",
-                "height": 1380,
+                "height": 1460,
                 "itemId": "pnlImportOrigin",
                 "layout": "vbox",
                 "margin": "0 0 5 0",
@@ -2158,7 +2158,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "bodyPadding": 10,
-                        "height": 152,
+                        "height": 216,
                         "padding": "15 0 0 0",
                         "title": "Origins"
                     },
@@ -2292,10 +2292,78 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": null,
-                                                "text": "Import GL Accounts From Origins"
+                                                "text": "Import GL Accounts from Origins"
                                             },
                                             "name": "MyLabel9",
                                             "designerId": "6ee59d84-8785-47cf-b9dd-6954d9efe2c4"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportInventoryReceiptsOrigins",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer32",
+                            "designerId": "757d4463-5340-4172-b3f5-193309fee1a3",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportInventoryReceiptsOrigins",
+                                        "layout|flex": 1,
+                                        "text": "Import Inventory Receipts"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "d3e18c4a-d9e4-4cd4-a3f3-53b11566fcde"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "60d5db7f-c816-42d2-83a7-e27b72ff6814",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Inventory Receipts from Origins"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "392315e0-215b-4f89-a0c8-c4ed73ac466d"
                                         }
                                     ]
                                 }

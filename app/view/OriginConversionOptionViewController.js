@@ -106,6 +106,9 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             case "btnImportGLAccountsOrigins":
                 originType = "GLAccountsOrigins";
                 break;
+            case "btnImportInventoryReceiptsOrigins":
+                originType = "InventoryReceipts";
+                break;
         }
 
         var allowOverwrite = this.view.viewModel.getData().allowOverwrite;

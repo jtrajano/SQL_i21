@@ -187,7 +187,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
         {
             xtype: 'panel',
             border: false,
-            height: 1380,
+            height: 1460,
             itemId: 'pnlImportOrigin',
             margin: '0 0 5 0',
             bodyPadding: 10,
@@ -1060,7 +1060,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                 },
                 {
                     xtype: 'panel',
-                    height: 152,
+                    height: 216,
                     padding: '15 0 0 0',
                     bodyPadding: 10,
                     title: 'Origins',
@@ -1129,7 +1129,42 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     items: [
                                         {
                                             xtype: 'label',
-                                            text: 'Import GL Accounts From Origins'
+                                            text: 'Import GL Accounts from Origins'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntImportInventoryReceiptsOrigins',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnImportInventoryReceiptsOrigins',
+                                    text: 'Import Inventory Receipts'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 1,
+                                    height: 40,
+                                    padding: 10,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            text: 'Import Inventory Receipts from Origins'
                                         }
                                     ]
                                 }
