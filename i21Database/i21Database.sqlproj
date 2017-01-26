@@ -4903,6 +4903,8 @@
     <Build Include="dbo\Stored Procedures\uspICImportInventoryReceiptOrigins.sql" />
     <Build Include="dbo\Views\vyuTMDegreeDayReadingSearch.sql" />
     <Build Include="dbo\Functions\fnTMGetSeasonYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleContractSlice.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleContractCopy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
