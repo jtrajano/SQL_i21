@@ -225,6 +225,47 @@
 	BEGIN
 		SET @Sucess = 0
 		SET @Message = 'There is a discrepancy on Salesperson records.'
+		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
+		 BEGIN
+			INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT DISTINCT (agivc_slsmn_no) 
+				,'Salesperson'
+				,'Salesperson Missing in i21'
+				,@UserId
+				,@logDate
+				,@key 
+			FROM agivcmst WHERE agivc_slsmn_no COLLATE SQL_Latin1_General_CP1_CS_AS  NOT IN 
+					(select strSalespersonId  COLLATE SQL_Latin1_General_CP1_CS_AS from tblARSalesperson) 
+		 END
+
+		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
+		 BEGIN
+			INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT DISTINCT (ptivc_sold_by) 
+				,'Salesperson'
+				,'Salesperson Missing in i21'
+				,@UserId
+				,@logDate
+				,@key 
+			FROM ptivcmst WHERE ptivc_sold_by COLLATE SQL_Latin1_General_CP1_CS_AS  NOT IN 
+					(select strSalespersonId  COLLATE SQL_Latin1_General_CP1_CS_AS from tblARSalesperson) 
+		 END
 		RETURN;	
 	END
 		
