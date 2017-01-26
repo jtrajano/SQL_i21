@@ -36,7 +36,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'i21.store.CompanyLocationPricingLevelBuffered',
         'i21.store.ModuleBuffered',
         'GeneralLedger.store.BufAccountCategoryGroup',
-        'GeneralLedger.store.BufAccountId',
+        //'GeneralLedger.store.BufAccountId',
         'Manufacturing.store.BufferedManufacturingCell',
         'Manufacturing.store.BufferedPackType',
         'Patronage.store.BufferedPatronageCategory',
@@ -250,10 +250,6 @@ Ext.define('Inventory.view.ItemViewModel', {
             autoLoad: true,
             type: 'glbufaccountcategorygroup'
         },
-        accountId: {
-            type: 'glbufaccountid'
-        },
-
         copyLocation: {
             type: 'icbuffereditemlocation'
         },
@@ -916,12 +912,17 @@ Ext.define('Inventory.view.ItemViewModel', {
     formulas: {
         otherChargeAcct: function(get) {
             var category = get('grdGlAccounts.selection.strAccountCategory');
+            
             /** If selected category is Other Charge Income or Other Charge Expenses,
              * display accounts under General category **/
-            if (category == 'Other Charge Expense' || // Other Charge Expenses
-                category == 'Other Charge Income')   // Other Charge Income
-                return 'General'; // General
-            return '';
+            switch (category) {
+                case 'Other Charge Expense':
+                case 'Other Charge Income':
+                    return 'General';
+                    break;            
+                default:
+                    return category;
+            }
         },
         checkLotTracking: function (get) {
             if (get('current.strLotTracking') === 'No') {
