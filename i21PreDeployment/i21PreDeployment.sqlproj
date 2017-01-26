@@ -150,6 +150,7 @@
     <None Include="Scripts\Pre-Deployment\12_EM\20_CleanCustomerSpecialPrice.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Charges.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Update_M2M_Computation_Setup.sql" />
+    <None Include="Scripts\Pre-Deployment\4_SM\9_DropTblSMAlternateApproverGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
