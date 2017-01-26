@@ -18,7 +18,8 @@ AS
 			CH.intNoOfLoad,					CH.dblQuantityPerLoad,			CH.intLoadUOMId,
 			CH.ysnCategory,					CH.ysnMultiplePriceFixation,	CH.intCategoryUnitMeasureId,
 			CH.intLoadCategoryUnitMeasureId,CH.intContractPlanId,			CH.ysnExported,
-			CH.dtmExported,					CH.dtmSigned,
+			CH.dtmExported,					CH.dtmSigned,					CH.intCreatedById,
+			CH.intLastModifiedById,
 
 			EY.intEntityId,					EY.strEntityName,				CY.strDescription			AS	strCommodityDescription,
 			EY.strEntityNumber,				EY.strEntityAddress,			U2.strUnitMeasure			AS	strHeaderUnitMeasure,
