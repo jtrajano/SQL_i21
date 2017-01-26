@@ -360,6 +360,11 @@ GO
 			('
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = ''CF Invoice'' AND intPaymentMethodID = 9)
 				BEGIN
+
+					IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tmpSMPaymentMethod'')
+					BEGIN
+						DROP TABLE tmpSMPaymentMethod
+					END
 				
 					IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where CONSTRAINT_NAME = ''FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId'')
 					BEGIN
