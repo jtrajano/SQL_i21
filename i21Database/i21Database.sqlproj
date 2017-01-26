@@ -4882,8 +4882,8 @@
     <Build Include="dbo\Tables\tblSMStartingNumberParameter.sql" />
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotals.sql" />
-    <Build Include="dbo\Tables\tblSMAlternateApproverGroup.sql" />
-    <Build Include="dbo\Tables\tblSMAlternateApproverGroupUserSecurity.sql" />
+    <Build Include="dbo\Tables\tblSMApproverGroup.sql" />
+    <Build Include="dbo\Tables\tblSMApproverGroupUserSecurity.sql" />
     <Build Include="dbo\Tables\tblSMTransactionLockHistory.sql" />
     <Build Include="dbo\Tables\tblSMSignature.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotTextInReport.sql" />

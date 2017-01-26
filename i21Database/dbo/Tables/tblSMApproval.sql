@@ -4,7 +4,7 @@
 	[intTransactionId]				[int]											NOT NULL,
 	[intApproverId]					[int]											NULL,
 	[intAlternateApproverId]		[int]											NULL,
-	[intAlternateApproverGroupId]	[int]											NULL,
+	[intApproverGroupId]			[int]											NULL,
 	[strTransactionNumber]			[nvarchar](50)	COLLATE Latin1_General_CI_AS	NOT NULL,
 	[intSubmittedById]				[int]											NOT NULL,
 	[dblAmount]						[numeric](18, 6)								NOT NULL,

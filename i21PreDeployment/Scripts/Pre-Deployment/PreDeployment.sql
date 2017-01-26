@@ -48,6 +48,7 @@
 :r .\4_SM\6_TicketManagement.sql
 :r .\4_SM\7_CRM.sql
 :r .\4_SM\8_TransactionManagement.sql
+:r .\4_SM\9_DropTblSMAlternateApproverGroup.sql
 
 -- CM
 :r .\5_CM\1_DropTriggers.sql
