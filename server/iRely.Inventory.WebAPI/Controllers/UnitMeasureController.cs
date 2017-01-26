@@ -35,9 +35,9 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetQuantityVolumeWeightPackedUOMs(GetParameter param)
+        public async Task<HttpResponseMessage> GetQuantityVolumeWeightPackedAreaUOMs(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetQuantityVolumeWeightPackedUOM(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetQuantityVolumeWeightPackedAreaUOM(param));
         }
 
         [HttpGet]

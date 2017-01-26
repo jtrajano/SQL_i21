@@ -75,9 +75,9 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetQuantityVolumeWeightPackedUOM(GetParameter param)
+        public async Task<SearchResult> GetQuantityVolumeWeightPackedAreaUOM(GetParameter param)
         {
-            var query = _db.GetQuery<tblICUnitMeasure>().Where(p => p.strUnitType == "Quantity" || p.strUnitType == "Volume" || p.strUnitType == "Weight" || p.strUnitType == "Packed")
+            var query = _db.GetQuery<tblICUnitMeasure>().Where(p => p.strUnitType == "Quantity" || p.strUnitType == "Volume" || p.strUnitType == "Weight" || p.strUnitType == "Packed" || p.strUnitType == "Area")
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
 

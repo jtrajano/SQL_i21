@@ -72,7 +72,7 @@ Ext.define('Inventory.view.InventoryUOMViewModel', {
                 case 'Volume':
                 case 'Weight':
                 case 'Packed':
-                    return '../Inventory/api/UnitMeasure/GetQuantityVolumeWeightPackedUOMs';
+                    return '../Inventory/api/UnitMeasure/GetQuantityVolumeWeightPackedAreaUOMs';
                     break;
                 case 'Time':
                     return '../Inventory/api/UnitMeasure/GetTimeUOMs';
