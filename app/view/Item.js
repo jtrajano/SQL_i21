@@ -894,7 +894,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Account Id',
                                                                         flex: 1,
                                                                         editor: {
-                                                                            xtype: 'gridcombobox',
+                                                                            xtype: 'glaccountcombobox',
                                                                             columns: [
                                                                                 {
                                                                                     dataIndex: 'intAccountId',
