@@ -22,7 +22,7 @@ SELECT dtmDate				= ISNULL(I.dtmPostDate, I.dtmDate)
 	 , strTransactionType	= I.strTransactionType
 	 , dblTransactionTotal	= ISNULL(I.dblInvoiceTotal, 0.00)
 	 , dblAmountPaid		= ISNULL(I.dblPayment, 0.00)
-	 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0.00) * -1 ELSE ISNULL(I.dblAmountDue, 0.00) END
+	 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblAmountDue, 0.00) * -1 ELSE ISNULL(I.dblAmountDue, 0.00) END
 	 , intEntityCustomerId	= C.intEntityCustomerId
 	 , strCustomerNumber	= C.strCustomerNumber
 	 , strCustomerName		= E.strName
@@ -38,14 +38,15 @@ UNION
 SELECT dtmDate				= P.dtmDatePaid
 	 , strTransactionNumber	= P.strRecordNumber
 	 , strTransactionType	= 'Receive Payment'
-	 , dblTransactionTotal	= ISNULL(PD.dblTotal, 0.00)
-	 , dblAmountPaid		= ISNULL(P.dblAmountPaid, 0.00)
+	 , dblTransactionTotal	= ISNULL(PAYMENT.dblTotal, 0.00)
+	 , dblAmountPaid		= ISNULL(PAYMENT.dblPayment, 0.00) + ISNULL(PAYMENT.dblDiscount, 0.00)
 	 , dblAmountDue			= 0.00
 	 , intEntityCustomerId	= C.intEntityCustomerId
 	 , strCustomerNumber	= C.strCustomerNumber
 	 , strCustomerName		= E.strName
 	 , ysnPaid				= 0
 FROM tblARPayment P
-LEFT OUTER JOIN (SELECT intPaymentId ,SUM(dblInvoiceTotal)	AS dblTotal FROM tblARPaymentDetail GROUP BY intPaymentId) AS PD ON P.intPaymentId = PD.intPaymentId
+LEFT OUTER JOIN (SELECT PD.intPaymentId, SUM(dblInvoiceTotal) AS dblTotal, SUM(dblPayment) AS dblPayment, SUM(dblDiscount) AS dblDiscount FROM tblARPaymentDetail PD
+	INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 GROUP BY PD.intPaymentId) PAYMENT ON P.intPaymentId = PAYMENT.intPaymentId
 INNER JOIN tblARCustomer C ON P.intEntityCustomerId = C.intEntityCustomerId 
 INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
