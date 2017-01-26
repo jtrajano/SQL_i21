@@ -9,6 +9,7 @@
     [intUserID]               INT             DEFAULT 0 NULL,
     [dtmLastUpdated]          DATETIME        DEFAULT 0 NULL,
     [intClockID]              INT             DEFAULT 0 NOT NULL,
+    [ysnSeasonStart] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblTMDDReading] PRIMARY KEY CLUSTERED ([intDegreeDayReadingID] ASC),
 	CONSTRAINT [UQ_tblTMDegreeDayReading] UNIQUE NONCLUSTERED 
 	(
@@ -116,3 +117,13 @@ CREATE INDEX [IX_tblTMDegreeDayReading_intClockID] ON [dbo].[tblTMDegreeDayReadi
 GO
 
 CREATE INDEX [IX_tblTMDegreeDayReading_dtmDate] ON [dbo].[tblTMDegreeDayReading] ([dtmDate])
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Season Start Indicator',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N' ysnSeasonStart '

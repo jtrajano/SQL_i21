@@ -4901,6 +4901,8 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1096.sql" />
     <Build Include="dbo\Tables\tblARImportInvoiceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportInventoryReceiptOrigins.sql" />
+    <Build Include="dbo\Views\vyuTMDegreeDayReadingSearch.sql" />
+    <Build Include="dbo\Functions\fnTMGetSeasonYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
