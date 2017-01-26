@@ -365,6 +365,7 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]
 		,[intPrepayTypeId]
 		,[intStorageLocationId]
+		,[strVFDDocumentNumber]
 		,[intCompanyLocationSubLocationId])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
@@ -437,6 +438,7 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]		= ARID.intStorageScheduleTypeId
 		,[intPrepayTypeId]				= ARID.intPrepayTypeId
 		,[intStorageLocationId]			= ARID.intStorageLocationId
+		,[strVFDDocumentNumber]			= ARID.strVFDDocumentNumber
 		,[intCompanyLocationSubLocationId] = ARID.intCompanyLocationSubLocationId
 	FROM
 		tblARInvoiceDetail ARID

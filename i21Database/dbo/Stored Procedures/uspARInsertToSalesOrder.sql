@@ -119,20 +119,23 @@ BEGIN
 							    dblDiscount				NUMERIC(18,6), 
 								dblDiscountAmount		NUMERIC(18,6),
 								dblPrice				NUMERIC(18,6),
-								dblQtyOrdered			NUMERIC(18,6))
+								dblQtyOrdered			NUMERIC(18,6),
+								strVFDDocumentNumber	NVARCHAR(100))
 		
 	INSERT INTO @OrderDetails
 		([intSalesOrderDetailId]
 		,[dblDiscount]
 		,[dblDiscountAmount]
 		,[dblPrice]
-		,[dblQtyOrdered])
+		,[dblQtyOrdered]
+		,[strVFDDocumentNumber])
 	SELECT 	
 		 [intSalesOrderDetailId]
 		,ISNULL([dblDiscount], @ZeroDecimal)
 		,ISNULL([dblItemTermDiscount], @ZeroDecimal)
 		,ISNULL([dblPrice], @ZeroDecimal)
 		,ISNULL([dblQtyOrdered], @ZeroDecimal)
+		,[strVFDDocumentNumber]
 	FROM
 		tblSOSalesOrderDetail
 	WHERE

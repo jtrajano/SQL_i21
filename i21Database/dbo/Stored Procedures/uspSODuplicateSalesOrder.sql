@@ -194,6 +194,7 @@ BEGIN
 				   ,[intStorageScheduleTypeId]	
 				   ,[intSubCurrencyId]
 				   ,[dblSubCurrencyRate]
+				   ,[strVFDDocumentNumber]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -229,6 +230,7 @@ BEGIN
 				   ,[intStorageScheduleTypeId]
 				   ,[intSubCurrencyId]
 				   ,[dblSubCurrencyRate]
+				   ,[strVFDDocumentNumber]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE
