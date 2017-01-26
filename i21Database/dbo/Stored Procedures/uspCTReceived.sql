@@ -24,11 +24,14 @@ BEGIN TRY
 				@intSourceType					INT,
 				@ysnPO							BIT,
 				@ysnLoad						BIT,
-				@intPricingTypeId				INT
+				@intPricingTypeId				INT,
+				@strScreenName					NVARCHAR(50)
 
 	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 
-	IF(@strReceiptType <> 'Purchase Contract' AND @strReceiptType <> 'Purchase Order')
+	SELECT @strScreenName = CASE WHEN @strReceiptType = 'Inventory Return' THEN 'Receipt Return' ELSE 'Inventory Receipt' END
+
+	IF	@strReceiptType NOT IN ('Purchase Contract','Purchase Order', 'Inventory Return')
 		RETURN
 
 	SELECT	@ysnLoad = ysnLoad 
@@ -45,7 +48,7 @@ BEGIN TRY
 		dblQty						NUMERIC(18,6)	
 	)
 
-	IF(@strReceiptType = 'Purchase Contract')
+	IF @strReceiptType IN ('Purchase Contract','Inventory Return')
 	BEGIN
 		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
 		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,CASE WHEN @ysnLoad=1 THEN IR.intLoadReceive ELSE dblQty END
@@ -101,7 +104,7 @@ BEGIN TRY
 					@dblQuantityToUpdate	=	@dblConvertedQty,
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intInventoryReceiptDetailId,
-					@strScreenName			=	'Inventory Receipt'
+					@strScreenName			=	@strScreenName
 		END
 		ELSE
 		BEGIN
@@ -110,18 +113,18 @@ BEGIN TRY
 					@dblQuantityToUpdate	=	@dblConvertedQty,
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intInventoryReceiptDetailId,
-					@strScreenName			=	'Inventory Receipt' 
+					@strScreenName			=	@strScreenName 
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
-			IF @intSourceType IN (0,1,2,3) OR @ysnPO = 1
+			IF (@intSourceType IN (0,1,2,3) OR @ysnPO = 1) AND @strReceiptType <> 'Inventory Return'
 			BEGIN					
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
 						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInventoryReceiptDetailId,
-						@strScreenName			=	'Inventory Receipt' 
+						@strScreenName			=	@strScreenName
 			END
 		END
 		

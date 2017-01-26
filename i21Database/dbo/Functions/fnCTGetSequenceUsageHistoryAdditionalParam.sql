@@ -33,7 +33,7 @@ BEGIN
 	FROM	tblSMUserSecurity 
 	WHERE	intEntityUserSecurityId	=	@intUserId
 	
-	IF	@strScreenName = 'Inventory Receipt'
+	IF	@strScreenName IN ('Inventory Receipt', 'Receipt Return')
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intInventoryReceiptId,
 				@strNumber						=	HR.strReceiptNumber,
