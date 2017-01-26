@@ -507,3 +507,15 @@ EXEC sp_addmessage 80106,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80107) EXEC sp_dropmessage 80107, 'us_english'	
 SET @strmessage = 'Unable to unpost the Inventory Transfer. The %s already have a receipt. Please remove it from the receipt "%s"'
 EXEC sp_addmessage 80107,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80108) EXEC sp_dropmessage 80108, 'us_english'	
+SET @strmessage = 'Receipt Type is invalid or missing.'
+EXEC sp_addmessage 80108,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80109) EXEC sp_dropmessage 80109, 'us_english'	
+SET @strmessage = 'Vendor Id is invalid or missing.'
+EXEC sp_addmessage 80109,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80110) EXEC sp_dropmessage 80110, 'us_english'	
+SET @strmessage = 'Ship From Id is invalid or missing.'
+EXEC sp_addmessage 80110,11,@strmessage,'us_english','False'

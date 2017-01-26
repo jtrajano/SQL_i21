@@ -22,6 +22,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+BEGIN TRANSACTION
+
 DECLARE @intEntityId AS INT
 DECLARE @startingNumberId_InventoryReceipt AS INT = 23;
 DECLARE @receiptNumber AS NVARCHAR(50);
@@ -155,6 +157,55 @@ BEGIN
 		
 		SET @receiptNumber = NULL 
 		SET @inventoryReceiptId = NULL 
+
+		----------------------------------
+		----- Validate Header Fields -----
+		----------------------------------
+
+		-- Validate Receipt Type --
+		DECLARE @valueReceiptType NVARCHAR(50)
+
+		SELECT @valueReceiptType = RawHeaderData.ReceiptType
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF RTRIM(LTRIM(LOWER(@valueReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order')
+			BEGIN
+				--Receipt Type is invalid or missing.
+				RAISERROR(80108, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+			
+		-- Validate Vendor Id --
+		DECLARE @valueEntityId INT
+
+		SELECT @valueEntityId = RawHeaderData.Vendor
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @valueEntityId)
+			BEGIN
+				-- Vendor Id is invalid or missing.
+				RAISERROR(80109, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Ship From Id --
+		DECLARE @valueShipFromId INT
+
+		SELECT @valueShipFromId = RawHeaderData.ShipFrom
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityLocation WHERE intEntityId = @valueEntityId AND intEntityLocationId = @valueShipFromId)
+			BEGIN
+				-- Ship From Id is invalid or missing.
+				RAISERROR(80110, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
 
 		-- Check if there is an existing Inventory receipt 
 		SELECT	@inventoryReceiptId = RawData.intInventoryReceiptId
@@ -1136,6 +1187,8 @@ BEGIN
 
 	CLOSE loopDataForReceiptHeader;
 	DEALLOCATE loopDataForReceiptHeader;
+
+	COMMIT TRANSACTION
 END 
 
 _Exit:
