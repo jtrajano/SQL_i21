@@ -244,8 +244,8 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         record.set('intCostingMethod', 1);
         record.set('intAllowNegativeInventory', 3);
         if (iRely.Functions.isEmpty(me.defaultUOM) === false) {
-            record.set('intIssueUOMId', me.defaultUOM.get('intItemUOMId'));
-            record.set('intReceiveUOMId', me.defaultUOM.get('intItemUOMId'));
+            record.set('intIssueUOMId', me.defaultUOM.intItemUOMId);
+            record.set('intReceiveUOMId', me.defaultUOM.intItemUOMId);
         }
         action(record);
     },
