@@ -1,5 +1,6 @@
 var Harness = Siesta.Harness.Browser.ExtJS,
     version = Math.floor(Math.random() * 9999) + 1,
+    commonIC = 'Common/CommonIC.js?v='+version,
     functionalTest = '../../TestFramework/FunctionalTest.js?v='+version;
 
 Harness.configure({
@@ -26,21 +27,24 @@ Harness.start(
                 url: 'PreSetup/UsersLocation.js?v='+version,
                 title: 'UserLocation',
                 preload: [
-                    functionalTest
+                    functionalTest,
+                    commonIC
                 ]
             },
             {
                 url: 'PreSetup/StorageLocation.js?v='+version,
                 title: 'StorageLocation',
                 preload: [
-                    functionalTest
+                    functionalTest,
+                    commonIC
                 ]
             },
             {
                 url: 'PreSetup/Items.js?v='+version,
                 title: 'Items',
                 preload: [
-                    functionalTest
+                    functionalTest,
+                    commonIC
                 ]
             }
 
@@ -380,28 +384,8 @@ Harness.start(
                 url: 'SmokeTesting/ICSmokeTests.js?v='+version,
                 title: 'ICSmokeTests',
                 preload: [
-                    functionalTest
-                ]
-            },
-            {
-                url: 'SmokeTesting/ICOpenScreens.js?v='+version,
-                title: 'ICOpenScreens',
-                preload: [
-                    functionalTest
-                ]
-            },
-            {
-                url: 'SmokeTesting/ICAddMaintenance.js?v='+version,
-                title: 'ICAddMaintenance',
-                preload: [
-                    functionalTest
-                ]
-            },
-            {
-                url: 'SmokeTesting/ICAddTransactions.js?v='+version,
-                title: 'ICAddTransactions',
-                preload: [
-                    functionalTest
+                    functionalTest,
+                    commonIC
                 ]
             }
 

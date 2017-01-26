@@ -55,7 +55,8 @@ StartTest (function (t) {
         .clickMessageBoxButton('yes')
         .waitUntilLoaded()
         .clickButton('Close')
-        .displayText('=====  Scenario 1: Delete Multiple Unused Storage Location Done=====')
+        .waitUntilLoaded()
+        .displayText('=====  Delete Multiple Storage Location Done =====')
         //endregion
 
         .done();

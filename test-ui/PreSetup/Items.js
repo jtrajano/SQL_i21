@@ -1,160 +1,68 @@
 StartTest (function (t) {
+    var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
 
-        //region Non Lotted Item for Transactions
-        .displayText('===== Scenario 1: Add Non Lotted Item Test Item for Non Lotted Inventory Adjustment=====')
-        .clickMenuFolder('Inventory','Folder')
-        .clickMenuScreen('Items','Screen')
-        .clickButton('New')
-        .enterData('Text Field','ItemNo','003 - CNLTI')
-        .enterData('Text Field','Description','001 - CRUD Non Lotted Item')
-        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',3,0)
-        .verifyData('Combo Box','Tracking','Item Level')
+        //region
 
-        .displayText('===== Setup Item UOM=====')
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure',0, 'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .waitUntilLoaded('')
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
-        .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '56')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')
+        //Add Category
+        .addFunction(function(next){
+            commonIC.addCategory (t,next, 'Category-1', 'Test Category Description', 2)
+        })
 
-        .displayText('===== Setup Item GL Accounts=====')
-        .clickTab('Setup')
-        .clickButton('AddRequiredAccounts')
-        .verifyGridData('GlAccounts', 1, 'colGLAccountCategory', 'AP Clearing')
-        .verifyGridData('GlAccounts', 2, 'colGLAccountCategory', 'Inventory')
-        .verifyGridData('GlAccounts', 3, 'colGLAccountCategory', 'Cost of Goods')
-        .verifyGridData('GlAccounts', 4, 'colGLAccountCategory', 'Sales Account')
-        .verifyGridData('GlAccounts', 5, 'colGLAccountCategory', 'Inventory In-Transit')
-        .verifyGridData('GlAccounts', 6, 'colGLAccountCategory', 'Inventory Adjustment')
-        .verifyGridData('GlAccounts', 7, 'colGLAccountCategory', 'Auto-Variance')
-        .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '21000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 2, 'strAccountId', '16000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 3, 'strAccountId', '50000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 4, 'strAccountId', '40010-0001-006', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 7, 'strAccountId', '16010-0000-000', 'strAccountId')
+        //Add Commodity
+        .addFunction(function(next){
+            commonIC.addCommodity (t,next, 'Commodity-1', 'Test Commodity Description')
+        })
 
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
+        //Add Non Lotted Item
+        .addFunction(function(next){
+            commonIC.addInventoryItem
+            (t,next,
+                'NLTI - 01'
+                , 'Test Non Lotted Item Description'
+                , 4
+                , 'Category-2'
+                , 'Commodity-2'
+                , 'LB'
+                , 'LB'
+                , 10
+                , 10
+                , 40
+            )
+        })
 
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
-        .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'Indy Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clickButton('Save')
-        .waitUntilLoaded()
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clickMenuFolder('Inventory','Folder')
-        //endregion
+        //Add Lotted Item - Manual
+        .addFunction(function(next){
+            commonIC.addInventoryItem
+            (t,next,
+                'LTI - 01'
+                , 'Test Lotted Item Description'
+                , 3
+                , 'Category-2'
+                , 'Commodity-2'
+                , 'LB'
+                , 'LB'
+                , 10
+                , 10
+                , 40
+            )
+        })
 
-        //region Items for Delete Inventory Receipt
-        .displayText('===== Pre setup: Items for Delete Inventory Receipt Script =====')
-        .displayText('===== Creating Non Lotted Item =====')
-        .clickMenuFolder('Inventory','Folder')
-        .clickMenuScreen('Items','Screen')
-        .clickButton('New')
-        .enterData('Text Field','ItemNo','DNLTI - 01')
-        .enterData('Text Field','Description','Non Lotted for Delete IR')
-        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',3,0)
-        .verifyData('Combo Box','Tracking','Item Level')
+        //Adding Stock to Items
+        .displayText('===== Adding Stocks to Created items =====')
+        .addFunction(function(next){
+            commonIC.addDirectIRNonLotted(t,next, 'ABC Trucking', '0001 - Fort Wayne','NLTI - 02', 'LB', 100, 10)
+        })
 
-        .displayText('===== Setup Item UOM=====')
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure',0, 'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .waitUntilLoaded('')
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
-        .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '56')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')
+        .addFunction(function(next){
+            commonIC.addDirectIRLotted(t,next, 'ABC Trucking', '0001 - Fort Wayne','LTI - 02', 'LB', 100, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
+        .displayText('===== Adding Stocks to Created Done =====')
 
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Setup')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-        .waitUntilLoaded()
 
-        .clickButton('Save')
-        .waitUntilLoaded()
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .displayText('===== None Lotted Item Created =====')
+        .displayText('===== Pre-setup done =====')
 
-        .displayText('===== Creating Lotted Item =====')
-        .clickButton('New')
-        .enterData('Text Field','ItemNo','DNLTI - 02')
-        .enterData('Text Field','Description','Lotted for Delete IR')
-        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',1,0)
-        .verifyData('Combo Box','Tracking','Lot Level')
-
-        .displayText('===== Setup Item UOM=====')
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure',0, 'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .waitUntilLoaded('')
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
-        .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '56')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')
-
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Setup')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-        .waitUntilLoaded()
-
-        .clickButton('Save')
-        .waitUntilLoaded()
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .displayText('===== Lotted Item Created =====')
         //endregion
 
 
