@@ -1,32 +1,42 @@
-﻿CREATE VIEW vyuLGLoadDocumentTrackingSummary
+﻿CREATE VIEW vyuLGLoadDocumentTrackingSummary 
 AS
 SELECT DT.strContractNumber
 	,intContractSeq
-	,strLoadNumber
+	,DT.strLoadNumber
 	,strVendorName
 	,E.strName AS strProducer
 	,DT.dtmScheduledDate
-	,DT.dtmETAPOD
+	,DT.dtmETAPOD AS dtmETAPODSA
+	,SI.dtmETAPOD AS dtmETAPODSI
 	,(
 		SELECT COUNT(*)
 		FROM vyuLGLoadDocumentTracking T
-		WHERE T.intContractHeaderId = DT.intContractHeaderId
+		JOIN tblLGLoad L ON L.intLoadId = T.intLoadId
+		WHERE T.intContractHeaderId = DT.intContractHeaderId AND L.intShipmentType = 1
 		) intDocsCount
 	,(
 		SELECT COUNT(*)
 		FROM vyuLGLoadDocumentTracking T
+		JOIN tblLGLoad L ON L.intLoadId = T.intLoadId
 		WHERE T.intContractHeaderId = DT.intContractHeaderId
+			AND L.intShipmentType = 1
 			AND ISNULL(T.ysnReceived, 0) = 1
 		) intReceivedDocsCount
+	,(SELECT MAX(dtmStartDate) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dtmStartDate
+	,(SELECT MAX(dtmEndDate) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dtmEndDate
 	,CASE 
 		WHEN (
 				SELECT COUNT(*)
 				FROM vyuLGLoadDocumentTracking T
+				JOIN tblLGLoad L ON L.intLoadId = T.intLoadId
 				WHERE T.intContractHeaderId = DT.intContractHeaderId
+					AND L.intShipmentType = 1
 				) = (
 				SELECT COUNT(*)
 				FROM vyuLGLoadDocumentTracking T
+				JOIN tblLGLoad L ON L.intLoadId = T.intLoadId
 				WHERE T.intContractHeaderId = DT.intContractHeaderId
+					AND L.intShipmentType = 1
 					AND ISNULL(T.ysnReceived, 0) = 1
 				)
 			THEN 'Y'
@@ -34,12 +44,17 @@ SELECT DT.strContractNumber
 		END strDocumentsReceived
 FROM vyuLGLoadDocumentTracking DT
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = DT.intContractHeaderId
+JOIN tblLGLoad L ON L.intLoadId = DT.intLoadId
+LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblEMEntity E ON E.intEntityId = CH.intProducerId
+WHERE L.intShipmentType = 1	
 GROUP BY DT.strContractNumber
 	,DT.intContractHeaderId
+	,CH.intContractHeaderId
 	,DT.intContractSeq
-	,strLoadNumber
+	,DT.strLoadNumber
 	,strVendorName
 	,E.strName
 	,DT.dtmScheduledDate
 	,DT.dtmETAPOD
+	,SI.dtmETAPOD
