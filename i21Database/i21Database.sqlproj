@@ -4908,6 +4908,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleContractSlice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractCopy.sql" />
     <Build Include="dbo\Views\vyuARPaymentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetDiscountRead.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
