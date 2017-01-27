@@ -2427,3 +2427,7 @@ WHERE NOT EXISTS (
 		WHERE LI.intLotId = L.intLotId
 		)
 GO
+UPDATE tblMFPatternDetail
+SET ysnPaddingZero = 1
+WHERE ysnPaddingZero IS NULL
+GO

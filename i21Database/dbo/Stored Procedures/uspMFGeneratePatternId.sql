@@ -51,6 +51,7 @@ BEGIN
 		,intSubPatternSize INT
 		,strSubPatternTypeDetail NVARCHAR(MAX)
 		,strSubPatternFormat NVARCHAR(MAX)
+		,ysnPaddingZero bit
 		)
 	DECLARE @tblMFRecord TABLE (strRecordName NVARCHAR(50))
 	DECLARE @tblMFFindPrimaryKeyColumn TABLE (
@@ -96,11 +97,13 @@ BEGIN
 		,intSubPatternSize
 		,strSubPatternTypeDetail
 		,strSubPatternFormat
+		,ysnPaddingZero
 		)
 	SELECT intSubPatternTypeId
 		,intSubPatternSize
 		,strSubPatternTypeDetail
 		,strSubPatternFormat
+		,ysnPaddingZero
 	FROM dbo.tblMFPatternDetail
 	WHERE intPatternId = @intPatternId
 	ORDER BY intOrdinalPosition
@@ -115,6 +118,7 @@ BEGIN
 			,@intSubPatternSize = intSubPatternSize
 			,@strSubPatternTypeDetail = strSubPatternTypeDetail
 			,@strSubPatternFormat = strSubPatternFormat
+			,@ysnPaddingZero=IsNULL(ysnPaddingZero,1)
 		FROM @tblMFPatternDetail
 		WHERE intRecordId = @intRecordId
 
@@ -304,7 +308,6 @@ BEGIN
 			END
 
 			SELECT @strSequence = convert(NVARCHAR, intSequenceNo)
-				,@ysnPaddingZero = IsNULL(ysnPaddingZero, 1)
 			FROM dbo.tblMFPatternSequence
 			WHERE intPatternId = @intPatternId
 				AND strPatternSequence = @strPatternString
