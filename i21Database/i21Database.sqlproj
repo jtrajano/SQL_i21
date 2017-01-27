@@ -4909,6 +4909,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleContractCopy.sql" />
     <Build Include="dbo\Views\vyuARPaymentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDiscountRead.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDocumentTrackingSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuLGLoadDocumentTracking
 AS
 SELECT CH.strContractNumber
+	,CH.intContractHeaderId
 	,CD.intContractSeq
 	,Vendor.strName AS strVendorName
 	,Customer.strName AS strCustomerName
