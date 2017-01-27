@@ -35,7 +35,7 @@ AS
 			PL.strPricingLevelName,			PT.strPricingType,				U5.strUnitMeasure			AS	strLoadCategoryUnitMeasure,				
 			CB.strINCOLocationType,			CH.dtmCreated,					CE.strName					AS	strCreatedBy,
 			CH.dtmLastModified,				CP.strContractPlan,				UE.strName					AS	strLastModifiedBy,					
-			YR.strCropYear,															
+			YR.strCropYear,					TM.strTermCode,										
 																		
 			CASE WHEN strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName	END	AS	strINCOLocation,
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses

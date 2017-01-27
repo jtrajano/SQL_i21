@@ -28,6 +28,9 @@
 	intDefContractStatusId INT,
 	ysnBasisComponent BIT,
     [strAmendmentFields] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	ysnOutGoingContractFeed BIT,
+	ysnRoundLotsForMultiPrice BIT,
+	ysnMultiPriceOnBasis BIT,
 	intDefContainerTypeId INT,
 
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
