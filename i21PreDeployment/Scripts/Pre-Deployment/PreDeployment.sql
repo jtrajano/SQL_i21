@@ -65,6 +65,7 @@
 :r .\7_AR\2_DropTableScript.sql
 :r .\7_AR\4_InvoicePaymentMethodCleanUp.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql
+:r .\7_AR\6_PaymentDetailInvoiceCleanUp.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql

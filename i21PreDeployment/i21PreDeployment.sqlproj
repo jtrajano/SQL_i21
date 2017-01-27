@@ -296,4 +296,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\Clean_Valuation_Indexes.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\6_PaymentDetailInvoiceCleanUp.sql" />
+  </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuARPaymentDetail]
+﻿CREATE VIEW [dbo].[vyuARInvoicesForPayment]
 AS
 SELECT 
 	 [intTransactionId]			= ARI.[intInvoiceId]

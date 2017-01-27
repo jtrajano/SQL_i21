@@ -4907,9 +4907,9 @@
     <Build Include="dbo\Functions\fnTMGetSeasonYear.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractSlice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractCopy.sql" />
-    <Build Include="dbo\Views\vyuARPaymentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDiscountRead.sql" />
     <Build Include="dbo\Views\vyuLGLoadDocumentTrackingSummary.sql" />
+    <Build Include="dbo\Views\vyuARInvoicesForPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
