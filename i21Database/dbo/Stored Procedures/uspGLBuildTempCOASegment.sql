@@ -2,6 +2,12 @@
 	
 AS
 BEGIN
+	
+	DELETE FROM tblGLAccountStructure WHERE intAccountStructureId not in
+	(SELECT DISTINCT(intAccountStructureId) FROM tblGLAccountSegment) and strType != 'Divider'
+
+	UPDATE tblGLAccountStructure SET strType = 'Segment' WHERE  strStructureName = 'Location'
+
 	--CREATE DYNAMIC ACCOUNT STRUCTURE
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDASTable') 
 	BEGIN 
@@ -30,7 +36,6 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-		
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType  = N'Segment' and strStructureName = N'Location')
 			BEGIN
 				UPDATE tblGLAccountStructure SET strStructureName = 'Location' WHERE  intAccountStructureId = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Segment')
