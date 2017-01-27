@@ -16,6 +16,7 @@ BEGIN
 	DECLARE @intInsurerEntityId INT
 	DECLARE @ysnClaimsToProducer BIT
 	DECLARE @intProducerEntityId INT
+	DECLARE @strInstoreLetterName NVARCHAR(MAX)
 
 	IF (@strReportName = 'ShippingInstruction' or @strReportName = 'ShippingInstruction2')
 	BEGIN
@@ -213,6 +214,8 @@ BEGIN
 							   JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 							   JOIN tblEMEntity EM ON EM.intEntityId = CLSL.intVendorId
 							   WHERE LW.intLoadWarehouseId = @intTransactionId)
+
+				SELECT @strInstoreLetterName = 'in store letter'				
 		END
 		ELSE 
 		BEGIN
@@ -220,6 +223,8 @@ BEGIN
 								JOIN tblLGLoadWarehouse LW ON L.intLoadId = LW.intLoadId
 								JOIN tblEMEntity EM ON EM.intEntityId = L.intShippingLineEntityId
 								WHERE intLoadWarehouseId = @intTransactionId)
+
+				SELECT @strInstoreLetterName = 'release order'
 		END
 
 		SELECT @strEntityName = strName
@@ -235,15 +240,15 @@ BEGIN
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
-		SET @Subject = 'Load/Shipment Schedule - In Store Letter - ' + @strLoadNumber
-		SET @body += '<!DOCTYPE html>'
-		SET @body += '<html>'
-		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
-		SET @body += 'Please see your "in store letter"  in the attachments tab. <br><br>'
-		SET @body += 'Thank you for your business. <br><br>'
-		SET @body += 'Sincerely, <br><br>'
-		SET @body += '</html>'
-		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+        SET @Subject = 'Load/Shipment Schedule - ' + CASE WHEN @strInstoreTo = 'Warehouse' THEN 'In Store Letter' ELSE 'Release Order' END + ' - ' + @strLoadNumber
+        SET @body += '<!DOCTYPE html>'
+        SET @body += '<html>'
+        SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
+        SET @body += 'Please see your "' + @strInstoreLetterName + '"  in the attachments tab. <br><br>'
+        SET @body += 'Thank you for your business. <br><br>'
+        SET @body += 'Sincerely, <br><br>'
+        SET @body += '</html>'
+        SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
 		SELECT @Subject AS strSubject
 			,@Filter AS strFilters

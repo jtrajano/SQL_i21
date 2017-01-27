@@ -2,8 +2,7 @@
 	 @intLotId INT
 	,@strAlternateLotNo NVARCHAR(50)
 	,@strLotSourceLocation NVARCHAR(50)
-	,@intOrderHeaderId INT
-	,@intTaskId INT
+	,@strShipmentNo NVARCHAR(100)
 AS
 BEGIN TRY
 	DECLARE @strOrderLotNo NVARCHAR(50)
@@ -20,6 +19,7 @@ BEGIN TRY
 	DECLARE @strKitStagingArea NVARCHAR(100)
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @intLotStatusId INT
+	DECLARE @intTaskId INT
 
 	SELECT @intStorageLocationId = intStorageLocationId
 	FROM tblICStorageLocation
@@ -43,6 +43,13 @@ BEGIN TRY
 	WHERE a.strAttributeName = 'Kit Staging Location'
 		AND intManufacturingProcessId = 1
 	
+	IF (@intLotId <> @intAlternateLotId)
+	BEGIN
+		SELECT @intTaskId = intTaskId FROM tblMFTask T
+		JOIN tblMFOrderHeader O ON O.intOrderHeaderId = T.intOrderHeaderId
+		WHERE intLotId = @intLotId
+	END
+
 	BEGIN TRANSACTION
 
 		IF EXISTS (SELECT 1 FROM tblMFTask WHERE intLotId = @intLotId AND intTaskId = @intTaskId)

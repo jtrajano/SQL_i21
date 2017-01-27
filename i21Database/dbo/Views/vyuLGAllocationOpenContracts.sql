@@ -36,7 +36,7 @@ AS
 			CASE WHEN CD.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
 			CD.strCommodityDescription as strCommodity,
 			CD.strLocationName,
-			CAST(CASE WHEN CD.intContractStatusId IN (1,4,5) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
+			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
 			CD.strPricingType,
 			CD.dblCashPrice,
 			CD.dblAdjustment,

@@ -33,7 +33,7 @@ SELECT * FROM (
 			FROM tblCTContractDetail Seq
 			WHERE Seq.intContractHeaderId = CH.intContractHeaderId
 				AND Seq.intItemId = CD.intItemId
-				AND Seq.intContractStatusId <> 5
+				AND Seq.intContractStatusId NOT IN (5,6)
 			)
 		,strRemarks = CH.strInternalComment
         ,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, MAX(CD.dtmEndDate)), 2)
