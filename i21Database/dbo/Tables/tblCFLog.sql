@@ -4,6 +4,7 @@
     [strProcessid] NVARCHAR (MAX) NOT NULL,
     [strCallStack] NVARCHAR (MAX) NULL,
     [intSortId]    INT            NOT NULL,
+    [strMessage] NVARCHAR(MAX) NULL, 
     CONSTRAINT [PK_tblCFLog] PRIMARY KEY CLUSTERED ([intLogId] ASC)
 );
 

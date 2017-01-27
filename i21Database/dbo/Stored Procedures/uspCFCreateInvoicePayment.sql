@@ -17,84 +17,92 @@ BEGIN
 		DECLARE @companyLocationId		INT = 0
 		DECLARE @accountId				INT = 0
 		DECLARE @ysnAddPayment			BIT = 0
+		DECLARE @executedLine			INT = 0 
 		--------------------------------------
 
 		----------TEMPORARY TABLE-------------
+		SET @executedLine = 1
 		CREATE TABLE #tblCFDisctinctCustomerInvoice	
-	(
-		 intAccountId					INT
-		,intCustomerId					INT
-	)
+		(
+			 intAccountId					INT
+			,intCustomerId					INT
+		)
+
+		SET @executedLine = 2
 		CREATE TABLE #tblCFInvoiceDiscount	
-(
-		 intAccountId					INT
-		,intSalesPersonId				INT
-		,dtmInvoiceDate					DATETIME
-		,intCustomerId					INT
-		,intInvoiceId					INT
-		,intTransactionId				INT
-		,intCustomerGroupId				INT
-		,intTermID						INT
-		,intBalanceDue					INT
-		,intDiscountDay					INT	
-		,intDayofMonthDue				INT
-		,intDueNextMonth				INT
-		,intSort						INT
-		,intConcurrencyId				INT
-		,ysnAllowEFT					BIT
-		,ysnActive						BIT
-		,ysnEnergyTrac					BIT
-		,dblQuantity					NUMERIC(18,6)
-		,dblTotalQuantity				NUMERIC(18,6)
-		,dblDiscountRate				NUMERIC(18,6)
-		,dblDiscount					NUMERIC(18,6)
-		,dblTotalAmount					NUMERIC(18,6)
-		,dblAccountTotalAmount			NUMERIC(18,6)
-		,dblAccountTotalDiscount		NUMERIC(18,6)
-		,dblAccountTotalLessDiscount	NUMERIC(18,6)
-		,dblDiscountEP					NUMERIC(18,6)
-		,dblAPR							NUMERIC(18,6)	
-		,strTerm						NVARCHAR(MAX)
-		,strType						NVARCHAR(MAX)
-		,strTermCode					NVARCHAR(MAX)	
-		,strNetwork						NVARCHAR(MAX)	
-		,strCustomerName				NVARCHAR(MAX)
-		,strInvoiceCycle				NVARCHAR(MAX)
-		,strGroupName					NVARCHAR(MAX)
-		,strInvoiceNumber				NVARCHAR(MAX)
-		,strInvoiceReportNumber			NVARCHAR(MAX)
-		,dtmDiscountDate				DATETIME
-		,dtmDueDate						DATETIME
-		,dtmTransactionDate				DATETIME
-		,dtmPostedDate					DATETIME
-)
+		(
+			 intAccountId					INT
+			,intSalesPersonId				INT
+			,dtmInvoiceDate					DATETIME
+			,intCustomerId					INT
+			,intInvoiceId					INT
+			,intTransactionId				INT
+			,intCustomerGroupId				INT
+			,intTermID						INT
+			,intBalanceDue					INT
+			,intDiscountDay					INT	
+			,intDayofMonthDue				INT
+			,intDueNextMonth				INT
+			,intSort						INT
+			,intConcurrencyId				INT
+			,ysnAllowEFT					BIT
+			,ysnActive						BIT
+			,ysnEnergyTrac					BIT
+			,dblQuantity					NUMERIC(18,6)
+			,dblTotalQuantity				NUMERIC(18,6)
+			,dblDiscountRate				NUMERIC(18,6)
+			,dblDiscount					NUMERIC(18,6)
+			,dblTotalAmount					NUMERIC(18,6)
+			,dblAccountTotalAmount			NUMERIC(18,6)
+			,dblAccountTotalDiscount		NUMERIC(18,6)
+			,dblAccountTotalLessDiscount	NUMERIC(18,6)
+			,dblDiscountEP					NUMERIC(18,6)
+			,dblAPR							NUMERIC(18,6)	
+			,strTerm						NVARCHAR(MAX)
+			,strType						NVARCHAR(MAX)
+			,strTermCode					NVARCHAR(MAX)	
+			,strNetwork						NVARCHAR(MAX)	
+			,strCustomerName				NVARCHAR(MAX)
+			,strInvoiceCycle				NVARCHAR(MAX)
+			,strGroupName					NVARCHAR(MAX)
+			,strInvoiceNumber				NVARCHAR(MAX)
+			,strInvoiceReportNumber			NVARCHAR(MAX)
+			,dtmDiscountDate				DATETIME
+			,dtmDueDate						DATETIME
+			,dtmTransactionDate				DATETIME
+			,dtmPostedDate					DATETIME
+		)
 		--------------------------------------
 
 		----------COMPANY PREFERENCE----------
+		SET @executedLine = 3
 		SELECT TOP 1 
-	@companyLocationId = intARLocationId ,
-	@accountId = intGLAccountId
-	FROM tblCFCompanyPreference
+			@companyLocationId = intARLocationId ,
+			@accountId = intGLAccountId
+		FROM tblCFCompanyPreference
 		--------------------------------------
 	
 		-------------INVOICE LIST-------------
+		SET @executedLine = 4
 		INSERT INTO #tblCFInvoiceDiscount
-	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+		EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
 		--------------------------------------
 
 		----------GROUP BY CUSTOMER-----------
+		SET @executedLine = 5
 		INSERT INTO #tblCFDisctinctCustomerInvoice(
-		 intAccountId	
-		,intCustomerId	
-	)
-	SELECT 
-		 intAccountId	
-		,intCustomerId	
-	FROM #tblCFInvoiceDiscount
-	GROUP BY intAccountId,intCustomerId	
+			 intAccountId	
+			,intCustomerId	
+		)
+		SELECT 
+			 intAccountId	
+			,intCustomerId	
+		FROM #tblCFInvoiceDiscount
+		GROUP BY intAccountId,intCustomerId	
 		--------------------------------------
 
 		------------LOOP VARIABLES------------
+		SET @executedLine = 6
 		DECLARE @id							INT
 		DECLARE @loopAccountId				INT
 		DECLARE @loopCustomerId				INT
@@ -103,6 +111,7 @@ BEGIN
 		--------------------------------------
 
 		----------PAYMENT PARAMETERS-----------
+		SET @executedLine = 7
 		DECLARE @EntityCustomerId		INT										--QUERY
 		DECLARE @CurrencyId				INT				= NULL					--NULL
 		DECLARE @DatePaid				DATETIME								--QUERY
@@ -126,23 +135,28 @@ BEGIN
 		---------------------------------------
 
 		------------LOOP CUST GROUP------------
+		SET @executedLine = 8
 		WHILE (EXISTS(SELECT 1 FROM #tblCFDisctinctCustomerInvoice))
 		---------------------------------------
 		BEGIN
-
+			
+			SET @executedLine = 9
 			SELECT	@loopCustomerId = intCustomerId, 
 					@loopAccountId = intAccountId 
 			FROM #tblCFDisctinctCustomerInvoice
 
 			------------LOOP INVOICE------------
+			SET @executedLine = 10
 			WHILE (EXISTS(SELECT 1 FROM #tblCFInvoiceDiscount WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId))
 			---------------------------------------
 			BEGIN
 
+				SET @executedLine = 11
 				SELECT	TOP 1 @id = intTransactionId
 				FROM #tblCFInvoiceDiscount
 				WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId
 
+				SET @executedLine = 12
 				SELECT TOP 1
 				 @EntityCustomerId		= intCustomerId
 				,@AmountPaid			= dblTotalAmount
@@ -155,16 +169,18 @@ BEGIN
 				WHERE intTransactionId = @id
 				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
+
 				IF (@ysnAddPayment = 0)
 				BEGIN
 
+					SET @executedLine = 13
 					PRINT 'CREATE PAYMENT'
 					EXEC [dbo].[uspARCreateCustomerPayment]
 					@EntityCustomerId						= @EntityCustomerId,
 					@CompanyLocationId						= @companyLocationId,
 					@CurrencyId								= @CurrencyId,
 					@DatePaid								= @DatePaid,
-					@AccountId								= @accountId,
+					@WriteOffAccountId						= @accountId,
 					@BankAccountId							= @BankAccountId,
 					@AmountPaid								= @AmountPaid,
 					@PaymentMethodId						= @PaymentMethodId,
@@ -186,6 +202,7 @@ BEGIN
 					@InvoicePrepayment						= @InvoicePrepayment
 					SET @ysnAddPayment = 1
 
+					SET @executedLine = 14
 					IF (@CreatedIvoices IS NOT NULL)
 					BEGIN
 						SET @CreatedIvoices =  @CreatedIvoices + ',' + CONVERT(varchar(10), @newPaymentId)
@@ -195,6 +212,7 @@ BEGIN
 						SET @CreatedIvoices = CONVERT(varchar(10), @newPaymentId)
 					END
 
+					SET @executedLine = 15
 					INSERT INTO tblCFInvoiceProcessResult(
 						 strInvoiceProcessResultId
 						,intTransactionProcessId
@@ -216,6 +234,7 @@ BEGIN
 				END
 				ELSE
 				BEGIN
+					SET @executedLine = 16
 					PRINT 'ADD PAYMENT'
 					EXEC [dbo].[uspARAddInvoiceToPayment]
 					 @PaymentId								= @newPaymentId
@@ -231,18 +250,21 @@ BEGIN
 
 				END
 
+				SET @executedLine = 17
 				DELETE FROM #tblCFInvoiceDiscount 
 				WHERE intTransactionId = @id
 				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
 			END
 	
+			SET @executedLine = 18
 			SET @ysnAddPayment = 0
 			DELETE FROM #tblCFDisctinctCustomerInvoice WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId
 
 		END
 
 		-----------------POST PAYMENT--------------
+		SET @executedLine = 19
 		EXEC dbo.uspARPostPayment
 		@post = 1,
 		@recap = 0,
@@ -251,6 +273,7 @@ BEGIN
 		@invalidCount = @InvalidPostCount OUTPUT
 		--------------------------------------------
 
+		SET @executedLine = 20
 		DROP TABLE #tblCFInvoiceDiscount
 		DROP TABLE #tblCFDisctinctCustomerInvoice
 
@@ -258,7 +281,20 @@ BEGIN
 	BEGIN CATCH
 
 		------------SET ERROR MESSAGE-----------
-		SET @ErrorMessage = ERROR_MESSAGE ()  
+		DECLARE @CatchErrorMessage NVARCHAR(4000);  
+		DECLARE @CatchErrorSeverity INT;  
+		DECLARE @CatchErrorState INT;  
+  
+		SELECT   
+			@CatchErrorMessage = 'Line:' + (LTRIM(RTRIM(STR(@executedLine)))) + ' Process Payment  > ' + ERROR_MESSAGE(),  
+			@CatchErrorSeverity = ERROR_SEVERITY(),  
+			@CatchErrorState = ERROR_STATE();  
+  
+		RAISERROR (
+			@CatchErrorMessage, 
+			@CatchErrorSeverity, 
+			@CatchErrorState   
+		);  
 		----------------------------------------
 
 		----------DROP TEMPORARY TABLE----------
