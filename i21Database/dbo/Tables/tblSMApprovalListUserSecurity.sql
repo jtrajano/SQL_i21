@@ -2,7 +2,7 @@
 (
 	[intApprovalListUserSecurityId]			INT				NOT NULL PRIMARY KEY IDENTITY, 
     [intApprovalListId]						INT				NOT NULL, 
-    [intEntityUserSecurityId]				INT				NOT NULL, 
+    [intEntityUserSecurityId]				INT				NULL, 
 	[intApproverLevel]						INT				NOT NULL DEFAULT 1,
 	[intAlternateEntityUserSecurityId]		INT				NULL, 
 	[intApproverGroupId]					INT				NULL, 
