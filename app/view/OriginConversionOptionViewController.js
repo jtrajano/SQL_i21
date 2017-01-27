@@ -193,8 +193,6 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             error: function(jqXHR, status, error) {
                 iRely.Msg.close();
                 var json = JSON.parse(jqXHR.responseText);
-                viewModel.set('lineOfBusiness', lineOfBusiness);
-                viewModel.set('currentTask', originTypes[type+1]);
                 i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
                     function() {
                         //win.close();

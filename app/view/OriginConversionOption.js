@@ -1067,7 +1067,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                     height: 844,
                     padding: '15 0 0 0',
                     bodyPadding: 10,
-                    title: 'Origins',
+                    title: 'Import Origin Data',
                     items: [
                         {
                             xtype: 'container',
@@ -1114,10 +1114,10 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             items: [
                                 {
                                     xtype: 'combobox',
-                                    flex: 1,
                                     bind: {
                                         disabled: '{disableLob}'
                                     },
+                                    flex: 1,
                                     itemId: 'cboLOB',
                                     width: 361,
                                     fieldLabel: 'Line of Business',
@@ -1183,7 +1183,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     height: 40,
                                     itemId: 'btnOriginUOM',
                                     width: 469,
-                                    text: 'Import Unit of Measures'
+                                    text: 'Unit of Measures'
                                 },
                                 {
                                     xtype: 'container',
@@ -1222,7 +1222,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     flex: 1,
                                     height: 40,
                                     itemId: 'btnOriginLocations',
-                                    text: 'Import Sub Locations and Storage Locations'
+                                    text: 'Sub Locations and Storage Locations'
                                 },
                                 {
                                     xtype: 'container',
@@ -1261,7 +1261,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     flex: 1,
                                     height: 40,
                                     itemId: 'btnOriginCommodity',
-                                    text: 'Import Commodity'
+                                    text: 'Commodity'
                                 },
                                 {
                                     xtype: 'container',
@@ -1302,7 +1302,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     flex: 1,
                                     height: 40,
                                     itemId: 'btnOriginCategoryClass',
-                                    text: 'Import Category/Class'
+                                    text: 'Category/Class'
                                 },
                                 {
                                     xtype: 'container',
@@ -1342,7 +1342,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     flex: 1,
                                     height: 40,
                                     itemId: 'btnOriginCategoryGLAccts',
-                                    text: 'Import GL Accounts for category'
+                                    text: 'GL Accounts for category'
                                 },
                                 {
                                     xtype: 'container',
@@ -1422,7 +1422,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     flex: 1,
                                     height: 40,
                                     itemId: 'btnOriginItems',
-                                    text: 'Import Items, Locations and Pricing'
+                                    text: 'Items, Locations and Pricing'
                                 },
                                 {
                                     xtype: 'container',
@@ -1462,7 +1462,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     flex: 1,
                                     height: 40,
                                     itemId: 'btnOriginItemGLAccts',
-                                    text: 'Import GL Accounts for Items'
+                                    text: 'GL Accounts for Items'
                                 },
                                 {
                                     xtype: 'container',
@@ -1532,7 +1532,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     flex: 1,
                                     height: 40,
                                     itemId: 'btnOriginBalance',
-                                    text: 'Import Opening Balance'
+                                    text: 'Opening Balance'
                                 },
                                 {
                                     xtype: 'container',

@@ -2162,7 +2162,7 @@
                         "bodyPadding": 10,
                         "height": 844,
                         "padding": "15 0 0 0",
-                        "title": "Origins"
+                        "title": "Import Origin Data"
                     },
                     "name": "MyPanel37",
                     "designerId": "c3171e1b-a9d5-4908-b30f-3d3751119aea",
@@ -2367,7 +2367,7 @@
                                         "height": 40,
                                         "itemId": "btnOriginUOM",
                                         "layout|flex": 1,
-                                        "text": "Import Unit of Measures",
+                                        "text": "Unit of Measures",
                                         "width": 469
                                     },
                                     "name": "MyButton25",
@@ -2453,7 +2453,7 @@
                                         "height": 40,
                                         "itemId": "btnOriginLocations",
                                         "layout|flex": 1,
-                                        "text": "Import Sub Locations and Storage Locations"
+                                        "text": "Sub Locations and Storage Locations"
                                     },
                                     "name": "MyButton25",
                                     "configAlternates": {
@@ -2537,7 +2537,7 @@
                                         "height": 40,
                                         "itemId": "btnOriginCommodity",
                                         "layout|flex": 1,
-                                        "text": "Import Commodity"
+                                        "text": "Commodity"
                                     },
                                     "name": "MyButton25",
                                     "configAlternates": {
@@ -2623,7 +2623,7 @@
                                         "height": 40,
                                         "itemId": "btnOriginCategoryClass",
                                         "layout|flex": 1,
-                                        "text": "Import Category/Class"
+                                        "text": "Category/Class"
                                     },
                                     "name": "MyButton25",
                                     "configAlternates": {
@@ -2708,7 +2708,7 @@
                                         "height": 40,
                                         "itemId": "btnOriginCategoryGLAccts",
                                         "layout|flex": 1,
-                                        "text": "Import GL Accounts for category"
+                                        "text": "GL Accounts for category"
                                     },
                                     "name": "MyButton25",
                                     "configAlternates": {
@@ -2878,7 +2878,7 @@
                                         "height": 40,
                                         "itemId": "btnOriginItems",
                                         "layout|flex": 1,
-                                        "text": "Import Items, Locations and Pricing"
+                                        "text": "Items, Locations and Pricing"
                                     },
                                     "name": "MyButton25",
                                     "configAlternates": {
@@ -2963,7 +2963,7 @@
                                         "height": 40,
                                         "itemId": "btnOriginItemGLAccts",
                                         "layout|flex": 1,
-                                        "text": "Import GL Accounts for Items"
+                                        "text": "GL Accounts for Items"
                                     },
                                     "name": "MyButton25",
                                     "configAlternates": {
@@ -3104,7 +3104,7 @@
                                         "height": 40,
                                         "itemId": "btnOriginBalance",
                                         "layout|flex": 1,
-                                        "text": "Import Opening Balance"
+                                        "text": "Opening Balance"
                                     },
                                     "name": "MyButton25",
                                     "configAlternates": {
