@@ -65,11 +65,28 @@ SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompany
 --END
 
 --Make sure all items were not yet billed.
-IF NOT EXISTS(SELECT 1 FROM tblICInventoryReceiptItem A
-					WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)
-					AND A.dblOpenReceive != A.dblBillQty)
+IF NOT EXISTS (
+	SELECT	TOP 1 1 
+	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			INNER JOIN #tmpReceiptIds tmp
+				ON ri.intInventoryReceiptId = tmp.intInventoryReceiptId
+	WHERE	ri.dblOpenReceive <> ri.dblBillQty
+			AND r.strReceiptType = 'inventory Return'			
+)
+BEGIN 
+	RAISERROR('All return item(s) already has a Debit Memo.', 16, 1);
+END
+
+--Make sure all items were not yet billed.
+IF NOT EXISTS(
+	SELECT	TOP 1 1 
+	FROM	tblICInventoryReceiptItem r INNER JOIN #tmpReceiptIds tmp
+				ON r.intInventoryReceiptId = tmp.intInventoryReceiptId
+	WHERE	r.dblOpenReceive <> r.dblBillQty
+)
 BEGIN
-	RAISERROR('All of the item in the receipt was fully billed.', 16, 1);
+	RAISERROR('All receipt item(s) already has a Voucher.', 16, 1);
 	--GOTO DONE
 END
 
