@@ -169,6 +169,7 @@ BEGIN
 			,[ysnUpdateAvailableDiscount]
 			,[strItemTermDiscountBy]
 			,[dblItemTermDiscount]
+			,[strDocumentNumber]
 		)
 		SELECT
 			 [strTransactionType]					= 'Debit Memo'
@@ -251,6 +252,7 @@ BEGIN
 			,[ysnUpdateAvailableDiscount]			= 1
 			,[strItemTermDiscountBy]				= 'Amount'
 			,[dblItemTermDiscount]					= dblAccountTotalDiscount
+			,[strDocumentNumber]					= strInvoiceReportNumber
 		FROM #tblCFInvoiceDiscount
 		GROUP BY 
 		intCustomerId
@@ -364,4 +366,3 @@ BEGIN
 	END CATCH
 
 END
-
