@@ -3,7 +3,8 @@
 	@intFutureMarketId	int,
 	@intCommodityId	int ,
 	@intBrokerId	int ,
-	@intBorkerageAccountId	int=null
+	@intBorkerageAccountId	int=null,
+	@intReconciliationBrokerStatementHeaderId int
 
 AS
 
@@ -14,4 +15,7 @@ BEGIN
 	AND intBrokerageAccountId = CASE WHEN ISNULL(@intBorkerageAccountId,0)=0 THEN intBrokerageAccountId ELSE @intBorkerageAccountId END 
 	AND ISNULL(ysnFreezed,0) = 0
 	AND intInstrumentTypeId=1 AND intSelectedInstrumentTypeId=1
+
+	update tblRKReconciliationBrokerStatementHeader set ysnFreezed = 1 where intReconciliationBrokerStatementHeaderId=@intReconciliationBrokerStatementHeaderId
+
 END

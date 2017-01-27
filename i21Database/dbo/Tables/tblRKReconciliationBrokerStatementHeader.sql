@@ -10,8 +10,8 @@
     [intCommodityId] INT  NULL, 
 	[strImportStatus]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strComments]  NVARCHAR(Max) COLLATE Latin1_General_CI_AS NULL, 
-
-	CONSTRAINT [PK_tblRKReconciliationBrokerStatementHeader_intReconciliationBrokerStatementHeaderId] PRIMARY KEY (intReconciliationBrokerStatementHeaderId),	
+	[ysnFreezed] BIT NULL, 
+    CONSTRAINT [PK_tblRKReconciliationBrokerStatementHeader_intReconciliationBrokerStatementHeaderId] PRIMARY KEY (intReconciliationBrokerStatementHeaderId),	
     CONSTRAINT [FK_tblRKReconciliationBrokerStatementHeader_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblRKReconciliationBrokerStatementHeader_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
 	CONSTRAINT [FK_tblRKReconciliationBrokerStatementHeader_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])
