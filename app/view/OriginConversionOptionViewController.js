@@ -335,7 +335,7 @@ function getTemplateColumns(name) {
         case "Manufacturers":
             return ["Manufacturer"];
         case "Commodities":
-            return ["Commodity Code", "Description", "Exchange Traded", "Decimals on DPR", "Default Future Market", "Consolidate Factor", "FX Exposure", "Price Checks Min",
+            return ["Commodity Code", "Description", "Exchange Traded", "Decimals on DPR", "Default Future Market", "Price Checks Min",
                 "Price Checks Max", "Checkoff Tax Desc", "Checkoff All States", "Insurance Tax Desc", "Insurance All States",
                 "Crop End Date Current", "Crop End Date New", "EDI Code", "Default Schedule Store", "Discount", "Scale Auto Dist Default"];
         case "Items":
