@@ -58,7 +58,8 @@ AS
 		AND			intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
 		AND			CD.intContractStatusId <> 3
 		AND			CD.intSplitFromId	IS NULL
-		
+		AND			CD.intContractStatusId NOT IN (2,3)
+
 		UNION ALL
 		
 		SELECT 		CAST (NULL AS INT)			AS	intPriceContractId,
@@ -112,6 +113,7 @@ AS
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
 		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
 		AND			CD.intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation)
+		AND			CD.intContractStatusId NOT IN (2,3)
 		GROUP BY	CD.intContractHeaderId,
 					CD.strContractNumber,
 					CD.intContractTypeId,

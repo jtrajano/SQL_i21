@@ -28,7 +28,7 @@ AS
 					JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
 					JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
 					WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
-												'ContractManagement.view.ContractAmendments')AND 
+												'ContractManagement.view.Amendments')AND 
 							AP.strStatus = 'Submitted'
 					ORDER BY intApprovalId DESC
 			) AP ON AP.intRecordId = CD.intContractDetailId											LEFT

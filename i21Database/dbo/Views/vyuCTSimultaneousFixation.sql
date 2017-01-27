@@ -32,7 +32,7 @@ FROM
 				JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId			=	CC.intItemUOMId			LEFT
 				JOIN	tblICCommodityUnitMeasure	CM	ON	CM.intCommodityId		=	CD.intCommodityId		AND 
 															CM.intUnitMeasureId		=	IU.intUnitMeasureId
-				WHERE CC.intContractDetailId = CD.intContractDetailId
+				WHERE CC.intContractDetailId = CD.intContractDetailId AND CC.ysnBasis <> 1
 			) dblAdditionalCost,
 			PF.intFinalPriceUOMId
 			
