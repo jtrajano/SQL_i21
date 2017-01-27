@@ -13934,12 +13934,6 @@
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Customer Name',",
                                                                             "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strType',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Type',",
-                                                                            "\t\tflex: 1",
                                                                             "\t}",
                                                                             "]"
                                                                         ],

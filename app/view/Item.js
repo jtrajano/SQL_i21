@@ -6357,12 +6357,6 @@ Ext.define('Inventory.view.Item', {
                                                                                     dataType: 'string',
                                                                                     text: 'Customer Name',
                                                                                     flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Type',
-                                                                                    flex: 1
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboOwner',
