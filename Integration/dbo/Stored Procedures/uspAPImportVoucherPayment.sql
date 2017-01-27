@@ -142,7 +142,7 @@ SELECT DISTINCT
 	[intEntityId]			= @UserId,
 	[intConcurrencyId]		= 0,
 	[ysnOrigin]				= 1,
-	[ysnPrepay]				= 0,
+	[ysnPrepay]				= CASE WHEN A.apivc_trans_type = 'A' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END,
 	[apivc_vnd_no]			= A.apivc_vnd_no,
 	[apivc_chk_rev_dt]		= A.apivc_chk_rev_dt,
 	[apivc_cbk_no]			= A.apivc_cbk_no,
@@ -186,7 +186,7 @@ SELECT
 	[intEntityId]			= @UserId,
 	[intConcurrencyId]		= 0,
 	[ysnOrigin]				= 1,
-	[ysnPrepay]				= CASE WHEN A.apivc_trans_type = 'A' AND A.apivc_status_ind = 'C' THEN 1 ELSE 0 END,
+	[ysnPrepay]				= CASE WHEN A.apivc_trans_type = 'A' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END,
 	[apivc_vnd_no]			= A.apivc_vnd_no,
 	[apivc_chk_rev_dt]		= A.apivc_chk_rev_dt,
 	[apivc_cbk_no]			= A.apivc_cbk_no,
@@ -198,50 +198,50 @@ INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no
 INNER JOIN tblCMBankAccount D ON A.apivc_cbk_no = D.strCbkNo COLLATE Latin1_General_CS_AS
 LEFT JOIN apchkmst E ON A.apchk_A4GLIdentity = E.A4GLIdentity
 WHERE (A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '') AND A.apchk_A4GLIdentity IS NULL
-UNION ALL
---CREATE UNPAID PREPAYMENT RECORD (ysnPrepay)
-SELECT
-	[intAccountId]			= D.intGLAccountId,
-	[intBankAccountId]		= D.intBankAccountId,
-	[intPaymentMethodId]	= CASE
-									WHEN ISNULL(E.apchk_chk_amt,0) > 0 THEN 
-										CASE 
-											WHEN LEFT(E.apchk_chk_no, 1) = 'E' THEN @eft
-											WHEN LEFT(E.apchk_chk_no, 1) = 'W' THEN @wire
-											WHEN ISNULL(E.apchk_trx_ind,'C') = 'C' THEN @check --DEFAULT TO CHECK IF PAYMENT IS MISSING
-											ELSE @withdrawal
-										END
-									WHEN ISNULL(E.apchk_chk_amt,0) < 0 THEN @deposit
-									WHEN ISNULL(E.apchk_chk_amt,0) = 0 THEN @debitmemosandpayments
-								END,
-	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
-	[intEntityVendorId]		= B.intEntityVendorId,
-	[strPaymentInfo]		= A.apivc_chk_no,
-	[strNotes]				= NULL,
-	[dtmDatePaid]			= CASE WHEN ISDATE(E.apchk_rev_dt) = 1 
-										THEN CONVERT(DATE, CAST(E.apchk_rev_dt AS CHAR(12)), 112) 
-									WHEN ISDATE(A.apivc_gl_rev_dt) = 1 
-										THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) --USE VOUCHER DATE IF CHECK DATE IS INVALID
-									ELSE GETDATE() END,
-	[dblAmountPaid]			= ABS((E.apchk_chk_amt)), --IF MISSING PAYMENT, USE THE NET AMOUNT (THE DISCOUNT IS DEDUCTED)
-	[dblUnapplied]			= 0,
-	[ysnPosted]				= 1,
-	[dblWithheld]			= 0,
-	[intEntityId]			= @UserId,
-	[intConcurrencyId]		= 0,
-	[ysnOrigin]				= 1,
-	[ysnPrepay]				= 1,
-	[apivc_vnd_no]			= E.apchk_vnd_no,
-	[apivc_chk_rev_dt]		= E.apchk_rev_dt,
-	[apivc_cbk_no]			= E.apchk_cbk_no,
-	[apivc_chk_no]			= E.apchk_chk_no,
-	[apchk_A4GLIdentity]	= E.A4GLIdentity
-FROM tmp_apivcmstImport A
-INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
-INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no COLLATE Latin1_General_CS_AS
-INNER JOIN tblCMBankAccount D ON A.apivc_cbk_no = D.strCbkNo COLLATE Latin1_General_CS_AS
-INNER JOIN apchkmst E ON E.apchk_chk_no = A.apivc_chk_no COLLATE Latin1_General_CS_AS
-WHERE (A.apivc_status_ind = 'U' AND A.apivc_trans_type = 'A' AND E.apchk_adv_chk_yn = 'Y')
+--UNION ALL
+----CREATE UNPAID PREPAYMENT RECORD (ysnPrepay) 
+--SELECT
+--	[intAccountId]			= D.intGLAccountId,
+--	[intBankAccountId]		= D.intBankAccountId,
+--	[intPaymentMethodId]	= CASE
+--									WHEN ISNULL(E.apchk_chk_amt,0) > 0 THEN 
+--										CASE 
+--											WHEN LEFT(E.apchk_chk_no, 1) = 'E' THEN @eft
+--											WHEN LEFT(E.apchk_chk_no, 1) = 'W' THEN @wire
+--											WHEN ISNULL(E.apchk_trx_ind,'C') = 'C' THEN @check --DEFAULT TO CHECK IF PAYMENT IS MISSING
+--											ELSE @withdrawal
+--										END
+--									WHEN ISNULL(E.apchk_chk_amt,0) < 0 THEN @deposit
+--									WHEN ISNULL(E.apchk_chk_amt,0) = 0 THEN @debitmemosandpayments
+--								END,
+--	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
+--	[intEntityVendorId]		= B.intEntityVendorId,
+--	[strPaymentInfo]		= A.apivc_chk_no,
+--	[strNotes]				= NULL,
+--	[dtmDatePaid]			= CASE WHEN ISDATE(E.apchk_rev_dt) = 1 
+--										THEN CONVERT(DATE, CAST(E.apchk_rev_dt AS CHAR(12)), 112) 
+--									WHEN ISDATE(A.apivc_gl_rev_dt) = 1 
+--										THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) --USE VOUCHER DATE IF CHECK DATE IS INVALID
+--									ELSE GETDATE() END,
+--	[dblAmountPaid]			= ABS((E.apchk_chk_amt)), --IF MISSING PAYMENT, USE THE NET AMOUNT (THE DISCOUNT IS DEDUCTED)
+--	[dblUnapplied]			= 0,
+--	[ysnPosted]				= 1,
+--	[dblWithheld]			= 0,
+--	[intEntityId]			= @UserId,
+--	[intConcurrencyId]		= 0,
+--	[ysnOrigin]				= 1,
+--	[ysnPrepay]				= 1,
+--	[apivc_vnd_no]			= E.apchk_vnd_no,
+--	[apivc_chk_rev_dt]		= E.apchk_rev_dt,
+--	[apivc_cbk_no]			= E.apchk_cbk_no,
+--	[apivc_chk_no]			= E.apchk_chk_no,
+--	[apchk_A4GLIdentity]	= E.A4GLIdentity
+--FROM tmp_apivcmstImport A
+--INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+--INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no COLLATE Latin1_General_CS_AS
+--INNER JOIN tblCMBankAccount D ON A.apivc_cbk_no = D.strCbkNo COLLATE Latin1_General_CS_AS
+--INNER JOIN apchkmst E ON E.apchk_chk_no = A.apivc_chk_no COLLATE Latin1_General_CS_AS
+--WHERE (A.apivc_status_ind = 'U' AND A.apivc_trans_type = 'A' AND E.apchk_adv_chk_yn = 'Y')
 UNION ALL
 --CREATE PAID PREPAYMENT RECORD (ysnPrepay)
 SELECT
@@ -319,7 +319,8 @@ INSERT
 	[dblWithheld],
 	[intEntityId],
 	[intConcurrencyId],
-	[ysnOrigin]
+	[ysnOrigin],
+	[ysnPrepay]
 )
 VALUES
 (
@@ -338,7 +339,8 @@ VALUES
 	[dblWithheld],
 	[intEntityId],
 	[intConcurrencyId],
-	[ysnOrigin]
+	[ysnOrigin],
+	[ysnPrepay]
 )
 OUTPUT 
 	inserted.intPaymentId,
