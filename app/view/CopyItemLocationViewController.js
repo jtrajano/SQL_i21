@@ -74,7 +74,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
     setupContext: function(config) {
         var me = this;
         var win = config.window;
-        var store = Ext.create('Inventory.store.Item', { pageSize: 50 });
+        var store = Ext.create('Inventory.store.Item', { pageSize: 0 });
         
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
