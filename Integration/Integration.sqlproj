@@ -370,5 +370,8 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportPaymentFromImportedPostedVoucher.sql" />
     <None Include="dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportInventoryReceipts.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportInventoryReceiptsAGItemTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportInventoryReceiptsPTItemTax.sql" />
   </ItemGroup>
 </Project>
