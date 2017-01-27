@@ -39,6 +39,7 @@ namespace iRely.Inventory.BusinessLayer
                 string h = header.ToLower().Trim();
                 int? lu = null;
                 bool inserted = false;
+                string inventoryType = "";
 
                 switch (h)
                 {
@@ -50,6 +51,7 @@ namespace iRely.Inventory.BusinessLayer
                         fc.strDescription = value;
                         break;
                     case "inventory type":
+                        inventoryType = value;
                         if (!SetFixedLookup(value, del => fc.strInventoryType = del, "Inventory Type", inventoryTypes, dr, header, row, true))
                             valid = false;
                         break;
@@ -91,16 +93,22 @@ namespace iRely.Inventory.BusinessLayer
                             case "AVG": fc.intCostingMethod = 1; break;
                             case "FIFO": fc.intCostingMethod = 2; break;
                             case "LIFO": fc.intCostingMethod = 3; break;
-                            default: 
-                                valid = false;
-                                dr.Messages.Add(new ImportDataMessage()
+                            default:
+                                if (string.IsNullOrEmpty(value.Trim()))
                                 {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_ERROR,
-                                    Status = REC_SKIP,
-                                    Message = string.Format("The value for Costing Method should not be blank.")
-                                });
+                                    if (inventoryType == "Inventory" || inventoryType == "Finished Good" || inventoryType == "Raw Material")
+                                    {
+                                        valid = false;
+                                        dr.Messages.Add(new ImportDataMessage()
+                                        {
+                                            Column = header,
+                                            Row = row,
+                                            Type = TYPE_INNER_ERROR,
+                                            Status = REC_SKIP,
+                                            Message = string.Format("The value for Costing Method should not be blank.")
+                                        });
+                                    }
+                                }
                                 break;
                         }
                         break;

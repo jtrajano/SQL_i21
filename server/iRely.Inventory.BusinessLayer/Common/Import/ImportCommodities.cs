@@ -42,12 +42,12 @@ namespace iRely.Inventory.BusinessLayer
                     case "exchange traded":
                         SetBoolean(value, del => fc.ysnExchangeTraded = del);
                         break;
-                    case "consolidate factor":
-                        SetDecimal(value, del => fc.dblConsolidateFactor = del, "Consolidate Factor", dr, header, row);
-                        break;
-                    case "fx exposure":
-                        SetBoolean(value, del => fc.ysnFXExposure = del);
-                        break;
+                    //case "consolidate factor":
+                    //    SetDecimal(value, del => fc.dblConsolidateFactor = del, "Consolidate Factor", dr, header, row);
+                    //    break;
+                    //case "fx exposure":
+                    //    SetBoolean(value, del => fc.ysnFXExposure = del);
+                    //    break;
                     case "price checks min":
                         SetDecimal(value, del => fc.dblPriceCheckMin = del, "Price Checks Min", dr, header, row);
                         break;
