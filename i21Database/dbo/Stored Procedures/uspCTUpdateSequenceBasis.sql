@@ -24,7 +24,7 @@ AS
 
 	
 	UPDATE PF
-	SET		PF.dblPriceWORollArb =	PF.dblPriceWORollArb - 
+	SET		PF.dblFinalPrice =		PF.dblFinalPrice - 
 									dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,PF.dblOriginalBasis) +
 									dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,@dblNewBasis),
 			PF.dblOriginalBasis	 =	@dblNewBasis
