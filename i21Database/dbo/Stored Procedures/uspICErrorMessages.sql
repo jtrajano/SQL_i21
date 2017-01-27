@@ -480,7 +480,7 @@ SET @strmessage = 'Cannot return the inventory receipt. %s must be posted before
 EXEC sp_addmessage 80100,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80101) EXEC sp_dropmessage 80101, 'us_english'	
-SET @strmessage = 'Unable to unpost. The inventory return has a voucher in %s.'
+SET @strmessage = 'Unable to unpost. It has a Debit Memo, %s.'
 EXEC sp_addmessage 80101,11,@strmessage,'us_english','False'
 
 -- was 51174 
