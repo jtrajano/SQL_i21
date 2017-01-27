@@ -604,6 +604,8 @@ BEGIN TRY
 					AND R.strInternalCode = 'STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
 				JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
+				JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
+				JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
@@ -707,6 +709,8 @@ BEGIN TRY
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 				AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
+				JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
+			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
@@ -814,6 +818,8 @@ BEGIN TRY
 					AND SL.ysnAllowConsume = 1
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 					AND R.strInternalCode = 'STOCK'
+					JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
+			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1
@@ -1116,6 +1122,8 @@ BEGIN TRY
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 					AND R.strInternalCode = 'STOCK'
 					JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
+					JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
+					JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND L.intLotStatusId = 1

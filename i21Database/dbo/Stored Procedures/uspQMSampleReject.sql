@@ -256,7 +256,7 @@ BEGIN TRY
 		FROM dbo.tblICLot
 		WHERE intLotId = @intProductValueId
 
-		IF @intCurrentLotStatusId <> @intLotStatusId and (@intSampleControlPointId<>14 or @intSampleControlPointId=14 and @intCurrentLotStatusId=6)
+		IF @intCurrentLotStatusId <> @intLotStatusId and @intSampleControlPointId<>14 
 		BEGIN
 			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
 				,@intNewLotStatusId = @intLotStatusId
@@ -312,7 +312,7 @@ BEGIN TRY
 			FROM @ParentLotData
 			WHERE intSeqNo = @intSeqNo
 
-			IF @intCurrentLotStatusId <> @intLotStatusId and (@intSampleControlPointId<>14 or @intSampleControlPointId=14 and @intCurrentLotStatusId=6)
+			IF @intCurrentLotStatusId <> @intLotStatusId and @intSampleControlPointId<>14 
 			BEGIN
 				EXEC uspMFSetLotStatus @intLotId = @intLotId
 					,@intNewLotStatusId = @intLotStatusId

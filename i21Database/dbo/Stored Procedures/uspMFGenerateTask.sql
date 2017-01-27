@@ -429,6 +429,7 @@ BEGIN TRY
 					,11
 					)
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 			JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
 			WHERE L.intItemId = @intItemId
 				AND L.intLotStatusId = 1
@@ -566,6 +567,7 @@ BEGIN TRY
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 				AND R.strInternalCode = 'STOCK'
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 			JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
 			WHERE L.intItemId = @intItemId
 				AND L.intLotStatusId = 1
@@ -701,6 +703,7 @@ BEGIN TRY
 					,11
 					)
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 			JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
 			WHERE L.intItemId = @intItemId
 				AND L.intLotStatusId = 1

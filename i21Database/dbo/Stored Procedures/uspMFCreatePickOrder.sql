@@ -400,6 +400,8 @@ BEGIN TRY
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 				AND R.strInternalCode = 'STOCK'
 			LEFT JOIN dbo.tblMFTask T ON T.intLotId = L.intLotId
+			JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
+			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1

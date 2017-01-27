@@ -2417,3 +2417,13 @@ UPDATE tblMFCompanyPreference
 SET strLotTextInReport = 'Lot No'
 WHERE strLotTextInReport IS NULL
 GO
+
+INSERT INTO tblMFLotInventory (intLotId)
+SELECT L.intLotId
+FROM tblICLot L
+WHERE NOT EXISTS (
+		SELECT *
+		FROM tblMFLotInventory LI
+		WHERE LI.intLotId = L.intLotId
+		)
+GO
