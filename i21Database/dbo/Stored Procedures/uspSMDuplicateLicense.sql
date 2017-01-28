@@ -12,6 +12,7 @@ BEGIN
 	INSERT tblARCustomerLicenseInformation([strUniqueId],
 	[intEntityCustomerId],
 	[strCompanyId],
+	[intNumberOfAdmin],
 	[intNumberOfUser],
 	[strDescription],
 	[intNumberOfSite],
@@ -23,6 +24,7 @@ BEGIN
 	SELECT @strUniqueId,
 	[intEntityCustomerId],
 	[strCompanyId],
+	[intNumberOfAdmin],
 	[intNumberOfUser],
 	CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strDescription] 
