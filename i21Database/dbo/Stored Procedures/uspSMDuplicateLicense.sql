@@ -13,6 +13,7 @@ BEGIN
 	[strVersion],
 	[intEntityCustomerId],
 	[strCompanyId],
+	[intNumberOfAdmin],
 	[intNumberOfUser],
 	[strDescription],
 	[intNumberOfSite],
@@ -25,6 +26,7 @@ BEGIN
 	[strVersion],
 	[intEntityCustomerId],
 	[strCompanyId],
+	[intNumberOfAdmin],
 	[intNumberOfUser],
 	CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strDescription] 
