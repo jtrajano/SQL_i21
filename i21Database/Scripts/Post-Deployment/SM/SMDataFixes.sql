@@ -244,3 +244,6 @@ GO
 	) 
 	AND strVersion = ''
 GO
+	PRINT N'SET application/pdf for pdf files'
+	UPDATE tblSMAttachment SET strFileType = 'application/pdf' WHERE strName LIKE '%.pdf' and strFileType = ''
+GO
