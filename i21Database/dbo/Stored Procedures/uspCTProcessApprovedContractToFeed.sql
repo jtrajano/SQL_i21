@@ -4,29 +4,30 @@ AS
 
 BEGIN TRY
 
-	DECLARE @ErrMsg	NVARCHAR(MAX),
-			@intContractDetailId INT,
-			@intPrevApprovedContractId INT,
-			@strModifiedColumns NVARCHAR(MAX),
-			@listStr NVARCHAR(MAX),
-			@ysnFeedExist BIT = 0,
-			@intLastFeedId INT = 0,
-			@strSQL NVARCHAR(MAX),
-			@strFeedColumns  NVARCHAR(MAX)
+	DECLARE @ErrMsg						NVARCHAR(MAX),
+			@intContractDetailId		INT,
+			@intPrevApprovedContractId	INT,
+			@strModifiedColumns			NVARCHAR(MAX),
+			@listStr					NVARCHAR(MAX),
+			@ysnFeedExist				BIT = 0,
+			@intLastFeedId				INT = 0,
+			@strSQL						NVARCHAR(MAX),
+			@strFeedInsertColumns		NVARCHAR(MAX),
+			@strFeedUpdateColumns		NVARCHAR(MAX)
 
-		DECLARE	@IdName TABLE (strIdField  NVARCHAR(MAX),strNameField  NVARCHAR(MAX))
-		INSERT	INTO @IdName
-		SELECT	'intContractBasisId','strContractBasis,strContractBasisDesc'		 UNION ALL
-		SELECT	'intSubLocationId','strSubLocation'		 UNION ALL
-		SELECT	'intEntityId','strEntityNo'		 UNION ALL
-		SELECT	'intTermId'	,'strTerm'		 UNION ALL
-		SELECT	'intPurchasingGroupId','strPurchasingGroup'		 UNION ALL
-		SELECT	'intItemId','strItemNo'		 UNION ALL
-		SELECT	'intStorageLocationId','strStorageLocation'		 UNION ALL
-		SELECT	'intCurrencyId'	,'strCurrency'		 UNION ALL
-		SELECT	'dblCashPrice'	,'dblCashPrice,dblUnitCashPrice'		 UNION ALL
-		SELECT	'intPriceUOMId'	,'strPriceUOM'			 UNION ALL
-		SELECT	'intQtyUOMId'	,'strQuantityUOM'	
+		DECLARE		@IdName TABLE (strIdField  NVARCHAR(MAX),strNameField  NVARCHAR(MAX))
+		INSERT		INTO	@IdName
+					SELECT	'intContractBasisId',	'strContractBasis,strContractBasisDesc'
+		UNION ALL	SELECT	'intSubLocationId',		'strSubLocation'		
+		UNION ALL	SELECT	'intEntityId',			'strEntityNo'	
+		UNION ALL	SELECT	'intTermId'	,			'strTerm'		 
+		UNION ALL	SELECT	'intPurchasingGroupId',	'strPurchasingGroup'		 
+		UNION ALL	SELECT	'intItemId',			'strItemNo'		 
+		UNION ALL	SELECT	'intStorageLocationId',	'strStorageLocation'		 
+		UNION ALL	SELECT	'intCurrencyId',		'strCurrency'		 
+		UNION ALL	SELECT	'dblCashPrice',			'dblCashPrice,dblUnitCashPrice'		
+		UNION ALL	SELECT	'intPriceUOMId',		'strPriceUOM'			 
+		UNION ALL	SELECT	'intQtyUOMId',			'strQuantityUOM'	
 
 	SELECT @intContractDetailId = intContractDetailId FROM tblCTApprovedContract WHERE intApprovedContractId = @intApprovedContractId
 	
@@ -37,7 +38,7 @@ BEGIN TRY
 	END
 
 	IF	@ysnFeedExist = 0 OR 
-		EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND ISNULL(strFeedStatus,'') IN (''))
+		EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND ISNULL(strFeedStatus,'') IN ('') AND strRowState = 'Added')
 	BEGIN
 
 		DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
@@ -66,7 +67,7 @@ BEGIN TRY
 		FROM	vyuCTContractFeed
 		WHERE	intContractDetailId = @intContractDetailId
 
-	END
+	END 
 	ELSE
 	BEGIN
 		SELECT	TOP 1 @intPrevApprovedContractId =  intApprovedContractId 
@@ -86,21 +87,33 @@ BEGIN TRY
 				SELECT	@listStr = COALESCE(@listStr+',' ,'') + ISNULL(strNameField,Item)
 				FROM	#Modified A LEFT JOIN @IdName B ON A.Item = B.strIdField
 
+				SELECT	@strFeedUpdateColumns = COALESCE(@strFeedUpdateColumns+',' ,'') + COLUMN_NAME + 
+						' = (SELECT ' + COLUMN_NAME + ' FROM vyuCTContractFeed WHERE	intContractDetailId = @intContractDetailId)'
+				FROM	INFORMATION_SCHEMA.COLUMNS COL 
+				WHERE	COL.TABLE_NAME = 'tblCTContractFeed' AND COLUMN_NAME IN (SELECT * FROM dbo.fnSplitString(@listStr,','))
 
 				SELECT	@listStr = 'intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,' + @listStr 
 				
-				SELECT	@strFeedColumns = COALESCE(@strFeedColumns+',' ,'') + COLUMN_NAME
+				SELECT	@strFeedInsertColumns = COALESCE(@strFeedInsertColumns+',' ,'') + COLUMN_NAME
 				FROM	INFORMATION_SCHEMA.COLUMNS COL 
 				WHERE	COL.TABLE_NAME = 'tblCTContractFeed' AND COLUMN_NAME IN (SELECT * FROM dbo.fnSplitString(@listStr,','))
-				
-				SELECT @strSQL =	'INSERT INTO tblCTContractFeed ('+@strFeedColumns+',strRowState,dtmFeedCreated)
-									SELECT	'+@strFeedColumns+',''Modified'',GETDATE()
-									FROM	vyuCTContractFeed
-									WHERE	intContractDetailId = @intContractDetailId'
-				
-				
-				EXEC sp_executesql @strSQL,N'@intContractDetailId INT', @intContractDetailId =  @intContractDetailId
 
+				IF	@ysnFeedExist = 1 AND 
+					EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND ISNULL(strFeedStatus,'') IN ('') AND strRowState = 'Modified')
+				BEGIN
+					SELECT @strSQL =   'UPDATE tblCTContractFeed 
+										SET ' + @strFeedUpdateColumns +' 
+										WHERE	intContractFeedId = @intContractFeedId'
+					EXEC sp_executesql @strSQL,N'@intContractDetailId INT,@intContractFeedId INT', @intContractDetailId =  @intContractDetailId, @intContractFeedId =  @intLastFeedId
+				END
+				ELSE
+				BEGIN
+					SELECT @strSQL =   'INSERT INTO tblCTContractFeed ('+@strFeedInsertColumns+',strRowState,dtmFeedCreated)
+										SELECT	'+@strFeedInsertColumns+',''Modified'',GETDATE()
+										FROM	vyuCTContractFeed
+										WHERE	intContractDetailId = @intContractDetailId'
+					EXEC sp_executesql @strSQL,N'@intContractDetailId INT', @intContractDetailId =  @intContractDetailId
+				END
 		END
 
 	END
