@@ -279,6 +279,8 @@ BEGIN
 	FROM @tblMFItemPlanSummary I
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
+	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+	JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 	WHERE L.intLotStatusId = 1
 		AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 		AND CSL.strSubLocationName <> 'Intrasit'
@@ -311,6 +313,20 @@ BEGIN
 			)
 	GROUP BY W.intLocationId
 		,I.intItemId
+
+	INSERT INTO @tblMFQtyInProduction
+	SELECT R.intLocationId
+		,RI.intItemId
+		,SUM(CASE 
+				WHEN RI.intWeightUOMId IS NULL
+					THEN RI.dblOpenReceive
+				ELSE RI.dblNet
+				END) 
+	FROM dbo.tblICInventoryReceiptItem RI
+	JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	WHERE R.ysnPosted = 0
+	GROUP BY R.intLocationId
+		,RI.intItemId
 
 	UPDATE I
 	SET dblPoundsAvailable = Q.dblWeight

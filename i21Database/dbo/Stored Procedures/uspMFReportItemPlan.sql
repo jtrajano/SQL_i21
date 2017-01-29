@@ -620,6 +620,8 @@ BEGIN
 	FROM @tblICItem I
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
+	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+	JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 	WHERE L.intLotStatusId = 1
 		AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 		AND CSL.strSubLocationName <> 'Intrasit'
@@ -652,6 +654,20 @@ BEGIN
 			)
 	GROUP BY W.intLocationId
 		,I.intItemId
+
+INSERT INTO @tblMFQtyInProduction
+SELECT R.intLocationId
+	,RI.intItemId
+	,SUM(CASE 
+			WHEN RI.intWeightUOMId IS NULL
+				THEN RI.dblOpenReceive
+			ELSE RI.dblNet
+			END) 
+FROM dbo.tblICInventoryReceiptItem RI
+JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+WHERE R.ysnPosted = 0
+GROUP BY R.intLocationId
+	,RI.intItemId
 
 	UPDATE @tblMFRequiredItemByLocation
 	SET dblQtyInProduction = Q.dblWeight
@@ -825,7 +841,7 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		,'Inventory - Unblended'
+		,'Inventory - Planned'
 		,NULL
 		,RI.intItemId
 		,strItemNo
@@ -867,7 +883,7 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		,'Inventory - Unblended'
+		,'Inventory - Planned'
 		,NULL
 		,RI.intItemId
 		,strItemNo
@@ -908,7 +924,7 @@ BEGIN
 		,intDisplayOrder
 		)
 	SELECT ''
-		,'Inventory - Unblended'
+		,'Inventory - Planned'
 		,RI.intItemId
 		,strItemNo
 		,strDescription
@@ -1060,7 +1076,7 @@ BEGIN
 					AND b.strItemNo IN (
 						SELECT c.strItemNo
 						FROM @tblMFFinalWIPItem c
-						WHERE c.strWorkOrderNo = 'Inventory - Unblended'
+						WHERE c.strWorkOrderNo = 'Inventory - Planned'
 							AND c.dblItemRequired > 0
 							AND c.dtmPlannedDate IN (
 								SELECT Max(d.dtmPlannedDate)
@@ -1104,14 +1120,14 @@ BEGIN
 				a.strItemNo IN (
 					SELECT b.strItemNo
 					FROM @tblMFFinalWIPItem b
-					WHERE b.strWorkOrderNo = 'Inventory - Unblended'
+					WHERE b.strWorkOrderNo = 'Inventory - Planned'
 						AND b.dblItemRequired < 0
 					)
 				OR (
 					NOT EXISTS (
 						SELECT c.strItemNo
 						FROM @tblMFFinalWIPItem c
-						WHERE c.strWorkOrderNo = 'Inventory - Unblended'
+						WHERE c.strWorkOrderNo = 'Inventory - Planned'
 							AND c.strItemNo = a.strItemNo
 						)
 					AND EXISTS (
