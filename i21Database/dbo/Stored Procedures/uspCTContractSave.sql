@@ -98,7 +98,7 @@ BEGIN TRY
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
-		EXEC	uspCTSequencePriceChanged @intContractDetailId
+		EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence'
 		
 		IF @dblOriginalBasis IS NOT NULL AND  @dblBasis <> @dblOriginalBasis
 		BEGIN

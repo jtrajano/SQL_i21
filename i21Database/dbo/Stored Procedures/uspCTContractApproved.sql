@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTContractApproved]
 	@intContractHeaderId	INT,
-	@intApprovedById		INT
+	@intApprovedById		INT,
+	@intContractDetailId	INT = NULL
 AS
 
 BEGIN TRY
@@ -61,6 +62,7 @@ BEGIN TRY
 										AND	CA.strType					=	'Origin'				LEFT
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	AND		CD.intContractDetailId	=	CASE WHEN @intContractDetailId IS NULL THEN CD.intContractDetailId ELSE @intContractDetailId END
 
 	SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY
 

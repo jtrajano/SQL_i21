@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTSequencePriceChanged]
 		
 	@intContractDetailId	INT,
-	@intUserId				INT = NULL
+	@intUserId				INT = NULL,
+	@ScreenName				NVARCHAR(50)
 	
 AS
 
@@ -13,10 +14,22 @@ BEGIN TRY
 			@strReceiptNumber		NVARCHAR(50),
 			@intLastModifiedById	INT,
 			@intInventoryReceiptId	INT,
-			@intPricingTypeId		INT
+			@intPricingTypeId		INT,
+			@intContractHeaderId	INT
 
-	SELECT	@dblCashPrice = dblCashPrice, @intPricingTypeId = intPricingTypeId, @intLastModifiedById = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+	SELECT	@dblCashPrice			=	dblCashPrice, 
+			@intPricingTypeId		=	intPricingTypeId, 
+			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
+			@intContractHeaderId	=	intContractHeaderId
+	FROM	tblCTContractDetail 
+	WHERE	intContractDetailId		=	@intContractDetailId
+
 	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
+
+	IF @ScreenName = 'Price Contract'
+	BEGIN
+		EXEC [uspCTContractApproved] @intContractHeaderId,@intUserId,@intContractDetailId
+	END
 
 	IF 	@intPricingTypeId NOT IN (1,6)
 		RETURN

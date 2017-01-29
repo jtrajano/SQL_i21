@@ -143,6 +143,8 @@ BEGIN TRY
 				
 			END
 
+			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract'
+
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
 				SELECT	@intContractDetailId = MIN(intContractDetailId)
@@ -354,7 +356,7 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId
+		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract'
 
 		IF	@ysnMultiplePriceFixation = 1
 		BEGIN
