@@ -145,6 +145,7 @@ BEGIN TRY
 			
 			IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
 			BEGIN
+				UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 				EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
 			END
 			 

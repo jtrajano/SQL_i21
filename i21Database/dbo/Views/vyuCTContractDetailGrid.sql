@@ -26,7 +26,7 @@ AS
 			IC.strContractItemName,
 			WM.strUnitMeasure strNetWeightUOM,
 			PM.strUnitMeasure strPriceUOM,
-			RY.strCountry AS strOrigin,
+			ISNULL(RY.strCountry,OG.strCountry) AS strOrigin,
 			IX.strIndex,
 			CS.strContractStatus,
 			PF.intPriceFixationId, 
@@ -72,7 +72,10 @@ LEFT JOIN	tblCTIndex					IX	ON	IX.intIndexId					=		CD.intIndexId
 LEFT JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId			=		CD.intContractStatusId
 
 LEFT JOIN	tblICItemContract			IC	ON	IC.intItemContractId			=		CD.intItemContractId		
-LEFT JOIN	tblSMCountry				RY	ON	RY.intCountryID					=		IC.intCountryId				
+LEFT JOIN	tblSMCountry				RY	ON	RY.intCountryID					=		IC.intCountryId
+LEFT JOIN	tblICCommodityAttribute		CA	ON	CA.intCommodityAttributeId		=		IM.intOriginId
+											AND	CA.strType						=		'Origin'			
+LEFT JOIN	tblSMCountry				OG	ON	OG.intCountryID					=		CA.intCountryID						
 LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=		CD.intCurrencyId			
 LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=		CU.intMainCurrencyId		
 
