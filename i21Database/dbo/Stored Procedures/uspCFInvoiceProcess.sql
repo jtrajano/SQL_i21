@@ -23,8 +23,97 @@ BEGIN
 BEGIN TRY
 
 	DECLARE	@return_value int
+	DECLARE @loopAccountId				INT
+	DECLARE @loopCustomerId				INT
+	DECLARE @CFID NVARCHAR(MAX)
 
 	IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
+
+	----------CREATE TEMPORARY TABLE----------
+	CREATE TABLE #tblCFDisctinctCustomerInvoice	
+	(
+		intAccountId					INT
+		,intCustomerId					INT
+	)
+	CREATE TABLE #tblCFInvoiceDiscount	
+		(
+			 intAccountId					INT
+			,intSalesPersonId				INT
+			,dtmInvoiceDate					DATETIME
+			,intCustomerId					INT
+			,intInvoiceId					INT
+			,intTransactionId				INT
+			,intCustomerGroupId				INT
+			,intTermID						INT
+			,intBalanceDue					INT
+			,intDiscountDay					INT	
+			,intDayofMonthDue				INT
+			,intDueNextMonth				INT
+			,intSort						INT
+			,intConcurrencyId				INT
+			,ysnAllowEFT					BIT
+			,ysnActive						BIT
+			,ysnEnergyTrac					BIT
+			,dblQuantity					NUMERIC(18,6)
+			,dblTotalQuantity				NUMERIC(18,6)
+			,dblDiscountRate				NUMERIC(18,6)
+			,dblDiscount					NUMERIC(18,6)
+			,dblTotalAmount					NUMERIC(18,6)
+			,dblAccountTotalAmount			NUMERIC(18,6)
+			,dblAccountTotalDiscount		NUMERIC(18,6)
+			,dblAccountTotalLessDiscount	NUMERIC(18,6)
+			,dblDiscountEP					NUMERIC(18,6)
+			,dblAPR							NUMERIC(18,6)	
+			,strTerm						NVARCHAR(MAX)
+			,strType						NVARCHAR(MAX)
+			,strTermCode					NVARCHAR(MAX)	
+			,strNetwork						NVARCHAR(MAX)	
+			,strCustomerName				NVARCHAR(MAX)
+			,strInvoiceCycle				NVARCHAR(MAX)
+			,strGroupName					NVARCHAR(MAX)
+			,strInvoiceNumber				NVARCHAR(MAX)
+			,strInvoiceReportNumber			NVARCHAR(MAX)
+			,dtmDiscountDate				DATETIME
+			,dtmDueDate						DATETIME
+			,dtmTransactionDate				DATETIME
+			,dtmPostedDate					DATETIME
+		)
+	----------------------------------------
+
+	-------------INVOICE LIST-------------
+	INSERT INTO #tblCFInvoiceDiscount
+	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+	--------------------------------------
+
+	----------GROUP BY CUSTOMER-----------
+	INSERT INTO #tblCFDisctinctCustomerInvoice(
+		intAccountId	
+		,intCustomerId	
+	)
+	SELECT 
+		intAccountId	
+		,intCustomerId	
+	FROM #tblCFInvoiceDiscount
+	GROUP BY intAccountId,intCustomerId	
+	--------------------------------------
+
+	----------UPDATE INVOICE REPORT NUMBER-----------
+	WHILE (EXISTS(SELECT 1 FROM #tblCFDisctinctCustomerInvoice))
+	-------------------------------------------------
+	BEGIN
+			
+		EXEC uspSMGetStartingNumber 53, @CFID OUT
+
+		SELECT	@loopCustomerId = intCustomerId, 
+				@loopAccountId = intAccountId 
+		FROM #tblCFDisctinctCustomerInvoice
+
+		UPDATE tblCFTransaction SET strInvoiceReportNumber =  @CFID WHERE intTransactionId IN (SELECT intTransactionId FROM #tblCFInvoiceDiscount WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId)
+	
+		DELETE FROM #tblCFDisctinctCustomerInvoice WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId
+
+	END
+	
 
 	EXEC	@return_value = [dbo].[uspCFCreateInvoicePayment]
 			@xmlParam				= @xmlParam
@@ -55,6 +144,12 @@ BEGIN TRY
 			,@ErrorMessage			AS 'ErrorMessage'
 			,@CreatedIvoices		AS 'CreatedIvoices'
 			,@UpdatedIvoices		AS 'UpdatedIvoices'
+
+
+	----------DROP TEMPORARY TABLE----------
+	DROP TABLE #tblCFInvoiceDiscount
+	DROP TABLE #tblCFDisctinctCustomerInvoice
+	----------------------------------------
 
 	IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 
