@@ -172,6 +172,17 @@ BEGIN TRY
 	END
 
 	-- New Sample Create
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblCTContractDetail
+			WHERE intContractDetailId = @intContractDetailId
+			)
+		RAISERROR (
+				'Contract Sequence is not available. '
+				,16
+				,1
+				)
+
 	IF ISNULL(@strSampleStatus, '') = ''
 		RAISERROR (
 				'Sample Status cannot be empty. '
@@ -191,37 +202,32 @@ BEGIN TRY
 				)
 
 	IF ISNULL(@strSampleUOM, '') = ''
-		RAISERROR (
-				'Sample UOM cannot be empty. '
-				,16
-				,1
-				)
+	BEGIN
+		SELECT TOP 1 @intSampleUOMId = UOM.intUnitMeasureId
+			,@strSampleUOM = UOM.strUnitMeasure
+		FROM tblCTContractDetail CD
+		JOIN tblICItemUOM IUOM ON IUOM.intItemId = CD.intItemId
+			AND IUOM.ysnStockUnit = 1
+		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+		WHERE CD.intContractDetailId = @intContractDetailId
+	END
+	ELSE
+	BEGIN
+		SELECT @intSampleUOMId = intUnitMeasureId
+		FROM tblICUnitMeasure
+		WHERE strUnitMeasure = @strSampleUOM
 
-	SELECT @intSampleUOMId = intUnitMeasureId
-	FROM tblICUnitMeasure
-	WHERE strUnitMeasure = @strSampleUOM
-
-	IF @intSampleUOMId IS NULL
-		RAISERROR (
-				'Sample UOM is not available. '
-				,16
-				,1
-				)
+		IF @intSampleUOMId IS NULL
+			RAISERROR (
+					'Sample UOM is not available. '
+					,16
+					,1
+					)
+	END
 
 	IF @dblSampleQty IS NULL
 		RAISERROR (
 				'Sample Qty cannot be empty. '
-				,16
-				,1
-				)
-
-	IF NOT EXISTS (
-			SELECT 1
-			FROM tblCTContractDetail
-			WHERE intContractDetailId = @intContractDetailId
-			)
-		RAISERROR (
-				'Contract Sequence is not available. '
 				,16
 				,1
 				)
