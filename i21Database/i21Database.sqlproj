@@ -4917,6 +4917,8 @@
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
     <Build Include="dbo\Views\vyuRKGetFilledDate.sql" />
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
+    <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
