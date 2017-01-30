@@ -3,6 +3,7 @@
     [intPaymentId]				INT             NOT NULL,
     [intInvoiceId]				INT             NULL,
 	[intBillId]					INT             NULL,
+	[strTransactionNumber]		NVARCHAR(50)   COLLATE Latin1_General_CI_AS NULL,
 	[intTermId]					INT             NULL,
     [intAccountId]				INT             NOT NULL,
     [dblInvoiceTotal]			NUMERIC (18, 6) NULL,

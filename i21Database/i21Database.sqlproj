@@ -4918,7 +4918,7 @@
     <Build Include="dbo\Views\vyuRKGetFilledDate.sql" />
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
     <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
-
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
