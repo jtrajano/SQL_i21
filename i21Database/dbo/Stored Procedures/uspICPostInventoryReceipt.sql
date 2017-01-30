@@ -227,6 +227,24 @@ BEGIN
 		RAISERROR(80090, 11, 1, @strItemNo)  
 		GOTO Post_Exit  
 	END
+
+	-- Do not allow unpost if it has an Inventory Return transaction 
+	IF @ysnPost = 0 AND @ysnRecap = 0 
+	BEGIN 
+		DECLARE @strReturnId AS NVARCHAR(50) 
+
+		SELECT	TOP 1 
+				@strReturnId = strReceiptNumber
+		FROM	tblICInventoryReceipt r
+		WHERE	r.intSourceInventoryReceiptId = @intTransactionId 
+
+		IF @strReturnId IS NOT NULL 
+		BEGIN 
+			-- Unable to unpost the Inventory Receipt. It has an Inventory Return in {return id}.
+			RAISERROR(80112, 11, 1, @strReturnId)  
+			GOTO Post_Exit  
+		END 
+	END 
 END
 
 -- Check if sub location and storage locations are valid. 
