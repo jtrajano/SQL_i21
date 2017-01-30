@@ -557,7 +557,7 @@ SET @strmessage = 'Contract Detail Id is invalid or missing for Contract Header 
 EXEC sp_addmessage 80119,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80120) EXEC sp_dropmessage 80120, 'us_english'	
-SET @strmessage = 'Item UOM Id %s is invalid for item %s.'
+SET @strmessage = 'Item UOM Id is invalid or missing for item %s.'
 EXEC sp_addmessage 80120,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80121) EXEC sp_dropmessage 80121, 'us_english'	
@@ -595,3 +595,19 @@ EXEC sp_addmessage 80128,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80129) EXEC sp_dropmessage 80129, 'us_english'	
 SET @strmessage = 'Other Charge Item Id is required for other charges.'
 EXEC sp_addmessage 80129,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80130) EXEC sp_dropmessage 80130, 'us_english'	
+SET @strmessage = 'Lot Number is invalid or missing for item %s.'
+EXEC sp_addmessage 80130,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80131) EXEC sp_dropmessage 80131, 'us_english'	
+SET @strmessage = 'Lot Condition %s is invalid for item %s.'
+EXEC sp_addmessage 80131,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80132) EXEC sp_dropmessage 80132, 'us_english'	
+SET @strmessage = 'Parent Lot Id %s is invalid for item %s.'
+EXEC sp_addmessage 80132,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80133) EXEC sp_dropmessage 80133, 'us_english'	
+SET @strmessage = 'Parent Lot Number is invalid or missing for item %s.'
+EXEC sp_addmessage 80133,11,@strmessage,'us_english','False'

@@ -611,11 +611,10 @@ BEGIN
 			END
 
 		-- Validate Item UOM Id
-		DECLARE @valueItemUOMId INT = NULL
 		SET @getItemId = NULL
 		SET @getItem = NULL
 
-		SELECT TOP 1 @valueItemUOMId = RawData.intItemUOMId, @getItemId = RawData.intItemId
+		SELECT TOP 1 @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData 
 		INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
@@ -625,19 +624,20 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
-		WHERE RawHeaderData.intId = @intId AND RawData.intItemUOMId IS NOT NULL
-				AND RawData.intItemUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)
+		WHERE RawHeaderData.intId = @intId
+				AND (RawData.intItemUOMId IS NULL OR
+				(RawData.intItemUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)))
 				AND RawData.intItemId IS NOT NULL
 		ORDER BY RawData.intItemUOMId ASC
 
-		IF @valueItemUOMId IS NOT NULL
+		IF @getItemId IS NOT NULL
 			BEGIN
 				SELECT @getItem = strItemNo
 				FROM tblICItem
 				WHERE intItemId = @getItemId
 
-				-- Item UOM Id {Item UOM Id} is invalid for item {Item}.
-				RAISERROR(80120, 11, 1, @valueItemUOMId, @getItem);
+				-- Item UOM Id is invalid or missing for item {Item}.
+				RAISERROR(80120, 11, 1, @getItem);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -763,8 +763,7 @@ BEGIN
 				WHERE intItemId = @getItemId
 
 				-- Cost UOM is invalid or missing for item {Item}.
-				--RAISERROR(80122, 11, 1, @getItem);
-				RAISERROR('Cost UOM is invalid', 16, 1)
+				RAISERROR(80122, 11, 1, @getItem);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -796,8 +795,7 @@ BEGIN
 				WHERE intItemId = @getItemId
 
 				-- Lot ID {Lot Id} is invalid for item {Item}.
-				--RAISERROR(80123, 11, 1, @valueLotId, @getItem);
-				RAISERROR('Lot Id is invalid', 16, 1)
+				RAISERROR(80123, 11, 1, @valueLotId, @getItem);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -1605,6 +1603,229 @@ BEGIN
 							   FROM tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 							   WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId AND Item.strLotTracking != 'No')
 						BEGIN
+
+							------------------------------------------------
+							------- Validate Receipt Item Lot fields -------
+							------------------------------------------------
+
+							-- Validate Lot Id
+							DECLARE @valueLotRecordLotId INT = NULL
+									,@valueLotRecordItemId INT = NULL
+									,@valueLotRecordItemNo NVARCHAR(50) = NULL
+
+							SELECT TOP 1 @valueLotRecordLotId = ItemLot.intLotId, @valueLotRecordItemId = ItemLot.intItemId
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+									AND ItemLot.intLotId IS NOT NULL AND ReceiptItem.intItemId IS NOT NULL
+									AND ItemLot.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId)
+							ORDER BY ItemLot.intLotId ASC
+
+							IF @valueLotRecordLotId IS NOT NULL
+								BEGIN
+									SELECT @valueLotRecordItemNo = strItemNo
+									FROM tblICItem
+									WHERE intItemId = @valueLotRecordItemId
+
+									-- Lot ID {Lot Id} is invalid for item {Item}.
+									RAISERROR(80123, 11, 1, @valueLotRecordLotId, @valueLotRecordItemNo);
+									ROLLBACK TRANSACTION;
+									GOTO _Exit;
+								END
+
+							-- Validate Lot Number
+							DECLARE @valueLotRecordLotNo NVARCHAR(50) = NULL
+							SET	@valueLotRecordItemId = NULL
+							SET @valueLotRecordItemNo = NULL
+
+							SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+									AND ItemLot.intLotId IS NOT NULL AND ReceiptItem.intItemId IS NOT NULL
+									AND (ItemLot.strLotNumber IS NULL OR
+									(ItemLot.strLotNumber NOT IN (SELECT strLotNumber FROM tblICLot WHERE intLotId = ItemLot.intLotId)))
+							ORDER BY ItemLot.strLotNumber ASC
+
+							IF @valueLotRecordItemId IS NOT NULL
+								BEGIN
+									SELECT @valueLotRecordItemNo = strItemNo
+									FROM tblICItem
+									WHERE intItemId = @valueLotRecordItemId
+
+									-- Lot Number is invalid or missing for item {ItemNo.}.
+									RAISERROR(80130, 11, 1, @valueLotRecordItemNo);
+									ROLLBACK TRANSACTION;
+									GOTO _Exit;
+								END
+
+								-- Validate Item UOM Id
+								SET	@valueLotRecordItemId = NULL
+								SET @valueLotRecordItemNo = NULL
+
+								SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
+								FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+								WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+										AND (ItemLot.intItemUnitMeasureId IS NULL OR
+										(ItemLot.intItemUnitMeasureId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = ItemLot.intItemId)))
+										AND ItemLot.intItemId IS NOT NULL
+								ORDER BY ItemLot.intItemUnitMeasureId ASC
+
+								IF @valueLotRecordItemId IS NOT NULL
+									BEGIN
+										SELECT @valueLotRecordItemNo = strItemNo
+										FROM tblICItem
+										WHERE intItemId = @valueLotRecordItemId
+
+										-- Item UOM Id is invalid or missing for item {Item}.
+										RAISERROR(80120, 11, 1, @valueLotRecordItemNo);
+										ROLLBACK TRANSACTION;
+										GOTO _Exit;
+									END
+
+							-- Validate Lot Condition
+							DECLARE @valueLotRecordLotCondition NVARCHAR(50) = NULL
+								SET	@valueLotRecordItemId = NULL
+								SET @valueLotRecordItemNo = NULL
+
+								SELECT TOP 1 @valueLotRecordLotCondition = ItemLot.strCondition, @valueLotRecordItemId = ItemLot.intItemId
+								FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+								WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+										AND ItemLot.strCondition IS NOT NULL 
+										AND RTRIM(LTRIM(LOWER(ItemLot.strCondition))) NOT IN ('sound/full', 'slack', 'damaged', 'clean wgt')
+								ORDER BY ItemLot.strCondition ASC
+
+								IF @valueLotRecordLotCondition IS NOT NULL
+									BEGIN
+										SELECT @valueLotRecordItemNo = strItemNo
+										FROM tblICItem
+										WHERE intItemId = @valueLotRecordItemId
+
+										-- Lot Condition {Lot Condition} is invalid for item {Item No.}.
+										RAISERROR(80131, 11, 1, @valueLotRecordLotCondition, @valueLotRecordItemNo);
+										ROLLBACK TRANSACTION;
+										GOTO _Exit;
+									END
+
+							-- Validate Parent Lot Id
+							DECLARE @valueLotRecordParentLotId INT = NULL
+							SET	@valueLotRecordItemId = NULL
+							SET @valueLotRecordItemNo = NULL
+
+							SELECT TOP 1 @valueLotRecordParentLotId = ItemLot.intParentLotId, @valueLotRecordItemId = ItemLot.intItemId
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+									AND ItemLot.intParentLotId IS NOT NULL AND ReceiptItem.intItemId IS NOT NULL
+									AND ItemLot.intParentLotId NOT IN (SELECT intParentLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId AND intLotId = ItemLot.intLotId)
+							ORDER BY ItemLot.intParentLotId ASC
+
+							IF @valueLotRecordParentLotId IS NOT NULL
+								BEGIN
+									SELECT @valueLotRecordItemNo = strItemNo
+									FROM tblICItem
+									WHERE intItemId = @valueLotRecordItemId
+
+									-- Parent Lot Id {Parent Lot Id} is invalid for item {Item No.}.
+									RAISERROR(80132, 11, 1, @valueLotRecordParentLotId, @valueLotRecordItemNo);
+									ROLLBACK TRANSACTION;
+									GOTO _Exit;
+								END
+
+							-- Validate Parent Lot Number
+							DECLARE @valueLotRecordParentLotNo NVARCHAR(50) = NULL
+							SET	@valueLotRecordItemId = NULL
+							SET @valueLotRecordItemNo = NULL
+
+							SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+									AND ItemLot.intParentLotId IS NOT NULL AND ReceiptItem.intItemId IS NOT NULL
+									AND (ItemLot.strParentLotNumber IS NULL OR
+									(ItemLot.strParentLotNumber NOT IN (SELECT strParentLotNumber FROM tblICParentLot WHERE intItemId = ItemLot.intItemId AND intParentLotId = ItemLot.intParentLotId)))
+							ORDER BY ItemLot.strParentLotNumber ASC
+
+							IF @valueLotRecordItemId IS NOT NULL
+								BEGIN
+									SELECT @valueLotRecordItemNo = strItemNo
+									FROM tblICItem
+									WHERE intItemId = @valueLotRecordItemId
+
+									-- Parent Lot Number is invalid or missing for item {ItemNo.}.
+									RAISERROR(80133, 11, 1, @valueLotRecordItemNo);
+									ROLLBACK TRANSACTION;
+									GOTO _Exit;
+								END
+
 							-- Insert Lot for Receipt Item
 							INSERT INTO dbo.tblICInventoryReceiptItemLot (
 								[intInventoryReceiptItemId]		
