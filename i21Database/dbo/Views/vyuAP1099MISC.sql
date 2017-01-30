@@ -39,7 +39,7 @@ AS
 										, B.strAddress
 										, B.strCity
 										, B.strState
-										, B.strZip
+										, +' '+B.strZip
 										, B.strCountry
 										, B.strPhone)
 		, B.strCompanyName
@@ -139,3 +139,4 @@ HAVING SUM(ISNULL(dblBoatsProceeds,0)
 		+ ISNULL(dblRents,0)
 		+ ISNULL(dblRoyalties,0)
 		+ ISNULL(dblSubstitutePayments,0)) > 0
+GO
