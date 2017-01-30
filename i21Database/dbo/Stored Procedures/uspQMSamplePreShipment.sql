@@ -35,6 +35,18 @@ BEGIN TRY
 		,@dtmCreated DATETIME = GETDATE()
 		,@intUserId INT
 		,@intValidDate INT
+	DECLARE @dblOldSampleQty NUMERIC(18, 6)
+		,@intOldSampleUOMId INT
+		,@strOldRefNo NVARCHAR(100)
+		,@intOldSampleStatusId INT
+		,@strOldSampleNote NVARCHAR(512)
+		,@dtmOldSampleReceivedDate DATETIME
+	DECLARE @dblNewSampleQty NUMERIC(18, 6)
+		,@intNewSampleUOMId INT
+		,@strNewRefNo NVARCHAR(100)
+		,@intNewSampleStatusId INT
+		,@strNewSampleNote NVARCHAR(512)
+		,@dtmNewSampleReceivedDate DATETIME
 	DECLARE @intItemId INT
 		,@intItemContractId INT
 		,@intCountryID INT
@@ -47,6 +59,10 @@ BEGIN TRY
 	SET @intValidDate = (
 			SELECT DATEPART(dy, GETDATE())
 			)
+
+	-- Temporary taking first user 
+	SELECT TOP 1 @intUserId = intEntityId
+	FROM tblEMEntity
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@intContractDetailId = intContractDetailId
@@ -110,6 +126,15 @@ BEGIN TRY
 
 			BEGIN TRAN
 
+			SELECT @dblOldSampleQty = dblSampleQty
+				,@intOldSampleUOMId = intSampleUOMId
+				,@strOldRefNo = strRefNo
+				,@intOldSampleStatusId = intSampleStatusId
+				,@strOldSampleNote = strSampleNote
+				,@dtmOldSampleReceivedDate = dtmSampleReceivedDate
+			FROM tblQMSample
+			WHERE intSampleId = @intSampleId
+
 			UPDATE tblQMSample
 			SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 				,dblSampleQty = CASE 
@@ -164,6 +189,50 @@ BEGIN TRY
 					END
 			FROM tblQMSample
 			WHERE intSampleId = @intSampleId
+
+			SELECT @dblNewSampleQty = dblSampleQty
+				,@intNewSampleUOMId = intSampleUOMId
+				,@strNewRefNo = strRefNo
+				,@intNewSampleStatusId = intSampleStatusId
+				,@strNewSampleNote = strSampleNote
+				,@dtmNewSampleReceivedDate = dtmSampleReceivedDate
+			FROM tblQMSample
+			WHERE intSampleId = @intSampleId
+
+			IF (@intSampleId > 0)
+			BEGIN
+				DECLARE @strDetails NVARCHAR(MAX) = ''
+
+				IF (@dblOldSampleQty <> @dblNewSampleQty)
+					SET @strDetails += '{"change":"dblSampleQty","iconCls":"small-gear","from":"' + LTRIM(@dblOldSampleQty) + '","to":"' + LTRIM(@dblNewSampleQty) + '","leaf":true},'
+
+				IF (@intOldSampleUOMId <> @intNewSampleUOMId)
+					SET @strDetails += '{"change":"intSampleUOMId","iconCls":"small-gear","from":"' + LTRIM(@intOldSampleUOMId) + '","to":"' + LTRIM(@intNewSampleUOMId) + '","leaf":true},'
+
+				IF (@strOldRefNo <> @strNewRefNo)
+					SET @strDetails += '{"change":"strRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldRefNo) + '","to":"' + LTRIM(@strNewRefNo) + '","leaf":true},'
+
+				IF (@intOldSampleStatusId <> @intNewSampleStatusId)
+					SET @strDetails += '{"change":"intSampleStatusId","iconCls":"small-gear","from":"' + LTRIM(@intOldSampleStatusId) + '","to":"' + LTRIM(@intNewSampleStatusId) + '","leaf":true},'
+
+				IF (@strOldSampleNote <> @strNewSampleNote)
+					SET @strDetails += '{"change":"strSampleNote","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleNote) + '","to":"' + LTRIM(@strNewSampleNote) + '","leaf":true},'
+
+				IF (@dtmOldSampleReceivedDate <> @dtmNewSampleReceivedDate)
+					SET @strDetails += '{"change":"dtmSampleReceivedDate","iconCls":"small-gear","from":"' + LTRIM(@dtmOldSampleReceivedDate) + '","to":"' + LTRIM(@dtmNewSampleReceivedDate) + '","leaf":true},'
+
+				IF (LEN(@strDetails) > 1)
+				BEGIN
+					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+					EXEC uspSMAuditLog @keyValue = @intSampleId
+						,@screenName = 'Quality.view.QualitySample'
+						,@entityId = @intUserId
+						,@actionType = 'Updated'
+						,@actionIcon = 'small-tree-modified'
+						,@details = @strDetails
+				END
+			END
 
 			COMMIT TRAN
 
@@ -249,10 +318,6 @@ BEGIN TRY
 	LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 	LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
 	WHERE CD.intContractDetailId = @intContractDetailId
-
-	-- Temporary taking first user 
-	SELECT TOP 1 @intUserId = intEntityId
-	FROM tblEMEntity
 
 	SELECT @intProductId = (
 			SELECT P.intProductId
@@ -555,6 +620,20 @@ BEGIN TRY
 	ORDER BY PP.intSequenceNo
 
 	SELECT @strSampleNumber AS strSampleNumber
+
+	IF (@intSampleId > 0)
+	BEGIN
+		DECLARE @StrDescription AS NVARCHAR(MAX) = 'Sample Number'
+
+		EXEC uspSMAuditLog @keyValue = @intSampleId
+			,@screenName = 'Quality.view.QualitySample'
+			,@entityId = @intUserId
+			,@actionType = 'Created'
+			,@actionIcon = 'small-new-plus'
+			,@changeDescription = @StrDescription
+			,@fromValue = ''
+			,@toValue = @strSampleNumber
+	END
 
 	EXEC sp_xml_removedocument @idoc
 
