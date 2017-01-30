@@ -5352,6 +5352,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var me = this;
         var win = button.up('window');
         var grdLotTracking = win.down('grdLotTracking');
+        var currentReceipt = win.viewModel.data.current;
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var lineItemQty = currentReceiptItem.get('dblOpenReceive');
         var lineItemCF = currentReceiptItem.get('dblItemUOMConvFactor');
@@ -5597,10 +5598,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     grdLotTracking.suspendEvents(true);
 
                     var totalLotQty = 0;
-
-                   /* currentReceiptItem.tblICInventoryReceiptItemLots().each(function (lot) {
-                        totalLotQty += lot.get('dblQuantity');
-                    });*/
                     grdLotTracking.store.each(function (lot) {
                         totalLotQty += lot.get('dblQuantity');
                     });
@@ -5613,19 +5610,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                            var itemNo = currentReceiptItem.get('strItemNo');
                            iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') + ' are fully replicated.');
                         }
+                    } 
+                    else {
+                        
+                        newLot.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, currentReceiptItem, newLot));
+                        newLot.set('dblStatedTotalNet', me.calculateStatedTotalNet(currentReceipt, currentReceiptItem, newLot));
+                        newLot.set('dblPhysicalVsStated', me.calculatePhysicalVsStated(currentReceipt, currentReceiptItem, newLot));
 
-                       // When item is already fully replicated, it should not generate lots anymore but should show an error message IC-1888
-                       /* iRely.Msg.showQuestion('The lots for ' + itemNo + ' is fully replicated. Are you sure you want to continue?',
-                            function (p) {
-                                if (p === 'no') {
-                                    grdLotTracking.resumeEvents(true);
-                                    return;
-                                } else {
-                                    currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
-                                }
-                            }, Ext.MessageBox.YESNO, win);*/
-                    } else {
-                        //currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
                         grdLotTracking.store.add(newLot);
 
                         //Notify user if the last lot has excess/loss
@@ -5686,7 +5677,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
                             });
                                         
-                                //currentReceiptItem.tblICInventoryReceiptItemLots().add(lastNewLot);
+                                lastNewLot.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, currentReceiptItem, lastNewLot));
+                                lastNewLot.set('dblStatedTotalNet', me.calculateStatedTotalNet(currentReceipt, currentReceiptItem, lastNewLot));
+                                lastNewLot.set('dblPhysicalVsStated', me.calculatePhysicalVsStated(currentReceipt, currentReceiptItem, lastNewLot));
+
                                 grdLotTracking.store.add(lastNewLot);
                                 //Notify user that the last lot has excess/loss
                                 iRely.Functions.showCustomDialog('information','ok','Excess tare/loss noticed for the last lot. Please verify and correct if required.');
@@ -5698,11 +5692,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     if (ctr === replicaCount - 1) {
                         grdLotTracking.resumeEvents(true);
+
                         //Calculate Gross/Net
                         me.calculateGrossNet(currentReceiptItem, 1);
 
-                        //Calculate Line Total
-                        var currentReceipt = win.viewModel.data.current;
+                        //Calculate Line Total                        
                         currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
                     }
                 }
