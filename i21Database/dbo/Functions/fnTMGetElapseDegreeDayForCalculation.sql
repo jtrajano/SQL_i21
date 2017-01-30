@@ -27,6 +27,11 @@ BEGIN
 	DECLARE @ysnCalcOnHold BIT
 	DECLARE @ysnOnHold BIT
 	DECLARE @dblElapseDDForCalc NUMERIC(18,6)
+
+	DECLARE @intDeliveryDateLifetimeAccumDD INT
+	DECLARE @intLastDeliveryDateLifetimeAccumDD INT
+	DECLARE @intClockId INT
+	DECLARE @dtmLastDeliveryDate DATETIME
 	
 
 	IF(@intDeliveryHistoryId IS NULL)
@@ -38,6 +43,7 @@ BEGIN
 			,@intLastDeliveryDegreeDay = intLastDeliveryDegreeDay
 			,@ysnCalcOnHold = ysnHoldDDCalculations
 			,@ysnOnHold = ysnOnHold
+			,@dtmLastDeliveryDate = dtmLastDeliveryDate
 		FROM tblTMSite
 		WHERE intSiteID = @intSiteId
 	END
@@ -49,19 +55,28 @@ BEGIN
 			,@dtmOnHoldEndDate = dtmSiteOnHoldEndDate
 			,@intLastDeliveryDegreeDay = intDegreeDayOnLastDeliveryDate
 			,@ysnCalcOnHold = ysnSiteHoldDDCalculations
+			,@dtmLastDeliveryDate = A.dtmSiteLastDelivery
 			,@ysnOnHold = ysnSiteOnHold
 		FROM tblTMDeliveryHistory A
 		WHERE A.intDeliveryHistoryID = @intDeliveryHistoryId
 	END
 	
+	SELECT TOP 1 @intClockId = intClockID FROM tblTMSite WHERE intSiteID = @intSiteId
+
 	---Get Degree REading Info
 	SELECT 
 		@dblAccumulatedDD = dblAccumulatedDegreeDay
 		,@dtmDeliveryDate = dtmDate
 	FROM tblTMDegreeDayReading
 	WHERE intDegreeDayReadingID = @intDDReadingId
+
+	--get the life time accumulated DD for last delivery and invoice date
+	SET @intDeliveryDateLifetimeAccumDD = ISNULL((SELECT SUM(intDegreeDays) FROM tblTMDegreeDayReading WHERE dtmDate <=  @dtmDeliveryDate AND intClockID = @intClockId),0)
+	SET @intLastDeliveryDateLifetimeAccumDD = ISNULL((SELECT SUM(intDegreeDays) FROM tblTMDegreeDayReading WHERE dtmDate <=  @dtmLastDeliveryDate AND intClockID = @intClockId),0)
 	
-	SET @intElapseDDBetweenDelivery = ROUND((ISNULL(@dblAccumulatedDD,0) - ISNULL(@intLastDeliveryDegreeDay,0)),0)
+	---	 get ellapse Degree Day between delivery
+	SET @intElapseDDBetweenDelivery = ABS(@intDeliveryDateLifetimeAccumDD - @intLastDeliveryDateLifetimeAccumDD)
+	
 	
 	-----Get Elapse DD for calculation
 	IF(@ysnOnHold = 0)
@@ -75,15 +90,15 @@ BEGIN
 		BEGIN
 			IF(@dtmDeliveryDate > @dtmOnHoldEndDate)
 			BEGIN
-				SET @dblElapseDDDuringHold = ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay FROM tblTMDegreeDayReading WHERE dtmDate = @dtmOnHoldEndDate),0)
-											-ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay FROM tblTMDegreeDayReading WHERE dtmDate = @dtmOnHoldStartDate),0)
+				SET @dblElapseDDDuringHold = ISNULL((SELECT SUM(intDegreeDays) FROM tblTMDegreeDayReading WHERE dtmDate <=  @dtmOnHoldEndDate AND intClockID = @intClockId),0)
+											-ISNULL((SELECT SUM(intDegreeDays) FROM tblTMDegreeDayReading WHERE dtmDate <=  @dtmOnHoldStartDate AND intClockID = @intClockId),0)
 			END
 			ELSE
 			BEGIN
-				IF((@dtmDeliveryDate >= @dtmOnHoldStartDate) AND @dtmDeliveryDate <= @dtmOnHoldStartDate)
+				IF((@dtmDeliveryDate >= @dtmOnHoldStartDate) AND @dtmDeliveryDate <= @dtmOnHoldEndDate)
 				BEGIN
-					SET @dblElapseDDDuringHold = ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay FROM tblTMDegreeDayReading WHERE dtmDate = @dtmDeliveryDate),0)
-												-ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay FROM tblTMDegreeDayReading WHERE dtmDate = @dtmOnHoldStartDate),0)
+					SET @dblElapseDDDuringHold = ISNULL((SELECT SUM(intDegreeDays) FROM tblTMDegreeDayReading WHERE dtmDate <=  @dtmDeliveryDate AND intClockID = @intClockId),0) 
+												-ISNULL((SELECT SUM(intDegreeDays) FROM tblTMDegreeDayReading WHERE dtmDate <=  @dtmOnHoldStartDate AND intClockID = @intClockId),0) 
 				END	
 			END
 		END

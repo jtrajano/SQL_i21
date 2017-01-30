@@ -135,33 +135,13 @@ BEGIN
 			END
 			
 			----------Get clock reading for the last Delivery date
-			IF EXISTS(SELECT TOP 1 1 FROM tblTMDegreeDayReading WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmLastDeliveryDate), 0) )
-			BEGIN
-				SELECT TOP 1
-					@intLastDegreeDays = intDegreeDays
-					,@dblLastAccumulatedDegreeDay = dblAccumulatedDegreeDay
-					,@intLastClockReadingId = intDegreeDayReadingID
-				FROM tblTMDegreeDayReading
-				WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmLastDeliveryDate), 0) 
-			END
-			ELSE
-			BEGIN
-				SELECT TOP 1
-					@intLastDegreeDays = intDegreeDays
-					,@dblLastAccumulatedDegreeDay = dblAccumulatedDD
-					,@intLastClockReadingId = intDDReadingID
-					,@intSeasonResetId = intSeasonResetArchiveID
-				FROM tblTMDDReadingSeasonResetArchive
-				WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmLastDeliveryDate), 0) 
-
-				SELECT TOP 1
-					@dblLastAccumulatedDDOnSeasonReset = ISNULL(dblAccumulatedDD,0.0)
-				FROM tblTMDDReadingSeasonResetArchive
-				WHERE intClockID = @intClockId AND intSeasonResetArchiveID = @intSeasonResetId
-				ORDER BY dtmDate DESC
-
-				SET @dblLastAccumulatedDegreeDay = @dblLastAccumulatedDegreeDay - ISNULL(@dblLastAccumulatedDDOnSeasonReset,0.0)
-			END
+			SELECT TOP 1
+				@intLastDegreeDays = intDegreeDays
+				,@dblLastAccumulatedDegreeDay = dblAccumulatedDegreeDay
+				,@intLastClockReadingId = intDegreeDayReadingID
+			FROM tblTMDegreeDayReading
+			WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmLastDeliveryDate), 0) 
+			
 		END
 		
 		

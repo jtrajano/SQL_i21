@@ -35,6 +35,11 @@ BEGIN
 	DECLARE @dtmDeliveryDate DATETIME
 	DECLARE @dblElapseDDForCalc NUMERIC(18,6)
 	DECLARE @dblElapseDDDuringHold NUMERIC(18,6)
+
+	DECLARE @intDeliveryDateLifetimeAccumDD INT
+	DECLARE @intLastDeliveryDateLifetimeAccumDD INT
+	DECLARE @intClockBeginSummerMonth INT
+	DECLARE @intClockBeginWinterMonth INT
 	
 	
 	IF(@intDeliveryHistoryId IS NULL)
@@ -83,9 +88,14 @@ BEGIN
 		,@dtmDeliveryDate = dtmDate
 	FROM tblTMDegreeDayReading
 	WHERE intDegreeDayReadingID = @intDDReadingId
+
+	--get the life time accumulated DD for last delivery and invoice date
+	SET @intDeliveryDateLifetimeAccumDD = ISNULL((SELECT SUM(intDegreeDays) FROM tblTMDegreeDayReading WHERE dtmDate <=  @dtmDeliveryDate AND intClockID = @intClockId),0)
+	SET @intLastDeliveryDateLifetimeAccumDD = ISNULL((SELECT SUM(intDegreeDays) FROM tblTMDegreeDayReading WHERE dtmDate <=  @dtmLastDeliveryDate AND intClockID = @intClockId),0)
+
 	
 	---	 get ellapse Degree Day between delivery
-	SET @dblElapseDDBetweenDelivery = ROUND((ISNULL(@dblAccumulatedDD,0) - ISNULL(@intLastDeliveryDegreeDay,0)),0)
+	SET @dblElapseDDBetweenDelivery = ABS(@intDeliveryDateLifetimeAccumDD - @intLastDeliveryDateLifetimeAccumDD)
 	
 	--get percent after deliver
 	SELECT TOP 1 @dblPercentAfterDelivery = dblPercentFull FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId 
@@ -134,9 +144,17 @@ BEGIN
 		SET @dblGallonsUsed = @dblLastGallonsInTank + @dblInvoiceQuantity - ((ISNULL(@dblPercentAfterDelivery,0)/100) * @dblTotalCapacity)
 	END
 	
+
+	-- Get Clock Info
+	SELECT TOP 1
+		@intClockBeginSummerMonth = intBeginSummerMonth
+		,@intClockBeginWinterMonth = intBeginWinterMonth
+	FROM tblTMClock
+	WHERE intClockID = @intClockId
+	
 	
 	--Check the current Season and get the daily used
-	IF((SELECT strCurrentSeason FROM tblTMClock WHERE intClockID = @intClockId) = 'Summer')
+	IF(YEAR(@dtmDeliveryDate) >= @intClockBeginSummerMonth AND YEAR(@dtmDeliveryDate) < @intClockBeginWinterMonth)
 	BEGIN
 		SET @dblDailyGalsUsed = @dblSummerDailyUse
 	END
