@@ -131,6 +131,9 @@ BEGIN TRY
 		WHERE	strContractNumber = @strContractNumber AND ysnImported = 0
 	END
 
+	EXEC uspQMSampleContractSlice @intContractHeaderId
+
+	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
 END TRY
 
 BEGIN CATCH
