@@ -4915,6 +4915,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetFilledDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
