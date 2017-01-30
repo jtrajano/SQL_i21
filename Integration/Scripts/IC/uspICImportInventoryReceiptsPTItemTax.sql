@@ -1,15 +1,16 @@
-/****** Object:  StoredProcedure [dbo].[uspICImportInventoryReceiptsPTItemTax]    Script Date: 08/24/2016 06:31:39 ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
+--/****** Object:  StoredProcedure [dbo].[uspICImportInventoryReceiptsPTItemTax]    Script Date: 08/24/2016 06:31:39 ******/
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICImportInventoryReceiptsPTItemTax]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICImportInventoryReceiptsPTItemTax]; 
+GO 
 
 CREATE PROCEDURE [dbo].[uspICImportInventoryReceiptsPTItemTax]
 
-	AS
-BEGIN
+AS
 
+SET ANSI_NULLS ON
+SET QUOTED_IDENTIFIER ON
+
+BEGIN
 --************************************************************************************************************************************************
 --******************************** TAX FOR ITEM DOESNOT HAVE TAX SETUP IN ORIGIN *****************************************************************
 --************************************************************************************************************************************************
