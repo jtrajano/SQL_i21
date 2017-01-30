@@ -471,6 +471,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strRequired).HasColumnName("strRequired");
             this.Property(t => t.intTonnageTaxUOMId).HasColumnName("intTonnageTaxUOMId");
             this.Property(t => t.strTonnageTaxUOM).HasColumnName("strTonnageTaxUOM");
+            this.Property(t => t.intModuleId).HasColumnName("intModuleId");
+            this.Property(t => t.strModule).HasColumnName("strModule");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)

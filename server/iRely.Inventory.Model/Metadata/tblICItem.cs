@@ -88,6 +88,7 @@ namespace iRely.Inventory.Model
         public decimal? dblMaintenanceRate { get; set; }
         public bool? ysnListBundleSeparately { get; set; }
         public int? intModuleId { get; set; }
+
         public string strNACSCategory { get; set; }
         public string strWICCode { get; set; }
         public int? intAGCategory { get; set; }
@@ -467,6 +468,8 @@ namespace iRely.Inventory.Model
         public string strRequired { get; set; }
         public int? intTonnageTaxUOMId { get; set; }
         public string strTonnageTaxUOM { get; set; }
+        public int? intModuleId { get; set; }
+        public string strModule { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }
