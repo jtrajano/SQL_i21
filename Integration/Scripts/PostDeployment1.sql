@@ -42,29 +42,17 @@ GO
 --General Ledger
 :r "..\Scripts\GL\1a_OriginCrossReferenceMapping.sql"
 
+--Inventory Receipt
 GO 
-
--- Create uspICImportInventoryReceipts if coctl_pt exists
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'coctlmst') AND type = N'U') 
-	:r "..\Scripts\IC\trgReceiptNumber.sql"
+:r "..\Scripts\IC\trgReceiptNumber.sql"
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'coctlmst') AND type = N'U') 
-	:r "..\Scripts\IC\uspICImportInventoryReceipts.sql"
+:r "..\Scripts\IC\uspICImportInventoryReceipts.sql"
 GO 
-
--- Create uspICImportInventoryReceiptsAGItemTax if PT table, coctl_pt, exists. 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'coctl_pt') AND type = N'U') 
-	:r "..\Scripts\IC\uspICImportInventoryReceiptsAG.sql"
+:r "..\Scripts\IC\uspICImportInventoryReceiptsAG.sql"
 GO
-
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'coctl_pt') AND type = N'U') 
-	:r "..\Scripts\IC\uspICImportInventoryReceiptsAGItemTax.sql"
+:r "..\Scripts\IC\uspICImportInventoryReceiptsAGItemTax.sql"
 GO 
-
--- Create uspICImportInventoryReceiptsPTItemTax if AG table, agphsmst, exists. 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'coctl_ag') AND type = N'U') 
-	:r "..\Scripts\IC\uspICImportInventoryReceiptsPT.sql"
+:r "..\Scripts\IC\uspICImportInventoryReceiptsPT.sql"
 GO 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'coctl_ag') AND type = N'U') 
-	:r "..\Scripts\IC\uspICImportInventoryReceiptsPTItemTax.sql"
+:r "..\Scripts\IC\uspICImportInventoryReceiptsPTItemTax.sql"
 GO 
