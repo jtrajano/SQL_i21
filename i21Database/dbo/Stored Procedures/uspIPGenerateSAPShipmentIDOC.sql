@@ -36,10 +36,16 @@ Declare @intMinHeader				INT,
 		@strPOLineItemNo			NVARCHAR(100),
 		@strShipItemRefNo			NVARCHAR(100),
 		@strItemXml					NVARCHAR(MAX),
-		@strLoadStgIds				NVARCHAR(MAX)
+		@strLoadStgIds				NVARCHAR(MAX),
+		@strContainerSizeCode		NVARCHAR(100),
+		@intLoadContainerId			INT,
+		@strContainerXml			NVARCHAR(MAX),
+		@strContainerItemXml		NVARCHAR(MAX),
+		@ysnBatchSplit				BIT
 
 Declare @tblDetail AS Table
 (
+	intRowNo INT IDENTITY(1,1),
 	intLoadStgId INT,
 	intLGLoadDetailStgId INT,
 	intLoadId INT,
@@ -57,6 +63,14 @@ Declare @tblDetail AS Table
 	strShipItemRefNo NVARCHAR(100),
 	strRowState NVARCHAR(50),
 	strCommodityCode NVARCHAR(50)
+)
+
+Declare @tblContainer AS Table
+(
+	intLoadContainerStgId INT,
+	intLoadContainerId	INT,
+	strContainerNo NVARCHAR(100),
+	strContainerSizeCode NVARCHAR(100)
 )
 
 Declare @tblOutput AS Table
@@ -199,11 +213,11 @@ Begin
 	Set @strXml += '</IDOC>'
 	Set @strXml +=  '</DELVRY07>'
 
-	Set @strLoadStgIds=NULL
-	Select @strLoadStgIds=COALESCE(CONVERT(VARCHAR,@strLoadStgIds) + ',', '') + intLoadStgId From @tblDetail
+	--Set @strLoadStgIds=NULL
+	--Select @strLoadStgIds=COALESCE(CONVERT(VARCHAR,@strLoadStgIds) + ',', '') + intLoadStgId From @tblDetail
 
 	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml)
-	VALUES(@strLoadStgIds,'CREATE',@strXml)
+	VALUES(@intMinHeader,'CREATE',@strXml)
 
 	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')='' AND strTransactionType='Shipping Instructions'
 End --Loop Header End
@@ -275,7 +289,7 @@ Begin
 
 	Set @strItemXml=''
 
-	Select @intMinDetail=Min(intLGLoadDetailStgId) From @tblDetail
+	Select @intMinDetail=Min(intRowNo) From @tblDetail
 
 	While(@intMinDetail is not null) --Loop Detail
 	Begin
@@ -291,7 +305,7 @@ Begin
 			@strPONo					=	strPONo,
 			@strPOLineItemNo			=	strPOLineItemNo,
 			@strShipItemRefNo			=	strShipItemRefNo
-		From @tblDetail Where intLGLoadDetailStgId=@intMinDetail
+		From @tblDetail Where intRowNo=@intMinDetail
 
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
@@ -329,21 +343,63 @@ Begin
 
 			Set @strItemXml += '</E1EDL24>'
 
-		Select @intMinDetail=Min(intLGLoadDetailStgId) From @tblDetail Where intLGLoadDetailStgId>@intMinDetail
+		Select @intMinDetail=Min(intRowNo) From @tblDetail Where intRowNo>@intMinDetail
 	End --Loop Detail End
 
+	--For Tea
+	If UPPER(@strCommodityCode)='TEA'
+	Begin
+			Set @strContainerXml=''
+
+			Delete From @tblContainer
+
+			Insert Into @tblContainer(intLoadContainerStgId,intLoadContainerId,strContainerNo,strContainerSizeCode)
+			Select c.intLoadContainerStgId,c.intLoadContainerId,c.strContainerNo,c.strContainerSizeCode
+			From tblLGLoadContainerStg c Where c.intLoadStgId=@intMinHeader
+
+			Select @intMinContainer=Min(intLoadContainerStgId) From @tblContainer
+
+			While(@intMinContainer is not null) --Loop Container
+			Begin
+				Select @strContainerNo=strContainerNo,@strContainerSizeCode=strContainerSizeCode,@intLoadContainerId=intLoadContainerId
+				From @tblContainer Where intLoadContainerStgId=@intMinContainer
+
+					Set @strContainerXml += '<E1EDL37 SEGMENT="1">'
+					Set @strContainerXml += '<EXIDV>'  +  ISNULL(@strContainerNo,'') + '</EXIDV>' 
+					Set @strContainerXml += '<VHILM>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM>' 
+					Set @strContainerXml += '<VHART>'  +  '0002' + '</VHART>' 
+
+					Set @strContainerItemXml=NULL
+					Select @strContainerItemXml=COALESCE(@strContainerItemXml, '') 
+					+ '<E1EDL44 SEGMENT="1">'
+					+ '<VBELN>'  +  ISNULL(@strExternalDeliveryNumber,'') + '</VBELN>' 
+					+ '<POSNR>'  +  ISNULL(ld.strExternalShipmentItemNumber,'') + '</POSNR>'
+					+ '<VEMNG>'  +  ISNULL(CONVERT(VARCHAR,cl.dblQuantity),'') + '</VEMNG>'
+					+ '<VEMEH>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(ld.strUnitOfMeasure,'')) + '</VEMEH>'
+					+ '</E1EDL44>'			 
+					From tblLGLoadDetailContainerLink cl Join tblLGLoadDetailStg ld on cl.intLoadDetailId=ld.intLoadDetailId
+					Where intLoadContainerId=@intLoadContainerId
+
+					Set @strContainerXml += ISNULL(@strContainerItemXml,'')
+					Set @strContainerXml += '</E1EDL37>'
+
+				Select @intMinContainer=Min(intLoadContainerStgId) From @tblContainer Where intLoadContainerStgId>@intMinContainer
+			End --Loop Container End
+
+	End
+
 	--Final Xml
-	Set @strXml += @strItemXml
+	Set @strXml += ISNULL(@strItemXml,'') + ISNULL(@strContainerXml,'')
 
 	Set @strXml += '</E1ELD20>'
 	Set @strXml += '</IDOC>'
 	Set @strXml +=  '</DELVRY07>'
 
-	Set @strLoadStgIds=NULL
-	Select @strLoadStgIds=COALESCE(CONVERT(VARCHAR,@strLoadStgIds) + ',', '') + intLoadStgId From @tblDetail
+	--Set @strLoadStgIds=NULL
+	--Select @strLoadStgIds=COALESCE(CONVERT(VARCHAR,@strLoadStgIds) + ',', '') + intLoadStgId From @tblDetail
 
 	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml)
-	VALUES(@strLoadStgIds,'CREATE',@strXml)
+	VALUES(@intMinHeader,'CREATE',@strXml)
 
 	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')='' AND strTransactionType='Shipment'
 End --Loop Header End

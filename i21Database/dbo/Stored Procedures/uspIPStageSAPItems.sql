@@ -14,7 +14,7 @@ BEGIN TRY
 	DECLARE @strItemNo NVARCHAR(50)
 	DECLARE @intStageItemId int
 
-	Set @strXml= REPLACE(@strXml,'utf-8','utf-16')
+	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 	,@strXml

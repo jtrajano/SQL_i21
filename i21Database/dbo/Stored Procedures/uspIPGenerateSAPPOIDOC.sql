@@ -44,7 +44,8 @@ Declare @intMinSeq					INT,
 		@strHeaderState				NVARCHAR(50),
 		@strContractFeedIds			NVARCHAR(MAX),
 		@strERPPONumber1			NVARCHAR (100),
-		@strCertificates			NVARCHAR(MAX)
+		@strCertificates			NVARCHAR(MAX),
+		@strOrigin					NVARCHAR(100)
 
 Declare @tblOutput AS Table
 (
@@ -58,6 +59,8 @@ Declare @tblHeader AS Table
 (
 	intRowNo INT IDENTITY(1,1),
 	intContractHeaderId int,
+	strCommodityCode NVARCHAR(50),
+	intContractFeedId INT,
 	strSubLocation NVARCHAR(50)
 )
 
@@ -65,374 +68,14 @@ Select @strPOCreateIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PO CREATE')
 Select @strPOUpdateIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 
---For COFFEE
-Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='COFFEE'
-
-While(@intMinSeq is not null)
-Begin
-	Select 
-		@intContractFeedId			= intContractFeedId ,
-		@intContractHeaderId		= intContractHeaderId,
-		@intContractDetailId		= intContractDetailId,
-		@strCommodityCode			= strCommodityCode ,
-		@strCommodityDesc			= strCommodityDesc ,
-		@strContractBasis			= strContractBasis ,--INCOTERMS1
-		@strContractBasisDesc		= strContractBasisDesc ,--INCOTERMS2
-		@strSubLocation				= strSubLocation , --L-Plant / PLANT 
-		@strCreatedBy				= strCreatedBy , 
-		@strCreatedByNo				= strCreatedByNo , 
-		@strEntityNo				= strEntityNo , --VENDOR 
-		@strTerm					= strTerm  , --PMNTTRMS / VEND_PART 
-		@strPurchasingGroup			= strPurchasingGroup, 
-		@strContractNumber			= strContractNumber  ,
-		@strERPPONumber				= strERPPONumber  ,
-		@intContractSeq				= intContractSeq, --PO_ITEM 
-		@strItemNo					= strItemNo  ,
-		@strStorageLocation			= strStorageLocation , --STGE_LOC 
-		@dblQuantity				= dblQuantity,
-		@strQuantityUOM				= dbo.fnIPConverti21UOMToSAP(strQuantityUOM) , --PO_UNIT
-		@dblCashPrice				= dblCashPrice, --NET_PRICE
-		@dblUnitCashPrice			= dblUnitCashPrice, --PRICE_UNIT 
-		@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate, --DELIVERY_DATE 
-		@dtmContractDate			= dtmContractDate, 
-		@dtmStartDate				= dtmStartDate, --VPER_START
-		@dtmEndDate					= dtmEndDate, --VPER_END
-		@dblBasis					= dblBasis, --COND_VALUE,
-		@strCurrency				= strCurrency ,--CURRENCY 
-		@strPriceUOM				= dbo.fnIPConverti21UOMToSAP(strPriceUOM) , --COND_UNIT 
-		@strRowState				= strRowState ,
-		@strFeedStatus				= strFeedStatus
-	From tblCTContractFeed Where intContractFeedId=@intMinSeq
-
-	--Find Doc Type
-	If @strContractBasis IN ('FCA','EXW')
-		Set @strDocType='ZHDE'
-
-	If @strContractBasis IN ('FOB','CFR')
-		Set @strDocType='ZHUB'
-
-	If @strSubLocation IN ('L953','L954')
-		Set @strDocType='ZB2B'
-
-	If UPPER(@strRowState)='ADDED'
-	Begin
-		Set @strXml =  '<PORDCR103>'
-		Set @strXml += '<IDOC BEGIN="1">'
-
-		--IDOC Header
-		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-		Set @strXml +=	@strPOCreateIDOCHeader
-		Set @strXml +=	'</EDI_DC40>'
-		
-		Set @strXml +=	'<E1PORDCR1 SEGMENT="1">'
-
-		--Header
-		Set @strXml += '<E1BPMEPOHEADER SEGMENT="1">'
-		Set @strXml += '<COMP_CODE>'	+ ISNULL(@strCompCode,'')			+ '</COMP_CODE>'
-		Set @strXml += '<DOC_TYPE>'		+ ISNULL(@strDocType,'')			+ '</DOC_TYPE>'
-		Set @strXml += '<CREAT_DATE>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</CREAT_DATE>'
-		Set @strXml += '<CREATED_BY>'	+ ISNULL(@strCreatedByNo,'')		+ '</CREATED_BY>'
-		Set @strXml += '<VENDOR>'		+ ISNULL(@strEntityNo,'')			+ '</VENDOR>'
-		Set @strXml += '<PMNTTRMS>'		+ ISNULL(@strTerm,'')				+ '</PMNTTRMS>'
-		Set @strXml += '<PURCH_ORG>'	+ '0380'							+ '</PURCH_ORG>'
-		Set @strXml += '<PUR_GROUP>'	+ ISNULL(@strPurchasingGroup,'')	+ '</PUR_GROUP>'
-		Set @strXml += '<DOC_DATE>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</DOC_DATE>'
-		Set @strXml += '<VPER_START>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmStartDate,112),'')	+ '</VPER_START>'
-		Set @strXml += '<VPER_END>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmEndDate,112),'')	+ '</VPER_END>'
-		Set @strXml += '<REF_1>'		+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
-		Set @strXml += '<INCOTERMS1>'	+ ISNULL(@strContractBasis,'')		+ '</INCOTERMS1>'
-		Set @strXml += '<INCOTERMS2>'	+ ISNULL(@strContractBasisDesc,'')	+ '</INCOTERMS2>'
-		Set @strXml +=	'</E1BPMEPOHEADER>'
-
-		--Item
-		Set @strXml += '<E1BPMEPOITEM SEGMENT="1">'
-		Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-		Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
-		Set @strXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
-		Set @strXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
-		Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractSeq),'')	+ '</TRACKINGNO>'
-		Set @strXml += '<QUANTITY>'		+ ISNULL(CONVERT(VARCHAR,@dblQuantity),'')		+ '</QUANTITY>'
-		Set @strXml += '<PO_UNIT>'		+ ISNULL(@strQuantityUOM,'')		+ '</PO_UNIT>'
-		Set @strXml += '<ORDERPR_UN>'	+ ISNULL(@strPriceUOM,'')			+ '</ORDERPR_UN>'
-		Set @strXml += '<NET_PRICE>'	+ ISNULL(CONVERT(VARCHAR,@dblCashPrice),'')	+ '</NET_PRICE>'
-		Set @strXml += '<PRICE_UNIT>'	+ ISNULL(CONVERT(VARCHAR,@dblUnitCashPrice * 1000),'')	+ '</PRICE_UNIT>'
-		Set @strXml += '<CONF_CTRL>'	+ 'SL08'							+ '</CONF_CTRL>'
-		Set @strXml += '<VEND_PART>'	+ ISNULL(CONVERT(VARCHAR,@strTerm),'')			+ '</VEND_PART>'
-		Set @strXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
-		If ISNULL(@dblCashPrice,0)=0
-			Set @strXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
-		Set @strXml +=	'</E1BPMEPOITEM>'
-
-		--Schedule
-		Set @strXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
-		Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('00000' + CONVERT(VARCHAR,@intContractSeq),5),'')		+ '</PO_ITEM>'
-		Set @strXml += '<SCHED_LINE>'	+ ISNULL(RIGHT('00000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</SCHED_LINE>'
-		Set @strXml += '<DELIVERY_DATE>'+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')	+ '</DELIVERY_DATE>'
-		Set @strXml += '<QUANTITY>'		+ ISNULL(CONVERT(VARCHAR,@dblQuantity),'')										+ '</QUANTITY>'
-		Set @strXml += '</E1BPMEPOSCHEDULE>'
-
-		--Basis Information
-		Set @strXml += '<E1BPMEPOCOND SEGMENT="1">'
-		Set @strXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
-		Set @strXml += '<COND_TYPE>'		+ 'ZDIF'		+ '</COND_TYPE>'
-		Set @strXml += '<COND_VALUE>'		+ ISNULL(CONVERT(VARCHAR,@dblBasis),'')	+ '</COND_VALUE>'
-		Set @strXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
-		Set @strXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
-		Set @strXml += '<COND_P_UNIT>'		+ ISNULL(CONVERT(VARCHAR,@dblUnitCashPrice * 100),'')	+ '</COND_P_UNIT>'
-		Set @strXml += '<CHANGE_ID>'		+ 'I'	+ '</CHANGE_ID>'
-		Set @strXml += '</E1BPMEPOCOND>'
-
-		--Certificate
-		Select @strCertificates=COALESCE(@strCertificates, '') 
-			+ '<E1BPMEPOTEXTHEADER>'
-			+ '<TEXT_ID>' + 'L15' + '</TEXT_ID>' 
-			+ '<TEXT_LINE>'  +  ISNULL(strCertificationName,'') + '</TEXT_LINE>' 
-			+ '</E1BPMEPOTEXTHEADER>'
-		From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
-		Where cc.intContractDetailId=@intContractDetailId
-
-		Set @strXml += ISNULL(@strCertificates,'')
-
-		Set @strXml +=	'</E1PORDCR1>'
-
-		Set @strXml += '</IDOC>'
-		Set @strXml +=  '</PORDCR103>'
-
-		INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
-		VALUES(@intContractFeedId,'CREATE',@strXml)
-	End
-
-	If UPPER(@strRowState)='MODIFIED'
-	Begin
-		Set @strXml =  '<PORDCH03>'
-		Set @strXml += '<IDOC BEGIN="1">'
-
-		--IDOC Header
-		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-		Set @strXml +=	@strPOUpdateIDOCHeader
-		Set @strXml +=	'</EDI_DC40>'
-		
-		Set @strXml +=	'<E1PORDCH SEGMENT="1">'
-
-		--Header
-		Set @strXml += '<E1BPMEPOHEADER SEGMENT="1">'
-		Set @strXml += '<COMP_CODE>'	+ ISNULL(@strCompCode,'')			+ '</COMP_CODE>'
-		Set @strXml += '<DOC_TYPE>'		+ ISNULL(@strDocType,'')			+ '</DOC_TYPE>'
-		Set @strXml += '<CREAT_DATE>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</CREAT_DATE>'
-		Set @strXml += '<CREATED_BY>'	+ ISNULL(@strCreatedByNo,'')		+ '</CREATED_BY>'
-		Set @strXml += '<VENDOR>'		+ ISNULL(@strEntityNo,'')			+ '</VENDOR>'
-		Set @strXml += '<PMNTTRMS>'		+ ISNULL(@strTerm,'')				+ '</PMNTTRMS>'
-		Set @strXml += '<PURCH_ORG>'	+ '0380'							+ '</PURCH_ORG>'
-		Set @strXml += '<PUR_GROUP>'	+ ISNULL(@strPurchasingGroup,'')	+ '</PUR_GROUP>'
-		Set @strXml += '<DOC_DATE>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</DOC_DATE>'
-		Set @strXml += '<VPER_START>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmStartDate,112),'')	+ '</VPER_START>'
-		Set @strXml += '<VPER_END>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmEndDate,112),'')	+ '</VPER_END>'
-		Set @strXml += '<REF_1>'		+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
-		Set @strXml += '<INCOTERMS1>'	+ ISNULL(@strContractBasis,'')		+ '</INCOTERMS1>'
-		Set @strXml += '<INCOTERMS2>'	+ ISNULL(@strContractBasisDesc,'')	+ '</INCOTERMS2>'
-		Set @strXml += '<PO_NUMBER>'	+ ISNULL(@strERPPONumber,'')	+ '</PO_NUMBER>'
-		Set @strXml +=	'</E1BPMEPOHEADER>'
-
-		--HeaderX
-		Set @strXml += '<E1BPMEPOHEADERX SEGMENT="1">'
-		Set @strXml += '<COMP_CODE>'		+ 'X'	+ '</COMP_CODE>'			
-		If @strContractBasis IS NOT NULL OR @strSubLocation IS NOT NULL
-			Set @strXml += '<DOC_TYPE>'		+ 'X'	+ '</DOC_TYPE>' 
-		If @dtmContractDate IS NOT NULL
-			Set @strXml += '<CREAT_DATE>'	+ 'X'	+ '</CREAT_DATE>'
-		If @strEntityNo IS NOT NULL
-			Set @strXml += '<VENDOR>'		+ 'X'	+ '</VENDOR>'
-		If @strTerm IS NOT NULL
-			Set @strXml += '<PMNTTRMS>'		+ 'X'	+ '</PMNTTRMS>'
-		Set @strXml += '<PURCH_ORG>'		+ 'X'+ '</PURCH_ORG>'
-		If @strPurchasingGroup IS NOT NULL
-			Set @strXml += '<PUR_GROUP>'	+ 'X'	+ '</PUR_GROUP>'
-		If @dtmContractDate IS NOT NULL
-			Set @strXml += '<DOC_DATE>'		+ 'X'	+ '</DOC_DATE>'
-		If @dtmStartDate IS NOT NULL
-			Set @strXml += '<VPER_START>'	+ 'X'	+ '</VPER_START>'
-		If @dtmEndDate IS NOT NULL
-			Set @strXml += '<VPER_END>'		+ 'X'	+ '</VPER_END>'
-		If @strContractNumber IS NOT NULL
-			Set @strXml += '<REF_1>'		+ 'X'	+ '</REF_1>'
-		If @strContractBasis IS NOT NULL
-			Set @strXml += '<INCOTERMS1>'	+ 'X'	+ '</INCOTERMS1>'
-		If @strContractBasisDesc IS NOT NULL
-			Set @strXml += '<INCOTERMS2>'	+ 'X'	+ '</INCOTERMS2>'
-		Set @strXml += '<PO_NUMBER>'		+ 'X'	+ '</PO_NUMBER>'
-		Set @strXml +=	'</E1BPMEPOHEADERX>'
-
-		--Item
-		Set @strXml += '<E1BPMEPOITEM SEGMENT="1">'
-		Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-		Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
-		Set @strXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
-		Set @strXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
-		Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractSeq),'')	+ '</TRACKINGNO>'
-		Set @strXml += '<QUANTITY>'		+ ISNULL(CONVERT(VARCHAR,@dblQuantity),'')		+ '</QUANTITY>'
-		Set @strXml += '<PO_UNIT>'		+ ISNULL(@strQuantityUOM,'')		+ '</PO_UNIT>'
-		Set @strXml += '<ORDERPR_UN>'	+ ISNULL(@strPriceUOM,'')			+ '</ORDERPR_UN>'
-		Set @strXml += '<NET_PRICE>'	+ ISNULL(CONVERT(VARCHAR,@dblCashPrice),'')	+ '</NET_PRICE>'
-		Set @strXml += '<PRICE_UNIT>'	+ ISNULL(CONVERT(VARCHAR,@dblUnitCashPrice * 1000),'')	+ '</PRICE_UNIT>'
-		Set @strXml += '<CONF_CTRL>'	+ 'SL08'							+ '</CONF_CTRL>'
-		Set @strXml += '<VEND_PART>'	+ ISNULL(CONVERT(VARCHAR,@strTerm),'')			+ '</VEND_PART>'
-		Set @strXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
-		If @dblCashPrice=0
-			Set @strXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
-		Set @strXml +=	'</E1BPMEPOITEM>'
-
-		--ItemX
-		Set @strXml += '<E1BPMEPOITEMX SEGMENT="1">'
-		Set @strXml += '<PO_ITEM>'			+ 'X'		+ '</PO_ITEM>'
-		If @strItemNo IS NOT NULL
-			Set @strXml += '<MATERIAL>'		+ 'X'		+ '</MATERIAL>'
-		If @strSubLocation IS NOT NULL
-			Set @strXml += '<PLANT>'		+ 'X'		+ '</PLANT>'
-		If @strStorageLocation IS NOT NULL
-			Set @strXml += '<STGE_LOC>'		+ 'X'		+ '</STGE_LOC>'
-		Set @strXml += '<TRACKINGNO>'		+ 'X'	+ '</TRACKINGNO>'
-		If @dblQuantity IS NOT NULL
-			Set @strXml += '<QUANTITY>'		+ 'X'		+ '</QUANTITY>'
-		If @strQuantityUOM IS NOT NULL
-			Set @strXml += '<PO_UNIT>'		+ 'X'		+ '</PO_UNIT>'
-		If @strPriceUOM IS NOT NULL
-			Set @strXml += '<ORDERPR_UN>'	+ 'X'		+ '</ORDERPR_UN>'
-		If @dblCashPrice IS NOT NULL
-			Set @strXml += '<NET_PRICE>'	+ 'X'		+ '</NET_PRICE>'
-		If @dblUnitCashPrice IS NOT NULL
-			Set @strXml += '<PRICE_UNIT>'	+ 'X'		+ '</PRICE_UNIT>'
-		Set @strXml += '<CONF_CTRL>'		+ 'X'	+ '</CONF_CTRL>'
-		If @strTerm IS NOT NULL
-			Set @strXml += '<VEND_PART>'	+ 'X'		+ '</VEND_PART>'
-		Set @strXml += '<PO_PRICE>'			+ 'X'		+ '</PO_PRICE>'
-		If ISNULL(@dblCashPrice,0)=0
-			Set @strXml += '<FREE_ITEM>'	+ 'X'		+ '</FREE_ITEM>'
-		Set @strXml +=	'</E1BPMEPOITEMX>'
-
-		--Schedule
-		Set @strXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
-		Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('00000' + CONVERT(VARCHAR,@intContractSeq),5),'')		+ '</PO_ITEM>'
-		Set @strXml += '<SCHED_LINE>'	+ ISNULL(RIGHT('00000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</SCHED_LINE>'
-		Set @strXml += '<DELIVERY_DATE>'+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')	+ '</DELIVERY_DATE>'
-		Set @strXml += '<QUANTITY>'		+ ISNULL(CONVERT(VARCHAR,@dblQuantity),'')										+ '</QUANTITY>'
-		Set @strXml += '</E1BPMEPOSCHEDULE>'
-
-		--ScheduleX
-		Set @strXml += '<E1BPMEPOSCHEDULEX SEGMENT="1">'
-		Set @strXml += '<PO_ITEM>'		+ 'X'		+ '</PO_ITEM>'
-		Set @strXml += '<SCHED_LINE>'	+ 'X'		+ '</SCHED_LINE>'
-		If @dtmPlannedAvailabilityDate IS NOT NULL
-			Set @strXml += '<DELIVERY_DATE>'+ 'X'	+ '</DELIVERY_DATE>'
-		If @dblQuantity IS NOT NULL
-			Set @strXml += '<QUANTITY>'		+ 'X'	+ '</QUANTITY>'
-		Set @strXml += '</E1BPMEPOSCHEDULEX>'
-
-		--Basis Information
-		Set @strXml += '<E1BPMEPOCOND SEGMENT="1">'
-		Set @strXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
-		Set @strXml += '<COND_TYPE>'		+ 'ZDIF'		+ '</COND_TYPE>'
-		Set @strXml += '<COND_VALUE>'		+ ISNULL(CONVERT(VARCHAR,@dblBasis),'')	+ '</COND_VALUE>'
-		Set @strXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
-		Set @strXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
-		Set @strXml += '<COND_P_UNIT>'		+ ISNULL(CONVERT(VARCHAR,@dblUnitCashPrice * 100),'')	+ '</COND_P_UNIT>'
-		Set @strXml += '<CHANGE_ID>'		+ 'U'	+ '</CHANGE_ID>'
-		Set @strXml += '</E1BPMEPOCOND>'
-
-		--Basis Information
-		Set @strXml += '<E1BPMEPOCONDX SEGMENT="1">'
-		Set @strXml += '<ITM_NUMBER>'		+ 'X'		+ '</ITM_NUMBER>'
-		Set @strXml += '<COND_TYPE>'		+ 'X'		+ '</COND_TYPE>'
-		If @dblBasis IS NOT NULL
-			Set @strXml += '<COND_VALUE>'	+ 'X'	+ '</COND_VALUE>'
-		If @strCurrency IS NOT NULL
-			Set @strXml += '<CURRENCY>'		+ 'X'		+ '</CURRENCY>'
-		If @strPriceUOM IS NOT NULL
-			Set @strXml += '<COND_UNIT>'	+ 'X'		+ '</COND_UNIT>'
-		If @dblUnitCashPrice IS NOT NULL
-			Set @strXml += '<COND_P_UNIT>'	+ 'X'	+ '</COND_P_UNIT>'
-		Set @strXml += '<CHANGE_ID>'		+ 'X'	+ '</CHANGE_ID>'
-		Set @strXml += '</E1BPMEPOCONDX>'
-
-		--Certificate
-		Select @strCertificates=COALESCE(@strCertificates, '') 
-			+ '<E1BPMEPOTEXTHEADER>'
-			+ '<TEXT_ID>' + 'L15' + '</TEXT_ID>' 
-			+ '<TEXT_LINE>'  +  ISNULL(strCertificationName,'') + '</TEXT_LINE>' 
-			+ '</E1BPMEPOTEXTHEADER>'
-		From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
-		Where cc.intContractDetailId=@intContractDetailId
-
-		Set @strXml += ISNULL(@strCertificates,'')
-
-		--CertificateX
-		Select @strCertificates=COALESCE(@strCertificates, '') 
-			+ '<E1BPMEPOTEXTHEADER>'
-			+ '<TEXT_ID>' + 'X' + '</TEXT_ID>' 
-			+ '<TEXT_LINE>'  +  'X' + '</TEXT_LINE>' 
-			+ '</E1BPMEPOTEXTHEADER>'
-		From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
-		Where cc.intContractDetailId=@intContractDetailId
-
-		Set @strXml += ISNULL(@strCertificates,'')
-
-		Set @strXml +=	'</E1PORDCH>'
-
-		Set @strXml += '</IDOC>'
-		Set @strXml +=  '</PORDCH03>'
-
-		INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
-		VALUES(@intContractFeedId,'UPDATE',@strXml)
-	End
-
-	If UPPER(@strRowState)='DELETE'
-	Begin
-		Set @strXml =  '<PORDCH03>'
-		Set @strXml += '<IDOC BEGIN="1">'
-
-		--IDOC Header
-		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-		Set @strXml +=	@strPOUpdateIDOCHeader
-		Set @strXml +=	'</EDI_DC40>'
-		
-		Set @strXml +=	'<E1PORDCH SEGMENT="1">'
-
-		--Header
-		Set @strXml += '<E1BPMEPOHEADER SEGMENT="1">'
-		Set @strXml += '<COMP_CODE>'	+ ISNULL(@strCompCode,'')		+ '</COMP_CODE>'
-		Set @strXml += '<PO_NUMBER>'	+ ISNULL(@strERPPONumber,'')	+ '</PO_NUMBER>'
-		Set @strXml +=	'</E1BPMEPOHEADER>'
-
-		--Item
-		Set @strXml += '<E1BPMEPOITEM SEGMENT="1">'
-		Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-		Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
-		Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractSeq),'')	+ '</TRACKINGNO>'
-		Set @strXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
-		Set @strXml +=	'</E1BPMEPOITEM>'
-
-		--Schedule
-		Set @strXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
-		Set @strXml += '</E1BPMEPOSCHEDULE>'
-
-		--Basis Information
-		Set @strXml += '<E1BPMEPOCOND SEGMENT="1">'
-		Set @strXml += '</E1BPMEPOCOND>'
-
-		Set @strXml +=	'</E1PORDCH>'
-
-		Set @strXml += '</IDOC>'
-		Set @strXml +=  '</PORDCH03>'
-
-		INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
-		VALUES(@intContractFeedId,'DELETE',@strXml)
-	End
-
-	Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where intContractFeedId>@intMinSeq
-End
-
---For TEA
-Insert Into @tblHeader(intContractHeaderId,strSubLocation)
-Select DISTINCT intContractHeaderId,strSubLocation From tblCTContractFeed 
+--Get the Headers
+Insert Into @tblHeader(intContractHeaderId,strCommodityCode,intContractFeedId,strSubLocation)
+Select intContractHeaderId,'COFFEE' AS strCommodityCode,intContractFeedId,'' AS strSubLocation 
+From tblCTContractFeed 
+Where ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='COFFEE'
+UNION ALL
+Select DISTINCT intContractHeaderId,'TEA' AS strCommodityCode,MAX(intContractFeedId) AS intContractFeedId,strSubLocation 
+From tblCTContractFeed 
 Where ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
 Group By intContractHeaderId,strSubLocation
 Order By intContractHeaderId
@@ -441,51 +84,65 @@ Select @intMinRowNo=Min(intRowNo) From @tblHeader
 
 While(@intMinRowNo is not null) --Header Loop
 Begin
-	Select @intContractHeaderId=intContractHeaderId,@strSubLocation=strSubLocation From @tblHeader Where intRowNo=@intMinRowNo
-
-	Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'') 
-					AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
-
 	Set @strXml=''
 	Set @strXmlHeaderStart=''
 	Set @strXmlHeaderEnd=''
 	Set @strHeaderState=''
 	Set @strContractFeedIds=NULL
 
-	Select @strContractFeedIds=COALESCE(CONVERT(VARCHAR,@strContractFeedIds) + ',', '') + CONVERT(VARCHAR,intContractFeedId) 
-	From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'')
-		AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
+	Select @intContractHeaderId=intContractHeaderId,@strSubLocation=strSubLocation,@intContractFeedId=intContractFeedId,@strCommodityCode=strCommodityCode 
+	From @tblHeader Where intRowNo=@intMinRowNo
 
-	If ISNULL(@strSubLocation,'')=''
-	Begin
-		Select TOP 1 @strERPPONumber1=strERPPONumber From tblCTContractDetail Where intContractHeaderId=@intContractHeaderId
+	If UPPER(@strCommodityCode)='COFFEE'
+	Begin	
+		Select @intMinSeq=@intContractFeedId
 
-		If ISNULL(@strERPPONumber1,'')<>''
-			Begin
-				Set @strHeaderState='MODIFIED'
+		Select @strContractFeedIds=@intContractFeedId
 
-				Update tblCTContractFeed Set strERPPONumber=@strERPPONumber1
-				Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
-			End
-		Else
-			Set @strHeaderState='ADDED'
+		Select @strHeaderState=CASE WHEN UPPER(strRowState)='DELETE' THEN 'MODIFIED' ELSE UPPER(strRowState) END 
+		From tblCTContractFeed Where intContractFeedId=@intContractFeedId
 	End
-	Else
+
+	If UPPER(@strCommodityCode)='TEA'
 	Begin
-		Select TOP 1 @strERPPONumber1=strERPPONumber From tblCTContractDetail Where intContractHeaderId=@intContractHeaderId 
-				AND intSubLocationId=(Select TOP 1 intCompanyLocationSubLocationId from tblSMCompanyLocationSubLocation Where strSubLocationName=ISNULL(@strSubLocation,'')
-				AND intCompanyLocationId=(Select TOP 1 intCompanyLocationId From tblCTContractDetail Where intContractHeaderId=@intContractHeaderId))
+		Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'') 
+				AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
 
-		If ISNULL(@strERPPONumber1,'')<>''
-			Begin
-				Set @strHeaderState='MODIFIED'
+		Select @strContractFeedIds=COALESCE(CONVERT(VARCHAR,@strContractFeedIds) + ',', '') + CONVERT(VARCHAR,intContractFeedId) 
+		From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'')
+			AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
 
-				Update tblCTContractFeed Set strERPPONumber=@strERPPONumber1
-				Where intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'')
-				AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'		
-			End
+		If ISNULL(@strSubLocation,'')=''
+		Begin
+			Select TOP 1 @strERPPONumber1=strERPPONumber From tblCTContractDetail Where intContractHeaderId=@intContractHeaderId
+
+			If ISNULL(@strERPPONumber1,'')<>''
+				Begin
+					Set @strHeaderState='MODIFIED'
+
+					Update tblCTContractFeed Set strERPPONumber=@strERPPONumber1
+					Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
+				End
+			Else
+				Set @strHeaderState='ADDED'
+		End
 		Else
-			Set @strHeaderState='ADDED'
+		Begin
+			Select TOP 1 @strERPPONumber1=strERPPONumber From tblCTContractDetail Where intContractHeaderId=@intContractHeaderId 
+					AND intSubLocationId=(Select TOP 1 intCompanyLocationSubLocationId from tblSMCompanyLocationSubLocation Where strSubLocationName=ISNULL(@strSubLocation,'')
+					AND intCompanyLocationId=(Select TOP 1 intCompanyLocationId From tblCTContractDetail Where intContractHeaderId=@intContractHeaderId))
+
+			If ISNULL(@strERPPONumber1,'')<>''
+				Begin
+					Set @strHeaderState='MODIFIED'
+
+					Update tblCTContractFeed Set strERPPONumber=@strERPPONumber1
+					Where intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'')
+					AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'		
+				End
+			Else
+				Set @strHeaderState='ADDED'
+		End
 	End
 
 	While(@intMinSeq is not null) --Sequence Loop
@@ -510,7 +167,7 @@ Begin
 			@strItemNo					= strItemNo  ,
 			@strStorageLocation			= strStorageLocation , --STGE_LOC 
 			@dblQuantity				= dblQuantity,
-			@strQuantityUOM				= dbo.fnIPConverti21UOMToSAP(strQuantityUOM) , --PO_UNIT
+			@strQuantityUOM				= strQuantityUOM , --PO_UNIT
 			@dblCashPrice				= dblCashPrice, --NET_PRICE
 			@dblUnitCashPrice			= dblUnitCashPrice, --PRICE_UNIT 
 			@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate, --DELIVERY_DATE 
@@ -519,7 +176,7 @@ Begin
 			@dtmEndDate					= dtmEndDate, --VPER_END
 			@dblBasis					= dblBasis, --COND_VALUE,
 			@strCurrency				= strCurrency ,--CURRENCY 
-			@strPriceUOM				= dbo.fnIPConverti21UOMToSAP(strPriceUOM) , --COND_UNIT 
+			@strPriceUOM				= strPriceUOM , --COND_UNIT 
 			@strRowState				= strRowState ,
 			@strFeedStatus				= strFeedStatus
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
@@ -548,24 +205,6 @@ Begin
 				Set @strXmlHeaderStart +=	'</EDI_DC40>'
 		
 				Set @strXmlHeaderStart +=	'<E1PORDCR1 SEGMENT="1">'
-
-				--Header
-				Set @strXmlHeaderStart += '<E1BPMEPOHEADER SEGMENT="1">'
-				Set @strXmlHeaderStart += '<COMP_CODE>'	+ ISNULL(@strCompCode,'')			+ '</COMP_CODE>'
-				Set @strXmlHeaderStart += '<DOC_TYPE>'		+ ISNULL(@strDocType,'')			+ '</DOC_TYPE>'
-				Set @strXmlHeaderStart += '<CREAT_DATE>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</CREAT_DATE>'
-				Set @strXmlHeaderStart += '<CREATED_BY>'	+ ISNULL(@strCreatedByNo,'')		+ '</CREATED_BY>'
-				Set @strXmlHeaderStart += '<VENDOR>'		+ ISNULL(@strEntityNo,'')			+ '</VENDOR>'
-				Set @strXmlHeaderStart += '<PMNTTRMS>'		+ ISNULL(@strTerm,'')				+ '</PMNTTRMS>'
-				Set @strXmlHeaderStart += '<PURCH_ORG>'	+ '0380'							+ '</PURCH_ORG>'
-				Set @strXmlHeaderStart += '<PUR_GROUP>'	+ ISNULL(@strPurchasingGroup,'')	+ '</PUR_GROUP>'
-				Set @strXmlHeaderStart += '<DOC_DATE>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</DOC_DATE>'
-				Set @strXmlHeaderStart += '<VPER_START>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmStartDate,112),'')	+ '</VPER_START>'
-				Set @strXmlHeaderStart += '<VPER_END>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmEndDate,112),'')	+ '</VPER_END>'
-				Set @strXmlHeaderStart += '<REF_1>'		+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
-				Set @strXmlHeaderStart += '<INCOTERMS1>'	+ ISNULL(@strContractBasis,'')		+ '</INCOTERMS1>'
-				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ ISNULL(@strContractBasisDesc,'')	+ '</INCOTERMS2>'
-				Set @strXmlHeaderStart +=	'</E1BPMEPOHEADER>'
 			End
 
 			If UPPER(@strHeaderState)='MODIFIED'
@@ -579,33 +218,42 @@ Begin
 				Set @strXmlHeaderStart +=	'</EDI_DC40>'
 		
 				Set @strXmlHeaderStart +=	'<E1PORDCH SEGMENT="1">'
+			End
 
+			If UPPER(@strHeaderState)='ADDED' OR UPPER(@strHeaderState)='MODIFIED'
+			Begin
 				--Header
 				Set @strXmlHeaderStart += '<E1BPMEPOHEADER SEGMENT="1">'
-				Set @strXmlHeaderStart += '<COMP_CODE>'	+ ISNULL(@strCompCode,'')			+ '</COMP_CODE>'
+				Set @strXmlHeaderStart += '<COMP_CODE>'		+ ISNULL(@strCompCode,'')			+ '</COMP_CODE>'
 				Set @strXmlHeaderStart += '<DOC_TYPE>'		+ ISNULL(@strDocType,'')			+ '</DOC_TYPE>'
 				Set @strXmlHeaderStart += '<CREAT_DATE>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</CREAT_DATE>'
 				Set @strXmlHeaderStart += '<CREATED_BY>'	+ ISNULL(@strCreatedByNo,'')		+ '</CREATED_BY>'
 				Set @strXmlHeaderStart += '<VENDOR>'		+ ISNULL(@strEntityNo,'')			+ '</VENDOR>'
 				Set @strXmlHeaderStart += '<PMNTTRMS>'		+ ISNULL(@strTerm,'')				+ '</PMNTTRMS>'
-				Set @strXmlHeaderStart += '<PURCH_ORG>'	+ '0380'							+ '</PURCH_ORG>'
-				Set @strXmlHeaderStart += '<PUR_GROUP>'	+ ISNULL(@strPurchasingGroup,'')	+ '</PUR_GROUP>'
+				Set @strXmlHeaderStart += '<PURCH_ORG>'		+ '0380'							+ '</PURCH_ORG>'
+				Set @strXmlHeaderStart += '<PUR_GROUP>'		+ ISNULL(@strPurchasingGroup,'')	+ '</PUR_GROUP>'
 				Set @strXmlHeaderStart += '<DOC_DATE>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</DOC_DATE>'
 				Set @strXmlHeaderStart += '<VPER_START>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmStartDate,112),'')	+ '</VPER_START>'
 				Set @strXmlHeaderStart += '<VPER_END>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmEndDate,112),'')	+ '</VPER_END>'
-				Set @strXmlHeaderStart += '<REF_1>'		+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
+				Set @strXmlHeaderStart += '<REF_1>'			+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
 				Set @strXmlHeaderStart += '<INCOTERMS1>'	+ ISNULL(@strContractBasis,'')		+ '</INCOTERMS1>'
 				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ ISNULL(@strContractBasisDesc,'')	+ '</INCOTERMS2>'
-				Set @strXmlHeaderStart += '<PO_NUMBER>'	+ ISNULL(@strERPPONumber,'')	+ '</PO_NUMBER>'
+				If UPPER(@strHeaderState)='MODIFIED'
+					Set @strXmlHeaderStart += '<PO_NUMBER>'	+ ISNULL(@strERPPONumber,'')	+ '</PO_NUMBER>'
 				Set @strXmlHeaderStart +=	'</E1BPMEPOHEADER>'
 
 				--HeaderX
 				Set @strXmlHeaderStart += '<E1BPMEPOHEADERX SEGMENT="1">'
-				Set @strXmlHeaderStart += '<COMP_CODE>'		+ 'X'	+ '</COMP_CODE>'			
-				If @strContractBasis IS NOT NULL OR @strSubLocation IS NOT NULL
+				If @strCompCode IS NOT NULL
+					Set @strXmlHeaderStart += '<COMP_CODE>'	+ 'X'	+ '</COMP_CODE>'			
+				If UPPER(@strHeaderState)='ADDED' AND @strDocType IS NOT NULL
 					Set @strXmlHeaderStart += '<DOC_TYPE>'		+ 'X'	+ '</DOC_TYPE>' 
+				If UPPER(@strHeaderState)='MODIFIED' AND (@strContractBasis IS NOT NULL OR @strSubLocation IS NOT NULL)
+					Set @strXmlHeaderStart += '<DOC_TYPE>'		+ 'X'	+ '</DOC_TYPE>'
 				If @dtmContractDate IS NOT NULL
 					Set @strXmlHeaderStart += '<CREAT_DATE>'	+ 'X'	+ '</CREAT_DATE>'
+				If @strCreatedByNo IS NOT NULL
+					Set @strXmlHeaderStart += '<CREATED_BY>'	+ 'X'	+ '</CREATED_BY>'
 				If @strEntityNo IS NOT NULL
 					Set @strXmlHeaderStart += '<VENDOR>'		+ 'X'	+ '</VENDOR>'
 				If @strTerm IS NOT NULL
@@ -625,156 +273,162 @@ Begin
 					Set @strXmlHeaderStart += '<INCOTERMS1>'	+ 'X'	+ '</INCOTERMS1>'
 				If @strContractBasisDesc IS NOT NULL
 					Set @strXmlHeaderStart += '<INCOTERMS2>'	+ 'X'	+ '</INCOTERMS2>'
-				Set @strXmlHeaderStart += '<PO_NUMBER>'		+ 'X'	+ '</PO_NUMBER>'
+				If UPPER(@strHeaderState)='MODIFIED'
+					Set @strXmlHeaderStart += '<PO_NUMBER>'	+ 'X'	+ '</PO_NUMBER>'
 				Set @strXmlHeaderStart +=	'</E1BPMEPOHEADERX>'
-			End
+		End
 		End
 
 		--Repeat Details
-		If UPPER(@strRowState)='ADDED'
-		Begin
-			--Item
-			Set @strXml += '<E1BPMEPOITEM SEGMENT="1">'
-			Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-			Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
-			Set @strXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
-			Set @strXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
-			Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractSeq),'')	+ '</TRACKINGNO>'
-			Set @strXml += '<QUANTITY>'		+ ISNULL(CONVERT(VARCHAR,@dblQuantity),'')		+ '</QUANTITY>'
-			Set @strXml += '<PO_UNIT>'		+ ISNULL(@strQuantityUOM,'')		+ '</PO_UNIT>'
-			Set @strXml += '<ORDERPR_UN>'	+ ISNULL(@strPriceUOM,'')			+ '</ORDERPR_UN>'
-			Set @strXml += '<NET_PRICE>'	+ ISNULL(CONVERT(VARCHAR,@dblCashPrice),'')	+ '</NET_PRICE>'
-			Set @strXml += '<PRICE_UNIT>'	+ ISNULL(CONVERT(VARCHAR,@dblUnitCashPrice * 1000),'')	+ '</PRICE_UNIT>'
-			Set @strXml += '<CONF_CTRL>'	+ 'SL08'							+ '</CONF_CTRL>'
-			Set @strXml += '<VEND_PART>'	+ ISNULL(CONVERT(VARCHAR,@strTerm),'')			+ '</VEND_PART>'
-			Set @strXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
-			If ISNULL(@dblCashPrice,0)=0
-				Set @strXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
-			Set @strXml +=	'</E1BPMEPOITEM>'
+		If UPPER(@strRowState)='ADDED' OR UPPER(@strRowState)='MODIFIED'
+			Begin
+				--Item
+				Set @strXml += '<E1BPMEPOITEM SEGMENT="1">'
+				Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
+				Set @strXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
+				Set @strXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
+				Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractDetailId),'')	+ '</TRACKINGNO>'
+				Set @strXml += '<QUANTITY>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'')		+ '</QUANTITY>'
+				Set @strXml += '<PO_UNIT>'		+ ISNULL(@strQuantityUOM,'')		+ '</PO_UNIT>'
+				Set @strXml += '<ORDERPR_UN>'	+ ISNULL(@strPriceUOM,'')			+ '</ORDERPR_UN>'
+				Set @strXml += '<NET_PRICE>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblUnitCashPrice * 1000)),'0.00')	+ '</NET_PRICE>'
+				Set @strXml += '<PRICE_UNIT>'	+ '1000'	+ '</PRICE_UNIT>'
+				If ISNULL(@dblCashPrice,0)=0
+					Set @strXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
+				Else
+					Set @strXml += '<FREE_ITEM>'	+ ''	+ '</FREE_ITEM>'
+				Set @strXml += '<CONF_CTRL>'	+ 'SL08'							+ '</CONF_CTRL>'
+				Set @strXml += '<VEND_PART>'	+ ISNULL(CONVERT(VARCHAR,@strTerm),'')			+ '</VEND_PART>'
+				Set @strXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
+				Set @strXml +=	'</E1BPMEPOITEM>'
 
-			--Schedule
-			Set @strXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
-			Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('00000' + CONVERT(VARCHAR,@intContractSeq),5),'')		+ '</PO_ITEM>'
-			Set @strXml += '<SCHED_LINE>'	+ ISNULL(RIGHT('00000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</SCHED_LINE>'
-			Set @strXml += '<DELIVERY_DATE>'+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')	+ '</DELIVERY_DATE>'
-			Set @strXml += '<QUANTITY>'		+ ISNULL(CONVERT(VARCHAR,@dblQuantity),'')										+ '</QUANTITY>'
-			Set @strXml += '</E1BPMEPOSCHEDULE>'
+				--ItemX
+				Set @strXml += '<E1BPMEPOITEMX SEGMENT="1">'
+				Set @strXml += '<PO_ITEM>'			+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				Set @strXml += '<PO_ITEMX>'		+ 'X'	+ '</PO_ITEMX>'
+				If @strItemNo IS NOT NULL
+					Set @strXml += '<MATERIAL>'		+ 'X'		+ '</MATERIAL>'
+				If @strSubLocation IS NOT NULL
+					Set @strXml += '<PLANT>'		+ 'X'		+ '</PLANT>'
+				If @strStorageLocation IS NOT NULL
+					Set @strXml += '<STGE_LOC>'		+ 'X'		+ '</STGE_LOC>'
+				Set @strXml += '<TRACKINGNO>'		+ 'X'	+ '</TRACKINGNO>'
+				If @dblQuantity IS NOT NULL
+					Set @strXml += '<QUANTITY>'		+ 'X'		+ '</QUANTITY>'
+				If @strQuantityUOM IS NOT NULL
+					Set @strXml += '<PO_UNIT>'		+ 'X'		+ '</PO_UNIT>'
+				If @strPriceUOM IS NOT NULL
+					Set @strXml += '<ORDERPR_UN>'	+ 'X'		+ '</ORDERPR_UN>'
+				If @dblCashPrice IS NOT NULL
+					Set @strXml += '<NET_PRICE>'	+ 'X'		+ '</NET_PRICE>'
+				If @dblUnitCashPrice IS NOT NULL
+					Set @strXml += '<PRICE_UNIT>'	+ 'X'		+ '</PRICE_UNIT>'
+				If ISNULL(@dblCashPrice,0)=0
+					Set @strXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
+				Set @strXml += '<CONF_CTRL>'		+ 'X'	+ '</CONF_CTRL>'
+				If @strTerm IS NOT NULL
+					Set @strXml += '<VEND_PART>'	+ 'X'		+ '</VEND_PART>'
+				Set @strXml += '<PO_PRICE>'			+ 'X'		+ '</PO_PRICE>'
+				Set @strXml +=	'</E1BPMEPOITEMX>'
 
-			--Basis Information
-			Set @strXml += '<E1BPMEPOCOND SEGMENT="1">'
-			Set @strXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
-			Set @strXml += '<COND_TYPE>'		+ 'ZDIF'		+ '</COND_TYPE>'
-			Set @strXml += '<COND_VALUE>'		+ ISNULL(CONVERT(VARCHAR,@dblBasis),'')	+ '</COND_VALUE>'
-			Set @strXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
-			Set @strXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
-			Set @strXml += '<COND_P_UNIT>'		+ ISNULL(CONVERT(VARCHAR,@dblUnitCashPrice * 100),'')	+ '</COND_P_UNIT>'
-			Set @strXml += '<CHANGE_ID>'		+ 'I'	+ '</CHANGE_ID>'
-			Set @strXml += '</E1BPMEPOCOND>'
-		End
+				--Schedule
+				Set @strXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
+				Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				Set @strXml += '<SCHED_LINE>'	+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</SCHED_LINE>'
+				Set @strXml += '<DELIVERY_DATE>'+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')	+ '</DELIVERY_DATE>'
+				Set @strXml += '<QUANTITY>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'')	+ '</QUANTITY>'
+				Set @strXml += '</E1BPMEPOSCHEDULE>'
 
-		If UPPER(@strRowState)='MODIFIED'
-		Begin
-			--Item
-			Set @strXml += '<E1BPMEPOITEM SEGMENT="1">'
-			Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-			Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
-			Set @strXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
-			Set @strXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
-			Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractSeq),'')	+ '</TRACKINGNO>'
-			Set @strXml += '<QUANTITY>'		+ ISNULL(CONVERT(VARCHAR,@dblQuantity),'')		+ '</QUANTITY>'
-			Set @strXml += '<PO_UNIT>'		+ ISNULL(@strQuantityUOM,'')		+ '</PO_UNIT>'
-			Set @strXml += '<ORDERPR_UN>'	+ ISNULL(@strPriceUOM,'')			+ '</ORDERPR_UN>'
-			Set @strXml += '<NET_PRICE>'	+ ISNULL(CONVERT(VARCHAR,@dblCashPrice),'')	+ '</NET_PRICE>'
-			Set @strXml += '<PRICE_UNIT>'	+ ISNULL(CONVERT(VARCHAR,@dblUnitCashPrice * 1000),'')	+ '</PRICE_UNIT>'
-			Set @strXml += '<CONF_CTRL>'	+ 'SL08'							+ '</CONF_CTRL>'
-			Set @strXml += '<VEND_PART>'	+ ISNULL(CONVERT(VARCHAR,@strTerm),'')			+ '</VEND_PART>'
-			Set @strXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
-			If @dblCashPrice=0
-				Set @strXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
-			Set @strXml +=	'</E1BPMEPOITEM>'
+				--ScheduleX
+				Set @strXml += '<E1BPMEPOSCHEDULX SEGMENT="1">'
+				Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				Set @strXml += '<SCHED_LINE>'	+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</SCHED_LINE>'
+				Set @strXml += '<PO_ITEMX>'		+ 'X'	+ '</PO_ITEMX>'
+				Set @strXml += '<SCHED_LINEX>'		+ 'X'	+ '</SCHED_LINEX>'
+				If @dtmPlannedAvailabilityDate IS NOT NULL
+					Set @strXml += '<DELIVERY_DATE>'+ 'X'	+ '</DELIVERY_DATE>'
+				If @dblQuantity IS NOT NULL
+					Set @strXml += '<QUANTITY>'		+ 'X'	+ '</QUANTITY>'
+				Set @strXml += '</E1BPMEPOSCHEDULX>'
 
-			--ItemX
-			Set @strXml += '<E1BPMEPOITEMX SEGMENT="1">'
-			Set @strXml += '<PO_ITEM>'			+ 'X'		+ '</PO_ITEM>'
-			If @strItemNo IS NOT NULL
-				Set @strXml += '<MATERIAL>'		+ 'X'		+ '</MATERIAL>'
-			If @strSubLocation IS NOT NULL
-				Set @strXml += '<PLANT>'		+ 'X'		+ '</PLANT>'
-			If @strStorageLocation IS NOT NULL
-				Set @strXml += '<STGE_LOC>'		+ 'X'		+ '</STGE_LOC>'
-			Set @strXml += '<TRACKINGNO>'		+ 'X'	+ '</TRACKINGNO>'
-			If @dblQuantity IS NOT NULL
-				Set @strXml += '<QUANTITY>'		+ 'X'		+ '</QUANTITY>'
-			If @strQuantityUOM IS NOT NULL
-				Set @strXml += '<PO_UNIT>'		+ 'X'		+ '</PO_UNIT>'
-			If @strPriceUOM IS NOT NULL
-				Set @strXml += '<ORDERPR_UN>'	+ 'X'		+ '</ORDERPR_UN>'
-			If @dblCashPrice IS NOT NULL
-				Set @strXml += '<NET_PRICE>'	+ 'X'		+ '</NET_PRICE>'
-			If @dblUnitCashPrice IS NOT NULL
-				Set @strXml += '<PRICE_UNIT>'	+ 'X'		+ '</PRICE_UNIT>'
-			Set @strXml += '<CONF_CTRL>'		+ 'X'	+ '</CONF_CTRL>'
-			If @strTerm IS NOT NULL
-				Set @strXml += '<VEND_PART>'	+ 'X'		+ '</VEND_PART>'
-			Set @strXml += '<PO_PRICE>'			+ 'X'		+ '</PO_PRICE>'
-			If ISNULL(@dblCashPrice,0)=0
-				Set @strXml += '<FREE_ITEM>'	+ 'X'		+ '</FREE_ITEM>'
-			Set @strXml +=	'</E1BPMEPOITEMX>'
+				--Basis Information
+				Set @strXml += '<E1BPMEPOCOND SEGMENT="1">'
+				Set @strXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
+				Set @strXml += '<COND_TYPE>'		+ 'ZDIF'		+ '</COND_TYPE>'
+				Set @strXml += '<COND_VALUE>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblBasis * 100)),'')	+ '</COND_VALUE>'
+				Set @strXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
+				Set @strXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
+				Set @strXml += '<COND_P_UNT>'		+ '100'	+ '</COND_P_UNT>'
+				Set @strXml += '<CHANGE_ID>'		+ 'U' + '</CHANGE_ID>'
+				Set @strXml += '</E1BPMEPOCOND>'
 
-			--Schedule
-			Set @strXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
-			Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('00000' + CONVERT(VARCHAR,@intContractSeq),5),'')		+ '</PO_ITEM>'
-			Set @strXml += '<SCHED_LINE>'	+ ISNULL(RIGHT('00000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</SCHED_LINE>'
-			Set @strXml += '<DELIVERY_DATE>'+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')	+ '</DELIVERY_DATE>'
-			Set @strXml += '<QUANTITY>'		+ ISNULL(CONVERT(VARCHAR,@dblQuantity),'')										+ '</QUANTITY>'
-			Set @strXml += '</E1BPMEPOSCHEDULE>'
+				--Basis InformationX
+				Set @strXml += '<E1BPMEPOCONDX SEGMENT="1">'
+				Set @strXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
+				Set @strXml += '<ITM_NUMBERX>'		+ 'X'		+ '</ITM_NUMBERX>'
+				Set @strXml += '<COND_TYPE>'		+ 'X'		+ '</COND_TYPE>'
+				If @dblBasis IS NOT NULL
+					Set @strXml += '<COND_VALUE>'	+ 'X'	+ '</COND_VALUE>'
+				If @strCurrency IS NOT NULL
+					Set @strXml += '<CURRENCY>'		+ 'X'		+ '</CURRENCY>'
+				If @strPriceUOM IS NOT NULL
+					Set @strXml += '<COND_UNIT>'	+ 'X'		+ '</COND_UNIT>'
+				If @dblUnitCashPrice IS NOT NULL
+					Set @strXml += '<COND_P_UNT>'	+ 'X'	+ '</COND_P_UNT>'
+				Set @strXml += '<CHANGE_ID>'		+ 'X'	+ '</CHANGE_ID>'
+				Set @strXml += '</E1BPMEPOCONDX>'
 
-			--ScheduleX
-			Set @strXml += '<E1BPMEPOSCHEDULEX SEGMENT="1">'
-			Set @strXml += '<PO_ITEM>'		+ 'X'		+ '</PO_ITEM>'
-			Set @strXml += '<SCHED_LINE>'	+ 'X'		+ '</SCHED_LINE>'
-			If @dtmPlannedAvailabilityDate IS NOT NULL
-				Set @strXml += '<DELIVERY_DATE>'+ 'X'	+ '</DELIVERY_DATE>'
-			If @dblQuantity IS NOT NULL
-				Set @strXml += '<QUANTITY>'		+ 'X'	+ '</QUANTITY>'
-			Set @strXml += '</E1BPMEPOSCHEDULEX>'
+				If UPPER(@strCommodityCode)='COFFEE'
+				Begin
+					--Origin (L16)
+					If ISNULL(@strOrigin,'')<>''
+					Begin
+						Set @strXml += '<E1BPMEPOTEXTHEADER>'
+						Set @strXml += '<TEXT_ID>' + 'L16' + '</TEXT_ID>' 
+						Set @strXml += '<TEXT_LINE>'  +  ISNULL(@strOrigin,'') + '</TEXT_LINE>' 
+						Set @strXml += '</E1BPMEPOTEXTHEADER>'
+					End
 
-			--Basis Information
-			Set @strXml += '<E1BPMEPOCOND SEGMENT="1">'
-			Set @strXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
-			Set @strXml += '<COND_TYPE>'		+ 'ZDIF'		+ '</COND_TYPE>'
-			Set @strXml += '<COND_VALUE>'		+ ISNULL(CONVERT(VARCHAR,@dblBasis),'')	+ '</COND_VALUE>'
-			Set @strXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
-			Set @strXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
-			Set @strXml += '<COND_P_UNIT>'		+ ISNULL(CONVERT(VARCHAR,@dblUnitCashPrice * 100),'')	+ '</COND_P_UNIT>'
-			Set @strXml += '<CHANGE_ID>'		+ 'U'	+ '</CHANGE_ID>'
-			Set @strXml += '</E1BPMEPOCOND>'
+					--Certificate (L15)
+					Select @strCertificates=COALESCE(@strCertificates, '') 
+						+ '<E1BPMEPOTEXTHEADER>'
+						+ '<TEXT_ID>' + 'L15' + '</TEXT_ID>' 
+						+ '<TEXT_LINE>'  +  ISNULL(strCertificationName,'') + '</TEXT_LINE>' 
+						+ '</E1BPMEPOTEXTHEADER>'
+					From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
+					Where cc.intContractDetailId=@intContractDetailId
 
-			--Basis Information
-			Set @strXml += '<E1BPMEPOCONDX SEGMENT="1">'
-			Set @strXml += '<ITM_NUMBER>'		+ 'X'		+ '</ITM_NUMBER>'
-			Set @strXml += '<COND_TYPE>'		+ 'X'		+ '</COND_TYPE>'
-			If @dblBasis IS NOT NULL
-				Set @strXml += '<COND_VALUE>'	+ 'X'	+ '</COND_VALUE>'
-			If @strCurrency IS NOT NULL
-				Set @strXml += '<CURRENCY>'		+ 'X'		+ '</CURRENCY>'
-			If @strPriceUOM IS NOT NULL
-				Set @strXml += '<COND_UNIT>'	+ 'X'		+ '</COND_UNIT>'
-			If @dblUnitCashPrice IS NOT NULL
-				Set @strXml += '<COND_P_UNIT>'	+ 'X'	+ '</COND_P_UNIT>'
-			Set @strXml += '<CHANGE_ID>'		+ 'X'	+ '</CHANGE_ID>'
-			Set @strXml += '</E1BPMEPOCONDX>'
-		End
+					Set @strCertificates=LTRIM(RTRIM(ISNULL(@strCertificates,'')))
+
+					If @strCertificates<>''
+						Set @strXml += ISNULL(@strCertificates,'')
+					Else
+					Begin --Set 0 (For No Certificate)
+						Set @strXml += '<E1BPMEPOTEXTHEADER>'
+						Set @strXml += '<TEXT_ID>'		+ 'L15' + '</TEXT_ID>' 
+						Set @strXml += '<TEXT_LINE>'	+  '0' + '</TEXT_LINE>' 
+						Set @strXml += '</E1BPMEPOTEXTHEADER>'
+					End
+				End
+			End
 
 		If UPPER(@strRowState)='DELETE'
 		Begin
 			--Item
 			Set @strXml += '<E1BPMEPOITEM SEGMENT="1">'
 			Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-			Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
-			Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractSeq),'')	+ '</TRACKINGNO>'
+			Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractDetailId),'')	+ '</TRACKINGNO>'
 			Set @strXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
 			Set @strXml +=	'</E1BPMEPOITEM>'
+
+			--ItemX
+			Set @strXml += '<E1BPMEPOITEMX SEGMENT="1">'
+			Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+			Set @strXml += '<PO_ITEMX>'		+ 'X'		+ '</PO_ITEMX>'
+			Set @strXml += '<TRACKINGNO>'	+ 'X'	+ '</TRACKINGNO>'
+			Set @strXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
+			Set @strXml +=	'</E1BPMEPOITEMX>'
 
 			--Schedule
 			Set @strXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
@@ -805,7 +459,10 @@ Begin
 			End
 		End
 
-		Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where intContractFeedId>@intMinSeq AND intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'')
+		If UPPER(@strCommodityCode)='COFFEE'
+			Set @intMinSeq=NULL
+		ELSE
+			Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where intContractFeedId>@intMinSeq AND intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'')
 						AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
 	End
 
@@ -813,7 +470,7 @@ Begin
 	Set @strXml = @strXmlHeaderStart + @strXml+ @strXmlHeaderEnd
 
 	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
-	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' WHEN UPPER(@strHeaderState)='MODIFIED' THEN 'UPDATE' END,@strXml)
+	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml)
 
 	Select @intMinRowNo=Min(intRowNo) From @tblHeader Where intRowNo>@intMinRowNo
 End --End Header Loop

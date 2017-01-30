@@ -28,6 +28,7 @@ Declare
 Declare @tblOutput AS Table
 (
 	intRowNo INT IDENTITY(1,1),
+	strStgMatchPnSId NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
 	strXml NVARCHAR(MAX)
 )
@@ -117,8 +118,8 @@ Begin
 		Set @strXml += '</IDOC>'
 		Set @strXml +=  '</ACC_DOCUMENT03>'
 
-		INSERT INTO @tblOutput(strRowState,strXml)
-		VALUES('CREATE',@strXml)
+		INSERT INTO @tblOutput(strStgMatchPnSId,strRowState,strXml)
+		VALUES(@intMinStageId,'CREATE',@strXml)
 	End
 	Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where intStgMatchPnSId>@intMinStageId
 End
