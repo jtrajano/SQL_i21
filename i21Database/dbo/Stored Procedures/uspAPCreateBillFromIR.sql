@@ -75,7 +75,8 @@ IF NOT EXISTS (
 			AND r.strReceiptType = 'inventory Return'			
 )
 BEGIN 
-	RAISERROR('All return item(s) already has a Debit Memo.', 16, 1);
+	-- Debit Memo is no longer needed. All items have Debit Memo.
+	RAISERROR(80110, 11, 1)  
 END
 
 --Make sure all items were not yet billed.
@@ -86,8 +87,8 @@ IF NOT EXISTS(
 	WHERE	r.dblOpenReceive <> r.dblBillQty
 )
 BEGIN
-	RAISERROR('All receipt item(s) already has a Voucher.', 16, 1);
-	--GOTO DONE
+	-- Voucher is no longer needed. All items have Voucher.
+	RAISERROR(80111, 11, 1)  
 END
 
 --removed first the constraint

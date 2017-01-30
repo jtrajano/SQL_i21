@@ -516,4 +516,10 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80109) EXEC sp_dropmessa
 SET @strmessage = 'Return is stopped. All the stocks %s from %s are already returned or over-return is going to happen.'
 EXEC sp_addmessage 80109,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80110) EXEC sp_dropmessage 80110, 'us_english'	
+SET @strmessage = 'Debit Memo is no longer needed. All items have Debit Memo.'
+EXEC sp_addmessage 80110,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80111) EXEC sp_dropmessage 80111, 'us_english'	
+SET @strmessage = 'Voucher is no longer needed. All items have Voucher.'
+EXEC sp_addmessage 80111,11,@strmessage,'us_english','False'
