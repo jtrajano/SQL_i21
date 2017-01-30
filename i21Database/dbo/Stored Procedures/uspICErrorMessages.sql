@@ -571,3 +571,27 @@ EXEC sp_addmessage 80122,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80123) EXEC sp_dropmessage 80123, 'us_english'	
 SET @strmessage = 'Lot ID %s is invalid for item %s.'
 EXEC sp_addmessage 80123,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80124) EXEC sp_dropmessage 80124, 'us_english'	
+SET @strmessage = '%s is not a valid Other Charge Item Id.'
+EXEC sp_addmessage 80124,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80125) EXEC sp_dropmessage 80125, 'us_english'	
+SET @strmessage = 'Cost Method for Other Charge item %s is invalid or missing.'
+EXEC sp_addmessage 80125,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80126) EXEC sp_dropmessage 80126, 'us_english'	
+SET @strmessage = 'Currency Id is invalid or missing for other charge item %s.'
+EXEC sp_addmessage 80126,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80127) EXEC sp_dropmessage 80127, 'us_english'	
+SET @strmessage = 'Vendor Id is invalid for other charge item %s.'
+EXEC sp_addmessage 80127,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80128) EXEC sp_dropmessage 80128, 'us_english'	
+SET @strmessage = 'Allocate Cost By is invalid or missing for other charge item %s.'
+EXEC sp_addmessage 80128,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80129) EXEC sp_dropmessage 80129, 'us_english'	
+SET @strmessage = 'Other Charge Item Id is required for other charges.'
+EXEC sp_addmessage 80129,11,@strmessage,'us_english','False'
