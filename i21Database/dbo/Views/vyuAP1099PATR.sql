@@ -36,7 +36,7 @@ AS
 									, B.strAddress
 									, B.strCity
 									, B.strState
-									, B.strZip
+									, +' ' + B.strZip
 									, B.strCountry
 									, B.strPhone)
 	, B.strCompanyName
