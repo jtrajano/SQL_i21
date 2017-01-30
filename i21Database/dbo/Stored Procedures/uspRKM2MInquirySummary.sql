@@ -186,7 +186,7 @@ BEGIN
 				,strCommodityCode
 				,sum((ISNULL(GrossPnL, 0) * (isnull(dbo.fnRKGetLatestClosingPrice(vp.intFutureMarketId, vp.intFutureMonthId, @dtmPriceDate), 0) - isnull(dblPrice, 0))) - isnull(dblFutCommission, 0)) pnl
 			FROM vyuRKUnrealizedPnL vp
-			WHERE intCommodityId = @intCommodityId1
+			WHERE intCommodityId = @intCommodityId1 and ysnExpired = 0
 			GROUP BY intCommodityId
 				,strCommodityCode
 			) t

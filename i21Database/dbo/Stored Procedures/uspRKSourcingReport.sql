@@ -39,11 +39,11 @@ SELECT e.strName,strContractNumber,
               join tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
               WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(2))-
               isnull((SELECT dblLineTotal
-					FROM tblICInventoryReturned r
-							JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
-							JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
-							JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
-					WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ),0))
+                            FROM tblICInventoryReturned r
+                                    JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
+                                    JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
+                                    JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
+                            WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ),0))
               as dblUnPriced
 
               ,(SELECT distinct
@@ -81,3 +81,15 @@ JOIN tblEMEntity e on e.intEntityId=ch.intEntityId
 WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate 
 )t)t1 group by t1.strName
 )t2
+
+
+
+
+
+
+
+
+
+
+
+
