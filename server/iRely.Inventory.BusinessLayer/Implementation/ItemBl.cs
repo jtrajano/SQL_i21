@@ -1035,7 +1035,7 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetItemOwner(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemOwner>()
-                .Filter(param, true);
+                .Filter(param, false);
 
             var data = await query.ExecuteProjection(param, "intItemOwnerId").ToListAsync();
 
