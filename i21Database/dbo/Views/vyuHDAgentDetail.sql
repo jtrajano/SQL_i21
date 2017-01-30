@@ -6,7 +6,9 @@
 		strFullName = en.strName,
 		strEmail = en.strEmail,
 		intEntityId = us.[intEntityUserSecurityId],
-		ysnDisabled = us.ysnDisabled
+		ysnDisabled = us.ysnDisabled,
+		strPhone = en.strPhone,
+		strMobile = en.strMobile
 	from
 		tblSMUserSecurity us
 		inner join vyuEMEntityContact en on en.intEntityId = us.[intEntityUserSecurityId] and en.ysnDefaultContact = 1
@@ -22,7 +24,9 @@
 		,strFullName = en.strName
 		,strEmail = en.strEmail
 		,intEntityId = us.intEntitySalespersonId
-		,ysnDisabled = (case when convert(bit, us.ysnActive) = 0 then convert(bit, 1) else convert(bit, 0) end)
+		,ysnDisabled = (case when convert(bit, us.ysnActive) = 0 then convert(bit, 1) else convert(bit, 0) end),
+		strPhone = en.strPhone,
+		strMobile = en.strMobile
 	from
 		tblARSalesperson us, [tblEMEntityToContact] etc, tblEMEntity en, [tblEMEntityCredential] ec
 	where
