@@ -3,6 +3,7 @@ CREATE PROCEDURE uspQMSampleContractCopy @intOldSampleId INT
 	,@intNewContractDetailId INT
 	,@dblNewRepresentingQuantity NUMERIC(18, 6)
 	,@intNewRepresentingUOMId INT
+	,@intUserId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -272,6 +273,20 @@ BEGIN TRY
 		,dtmLastModified
 	FROM tblQMTestResult
 	WHERE intSampleId = @intOldSampleId
+
+	IF (@intSampleId > 0)
+	BEGIN
+		DECLARE @StrDescription AS NVARCHAR(MAX) = 'Contract Slice to Quality'
+
+		EXEC uspSMAuditLog @keyValue = @intSampleId
+			,@screenName = 'Quality.view.QualitySample'
+			,@entityId = @intUserId
+			,@actionType = 'Created'
+			,@actionIcon = 'small-new-plus'
+			,@changeDescription = @StrDescription
+			,@fromValue = ''
+			,@toValue = @strSampleNumber
+	END
 END TRY
 
 BEGIN CATCH

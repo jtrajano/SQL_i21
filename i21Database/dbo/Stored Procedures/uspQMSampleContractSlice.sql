@@ -10,6 +10,7 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @strSampleNumber NVARCHAR(30)
+		,@strSampleId NVARCHAR(MAX)
 	DECLARE @intCRowNo INT
 		,@intCContractDetailId INT
 		,@intCParentDetailId INT
@@ -103,7 +104,29 @@ BEGIN TRY
 			UPDATE tblQMSample
 			SET dblRepresentingQty = @dblOrgQuantity
 				,intRepresentingUOMId = @intOrgUnitMeasureId
+				,intConcurrencyId = (intConcurrencyId + 1)
 			WHERE intSampleId = @intSSampleId
+
+			SELECT @strSampleId = CONVERT(NVARCHAR, @intSSampleId)
+
+			IF (LEN(@strSampleId) > 0)
+			BEGIN
+				DECLARE @strDetails NVARCHAR(MAX)
+				DECLARE @intUserId INT
+
+				SET @strDetails = '{"change":"dblRepresentingQty","iconCls":"small-gear","from":"' + LTRIM(@dblSRepresentingQty) + '","to":"' + LTRIM(@dblOrgQuantity) + '","leaf":true}'
+
+				SELECT @intUserId = intLastModifiedById
+				FROM tblCTContractDetail
+				WHERE intContractDetailId = @intOrgParentDetailId
+
+				EXEC uspSMAuditLog @keyValue = @strSampleId
+					,@screenName = 'Quality.view.QualitySample'
+					,@entityId = @intUserId
+					,@actionType = 'Updated'
+					,@actionIcon = 'small-tree-modified'
+					,@details = @strDetails
+			END
 
 			SET @dblSRepresentingQty = (@dblSRepresentingQty - @dblOrgQuantity)
 
@@ -137,6 +160,7 @@ BEGIN TRY
 					,@intNewContractDetailId = @intCContractDetailId
 					,@dblNewRepresentingQuantity = @dblNewRepresentingQty
 					,@intNewRepresentingUOMId = @intNewRepresentingUOMId
+					,@intUserId = @intUserId
 
 				SET @dblSRepresentingQty = (@dblSRepresentingQty - @dblNewRepresentingQty)
 
