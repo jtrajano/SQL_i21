@@ -1,13 +1,7 @@
 CREATE VIEW [dbo].[vyuICGetInventoryValuation]
 AS
 
-SELECT	-- Commented because ROW_NUMBER() will slow down huge set of data. 
-			--CASE 	WHEN t.intInventoryTransactionId IS NULL THEN 
-			--			CAST(ROW_NUMBER() OVER (ORDER BY t.intInventoryTransactionId) AS INT)
-			--		ELSE 
-			--			t.intInventoryTransactionId
-			--END
-		intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0) 
+SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0) 
 		,intInventoryTransactionId	= ISNULL(t.intInventoryTransactionId, 0) 
 		,i.intItemId
 		,strItemNo					= i.strItemNo
@@ -40,6 +34,7 @@ SELECT	-- Commented because ROW_NUMBER() will slow down huge set of data.
 		,strBOLNumber				= CAST (
 											CASE	ty.intTransactionTypeId 
 													WHEN 4 THEN receipt.strBillOfLading 
+													WHEN 42 THEN receipt.strBillOfLading 
 													WHEN 5 THEN shipment.strBOLNumber 
 													ELSE NULL 
 											END
@@ -86,7 +81,7 @@ FROM 	tblICItem i
 		LEFT JOIN tblICInventoryReceipt receipt 
 			ON receipt.intInventoryReceiptId = t.intTransactionId
 			AND receipt.strReceiptNumber = t.strTransactionId
-			AND ty.intTransactionTypeId = 4
+			AND ty.intTransactionTypeId IN (4, 42)
 		LEFT JOIN tblICInventoryShipment shipment 
 			ON shipment.intInventoryShipmentId = t.intTransactionId
 			AND shipment.strShipmentNumber = t.strTransactionId

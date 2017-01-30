@@ -177,7 +177,7 @@ USING	(
 		UNION ALL 
 		SELECT	id = 42
 				,name = 'Inventory Return'
-				,form = NULL 
+				,form = 'Inventory Receipt' 
 		UNION ALL 
 		SELECT	id = 43
 				,name = 'Inventory Adjustment - Ownership Change'
