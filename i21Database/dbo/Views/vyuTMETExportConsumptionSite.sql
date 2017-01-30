@@ -10,7 +10,7 @@ SELECT
 ,dmtsze = ISNULL(A.dblTotalCapacity,0)
 ,dmldd = ISNULL(A.intLastDeliveryDegreeDay,0)
 ,dmndd = ISNULL(A.intNextDeliveryDegreeDay,0)
-,ddytdg = ISNULL(A.dblYTDGalsThisSeason,0)
+,ddytdg = ISNULL(HH.dblTotalGallons,0.0)
 ,ddgal = ISNULL(A.dblLastDeliveredGal,0)
 ,ddming = ISNULL(A.dblLastGalsInTank,0)
 ,ddonhg = 0
@@ -104,5 +104,10 @@ LEFT JOIN (
 		AND A.intLocationId = F.intCompanyLocationId
 LEFT JOIN tblTMRoute G
 	ON A.intRouteId = G.intRouteId
+OUTER APPLY (
+	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+	WHERE intSiteId = A.intSiteID
+		AND intCurrentSeasonYear = intSeasonYear
+)HH
 WHERE C.ysnActive = 1 AND A.ysnActive = 1
 GO

@@ -56,7 +56,7 @@ SELECT
 	,strUserCreated = P.strUserName
 	,strSerialNumber = Q.strSerialNumber
 	,strTaxGroup = ISNULL(R.strTaxGroup,'')
-	,A.dblYTDGalsThisSeason
+	,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 	,ysnTaxable = ISNULL(A.ysnTaxable,0)
 	,strSiteDescription = ISNULL(A.strDescription,'')
 FROM tblTMSite A
@@ -108,4 +108,9 @@ LEFT JOIN (
 	AND Q.intCntId = 1
 LEFT JOIN tblSMTaxGroup R
 	ON A.intTaxStateID = R.intTaxGroupId
+OUTER APPLY (
+	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+	WHERE intSiteId = A.intSiteID
+		AND intCurrentSeasonYear = intSeasonYear
+)HH
 GO

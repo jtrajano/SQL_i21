@@ -71,7 +71,7 @@ BEGIN
 				,strUserCreated = P.strUserName
 				,strSerialNumber = Q.strSerialNumber
 				,strTaxGroup = ISNULL(R.vwlcl_tax_state, ISNULL(S.vwlcl_tax_state,''''))
-				,A.dblYTDGalsThisSeason
+				,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
 				,strSiteDescription = ISNULL(A.strDescription,'''')
 			FROM tblTMSite A
@@ -109,6 +109,11 @@ BEGIN
 				ON A.intTaxStateID = R.A4GLIdentity
 			LEFT JOIN vwlclmst S
 				ON C.intTaxId = S.A4GLIdentity
+			OUTER APPLY (
+				SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+				WHERE intSiteId = A.intSiteID
+					AND intCurrentSeasonYear = intSeasonYear
+			)HH
 		')
 	END
 	ELSE
@@ -173,7 +178,7 @@ BEGIN
 				,strUserCreated = P.strUserName
 				,strSerialNumber = Q.strSerialNumber
 				,strTaxGroup = ISNULL(R.strTaxGroup,'''')
-				,A.dblYTDGalsThisSeason
+				,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
 				,strSiteDescription = ISNULL(A.strDescription,'''')
 			FROM tblTMSite A
@@ -225,6 +230,11 @@ BEGIN
 				AND Q.intCntId = 1
 			LEFT JOIN tblSMTaxGroup R
 				ON A.intTaxStateID = R.intTaxGroupId
+			OUTER APPLY (
+				SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+				WHERE intSiteId = A.intSiteID
+					AND intCurrentSeasonYear = intSeasonYear
+			)HH
 		')
 	END
 END

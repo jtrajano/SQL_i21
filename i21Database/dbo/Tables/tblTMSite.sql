@@ -21,8 +21,6 @@
     [intDriverID]                 INT             DEFAULT 0 NULL,
     [strRouteId]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strSequenceID]               NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
-    [dblYTDGalsThisSeason]        NUMERIC (18, 6) DEFAULT 0 NULL,
-    [dblYTDGalsLastSeason]        NUMERIC (18, 6) DEFAULT 0 NULL,
     [dtmRunOutDate]               DATETIME        DEFAULT 0 NULL,
     [dblEstimatedPercentLeft]     NUMERIC (18, 6) DEFAULT 0 NULL,
     [dblConfidenceFactor]         NUMERIC (18, 6) DEFAULT 0 NULL,
@@ -35,7 +33,6 @@
     [dtmOnHoldStartDate]          DATETIME        DEFAULT 0 NULL,
     [dtmOnHoldEndDate]            DATETIME        DEFAULT 0 NULL,
     [ysnHoldDDCalculations]       BIT             DEFAULT 0 NULL,
-    [dblYTDSales]                 NUMERIC (18, 6) DEFAULT 0 NULL,
     [intUserID]                   INT             DEFAULT 0 NULL,
     [strBillingBy]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [dblPreviousBurnRate]         NUMERIC (18, 6) DEFAULT 0 NULL,
@@ -49,7 +46,6 @@
     [strCountry]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [intFillMethodId]             INT             DEFAULT 0 NULL,
     [intHoldReasonID]             INT             DEFAULT 0 NULL,
-    [dblYTDGals2SeasonsAgo]       NUMERIC (18, 6) DEFAULT 0 NULL,
     [intTaxLocale1]               INT             DEFAULT 0 NULL,
     [intTaxLocale2]               INT             DEFAULT 0 NULL,
     [ysnAllowPriceChange]         BIT             DEFAULT 0 NULL,
@@ -76,8 +72,6 @@
     [dtmForecastedDelivery]       DATETIME        NULL,
     [intParentSiteID]             INT             NULL,
     [intDeliveryTermID]           INT             NULL,
-    [dblYTDSalesLastSeason]       NUMERIC (18, 6) NULL,
-    [dblYTDSales2SeasonsAgo]      NUMERIC (18, 6) NULL,
     [intLocationId] INT NULL, 
     [intCompanyLocationPricingLevelId] INT NULL, 
     [intGlobalJulianCalendarId] INT NULL, 
@@ -293,23 +287,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strSequenceID'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'YTD Gallons This Season',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblTMSite',
-    @level2type = N'COLUMN',
-    @level2name = N'dblYTDGalsThisSeason'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'YTD Gallons Last Season',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblTMSite',
-    @level2type = N'COLUMN',
-    @level2name = N'dblYTDGalsLastSeason'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Run Out Date',
@@ -419,14 +399,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'ysnHoldDDCalculations'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'YTD Sales',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblTMSite',
-    @level2type = N'COLUMN',
-    @level2name = N'dblYTDSales'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'User ID',
@@ -545,14 +518,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intHoldReasonID'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'YTD Gallons 2 Seasons Ago',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblTMSite',
-    @level2type = N'COLUMN',
-    @level2name = N'dblYTDGals2SeasonsAgo'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Tax Locale 1',
@@ -788,23 +754,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intDeliveryTermID'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'YTD Sales Last Season',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblTMSite',
-    @level2type = N'COLUMN',
-    @level2name = N'dblYTDSalesLastSeason'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'YTD Sales Last 2 Season',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblTMSite',
-    @level2type = N'COLUMN',
-    @level2name = N'dblYTDSales2SeasonsAgo'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Location Id',

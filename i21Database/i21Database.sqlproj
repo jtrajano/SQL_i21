@@ -4919,6 +4919,8 @@
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
     <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql" />
+
+    <Build Include="dbo\Views\vyuTMSiteDeliveryHistoryTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

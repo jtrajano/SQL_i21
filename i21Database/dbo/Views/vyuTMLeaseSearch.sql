@@ -24,7 +24,7 @@ AS
 			,G.strSerialNumber
 			,dblLeaseAmount = J.dblAmount
 			,ysnLeaseTaxable = J.ysnTaxable
-			,dblTotalUsage = F.dblYTDGalsThisSeason
+			,dblTotalUsage = ISNULL(HH.dblTotalGallons,0.0)
 			,dblLeaseBillingMinimum = (SELECT TOP 1 dblMinimumUsage 
 												FROM tblTMLeaseMinimumUse 
 												WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 
@@ -64,4 +64,9 @@ AS
 			ON F.intCustomerID = K.intCustomerID 
 		LEFT JOIN tblEMEntity L
 			ON K.intCustomerNumber = L.intEntityId
+		OUTER APPLY (
+			SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+			WHERE intSiteId = F.intSiteID
+				AND intCurrentSeasonYear = intSeasonYear
+		)HH
 GO

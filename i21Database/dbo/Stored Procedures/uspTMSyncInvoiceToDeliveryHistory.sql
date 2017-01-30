@@ -285,15 +285,16 @@ BEGIN
 					---Update Site Info
 					IF(@strBillingBy <> 'Virtual Meter')
 					BEGIN
-						UPDATE tblTMSite
-						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal 
-							,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.0)
-						FROM(
-							SELECT dblQuantityTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - SUM(ISNULL(dblQtyShipped,0)) ELSE SUM(ISNULL(dblQtyShipped,0)) END
-								,dblSalesTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))) ELSE SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0)) END
-							FROM #tmpSiteInvoiceLineItems
-						)A
-						WHERE intSiteID = @intSiteId
+						--UPDATE tblTMSite
+						--SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal 
+						--	,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.0)
+						--FROM(
+						--	SELECT dblQuantityTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - SUM(ISNULL(dblQtyShipped,0)) ELSE SUM(ISNULL(dblQtyShipped,0)) END
+						--		,dblSalesTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))) ELSE SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0)) END
+						--	FROM #tmpSiteInvoiceLineItems
+						--)A
+						--WHERE intSiteID = @intSiteId
+						print 'Virtual Meter'
 					END
 					UPDATE tblTMSite
 					SET dtmLastReadingUpdate = @dtmInvoiceDate
@@ -459,16 +460,17 @@ BEGIN
 						-----Update Site
 						IF(@strBillingBy <> 'Virtual Meter')
 						BEGIN
-							UPDATE tblTMSite
-							SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
-								,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
-								,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-							FROM(
-								SELECT dblQuantityTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - SUM(ISNULL(dblQtyShipped,0)) ELSE dblQtyShipped END
-									,dblSalesTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))) ELSE SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0)) END
-								FROM #tmpSiteInvoiceLineItems
-							)A
-							WHERE intSiteID = @intSiteId
+							--UPDATE tblTMSite
+							--SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
+							--	,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
+							--	,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+							--FROM(
+							--	SELECT dblQuantityTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - SUM(ISNULL(dblQtyShipped,0)) ELSE dblQtyShipped END
+							--		,dblSalesTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))) ELSE SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0)) END
+							--	FROM #tmpSiteInvoiceLineItems
+							--)A
+							--WHERE intSiteID = @intSiteId
+							print 'Virtual Meter'
 						END
 					END
 					ELSE
@@ -624,19 +626,19 @@ BEGIN
 							
 						-----Update Site
 
-						IF(@strBillingBy <> 'Virtual Meter')
-						BEGIN
-							UPDATE tblTMSite
-							SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
-								,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
-								,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-							FROM(
-								SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
-									,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
-								FROM #tmpSiteInvoiceLineItems
-							)A
-							WHERE intSiteID = @intSiteId
-						END
+						--IF(@strBillingBy <> 'Virtual Meter')
+						--BEGIN
+						--	UPDATE tblTMSite
+						--	SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
+						--		,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
+						--		,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+						--	FROM(
+						--		SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
+						--			,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+						--		FROM #tmpSiteInvoiceLineItems
+						--	)A
+						--	WHERE intSiteID = @intSiteId
+						--END
 				
 					END
 				END
@@ -856,13 +858,13 @@ BEGIN
 					--SET dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
 					--WHERE intSiteID = @intSiteId
 
-					IF(@strBillingBy <> 'Virtual Meter')
-					BEGIN
-						UPDATE tblTMSite
-						SET	dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
-							,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
-						WHERE intSiteID = @intSiteId
-					END
+					--IF(@strBillingBy <> 'Virtual Meter')
+					--BEGIN
+					--	UPDATE tblTMSite
+					--	SET	dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
+					--		,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
+					--	WHERE intSiteID = @intSiteId
+					--END
 
 					
 					UPDATE tblTMSite
@@ -1164,11 +1166,11 @@ BEGIN
 			ON I.intEntitySalespersonId = C.intEntitySalespersonId
 
 		----Update Site Info
-		UPDATE tblTMSite
-		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - ISNULL(@dblQuantityShipped,0.0) ELSE ISNULL(@dblQuantityShipped,0.0) END
-			,dblYTDSales = ISNULL(dblYTDSales,0.0) + CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(@dblItemTotal,0.0) + ISNULL(@dblTotalTax,0.0)) ELSE ISNULL(@dblItemTotal,0.0) + ISNULL(@dblTotalTax,0.0) END
-			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-		WHERE intSiteID = @intSiteId
+		--UPDATE tblTMSite
+		--SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - ISNULL(@dblQuantityShipped,0.0) ELSE ISNULL(@dblQuantityShipped,0.0) END
+		--	,dblYTDSales = ISNULL(dblYTDSales,0.0) + CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(@dblItemTotal,0.0) + ISNULL(@dblTotalTax,0.0)) ELSE ISNULL(@dblItemTotal,0.0) + ISNULL(@dblTotalTax,0.0) END
+		--	,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+		--WHERE intSiteID = @intSiteId
 
 		EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
 

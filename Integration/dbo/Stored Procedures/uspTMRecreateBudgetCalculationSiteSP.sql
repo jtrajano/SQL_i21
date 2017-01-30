@@ -46,20 +46,20 @@ BEGIN
 					,intSiteNumber = A.intSiteNumber
 					,strSiteDescription  = A.strDescription
 					,strSiteAddress = A.strSiteAddress
-					,dblYTDGalsThisSeason = A.dblYTDGalsThisSeason
-					,dblYTDGalsLastSeason = A.dblYTDGalsLastSeason
-					,dblYTDGals2SeasonsAgo = A.dblYTDGals2SeasonsAgo
+					,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
+					,dblYTDGalsLastSeason = ISNULL(II.dblTotalGallons,0.0)
+					,dblYTDGals2SeasonsAgo = ISNULL(JJ.dblTotalGallons,0.0)
 					,dblSiteBurnRate = A.dblBurnRate
 					,dblSiteEstimatedGallonsLeft = A.dblEstimatedGallonsLeft
 					,dblSeasonExpectedUsage = CAST((F.intProjectedDegreeDay / A.dblBurnRate) AS NUMERIC(18,6))
 					,dblRequiredQuantity = CAST((CASE WHEN @strCalculateBudgetFor = ''Next Year'' AND @ysnIncludeEstimatedTankInventory = 1 
 													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - dblEstimatedGallonsLeft
 												WHEN @strCalculateBudgetFor = ''This Year'' AND @ysnIncludeEstimatedTankInventory = 1
-													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - (ISNULL(A.dblYTDGalsThisSeason,0.0) - A.dblEstimatedGallonsLeft)
+													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - (ISNULL(HH.dblTotalGallons,0.0) - A.dblEstimatedGallonsLeft)
 												WHEN @strCalculateBudgetFor = ''Next Year'' AND @ysnIncludeEstimatedTankInventory = 0
 													THEN (F.intProjectedDegreeDay / A.dblBurnRate)
 												WHEN @strCalculateBudgetFor = ''This Year'' AND @ysnIncludeEstimatedTankInventory = 0
-													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - ISNULL(A.dblYTDGalsThisSeason,0.0)
+													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - ISNULL(HH.dblTotalGallons,0.0)
 												ELSE 0
 												END) AS NUMERIC(18,6))
 					,dblCurrentARBalance = C.vwcus_balance
@@ -75,7 +75,7 @@ BEGIN
 					,intCustomerId = A.intCustomerID
 					,strItemNumber = RTRIM(E.vwitm_no) COLLATE Latin1_General_CI_AS 
 					,strItemClass = RTRIM(E.vwitm_class) COLLATE Latin1_General_CI_AS 
-					,dblDailyUse = (CASE WHEN G.strCurrentSeason = ''Winter'' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END)
+					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0.0) ELSE ISNULL(A.dblWinterDailyUse,0) END)
 				INTO #tmpStage1
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
@@ -90,6 +90,21 @@ BEGIN
 					ON A.intLocationId = D.A4GLIdentity
 				LEFT JOIN tblTMClock G
 					ON A.intClockID = G.intClockID
+				OUTER APPLY (
+					SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+					WHERE intSiteId = A.intSiteID
+						AND intCurrentSeasonYear = intSeasonYear
+				)HH
+				OUTER APPLY (
+					SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+					WHERE intSiteId = A.intSiteID
+						AND (intCurrentSeasonYear - 1) = intSeasonYear
+				)II
+				OUTER APPLY (
+					SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+					WHERE intSiteId = A.intSiteID
+						AND (intCurrentSeasonYear - 2) = intSeasonYear
+				)JJ
 	
 
 				IF OBJECT_ID(''tempdb..#tmpStage2'') IS NOT NULL 
@@ -192,20 +207,20 @@ BEGIN
 					,intSiteNumber = A.intSiteNumber
 					,strSiteDescription  = A.strDescription
 					,strSiteAddress = A.strSiteAddress
-					,dblYTDGalsThisSeason = A.dblYTDGalsThisSeason
-					,dblYTDGalsLastSeason = A.dblYTDGalsLastSeason
-					,dblYTDGals2SeasonsAgo = A.dblYTDGals2SeasonsAgo
+					,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
+					,dblYTDGalsLastSeason = ISNULL(II.dblTotalGallons,0.0)
+					,dblYTDGals2SeasonsAgo = ISNULL(JJ.dblTotalGallons,0.0)
 					,dblSiteBurnRate = A.dblBurnRate
 					,dblSiteEstimatedGallonsLeft = A.dblEstimatedGallonsLeft
 					,dblSeasonExpectedUsage = CAST((F.intProjectedDegreeDay / A.dblBurnRate) AS NUMERIC(18,6))
 					,dblRequiredQuantity = CAST((CASE WHEN @strCalculateBudgetFor = ''Next Year'' AND @ysnIncludeEstimatedTankInventory = 1 
 													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - dblEstimatedGallonsLeft
 												WHEN @strCalculateBudgetFor = ''This Year'' AND @ysnIncludeEstimatedTankInventory = 1
-													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - (ISNULL(A.dblYTDGalsThisSeason,0.0) - A.dblEstimatedGallonsLeft)
+													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - (ISNULL(HH.dblTotalGallons,0.0) - A.dblEstimatedGallonsLeft)
 												WHEN @strCalculateBudgetFor = ''Next Year'' AND @ysnIncludeEstimatedTankInventory = 0
 													THEN (F.intProjectedDegreeDay / A.dblBurnRate)
 												WHEN @strCalculateBudgetFor = ''This Year'' AND @ysnIncludeEstimatedTankInventory = 0
-													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - ISNULL(A.dblYTDGalsThisSeason,0.0)
+													THEN (F.intProjectedDegreeDay / A.dblBurnRate) - ISNULL(HH.dblTotalGallons,0.0)
 												ELSE 0
 												END) AS NUMERIC(18,6))
 					,dblCurrentARBalance = CAST((ISNULL(G.dbl10Days,0.0) + ISNULL(G.dbl30Days,0.0) + ISNULL(G.dbl60Days,0.0) + ISNULL(G.dbl90Days,0.0) + ISNULL(G.dbl91Days,0.0) + ISNULL(G.dblFuture,0.0) - ISNULL(G.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
@@ -219,7 +234,7 @@ BEGIN
 					--,dblPrice = 
 					--,dblEstimatedBudget = 
 					,intCustomerId = A.intCustomerID
-					,dblDailyUse = (CASE WHEN E.strCurrentSeason = ''Winter'' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END)
+					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0.0) ELSE ISNULL(A.dblWinterDailyUse,0) END)
 				INTO #tmpStage1
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
@@ -234,6 +249,21 @@ BEGIN
 					ON A.intLocationId = D.intCompanyLocationId
 				LEFT JOIN tblTMClock E
 					ON A.intClockID = E.intClockID
+				OUTER APPLY (
+					SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+					WHERE intSiteId = A.intSiteID
+						AND intCurrentSeasonYear = intSeasonYear
+				)HH
+				OUTER APPLY (
+					SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+					WHERE intSiteId = A.intSiteID
+						AND (intCurrentSeasonYear - 1) = intSeasonYear
+				)II
+				OUTER APPLY (
+					SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+					WHERE intSiteId = A.intSiteID
+						AND (intCurrentSeasonYear - 2) = intSeasonYear
+				)JJ
 
 				IF OBJECT_ID(''tempdb..#tmpStage2'') IS NOT NULL 
 				BEGIN DROP TABLE #tmpStage2 END

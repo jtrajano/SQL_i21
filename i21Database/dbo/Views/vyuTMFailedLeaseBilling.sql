@@ -18,7 +18,7 @@ SELECT
 	,strItemNumber = ISNULL(M.strItemNo,'')
 	,dblBillAmount = (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((SELECT TOP 1 ysnEnableLeaseBillingAboveMinUse FROM tblTMPreferenceCompany),0) = 1 
 							THEN 
-								(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND D.dblYTDGalsThisSeason > Z.dblMinimumUsage) > 0
+								(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(HH.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
 									THEN
 										0.0
 									ELSE
@@ -73,4 +73,9 @@ LEFT JOIN tblICItem M
 	ON G.intItemId = M.intItemId
 INNER JOIN tblTMCOBOLLeaseBilling O
 	ON O.intDeviceID =  B.intDeviceId
+OUTER APPLY (
+	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+	WHERE intSiteId = A.intSiteID
+		AND intCurrentSeasonYear = intSeasonYear
+)HH
 GO

@@ -65,12 +65,12 @@ SELECT
 	,ISNULL(A.intNextDeliveryDegreeDay,0) NextDeliveryDegreeDay
 	,ISNULL(A.dblEstimatedGallonsLeft,0) EstimatedGallonsLeft
 	,ISNULL(A.dblEstimatedPercentLeft,0) EstimatedPercentLeft
-	,ISNULL(A.dblYTDGalsThisSeason,0) YTDGallonsThisSeason
-	,ISNULL(A.dblYTDGalsLastSeason,0) YTDGallonsLastSeason
-	,ISNULL(A.dblYTDGals2SeasonsAgo,0) YTDGallons2SeasonsAgo
-	,ISNULL(A.dblYTDSales,0) YTDSalesThisSeason
-	,ISNULL(A.dblYTDSalesLastSeason,0) YTDSalesLastSeason
-	,ISNULL(A.dblYTDSales2SeasonsAgo,0) YTDSales2SeasonsAgo
+	,ISNULL(HH.dblTotalGallons,0) dblYTDGalsThisSeason
+	,ISNULL(II.dblTotalGallons,0) YTDGallonsLastSeason
+	,ISNULL(JJ.dblTotalGallons,0) YTDGallons2SeasonsAgo
+	,ISNULL(HH.dblTotalSales,0) YTDSalesThisSeason
+	,ISNULL(II.dblTotalSales,0) YTDSalesLastSeason
+	,ISNULL(JJ.dblTotalSales,0) YTDSales2SeasonsAgo
 	,ISNULL(CONVERT(VARCHAR(10),A.dtmRunOutDate , 101),'') RunOutDate
 	,ISNULL(CONVERT(VARCHAR(10),A.dtmForecastedDelivery , 101),'') ForecastedDeliveryDate
 	,ISNULL(J.strTankTownship,'') TankTownShip
@@ -144,4 +144,19 @@ LEFT JOIN tblTMTankTownship J
 	ON J.intTankTownshipId = A.intTankTownshipId
 LEFT JOIN tblTMRoute K
 	ON A.intRouteId = K.intRouteId
+OUTER APPLY (
+	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons), dblTotalSales = SUM(dblTotalSales) FROM vyuTMSiteDeliveryHistoryTotal 
+	WHERE intSiteId = A.intSiteID
+		AND intCurrentSeasonYear = intSeasonYear
+)HH
+OUTER APPLY (
+	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons), dblTotalSales = SUM(dblTotalSales) FROM vyuTMSiteDeliveryHistoryTotal 
+	WHERE intSiteId = A.intSiteID
+		AND (intCurrentSeasonYear - 1) = intSeasonYear
+)II
+OUTER APPLY (
+	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons), dblTotalSales = SUM(dblTotalSales) FROM vyuTMSiteDeliveryHistoryTotal 
+	WHERE intSiteId = A.intSiteID
+		AND (intCurrentSeasonYear - 2) = intSeasonYear
+)JJ
 WHERE C.ysnActive = 1 AND A.ysnActive =1
