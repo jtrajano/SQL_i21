@@ -29,9 +29,12 @@ LEFT OUTER JOIN (SELECT intEntityId, strName FROM tblEMEntity ) EM ON P.intEntit
 LEFT OUTER JOIN 
 	tblSMPaymentMethod PM 
 		ON P.intPaymentMethodId = PM.intPaymentMethodID
+INNER JOIN 
+	tblEMEntity E 
+		ON P.intEntityCustomerId = E.intEntityId
 LEFT OUTER JOIN 
-	(tblARCustomer C INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) 
-		ON C.intEntityCustomerId = P.intEntityCustomerId
+	tblARCustomer C 
+		ON E.intEntityId = C.intEntityCustomerId
 LEFT OUTER JOIN 
 	tblCMBankAccount BA 
 		ON P.intBankAccountId = BA.intBankAccountId

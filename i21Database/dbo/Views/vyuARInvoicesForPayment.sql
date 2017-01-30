@@ -40,6 +40,7 @@ SELECT
 	,[intTermBalanceDue]		= SMT.[intBalanceDue]
 	,[dtmTermDueDate]			= SMT.[dtmDueDate]
 	,[dblTermAPR]				= SMT.[dblAPR]
+	,[ysnExcludeForPayment]		= ARIFP.[ysnExcludeForPayment]
 FROM
 	(
 		SELECT 
@@ -72,6 +73,12 @@ FROM
 			,[strTicketNumbers]			= dbo.fnARGetScaleTicketNumbersFromInvoice(ARI.intInvoiceId)
 			,[strCustomerReferences]	= dbo.fnARGetCustomerReferencesFromInvoice(ARI.intInvoiceId)
 			,[intTermId]				= ARI.[intTermId]
+			,[ysnExcludeForPayment]		= (CASE WHEN ARI.strTransactionType = 'Customer Prepayment' AND (EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intInvoiceId = ARI.intInvoiceId AND (ISNULL(ysnRestricted, 0) = 1 OR ISNULL(intContractDetailId, 0) <> 0))) 
+												THEN CONVERT(BIT, 1)
+											WHEN ARI.strType = 'CF Tran'
+												THEN CONVERT(BIT, 1)
+											ELSE CONVERT(BIT, 0) 
+										 END)
 		FROM
 			[tblARInvoice] ARI
 		LEFT OUTER JOIN 
@@ -120,6 +127,7 @@ FROM
 			,[strTicketNumbers]			= ''
 			,[strCustomerReferences]	= ''
 			,[intTermId]				= APB.[intTermsId]
+			,[ysnExcludeForPayment]		= CONVERT(BIT, 0)
 		FROM
 			tblAPBill APB
 		INNER JOIN
