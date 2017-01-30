@@ -512,8 +512,8 @@ INSERT INTO @List(strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber
   round(dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblQuantity,0)) 
               / dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize),0) as dblNoOfLot,strItemName,dtmPeriod,
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblQuantity,0))  as dblQuantity,
-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblQuantity,0)) 
-              / dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize) as dblNoOfLot
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblQuantity,0)) 
+              / dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize),0) as dblNoOfLot
   FROM @DemandFinal cv  
   JOIN tblICCommodityUnitMeasure um on um.intCommodityId=@intCommodityId AND um.intUnitMeasureId=cv.intUOMId
   JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=@intFutureMarketId 
@@ -662,7 +662,7 @@ ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strF
 INSERT INTO @ListFinal
 SELECT
 intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
-    CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
+    abs(CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,abs(dblNoOfLot) dblNoOfLot, 
        dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
     WHERE PriceStatus='Unpriced - (Balance to be Priced)'
 ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC

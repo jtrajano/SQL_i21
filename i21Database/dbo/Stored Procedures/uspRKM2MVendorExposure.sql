@@ -9,7 +9,7 @@
                   @intCommodityId int=Null,
                   @intLocationId int= null,
                   @intMarketZoneId int= null,
-                             @ysnVendorProducer bit = null
+                  @ysnVendorProducer bit = null
 AS
 
 DECLARE @tblFinalDetail TABLE (
@@ -145,8 +145,8 @@ BEGIN
                                   JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
                                   JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
                                   JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
-                                                         JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
-                                  JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
+                                  LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
+                                  LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
 
                                   WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)'
                                   
@@ -243,5 +243,3 @@ BEGIN
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
        )t3
 END
-
-
