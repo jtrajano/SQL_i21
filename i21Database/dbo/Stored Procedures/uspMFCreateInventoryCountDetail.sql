@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspMFCreateInventoryCountDetail
 			@strInventoryCountNo NVARCHAR(50),
-			@strLotNumber NVARCHAR(500),
+			@intLotId INT,
 			@intUserSecurityId INT,
 			@dblPhysicalCount NUMERIC(18,6)
 AS
@@ -8,7 +8,7 @@ BEGIN
 	DECLARE @intLocationId INT
 	DECLARE @intSubLocationId INT
 	DECLARE @intStorageLocationId INT
-	DECLARE @intLotId INT
+	DECLARE @strLotNumber NVARCHAR(100)
 	DECLARE @dblLotQty NUMERIC(18,6)
 	DECLARE @dblLastCost NUMERIC(18,6)
 	DECLARE @intLotItemLocationId INT
@@ -24,14 +24,14 @@ BEGIN
 	WHERE strCountNo = @strInventoryCountNo
 
 	SELECT @intLotId = intLotId,
+		   @strLotNumber = strLotNumber,
 		   @dblLotQty = dblQty,
 		   @intLotItemLocationId = intItemLocationId,
 		   @intItemId = intItemId,
 		   @dblLastCost = dblLastCost,
 		   @intItemUOMId = intItemUOMId
 	FROM tblICLot
-	WHERE strLotNumber = @strLotNumber
-		AND intStorageLocationId = @intStorageLocationId
+	WHERE intLotId = @intLotId
 
 	IF NOT EXISTS (SELECT 1 FROM tblICInventoryCountDetail WHERE intLotId = @intLotId AND intInventoryCountId = @intInventoryCountId)
 	BEGIN
