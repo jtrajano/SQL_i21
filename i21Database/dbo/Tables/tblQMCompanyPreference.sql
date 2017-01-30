@@ -10,6 +10,7 @@
 	[ysnChangeLotStatusOnApproveforPreSanitizeLot] BIT NOT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnChangeLotStatusOnApproveforPreSanitizeLot] DEFAULT 0,
 	[ysnRejectLGContainer] BIT NOT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnRejectLGContainer] DEFAULT 1,
 	[intUserSampleApproval] INT,
+	ysnFilterContractByERPPONumber BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnFilterContractByERPPONumber] DEFAULT 0,
 
     CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intApproveLotStatus] FOREIGN KEY ([intApproveLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),

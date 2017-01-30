@@ -655,6 +655,12 @@ WHERE intUserSampleApproval IS NULL
 GO
 
 GO
+UPDATE tblQMCompanyPreference
+SET ysnFilterContractByERPPONumber = 0
+WHERE ysnFilterContractByERPPONumber IS NULL
+GO
+
+GO
 UPDATE tblQMReportProperty SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
 
