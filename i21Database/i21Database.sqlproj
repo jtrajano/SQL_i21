@@ -5052,6 +5052,7 @@
     </Build>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\00_Cleanup.sql" />
     <None Include="Scripts\Post-Deployment\MF\6_Dashboard.sql" />
+    <Build Include="dbo\Functions\fnEMGetEntityCompetitors.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
