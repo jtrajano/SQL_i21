@@ -150,7 +150,11 @@ GO
 IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 14)
 BEGIN
 	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
-	VALUES(14,'Customs Approval Sample','Customs Approval Sample')
+	VALUES(14,'Customs Approval','Customs Approval')
+END
+ELSE
+BEGIN -- Earlier Receipt Sample. Changing to Inbound Sample
+    UPDATE tblQMControlPoint SET strControlPointName = 'Customs Approval', strDescription = 'Customs Approval' WHERE intControlPointId = 14 AND strControlPointName = 'Customs Approval Sample'
 END
 GO
 -- Analysis Type
