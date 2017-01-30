@@ -3,6 +3,7 @@
 	[intLGLoadDetailLogId] INT IDENTITY(1,1) PRIMARY KEY,
 	[intLoadLogId] INT,
 	[intLoadId] INT,
+	[intSIDetailId] INT,
 	[intLoadDetailId] INT,
 	[intRowNumber] INT,
 	[strItemNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 

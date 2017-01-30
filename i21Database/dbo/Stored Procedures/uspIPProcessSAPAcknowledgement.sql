@@ -166,7 +166,7 @@ Begin
 			Update tblLGLoad  Set strExternalShipmentNumber=@strParam
 			Where intLoadId=@intLoadId
 
-			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='SUCCESS',strExternalDeliveryNumber=@strParam
+			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='SUCCESS',strExternalShipmentNumber=@strParam
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')=''
 
 			Insert Into @tblMessage(strMessageType,strMessage)

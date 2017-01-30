@@ -102,7 +102,7 @@ Begin
 		@strContractBasisDesc		=	strContractBasisDesc ,--INCOTERMS2
 		@strBillOfLading			=	strBillOfLading , 
 		@strShippingLine			=	strShippingLine , 
-		@strExternalDeliveryNumber	=	strExternalDeliveryNumber , 
+		@strExternalDeliveryNumber	=	strExternalShipmentNumber , 
 		@dtmScheduledDate			=   dtmScheduledDate,
 		@strHeaderRowState			=	strRowState ,
 		@strFeedStatus				=	strFeedStatus
@@ -240,7 +240,7 @@ Begin
 		@strContractBasisDesc		=	strContractBasisDesc ,--INCOTERMS2
 		@strBillOfLading			=	strBillOfLading , 
 		@strShippingLine			=	strShippingLine , 
-		@strExternalDeliveryNumber	=	strExternalDeliveryNumber , 
+		@strExternalDeliveryNumber	=	strExternalShipmentNumber, 
 		@dtmScheduledDate			=   dtmScheduledDate,
 		@strHeaderRowState			=	strRowState ,
 		@strFeedStatus				=	strFeedStatus

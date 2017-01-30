@@ -33,7 +33,7 @@ BEGIN TRY
 			,strContractBasisDesc
 			,strBillOfLading
 			,strShippingLine
-			,strExternalDeliveryNumber
+			,strExternalShipmentNumber
 			,strDateQualifier
 			,dtmScheduledDate
 			,strRowState
@@ -202,7 +202,7 @@ BEGIN TRY
 			,strContractBasisDesc
 			,strBillOfLading
 			,strShippingLine
-			,strExternalDeliveryNumber
+			,strExternalShipmentNumber
 			,strDateQualifier
 			,dtmScheduledDate
 			,strRowState
@@ -341,7 +341,7 @@ BEGIN TRY
 					ELSE CT.strContainerType
 					END
 				,'0002'
-				,L.strExternalShipmentNumber
+				,L.strExternalLoadNumber
 				,ROW_NUMBER() OVER (
 					PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
 					) AS Seq
