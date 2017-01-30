@@ -69,6 +69,7 @@ SELECT CD.intContractDetailId
 	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
 	,S.intCompanyLocationSubLocationId
 	,S.strSubLocationName
+	,S.dblRepresentingQty AS dblContainerQty
 	,intShipmentType = 1
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -102,6 +103,7 @@ LEFT JOIN (
 			,S.dtmTestingEndDate
 			,S.intCompanyLocationSubLocationId
 			,CLSL.strSubLocationName
+			,S.dblRepresentingQty
 		FROM tblQMSample S
 		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -201,6 +203,7 @@ SELECT CD.intContractDetailId
 	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
 	,S.intCompanyLocationSubLocationId
 	,S.strSubLocationName
+	,S.dblRepresentingQty AS dblContainerQty
 	,intShipmentType = 2
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -234,6 +237,7 @@ LEFT JOIN (
 			,S.dtmTestingEndDate
 			,S.intCompanyLocationSubLocationId
 			,CLSL.strSubLocationName
+			,S.dblRepresentingQty
 		FROM tblQMSample S
 		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -291,3 +295,4 @@ GROUP BY CD.intContractDetailId
 	,S.dtmTestingEndDate
 	,S.intCompanyLocationSubLocationId
 	,S.strSubLocationName
+	,S.dblRepresentingQty
