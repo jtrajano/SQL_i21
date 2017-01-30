@@ -131,6 +131,7 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
         var transactionType = null;
         switch (record.get('strTransactionType')) {
             case 'Inventory Receipt':
+            case 'Inventory Return':
                 transactionType = 'ReceiptNo';
                 break;
 
