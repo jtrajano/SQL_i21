@@ -172,7 +172,7 @@ BEGIN
 		IF RTRIM(LTRIM(LOWER(@valueReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order')
 			BEGIN
 				--Receipt Type is invalid or missing.
-				RAISERROR(80134, 11, 1);
+				RAISERROR(80108, 11, 1);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -187,7 +187,7 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @valueEntityId)
 			BEGIN
 				-- Vendor Id is invalid or missing.
-				RAISERROR(80135, 11, 1);
+				RAISERROR(80109, 11, 1);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -202,7 +202,7 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityLocation WHERE intEntityId = @valueEntityId AND intEntityLocationId = @valueShipFromId)
 			BEGIN
 				-- Ship From Id is invalid or missing.
-				RAISERROR(80136, 11, 1);
+				RAISERROR(80110, 11, 1);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -217,7 +217,7 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE intCompanyLocationId = @valueLocationId)
 			BEGIN
 				-- Location Id is invalid or missing.
-				RAISERROR(80137, 11, 1);
+				RAISERROR(80111, 11, 1);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -233,7 +233,7 @@ BEGIN
 		IF @valueShipViaId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE intEntityShipViaId = @valueShipViaId)
 			BEGIN
 				-- Ship Via Id {Ship Via Id} is invalid.
-				RAISERROR(80138, 11, 1, @valueShipViaId);
+				RAISERROR(80112, 11, 1, @valueShipViaId);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -578,7 +578,7 @@ BEGIN
 				GOTO _Exit;
 			END
 
-		-- Validate Item Location Id
+		/*-- Validate Item Location Id
 		DECLARE @valueItemLocationId INT = NULL
 				,@getItemId INT
 				,@getItem NVARCHAR(50)
@@ -609,10 +609,10 @@ BEGIN
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
-
+		*/
 		-- Validate Item UOM Id
-		SET @getItemId = NULL
-		SET @getItem = NULL
+		DECLARE @getItemId INT = NULL
+				,@getItem NVARCHAR(50) = NULL
 
 		SELECT TOP 1 @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData 
