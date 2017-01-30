@@ -38,6 +38,7 @@ BEGIN
 		,@intPatternId INT
 		,@dtmBusinessDate DATETIME
 		,@ysnPaddingZero BIT
+		,@ysnMaxSize BIT
 
 	IF @dtmDate IS NULL
 		SET @dtmCurrentDate = GetDate()
@@ -52,6 +53,7 @@ BEGIN
 		,strSubPatternTypeDetail NVARCHAR(MAX)
 		,strSubPatternFormat NVARCHAR(MAX)
 		,ysnPaddingZero bit
+		,ysnMaxSize BIT
 		)
 	DECLARE @tblMFRecord TABLE (strRecordName NVARCHAR(50))
 	DECLARE @tblMFFindPrimaryKeyColumn TABLE (
@@ -98,12 +100,14 @@ BEGIN
 		,strSubPatternTypeDetail
 		,strSubPatternFormat
 		,ysnPaddingZero
+		,ysnMaxSize
 		)
 	SELECT intSubPatternTypeId
 		,intSubPatternSize
 		,strSubPatternTypeDetail
 		,strSubPatternFormat
 		,ysnPaddingZero
+		,ysnMaxSize
 	FROM dbo.tblMFPatternDetail
 	WHERE intPatternId = @intPatternId
 	ORDER BY intOrdinalPosition
@@ -119,6 +123,7 @@ BEGIN
 			,@strSubPatternTypeDetail = strSubPatternTypeDetail
 			,@strSubPatternFormat = strSubPatternFormat
 			,@ysnPaddingZero=IsNULL(ysnPaddingZero,1)
+			,@ysnMaxSize = IsNULL(ysnMaxSize,1)
 		FROM @tblMFPatternDetail
 		WHERE intRecordId = @intRecordId
 
@@ -338,7 +343,7 @@ BEGIN
 						@intPatternId
 						,@strPatternString
 						,convert(INT, @strSequence)
-						,cast(REPLICATE('9', @intSubPatternSize) AS INT)
+						,CASE WHEN @ysnMaxSize = 1 THEN 2147483647 ELSE cast(REPLICATE('9', @intSubPatternSize) AS INT) END
 						,0
 						)
 				END
@@ -358,7 +363,7 @@ BEGIN
 				BEGIN
 					UPDATE dbo.tblMFPatternSequence
 					SET intSequenceNo = convert(INT, @strSequence)
-						,intMaximumSequence = cast(REPLICATE('9', @intSubPatternSize) AS INT)
+						,intMaximumSequence = CASE WHEN @ysnMaxSize = 1 THEN 2147483647 ELSE cast(REPLICATE('9', @intSubPatternSize) AS INT) END
 					WHERE intPatternId = @intPatternId
 						AND strPatternSequence = @strPatternString
 				END
