@@ -39,27 +39,21 @@ BEGIN
 			, @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
 	FROM	coctlmst		
 
-	IF(@Checking = 0) 
-	BEGIN	
-		--1 Time synchronization here
-		PRINT '1 Time Invoice Synchronization'
+	IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agphsmst')
+		EXEC uspICImportInventoryReceiptsAG
+			@Checking 
+			,@EntityId 
+			,@Total OUTPUT
+			,@StartDate 
+			,@EndDate
 
-		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agphsmst')
-			EXEC uspICImportInventoryReceiptsAG
-				@Checking 
-				,@EntityId 
-				,@Total OUTPUT
-				,@StartDate 
-				,@EndDate
-
-		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptphsmst')
-			EXEC uspICImportInventoryReceiptsPT
-				@Checking 
-				,@EntityId 
-				,@Total OUTPUT
-				,@StartDate 
-				,@EndDate
-	END
+	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptphsmst')
+		EXEC uspICImportInventoryReceiptsPT
+			@Checking 
+			,@EntityId 
+			,@Total OUTPUT
+			,@StartDate 
+			,@EndDate
 				 			
 	IF  EXISTS (SELECT * FROM sys.triggers WHERE object_id = OBJECT_ID(N'[dbo].[trgReceiptNumber]'))
 		DROP TRIGGER [dbo].trgReceiptNumber		  		
