@@ -5,8 +5,8 @@
         @intFutureMonthId INTEGER,  
         @intUOMId INTEGER,  
         @intDecimal INTEGER,
-		@intForecastWeeklyConsumption INTEGER = null,
-		@intForecastWeeklyConsumptionUOMId INTEGER = null   
+              @intForecastWeeklyConsumption INTEGER = null,
+              @intForecastWeeklyConsumptionUOMId INTEGER = null   
 AS  
 
 DECLARE @strUnitMeasure nvarchar(50)  
@@ -30,7 +30,7 @@ SELECT @dblForecastWeeklyConsumption=isnull(dbo.fnCTConvertQuantityToTargetCommo
 
 DECLARE @List as Table (  
      intRowNumber int identity(1,1),
-	 strGroup nvarchar(200) COLLATE Latin1_General_CI_AS,  
+       strGroup nvarchar(200) COLLATE Latin1_General_CI_AS,  
      Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
      PriceStatus  nvarchar(50) COLLATE Latin1_General_CI_AS,  
      strFutureMonth  nvarchar(20) COLLATE Latin1_General_CI_AS,  
@@ -54,9 +54,9 @@ SELECT 'Outright Coverage',Selection,PriceStatus,strFutureMonth,strAccountNumber
  
 SELECT * FROM(  
   SELECT  DISTINCT CASE WHEN @strRiskView='Processor' then 'Physical position / Differential cover' ELSE 'Physical position / Basis risk' END AS Selection,
-			'Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
+                     'Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,
- (SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, 
+(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, 
  CASE WHEN @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)end) from vyuRKGetInventoryAdjustQty aq where aq.intContractDetailId=cv.intContractDetailId) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,-dblNoOfLots as dblNoOfLot,
@@ -166,11 +166,11 @@ FROM (
        ,intContractHeaderId,intFutOptTransactionHeaderId 
        FROM (
               SELECT DISTINCT 'Terminal position ( in ' + @strUnitMeasure + ' )' AS Selection, 'Broker Account' AS PriceStatus, 
-			  strFutureMonth, e.strName + '-' + strAccountNumber AS strAccountNumber, 
-			  CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END AS dblNoOfContract, ft.strInternalTradeNo AS strTradeNo, 
-			  ft.dtmTransactionDate AS TransactionDate, strBuySell AS TranType, e.strName AS CustVendor, 
-			  CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END AS dblNoOfLot, 
-			  CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract * @dblContractSize) ELSE - (ft.intNoOfContract * @dblContractSize) END dblQuantity, um.intCommodityUnitMeasureId
+                       strFutureMonth, e.strName + '-' + strAccountNumber AS strAccountNumber, 
+                       CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END AS dblNoOfContract, ft.strInternalTradeNo AS strTradeNo, 
+                       ft.dtmTransactionDate AS TransactionDate, strBuySell AS TranType, e.strName AS CustVendor, 
+                       CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END AS dblNoOfLot, 
+                       CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract * @dblContractSize) ELSE - (ft.intNoOfContract * @dblContractSize) END dblQuantity, um.intCommodityUnitMeasureId
               , null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
               FROM tblRKFutOptTransaction ft
               INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
@@ -180,9 +180,33 @@ FROM (
               LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
               WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
               ) t
-			  )t1
+                       )t1
 UNION
   
+  SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,  
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intUOMId,(dblNoOfContract))*@dblContractSize as dblNoOfContract,  
+  strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intUOMId,dblQuantity) dblQuantity
+  ,intContractHeaderId,intFutOptTransactionHeaderId  from  
+(  
+SELECT DISTINCT 'Terminal position ( in '+ @strUnitMeasure +' )' as Selection,'Terminal position ( in '+ @strUnitMeasure +' )' as PriceStatus,  
+  strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
+  ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
+  case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
+  case when ft.strBuySell='Buy' then (ft.intNoOfContract*@dblContractSize) else -(ft.intNoOfContract*@dblContractSize) end dblQuantity,um.intCommodityUnitMeasureId  
+  , null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
+FROM tblRKFutOptTransaction ft  
+JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
+JOIN tblEMEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId = 1  
+JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
+JOIN tblRKFutureMarket mar on mar.intFutureMarketId=ft.intFutureMarketId
+LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=ft.intCommodityId and um.intUnitMeasureId=mar.intUnitMeasureId
+WHERE  ft.intCommodityId=@intCommodityId AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end AND ft.intFutureMarketId=@intFutureMarketId   
+AND dtmFutureMonthsDate >= @dtmFutureMonthsDate  
+)t  
+
+
+UNION
+
 SELECT * FROM(  
   SELECT DISTINCT 'Total speciality delta fixed' as Selection,'Delta %' as PriceStatus,cv.strFutureMonth,    
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
@@ -214,10 +238,10 @@ BEGIN
 INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,TransactionDate,dblQuantity,TranType) 
 
 SELECT CASE WHEN @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,
-		'a. Unpriced - (Balance to be Priced)' as PriceStatus,@strParamFutureMonth strFutureMonth ,
-		strAccountNumber,sum(dblNoOfLot) dblNoOfLot,getdate() TransactionDate,sum(dblNoOfLot) dblQuantity,'Inventory' TranType
+              'a. Unpriced - (Balance to be Priced)' as PriceStatus,@strParamFutureMonth strFutureMonth ,
+              strAccountNumber,sum(dblNoOfLot) dblNoOfLot,getdate() TransactionDate,sum(dblNoOfLot) dblQuantity,'Inventory' TranType
 FROM (
-  SELECT 	
+  SELECT      
   'Purchase'+' - '+isnull(ca.strDescription,'') as strAccountNumber,
   iis.dblUnitOnHand dblNoOfLot
   FROM tblICItem ic 
@@ -261,11 +285,11 @@ GROUP BY Selection,PriceStatus,strAccountNumber,strFutureMonth,strTradeNo, Trans
 -----Outright coverage (Weeks) ------------
 if (@strRiskView = 'Processor')
 BEGIN
-	INSERT INTO @List(strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
-	SELECT 'Outright Coverage','Outright coverage(Weeks)' AS Selection,'Outright coverage(Weeks)' as PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract)/@dblForecastWeeklyConsumption,strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
-			,intContractHeaderId,intFutOptTransactionHeaderId FROM @List 
-	WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
-	GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
+       INSERT INTO @List(strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
+       SELECT 'Outright Coverage','Outright coverage(Weeks)' AS Selection,'Outright coverage(Weeks)' as PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract)/@dblForecastWeeklyConsumption,strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
+                     ,intContractHeaderId,intFutOptTransactionHeaderId FROM @List 
+       WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
+       GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
 END
 
 --- second part
@@ -369,10 +393,10 @@ SELECT * FROM(
         LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  
         LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId and um.intUnitMeasureId=cv.intUnitMeasureId  
   WHERE fm.ysnExpired=0 and strContractType='sale' AND intPricingTypeId <> 1   
-		AND cv.intCommodityId=@intCommodityId 
-		AND cv.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cv.intCompanyLocationId else @intCompanyLocationId end
-		AND cv.intFutureMarketId=@intFutureMarketId   
-		AND dtmFutureMonthsDate >= @dtmFutureMonthsDate  
+              AND cv.intCommodityId=@intCommodityId 
+              AND cv.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cv.intCompanyLocationId else @intCompanyLocationId end
+              AND cv.intFutureMarketId=@intFutureMarketId   
+              AND dtmFutureMonthsDate >= @dtmFutureMonthsDate  
 
 union
 SELECT DISTINCT Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
@@ -398,25 +422,25 @@ SELECT DISTINCT Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' as strAccoun
 
 if (@strRiskView = 'Processor')
 BEGIN
-	DECLARE @DemandFinal1 as Table (  
+       DECLARE @DemandFinal1 as Table (  
      dblQuantity  numeric(24,10),  
      intUOMId  int,    
      strPeriod  nvarchar(200),
-	 strItemName nvarchar(200),
-	 dtmPeriod datetime,
-	 intItemId int,
-	 strDescription nvarchar(200)
+       strItemName nvarchar(200),
+       dtmPeriod datetime,
+       intItemId int,
+       strDescription nvarchar(200)
      )
 
-	 DECLARE @DemandQty as Table (  
+       DECLARE @DemandQty as Table (  
      intRowNumber int identity(1,1),  
      dblQuantity  numeric(24,10),  
      intUOMId  int,  
      dtmPeriod  datetime,  
      strPeriod  nvarchar(200),
-	 strItemName nvarchar(200),
-	 intItemId int,
-	 strDescription nvarchar(200)
+       strItemName nvarchar(200),
+       intItemId int,
+       strDescription nvarchar(200)
      )  
 
 DECLARE @DemandFinal as Table (  
@@ -425,9 +449,9 @@ DECLARE @DemandFinal as Table (
      intUOMId  int,  
      dtmPeriod  datetime,  
      strPeriod  nvarchar(200),
-	 strItemName nvarchar(200),
-	 intItemId int,
-	 strDescription nvarchar(200)
+       strItemName nvarchar(200),
+       intItemId int,
+       strDescription nvarchar(200)
      )
 
 INSERT INTO @DemandQty
@@ -435,7 +459,7 @@ SELECT dblQuantity,d.intUOMId,CONVERT(DATETIME,'01 '+strPeriod) dtmPeriod,strPer
 join tblICItem i on i.intItemId=d.intItemId
 JOIN tblICCommodityAttribute c on c.intCommodityId = i.intCommodityId
 JOIN tblRKCommodityMarketMapping m on m.intCommodityId=c.intCommodityId and   intProductTypeId=intCommodityAttributeId
-			AND intCommodityAttributeId in (select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
+                     AND intCommodityAttributeId in (select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=m.intFutureMarketId
 WHERE m.intCommodityId=@intCommodityId and fm.intFutureMarketId =@intFutureMarketId
 
@@ -462,17 +486,17 @@ WHERE @dtmPeriod1=CONVERT(DATETIME,'01 '+strFutureMonth)
 AND fm.intFutureMarketId = @intFutureMarketId and mm.intCommodityId=@intCommodityId
 
 IF @strFutureMonth1 IS NULL
-	--SELECT @strFutureMonth1=strFutureMonth FROM tblRKFuturesMonth where @dtmPeriod1<CONVERT(DATETIME,'01 '+strFutureMonth)
+       --SELECT @strFutureMonth1=strFutureMonth FROM tblRKFuturesMonth where @dtmPeriod1<CONVERT(DATETIME,'01 '+strFutureMonth)
 
-		SELECT top 1 @strFutureMonth1=strFutureMonth FROM tblRKFuturesMonth fm
-		JOIN tblRKCommodityMarketMapping mm on mm.intFutureMarketId= fm.intFutureMarketId 
-		WHERE  CONVERT(DATETIME,'01 '+strFutureMonth) > @dtmPeriod1  
-		AND fm.intFutureMarketId = @intFutureMarketId and mm.intCommodityId=@intCommodityId
-		order by CONVERT(DATETIME,'01 '+strFutureMonth) 
+              SELECT top 1 @strFutureMonth1=strFutureMonth FROM tblRKFuturesMonth fm
+              JOIN tblRKCommodityMarketMapping mm on mm.intFutureMarketId= fm.intFutureMarketId 
+              WHERE  CONVERT(DATETIME,'01 '+strFutureMonth) > @dtmPeriod1  
+              AND fm.intFutureMarketId = @intFutureMarketId and mm.intCommodityId=@intCommodityId
+              order by CONVERT(DATETIME,'01 '+strFutureMonth) 
 
 
-	INSERT INTO @DemandFinal1(dblQuantity,intUOMId,strPeriod,strItemName,intItemId,strDescription)
-	SELECT @dblQuantity,@intUOMId1,@strFutureMonth1,@strItemName,@intItemId,@strDescription
+       INSERT INTO @DemandFinal1(dblQuantity,intUOMId,strPeriod,strItemName,intItemId,strDescription)
+       SELECT @dblQuantity,@intUOMId1,@strFutureMonth1,@strItemName,@intItemId,@strDescription
 
 SELECT @intRowNumber= min(intRowNumber) FROM @DemandQty WHERE intRowNumber > @intRowNumber
 END
@@ -484,12 +508,12 @@ GROUP BY intUOMId, strPeriod,strItemName,intItemId,strDescription ORDER BY CONVE
 
 INSERT INTO @List(strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,dblQuantity,dblNoOfLot)  
  SELECT  DISTINCT 'Futures Required',case when @strRiskView='Processor' then 'To Purchase' else 'To Purchase' end as Selection,
- 'To Purchase' as PriceStatus,strPeriod as strFutureMonth,strDescription as strAccountNumber,  
+'To Purchase' as PriceStatus,strPeriod as strFutureMonth,strDescription as strAccountNumber,  
   round(dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblQuantity,0)) 
-		/ dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize),0) as dblNoOfLot,strItemName,dtmPeriod,
+              / dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize),0) as dblNoOfLot,strItemName,dtmPeriod,
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblQuantity,0))  as dblQuantity,
-	dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblQuantity,0)) 
-		/ dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize) as dblNoOfLot
+dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblQuantity,0)) 
+              / dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize) as dblNoOfLot
   FROM @DemandFinal cv  
   JOIN tblICCommodityUnitMeasure um on um.intCommodityId=@intCommodityId AND um.intUnitMeasureId=cv.intUOMId
   JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=@intFutureMarketId 
@@ -532,27 +556,27 @@ FROM(
          SELECT  CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
                          ,CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,(dblNoOfLot) dblNoOfContract,
                          strTradeNo, TransactionDate,TranType,CustVendor,(dblNoOfLot) dblNoOfLot, (dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId
-						 ,0 as dblUnPricedNoOfLot,0 as dblNetNetLot   
+                                         ,0 as dblUnPricedNoOfLot,0 as dblNetNetLot   
            FROM @List WHERE Selection = 'Terminal position ( in lots )'
-	   
-		UNION  
-	    SELECT  CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,
-					case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
+          
+              UNION  
+           SELECT  CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,
+                                  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
                      ,CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,dblNoOfLot dblNoOfContract,
                      strTradeNo, TransactionDate,TranType,CustVendor,(dblNoOfLot) dblNoOfLot, (dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId   
-					 ,abs(dblNoOfLot) dblUnPricedNoOfLot,0 as dblNetNetLot
+                                   ,abs(dblNoOfLot) dblUnPricedNoOfLot,0 as dblNetNetLot
        FROM @List WHERE Selection=case when @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end
            and PriceStatus = 'Unpriced - (Balance to be Priced)' and strAccountNumber like '%Purchase%'
 
-	   UNION
-	      SELECT  CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
-	                    ,CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,dblNoOfLot dblNoOfContract,
+          UNION
+             SELECT  CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
+                           ,CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,dblNoOfLot dblNoOfContract,
                         strTradeNo, TransactionDate,TranType,CustVendor,(dblNoOfLot) dblNoOfLot, (dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId
-						,0 as dblUnPricedNoOfLot, dblNoOfLot dblNetNetLot   
-          FROM @List WHERE Selection =  'To Purchase'	
-	)t 
+                                         ,0 as dblUnPricedNoOfLot, dblNoOfLot dblNetNetLot   
+          FROM @List WHERE Selection =  'To Purchase'  
+       )t 
 END
-	   
+          
 END
 
 SELECT TOP 1 @strFutureMonth=strFutureMonth FROM @List where  strFutureMonth<>'Previous' order by convert(datetime,'01 '+strFutureMonth) asc
@@ -572,12 +596,12 @@ IF NOT EXISTS ( SELECT *
        and intFutOptTransactionId not in(select intFutOptTransactionId from tblRKOptionsPnSExpired))
        BEGIN
               DELETE FROM @List where Selection like '%F&O%'
-       END	    
+       END        
 
 DECLARE @ListFinal as Table (  
      intRowNumber1 int identity(1,1),  
-	 intRowNumber int,
-	 strGroup nvarchar(200) COLLATE Latin1_General_CI_AS,
+        intRowNumber int,
+       strGroup nvarchar(200) COLLATE Latin1_General_CI_AS,
      Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
      PriceStatus  nvarchar(50) COLLATE Latin1_General_CI_AS,  
      strFutureMonth  nvarchar(20) COLLATE Latin1_General_CI_AS,  
@@ -598,65 +622,77 @@ INSERT INTO @ListFinal
 SELECT
 intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
     WHERE PriceStatus='Priced / Outright - (Outright position)'
- ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
 
 INSERT INTO @ListFinal
 SELECT
 intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+    WHERE Selection='Terminal position ( in '+ @strUnitMeasure +' )'  and  PriceStatus= 'Terminal position ( in '+ @strUnitMeasure +' )' and strGroup='Outright Coverage'
+ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+
+INSERT INTO @ListFinal
+SELECT
+intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
+    CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
     WHERE Selection='Total F&O( in ' + @strUnitMeasure + ' )'  and  PriceStatus= 'F&O'
- ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
 
 INSERT INTO @ListFinal
 SELECT
 intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
     WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END 
-		and PriceStatus = CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
- ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+              and PriceStatus = CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
+ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
 
 INSERT INTO @ListFinal
 SELECT
 intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
     WHERE PriceStatus='Outright coverage(Weeks)'
- ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
 
 INSERT INTO @ListFinal
 SELECT
 intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
     WHERE PriceStatus='Unpriced - (Balance to be Priced)'
- ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+
+INSERT INTO @ListFinal
+SELECT
+intRowNumber,strGroup, Selection,'Terminal position ( in lots )' PriceStatus,strFutureMonth,strAccountNumber,  
+    CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+    WHERE Selection='Terminal position ( in lots )' and PriceStatus='F&O'  
+ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
 
 INSERT INTO @ListFinal
 SELECT
 intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
-    WHERE Selection='Terminal position ( in lots )' and PriceStatus='F&O'
- ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
-
-INSERT INTO @ListFinal
-SELECT
-intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
-    CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
     WHERE PriceStatus='To Purchase'
- ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
 
 INSERT INTO @ListFinal
 SELECT
 intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
     WHERE PriceStatus=case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end 
  ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
- select intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber, CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-	dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId  from @ListFinal 
+select intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber, CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
+       dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId  from @ListFinal  where dblQuantity >0
+
+
+
+

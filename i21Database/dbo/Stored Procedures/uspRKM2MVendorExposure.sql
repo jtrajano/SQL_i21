@@ -121,13 +121,13 @@ BEGIN
                                   
                                   SELECT fd.strEntityName,fd.dblOpenQty as dblOpenQty,
 
-                                  dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,
-                           intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intPriceUOMId,intCommodityUnitMeasureId),
+                                  dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
+                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
                                   fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/
                                   case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice
        
-                                  ,dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,
-                           intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intPriceUOMId,intCommodityUnitMeasureId),
+                                  ,dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
+                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
                                   fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
                                   case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice                       
 
@@ -135,14 +135,18 @@ BEGIN
                                                 WHEN  ISNULL(strPriOrNotPriOrParPriced,'') = '' THEN 'Priced'
                                                                                   when  strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced' ELSE strPriOrNotPriOrParPriced END strPriOrNotPriOrParPriced
                                                 ,round(isnull(dblResult,0),2) dblResult,
-                                                strRiskIndicator,round(isnull(dblRiskTotalBusinessVolume,0),2) as dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,
-                                                round(isnull(dblCompanyExposurePercentage,0),2) as dblCompanyExposurePercentage ,round(isnull(dblSupplierSalesPercentage,0),2) as dblSupplierSalesPercentage
+                                                strRiskIndicator,
+                                                dbo.fnCTConvertQuantityToTargetCommodityUOM(cum.intCommodityUnitMeasureId,case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,dblRiskTotalBusinessVolume) dblRiskTotalBusinessVolume
+                                                ,intRiskUnitOfMeasureId,
+                                                round(isnull(dblCompanyExposurePercentage,0),2) as dblCompanyExposurePercentage ,
+                                                                                  round(isnull(dblSupplierSalesPercentage,0),2) as dblSupplierSalesPercentage
                                   FROM #temp  fd
                                   JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
                                   JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
                                   JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-                                  LEFT JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
-                                  LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
+                                  JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
+                                                         JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
+                                  JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
 
                                   WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)'
                                   
@@ -187,7 +191,7 @@ BEGIN
                                          CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
                                          CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue,
                                          CONVERT(NUMERIC(16,2),(dblFixedPurchaseValue + dblUnfixedPurchaseValue)) as dblTotalCommittedValue,
-                                         CONVERT(NUMERIC(16,2),(dblResult)) as dblResult
+                                        CONVERT(NUMERIC(16,2),(dblResult)) as dblResult
                                          ,strRiskIndicator,intRiskUnitOfMeasureId,dblRiskTotalBusinessVolume,dblCompanyExposurePercentage,dblSupplierSalesPercentage                                   
        FROM (
                      SELECT strEntityName,
@@ -202,13 +206,13 @@ BEGIN
                                   sum(dblResult) dblResult,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage 
                                   FROM(
                                   SELECT isnull(strProducer,strEntityName) strEntityName,dblOpenQty as dblOpenQty,
-                                  dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,
-                           intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intPriceUOMId,intCommodityUnitMeasureId),
+                                  dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
+                                                       fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
                                   fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/
                                   case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice
        
-                                  ,dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,
-                           intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intPriceUOMId,intCommodityUnitMeasureId),
+                                  ,dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
+                                                         fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
                                   fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
                                   case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice   
                                   
@@ -218,18 +222,26 @@ BEGIN
                                                                                   END strPriOrNotPriOrParPriced
                                                 ,round(isnull(dblResult,0),2) dblResult,
                                                 CASE WHEN isnull(strProducer,'')='' THEN pf1.strRiskIndicator ELSE pf.strRiskIndicator END strRiskIndicator,
-                                                                                  round(isnull(e.dblRiskTotalBusinessVolume,0),2) as dblRiskTotalBusinessVolume,e.intRiskUnitOfMeasureId,
+                                                dbo.fnCTConvertQuantityToTargetCommodityUOM(
+                                                                                  case when isnull(strProducer,'')='' then cum1.intCommodityUnitMeasureId else cum.intCommodityUnitMeasureId end,
+                                                                                  case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
+                                                                                  case when isnull(strProducer,'')='' then e1.dblRiskTotalBusinessVolume else e.dblRiskTotalBusinessVolume end) dblRiskTotalBusinessVolume,
+                                                                                  e.intRiskUnitOfMeasureId,
                                                 round(isnull(pf.dblCompanyExposurePercentage,0),2) as dblCompanyExposurePercentage ,round(isnull(pf.dblSupplierSalesPercentage,0),2) as dblSupplierSalesPercentage
                                   FROM #temp  fd
                                   JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
                                   JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
                                   JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
                                   LEFT JOIN tblAPVendor e on e.intEntityVendorId=fd.intProducerId
+                                                         LEFT join tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId 
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
-                                                         LEFT JOIN tblAPVendor e1 on e1.intEntityVendorId=fd.intEntityId        
+                                  LEFT JOIN tblAPVendor e1 on e1.intEntityVendorId=fd.intEntityId 
+                                                         LEFT join tblICCommodityUnitMeasure cum1 on cum1.intCommodityId=@intCommodityId and cum1.intUnitMeasureId=  e1.intRiskUnitOfMeasureId        
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf1 on pf1.intVendorPriceFixationLimitId=e1.intRiskVendorPriceFixationLimitId
                                   WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ) )t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
        )t3
 END
+
+
