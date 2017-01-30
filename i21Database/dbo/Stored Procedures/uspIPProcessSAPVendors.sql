@@ -27,7 +27,7 @@ If ISNULL(@intStageEntityId,0)=0
 
 Select @intEntityId=intEntityId From tblEMEntity Where strName=@strVendorName
 
-Select @intTermId=intTermID From tblSMTerm Where strTerm=@strTerm
+Select @intTermId=intTermID From tblSMTerm Where strTermCode=@strTerm
 
 Select @intCurrencyId=intCurrencyID From tblSMCurrency Where strCurrency=@strCurrency
 
@@ -55,6 +55,18 @@ Begin
 	--Entity Type
 	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
 	Values (@intEntityId,'Vendor',0)
+	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
+	Values (@intEntityId,'Ship Via',0)
+	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
+	Values (@intEntityId,'Producer',0)
+	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
+	Values (@intEntityId,'Shipping Line',0)
+	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
+	Values (@intEntityId,'Forwarding Agent',0)
+	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
+	Values (@intEntityId,'Insurer',0)
+	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
+	Values (@intEntityId,'Futures Broker',0)
 
 	--Entity Location
 	Insert Into tblEMEntityLocation(intEntityId,strLocationName,strAddress,strCity,strCountry,strZipCode,intTermsId,ysnDefaultLocation,ysnActive)
@@ -91,6 +103,9 @@ Begin
 	(Select ROW_NUMBER() OVER(ORDER BY intStageEntityContactId ASC) AS intRowNo,* from tblIPEntityContactStage Where intStageEntityId=@intStageEntityId) t2
 	on t1.intRowNo=t2.intRowNo
 
+	--Ship Via
+	Insert Into tblSMShipVia(intEntityShipViaId,strShipVia,strShippingService,intSort)
+	Values(@intEntityId,@strVendorName,'None',0)
 End
 Else
 Begin --Update

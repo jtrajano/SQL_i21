@@ -218,12 +218,15 @@ Begin
 				Set @strXmlHeaderStart +=	'</EDI_DC40>'
 		
 				Set @strXmlHeaderStart +=	'<E1PORDCH SEGMENT="1">'
+				Set @strXmlHeaderStart +=	'<PURCHASEORDER>'		+ ISNULL(@strERPPONumber,'')			+ '</PURCHASEORDER>'
 			End
 
 			If UPPER(@strHeaderState)='ADDED' OR UPPER(@strHeaderState)='MODIFIED'
 			Begin
 				--Header
 				Set @strXmlHeaderStart += '<E1BPMEPOHEADER SEGMENT="1">'
+				If UPPER(@strHeaderState)='MODIFIED'
+					Set @strXmlHeaderStart += '<PO_NUMBER>'	+ ISNULL(@strERPPONumber,'')	+ '</PO_NUMBER>'
 				Set @strXmlHeaderStart += '<COMP_CODE>'		+ ISNULL(@strCompCode,'')			+ '</COMP_CODE>'
 				Set @strXmlHeaderStart += '<DOC_TYPE>'		+ ISNULL(@strDocType,'')			+ '</DOC_TYPE>'
 				Set @strXmlHeaderStart += '<CREAT_DATE>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmContractDate,112),'')	+ '</CREAT_DATE>'
@@ -238,12 +241,12 @@ Begin
 				Set @strXmlHeaderStart += '<REF_1>'			+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
 				Set @strXmlHeaderStart += '<INCOTERMS1>'	+ ISNULL(@strContractBasis,'')		+ '</INCOTERMS1>'
 				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ ISNULL(@strContractBasisDesc,'')	+ '</INCOTERMS2>'
-				If UPPER(@strHeaderState)='MODIFIED'
-					Set @strXmlHeaderStart += '<PO_NUMBER>'	+ ISNULL(@strERPPONumber,'')	+ '</PO_NUMBER>'
 				Set @strXmlHeaderStart +=	'</E1BPMEPOHEADER>'
 
 				--HeaderX
 				Set @strXmlHeaderStart += '<E1BPMEPOHEADERX SEGMENT="1">'
+				If UPPER(@strHeaderState)='MODIFIED'
+					Set @strXmlHeaderStart += '<PO_NUMBER>'	+ 'X'	+ '</PO_NUMBER>'
 				If @strCompCode IS NOT NULL
 					Set @strXmlHeaderStart += '<COMP_CODE>'	+ 'X'	+ '</COMP_CODE>'			
 				If UPPER(@strHeaderState)='ADDED' AND @strDocType IS NOT NULL
@@ -273,8 +276,6 @@ Begin
 					Set @strXmlHeaderStart += '<INCOTERMS1>'	+ 'X'	+ '</INCOTERMS1>'
 				If @strContractBasisDesc IS NOT NULL
 					Set @strXmlHeaderStart += '<INCOTERMS2>'	+ 'X'	+ '</INCOTERMS2>'
-				If UPPER(@strHeaderState)='MODIFIED'
-					Set @strXmlHeaderStart += '<PO_NUMBER>'	+ 'X'	+ '</PO_NUMBER>'
 				Set @strXmlHeaderStart +=	'</E1BPMEPOHEADERX>'
 		End
 		End

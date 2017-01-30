@@ -13,13 +13,15 @@ BEGIN TRY
 	DECLARE @ErrMsg nvarchar(max)
 	DECLARE @strSessionId nvarchar(50)=NEWID()
 
-	Set @strXml= REPLACE(@strXml,'utf-8','utf-16')
+	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 	,@strXml
 
 	Insert Into tblIPPreShipmentSampleStage(dtmSampleDate,strPOItemNo,strItemNo,dblQuantity,strUOM,strSampleNo,strReferenceNo,strStatus,strLotNo,strSessionId)
-	SELECT   DATUM + ' ' + (select STUFF(STUFF(REPLICATE('0',6-LEN(ISNULL(UZEIT,''))) + convert(VARCHAR(6),ISNULL(UZEIT,'')),3,0,':'),6,0,':'))
+	SELECT   
+			CASE WHEN ISDATE(DATUM)=0 THEN NULL 
+			ELSE DATUM + ' ' + (select STUFF(STUFF(REPLICATE('0',6-LEN(ISNULL(UZEIT,''))) + convert(VARCHAR(6),ISNULL(UZEIT,'')),3,0,':'),6,0,':')) END
 			,POSNR
 			,ITEMNUM
 			,QUANTITY
