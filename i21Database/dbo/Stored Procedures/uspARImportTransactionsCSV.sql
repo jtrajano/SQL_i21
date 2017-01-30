@@ -293,7 +293,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				SELECT @ErrorMessage = 'Sales Order:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strSalesOrderNumber + '). ' FROM tblSOSalesOrder WHERE RTRIM(LTRIM(ISNULL(strSalesOrderOriginId,''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL(strSalesOrderOriginId,'')))) > 0
 			END
 					
-		IF ISNULL(@TransactionType, '') = '' OR @TransactionType NOT IN('Invoice', 'Sales Order', 'Credit Memo', 'Tank Delivery')
+		IF ISNULL(@TransactionType, '') = '' OR @TransactionType NOT IN('Invoice', 'Sales Order', 'Credit Memo', 'Tank Delivery', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment')
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Transaction Type provided does not exists. '
 
 		IF ISNULL(@EntityCustomerId, 0) = 0
@@ -740,7 +740,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 	
 		DECLARE @isValidFiscalYear BIT = 1
 	
-		SELECT @isValidFiscalYear = CASE WHEN @TransactionType IN ('Invoice', 'Credit Memo') THEN dbo.isOpenAccountingDateByModule(@Date, 'Accounts Receivable') ELSE 1 END
+		SELECT @isValidFiscalYear = CASE WHEN @TransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment') THEN dbo.isOpenAccountingDateByModule(@Date, 'Accounts Receivable') ELSE 1 END
 
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) > 0 AND @ErrorMessage <> 'Unable to find an open fiscal year period to match the transaction date.'
 			BEGIN
@@ -761,7 +761,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					BEGIN
 						UPDATE tblARImportLogDetail
 						SET [ysnImported]		= 1
-						   ,[strEventResult]	= CASE WHEN @TransactionType IN ('Invoice', 'Credit Memo') AND @ErrorMessage = 'Unable to find an open fiscal year period to match the transaction date.'
+						   ,[strEventResult]	= CASE WHEN @TransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment') AND @ErrorMessage = 'Unable to find an open fiscal year period to match the transaction date.'
 														THEN
 															(SELECT TOP 1 strTransactionType + ':' + strInvoiceNumber FROM tblARInvoice ORDER BY intInvoiceId DESC) + ' Imported. But unable to post due to: ' + @ErrorMessage
 														ELSE
