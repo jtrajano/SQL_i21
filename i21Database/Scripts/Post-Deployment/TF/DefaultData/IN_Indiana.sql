@@ -1828,18 +1828,23 @@ UNION ALL SELECT intReportTemplateId = 145, strFormCode = 'EDI', strScheduleCode
 
 EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
 
+
 -- Reporting Component - Output Designer
 /* Generate script for Reporting Component - Output Designer. Specify Tax Authority Id to filter out specific Reporting Component - Output Designer only.
-select 'UNION ALL SELECT intFilingPacketId = ' + CAST(intFilingPacketId AS NVARCHAR(10))
+select 'UNION ALL SELECT intScheduleColumnId = ' + CAST(intScheduleColumnId AS NVARCHAR(10))
 	+ CASE WHEN strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
 	+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
 	+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
-	+ CASE WHEN ysnStatus IS NULL THEN ', ysnStatus = NULL' ELSE ', ysnStatus = ' + CAST(ysnStatus AS NVARCHAR) END
-	+ CASE WHEN intFrequency IS NULL THEN ', intFrequency = NULL' ELSE ', intFrequency = ' + CAST(intFrequency AS NVARCHAR(10)) END
-from tblTFFilingPacket FP
-left join tblTFReportingComponent RC on RC.intReportingComponentId = FP.intReportingComponentId
-where intTaxAuthorityId = 
+	+ CASE WHEN strColumn IS NULL THEN ', strColumn = NULL' ELSE ', strColumn = ''' + strColumn + '''' END
+	+ CASE WHEN strCaption IS NULL THEN ', strCaption = NULL' ELSE ', strCaption = ''' + strCaption + '''' END
+	+ CASE WHEN strFormat IS NULL THEN ', strFormat = NULL' ELSE ', strFormat = ''' + strFormat + '''' END
+	+ CASE WHEN strFooter IS NULL THEN ', strFooter = NULL' ELSE ', strFooter = ''' + strFooter + '''' END
+	+ CASE WHEN intWidth IS NULL THEN ', intWidth = NULL' ELSE ', intWidth = ' + CAST(intWidth AS NVARCHAR(10)) END
+from tblTFScheduleFields TRP
+left join tblTFReportingComponent RC on RC.intReportingComponentId = TRP.intReportingComponentId
+where RC.intTaxAuthorityId =
 */
+
 DECLARE @ReportingComponentOutputDesigners AS TFReportingComponentOutputDesigners
 
 INSERT INTO @ReportingComponentOutputDesigners(
@@ -2342,22 +2347,22 @@ UNION ALL SELECT intScheduleColumnId = 10347, strFormCode = 'GT-103', strSchedul
 UNION ALL SELECT intScheduleColumnId = 10348, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strVendorLicenseNumber', strCaption = 'Indiana TID', strFormat = '', strFooter = 'No', intWidth = '0'
 UNION ALL SELECT intScheduleColumnId = 10349, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'dblGross', strCaption = 'Total Gals Purchased', strFormat = '', strFooter = 'No', intWidth = '0'
 UNION ALL SELECT intScheduleColumnId = 10350, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'dblTax', strCaption = 'GUT Paid to Supplier', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10351, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10352, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Supplier Name', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10353, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10354, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10355, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Supplier FEIN', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10356, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strVendorLicenseNumber', strCaption = 'Indiana TID', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10357, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Total Gals Purchased', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10358, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblTax', strCaption = 'GUT Paid to Supplier', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10359, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10360, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strVendorName', strCaption = 'Supplier Name', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10361, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10362, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10363, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Supplier FEIN', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10364, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strVendorLicenseNumber', strCaption = 'Indiana TID', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10365, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblGross', strCaption = 'Total Gals Purchased', strFormat = '', strFooter = 'No', intWidth = '0'
-UNION ALL SELECT intScheduleColumnId = 10366, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblTax', strCaption = 'GUT Paid to Supplier', strFormat = '', strFooter = 'No', intWidth = '0'
+UNION ALL SELECT intScheduleColumnId = 10351, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10352, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10353, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10354, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10355, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10357, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblQtyShipped', strCaption = 'Total Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10358, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Exempt Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 11401, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblTax', strCaption = 'GUT Collected', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10359, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10360, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10361, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10362, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10363, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10364, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblQtyShipped', strCaption = 'Total Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10365, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblGross', strCaption = 'Exempt Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 10366, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblTax', strCaption = 'GUT Collected', strFormat = '', strFooter = 'No', intWidth = 0
 UNION ALL SELECT intScheduleColumnId = 1483, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = '0'
 UNION ALL SELECT intScheduleColumnId = 1484, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = '0'
 UNION ALL SELECT intScheduleColumnId = 1485, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = '0'
