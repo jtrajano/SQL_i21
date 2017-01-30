@@ -22,6 +22,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+BEGIN TRANSACTION
+
 DECLARE @intEntityId AS INT
 DECLARE @startingNumberId_InventoryReceipt AS INT = 23;
 DECLARE @receiptNumber AS NVARCHAR(50);
@@ -92,7 +94,7 @@ DECLARE @DataForReceiptHeader TABLE(
 	,Currency INT
 	,intSourceType INT
 	,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,intTaxGroupId INT
+	--,intTaxGroupId INT
 )
 
 -- Sort the data from @ReceiptEntries and determine which ones are the header records. 
@@ -105,7 +107,7 @@ INSERT INTO @DataForReceiptHeader(
 		,ShipFrom
 		,Currency
 		,intSourceType
-		,intTaxGroupId
+		--,intTaxGroupId
 )
 SELECT	RawData.intEntityVendorId
 		,RawData.strBillOfLadding
@@ -115,7 +117,7 @@ SELECT	RawData.intEntityVendorId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
-		,RawData.intTaxGroupId
+		--,RawData.intTaxGroupId
 FROM	@ReceiptEntries RawData
 GROUP BY RawData.intEntityVendorId
 		,RawData.strBillOfLadding
@@ -125,7 +127,7 @@ GROUP BY RawData.intEntityVendorId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
-		,RawData.intTaxGroupId
+		--,RawData.intTaxGroupId
 ;
 
 -- Validate if there is data to process. If there is no data, then raise an error. 
@@ -155,6 +157,138 @@ BEGIN
 		
 		SET @receiptNumber = NULL 
 		SET @inventoryReceiptId = NULL 
+
+		------------------------------------------
+		----- Validate Receipt Header Fields -----
+		------------------------------------------
+
+		-- Validate Receipt Type --
+		DECLARE @valueReceiptType NVARCHAR(50)
+
+		SELECT @valueReceiptType = RawHeaderData.ReceiptType
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF RTRIM(LTRIM(LOWER(@valueReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order')
+			BEGIN
+				--Receipt Type is invalid or missing.
+				RAISERROR(80134, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+			
+		-- Validate Vendor Id --
+		DECLARE @valueEntityId INT
+
+		SELECT @valueEntityId = RawHeaderData.Vendor
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @valueEntityId)
+			BEGIN
+				-- Vendor Id is invalid or missing.
+				RAISERROR(80135, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Ship From Id --
+		DECLARE @valueShipFromId INT
+
+		SELECT @valueShipFromId = RawHeaderData.ShipFrom
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityLocation WHERE intEntityId = @valueEntityId AND intEntityLocationId = @valueShipFromId)
+			BEGIN
+				-- Ship From Id is invalid or missing.
+				RAISERROR(80136, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Location Id
+		DECLARE @valueLocationId INT
+
+		SELECT @valueLocationId = RawHeaderData.Location
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+		
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE intCompanyLocationId = @valueLocationId)
+			BEGIN
+				-- Location Id is invalid or missing.
+				RAISERROR(80137, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Ship Via Id
+		DECLARE @valueShipViaId INT
+
+		SELECT @valueShipViaId = RawHeaderData.ShipVia
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+
+		IF @valueShipViaId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE intEntityShipViaId = @valueShipViaId)
+			BEGIN
+				-- Ship Via Id {Ship Via Id} is invalid.
+				RAISERROR(80138, 11, 1, @valueShipViaId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Currency Id
+		DECLARE @valueCurrencyId INT
+
+		SELECT @valueCurrencyId = RawHeaderData.Currency
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @valueCurrencyId)
+			BEGIN
+				-- Currency Id is invalid or missing.
+				RAISERROR(80113, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Freight Term Id
+		DECLARE @valueFreightTermId INT
+
+		SELECT @valueFreightTermId = RawData.intFreightTermId
+		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,'') = ISNULL(RawData.strBillOfLadding,'') 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,'') = ISNULL(RawData.strReceiptType,'')
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)	
+		WHERE	RawHeaderData.intId = @intId
+
+		IF @valueFreightTermId IS NOT NULL AND NOT EXISTS (SELECT TOP 1 1 FROM tblSMFreightTerms WHERE intFreightTermId =  @valueFreightTermId)
+			BEGIN
+				-- Freight Term Id {Freight Term Id} is invalid.
+				RAISERROR(80114, 11, 1, @valueFreightTermId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Source Type Id
+		DECLARE @valueSourceTypeId INT
+
+		SELECT @valueSourceTypeId = RawHeaderData.intSourceType
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 4 OR @valueSourceTypeId < 0
+			BEGIN
+				-- Source Type Id is invalid or missing.
+				RAISERROR(80115, 11, 1);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
 
 		-- Check if there is an existing Inventory receipt 
 		SELECT	@inventoryReceiptId = RawData.intInventoryReceiptId
@@ -245,7 +379,7 @@ BEGIN
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
 				,strActualCostId		= IntegrationData.strActualCostId
-				,intTaxGroupId			= IntegrationData.intTaxGroupId
+				--,intTaxGroupId			= IntegrationData.intTaxGroupId
 				,intTransferorId		= IntegrationData.intTransferorId 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -282,7 +416,7 @@ BEGIN
 				,intCreatedUserId
 				,ysnPosted
 				,strActualCostId
-				,intTaxGroupId
+				--,intTaxGroupId
 				,intTransferorId
 			)
 			VALUES (
@@ -319,7 +453,7 @@ BEGIN
 				/*intCreatedUserId*/			,@intUserId
 				/*ysnPosted*/					,0
 				/*strActualCostId*/				,IntegrationData.strActualCostId
-				/*intTaxGroupId*/				,IntegrationData.intTaxGroupId
+				/*intTaxGroupId*/				--,IntegrationData.intTaxGroupId
 				/*intTransferorId*/				,IntegrationData.intTransferorId 
 			)
 		;
@@ -337,6 +471,334 @@ BEGIN
 			RAISERROR(80004, 11, 1);
 			RETURN;
 		END
+
+		-----------------------------------------------
+		----- Validate Receipt Item Detail Fields -----
+		-----------------------------------------------
+
+		-- Validate Item Id
+		DECLARE @valueItemId INT = NULL
+
+		SELECT TOP 1 @valueItemId = RawData.intItemId
+		FROM   @ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+				ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+				AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+				AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+				AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+				AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+				AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+				AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.intItemId IS NOT NULL
+				AND RawData.intItemId NOT IN (SELECT intItemId FROM tblICItem)
+		ORDER BY RawData.intItemId ASC
+
+		IF @valueItemId IS NOT NULL
+			BEGIN
+				-- Item Id {Item Id} invalid.
+				RAISERROR(80117, 11, 1, @valueItemId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Tax Group Id
+		DECLARE @valueTaxGroupId INT = NULL
+
+		SELECT TOP 1 @valueTaxGroupId = RawData.intTaxGroupId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.intTaxGroupId IS NOT NULL
+				AND RawData.intTaxGroupId NOT IN (SELECT intTaxGroupId FROM tblSMTaxGroup) 
+				AND RawData.intItemId IS NOT NULL
+		ORDER BY RawData.intTaxGroupId ASC
+
+		IF @valueTaxGroupId IS NOT NULL
+			BEGIN
+				-- Tax Group Id {Tax Group Id} is invalid.
+				RAISERROR(80116, 11, 1, @valueTaxGroupId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Contract Header Id
+		DECLARE @valueContractHeaderId INT = NULL
+
+		SELECT TOP 1 @valueContractHeaderId = RawData.intContractHeaderId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.intContractHeaderId IS NOT NULL
+				AND RawData.intContractHeaderId NOT IN (SELECT intContractHeaderId FROM tblCTContractHeader)
+				AND RawData.intItemId IS NOT NULL
+		ORDER BY RawData.intContractHeaderId ASC
+
+		IF @valueContractHeaderId IS NOT NULL
+			BEGIN
+				-- Contract Header Id {Contract Header Id} is invalid.
+				RAISERROR(80118, 11, 1, @valueContractHeaderId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Contract Detail Id
+		SET @valueContractHeaderId = NULL
+
+		SELECT TOP 1 @valueContractHeaderId = RawData.intContractHeaderId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.intContractHeaderId IS NOT NULL
+				AND (RawData.intContractDetailId IS NULL OR RawData.intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = RawData.intContractHeaderId))
+				AND RawData.intItemId IS NOT NULL
+		ORDER BY RawData.intContractDetailId ASC
+
+		IF @valueContractHeaderId IS NOT NULL
+			BEGIN
+				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
+				RAISERROR(80119, 11, 1, @valueContractHeaderId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Item Location Id
+		DECLARE @valueItemLocationId INT = NULL
+				,@getItemId INT
+				,@getItem NVARCHAR(50)
+
+		SELECT TOP 1 @valueItemLocationId = RawData.intItemLocationId, @getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.intItemLocationId IS NOT NULL
+				AND RawData.intItemLocationId NOT IN (SELECT intItemLocationId FROM tblICItemLocation WHERE intItemId = RawData.intItemId)
+				AND RawData.intItemId IS NOT NULL
+		ORDER BY RawData.intItemLocationId ASC
+
+		IF @valueItemLocationId IS NOT NULL
+			BEGIN
+				SELECT @getItem = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @getItemId
+
+				-- Item Location is invalid or missing for {Item}.
+				RAISERROR(80002, 11, 1, @getItem);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Item UOM Id
+		SET @getItemId = NULL
+		SET @getItem = NULL
+
+		SELECT TOP 1 @getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId
+				AND (RawData.intItemUOMId IS NULL OR
+				(RawData.intItemUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)))
+				AND RawData.intItemId IS NOT NULL
+		ORDER BY RawData.intItemUOMId ASC
+
+		IF @getItemId IS NOT NULL
+			BEGIN
+				SELECT @getItem = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @getItemId
+
+				-- Item UOM Id is invalid or missing for item {Item}.
+				RAISERROR(80120, 11, 1, @getItem);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Sub Location Id
+		DECLARE @valueSubLocationId INT
+		SET @getItemId = NULL
+		SET @getItem = NULL
+
+		SELECT TOP 1 @valueSubLocationId = RawData.intSubLocationId, @getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.intSubLocationId IS NOT NULL
+				AND RawData.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = RawData.intLocationId)
+				AND RawData.intItemId IS NOT NULL
+		ORDER BY RawData.intSubLocationId ASC
+
+		IF @valueSubLocationId IS NOT NULL
+			BEGIN
+				SELECT @getItem = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @getItemId
+
+				-- Sub Location is invalid or missing for item {Item}.
+				RAISERROR(80097, 11, 1,@getItem);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Storage Location Id
+		DECLARE @valueStorageLocationId INT
+		SET @getItemId = NULL
+		SET @getItem = NULL
+
+		SELECT TOP 1 @valueStorageLocationId = RawData.intStorageLocationId, @getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.intStorageLocationId IS NOT NULL
+				AND RawData.intStorageLocationId NOT IN (SELECT intStorageLocationId FROM tblICStorageLocation WHERE intLocationId = RawData.intLocationId)
+				AND RawData.intItemId IS NOT NULL
+		ORDER BY RawData.intStorageLocationId ASC
+
+		IF @valueStorageLocationId IS NOT NULL
+			BEGIN
+				SELECT @getItem = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @getItemId
+
+				-- Storage Location is invalid for item {Item}.
+				RAISERROR(80098, 11, 1, @getItem);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Gross/Net UOM Id
+		SET @getItemId = NULL
+		SET @getItem = NULL
+
+		SELECT TOP 1 @getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND (RawData.dblNet > 0 OR RawData.dblGross > 0)
+				AND RawData.intItemId IS NOT NULL
+				AND (RawData.intGrossNetUOMId IS NULL OR RawData.intGrossNetUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
+		ORDER BY RawData.intGrossNetUOMId ASC
+
+		IF @getItemId IS NOT NULL
+			BEGIN
+				SELECT @getItem = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @getItemId
+
+				-- Gross/Net UOM is invalid or missing for item {Item}.
+				RAISERROR(80121, 11, 1, @getItem);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Cost UOM Id
+		SET @getItemId = NULL
+		SET @getItem = NULL
+
+		SELECT TOP 1 @getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.dblCost > 0
+				AND RawData.intItemId IS NOT NULL
+				AND (RawData.intCostUOMId IS NULL OR RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
+		ORDER BY RawData.intCostUOMId ASC
+
+		IF @getItemId IS NOT NULL
+			BEGIN
+				SELECT @getItem = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @getItemId
+
+				-- Cost UOM is invalid or missing for item {Item}.
+				RAISERROR(80122, 11, 1, @getItem);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Lot Id
+		DECLARE @valueLotId INT = NULL
+		SET @getItemId = NULL
+		SET @getItem = NULL
+
+		SELECT TOP 1 @valueLotId = RawData.intLotId, @getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 
+		INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+		WHERE RawHeaderData.intId = @intId AND RawData.intLotId IS NOT NULL
+				AND RawData.intItemId IS NOT NULL
+				AND RawData.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = RawData.intItemId)
+		ORDER BY RawData.intLotId ASC
+
+		IF @valueLotId IS NOT NULL
+			BEGIN
+				SELECT @getItem = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @getItemId
+
+				-- Lot ID {Lot Id} is invalid for item {Item}.
+				RAISERROR(80123, 11, 1, @valueLotId, @getItem);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
 
 		--  Flush out existing detail detail data for re-insertion
 		BEGIN 
@@ -441,7 +903,7 @@ BEGIN
 				,intCostUOMId			= RawData.intCostUOMId
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
-				,intTaxGroupId			= ISNULL(RawData.intTaxGroupId,RawHeaderData.intTaxGroupId)
+				,intTaxGroupId			= RawData.intTaxGroupId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -497,6 +959,245 @@ BEGIN
 
 		WHERE RawHeaderData.intId = @intId
 
+		--------------------------------------------
+		------ Validate Other Charges Fields -------
+		--------------------------------------------
+
+		-- Validate Other Charge Item Id
+		DECLARE @valueChargeId INT = NULL
+
+		SELECT TOP 1 @valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)	   
+		WHERE RawHeaderData.intId = @intId AND RawData.intChargeId NOT IN (SELECT intItemId FROM tblICItem WHERE strType='Other Charge')
+		ORDER BY RawData.intChargeId ASC
+
+		IF @valueChargeId IS NOT NULL
+			BEGIN
+				-- {Charge Id} is not a valid Other Charge Item Id.
+				RAISERROR(80124, 11, 1, @valueChargeId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Cost Method
+		SET @valueChargeId = NULL
+		DECLARE @valueCharge NVARCHAR (50) = NULL
+
+		SELECT TOP 1 @valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)	   
+		WHERE RawHeaderData.intId = @intId AND (RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount'))
+		ORDER BY RawData.strCostMethod ASC
+
+		IF @valueChargeId IS NOT NULL
+			BEGIN
+				SELECT @valueCharge = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @valueChargeId
+
+				-- Cost Method for Other Charge item {Other Charge Item No.} is invalid or missing.
+				RAISERROR(80125, 11, 1, @valueCharge);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Cost Currency Id
+		DECLARE @valueCostCurrencyId INT
+		SET @valueChargeId = NULL
+		SET @valueCharge = NULL
+
+		SELECT @valueCostCurrencyId = RawData.intCostCurrencyId, @valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)	   
+		WHERE RawHeaderData.intId = @intId AND RawData.intCostCurrencyId NOT IN (SELECT intCurrencyId FROM tblSMCurrency)
+
+		IF @valueCostCurrencyId IS NOT NULL
+			BEGIN
+				SELECT @valueCharge = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @valueChargeId
+
+				-- Currency Id %s is invalid for other charge item %s.
+				RAISERROR(80126, 11, 1, @valueCostCurrencyId, @valueCharge);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Cost UOM Id
+		SET @valueChargeId = NULL
+		SET @valueCharge = NULL
+
+		SELECT @valueChargeId = RawData.intChargeId
+		FROM   @OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)	   
+		WHERE RawHeaderData.intId = @intId AND
+			  ((RawData.intCostUOMId IS NOT NULL AND RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intChargeId)) OR
+			  (RawData.intCostUOMId IS NULL AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) = 'per unit'))
+
+		IF @valueChargeId IS NOT NULL
+			BEGIN
+				SELECT @valueCharge = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @valueChargeId
+
+				-- Cost UOM is invalid or missing for item {Charge Item No.}.
+				RAISERROR(80122, 11, 1, @valueCharge);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Other Charges Vendor Id
+		DECLARE @valueOtherChargeEntityId INT
+		SET @valueChargeId = NULL
+		SET @valueCharge = NULL
+
+		SELECT @valueOtherChargeEntityId = RawData.intOtherChargeEntityVendorId, @valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+		WHERE RawHeaderData.intId = @intId AND RawData.intOtherChargeEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
+
+		IF @valueOtherChargeEntityId IS NOT NULL
+			BEGIN
+				SELECT @valueCharge = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @valueChargeId
+
+				-- Vendor Id is invalid for other charge item {Other Charge Item No.}.
+				RAISERROR(80127, 11, 1, @valueCharge);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Allocate Cost By
+		SET @valueChargeId = NULL
+		SET @valueCharge = NULL
+
+		SELECT @valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+		WHERE RawHeaderData.intId = @intId AND (RawData.strAllocateCostBy IS NULL OR RTRIM(LTRIM(LOWER(RawData.strAllocateCostBy))) NOT IN ('', 'unit', 'stock unit', 'cost'))
+
+		IF @valueChargeId IS NOT NULL
+			BEGIN
+				SELECT @valueCharge = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @valueChargeId
+
+				-- Allocate Cost By is invalid or missing for other charge item {Other Charge Item No.}.
+				RAISERROR(80128, 11, 1, @valueCharge);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Contract Header Id
+		DECLARE @valueOtherChargeContractHeaderId INT = NULL
+
+		SELECT TOP 1 @valueOtherChargeContractHeaderId = RawData.intContractHeaderId
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+		WHERE RawHeaderData.intId = @intId AND RawData.intContractHeaderId NOT IN (SELECT intContractHeaderId FROM tblCTContractHeader)
+		ORDER BY RawData.intContractHeaderId ASC
+
+		IF @valueOtherChargeContractHeaderId IS NOT NULL
+			BEGIN
+				-- Contract Header Id {Contract Header Id} is invalid.
+				RAISERROR(80118, 11, 1, @valueOtherChargeContractHeaderId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Contract Detail Id
+		SET @valueOtherChargeContractHeaderId = NULL
+
+		SELECT TOP 1 @valueOtherChargeContractHeaderId = RawData.intContractHeaderId
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+		WHERE RawHeaderData.intId = @intId
+				AND ((RawData.intContractHeaderId IS NOT NULL AND RawData.intContractDetailId IS NULL) OR
+				(RawData.intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = RawData.intContractHeaderId)))
+		ORDER BY RawData.intContractDetailId ASC
+
+		IF @valueOtherChargeContractHeaderId IS NOT NULL
+			BEGIN
+				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
+				RAISERROR(80119, 11, 1, @valueOtherChargeContractHeaderId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
+		-- Validate Tax Group Id
+		DECLARE @valueOtherChargeTaxGroupId INT = NULL
+
+		SELECT TOP 1 @valueOtherChargeTaxGroupId = RawData.intTaxGroupId	
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+		WHERE RawHeaderData.intId = @intId AND RawData.intTaxGroupId IS NOT NULL
+				AND RawData.intTaxGroupId NOT IN (SELECT intTaxGroupId FROM tblSMTaxGroup) 
+		ORDER BY RawData.intTaxGroupId ASC
+
+		IF @valueOtherChargeTaxGroupId IS NOT NULL
+			BEGIN
+				-- Tax Group Id {Tax Group Id} is invalid.
+				RAISERROR(80116, 11, 1, @valueOtherChargeTaxGroupId);
+				ROLLBACK TRANSACTION;
+				GOTO _Exit;
+			END
+
 		-- Insert the Other Charges
 		INSERT INTO dbo.tblICInventoryReceiptCharge (
 				[intInventoryReceiptId]
@@ -534,7 +1235,7 @@ BEGIN
 				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
 				,[intCurrencyId]			= RawData.intCostCurrencyId
 				,[intCent]					= CostCurrency.intCent
-				,[intTaxGroupId]			= ISNULL(RawData.intTaxGroupId, RawHeaderData.intTaxGroupId)
+				,[intTaxGroupId]			= RawData.intTaxGroupId
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -595,7 +1296,7 @@ BEGIN
 					,Receipt.intEntityVendorId
 					,ReceiptItem.intInventoryReceiptItemId
 					,Receipt.intShipFromId
-					,ISNULL(ReceiptItem.intTaxGroupId, Receipt.intTaxGroupId)
+					,ReceiptItem.intTaxGroupId
 					,Receipt.intFreightTermId 
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -902,6 +1603,229 @@ BEGIN
 							   FROM tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 							   WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId AND Item.strLotTracking != 'No')
 						BEGIN
+
+							------------------------------------------------
+							------- Validate Receipt Item Lot fields -------
+							------------------------------------------------
+
+							-- Validate Lot Id
+							DECLARE @valueLotRecordLotId INT = NULL
+									,@valueLotRecordItemId INT = NULL
+									,@valueLotRecordItemNo NVARCHAR(50) = NULL
+
+							SELECT TOP 1 @valueLotRecordLotId = ItemLot.intLotId, @valueLotRecordItemId = ItemLot.intItemId
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+									AND ItemLot.intLotId IS NOT NULL AND ReceiptItem.intItemId IS NOT NULL
+									AND ItemLot.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId)
+							ORDER BY ItemLot.intLotId ASC
+
+							IF @valueLotRecordLotId IS NOT NULL
+								BEGIN
+									SELECT @valueLotRecordItemNo = strItemNo
+									FROM tblICItem
+									WHERE intItemId = @valueLotRecordItemId
+
+									-- Lot ID {Lot Id} is invalid for item {Item}.
+									RAISERROR(80123, 11, 1, @valueLotRecordLotId, @valueLotRecordItemNo);
+									ROLLBACK TRANSACTION;
+									GOTO _Exit;
+								END
+
+							-- Validate Lot Number
+							DECLARE @valueLotRecordLotNo NVARCHAR(50) = NULL
+							SET	@valueLotRecordItemId = NULL
+							SET @valueLotRecordItemNo = NULL
+
+							SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+									AND ItemLot.intLotId IS NOT NULL AND ReceiptItem.intItemId IS NOT NULL
+									AND (ItemLot.strLotNumber IS NULL OR
+									(ItemLot.strLotNumber NOT IN (SELECT strLotNumber FROM tblICLot WHERE intLotId = ItemLot.intLotId)))
+							ORDER BY ItemLot.strLotNumber ASC
+
+							IF @valueLotRecordItemId IS NOT NULL
+								BEGIN
+									SELECT @valueLotRecordItemNo = strItemNo
+									FROM tblICItem
+									WHERE intItemId = @valueLotRecordItemId
+
+									-- Lot Number is invalid or missing for item {ItemNo.}.
+									RAISERROR(80130, 11, 1, @valueLotRecordItemNo);
+									ROLLBACK TRANSACTION;
+									GOTO _Exit;
+								END
+
+								-- Validate Item UOM Id
+								SET	@valueLotRecordItemId = NULL
+								SET @valueLotRecordItemNo = NULL
+
+								SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
+								FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+								WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+										AND (ItemLot.intItemUnitMeasureId IS NULL OR
+										(ItemLot.intItemUnitMeasureId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = ItemLot.intItemId)))
+										AND ItemLot.intItemId IS NOT NULL
+								ORDER BY ItemLot.intItemUnitMeasureId ASC
+
+								IF @valueLotRecordItemId IS NOT NULL
+									BEGIN
+										SELECT @valueLotRecordItemNo = strItemNo
+										FROM tblICItem
+										WHERE intItemId = @valueLotRecordItemId
+
+										-- Item UOM Id is invalid or missing for item {Item}.
+										RAISERROR(80120, 11, 1, @valueLotRecordItemNo);
+										ROLLBACK TRANSACTION;
+										GOTO _Exit;
+									END
+
+							-- Validate Lot Condition
+							DECLARE @valueLotRecordLotCondition NVARCHAR(50) = NULL
+								SET	@valueLotRecordItemId = NULL
+								SET @valueLotRecordItemNo = NULL
+
+								SELECT TOP 1 @valueLotRecordLotCondition = ItemLot.strCondition, @valueLotRecordItemId = ItemLot.intItemId
+								FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+								WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+										AND ItemLot.strCondition IS NOT NULL 
+										AND RTRIM(LTRIM(LOWER(ItemLot.strCondition))) NOT IN ('sound/full', 'slack', 'damaged', 'clean wgt')
+								ORDER BY ItemLot.strCondition ASC
+
+								IF @valueLotRecordLotCondition IS NOT NULL
+									BEGIN
+										SELECT @valueLotRecordItemNo = strItemNo
+										FROM tblICItem
+										WHERE intItemId = @valueLotRecordItemId
+
+										-- Lot Condition {Lot Condition} is invalid for item {Item No.}.
+										RAISERROR(80131, 11, 1, @valueLotRecordLotCondition, @valueLotRecordItemNo);
+										ROLLBACK TRANSACTION;
+										GOTO _Exit;
+									END
+
+							-- Validate Parent Lot Id
+							DECLARE @valueLotRecordParentLotId INT = NULL
+							SET	@valueLotRecordItemId = NULL
+							SET @valueLotRecordItemNo = NULL
+
+							SELECT TOP 1 @valueLotRecordParentLotId = ItemLot.intParentLotId, @valueLotRecordItemId = ItemLot.intItemId
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+									AND ItemLot.intParentLotId IS NOT NULL AND ReceiptItem.intItemId IS NOT NULL
+									AND ItemLot.intParentLotId NOT IN (SELECT intParentLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId AND intLotId = ItemLot.intLotId)
+							ORDER BY ItemLot.intParentLotId ASC
+
+							IF @valueLotRecordParentLotId IS NOT NULL
+								BEGIN
+									SELECT @valueLotRecordItemNo = strItemNo
+									FROM tblICItem
+									WHERE intItemId = @valueLotRecordItemId
+
+									-- Parent Lot Id {Parent Lot Id} is invalid for item {Item No.}.
+									RAISERROR(80132, 11, 1, @valueLotRecordParentLotId, @valueLotRecordItemNo);
+									ROLLBACK TRANSACTION;
+									GOTO _Exit;
+								END
+
+							-- Validate Parent Lot Number
+							DECLARE @valueLotRecordParentLotNo NVARCHAR(50) = NULL
+							SET	@valueLotRecordItemId = NULL
+							SET @valueLotRecordItemNo = NULL
+
+							SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
+							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+									ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+									AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+									AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+									AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+									AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+									AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+									AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+									AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+								LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+									ON ReceiptItem.intItemId = ItemLot.intItemId
+									AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+									AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId 
+									AND ItemLot.intParentLotId IS NOT NULL AND ReceiptItem.intItemId IS NOT NULL
+									AND (ItemLot.strParentLotNumber IS NULL OR
+									(ItemLot.strParentLotNumber NOT IN (SELECT strParentLotNumber FROM tblICParentLot WHERE intItemId = ItemLot.intItemId AND intParentLotId = ItemLot.intParentLotId)))
+							ORDER BY ItemLot.strParentLotNumber ASC
+
+							IF @valueLotRecordItemId IS NOT NULL
+								BEGIN
+									SELECT @valueLotRecordItemNo = strItemNo
+									FROM tblICItem
+									WHERE intItemId = @valueLotRecordItemId
+
+									-- Parent Lot Number is invalid or missing for item {ItemNo.}.
+									RAISERROR(80133, 11, 1, @valueLotRecordItemNo);
+									ROLLBACK TRANSACTION;
+									GOTO _Exit;
+								END
+
 							-- Insert Lot for Receipt Item
 							INSERT INTO dbo.tblICInventoryReceiptItemLot (
 								[intInventoryReceiptItemId]		
@@ -998,25 +1922,6 @@ BEGIN
 				END
 		END
 
-		-- Calculate the other charges
-		BEGIN 			
-			-- Calculate the other charges. 
-			EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
-				@inventoryReceiptId			
-
-			-- Calculate the surcharges
-			EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
-				@inventoryReceiptId
-			
-			-- Allocate the other charges and surcharges. 
-			EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
-				@inventoryReceiptId		
-				
-			-- Calculate Other Charges Taxes
-			EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
-				@inventoryReceiptId
-		END 
-
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
 		SET		dblTax = ROUND(
@@ -1098,6 +2003,25 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
+		-- Calculate the other charges
+		BEGIN 			
+			-- Calculate the other charges. 
+			EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
+				@inventoryReceiptId			
+
+			-- Calculate the surcharges
+			EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
+				@inventoryReceiptId
+			
+			-- Allocate the other charges and surcharges. 
+			EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+				@inventoryReceiptId		
+				
+			-- Calculate Other Charges Taxes
+			EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
+				@inventoryReceiptId
+		END 
+
 		-- Log successful inserts. 
 		INSERT INTO #tmpAddItemReceiptResult (
 			intSourceId
@@ -1136,6 +2060,8 @@ BEGIN
 
 	CLOSE loopDataForReceiptHeader;
 	DEALLOCATE loopDataForReceiptHeader;
+
+	COMMIT TRANSACTION
 END 
 
 _Exit:

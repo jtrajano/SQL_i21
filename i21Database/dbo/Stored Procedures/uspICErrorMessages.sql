@@ -527,3 +527,107 @@ EXEC sp_addmessage 80111,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80112) EXEC sp_dropmessage 80112, 'us_english'	
 SET @strmessage = 'Unable to unpost the Inventory Receipt. It has an Inventory Return in %s.'
 EXEC sp_addmessage 80112,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80113) EXEC sp_dropmessage 80113, 'us_english'	
+SET @strmessage = 'Currency Id is invalid or missing.'
+EXEC sp_addmessage 80113,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80114) EXEC sp_dropmessage 80114, 'us_english'	
+SET @strmessage = 'Freight Term Id %s is invalid.'
+EXEC sp_addmessage 80114,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80115) EXEC sp_dropmessage 80115, 'us_english'	
+SET @strmessage = 'Source Type Id is invalid or missing.'
+EXEC sp_addmessage 80115,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80116) EXEC sp_dropmessage 80116, 'us_english'	
+SET @strmessage = 'Tax Group Id %s is invalid.'
+EXEC sp_addmessage 80116,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80117) EXEC sp_dropmessage 80117, 'us_english'	
+SET @strmessage = 'Item Id %s is invalid.'
+EXEC sp_addmessage 80117,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80118) EXEC sp_dropmessage 80118, 'us_english'	
+SET @strmessage = 'Contract Header Id %s is invalid.'
+EXEC sp_addmessage 80118,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80119) EXEC sp_dropmessage 80119, 'us_english'	
+SET @strmessage = 'Contract Detail Id is invalid or missing for Contract Header Id %s.'
+EXEC sp_addmessage 80119,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80120) EXEC sp_dropmessage 80120, 'us_english'	
+SET @strmessage = 'Item UOM Id is invalid or missing for item %s.'
+EXEC sp_addmessage 80120,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80121) EXEC sp_dropmessage 80121, 'us_english'	
+SET @strmessage = 'Gross/Net UOM is invalid or missing for item %s.'
+EXEC sp_addmessage 80121,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80122) EXEC sp_dropmessage 80122, 'us_english'	
+SET @strmessage = 'Cost UOM is invalid or missing for item %s.'
+EXEC sp_addmessage 80122,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80123) EXEC sp_dropmessage 80123, 'us_english'	
+SET @strmessage = 'Lot ID %s is invalid for item %s.'
+EXEC sp_addmessage 80123,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80124) EXEC sp_dropmessage 80124, 'us_english'	
+SET @strmessage = '%s is not a valid Other Charge Item Id.'
+EXEC sp_addmessage 80124,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80125) EXEC sp_dropmessage 80125, 'us_english'	
+SET @strmessage = 'Cost Method for Other Charge item %s is invalid or missing.'
+EXEC sp_addmessage 80125,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80126) EXEC sp_dropmessage 80126, 'us_english'	
+SET @strmessage = 'Currency Id is invalid or missing for other charge item %s.'
+EXEC sp_addmessage 80126,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80127) EXEC sp_dropmessage 80127, 'us_english'	
+SET @strmessage = 'Vendor Id is invalid for other charge item %s.'
+EXEC sp_addmessage 80127,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80128) EXEC sp_dropmessage 80128, 'us_english'	
+SET @strmessage = 'Allocate Cost By is invalid or missing for other charge item %s.'
+EXEC sp_addmessage 80128,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80129) EXEC sp_dropmessage 80129, 'us_english'	
+SET @strmessage = 'Other Charge Item Id is required for other charges.'
+EXEC sp_addmessage 80129,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80130) EXEC sp_dropmessage 80130, 'us_english'	
+SET @strmessage = 'Lot Number is invalid or missing for item %s.'
+EXEC sp_addmessage 80130,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80131) EXEC sp_dropmessage 80131, 'us_english'	
+SET @strmessage = 'Lot Condition %s is invalid for item %s.'
+EXEC sp_addmessage 80131,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80132) EXEC sp_dropmessage 80132, 'us_english'	
+SET @strmessage = 'Parent Lot Id %s is invalid for item %s.'
+EXEC sp_addmessage 80132,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80133) EXEC sp_dropmessage 80133, 'us_english'	
+SET @strmessage = 'Parent Lot Number is invalid or missing for item %s.'
+EXEC sp_addmessage 80133,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80134) EXEC sp_dropmessage 80134, 'us_english'
+SET @strmessage = 'Receipt Type is invalid or missing.'
+EXEC sp_addmessage 80134,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80135) EXEC sp_dropmessage 80135, 'us_english'	
+SET @strmessage = 'Vendor Id is invalid or missing.'
+EXEC sp_addmessage 80135,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80136) EXEC sp_dropmessage 80136, 'us_english'	
+SET @strmessage = 'Ship From Id is invalid or missing.'
+EXEC sp_addmessage 80136,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80137) EXEC sp_dropmessage 80137, 'us_english'	
+SET @strmessage = 'Location Id is invalid or missing.'
+EXEC sp_addmessage 80137,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80138) EXEC sp_dropmessage 80138, 'us_english'	
+SET @strmessage = 'Ship Via Id %s is invalid.'
+EXEC sp_addmessage 80138,11,@strmessage,'us_english','False'
