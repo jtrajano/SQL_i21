@@ -1462,25 +1462,6 @@ BEGIN
 				END
 		END
 
-		-- Calculate the other charges
-		BEGIN 			
-			-- Calculate the other charges. 
-			EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
-				@inventoryReceiptId			
-
-			-- Calculate the surcharges
-			EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
-				@inventoryReceiptId
-			
-			-- Allocate the other charges and surcharges. 
-			EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
-				@inventoryReceiptId		
-				
-			-- Calculate Other Charges Taxes
-			EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
-				@inventoryReceiptId
-		END 
-
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
 		SET		dblTax = ROUND(
@@ -1561,6 +1542,25 @@ BEGIN
 				) Detail
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
+
+		-- Calculate the other charges
+		BEGIN 			
+			-- Calculate the other charges. 
+			EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
+				@inventoryReceiptId			
+
+			-- Calculate the surcharges
+			EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
+				@inventoryReceiptId
+			
+			-- Allocate the other charges and surcharges. 
+			EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+				@inventoryReceiptId		
+				
+			-- Calculate Other Charges Taxes
+			EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
+				@inventoryReceiptId
+		END 
 
 		-- Log successful inserts. 
 		INSERT INTO #tmpAddItemReceiptResult (
