@@ -368,11 +368,11 @@ SELECT
 	,[dtmDueDate]									= CFReportTable.dtmInvoiceDate
 	,[dtmShipDate]									= CFReportTable.dtmInvoiceDate
 	,[dblInvoiceTotal]								= SUM(ISNULL([STATEMENTREPORT].[dblInvoiceTotal], 0))
-	,[intPaymentId]									= 0	
-	,[strRecordNumber]								= NULL
-	,[strPaymentInfo]								= NULL	
-	,[dtmDatePaid]									= NULL	
-	,[dblPayment]									= 0
+	,[intPaymentId]									 
+	,[strRecordNumber]								 
+	,[strPaymentInfo]								 	
+	,[dtmDatePaid]									 	
+	,[dblPayment]									= SUM(ISNULL([STATEMENTREPORT].dblPayment, 0))
 	,[dblBalance]									= SUM(ISNULL([STATEMENTREPORT].[dblBalance], 0))
 	,[STATEMENTREPORT].[strSalespersonName]		
 	,[STATEMENTREPORT].[strFullAddress]			
@@ -431,3 +431,7 @@ GROUP BY CFReportTable.strInvoiceReportNumber
 		,STATEMENTREPORT.strCompanyName
 		,STATEMENTREPORT.strCompanyAddress
 		,AGINGREPORT.dblTotalAR  
+		,STATEMENTREPORT.[intPaymentId]									 
+		,STATEMENTREPORT.[strRecordNumber]								 
+		,STATEMENTREPORT.[strPaymentInfo]								 	
+		,STATEMENTREPORT.[dtmDatePaid]
