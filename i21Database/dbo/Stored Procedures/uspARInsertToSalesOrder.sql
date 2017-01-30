@@ -186,7 +186,8 @@ BEGIN
 			,[dblItemWeight]
 			,[dblOriginalItemWeight]
 			,[intSubCurrencyId]
-			,[dblSubCurrencyRate])
+			,[dblSubCurrencyRate]
+			,[strVFDDocumentNumber])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -221,6 +222,7 @@ BEGIN
 			,[dblOriginalItemWeight]
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
+			,[strVFDDocumentNumber]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 
