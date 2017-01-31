@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblSMMultiCurrency]
+(
+	[intMultiCurrencyId]							INT NOT NULL PRIMARY KEY IDENTITY,
+	[dblRealizedGainOrLossBasis]					NUMERIC(18, 6) NULL,
+	[dblRealizedGainOrLossFutures]					NUMERIC(18, 6) NULL,
+	[dblRealizedGainOrLossCash]						NUMERIC(18, 6) NULL,
+	[dblInventoryOffsetForRealizedGainOrLoss]		NUMERIC(18, 6) NULL,
+	[dblUnrealizedGainOrLossBasis]					NUMERIC(18, 6) NULL,
+	[dblUnrealizedGainOrLossFutures]				NUMERIC(18, 6) NULL,
+	[dblUnrealizedGainOrLossCash]					NUMERIC(18, 6) NULL,
+	[dblInventoryOffsetForUnrealizedGainOrLoss]		NUMERIC(18, 6) NULL,
+    [intAPVoucher]									INT NULL,
+	[intCMPayment]									INT NULL,
+	[intInventoryTransaction]						INT NULL,
+	[intAPRevaluation]								INT NULL, 
+    [intContractRevaluation]						INT NULL, 
+    [intARRevaluation]								INT NULL, 
+    [intConcurrencyId]								INT NOT NULL DEFAULT 1, 
+    CONSTRAINT [FK_tblSMMultiCurrency_RateType_APVoucher] FOREIGN KEY ([intAPVoucher]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_RateType_CMPayment] FOREIGN KEY ([intCMPayment]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_RateType_InventoryTransaction] FOREIGN KEY ([intInventoryTransaction]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_RateType_APRevaluation] FOREIGN KEY ([intAPRevaluation]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_RateType_ContractRevaluation] FOREIGN KEY ([intContractRevaluation]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_RateType_ARRevaluation] FOREIGN KEY ([intARRevaluation]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
+)

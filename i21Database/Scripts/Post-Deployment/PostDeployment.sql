@@ -22,6 +22,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\3_Currency.sql 
 :r .\SM\DefaultData\4_StartingNumbers.sql
 :r .\SM\DefaultData\5_CompanySetup.sql
+:r .\SM\DefaultData\5_1_MultiCurrency.sql
 :r .\SM\DefaultData\6_Preferences.sql
 :r .\SM\DefaultData\7_EULA.sql
 :r .\SM\DefaultData\8_Country.sql

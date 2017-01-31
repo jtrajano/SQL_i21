@@ -4924,6 +4924,7 @@
     <Build Include="dbo\Stored Procedures\uspICDuplicateStorageLocation.sql" />
     <Build Include="dbo\Tables\tblQMControlPointLotStatus.sql" />
     <Build Include="dbo\Views\vyuCTGetNeedPlanWeek.sql" />
+    <Build Include="dbo\Tables\tblSMMultiCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5062,6 +5063,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\00_Cleanup.sql" />
     <None Include="Scripts\Post-Deployment\MF\6_Dashboard.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityCompetitors.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\5_1_MultiCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
