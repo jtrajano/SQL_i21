@@ -4923,6 +4923,7 @@
     <Build Include="dbo\Views\vyuCTGetNeedPlanWeek.sql" />
     <Build Include="dbo\Tables\tblSMMultiCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForProcessRefund.sql" />
+    <Build Include="dbo\Tables\tblQMSampleTypeUserRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
