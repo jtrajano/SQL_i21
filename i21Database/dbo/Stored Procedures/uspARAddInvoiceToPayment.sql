@@ -109,17 +109,20 @@ IF (@InvoiceAmountDue + @Interest) < (@Payment + (CASE WHEN @ApplyTermDiscount =
 
 SET @PaymentTotal = ROUND(ISNULL((SELECT SUM(ISNULL(dblPayment, @ZeroDecimal)) FROM tblARPaymentDetail WHERE [intPaymentId] = @PaymentId), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 
-IF (@PaymentTotal + @Payment) > (@AmountPaid + @Payment)
+DECLARE @ErrorMsg NVARCHAR(100)
+SET @ErrorMsg = CONVERT(NVARCHAR(100),CAST(ISNULL(@Payment,@ZeroDecimal) AS MONEY),2) 
+
+IF (@PaymentTotal + @Payment) > @AmountPaid
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120059, 16, 1, @Payment);
+			RAISERROR(120059, 16, 1, @ErrorMsg);
 		RETURN 0;
 	END
 
 IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) > (@AmountPaid + @Payment)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120060, 16, 1, @Payment);
+			RAISERROR(120060, 16, 1, @ErrorMsg);
 		RETURN 0;
 	END
 
@@ -147,6 +150,8 @@ BEGIN TRY
 	INSERT INTO [tblARPaymentDetail]
 		([intPaymentId]
 		,[intInvoiceId]
+		,[intBillId]
+		,[strTransactionNumber] 
 		,[intTermId]
 		,[intAccountId]
 		,[dblInvoiceTotal]
@@ -162,6 +167,8 @@ BEGIN TRY
 	SELECT
 		 [intPaymentId]				= @PaymentId
 		,[intInvoiceId]				= ARI.[intInvoiceId] 
+		,[intBillId]				= NULL
+		,[strTransactionNumber]		= @InvoiceNumber
 		,[intTermId]				= ARI.[intTermId] 
 		,[intAccountId]				= ARI.[intAccountId] 
 		,[dblInvoiceTotal]			= @InvoiceTotal 
@@ -204,4 +211,3 @@ SET @ErrorMessage = NULL;
 RETURN 1;
 	
 END
-
