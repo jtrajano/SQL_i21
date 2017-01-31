@@ -232,8 +232,10 @@ BEGIN
 
 		IF @valueShipViaId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE intEntityShipViaId = @valueShipViaId)
 			BEGIN
+				DECLARE @valueShipViaIdStr NVARCHAR(50)
+				SET @valueShipViaIdStr = CAST(@valueShipViaId AS NVARCHAR(50))
 				-- Ship Via Id {Ship Via Id} is invalid.
-				RAISERROR(80112, 11, 1, @valueShipViaId);
+				RAISERROR(80112, 11, 1, @valueShipViaIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -269,8 +271,10 @@ BEGIN
 
 		IF @valueFreightTermId IS NOT NULL AND NOT EXISTS (SELECT TOP 1 1 FROM tblSMFreightTerms WHERE intFreightTermId =  @valueFreightTermId)
 			BEGIN
+				DECLARE @valueFreightTermIdStr NVARCHAR(50)
+				SET @valueFreightTermIdStr = CAST(@valueFreightTermId AS NVARCHAR(50))
 				-- Freight Term Id {Freight Term Id} is invalid.
-				RAISERROR(80114, 11, 1, @valueFreightTermId);
+				RAISERROR(80114, 11, 1, @valueFreightTermIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -494,8 +498,10 @@ BEGIN
 
 		IF @valueItemId IS NOT NULL
 			BEGIN
+				DECLARE @valueItemIdStr NVARCHAR(50)
+				SET @valueItemIdStr = CAST(@valueItemId AS NVARCHAR(50))
 				-- Item Id {Item Id} invalid.
-				RAISERROR(80117, 11, 1, @valueItemId);
+				RAISERROR(80117, 11, 1, @valueItemIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -520,15 +526,17 @@ BEGIN
 
 		IF @valueTaxGroupId IS NOT NULL
 			BEGIN
+				DECLARE @valueTaxGroupIdStr NVARCHAR(50)
+				SET @valueTaxGroupIdStr = CAST(@valueTaxGroupId AS NVARCHAR(50))
 				-- Tax Group Id {Tax Group Id} is invalid.
-				RAISERROR(80116, 11, 1, @valueTaxGroupId);
+				RAISERROR(80116, 11, 1, @valueTaxGroupIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
 
 		-- Validate Contract Header Id
 		DECLARE @valueContractHeaderId INT = NULL
-
+		
 		SELECT TOP 1 @valueContractHeaderId = RawData.intContractHeaderId
 		FROM	@ReceiptEntries RawData 
 		INNER JOIN @DataForReceiptHeader RawHeaderData 
@@ -546,12 +554,14 @@ BEGIN
 
 		IF @valueContractHeaderId IS NOT NULL
 			BEGIN
+				DECLARE @valueContractHeaderIdStr NVARCHAR(50)
+				SET @valueContractHeaderIdStr = CAST(@valueContractHeaderId AS NVARCHAR(50))
 				-- Contract Header Id {Contract Header Id} is invalid.
-				RAISERROR(80118, 11, 1, @valueContractHeaderId);
+				RAISERROR(80118, 11, 1, @valueContractHeaderIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
-
+			
 		-- Validate Contract Detail Id
 		SET @valueContractHeaderId = NULL
 
@@ -572,8 +582,9 @@ BEGIN
 
 		IF @valueContractHeaderId IS NOT NULL
 			BEGIN
+				SET @valueContractHeaderIdStr =  CAST(@valueContractHeaderId AS NVARCHAR(50))
 				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
-				RAISERROR(80119, 11, 1, @valueContractHeaderId);
+				RAISERROR(80119, 11, 1, @valueContractHeaderIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -794,8 +805,10 @@ BEGIN
 				FROM tblICItem
 				WHERE intItemId = @getItemId
 
+				DECLARE @valueLotIdStr NVARCHAR(50)
+				SET @valueLotIdStr = CAST(@valueLotId AS NVARCHAR(50))
 				-- Lot ID {Lot Id} is invalid for item {Item}.
-				RAISERROR(80123, 11, 1, @valueLotId, @getItem);
+				RAISERROR(80123, 11, 1, @valueLotIdStr, @getItem);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -980,8 +993,10 @@ BEGIN
 
 		IF @valueChargeId IS NOT NULL
 			BEGIN
+				DECLARE @valueChargeIdStr NVARCHAR(50)
+				SET @valueChargeIdStr = CAST(@valueChargeId AS NVARCHAR(50))
 				-- {Charge Id} is not a valid Other Charge Item Id.
-				RAISERROR(80124, 11, 1, @valueChargeId);
+				RAISERROR(80124, 11, 1, @valueChargeIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -1036,8 +1051,10 @@ BEGIN
 				FROM tblICItem
 				WHERE intItemId = @valueChargeId
 
+				DECLARE @valueCostCurrencyIdStr NVARCHAR(50)
+				SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
 				-- Currency Id %s is invalid for other charge item %s.
-				RAISERROR(80126, 11, 1, @valueCostCurrencyId, @valueCharge);
+				RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -1143,8 +1160,10 @@ BEGIN
 
 		IF @valueOtherChargeContractHeaderId IS NOT NULL
 			BEGIN
+				DECLARE @valueOtherChargeContractHeaderIdStr AS NVARCHAR(50)
+				SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
 				-- Contract Header Id {Contract Header Id} is invalid.
-				RAISERROR(80118, 11, 1, @valueOtherChargeContractHeaderId);
+				RAISERROR(80118, 11, 1, @valueOtherChargeContractHeaderIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -1168,8 +1187,9 @@ BEGIN
 
 		IF @valueOtherChargeContractHeaderId IS NOT NULL
 			BEGIN
+				SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
 				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
-				RAISERROR(80119, 11, 1, @valueOtherChargeContractHeaderId);
+				RAISERROR(80119, 11, 1, @valueOtherChargeContractHeaderIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -1192,8 +1212,10 @@ BEGIN
 
 		IF @valueOtherChargeTaxGroupId IS NOT NULL
 			BEGIN
+				DECLARE @valueOtherChargeTaxGroupIdStr NVARCHAR(50)
+				SET @valueOtherChargeTaxGroupIdStr = CAST(@valueOtherChargeTaxGroupId AS NVARCHAR(50))
 				-- Tax Group Id {Tax Group Id} is invalid.
-				RAISERROR(80116, 11, 1, @valueOtherChargeTaxGroupId);
+				RAISERROR(80116, 11, 1, @valueOtherChargeTaxGroupIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -1638,8 +1660,10 @@ BEGIN
 									FROM tblICItem
 									WHERE intItemId = @valueLotRecordItemId
 
+									DECLARE @valueLotRecordLotIdStr NVARCHAR(50)
+									SET @valueLotRecordLotIdStr = CAST(@valueLotRecordLotId AS NVARCHAR(50))
 									-- Lot ID {Lot Id} is invalid for item {Item}.
-									RAISERROR(80123, 11, 1, @valueLotRecordLotId, @valueLotRecordItemNo);
+									RAISERROR(80123, 11, 1, @valueLotRecordLotIdStr, @valueLotRecordItemNo);
 									ROLLBACK TRANSACTION;
 									GOTO _Exit;
 								END
@@ -1783,8 +1807,10 @@ BEGIN
 									FROM tblICItem
 									WHERE intItemId = @valueLotRecordItemId
 
+									DECLARE @valueLotRecordParentLotIdStr NVARCHAR(50)
+									SET @valueLotRecordParentLotIdStr = CAST(@valueLotRecordParentLotId AS NVARCHAR(50))
 									-- Parent Lot Id {Parent Lot Id} is invalid for item {Item No.}.
-									RAISERROR(80132, 11, 1, @valueLotRecordParentLotId, @valueLotRecordItemNo);
+									RAISERROR(80132, 11, 1, @valueLotRecordParentLotIdStr, @valueLotRecordItemNo);
 									ROLLBACK TRANSACTION;
 									GOTO _Exit;
 								END
