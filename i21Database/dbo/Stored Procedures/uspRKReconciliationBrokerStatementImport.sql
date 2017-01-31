@@ -144,7 +144,7 @@ JOIN @tblTransRec t1 on t.strName=t1.strName
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
                                                                               and t.strAccountNumber=t1.strAccountNumber 
                                                                                   and t.strFutMarketName=t1.strFutMarketName 
@@ -213,7 +213,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
                                                                               WHERE t.strAccountNumber=t1.strAccountNumber 
                                                                                   and t.strFutMarketName=t1.strFutMarketName 
@@ -263,7 +263,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -314,7 +314,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -365,7 +365,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -416,7 +416,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -467,7 +467,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -496,20 +496,6 @@ SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strB
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
-        and t.strFutMarketName=t1.strFutMarketName 
-        and t.strCommodityCode=t1.strCommodityCode 
-        --and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
-       and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
-        and t.dblPrice=t1.dblPrice 
-        
-
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
-FROM @tblTransRec t
-LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
-       WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
@@ -517,7 +503,21 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+FROM @tblTransRec t
+LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
+       WHERE t.strAccountNumber=t1.strAccountNumber 
+        and t.strFutMarketName=t1.strFutMarketName 
+        and t.strCommodityCode=t1.strCommodityCode 
+        --and t.strBuySell=t1.strBuySell 
+       --and t.intNoOfContract=t1.intNoOfContract
+       and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
+        and t.dblPrice=t1.dblPrice 
+        
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -565,7 +565,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -613,7 +613,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -661,7 +661,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
        -- and t.dblPrice=t1.dblPrice 
         
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -705,7 +705,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -753,7 +753,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
@@ -799,7 +799,7 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
-delete from  @ImportedRec  where importId in (select t1.importId from  @ImportedRec t1
+delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @ImportedRec t1
                                                                              JOIN @tblFinalRec t on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
