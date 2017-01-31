@@ -137,12 +137,8 @@ Ext.define('Inventory.view.Category', {
                                 items: [
                                     {
                                         xtype: 'panel',
-                                        bodyPadding: 10,
+                                        layout: 'fit',
                                         title: 'Detail',
-                                        layout: {
-                                            type: 'vbox',
-                                            align: 'stretch'
-                                        },
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgDetails'
@@ -157,11 +153,13 @@ Ext.define('Inventory.view.Category', {
                                                 items: [
                                                     {
                                                         xtype: 'container',
-                                                        flex: 1.25,
-                                                        margin: '0 5 0 0 ',
+                                                        flex: 1.5,
+                                                        margin: 2,
+                                                        padding: 5,
                                                         layout: {
                                                             type: 'vbox',
-                                                            align: 'stretch'
+                                                            align: 'stretch',
+                                                            padding: ''
                                                         },
                                                         items: [
                                                             {
@@ -375,107 +373,95 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'container',
                                                         flex: 2,
+                                                        padding: 5,
                                                         layout: {
-                                                            type: 'vbox',
+                                                            type: 'hbox',
                                                             align: 'stretch'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'container',
+                                                                xtype: 'advancefiltergrid',
                                                                 flex: 1,
-                                                                height: 154,
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
+                                                                border: true,
+                                                                itemId: 'grdTax',
+                                                                margin: 2,
+                                                                bodyBorder: true,
+                                                                columnLines: true,
+                                                                dockedItems: [
                                                                     {
-                                                                        xtype: 'frmadvancesearchgrid',
-                                                                        flex: 1,
-                                                                        height: 178,
-                                                                        itemId: 'grdTax',
-                                                                        margin: '1 0 0 0',
-                                                                        header: false,
-                                                                        title: 'Taxes',
-                                                                        columnLines: true,
-                                                                        forceFit: true,
-                                                                        dockedItems: [
-                                                                            {
-                                                                                xtype: 'toolbar',
-                                                                                dock: 'top',
-                                                                                componentCls: 'i21-toolbar-grid',
-                                                                                itemId: 'tlbGridOptions',
-                                                                                layout: {
-                                                                                    type: 'hbox',
-                                                                                    padding: '0 0 0 1'
-                                                                                },
-                                                                                items: [
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnInsertTax',
-                                                                                        iconCls: 'small-insert',
-                                                                                        text: 'Insert'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnDeleteTax',
-                                                                                        iconCls: 'small-remove',
-                                                                                        text: 'Remove'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'filter1'
-                                                                                    }
-                                                                                ]
-                                                                            }
-                                                                        ],
-                                                                        columns: [
-                                                                            {
-                                                                                xtype: 'gridcolumn',
-                                                                                headerDrillDownText: 'Open Tax Class',
-                                                                                headerDrillDownClick: 'onTaxClassHeaderClick',
-                                                                                itemId: 'colTaxClass',
-                                                                                minWidth: 95,
-                                                                                dataIndex: 'intUnitMeasureId',
-                                                                                text: 'Tax Class',
-                                                                                flex: 2,
-                                                                                editor: {
-                                                                                    xtype: 'gridcombobox',
-                                                                                    columns: [
-                                                                                        {
-                                                                                            dataIndex: 'intTaxClassId',
-                                                                                            dataType: 'numeric',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strTaxClass',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Tax Class',
-                                                                                            flex: 1
-                                                                                        }
-                                                                                    ],
-                                                                                    itemId: 'cboTaxClass',
-                                                                                    displayField: 'strTaxClass',
-                                                                                    valueField: 'strTaxClass'
-                                                                                }
-                                                                            }
-                                                                        ],
-                                                                        viewConfig: {
-                                                                            itemId: 'gvwTax'
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        componentCls: 'i21-toolbar-grid',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
                                                                         },
-                                                                        plugins: [
+                                                                        items: [
                                                                             {
-                                                                                ptype: 'cellediting',
-                                                                                pluginId: 'cepTax',
-                                                                                clicksToEdit: 1
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertTax',
+                                                                                iconCls: 'small-insert',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteTax',
+                                                                                iconCls: 'small-remove',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
                                                                             }
-                                                                        ],
-                                                                        selModel: {
-                                                                            selType: 'checkboxmodel'
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        headerDrillDownText: 'Open Tax Class',
+                                                                        headerDrillDownClick: 'onTaxClassHeaderClick',
+                                                                        itemId: 'colTaxClass',
+                                                                        dataIndex: 'intUnitMeasureId',
+                                                                        text: 'Tax Class',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intTaxClassId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strTaxClass',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Tax Class',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            pickerWidth: 435,
+                                                                            itemId: 'cboTaxClass',
+                                                                            displayField: 'strTaxClass',
+                                                                            valueField: 'strTaxClass'
                                                                         }
                                                                     }
-                                                                ]
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'gvwTax'
+                                                                },
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepTax',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ],
+                                                                selModel: {
+                                                                    selType: 'checkboxmodel'
+                                                                }
                                                             }
                                                         ]
                                                     }
@@ -483,7 +469,6 @@ Ext.define('Inventory.view.Category', {
                                             },
                                             {
                                                 xtype: 'container',
-                                                flex: 1,
                                                 hidden: true,
                                                 layout: {
                                                     type: 'hbox',
