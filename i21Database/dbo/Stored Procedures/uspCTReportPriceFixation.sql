@@ -125,7 +125,7 @@ BEGIN TRY
 			LTRIM(CAST(ROUND(PF.dblPriceWORollArb,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strTotalDesc,
 			LTRIM(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strDifferentialDesc,			
 			CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE 'Final Price :' END AS strFXFinalPriceLabelDesc,
-			LTRIM(CAST(ROUND(PF.dblFinalPrice,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per ' +' :'+CM.strUnitMeasure strFinalPriceDesc,
+			LTRIM(CAST(ROUND(PF.dblFinalPrice,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per '+CM.strUnitMeasure strFinalPriceDesc,
 			FY.strCurrency + '/' + TY.strCurrency+ ' :' AS strCurrencyExchangeRateDesc,
 			dbo.fnRemoveTrailingZeroes(ROUND(CD.dblRate,2)) AS dblRateDesc,
 			LTRIM(
