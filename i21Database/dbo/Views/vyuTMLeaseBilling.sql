@@ -16,14 +16,31 @@ SELECT
 	,strSerialNumber = B.strSerialNumber
 	,intDeviceId = B.intDeviceId
 	,strItemNumber = ISNULL(M.strItemNo,'')
-	,dblBillAmount = (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((SELECT TOP 1 ysnEnableLeaseBillingAboveMinUse FROM tblTMPreferenceCompany),0) = 1 
+	,dblBillAmount = (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((Q.ysnEnableLeaseBillingAboveMinUse),0) = 1 
 							THEN 
-								(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(HH.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
-									THEN
-										0.0
+								( CASE WHEN Q.strLeaseBillingIncentiveCalculation = '2 Years Ago' THEN
+									(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(JJ.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+										THEN
+											0.0
+										ELSE
+											ISNULL(G.dblAmount,0.0)
+										END)
+									WHEN Q.strLeaseBillingIncentiveCalculation = 'Prior Year' THEN
+										(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(II.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+										THEN
+											0.0
+										ELSE
+											ISNULL(G.dblAmount,0.0)
+										END)
 									ELSE
-										ISNULL(G.dblAmount,0.0)
-									END)
+										(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(HH.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+										THEN
+											0.0
+										ELSE
+											ISNULL(G.dblAmount,0.0)
+										END)
+									END
+								)
 							ELSE
 								ISNULL(G.dblAmount,0.0)
 							END)
@@ -89,22 +106,55 @@ INNER JOIN tblARCustomer O
 	ON O.intEntityCustomerId = F.intEntityId
 LEFT JOIN tblSMTaxGroup P
 	ON C.intLeaseTaxGroupId = P.intTaxGroupId
+CROSS APPLY (
+	SELECT TOP 1 
+		ysnEnableLeaseBillingAboveMinUse 
+		,strLeaseBillingIncentiveCalculation
+	FROM tblTMPreferenceCompany
+)Q
 OUTER APPLY (
 	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
 	WHERE intSiteId = A.intSiteID
 		AND intCurrentSeasonYear = intSeasonYear
 )HH
+OUTER APPLY (
+	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+	WHERE intSiteId = A.intSiteID
+		AND intCurrentSeasonYear = intSeasonYear
+)II
+OUTER APPLY (
+	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
+	WHERE intSiteId = A.intSiteID
+		AND intCurrentSeasonYear = intSeasonYear
+)JJ
 WHERE O.ysnActive = 1
 	AND C.strLeaseStatus <> 'Inactive'
 	AND B.strOwnership <> 'Customer Owned'
-	AND (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((SELECT TOP 1 ysnEnableLeaseBillingAboveMinUse FROM tblTMPreferenceCompany),0) = 1 
+	AND (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((Q.ysnEnableLeaseBillingAboveMinUse),0) = 1 
 		THEN 
-			(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(HH.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
-				THEN
-					0.0
+			( CASE WHEN Q.strLeaseBillingIncentiveCalculation = '2 Years Ago' THEN
+				(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(JJ.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+					THEN
+						0.0
+					ELSE
+						ISNULL(G.dblAmount,0.0)
+					END)
+				WHEN Q.strLeaseBillingIncentiveCalculation = 'Prior Year' THEN
+					(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(II.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+					THEN
+						0.0
+					ELSE
+						ISNULL(G.dblAmount,0.0)
+					END)
 				ELSE
-					ISNULL(G.dblAmount,0.0)
-				END)
+					(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(HH.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+					THEN
+						0.0
+					ELSE
+						ISNULL(G.dblAmount,0.0)
+					END)
+				END
+			)
 		ELSE
 			ISNULL(G.dblAmount,0.0)
 		END) > 0

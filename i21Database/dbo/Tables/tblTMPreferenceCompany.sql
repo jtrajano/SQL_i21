@@ -26,6 +26,7 @@
     [ysnUseOriginIntegration] BIT NOT NULL DEFAULT 1, 
     [strCSVPath] NVARCHAR(500)  COLLATE Latin1_General_CI_AS NULL DEFAULT '', 
     [ysnOriginToi21TMData] BIT NOT NULL DEFAULT 0, 
+    [strLeaseBillingIncentiveCalculation] NVARCHAR(25) NOT NULL DEFAULT N'Current Season', 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 
@@ -276,3 +277,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMPreferenceCompany',
     @level2type = N'COLUMN',
     @level2name = N'ysnOriginToi21TMData'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Calculation method for lease billing incentive',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strLeaseBillingIncentiveCalculation'
