@@ -48,8 +48,12 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [intLoadUOMId] INT NULL, 
 	[ysnCategory] BIT,
 
+	[ysnMultiplePriceFixation] BIT NULL, 
+	[intFutureMarketId] INT,
+	[intFutureMonthId] INT,
+	[dblFutures] NUMERIC(18, 6) NULL,
 	[dblNoOfLots] NUMERIC(18, 6) NULL,
-    [ysnMultiplePriceFixation] BIT NULL, 
+    
 	[intCategoryUnitMeasureId] INT NULL,
 	[intLoadCategoryUnitMeasureId] INT NULL,
 	[intArbitrationId] INT NULL,
