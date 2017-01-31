@@ -256,6 +256,21 @@ BEGIN TRY
 		FROM dbo.tblICLot
 		WHERE intLotId = @intProductValueId
 
+		IF EXISTS (
+				SELECT *
+				FROM tblQMControlPointLotStatus
+				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+					AND intControlPointId = @intSampleControlPointId
+					AND ysnApprove=1
+				)
+		BEGIN
+			SELECT @intLotStatusId = intLotStatusId
+			FROM tblQMControlPointLotStatus
+			WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+				AND intControlPointId = @intSampleControlPointId
+				AND ysnApprove=0
+		END
+
 		IF @intCurrentLotStatusId <> @intLotStatusId and @intSampleControlPointId<>14 
 		BEGIN
 			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
@@ -311,6 +326,21 @@ BEGIN TRY
 				,@intCurrentLotStatusId = intLotStatusId
 			FROM @ParentLotData
 			WHERE intSeqNo = @intSeqNo
+
+			IF EXISTS (
+				SELECT *
+				FROM tblQMControlPointLotStatus
+				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+					AND intControlPointId = @intSampleControlPointId
+					AND ysnApprove=1
+				)
+			BEGIN
+				SELECT @intLotStatusId = intLotStatusId
+				FROM tblQMControlPointLotStatus
+				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+					AND intControlPointId = @intSampleControlPointId
+					AND ysnApprove=0
+			END
 
 			IF @intCurrentLotStatusId <> @intLotStatusId and @intSampleControlPointId<>14 
 			BEGIN

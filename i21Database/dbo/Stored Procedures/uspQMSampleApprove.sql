@@ -72,14 +72,16 @@ BEGIN TRY
 	WHERE intItemId = @intSampleItemId
 
 	IF @ysnRequireCustomerApproval = 1
-		AND @intProductTypeId = 6 and @intSampleControlPointId=14
+		AND @intProductTypeId = 6
+		AND @intSampleControlPointId = 14
 	BEGIN
 		UPDATE tblMFLotInventory
 		SET intBondStatusId = @intLotStatusId
 		WHERE intLotId = @intProductValueId
 	END
 	ELSE IF @ysnRequireCustomerApproval = 1
-		AND @intProductTypeId = 11 and @intSampleControlPointId=14
+		AND @intProductTypeId = 11
+		AND @intSampleControlPointId = 14
 	BEGIN
 		UPDATE LI
 		SET intBondStatusId = @intLotStatusId
@@ -267,7 +269,23 @@ BEGIN TRY
 				SET @intLotStatusId = @intCurrentLotStatusId
 		END
 
-		IF @intCurrentLotStatusId <> @intLotStatusId and @intSampleControlPointId<>14 
+		IF EXISTS (
+				SELECT *
+				FROM tblQMControlPointLotStatus
+				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+					AND intControlPointId = @intSampleControlPointId
+					AND ysnApprove=1
+				)
+		BEGIN
+			SELECT @intLotStatusId = intLotStatusId
+			FROM tblQMControlPointLotStatus
+			WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+				AND intControlPointId = @intSampleControlPointId
+				AND ysnApprove=1
+		END
+
+		IF @intCurrentLotStatusId <> @intLotStatusId
+			AND @intSampleControlPointId <> 14
 		BEGIN
 			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
 				,@intNewLotStatusId = @intLotStatusId
@@ -329,7 +347,23 @@ BEGIN TRY
 					SET @intLotStatusId = @intCurrentLotStatusId
 			END
 
-			IF @intCurrentLotStatusId <> @intLotStatusId and @intSampleControlPointId<>14 
+			IF EXISTS (
+				SELECT *
+				FROM tblQMControlPointLotStatus
+				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+					AND intControlPointId = @intSampleControlPointId
+					AND ysnApprove=1
+				)
+			BEGIN
+				SELECT @intLotStatusId = intLotStatusId
+				FROM tblQMControlPointLotStatus
+				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+					AND intControlPointId = @intSampleControlPointId
+					AND ysnApprove=1
+			END
+
+			IF @intCurrentLotStatusId <> @intLotStatusId
+				AND @intSampleControlPointId <> 14
 			BEGIN
 				EXEC uspMFSetLotStatus @intLotId = @intLotId
 					,@intNewLotStatusId = @intLotStatusId
