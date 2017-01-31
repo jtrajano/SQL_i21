@@ -661,6 +661,12 @@ WHERE ysnFilterContractByERPPONumber IS NULL
 GO
 
 GO
+UPDATE tblQMCompanyPreference
+SET ysnEnableSampleTypeByUserRole = 0
+WHERE ysnEnableSampleTypeByUserRole IS NULL
+GO
+
+GO
 UPDATE tblQMReportProperty SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
 

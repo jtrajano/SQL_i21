@@ -10,7 +10,6 @@ SELECT S.intSampleId
 	,I.strItemNo
 	,I.strDescription
 	,S.strContainerNumber
-	--,SH.intTrackingNumber
 	,SH.strLoadNumber
 	,S.strLotNumber
 	,SS.strStatus
@@ -36,7 +35,6 @@ SELECT S.intSampleId
 	,ST.intSampleTypeId
 	,CH.intContractHeaderId
 	,I.intItemId
-	--,SH.intShipmentId
 	,S.intItemBundleId
 	,SH.intLoadId
 	,C.intLoadContainerId
@@ -54,6 +52,7 @@ SELECT S.intSampleId
 	,WO.strWorkOrderNo
 	,S.strComment
 	,ito1.intOwnerId AS intEntityId
+	,ISNULL(SU.intUserRoleID, 0) AS intUserRoleID
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -63,8 +62,6 @@ LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractH
 LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 LEFT JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem I1 ON I1.intItemId = S.intItemBundleId
---LEFT JOIN dbo.tblLGShipmentBLContainer C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId
---LEFT JOIN dbo.tblLGShipment SH ON SH.intShipmentId = S.intShipmentId
 LEFT JOIN dbo.tblLGLoadContainer C ON C.intLoadContainerId = S.intLoadContainerId
 LEFT JOIN dbo.tblLGLoad SH ON SH.intLoadId = S.intLoadId
 LEFT JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = S.intTestedById
@@ -82,3 +79,4 @@ LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUO
 LEFT JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
+LEFT JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = ST.intSampleTypeId
