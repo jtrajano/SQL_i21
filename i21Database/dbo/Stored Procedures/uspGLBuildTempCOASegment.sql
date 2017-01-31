@@ -2,6 +2,9 @@
 	
 AS
 BEGIN
+
+	DELETE FROM tblGLCOATemplateDetail WHERE intAccountStructureId 
+	NOT IN (SELECT DISTINCT(intAccountStructureId) FROM tblGLAccountSegment)
 	
 	DELETE FROM tblGLAccountStructure WHERE intAccountStructureId not in
 	(SELECT DISTINCT(intAccountStructureId) FROM tblGLAccountSegment) and strType != 'Divider'
