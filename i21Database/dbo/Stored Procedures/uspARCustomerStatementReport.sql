@@ -18,6 +18,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
 		,@strLocationName			AS NVARCHAR(100)
+		,@strStatementFormat		AS NVARCHAR(50)
 		,@ysnPrintZeroBalance		AS BIT
 		,@ysnPrintCreditBalance		AS BIT
 		,@ysnIncludeBudget			AS BIT
@@ -132,6 +133,10 @@ SELECT @strLocationName = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strLocationName'
 
+SELECT @strStatementFormat = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strStatementFormat'
+
 SELECT @ysnPrintZeroBalance = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnPrintZeroBalance'
@@ -174,7 +179,7 @@ ELSE
 INSERT INTO @temp_aging_table
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName
 
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmDate', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
 
 SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 
@@ -343,7 +348,7 @@ INNER JOIN @temp_aging_table AS AGINGREPORT
 INNER JOIN tblARCustomer CUSTOMER 
 	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 WHERE AGINGREPORT.dblTotalAR <> 0
-AND (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = 'Open Item')
+AND (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
 AND strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 
 UNION ALL
@@ -391,7 +396,7 @@ INNER JOIN (SELECT
 			FROM 
 				@temp_cf_table) CFReportTable ON STATEMENTREPORT.strReferenceNumber = CFReportTable.strInvoiceNumber
 WHERE AGINGREPORT.dblTotalAR <> 0
-AND (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = 'Open Item')
+AND (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
 AND strReferenceNumber IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 GROUP BY CFReportTable.strInvoiceReportNumber
       ,STATEMENTREPORT.strTransactionType
