@@ -106,6 +106,7 @@
 :r .\11_IC\Update_M2M_Computation_Setup.sql
 :r .\11_IC\Rename_tblICItemOwner_Fields.sql
 :r .\11_IC\Clean_Valuation_Indexes.sql
+:r .\11_IC\Relink_Line_Of_Business.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
