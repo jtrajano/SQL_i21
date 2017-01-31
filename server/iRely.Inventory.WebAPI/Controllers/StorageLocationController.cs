@@ -42,5 +42,27 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStorageBinMeasurementReading(param, intStorageLocationId));
         }
+
+        [HttpGet]
+        [ActionName("DuplicateStorageLocation")]
+        public HttpResponseMessage DuplicateStorageLocation(int StorageLocationId)
+        {
+            var result = _bl.DuplicateStorageLocation(StorageLocationId) as StorageLocationBl.DuplicateStorageLocationSaveResult;
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    id = result.Id,
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 }

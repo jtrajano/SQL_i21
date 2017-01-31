@@ -106,6 +106,13 @@ Ext.define('Inventory.view.StorageUnit', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
+                            itemId: 'btnDuplicate',
+                            ui: 'i21-button-toolbar-small',
+                            text: 'Duplicate'
+                        },
+                        {
+                            xtype: 'button',
+                            tabIndex: -1,
                             itemId: 'btnClose',
                             ui: 'i21-button-toolbar-small',
                             text: 'Close'

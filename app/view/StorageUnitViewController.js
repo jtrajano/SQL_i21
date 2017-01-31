@@ -353,6 +353,36 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         }
     },
 
+    onDuplicateClick: function(button) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            iRely.Msg.showWait('Duplicating Storage Location...');
+            ic.utils.ajax({
+                timeout: 120000,
+                url: '../Inventory/api/StorageLocation/DuplicateStorageLocation',
+                params: {
+                    StorageLocationId: current.get('intStorageLocationId')
+                },
+                method: 'Get'  
+            })
+            .finally(function() { iRely.Msg.close(); })
+            .subscribe(
+                function (successResponse) {
+				    var jsonData = Ext.decode(successResponse.responseText);
+                    context.configuration.store.addFilter([{ column: 'intStorageLocationId', value: jsonData.message.id }]);
+                    context.configuration.paging.moveFirst();
+				},
+				function (failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+				}
+            );
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboCategoryAllowed": {
@@ -378,6 +408,10 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             },
             "#cboCommodity": {
                 drilldown: this.onCommodityDrilldown
-            }        });
+            },
+            "#btnDuplicate": {
+                click: this.onDuplicateClick
+            },  
+        });
     }
 });

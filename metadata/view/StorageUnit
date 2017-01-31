@@ -19,6 +19,7 @@
         "minWidth": null,
         "minimizable": null,
         "reference": null,
+        "tabIndex": null,
         "title": "Storage Location",
         "width": 931
     },
@@ -172,6 +173,24 @@
                             },
                             "name": "MyButton103",
                             "designerId": "93112635-b509-4b6a-8710-4982f96564cd"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|uiInterfaceName": "i21-button-toolbar-small",
+                                "itemId": "btnDuplicate",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Duplicate",
+                                "ui": "i21-button-toolbar-small"
+                            },
+                            "name": "MyButton41",
+                            "designerId": "0aba5ed9-d777-4845-bced-d4fc671d6deb"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -1369,7 +1388,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter123",
                                                     "designerId": "44f4490e-5a9c-40bb-beaf-26df2f659502",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1647,7 +1666,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter124",
                                                     "designerId": "22931607-4134-4630-a48a-1fe5916ccd67",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1845,7 +1864,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter125",
                                                     "designerId": "e4e6a664-7884-4ddd-8995-16e91bcb4363",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2032,7 +2051,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter126",
                                                     "designerId": "6e9571a9-d0ec-46b7-ab0d-11523cb26254",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

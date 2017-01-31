@@ -138,5 +138,31 @@ namespace iRely.Inventory.BusinessLayer
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
+
+        public class DuplicateStorageLocationSaveResult : SaveResult
+        {
+            public int? Id { get; set; }
+        }
+
+        public DuplicateStorageLocationSaveResult DuplicateStorageLocation(int intStorageLocationId)
+        {
+            int? newStorageLocationId = 0;
+            var duplicationResult = new DuplicateStorageLocationSaveResult();
+            try
+            {
+                var db = (InventoryEntities)_db.ContextManager;
+                newStorageLocationId = db.DuplicateStorageLocation(intStorageLocationId);
+                var res = _db.Save(false);
+                duplicationResult.Id = newStorageLocationId;
+                duplicationResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                duplicationResult.BaseException = ex;
+                duplicationResult.HasError = true;
+                duplicationResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return duplicationResult;
+        }
     }
 }
