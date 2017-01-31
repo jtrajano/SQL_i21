@@ -112,7 +112,7 @@ Begin
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
 
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='SUCCESS',strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
-			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')=''
+			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,'SUCCESS')
@@ -123,7 +123,7 @@ Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
-			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')=''
+			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,@strMessage)

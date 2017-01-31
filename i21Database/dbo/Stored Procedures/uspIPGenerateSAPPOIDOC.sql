@@ -157,7 +157,7 @@ Begin
 			@strContractBasisDesc		= strContractBasisDesc ,--INCOTERMS2
 			@strSubLocation				= strSubLocation , --L-Plant / PLANT 
 			@strCreatedBy				= strCreatedBy , 
-			@strCreatedByNo				= strCreatedByNo , 
+			@strCreatedByNo				= strSubmittedByNo , 
 			@strEntityNo				= strEntityNo , --VENDOR 
 			@strTerm					= strTerm  , --PMNTTRMS / VEND_PART 
 			@strPurchasingGroup			= strPurchasingGroup, 
@@ -298,7 +298,7 @@ Begin
 				If ISNULL(@dblCashPrice,0)=0
 					Set @strXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
 				Else
-					Set @strXml += '<FREE_ITEM>'	+ ''	+ '</FREE_ITEM>'
+					Set @strXml += '<FREE_ITEM>'	+ ' '	+ '</FREE_ITEM>'
 				Set @strXml += '<CONF_CTRL>'	+ 'SL08'							+ '</CONF_CTRL>'
 				Set @strXml += '<VEND_PART>'	+ ISNULL(CONVERT(VARCHAR,@strTerm),'')			+ '</VEND_PART>'
 				Set @strXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
@@ -325,7 +325,7 @@ Begin
 					Set @strXml += '<NET_PRICE>'	+ 'X'		+ '</NET_PRICE>'
 				If @dblUnitCashPrice IS NOT NULL
 					Set @strXml += '<PRICE_UNIT>'	+ 'X'		+ '</PRICE_UNIT>'
-				If ISNULL(@dblCashPrice,0)=0
+				--If ISNULL(@dblCashPrice,0)=0
 					Set @strXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
 				Set @strXml += '<CONF_CTRL>'		+ 'X'	+ '</CONF_CTRL>'
 				If @strTerm IS NOT NULL

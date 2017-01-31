@@ -21,8 +21,14 @@ Declare @ErrMsg nvarchar(max)
 Declare @ysnDeleted bit
 Declare @intStageItemId int
 Declare @intNewStageItemId int
+Declare @strDescription NVARCHAR(250)
+Declare @strJson NVARCHAR(Max)
+Declare @dtmDate DateTime
+Declare @intUserId Int
+Declare @strUserName NVARCHAR(100)
 
-Select TOP 1 @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,@strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0) From tblIPItemStage
+Select TOP 1 @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
+@strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage
 
 If ISNULL(@intStageItemId,0)=0
 	RaisError('No data found.',16,1)
@@ -39,11 +45,10 @@ Begin
 	If ISNULL(@intCategoryId,0)=0
 		RaisError('Category not found.',16,1)
 
-	Select @strItemPart=SUBSTRING(@strItemNo,1,5)
-	If @strItemPart='49600'
+	If Exists (Select 1 where @strItemNo like '%49600%')
 		Select @strCommodity='Coffee'
 
-	If @strItemPart='49100'
+	If Exists (Select 1 where @strItemNo like '%49100%')
 		Select @strCommodity='Tea'
 
 	Select @intCommodityId=intCommodityId From tblICCommodity Where strCommodityCode=@strCommodity
@@ -63,10 +68,16 @@ End
 
 If @strItemType='ZMPN' --Contract Item
 Begin
-	If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemName=@strItemNo)
+	If ISNULL(@intItemId,0)=0
+		Begin
+			Set @ErrMsg='ZCOM item ' + @strSKUItemNo + ' not found.'
+			RaisError(@ErrMsg,16,1)
+		End
+
+	If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemName=@strDescription)
 	Begin
 		Insert Into tblICItemContract(intItemId,strContractItemName,intItemLocationId)
-		Select @intItemId,@strItemNo,intItemLocationId 
+		Select @intItemId,@strDescription,intItemLocationId 
 		From tblICItemLocation Where intItemId=@intItemId
 
 		GOTO MOVE_TO_ARCHIVE
@@ -92,12 +103,39 @@ Begin
 	Insert Into tblICItemLocation(intItemId,intLocationId,intCostingMethod,intAllowNegativeInventory)
 	Select @intItemId,cl.intCompanyLocationId,1,3
 	From tblSMCompanyLocation cl
+
+	--Add Audit Trail Record
+	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intItemId) + '","keyValue":' + CONVERT(VARCHAR,@intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
+	
+	Select @dtmDate=dtmCreated From tblIPItemStage Where intStageItemId=@intStageItemId
+	If @dtmDate is null
+		Set @dtmDate =  GETDATE()
+
+	Select @strUserName=strCreatedUserName From tblIPItemStage Where intStageItemId=@intStageItemId
+	Select @intUserId=e.intEntityId From tblEMEntity e Join tblEMEntityType et on e.intEntityId=et.intEntityId  Where e.strExternalERPId=@strUserName AND et.strType='User'
+
+	Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)
+	Values('Created','Inventory.view.Item',@intItemId,'','',@strJson,@dtmDate,@intUserId,1)
 End
 Else
 Begin --Update
 	Update i  Set i.strDescription=si.strDescription,i.strShortName=LEFT(si.strDescription,50) 
 	From tblICItem i Join tblIPItemStage si on i.strItemNo=si.strItemNo 
-	Where intItemId=@intItemId AND si.intStageItemId=@intStageItemId
+	Where intItemId=@intItemId AND si.intStageItemId=@intStageItemId AND si.strDescription <> '/'
+
+	Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
+	Select @intItemId,um.intUnitMeasureId,iu.dblNumerator/iu.dblDenominator,CASE When iu.strUOM=@strStockUOM THEN 1 ELSE 0 End,1,1  
+	From tblIPItemUOMStage iu 
+	Join tblIPSAPUOM su on iu.strUOM=su.strSAPUOM 
+	Join tblICUnitMeasure um on su.stri21UOM=um.strUnitMeasure
+	Where strItemNo=@strItemNo AND iu.intStageItemId=@intStageItemId
+
+	Update iu Set iu.dblUnitQty=st.dblNumerator/st.dblDenominator 
+	From tblICItemUOM iu 
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Join tblIPSAPUOM su on um.strUnitMeasure=su.stri21UOM
+	Join tblIPItemUOMStage st on st.strUOM=su.strSAPUOM
+	Where intItemId=@intItemId AND st.intStageItemId=@intStageItemId
 End
 End
 

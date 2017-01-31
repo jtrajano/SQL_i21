@@ -42,7 +42,8 @@ Declare @intMinHeader				INT,
 		@intLoadContainerId			INT,
 		@strContainerXml			NVARCHAR(MAX),
 		@strContainerItemXml		NVARCHAR(MAX),
-		@ysnBatchSplit				BIT
+		@ysnBatchSplit				BIT,
+		@strVendorAccountNo			NVARCHAR(50)
 
 Declare @tblDetail AS Table
 (
@@ -98,7 +99,7 @@ Begin
 		@intLoadStgId				=	intLoadStgId ,
 		@intLoadId					=	intLoadId,
 		@strTransactionType			=	strTransactionType,
-		@strLoadNumber				=	strLoadNumber,
+		@strLoadNumber				=	strShippingInstructionNumber,
 		@strContractBasis			=	strContractBasis ,--INCOTERMS1
 		@strContractBasisDesc		=	strContractBasisDesc ,--INCOTERMS2
 		@strBillOfLading			=	strBillOfLading , 
@@ -108,6 +109,9 @@ Begin
 		@strHeaderRowState			=	strRowState ,
 		@strFeedStatus				=	strFeedStatus
 	From tblLGLoadStg Where intLoadStgId=@intMinHeader
+
+	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
+	From tblLGLoadDetail ld Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityId Where intLoadId = @intLoadId
 
 	Set @strXml =  '<DELVRY07>'
 	Set @strXml += '<IDOC BEGIN="1">'
@@ -119,11 +123,11 @@ Begin
 		
 	--Header
 	Set @strXml += '<E1ELD20 SEGMENT="1">'
+	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
 	Set @strXml += '<INCO1>'	+ ISNULL(@strContractBasis,'')			+ '</INCO1>'
 	Set @strXml += '<INCO2>'	+ ISNULL(@strContractBasisDesc,'')		+ '</INCO2>'
 	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')			+ '</BOLNR>'
 	Set @strXml += '<TRAID>'	+ ISNULL(@strShippingLine,'')			+ '</TRAID>'
-	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
 	Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')				+ '</LIFEX>'
 
 	Set @strXml += '<E1EDL18 SEGMENT="1">'
@@ -132,10 +136,15 @@ Begin
 					+ '</QUALF>'
 	Set @strXml +=	'</E1EDL18>'
 
-	Set @strXml += '<E1EDL13 SEGMENT="1">'
+	Set @strXml += '<E1ADRM1 SEGMENT="1">'
+	Set @strXml += '<PARTNER_Q>'	+ 'WE'			+ '</PARTNER_Q>'
+	Set @strXml += '<PARTNER_ID>'	+ ISNULL(@strVendorAccountNo,'')		+ '</PARTNER_ID>'
+	Set @strXml +=	'</E1ADRM1>'
+
+	Set @strXml += '<E1EDT13 SEGMENT="1">'
 	Set @strXml += '<QUALF>'	+ '015'			+ '</QUALF>'
 	Set @strXml += '<NATANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmScheduledDate,112),'')		+ '</NATANF>'
-	Set @strXml +=	'</E1EDL13>'
+	Set @strXml +=	'</E1EDT13>'
 
 	Delete From @tblDetail
 
@@ -143,7 +152,7 @@ Begin
 		strSubLocation,strStorageLocation,strContainerNo,dblQuantity,strUOM,strPONo,strPOLineItemNo,strShipItemRefNo,strRowState,strCommodityCode)
 	Select sd.intLoadStgId,sd.intLGLoadDetailStgId,sd.intLoadId,sd.intLoadDetailId,
 		(ROW_NUMBER() OVER(ORDER BY intLGLoadDetailStgId ASC)) strDeliveryItemNo,'',sd.strItemNo,
-		sd.strSubLocationName,sd.strStorageLocationName,sd.strExternalPOBatchNumber,sd.dblDeliveredQty,sd.strUnitOfMeasure,sd.strExternalPONumber,sd.strExternalPOItemNumber,sd.intLoadDetailId,sd.strRowState,sd.strCommodityCode
+		sd.strSubLocationName,sd.strStorageLocationName,sd.strExternalPOBatchNumber,sd.dblDeliveredQty,sd.strUnitOfMeasure,sd.strExternalPONumber,sd.strExternalPOItemNumber,sd.intSIDetailId,sd.strRowState,sd.strCommodityCode
 		From tblLGLoadDetailStg sd 
 		Where intLoadStgId=@intMinHeader
 
@@ -236,7 +245,7 @@ Begin
 		@intLoadStgId				=	intLoadStgId ,
 		@intLoadId					=	intLoadId,
 		@strTransactionType			=	strTransactionType,
-		@strLoadNumber				=	strLoadNumber,
+		@strLoadNumber				=	strShippingInstructionNumber,
 		@strContractBasis			=	strContractBasis ,--INCOTERMS1
 		@strContractBasisDesc		=	strContractBasisDesc ,--INCOTERMS2
 		@strBillOfLading			=	strBillOfLading , 
@@ -246,6 +255,9 @@ Begin
 		@strHeaderRowState			=	strRowState ,
 		@strFeedStatus				=	strFeedStatus
 	From tblLGLoadStg Where intLoadStgId=@intMinHeader
+
+	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
+	From tblLGLoadDetail ld Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityId Where intLoadId = @intLoadId
 
 	Set @strXml =  '<DELVRY07>'
 	Set @strXml += '<IDOC BEGIN="1">'
@@ -257,11 +269,11 @@ Begin
 		
 	--Header
 	Set @strXml += '<E1ELD20 SEGMENT="1">'
+	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
 	Set @strXml += '<INCO1>'	+ ISNULL(@strContractBasis,'')			+ '</INCO1>'
 	Set @strXml += '<INCO2>'	+ ISNULL(@strContractBasisDesc,'')		+ '</INCO2>'
 	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')			+ '</BOLNR>'
 	Set @strXml += '<TRAID>'	+ ISNULL(@strShippingLine,'')			+ '</TRAID>'
-	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
 	Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')				+ '</LIFEX>'
 
 	Set @strXml += '<E1EDL18 SEGMENT="1">'
@@ -270,10 +282,15 @@ Begin
 					+ '</QUALF>'
 	Set @strXml +=	'</E1EDL18>'
 
-	Set @strXml += '<E1EDL13 SEGMENT="1">'
+	Set @strXml += '<E1ADRM1 SEGMENT="1">'
+	Set @strXml += '<PARTNER_Q>'	+ 'WE'			+ '</PARTNER_Q>'
+	Set @strXml += '<PARTNER_ID>'	+ ISNULL(@strVendorAccountNo,'')		+ '</PARTNER_ID>'
+	Set @strXml +=	'</E1ADRM1>'
+
+	Set @strXml += '<E1EDT13 SEGMENT="1">'
 	Set @strXml += '<QUALF>'	+ '007'			+ '</QUALF>'
 	Set @strXml += '<NATANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmScheduledDate,112),'')		+ '</NATANF>'
-	Set @strXml +=	'</E1EDL13>'
+	Set @strXml +=	'</E1EDT13>'
 
 	Delete From @tblDetail
 
@@ -281,7 +298,7 @@ Begin
 		strSubLocation,strStorageLocation,strContainerNo,dblQuantity,strUOM,strPONo,strPOLineItemNo,strShipItemRefNo,strRowState,strCommodityCode)
 	Select sd.intLoadStgId,sd.intLGLoadDetailStgId,sd.intLoadId,sd.intLoadDetailId,
 		(ROW_NUMBER() OVER(ORDER BY intLGLoadDetailStgId ASC)) strDeliveryItemNo,'',sd.strItemNo,
-		sd.strSubLocationName,sd.strStorageLocationName,sd.strExternalPOBatchNumber,sd.dblDeliveredQty,sd.strUnitOfMeasure,sd.strExternalPONumber,sd.strExternalPOItemNumber,sd.intLoadDetailId,sd.strRowState,sd.strCommodityCode
+		sd.strSubLocationName,sd.strStorageLocationName,sd.strExternalPOBatchNumber,sd.dblDeliveredQty,sd.strUnitOfMeasure,sd.strExternalPONumber,sd.strExternalPOItemNumber,sd.intSIDetailId,sd.strRowState,sd.strCommodityCode
 		From tblLGLoadDetailStg sd
 		Where intLoadStgId=@intMinHeader
 
