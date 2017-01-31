@@ -36,6 +36,8 @@ BEGIN TRY
 	DECLARE @intSampleItemId INT
 	DECLARE @ysnRequireCustomerApproval BIT
 	DECLARE @intSampleControlPointId INT
+	DECLARE @intSeqNo INT
+	DECLARE @strMainLotNumber NVARCHAR(50)
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -254,48 +256,92 @@ BEGIN TRY
 
 	IF @intProductTypeId = 6 -- Lot
 	BEGIN
-		SELECT @strLotNumber = strLotNumber
-			,@intItemId = intItemId
-			,@intLocationId = intLocationId
-			,@intSubLocationId = intSubLocationId
-			,@intStorageLocationId = intStorageLocationId
-			,@intCurrentLotStatusId = intLotStatusId
-		FROM dbo.tblICLot
+		SELECT @strMainLotNumber = strLotNumber
+		FROM tblICLot
 		WHERE intLotId = @intProductValueId
 
-		IF @intCurrentLotStatusId = 4 -- Pre-Sanitized
-		BEGIN
-			IF @ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
-				SET @intLotStatusId = @intCurrentLotStatusId
-		END
+		DECLARE @LotData TABLE (
+			intSeqNo INT IDENTITY(1, 1)
+			,intLotId INT
+			,strLotNumber NVARCHAR(50)
+			,intItemId INT
+			,intLocationId INT
+			,intSubLocationId INT
+			,intStorageLocationId INT
+			,intLotStatusId INT
+			)
 
-		IF EXISTS (
-				SELECT *
+		INSERT INTO @LotData (
+			intLotId
+			,strLotNumber
+			,intItemId
+			,intLocationId
+			,intSubLocationId
+			,intStorageLocationId
+			,intLotStatusId
+			)
+		SELECT intLotId
+			,strLotNumber
+			,intItemId
+			,intLocationId
+			,intSubLocationId
+			,intStorageLocationId
+			,intLotStatusId
+		FROM dbo.tblICLot
+		WHERE strLotNumber = @strMainLotNumber
+
+		SELECT @intSeqNo = MIN(intSeqNo)
+		FROM @LotData
+
+		WHILE (@intSeqNo > 0)
+		BEGIN
+			SELECT @intLotId = intLotId
+				,@strLotNumber = strLotNumber
+				,@intItemId = intItemId
+				,@intLocationId = intLocationId
+				,@intSubLocationId = intSubLocationId
+				,@intStorageLocationId = intStorageLocationId
+				,@intCurrentLotStatusId = intLotStatusId
+			FROM @LotData
+			WHERE intSeqNo = @intSeqNo
+
+			IF @intCurrentLotStatusId = 4 -- Pre-Sanitized
+			BEGIN
+				IF @ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
+					SET @intLotStatusId = @intCurrentLotStatusId
+			END
+
+			IF EXISTS (
+					SELECT *
+					FROM tblQMControlPointLotStatus
+					WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+						AND intControlPointId = @intSampleControlPointId
+						AND ysnApprove = 1
+					)
+			BEGIN
+				SELECT @intLotStatusId = intLotStatusId
 				FROM tblQMControlPointLotStatus
 				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
 					AND intControlPointId = @intSampleControlPointId
-					AND ysnApprove=1
-				)
-		BEGIN
-			SELECT @intLotStatusId = intLotStatusId
-			FROM tblQMControlPointLotStatus
-			WHERE intCurrentLotStatusId = @intCurrentLotStatusId
-				AND intControlPointId = @intSampleControlPointId
-				AND ysnApprove=1
-		END
+					AND ysnApprove = 1
+			END
 
-		IF @intCurrentLotStatusId <> @intLotStatusId
-			AND @intSampleControlPointId <> 14
-		BEGIN
-			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
-				,@intNewLotStatusId = @intLotStatusId
-				,@intUserId = @intLastModifiedUserId
+			IF @intCurrentLotStatusId <> @intLotStatusId
+				AND @intSampleControlPointId <> 14
+			BEGIN
+				EXEC uspMFSetLotStatus @intLotId = @intLotId
+					,@intNewLotStatusId = @intLotStatusId
+					,@intUserId = @intLastModifiedUserId
+			END
+
+			SELECT @intSeqNo = MIN(intSeqNo)
+			FROM @LotData
+			WHERE intSeqNo > @intSeqNo
 		END
 	END
 
 	IF @intProductTypeId = 11 -- Parent Lot
 	BEGIN
-		DECLARE @intSeqNo INT
 		DECLARE @ParentLotData TABLE (
 			intSeqNo INT IDENTITY(1, 1)
 			,intLotId INT
@@ -348,18 +394,18 @@ BEGIN TRY
 			END
 
 			IF EXISTS (
-				SELECT *
-				FROM tblQMControlPointLotStatus
-				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
-					AND intControlPointId = @intSampleControlPointId
-					AND ysnApprove=1
-				)
+					SELECT *
+					FROM tblQMControlPointLotStatus
+					WHERE intCurrentLotStatusId = @intCurrentLotStatusId
+						AND intControlPointId = @intSampleControlPointId
+						AND ysnApprove = 1
+					)
 			BEGIN
 				SELECT @intLotStatusId = intLotStatusId
 				FROM tblQMControlPointLotStatus
 				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
 					AND intControlPointId = @intSampleControlPointId
-					AND ysnApprove=1
+					AND ysnApprove = 1
 			END
 
 			IF @intCurrentLotStatusId <> @intLotStatusId
