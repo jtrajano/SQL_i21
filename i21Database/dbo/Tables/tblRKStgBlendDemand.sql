@@ -1,18 +1,18 @@
 ﻿CREATE TABLE [dbo].[tblRKStgBlendDemand]
 (
        [intStgBlendDemandId] INT NOT NULL IDENTITY,
-       [intConcurrencyId] INT NOT NULL,  
-       [intItemId] int NOT NULL,
-       [strItemName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,   
-       [intSubLocationId] int NOT NULL,
-       [strSubLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NOT NULL,
-       [dblQuantity] numeric(38,20) NOT NULL,
+       [intConcurrencyId] INT NULL,  
+       [intItemId] int NULL,
+       [strItemName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,   
+       [intSubLocationId] int NULL,
+       [strSubLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+       [dblQuantity] numeric(38,20) NULL,
 	   [dblTotalDemand] numeric(38,20), 
-       [intUOMId] int NOT NULL,
-       [strUOM] NVARCHAR(50)  COLLATE Latin1_General_CI_AS  NOT NULL, 
+       [intUOMId] int NULL,
+       [strUOM] NVARCHAR(50)  COLLATE Latin1_General_CI_AS  NULL, 
 	   [intYear] INT,
 	   [intWeek] INT,
-       [strPeriod] NVARCHAR(20) COLLATE Latin1_General_CI_AS  NOT NULL, -- '2016 7'      
-
+       [strPeriod] NVARCHAR(20) COLLATE Latin1_General_CI_AS  NULL,
+	   [dtmNeedDate] DATE NULL,
        CONSTRAINT [PK_tblRKStgBlendDemand_intStgBlendDemandId] PRIMARY KEY ([intStgBlendDemandId])
 )
