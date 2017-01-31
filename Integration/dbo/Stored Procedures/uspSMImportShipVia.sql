@@ -180,6 +180,120 @@ BEGIN
 		insert into tblEMEntityType(intEntityId, intConcurrencyId, strType)
 		select @EntityId, 1, ''Ship Via''
 
+		IF NOT EXISTS (select top 1 * from [tblEMEntityTariffType] where [strTariffType] = ''Default'')
+		Begin
+			INSERT INTO [dbo].[tblEMEntityTariffType]
+					   ([strTariffType]
+					  ,[intConcurrencyId])
+					VALUES (''Default'', 1)
+		End
+
+		--INSERT SHIPVIa Tariff
+		INSERT INTO [dbo].[tblEMEntityTariff]
+				   ([intEntityId]
+				   ,[strDescription]
+				   ,[dtmEffectiveDate]
+				   ,[intEntityTariffTypeId]
+				   ,[intConcurrencyId])
+
+		SELECT SHP.intEntityShipViaId
+			  ,CMR.trcmr_class
+			  ,CONVERT(DATE, CAST(20170101 AS CHAR(12)), 112)
+			  ,TRT.intEntityTariffTypeId,1 
+		FROM trcmrmst CMR
+		INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = CMR.trcmr_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN [tblEMEntityTariffType] TRT ON TRT.strTariffType = ''DEFAULT''
+		WHERE SHP.intEntityShipViaId = @EntityId
+
+		DECLARE @EntityTraffiId			int
+		WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityTariff WHERE intEntityId = @EntityId )
+		BEGIN
+				select top 1 @EntityTraffiId = intEntityTariffId from tblEMEntityTariff
+
+		--INSERT Ship Via Tariff Category
+		INSERT INTO [dbo].[tblEMEntityTariffCategory]
+				   ([intEntityTariffId]
+				   ,[intCategoryId]
+				   ,[intConcurrencyId])
+		SELECT TRT.intEntityTariffId
+			  ,CAT.intCategoryId
+			  ,1
+		FROM [tblEMEntityTariff] TRT
+		INNER JOIN tblICCategory CAT ON CAT.strCategoryCode  COLLATE SQL_Latin1_General_CP1_CS_AS = TRT.strDescription  COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE TRT.intEntityTariffId = @EntityTraffiId
+
+		--INSERT Ship Via FuelSurcharges
+		INSERT INTO [dbo].[tblEMEntityTariffFuelSurcharge]
+				   ([intEntityTariffId]
+				   ,[dblFuelSurcharge]
+				   ,[dtmEffectiveDate]
+				   ,[intConcurrencyId])
+		SELECT  TAR.intEntityTariffId
+			   ,CRM.trcmr_fuel_surchrg1
+			   ,(CASE WHEN ISDATE(CRM.trcmr_eff_rev_dt1) = 1 THEN CONVERT(DATE,CAST(CRM.trcmr_eff_rev_dt1 AS CHAR(12)), 112) ELSE '' '' END)
+			   ,1
+			   FROM trcmrmst CRM
+		INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityShipViaId
+		AND TAR.strDescription COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_class  COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE trcmr_fuel_surchrg1 <> 0 AND TAR.intEntityTariffId = @EntityTraffiId
+
+		INSERT INTO [dbo].[tblEMEntityTariffFuelSurcharge]
+				   ([intEntityTariffId]
+				   ,[dblFuelSurcharge]
+				   ,[dtmEffectiveDate]
+				   ,[intConcurrencyId])
+		SELECT  TAR.intEntityTariffId
+			   ,CRM.trcmr_fuel_surchrg2
+			   ,(CASE WHEN ISDATE(CRM.trcmr_eff_rev_dt2) = 1 THEN CONVERT(DATE,CAST(CRM.trcmr_eff_rev_dt1 AS CHAR(12)), 112) ELSE '' '' END)
+			   ,1
+			   FROM trcmrmst CRM
+		INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityShipViaId
+		AND TAR.strDescription COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_class  COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE trcmr_fuel_surchrg2 <> 0 AND TAR.intEntityTariffId = @EntityTraffiId
+
+		INSERT INTO [dbo].[tblEMEntityTariffFuelSurcharge]
+				   ([intEntityTariffId]
+				   ,[dblFuelSurcharge]
+				   ,[dtmEffectiveDate]
+				   ,[intConcurrencyId])
+		SELECT  TAR.intEntityTariffId
+			   ,CRM.trcmr_fuel_surchrg3
+			   ,(CASE WHEN ISDATE(CRM.trcmr_eff_rev_dt3) = 1 THEN CONVERT(DATE,CAST(CRM.trcmr_eff_rev_dt1 AS CHAR(12)), 112) ELSE '' '' END)
+			   ,1
+			   FROM trcmrmst CRM
+		INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityShipViaId
+		AND TAR.strDescription COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_class  COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE trcmr_fuel_surchrg3 <> 0 AND TAR.intEntityTariffId = @EntityTraffiId
+		
+		--INSERT Ship Via Tariff MILAGE 
+		INSERT INTO [dbo].[tblEMEntityTariffMileage]
+				   ([intEntityTariffId]
+				   ,[intFromMiles]
+				   ,[intToMiles]
+				   ,[dblCostRatePerUnit]
+				   ,[dblInvoiceRatePerUnit]
+				   ,[intConcurrencyId])
+
+		SELECT  TAR.intEntityTariffId
+			   ,CASE WHEN (MDT.trcdt_seq_no = 1) THEN 0 
+				ELSE 1 + (select trcdt_thru_miles from trcdtmst where trcdt_seq_no = MDT. trcdt_seq_no-1
+											 AND trcdt_carrier = MDT.trcdt_carrier AND trcdt_class = MDT.trcdt_class)
+				END
+			   ,MDT.trcdt_thru_miles
+			   ,MDT.trcdt_cost_rt_per_un
+			   ,MDT.trcdt_invc_rt_per_un
+			   ,1	 
+		FROM trcdtmst MDT
+		INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = MDT.trcdt_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityShipViaId
+		AND TAR.strDescription COLLATE SQL_Latin1_General_CP1_CS_AS = MDT.trcdt_class  COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE TAR.intEntityTariffId = @EntityTraffiId
+
+		END
+
 		delete from @ImportShipVia where strShipViaOriginKey = @CurKey
 	end
 END
