@@ -72,7 +72,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemUOMMap());
             modelBuilder.Configurations.Add(new tblICItemUPCMap());
             modelBuilder.Configurations.Add(new tblICItemVendorXrefMap());
-            modelBuilder.Configurations.Add(new tblICLineOfBusinessMap());
+            modelBuilder.Configurations.Add(new tblSMLineOfBusinessMap());
             modelBuilder.Configurations.Add(new tblICLotStatusMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
             modelBuilder.Configurations.Add(new tblICM2MComputationMap());

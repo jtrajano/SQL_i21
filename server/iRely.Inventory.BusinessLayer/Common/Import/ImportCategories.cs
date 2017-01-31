@@ -56,13 +56,52 @@ namespace iRely.Inventory.BusinessLayer
                             valid = false;
                         break;
                     case "line of business":
-                        lu = InsertAndOrGetLookupId<tblICLineOfBusiness>(
+                        // Get the default sales person
+                        int intEntitySalespersonId = 0; 
+
+                        var query = "SELECT intEntitySalespersonId, strSalespersonId, strName FROM vyuEMSalesperson";
+                        IEnumerable<vyuEMSalesperson> salesReps = context.ContextManager.Database.SqlQuery<vyuEMSalesperson>(query);
+                        try
+                        {
+                            vyuEMSalesperson salesRep = salesReps.First();
+
+                            if (salesRep != null)
+                                intEntitySalespersonId = salesRep.intEntitySalespersonId;
+                            else
+                            {
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Can't find default Sales Rep for Line of Business: " + value + '.',
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                dr.Info = INFO_WARN;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Message = "Can't find default Sales Rep for Line of Business: " + value + '.',
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                        }
+
+                        // Find or Insert a new Line of Business record. 
+                        lu = InsertAndOrGetLookupId<tblSMLineOfBusiness>(
                             context,
                             m => m.strLineOfBusiness == value,
                             e => e.intLineOfBusinessId,
-                            new tblICLineOfBusiness()
+                            new tblSMLineOfBusiness()
                             {
-                                strLineOfBusiness = value
+                                strLineOfBusiness = value,
+                                intEntityId = intEntitySalespersonId
                             }, out inserted);
                         if (inserted)
                         {
@@ -170,6 +209,13 @@ namespace iRely.Inventory.BusinessLayer
         protected override int GetPrimaryKeyId(ref tblICCategory entity)
         {
             return entity.intCategoryId;
+        }
+        
+        public class vyuEMSalesperson
+        {
+            public int intEntitySalespersonId { get; set; }
+            public string strSalespersonId { get; set; }
+            public string strName { get; set; }
         }
     }
 }

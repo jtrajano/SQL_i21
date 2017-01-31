@@ -15,6 +15,7 @@
         "hidden": false,
         "icon": null,
         "layout": "fit",
+        "margin": "",
         "maximizable": true,
         "minHeight": 560,
         "minWidth": null,
@@ -271,7 +272,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "container|align": "stretch",
-                                        "container|padding": 5,
+                                        "container|padding": null,
                                         "designer|displayName": "container",
                                         "layout": "hbox",
                                         "layout|flex": null
@@ -290,7 +291,7 @@
                                                 "container|align": "stretch",
                                                 "designer|displayName": "container",
                                                 "layout": "vbox",
-                                                "layout|flex": 1.1,
+                                                "layout|flex": 1.25,
                                                 "layout|margins": null,
                                                 "margin": "0 5 0 0 "
                                             },
@@ -478,27 +479,7 @@
                                                     },
                                                     "name": "MyCheckbox43",
                                                     "designerId": "4b49a370-474e-49f5-9267-283a0eb444dd"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.container.Container",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1,
-                                                "layout|margins": null,
-                                                "margin": "0 1 0 5"
-                                            },
-                                            "name": "MyContainer48",
-                                            "designerId": "e6cdf274-a2f6-4656-bdd9-1f2a668dcb18",
-                                            "cn": [
+                                                },
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
                                                     "reference": {
@@ -735,7 +716,27 @@
                                                             "type": "string"
                                                         }
                                                     ]
-                                                },
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": 2,
+                                                "layout|margins": null,
+                                                "margin": null
+                                            },
+                                            "name": "MyContainer48",
+                                            "designerId": "e6cdf274-a2f6-4656-bdd9-1f2a668dcb18",
+                                            "cn": [
                                                 {
                                                     "type": "Ext.container.Container",
                                                     "reference": {
@@ -745,7 +746,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "container|align": "stretch",
-                                                        "container|padding": "5 0 0 0",
+                                                        "container|padding": null,
                                                         "designer|displayName": "container",
                                                         "height": 154,
                                                         "layout": "hbox",
@@ -770,7 +771,7 @@
                                                                 "height": 178,
                                                                 "itemId": "grdTax",
                                                                 "layout|flex": 1,
-                                                                "margin": null,
+                                                                "margin": "1 0 0 0",
                                                                 "title": "Taxes"
                                                             },
                                                             "name": "MyGridPanel4",
@@ -845,7 +846,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter130",
+                                                                            "name": "filter1",
                                                                             "designerId": "71ba6869-8472-4cc0-b05f-12081a55f44d",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -1053,7 +1054,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter131",
+                                                            "name": "filter11",
                                                             "designerId": "53804780-f5bc-480e-aa2f-13d727814dbe",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -1407,7 +1408,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter12",
                                                     "designerId": "15a1d931-71e4-4cbc-8963-0531112b0fe0",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1631,7 +1632,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter133",
+                                                    "name": "filter13",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1881,7 +1882,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter14",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3134,7 +3135,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging1",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

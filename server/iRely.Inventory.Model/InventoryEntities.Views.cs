@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets31160cc9271043f8c1b5b99fd6a19a7812582a49694038d05a50e40e82f909ec))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetse8661e1e5106518890ac9c2631d071353f0d085984f4f82896c9b7919a4b7ec7))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets31160cc9271043f8c1b5b99fd6a19a7812582a49694038d05a50e40e82f909ec : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetse8661e1e5106518890ac9c2631d071353f0d085984f4f82896c9b7919a4b7ec7 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "31160cc9271043f8c1b5b99fd6a19a7812582a49694038d05a50e40e82f909ec"; }
+            get { return "e8661e1e5106518890ac9c2631d071353f0d085984f4f82896c9b7919a4b7ec7"; }
         }
 
         /// <summary>
@@ -1157,12 +1157,12 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView221();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICLineOfBusiness")
+            if (extentName == "CodeFirstDatabase.tblSMLineOfBusiness")
             {
                 return GetView222();
             }
 
-            if (extentName == "InventoryEntities.tblICLineOfBusinesses")
+            if (extentName == "InventoryEntities.tblSMLineOfBusinesses")
             {
                 return GetView223();
             }
@@ -8982,42 +8982,42 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICLineOfBusiness.
+        /// Gets the view for CodeFirstDatabase.tblSMLineOfBusiness.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView222()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICLineOfBusiness
-        [CodeFirstDatabaseSchema.tblICLineOfBusiness](T1.tblICLineOfBusiness_intLineOfBusinessId, T1.tblICLineOfBusiness_strLineOfBusiness, T1.tblICLineOfBusiness_intSort, T1.tblICLineOfBusiness_intConcurrencyId)
+    SELECT VALUE -- Constructing tblSMLineOfBusiness
+        [CodeFirstDatabaseSchema.tblSMLineOfBusiness](T1.tblSMLineOfBusiness_intLineOfBusinessId, T1.tblSMLineOfBusiness_strLineOfBusiness, T1.tblSMLineOfBusiness_intEntityId, T1.tblSMLineOfBusiness_intConcurrencyId)
     FROM (
         SELECT 
-            T.intLineOfBusinessId AS tblICLineOfBusiness_intLineOfBusinessId, 
-            T.strLineOfBusiness AS tblICLineOfBusiness_strLineOfBusiness, 
-            T.intSort AS tblICLineOfBusiness_intSort, 
-            T.intConcurrencyId AS tblICLineOfBusiness_intConcurrencyId, 
+            T.intLineOfBusinessId AS tblSMLineOfBusiness_intLineOfBusinessId, 
+            T.strLineOfBusiness AS tblSMLineOfBusiness_strLineOfBusiness, 
+            T.intEntityId AS tblSMLineOfBusiness_intEntityId, 
+            T.intConcurrencyId AS tblSMLineOfBusiness_intConcurrencyId, 
             True AS _from0
-        FROM InventoryEntities.tblICLineOfBusinesses AS T
+        FROM InventoryEntities.tblSMLineOfBusinesses AS T
     ) AS T1");
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblICLineOfBusinesses.
+        /// Gets the view for InventoryEntities.tblSMLineOfBusinesses.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView223()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICLineOfBusinesses
-        [iRely.Inventory.Model.tblICLineOfBusiness](T1.tblICLineOfBusiness_intLineOfBusinessId, T1.tblICLineOfBusiness_strLineOfBusiness, T1.tblICLineOfBusiness_intSort, T1.tblICLineOfBusiness_intConcurrencyId)
+    SELECT VALUE -- Constructing tblSMLineOfBusinesses
+        [iRely.Inventory.Model.tblSMLineOfBusiness](T1.tblSMLineOfBusiness_intLineOfBusinessId, T1.tblSMLineOfBusiness_strLineOfBusiness, T1.tblSMLineOfBusiness_intEntityId, T1.tblSMLineOfBusiness_intConcurrencyId)
     FROM (
         SELECT 
-            T.intLineOfBusinessId AS tblICLineOfBusiness_intLineOfBusinessId, 
-            T.strLineOfBusiness AS tblICLineOfBusiness_strLineOfBusiness, 
-            T.intSort AS tblICLineOfBusiness_intSort, 
-            T.intConcurrencyId AS tblICLineOfBusiness_intConcurrencyId, 
+            T.intLineOfBusinessId AS tblSMLineOfBusiness_intLineOfBusinessId, 
+            T.strLineOfBusiness AS tblSMLineOfBusiness_strLineOfBusiness, 
+            T.intEntityId AS tblSMLineOfBusiness_intEntityId, 
+            T.intConcurrencyId AS tblSMLineOfBusiness_intConcurrencyId, 
             True AS _from0
-        FROM CodeFirstDatabase.tblICLineOfBusiness AS T
+        FROM CodeFirstDatabase.tblSMLineOfBusiness AS T
     ) AS T1");
         }
 

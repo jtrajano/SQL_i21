@@ -658,7 +658,8 @@ Ext.define('Inventory.view.CategoryViewController', {
     },
 
     onLineOfBusinessDrilldown: function() {
-        iRely.Functions.openScreen('Inventory.view.LineOfBusiness', {viewConfig: { modal: true }});
+        //iRely.Functions.openScreen('Inventory.view.LineOfBusiness', {viewConfig: { modal: true }});
+        iRely.Functions.openScreen('i21.view.LineOfBusiness', {viewConfig: { modal: true }});
     },
 
     onTaxClassHeaderClick: function(menu, column) {

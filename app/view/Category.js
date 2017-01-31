@@ -39,6 +39,7 @@ Ext.define('Inventory.view.Category', {
 
     height: 560,
     hidden: false,
+    margin: '',
     minHeight: 560,
     width: 860,
     layout: 'fit',
@@ -151,13 +152,12 @@ Ext.define('Inventory.view.Category', {
                                                 xtype: 'container',
                                                 layout: {
                                                     type: 'hbox',
-                                                    align: 'stretch',
-                                                    padding: 5
+                                                    align: 'stretch'
                                                 },
                                                 items: [
                                                     {
                                                         xtype: 'container',
-                                                        flex: 1.1,
+                                                        flex: 1.25,
                                                         margin: '0 5 0 0 ',
                                                         layout: {
                                                             type: 'vbox',
@@ -237,18 +237,7 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'chkSalesAnalysisByTon',
                                                                 fieldLabel: 'Sales Analysis by Ton',
                                                                 labelWidth: 130
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 1 0 5',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
+                                                            },
                                                             {
                                                                 xtype: 'combobox',
                                                                 hidden: true,
@@ -380,15 +369,24 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130,
                                                                 displayField: 'strUnitMeasure',
                                                                 valueField: 'intCategoryUOMId'
-                                                            },
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 2,
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 1,
                                                                 height: 154,
                                                                 layout: {
                                                                     type: 'hbox',
-                                                                    align: 'stretch',
-                                                                    padding: '5 0 0 0'
+                                                                    align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
@@ -396,6 +394,7 @@ Ext.define('Inventory.view.Category', {
                                                                         flex: 1,
                                                                         height: 178,
                                                                         itemId: 'grdTax',
+                                                                        margin: '1 0 0 0',
                                                                         header: false,
                                                                         title: 'Taxes',
                                                                         columnLines: true,

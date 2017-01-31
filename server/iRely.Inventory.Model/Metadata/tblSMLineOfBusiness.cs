@@ -9,10 +9,10 @@ using iRely.Common;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICLineOfBusiness : BaseEntity
+    public class tblSMLineOfBusiness : BaseEntity
     {
         public int intLineOfBusinessId { get; set; }
         public string strLineOfBusiness { get; set; }
-        public int intSort { get; set; }
+        public int intEntityId { get; set; }
     }
 }

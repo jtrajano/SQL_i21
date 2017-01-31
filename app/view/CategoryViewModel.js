@@ -5,14 +5,15 @@ Ext.define('Inventory.view.CategoryViewModel', {
     requires: [
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedCompactItem',
-        'Inventory.store.BufferedLineOfBusiness',
+        //'Inventory.store.BufferedLineOfBusiness',
         'Inventory.store.BufferedCategoryLocation',
         'Inventory.store.BufferedCategoryUOM',
         'EntityManagement.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.TaxClassBuffered',
         'Store.store.SubCategoryBuffered',
-        'GeneralLedger.store.BufAccountCategoryGroup'
+        'GeneralLedger.store.BufAccountCategoryGroup',
+        'i21.store.LineOfBusinessBuffered'
     ],
 
     stores: {
@@ -58,7 +59,8 @@ Ext.define('Inventory.view.CategoryViewModel', {
             ]
         },
         linesOfBusiness: {
-            type: 'icbufferedlineofbusiness'
+            //type: 'icbufferedlineofbusiness'
+            type: 'smlineofbusinessbuffered'
         },
         costingMethods: {
             autoLoad: true,

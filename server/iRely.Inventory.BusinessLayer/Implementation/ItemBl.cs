@@ -673,9 +673,6 @@ namespace iRely.Inventory.BusinessLayer
             string locationFromPreviousPage = "";
             string itemFromPreviousPage = "";
 
-            decimal? dblRootBalance = 0;
-            decimal? dblRootQty = 0;
-
             // If it is not the starting page, retrieve the previous page data. 
             if (param.start > 0)
             {

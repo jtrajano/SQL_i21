@@ -3,18 +3,18 @@ using System.Data.Entity.ModelConfiguration;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICLineOfBusinessMap: EntityTypeConfiguration<tblICLineOfBusiness>
+    public class tblSMLineOfBusinessMap: EntityTypeConfiguration<tblSMLineOfBusiness>
     {
-        public tblICLineOfBusinessMap()
+        public tblSMLineOfBusinessMap()
         {
             // Primary Key
             this.HasKey(t => t.intLineOfBusinessId);
 
             // Table & Column Mappings
-            this.ToTable("tblICLineOfBusiness");
-            this.Property(t => t.intLineOfBusinessId).HasColumnName("intLineOfBusinessId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.ToTable("tblSMLineOfBusiness");
+            this.Property(t => t.intLineOfBusinessId).HasColumnName("intLineOfBusinessId");            
             this.Property(t => t.strLineOfBusiness).HasColumnName("strLineOfBusiness");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
         }
     }
 }

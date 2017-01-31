@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace iRely.Inventory.BusinessLayer
 {
-    public class ImportLineOfBusiness : ImportDataLogic<tblICLineOfBusiness>
+    public class ImportLineOfBusiness : ImportDataLogic<tblSMLineOfBusiness>
     {
         protected override string[] GetRequiredFields()
         {
             return new string[] { "line of business" };
         }
 
-        protected override tblICLineOfBusiness ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
+        protected override tblSMLineOfBusiness ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
         {
-            tblICLineOfBusiness fc = new tblICLineOfBusiness();
+            tblSMLineOfBusiness fc = new tblSMLineOfBusiness();
             bool valid = true;
             for (var i = 0; i < fieldCount; i++)
             {
@@ -38,14 +38,14 @@ namespace iRely.Inventory.BusinessLayer
             if(!valid)
                 return null;
 
-            if (!context.GetQuery<tblICLineOfBusiness>().Any(t => t.strLineOfBusiness == fc.strLineOfBusiness))
+            if (!context.GetQuery<tblSMLineOfBusiness>().Any(t => t.strLineOfBusiness == fc.strLineOfBusiness))
             {
-                context.AddNew<tblICLineOfBusiness>(fc);
+                context.AddNew<tblSMLineOfBusiness>(fc);
             }
             return fc;
         }
 
-        protected override int GetPrimaryKeyId(ref tblICLineOfBusiness entity)
+        protected override int GetPrimaryKeyId(ref tblSMLineOfBusiness entity)
         {
             return entity.intLineOfBusinessId;
         }
