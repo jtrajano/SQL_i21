@@ -8,7 +8,7 @@ BEGIN
 
 	SELECT	@intAccountId = inti21Id 
 	FROM	dbo.tblGLCOACrossReference 
-	WHERE	strExternalId = @strOriginAccountId
+	WHERE	ABS(strExternalId) = @strOriginAccountId
 
 	RETURN @intAccountId
 END
