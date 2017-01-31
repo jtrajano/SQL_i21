@@ -166,6 +166,7 @@ SELECT
 	,A.strCompanyName  
 	,A.strAddress  
 	,A.strCity + ', ' + A.strState + ' ' + A.strZip as strCityZipCode  
+	,A.strPhone
 	,SUM(intTotalForm) intTotalForm
 	,SUM(dblTotal) dblTotal
 	,(SELECT RIGHT(@yearParam,2)) AS strYear
@@ -199,3 +200,4 @@ GROUP BY intYear
 ,strZip
 ,strCompanyName
 ,strYear
+,strPhone
