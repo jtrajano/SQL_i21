@@ -76,7 +76,6 @@ END
 	BEGIN 
 		SELECT TOP 1
 			@intEquityPaySummaryId = tEP.intEquityPaySummaryId,
-			@intCustomerPatronId = tEP.dblEquityPaid,
 			@intCustomerPatronId = tEP.intCustomerPatronId,
 			@dblEquityPay = ROUND(tEP.dblEquityPaid,2),
 			@strVenderOrderNumber = tEP.strPaymentNumber + '' + CONVERT(NVARCHAR(MAX), tEP.intEquityPaySummaryId)

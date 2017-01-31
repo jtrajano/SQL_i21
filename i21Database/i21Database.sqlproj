@@ -3821,9 +3821,6 @@
     <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCCNotification.sql" />
     <Build Include="dbo\Views\vyuSMETExportTerm.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATRefundVoucherToAPBill.sql" />
-    <Build Include="dbo\Functions\fnPATGetCustomerRequiredDetailsForVoucher.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATProcessRefundsToVoucher.sql" />
     <Build Include="dbo\Tables\tblCTContractImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportFromXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
@@ -4925,6 +4922,7 @@
     <Build Include="dbo\Tables\tblQMControlPointLotStatus.sql" />
     <Build Include="dbo\Views\vyuCTGetNeedPlanWeek.sql" />
     <Build Include="dbo\Tables\tblSMMultiCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForProcessRefund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
