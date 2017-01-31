@@ -29,6 +29,7 @@ BEGIN TRY
 			intLoadId
 			,strTransactionType
 			,strLoadNumber
+			,strShippingInstructionNumber
 			,strContractBasis
 			,strContractBasisDesc
 			,strBillOfLading
@@ -50,6 +51,11 @@ BEGIN TRY
 				ELSE ''
 				END COLLATE Latin1_General_CI_AS
 			,strLoadNumber
+			,CASE 
+				WHEN ISNULL(L.strShippingInstructionNumber, '') = ''
+					THEN L.strLoadNumber
+				ELSE L.strShippingInstructionNumber
+				END
             ,strContractBasis = (
                 SELECT TOP 1 CB.strContractBasis
                 FROM tblCTContractHeader CH
@@ -81,6 +87,7 @@ BEGIN TRY
 		INSERT INTO tblLGLoadDetailStg(
 			 intLoadStgId
 			,intLoadId
+			,intSIDetailId
 			,intLoadDetailId
 			,intRowNumber
 			,strItemNo
@@ -105,6 +112,11 @@ BEGIN TRY
 			,strCommodityCode)
 		SELECT @intLoadStgId
 			,@intLoadId
+			,CASE 
+				WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
+					THEN LD.intLoadDetailId
+				ELSE LSID.intLoadDetailId
+				END AS intSIDetailId
 			,LD.intLoadDetailId
 			,Row_NUMBER() OVER (
 				PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
@@ -161,6 +173,9 @@ BEGIN TRY
 					THEN LD.intPCommodityId
 				ELSE LD.intSCommodityId
 				END
+		LEFT JOIN tblLGLoad L ON L.intLoadId = D.intLoadId
+		LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+		LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId AND D.intPContractDetailId = LSID.intPContractDetailId
 		WHERE LD.intLoadId = @intLoadId
 
 		IF (@intShipmentType = 1)
@@ -198,6 +213,7 @@ BEGIN TRY
 			intLoadId
 			,strTransactionType
 			,strLoadNumber
+			,strShippingInstructionNumber
 			,strContractBasis
 			,strContractBasisDesc
 			,strBillOfLading
@@ -218,6 +234,11 @@ BEGIN TRY
 				ELSE ''
 				END COLLATE Latin1_General_CI_AS
 			,strLoadNumber
+			,CASE 
+				WHEN ISNULL(L.strShippingInstructionNumber, '') = ''
+					THEN L.strLoadNumber
+				ELSE L.strShippingInstructionNumber
+				END
 			,strContractBasis = (
 				SELECT TOP 1 CB.strContractBasis
 				FROM tblCTContractHeader CH
@@ -246,6 +267,7 @@ BEGIN TRY
 		INSERT INTO tblLGLoadDetailLog(
 			 intLoadLogId
 			,intLoadId
+			,intSIDetailId
 			,intLoadDetailId
 			,intRowNumber
 			,strItemNo
@@ -269,6 +291,11 @@ BEGIN TRY
 			,strCommodityCode)
 		SELECT @intLoadStgId
 			,@intLoadId
+			,CASE 
+				WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
+					THEN LD.intLoadDetailId
+				ELSE LSID.intLoadDetailId
+				END AS intSIDetailId
 			,LD.intLoadDetailId
 			,Row_NUMBER() OVER (
 				PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
@@ -324,6 +351,9 @@ BEGIN TRY
 					THEN LD.intPCommodityId
 				ELSE LD.intSCommodityId
 				END
+		LEFT JOIN tblLGLoad L ON L.intLoadId = D.intLoadId
+		LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+		LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId AND D.intPContractDetailId = LSID.intPContractDetailId
 		WHERE LD.intLoadId = @intLoadId
 
 		IF (@intShipmentType = 1)

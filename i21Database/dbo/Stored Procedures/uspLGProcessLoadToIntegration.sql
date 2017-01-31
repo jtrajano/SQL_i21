@@ -24,11 +24,10 @@ BEGIN TRY
 		IF LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) = ''
 			SET @strModifiedColumns = NULL
 
-		SELECT @strSQL = 'INSERT INTO  tblLGLoadStg (' + ISNULL(@strModifiedColumns + ',','') + ' intLoadId,strRowState,strTransactionType,dtmFeedCreated)
-										SELECT	' + ISNULL(@strModifiedColumns + ',','') + 'intLoadId,''Modified'',strTransactionType,GETDATE()
+		SELECT @strSQL = 'INSERT INTO  tblLGLoadStg (' + ISNULL(@strModifiedColumns + ',','') + 'strLoadNumber,strShippingInstructionNumber, intLoadId,strRowState,strTransactionType,dtmFeedCreated)
+										SELECT	' + ISNULL(@strModifiedColumns + ',','') + 'strLoadNumber,strShippingInstructionNumber ,intLoadId,''Modified'',strTransactionType,GETDATE()
 										FROM	tblLGLoadLog
 										WHERE	intLoadLogId = @intLoadLogId '
-
 
 		EXEC sp_executesql @strSQL
 			,N'@intLoadLogId INT'
@@ -40,8 +39,8 @@ BEGIN TRY
 		IF LTRIM(RTRIM(ISNULL(@strModifiedColumns,''))) = ''
 			SET @strModifiedColumns = NULL
 
-		SELECT @strSQL = 'INSERT INTO  tblLGLoadDetailStg (' + ISNULL(@strModifiedColumns + ',','') + 'intLoadStgId,intLoadDetailId,strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strCommodityCode,strRowState,dtmFeedCreated)
-										SELECT	' + ISNULL(@strModifiedColumns + ',','') + CONVERT(NVARCHAR,@intLoadStgId)  + ',intLoadDetailId,strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strCommodityCode,''Modified'',GETDATE()
+		SELECT @strSQL = 'INSERT INTO  tblLGLoadDetailStg (' + ISNULL(@strModifiedColumns + ',','') + 'intLoadStgId,intSIDetailId,intLoadDetailId,strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strCommodityCode,strRowState,dtmFeedCreated)
+										SELECT	' + ISNULL(@strModifiedColumns + ',','') + CONVERT(NVARCHAR,@intLoadStgId)  + ',intSIDetailId,intLoadDetailId,strExternalPONumber,strExternalPOItemNumber,strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strCommodityCode,''Modified'',GETDATE()
 										FROM	tblLGLoadDetailLog
 										WHERE	intLGLoadDetailLogId = @intLoadDetailLogId '
 

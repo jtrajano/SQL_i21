@@ -39,9 +39,9 @@ SELECT -- Load Header
 			THEN 'Pick Lots'
 		END
 	,strTransportationMode = CASE 
-		WHEN intTransportationMode = 1 
+		WHEN LOAD.intTransportationMode = 1 
 			THEN 'Truck'
-		WHEN intTransportationMode = 2
+		WHEN LOAD.intTransportationMode = 2
 			THEN 'Ocean Vessel'
 		END
 	,LOAD.intTransUsedBy
@@ -87,7 +87,7 @@ SELECT -- Load Header
 	,LOAD.ysnDispatchMailSent
 	,LOAD.dtmDispatchMailSent
 	,LOAD.dtmCancelDispatchMailSent
-	,strShipmentStatus = CASE intShipmentStatus
+	,strShipmentStatus = CASE LOAD.intShipmentStatus
 		WHEN 1
 			THEN 'Scheduled'
 		WHEN 2
@@ -110,7 +110,7 @@ SELECT -- Load Header
 					THEN 'Outbound'
 				ELSE 'Drop-Ship'
 				END
-		END + ' - ' + CASE intShipmentStatus
+		END + ' - ' + CASE LOAD.intShipmentStatus
 		WHEN 1
 			THEN 'Scheduled'
 		WHEN 2
@@ -136,42 +136,42 @@ SELECT -- Load Header
 		LOAD.intPositionId,
 		LOAD.[intWeightUnitMeasureId],
 		strWeightUnitMeasure = [strUnitMeasure],
-		ISNULL([strBLNumber],'') AS [strBLNumber],
-		[dtmBLDate],
-		[strOriginPort],
-		[strDestinationPort],
-		[strDestinationCity],
-		[intTerminalEntityId],
+		ISNULL(LOAD.[strBLNumber],'') AS [strBLNumber],
+		LOAD.[dtmBLDate],
+		LOAD.[strOriginPort],
+		LOAD.[strDestinationPort],
+		LOAD.[strDestinationCity],
+		LOAD.[intTerminalEntityId],
 		[strTerminal] =  Terminal.strName,
-		[intShippingLineEntityId],
+		LOAD.[intShippingLineEntityId],
 		[strShippingLine] =  ShippingLine.strName,
-		[strServiceContractNumber],
-		[strPackingDescription],
-		[strMVessel],
-		[strMVoyageNumber],
-		[strFVessel],
-		[strFVoyageNumber],
-		[intForwardingAgentEntityId],
+		LOAD.[strServiceContractNumber],
+		LOAD.[strPackingDescription],
+		LOAD.[strMVessel],
+		LOAD.[strMVoyageNumber],
+		LOAD.[strFVessel],
+		LOAD.[strFVoyageNumber],
+		LOAD.[intForwardingAgentEntityId],
 		[strForwardingAgent] = ForwardingAgent.strName,
-		[strForwardingAgentRef],
-		[intInsurerEntityId],
+		LOAD.[strForwardingAgentRef],
+		LOAD.[intInsurerEntityId],
 		[strInsurer] = Insurer.strName,
-		[dblInsuranceValue],
-		[intInsuranceCurrencyId],
+		LOAD.[dblInsuranceValue],
+		LOAD.[intInsuranceCurrencyId],
 		[strInsuranceCurrency] = Currency.strCurrency,
-		[dtmDocsToBroker],
-		[strMarks],
-		[strMarkingInstructions],
-		[strShippingMode],
-		[intNumberOfContainers],
+		LOAD.[dtmDocsToBroker],
+		LOAD.[strMarks],
+		LOAD.[strMarkingInstructions],
+		LOAD.[strShippingMode],
+		LOAD.[intNumberOfContainers],
 		LOAD.[intContainerTypeId],
 		[strContainerType] = CT.strContainerType,
-		[intBLDraftToBeSentId],
-		[strBLDraftToBeSentType],
+		LOAD.[intBLDraftToBeSentId],
+		LOAD.[strBLDraftToBeSentType],
 		[strBLDraftToBeSent] = BLDraftToBeSent.strName,
-		[strDocPresentationType],
+		LOAD.[strDocPresentationType],
 		[strDocPresentationVal] = NP.strName,
-		[intDocPresentationId],
+		LOAD.[intDocPresentationId],
 		LOAD.[ysnPosted],
 		LOAD.[dtmPostedDate],
 		LOAD.[dtmDocsReceivedDate],
@@ -195,7 +195,8 @@ SELECT -- Load Header
 		LOAD.[intTransportationMode],
 		LOAD.[intShipmentStatus],
 		LOAD.intShipmentType,
-		LOAD.strExternalShipmentNumber
+		LOAD.strExternalShipmentNumber,
+		LOADSI.strLoadNumber AS strShippingInstructionNumber
 FROM tblLGLoad LOAD
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId
@@ -214,3 +215,4 @@ LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = LOAD.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = LOAD.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId] = LOAD.intDispatcherId
 LEFT JOIN tblCTPosition P ON LOAD.intPositionId = P.intPositionId
+LEFT JOIN tblLGLoad LOADSI ON LOADSI.intLoadId = LOAD.intLoadShippingInstructionId
