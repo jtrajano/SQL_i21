@@ -1,8 +1,9 @@
-﻿--EXEC uspQMSampleCopy 3195,3566,1
+﻿--EXEC uspQMSampleCopy 3195,3566,1,1
 CREATE PROCEDURE uspQMSampleCopy
 	@intOldLotId INT
 	,@intNewLotId INT
 	,@intLocationId INT
+	,@intUserId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -278,6 +279,20 @@ BEGIN TRY
 		,dtmLastModified
 	FROM tblQMTestResult
 	WHERE intSampleId = @intOldSampleId
+
+	IF (@intSampleId > 0)
+	BEGIN
+		DECLARE @StrDescription AS NVARCHAR(MAX) = 'Lot Split to Quality'
+
+		EXEC uspSMAuditLog @keyValue = @intSampleId
+			,@screenName = 'Quality.view.QualitySample'
+			,@entityId = @intUserId
+			,@actionType = 'Created'
+			,@actionIcon = 'small-new-plus'
+			,@changeDescription = @StrDescription
+			,@fromValue = ''
+			,@toValue = @strSampleNumber
+	END
 END TRY
 
 BEGIN CATCH

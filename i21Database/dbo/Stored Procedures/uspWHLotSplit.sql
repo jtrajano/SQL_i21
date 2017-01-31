@@ -251,6 +251,7 @@ BEGIN TRY
 	EXEC uspQMSampleCopy @intOldLotId = @intLotId
 		,@intNewLotId = @intNewLotId
 		,@intLocationId = @intLocationId
+		,@intUserId = @intUserId
 
 	COMMIT TRANSACTION
 END TRY

@@ -370,6 +370,20 @@ BEGIN TRY
 	WHERE PRD.intProductId = @intProductId
 		AND PC.intControlPointId = @intControlPointId
 	ORDER BY PP.intSequenceNo
+
+	IF (@intSampleId > 0)
+	BEGIN
+		DECLARE @StrDescription AS NVARCHAR(MAX) = 'Auto Populate from Work Order to Quality'
+
+		EXEC uspSMAuditLog @keyValue = @intSampleId
+			,@screenName = 'Quality.view.QualitySample'
+			,@entityId = @intUserId
+			,@actionType = 'Created'
+			,@actionIcon = 'small-new-plus'
+			,@changeDescription = @StrDescription
+			,@fromValue = ''
+			,@toValue = @strSampleNumber
+	END
 END TRY
 
 BEGIN CATCH
