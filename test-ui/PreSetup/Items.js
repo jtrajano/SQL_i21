@@ -22,8 +22,8 @@ StartTest (function (t) {
                 'NLTI - 01'
                 , 'Test Non Lotted Item Description'
                 , 4
-                , 'Category-2'
-                , 'Commodity-2'
+                , 'Category-1'
+                , 'Commodity-1'
                 , 'LB'
                 , 'LB'
                 , 10
@@ -39,8 +39,8 @@ StartTest (function (t) {
                 'LTI - 01'
                 , 'Test Lotted Item Description'
                 , 3
-                , 'Category-2'
-                , 'Commodity-2'
+                , 'Category-1'
+                , 'Commodity-1'
                 , 'LB'
                 , 'LB'
                 , 10
@@ -52,11 +52,11 @@ StartTest (function (t) {
         //Adding Stock to Items
         .displayText('===== Adding Stocks to Created items =====')
         .addFunction(function(next){
-            commonIC.addDirectIRNonLotted(t,next, 'ABC Trucking', '0001 - Fort Wayne','NLTI - 02', 'LB', 100, 10)
+            commonIC.addDirectIRNonLotted(t,next, 'ABC Trucking', '0001 - Fort Wayne','NLTI - 01', 'LB', 100, 10)
         })
 
         .addFunction(function(next){
-            commonIC.addDirectIRLotted(t,next, 'ABC Trucking', '0001 - Fort Wayne','LTI - 02', 'LB', 100, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+            commonIC.addDirectIRLotted(t,next, 'ABC Trucking', '0001 - Fort Wayne','LTI - 01', 'LB', 100, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
         })
         .displayText('===== Adding Stocks to Created Done =====')
 
