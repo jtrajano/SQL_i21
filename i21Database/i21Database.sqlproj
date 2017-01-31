@@ -4921,6 +4921,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql" />
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistoryTotal.sql" />
     <None Include="Scripts\Post-Deployment\TM\5_ObsoletingSeasonReset.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDuplicateStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
