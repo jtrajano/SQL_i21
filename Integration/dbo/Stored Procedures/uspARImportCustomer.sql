@@ -1262,6 +1262,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						intShipToId = @EntityLocationId
 					WHERE intEntityCustomerId = @EntityId
 
+					--INSERT TERMINAL TO CUSTOMER FREIGHT
+					EXEC uspEMImportPTTerminalToCustomer @originCustomer
 
 					COMMIT TRANSACTION
 					
