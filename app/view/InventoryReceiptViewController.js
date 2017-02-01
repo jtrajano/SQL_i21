@@ -5938,11 +5938,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     iRely.Functions.showErrorDialog(jsonData.message.statusText);
                 }
                 else {
-                    context.configuration.paging.store.load();
-                    var task = new Ext.util.DelayedTask(new function () {
-                        me.doOtherChargeTaxCalculate(win);
+                    context.configuration.paging.store.load({
+                        callback: function(records, options, success) {
+                            console.log(records);
+                            me.doOtherChargeTaxCalculate(win);
+                        }
                     });
-                    task.delay(1700);
+                    // var task = new Ext.util.DelayedTask(new function () {
+                        
+                    // });
+                    // task.delay(1700);
                 };
             }
             ,function(failureResponse) {
