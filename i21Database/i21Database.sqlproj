@@ -4926,6 +4926,10 @@
     <Build Include="dbo\Tables\tblQMSampleTypeUserRole.sql" />
     <Build Include="dbo\Tables\tblCFNetworkSiteTaxGroup.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerTaxExemption.sql" />
+    <Build Include="dbo\Functions\fnAESDecryptASym.sql" />
+    <Build Include="dbo\Functions\fnAESEncryptASym.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESDecryptASym.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESEncryptASym.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
