@@ -153,6 +153,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                         xtype: 'textfield',
                                                         flex: 1,
                                                         itemId: 'txtSymbol',
+                                                        margin: '0 5 0 0',
                                                         fieldLabel: 'Symbol',
                                                         labelWidth: 80
                                                     },
@@ -160,11 +161,20 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                         xtype: 'combobox',
                                                         flex: 1,
                                                         itemId: 'cboUnitType',
-                                                        margin: '0 0 0 5',
+                                                        margin: '0 5 0 0',
                                                         fieldLabel: 'Unit Type',
-                                                        labelWidth: 80,
+                                                        labelWidth: 60,
                                                         displayField: 'strDescription',
                                                         valueField: 'strDescription'
+                                                    },
+                                                    {
+                                                        xtype: 'combobox',
+                                                        itemId: 'cboDecimals',
+                                                        maxWidth: 110,
+                                                        minWidth: 110,
+                                                        width: 110,
+                                                        fieldLabel: 'Decimals',
+                                                        labelWidth: 57
                                                     }
                                                 ]
                                             },

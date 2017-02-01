@@ -283,7 +283,8 @@
                                                 "fieldLabel": "Symbol",
                                                 "itemId": "txtSymbol",
                                                 "labelWidth": 80,
-                                                "layout|flex": 1
+                                                "layout|flex": 1,
+                                                "margin": "0 5 0 0"
                                             },
                                             "name": "MyTextField1",
                                             "designerId": "4a8fca37-5409-418f-a224-25c69b5b1410"
@@ -299,13 +300,35 @@
                                                 "displayField": "strDescription",
                                                 "fieldLabel": "Unit Type",
                                                 "itemId": "cboUnitType",
-                                                "labelWidth": 80,
+                                                "labelWidth": 60,
                                                 "layout|flex": 1,
-                                                "margin": "0 0 0 5",
+                                                "margin": "0 5 0 0",
                                                 "valueField": "strDescription"
                                             },
                                             "name": "MyComboBox1",
                                             "designerId": "c39fa417-5b6a-4ab4-834c-156284f47467"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "displayField": null,
+                                                "fieldLabel": "Decimals",
+                                                "itemId": "cboDecimals",
+                                                "labelWidth": 57,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxWidth": 110,
+                                                "minWidth": 110,
+                                                "valueField": null,
+                                                "width": 110
+                                            },
+                                            "name": "MyComboBox77",
+                                            "designerId": "d9d992ca-8e63-480f-882c-41d63efc4231"
                                         }
                                     ]
                                 },
@@ -609,7 +632,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
