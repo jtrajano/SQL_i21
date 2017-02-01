@@ -41,7 +41,6 @@ SELECT
 INTO #tmpTimecard
 FROM tblPRTimecard T LEFT JOIN tblPREmployeeEarning E 
 	ON T.intEmployeeEarningId = E.intEmployeeEarningId 
-	AND T.intEntityEmployeeId = E.intEntityEmployeeId
 WHERE T.ysnApproved = 1
 	AND T.intPaycheckId IS NULL
 	AND T.intPayGroupDetailId IS NULL
@@ -57,7 +56,6 @@ GROUP BY
 
 DECLARE @intEmployeeEarningId INT
 DECLARE @intEmployeeDepartmentId INT
-DECLARE @intEntityEmployeeId INT
 DECLARE @intPayGroupDetailId INT
 
 /* Add Timecards to Pay Group Detail */
@@ -68,7 +66,6 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		SELECT TOP 1 
 			@intEmployeeEarningId	  = intEmployeeEarningId
 			,@intEmployeeDepartmentId = intEmployeeDepartmentId
-			,@intEntityEmployeeId = intEntityEmployeeId
 		FROM #tmpTimecard
 
 		/* Insert Regular Hours To Pay Group Detail */
@@ -99,7 +96,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TC.dblRegularHours
 			,TC.dblRegularHours
 			,EE.dblRateAmount
-			,TC.dblRegularHours * EE.dblRateAmount
+			,ROUND(TC.dblRegularHours * EE.dblRateAmount, 2)
 			,@dtmBegin 
 			,@dtmEnd
 			,1
@@ -114,7 +111,6 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				AND EE.intEntityEmployeeId = EL.intEntityEmployeeId
 		WHERE TC.intEmployeeEarningId = @intEmployeeEarningId
 		  AND TC.intEmployeeDepartmentId = @intEmployeeDepartmentId
-		  AND TC.intEntityEmployeeId = @intEntityEmployeeId
 		  AND EE.strCalculationType IN ('Hourly Rate', 'Fixed Amount')
 
 		/* Get the Created Pay Group Detail Id*/
@@ -146,7 +142,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TCE.dblOvertimeHours
 			,TCE.dblOvertimeHours
 			,EL.dblRateAmount 
-			,TCE.dblOvertimeHours * TCE.dblRateAmount
+			,ROUND(TCE.dblOvertimeHours * EL.dblRateAmount, 2)
 			,@dtmBegin 
 			,@dtmEnd
 			,1
@@ -158,8 +154,6 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			ON EL.intEmployeeEarningLinkId = TCE.intTypeEarningId
 				AND EL.intEntityEmployeeId = TCE.intEntityEmployeeId	
 		WHERE TCE.intEmployeeDepartmentId = @intEmployeeDepartmentId
-		  AND TCE.dblOvertimeHours > 0
-		  AND TCE.intEntityEmployeeId = @intEntityEmployeeId
 		  AND EL.strCalculationType IN ('Overtime')
 
 		/* Update Processed Timecards */
@@ -239,7 +233,6 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		DELETE FROM #tmpTimecard 
 		WHERE intEmployeeEarningId = @intEmployeeEarningId
 			AND intEmployeeDepartmentId = @intEmployeeDepartmentId 
-			AND intEntityEmployeeId = @intEntityEmployeeId
 	END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTimecard')) DROP TABLE #tmpTimecard
