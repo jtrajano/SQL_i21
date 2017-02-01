@@ -50,7 +50,7 @@ BEGIN TRY
 	JOIN	[tblEMEntityFarm]	EF	ON	EF.intFarmFieldId		=	CD.intFarmFieldId		LEFT
 	JOIN	tblCTBagMark		BM	ON	BM.intContractDetailId	=	CD.intContractDetailId	
 									AND	BM.ysnDefault			=	1						LEFT
-	JOIN	tblICItemUOM		NM	ON	NM.intWeightUOMId		=	CD.intNetWeightUOMId	LEFT
+	JOIN	tblICItemUOM		NM	ON	NM.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
 	JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
 	JOIN	tblICUnitMeasure	U7	ON	U7.intUnitMeasureId		=	WU.intUnitMeasureId		LEFT
 	JOIN	tblICUnitMeasure	NU	ON	NU.intUnitMeasureId		=	NM.intUnitMeasureId
