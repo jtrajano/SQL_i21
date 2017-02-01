@@ -242,6 +242,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
             this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
 
             this.HasOptional(p => p.vyuICInventoryReceiptItemLookUp)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
@@ -389,6 +391,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblContainerWeightPerQty).HasColumnName("dblContainerWeightPerQty").HasPrecision(19, 6);
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
             this.Property(t => t.strPricingType).HasColumnName("strPricingType");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
         }
     }
 

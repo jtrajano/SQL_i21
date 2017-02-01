@@ -31,8 +31,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
         'Logistics.store.BufferedShipmentReceiptContracts',
-        'Inventory.store.BufferedReceiptItemView'
-        //'AccountsPayable.common.extensions.GridExtension' -- Removed as per Erick and Lex.
+        'Inventory.store.BufferedReceiptItemView',
+        'i21.store.CurrencyExchangeRateTypeBuffered'
     ],
 
     data: {
@@ -328,6 +328,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             fields: {
                 name: 'strDescription'
             }
+        },
+        forexRateType: {
+            type: 'smcurrencyexchangeratetypebuffered'
         }
     },
 

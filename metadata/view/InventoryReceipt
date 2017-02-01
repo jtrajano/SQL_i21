@@ -2863,6 +2863,89 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "dataIndex": "strForexRateType",
+                                                                        "itemId": "colForexRateType",
+                                                                        "text": "Forex Rate Type",
+                                                                        "width": 150
+                                                                    },
+                                                                    "name": "MyColumn65",
+                                                                    "designerId": "56bc3181-4b92-42f4-9463-90cf9d469d63",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "columns": [
+                                                                                    "[",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'intCurrencyExchangeRateTypeId',",
+                                                                                    "\t\tdataType: 'numeric',",
+                                                                                    "\t\ttext: 'Forex Rate Type Id',",
+                                                                                    "\t\tflex: 1,",
+                                                                                    "        hidden: true",
+                                                                                    "\t},",
+                                                                                    "    {",
+                                                                                    "\t\tdataIndex: 'strCurrencyExchangeRateType',",
+                                                                                    "\t\tdataType: 'string',",
+                                                                                    "\t\ttext: 'Forex Rate Type',",
+                                                                                    "\t\tflex: 1",
+                                                                                    "\t},",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                                    "\t\tdataType: 'string',",
+                                                                                    "\t\ttext: 'Description',",
+                                                                                    "\t\tflex: 1",
+                                                                                    "\t}",
+                                                                                    "]"
+                                                                                ],
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strCurrencyExchangeRateType",
+                                                                                "itemId": "cboForexRateType",
+                                                                                "valueField": "strCurrencyExchangeRateType"
+                                                                            },
+                                                                            "name": "MyComboBox4",
+                                                                            "configAlternates": {
+                                                                                "columns": "array"
+                                                                            },
+                                                                            "designerId": "63927701-e392-4fdc-88c8-a5370742b90a",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "columns",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Number",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "dblForexRate",
+                                                                        "itemId": "colForexRate",
+                                                                        "text": "Forex Rate",
+                                                                        "width": 85
+                                                                    },
+                                                                    "name": "MyNumberColumn22",
+                                                                    "designerId": "8a1d2789-3a19-48c0-a552-b6942d947972"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
                                                                         "dataIndex": "strDescription",
                                                                         "itemId": "colSubLocation",
                                                                         "text": "Sub Location",

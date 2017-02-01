@@ -1458,6 +1458,47 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colForexRateType',
+                                                                                width: 150,
+                                                                                dataIndex: 'strForexRateType',
+                                                                                text: 'Forex Rate Type',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intCurrencyExchangeRateTypeId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Forex Rate Type Id',
+                                                                                            flex: 1,
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strCurrencyExchangeRateType',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Forex Rate Type',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strDescription',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Description',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboForexRateType',
+                                                                                    displayField: 'strCurrencyExchangeRateType',
+                                                                                    valueField: 'strCurrencyExchangeRateType'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colForexRate',
+                                                                                width: 85,
+                                                                                dataIndex: 'dblForexRate',
+                                                                                text: 'Forex Rate'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
                                                                                 itemId: 'colSubLocation',
                                                                                 width: 90,
                                                                                 dataIndex: 'strDescription',

@@ -250,6 +250,8 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
         public bool? ysnSubCurrency { get; set; }
         public int? intTaxGroupId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public decimal? dblForexRate { get; set; }
         
         private string _orderNumber;
         [NotMapped]
@@ -861,6 +863,26 @@ namespace iRely.Inventory.Model
                 _itemTaxGroup = value;
             }
         }
+        private string _forexRateType; 
+        [NotMapped]
+        public string strForexRateType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_forexRateType))
+                    if (vyuICInventoryReceiptItemLookUp != null)
+                        return vyuICInventoryReceiptItemLookUp.strForexRateType;
+                    else
+                        return null;
+                else
+                    return _forexRateType;
+            }
+            set
+            {
+                _forexRateType = value;
+            }
+        }
+
         /* private decimal _franchise;
          [NotMapped]
          public decimal dblFranchise
@@ -1023,6 +1045,7 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public string strPricingType { get; set; }
         public string strTaxGroup { get; set; }
+        public string strForexRateType { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
