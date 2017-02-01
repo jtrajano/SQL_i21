@@ -4929,6 +4929,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeNeedPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeNeedPlanDetail.sql" />
     <Build Include="dbo\Views\vyuPRUnpaidEmployeeReport.sql" />
+    <Build Include="dbo\Functions\fnGetLoadDetailLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
