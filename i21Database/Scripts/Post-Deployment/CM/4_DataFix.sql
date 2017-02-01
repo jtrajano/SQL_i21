@@ -117,8 +117,7 @@ print('/************END CM datafix on encryption and decryption****************?
 --This will correctly update the Bank Routing No to encrypted value
 IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) > 20) --Greater than 20 means value is already encrypted
 BEGIN
-	DECLARE @strRTN AS NVARCHAR(100),
-			@intBankId AS INT
+	DECLARE @strRTN AS NVARCHAR(100)
 
 	SELECT * INTO #tmpCMBank FROM tblCMBank
 
