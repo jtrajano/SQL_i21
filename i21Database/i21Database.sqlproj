@@ -4928,6 +4928,7 @@
     <Build Include="dbo\Views\vyuEMETExportCustomerTaxExemption.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeNeedPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeNeedPlanDetail.sql" />
+    <Build Include="dbo\Views\vyuPRUnpaidEmployeeReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
