@@ -1,6 +1,8 @@
 ﻿--CHECKS FOR PROFIT CENTER OR LOCATION IS PRESENT IN ACCOUNT STRUCTURE TABLE
 GO
-EXEC('IF EXISTS(SELECT  *  FROM  sys.objects WHERE    object_id = OBJECT_ID(N''[dbo].[tblGLAccountStructure]'') AND type in (N''U''))
+EXEC('
+IF EXISTS( SELECT TOP 1 1 FROM tblSMBuildNumber where strVersionNo like ''17%'' ) RETURN
+IF EXISTS(SELECT  *  FROM  sys.objects WHERE    object_id = OBJECT_ID(N''[dbo].[tblGLAccountStructure]'') AND type in (N''U''))
 	  BEGIN
 		 IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure)	
 			BEGIN
