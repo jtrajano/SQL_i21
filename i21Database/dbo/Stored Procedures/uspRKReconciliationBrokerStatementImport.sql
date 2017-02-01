@@ -826,7 +826,7 @@ IF EXISTS(SELECT 1 FROM @tblFinalRec where strStatus <> 'Success' )
 BEGIN
 
      INSERT INTO tblRKReconciliationBrokerStatementHeader
-       (intConcurrencyId,dtmReconciliationDate,dtmFilledDate,intEntityId,intBrokerageAccountId,intFutureMarketId,intCommodityId,strImportStatus,strComments)
+       (intConcurrencyId,dtmReconciliationDate,dtmFilledDate,intEntityId,intBrokerageAccountId,intFutureMarketId,intCommodityId,strImportStatus,strComments,ysnFreezed)
      SELECT 1 AS intConcurrencyId
      ,GETDATE() AS dtmReconciliationDate
      ,@dtmFilledDate AS dtmFilledDate
@@ -836,6 +836,7 @@ BEGIN
      ,@intCommodityId AS intCommodityId
      ,'Failed'  AS ysnImportStatus
      ,'' AS strComments
+	 ,0 as ysnFreezed
      SET @intReconciliationBrokerStatementHeaderId=SCOPE_IDENTITY()
      SET @strStatus = 'Failed'
 END  
@@ -843,7 +844,7 @@ ELSE
 BEGIN
 
      INSERT INTO tblRKReconciliationBrokerStatementHeader
-       (intConcurrencyId,dtmReconciliationDate,dtmFilledDate,intEntityId,intBrokerageAccountId,intFutureMarketId,intCommodityId,strImportStatus,strComments)
+       (intConcurrencyId,dtmReconciliationDate,dtmFilledDate,intEntityId,intBrokerageAccountId,intFutureMarketId,intCommodityId,strImportStatus,strComments,ysnFreezed)
      SELECT 1 AS intConcurrencyId
      ,GETDATE() AS dtmReconciliationDate
      ,@dtmFilledDate AS dtmFilledDate
@@ -853,6 +854,7 @@ BEGIN
      ,@intCommodityId AS intCommodityId
      ,'Success'  AS ysnImportStatus
      ,'' AS strComments
+	 ,1 as ysnFreezed
      SET @intReconciliationBrokerStatementHeaderId=SCOPE_IDENTITY()
      SET @strStatus = 'Success'
 
