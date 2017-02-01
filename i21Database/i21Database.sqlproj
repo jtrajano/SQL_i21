@@ -4926,6 +4926,7 @@
     <Build Include="dbo\Tables\tblQMSampleTypeUserRole.sql" />
     <Build Include="dbo\Tables\tblCFNetworkSiteTaxGroup.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerTaxExemption.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportDataFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeNeedPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeNeedPlanDetail.sql" />
     <Build Include="dbo\Views\vyuPRUnpaidEmployeeReport.sql" />

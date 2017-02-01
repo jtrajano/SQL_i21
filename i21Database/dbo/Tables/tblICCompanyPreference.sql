@@ -9,5 +9,7 @@
     [intReceiptSourceType] INT NULL, 
     [intShipmentOrderType] INT NULL, 
     [intShipmentSourceType] INT NULL, 
+    [strOriginLineOfBusiness] NVARCHAR(50) NULL, 
+    [strOriginLastTask] NVARCHAR(50) NULL, 
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
