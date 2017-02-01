@@ -17,7 +17,7 @@ END
 
 print('/************BEGIN CM datafix on encryption and decryption****************?')
 
-IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Cash Management Datafix for Asymmetric approach in Encryption and Decryption')
+IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Datafix for Asymmetric approach in Encryption and Decryption')
 BEGIN
 
 	--Backup tblCMBank table
@@ -54,16 +54,16 @@ BEGIN
 	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 	--Insert into temp table
-	SELECT intBankId, dbo.fnAESDecrypt(strRTN) as strRTN INTO #tmpCMBank FROM tblCMBank
+	SELECT intBankId, dbo.fnAESDecrypt(strRTN) as strRTN INTO #tmpCMBankDecrypted FROM tblCMBank
 
 	--loop thru the records and update tblCMBank.strRTN
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCMBank)
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCMBankDecrypted)
 	BEGIN
-		SELECT TOP 1 @intBankId = intBankId, @strRTNFromBank = strRTN FROM #tmpCMBank
+		SELECT TOP 1 @intBankId = intBankId, @strRTNFromBank = strRTN FROM #tmpCMBankDecrypted
 
 		UPDATE tblCMBank set strRTN = @strRTNFromBank WHERE intBankId = @intBankId
 
-		DELETE FROM #tmpCMBank WHERE intBankId = @intBankId
+		DELETE FROM #tmpCMBankDecrypted WHERE intBankId = @intBankId
 	END
 
 
@@ -104,11 +104,11 @@ BEGIN
 	ALTER TABLE tblCMBank ENABLE TRIGGER trgInsteadOfInsertCMBank
 	ALTER TABLE tblCMBank ENABLE TRIGGER trgInsteadOfUpdateCMBank
 
-	drop table #tmpCMBank
+	drop table #tmpCMBankDecrypted
 	drop table #tmpCMBankAccount
 
 	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
-	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Cash Management Datafix for Asymmetric approach in Encryption and Decryption','1')
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Datafix for Asymmetric approach in Encryption and Decryption','1')
 END
 
 
