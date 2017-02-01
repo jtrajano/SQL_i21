@@ -61,7 +61,7 @@ BEGIN
 		@dtmRebuildDate
 END
 
-BEGIN TRANSACTION 
+--BEGIN TRANSACTION 
 
 -- Backup Inventory
 DECLARE @strRemarks VARCHAR(200)
@@ -617,7 +617,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			PRINT 'Posting ' + @strBatchId
+			--PRINT 'Posting ' + @strBatchId
 
 			-- Setup the GL Description
 			SET @strGLDescription = 
@@ -1683,21 +1683,17 @@ BEGIN
 					AND strName <> 'Cost Adjustment'
 		)
 		BEGIN 
-			BEGIN TRY
-				EXEC dbo.uspGLBookEntries @GLEntries, 1 
-			END TRY
-			BEGIN CATCH
-				PRINT 'Error in posting the g/l entries.'
-				PRINT @intItemId 
-				PRINT @strTransactionId
-				PRINT @strBatchId
-				PRINT @strAccountToCounterInventory
-
-				SELECT * FROM @GLEntries
+			DECLARE @intReturnCode AS INT = 0;
+			EXEC @intReturnCode = dbo.uspGLBookEntries @GLEntries, 1 
+			
+			IF ISNULL(@intReturnCode, 0) <> 0 
+			BEGIN 
+				-- 'Unable to repost. Item id: {Item No}. Transaction id: {Trans Id}. Batch id: {Batch Id}. Account Category: {Account Category}.'
+				RAISERROR(80139, 11, 1, @strItemNo, @strTransactionId, @strBatchId, @strAccountToCounterInventory) 
 				GOTO _EXIT_WITH_ERROR
-			END CATCH 
+			END 
 		END 
-
+		
 		DELETE	FROM #tmpICInventoryTransaction
 		WHERE	strBatchId = @strBatchId
 				AND intTransactionId = @intTransactionId
@@ -1744,17 +1740,17 @@ BEGIN
 	END 
 END 
 
-
 ---- Compare the snapshot of the gl entries 
 --BEGIN
 --	EXEC uspICCompareGLSnapshotOnRebuildInventoryValuation
 --		@dtmRebuildDate
 --END
 
-COMMIT TRANSACTION 
+--COMMIT TRANSACTION 
 GOTO _EXIT
 
 _EXIT_WITH_ERROR: 
-ROLLBACK TRANSACTION 
+RETURN -1; 
+--ROLLBACK TRANSACTION 
 
 _EXIT: 

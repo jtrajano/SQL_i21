@@ -631,3 +631,8 @@ EXEC sp_addmessage 80137,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80138) EXEC sp_dropmessage 80138, 'us_english'	
 SET @strmessage = 'Ship Via Id %s is invalid.'
 EXEC sp_addmessage 80138,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80139) EXEC sp_dropmessage 80139, 'us_english'	
+SET @strmessage = 'Unable to repost. Item id: %s. Transaction id: %s. Batch id: %s. Account Category: %s.'
+EXEC sp_addmessage 80139,11,@strmessage,'us_english','False'
+
