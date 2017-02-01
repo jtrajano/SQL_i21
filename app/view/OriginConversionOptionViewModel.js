@@ -41,7 +41,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
         },
 
         disableCommodity: function(get) {
-            return get('currentTask') !== 'Commodity' || !get('hasLob');
+            return get('currentTask') !== 'Commodity' || !get('hasLob') || get('lineOfBusiness') !== 'Grain';
         },
 
         disableCategoryClass: function(get) {

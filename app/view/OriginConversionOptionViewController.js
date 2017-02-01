@@ -30,8 +30,9 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
         var type = null;
         var originType = null;
-        var originTypes = ["UOM", "Locations", "Commodity", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
-
+        var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
+        var grain = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
+        
         switch (button.itemId) {
             case "btnImportFuelCategories":
                 type = "FuelCategories";
@@ -142,8 +143,11 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 allowOverwrite: allowOverwrite
             });
         }
-        else if(originType !== null)
+        else if(originType !== null) {
+            if(lineOfBusiness === 'Grain')
+                originTypes = grain;
             this.importFromOrigins(this.view.viewModel, originTypes, originType, lineOfBusiness, win);
+        }
     },
 
     importFromOrigins: function(viewModel, originTypes, type, lineOfBusiness, win) {
@@ -166,24 +170,24 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
             success: function(data, status, jqXHR) {
                 iRely.Msg.close();
-                var type = 'info';
+                var msgtype = 'info';
                 var msg = "File imported successfully.";
                 var json = JSON.parse(jqXHR.responseText);
                 if (json.result.Info == "warning") {
-                    type = "warning";
+                    msgtype = "warning";
                     msg = "File imported successfully with warnings.";
                 }
                 if(json.result.Info == "error") {
-                    type = "warning";
+                    msgtype = "warning";
                     msg = "File imported successfully with errors.";
                 }
                 viewModel.set('lineOfBusiness', lineOfBusiness);
                 viewModel.set('currentTask', originTypes[type+1]);
 
-                i21.functions.showCustomDialog(type, 'ok', msg, function() {
+                i21.functions.showCustomDialog(msgtype, 'ok', msg, function() {
                     //win.close();
 
-                    if (data.messages !== null && data.messages.length > 0) {
+                    if (data.result.Messages !== null && data.result.Messages.length > 0) {
                         iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
                             data: data
                         });
