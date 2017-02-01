@@ -367,7 +367,7 @@ Begin
 			If UPPER(@strRowState)='DELETE'
 			Begin
 				Set @strItemXml += '<E1EDL19 SEGMENT="1">'
-				Set @strItemXml += '<QUALF>'  +  'DEL' + '<QUALF>' 
+				Set @strItemXml += '<QUALF>'  +  'DEL' + '</QUALF>' 
 				Set @strItemXml += '</E1EDL19>'
 			End
 			Else
@@ -375,7 +375,7 @@ Begin
 				If ISNULL(@ysnBatchSplit,0)=0 AND (UPPER(@strRowState)='ADDED' OR UPPER(@strRowState)='MODIFIED')
 				Begin
 					Set @strItemXml += '<E1EDL19 SEGMENT="1">'
-					Set @strItemXml += '<QUALF>'  +  'QUA' + '<QUALF>' 
+					Set @strItemXml += '<QUALF>'  +  'QUA' + '</QUALF>' 
 					Set @strItemXml += '</E1EDL19>'
 				End
 			End
@@ -395,7 +395,7 @@ Begin
 				Begin
 					Select @strContainerXml=COALESCE(@strContainerXml, '') 
 							+ '<E1EDL24 SEGMENT="1">'
-							+ '<POSNR>' + ISNULL(c.intLoadContainerId,'') + '</POSNR>' 
+							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,c.intLoadContainerId),'') + '</POSNR>' 
 							+ '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
 							+ '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 

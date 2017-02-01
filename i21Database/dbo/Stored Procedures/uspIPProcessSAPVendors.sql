@@ -33,17 +33,22 @@ Declare @strJson NVARCHAR(Max)
 Declare @dtmDate DateTime
 Declare @intUserId Int
 Declare @strUserName NVARCHAR(100)
+Declare @intCountryId INT
 
 DECLARE @tblEntityContactIdOutput table (intEntityId int)
 
-Select TOP 1 @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency From tblIPEntityStage Where strEntityType='Vendor'
+Select TOP 1 @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency,@strAccountNo=strAccountNo 
+From tblIPEntityStage Where strEntityType='Vendor'
 
 If ISNULL(@intStageEntityId,0)=0
 	RaisError('No data found.',16,1)
 
-Select @intEntityId=intEntityId From tblEMEntity Where strName=@strVendorName
+Select @intEntityId=intEntityVendorId From tblAPVendor Where strVendorAccountNum=@strAccountNo
 Select @intTermId=intTermID From tblSMTerm Where strTermCode=@strTerm
 Select @intCurrencyId=intCurrencyID From tblSMCurrency Where strCurrency=@strCurrency
+
+If ISNULL(@strAccountNo,'')=''
+	RaisError('Account No is required.',16,1)
 
 Begin Tran
 
@@ -54,6 +59,9 @@ Begin
 
 	If ISNULL(@intCurrencyId,0)=0
 		RaisError('Currency not found.',16,1)
+
+	If ISNULL(@strVendorName,'')=''
+		RaisError('Vendor Name is required.',16,1)
 
 	If (Select ISNULL(strCity,'') From tblIPEntityStage Where intStageEntityId=@intStageEntityId)=''
 		RaisError('City is required.',16,1)
@@ -66,6 +74,9 @@ Begin
 
 	If (Select ISNULL(strFirstName,'') From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId)=''
 		RaisError('Contact Name is required.',16,1)
+
+	Select @intCountryId=c.intCountryID,@strCountry=c.strCountry 
+	From tblIPEntityStage e Join  tblSMCountry c on e.strCountry=c.strISOCode Where intStageEntityId=@intStageEntityId
 
 	Exec uspSMGetStartingNumber 43,@strEntityNo OUT
 
@@ -94,14 +105,14 @@ Begin
 
 	--Entity Location
 	Insert Into tblEMEntityLocation(intEntityId,strLocationName,strAddress,strCity,strCountry,strZipCode,intTermsId,ysnDefaultLocation,ysnActive)
-	Select @intEntityId,LEFT(strCity,50),ISNULL(strAddress,'') + ' ' + ISNULL(strAddress1,'') ,strCity,strCountry,strZipCode,@intTermId,1,1
+	Select @intEntityId,LEFT(strCity,50),ISNULL(strAddress,'') + ' ' + ISNULL(strAddress1,'') ,strCity,@strCountry,strZipCode,@intTermId,1,1
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intEntityLocationId=SCOPE_IDENTITY()
 
 	--Vendor
-	Insert Into tblAPVendor(intEntityVendorId,intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit,strVendorAccountNum)
-	Select @intEntityId,@intCurrencyId,@strEntityNo,1,strTaxNo,@intEntityLocationId,@intEntityLocationId,strFLOId,0,0,0.0,strAccountNo
+	Insert Into tblAPVendor(intEntityVendorId,intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit,strVendorAccountNum,intTermsId)
+	Select @intEntityId,@intCurrencyId,@strEntityNo,1,strTaxNo,@intEntityLocationId,@intEntityLocationId,strFLOId,0,0,0.0,strAccountNo,@intTermId
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	--Add Contacts to Entity table
@@ -120,7 +131,7 @@ Begin
 
 	--Add Phone
 	Insert Into tblEMEntityPhoneNumber(intEntityId,strPhone,intCountryId)
-	Select t1.intEntityId,t2.strPhone,(Select TOP 1 intCountryID From tblSMCountry Where strCountry=(Select strCountry From tblEMEntityLocation Where intEntityLocationId=@intEntityLocationId)) 
+	Select t1.intEntityId,t2.strPhone,@intCountryId 
 	From
 	(Select ROW_NUMBER() OVER(ORDER BY intEntityId ASC) AS intRowNo,* from @tblEntityContactIdOutput) t1
 	Join
@@ -148,7 +159,7 @@ Else
 Begin --Update
 	Select TOP 1 @intEntityLocationId=intEntityLocationId From tblEMEntityLocation Where intEntityId=@intEntityId
 
-	Select @strAddress=strAddress,@strAddress1=strAddress1,@strCity=strCity,@strCountry=strCountry,@strZipCode=strZipCode,@strAccountNo=strAccountNo,
+	Select @strAddress=strAddress,@strAddress1=strAddress1,@strCity=strCity,@strCountry=strCountry,@strZipCode=strZipCode,
 	@strTaxNo=strTaxNo,@strFLOId=strFLOId 
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 	
@@ -159,10 +170,7 @@ Begin --Update
 	If ISNULL(@strCurrency,'/')<>'/' AND ISNULL(@intCurrencyId,0)=0
 		RaisError('Currency not found.',16,1)
 
-	If ISNULL(@strAccountNo,'/')<>'/'
-		RaisError('Account No is required.',16,1)
-
-	If ISNULL(@strCity,'/')<>'/'
+	If ISNULL(@strCity,'/')<>'/' AND ISNULL(@strCity,'')=''
 		RaisError('City is required.',16,1)
 
 	If ISNULL(@strAddress,'/')<>'/'
@@ -177,20 +185,24 @@ Begin --Update
 		Update tblEMEntityLocation Set strLocationName=@strCity,strCity=@strCity Where intEntityLocationId=@intEntityLocationId
 
 	If ISNULL(@strCountry,'/')<>'/'
-		Update tblEMEntityLocation Set strCountry=@strCountry Where intEntityLocationId=@intEntityLocationId
+		Update tblEMEntityLocation Set strCountry=(Select strCountry From tblSMCountry Where strISOCode=@strCountry) Where intEntityLocationId=@intEntityLocationId
 
 	If ISNULL(@strZipCode,'/')<>'/'
 		Update tblEMEntityLocation Set strZipCode=@strZipCode Where intEntityLocationId=@intEntityLocationId
 
 	If ISNULL(@strTerm,'/')<>'/'
-		Update tblEMEntityLocation Set intTermsId=@intTermId Where intEntityLocationId=@intEntityLocationId
+		Begin
+			Update tblEMEntityLocation Set intTermsId=@intTermId Where intEntityLocationId=@intEntityLocationId
+			Update tblAPVendor Set intTermsId=@intTermId Where intEntityVendorId=@intEntityId
+		End
+
+	--Entity table Update
+	If ISNULL(@strVendorName,'/')<>'/'
+		Update tblEMEntity Set strName=@strVendorName,strContactNumber=@strVendorName Where intEntityId=@intEntityId
 
 	--Vendor table update
 	If ISNULL(@strCurrency,'/')<>'/'
 		Update tblAPVendor Set intCurrencyId=@intCurrencyId Where intEntityVendorId=@intEntityId
-
-	If ISNULL(@strAccountNo,'/')<>'/'
-		Update tblAPVendor Set strVendorAccountNum=@strAccountNo Where intEntityVendorId=@intEntityId
 
 	If ISNULL(@strFLOId,'/')<>'/'
 		Update tblAPVendor Set strFLOId=@strFLOId Where intEntityVendorId=@intEntityId

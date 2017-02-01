@@ -74,14 +74,22 @@ Begin
 			RaisError(@ErrMsg,16,1)
 		End
 
-	If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemName=@strDescription)
+	If @ysnDeleted=1
+		Delete From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo
+	Else
 	Begin
-		Insert Into tblICItemContract(intItemId,strContractItemName,intItemLocationId)
-		Select @intItemId,@strDescription,intItemLocationId 
-		From tblICItemLocation Where intItemId=@intItemId
-
-		GOTO MOVE_TO_ARCHIVE
+		If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo) --Add
+		Begin
+			Insert Into tblICItemContract(intItemId,strContractItemNo,strContractItemName,intItemLocationId)
+			Select @intItemId,@strItemNo,@strDescription,intItemLocationId 
+			From tblICItemLocation Where intItemId=@intItemId
+		End
+		Else
+		Begin --Update
+			Update tblICItemContract Set strContractItemName=@strDescription Where intItemId=@intItemId AND strContractItemNo=@strItemNo
+		End
 	End
+	GOTO MOVE_TO_ARCHIVE
 End
 Else
 Begin --Inventory Item
