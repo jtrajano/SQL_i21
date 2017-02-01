@@ -15,8 +15,6 @@ BEGIN
 END
 
 
-print('/************BEGIN CM datafix on encryption and decryption****************?')
-
 IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Datafix for Asymmetric approach in Encryption and Decryption')
 BEGIN
 
@@ -54,16 +52,16 @@ BEGIN
 	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 	--Insert into temp table
-	SELECT intBankId, dbo.fnAESDecrypt(strRTN) as strRTN INTO #tmpCMBankDecrypted FROM tblCMBank
+	SELECT intBankId, dbo.fnAESDecrypt(strRTN) as strRTN INTO #tmpCMBank FROM tblCMBank
 
 	--loop thru the records and update tblCMBank.strRTN
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCMBankDecrypted)
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCMBank)
 	BEGIN
-		SELECT TOP 1 @intBankId = intBankId, @strRTNFromBank = strRTN FROM #tmpCMBankDecrypted
+		SELECT TOP 1 @intBankId = intBankId, @strRTNFromBank = strRTN FROM #tmpCMBank
 
 		UPDATE tblCMBank set strRTN = @strRTNFromBank WHERE intBankId = @intBankId
 
-		DELETE FROM #tmpCMBankDecrypted WHERE intBankId = @intBankId
+		DELETE FROM #tmpCMBank WHERE intBankId = @intBankId
 	END
 
 
@@ -104,7 +102,7 @@ BEGIN
 	ALTER TABLE tblCMBank ENABLE TRIGGER trgInsteadOfInsertCMBank
 	ALTER TABLE tblCMBank ENABLE TRIGGER trgInsteadOfUpdateCMBank
 
-	drop table #tmpCMBankDecrypted
+	drop table #tmpCMBank
 	drop table #tmpCMBankAccount
 
 	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
@@ -112,45 +110,60 @@ BEGIN
 END
 
 
-print('/************END CM datafix on encryption and decryption****************?')
-
 --This will correctly update the Bank Routing No to encrypted value
-IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) > 20) --Greater than 20 means value is already encrypted
-BEGIN
-	DECLARE @strRTN AS NVARCHAR(100)
+--IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) > 20) --Greater than 20 means value is already encrypted
+--BEGIN
+--	DECLARE @strRTN AS NVARCHAR(100)
 
-	SELECT * INTO #tmpCMBank FROM tblCMBank
+--	SELECT * INTO #tmpCMBank FROM tblCMBank
 
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCMBank)
-	BEGIN
-			--OPEN SYMMETRIC KEY i21EncryptionSymKey
-			--   DECRYPTION BY CERTIFICATE i21EncryptionCert
-			--   WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+--	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCMBank)
+--	BEGIN
+--			--OPEN SYMMETRIC KEY i21EncryptionSymKey
+--			--   DECRYPTION BY CERTIFICATE i21EncryptionCert
+--			--   WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
-				SELECT TOP 1
-				@intBankId = intBankId,
-				@strRTN = dbo.fnAESDecryptASym(strRTN)
-			    FROM #tmpCMBank
+--				SELECT TOP 1
+--				@intBankId = intBankId,
+--				@strRTN = dbo.fnAESDecryptASym(strRTN)
+--			    FROM #tmpCMBank
 
-			IF @strRTN IS NOT NULL OR @strRTN <> ''
-			BEGIN
-				UPDATE tblCMBank SET strRTN = @strRTN WHERE intBankId = @intBankId
-			END
+--			IF @strRTN IS NOT NULL OR @strRTN <> ''
+--			BEGIN
+--				UPDATE tblCMBank SET strRTN = @strRTN WHERE intBankId = @intBankId
+--			END
 
-			DELETE FROM #tmpCMBank WHERE intBankId = @intBankId
+--			DELETE FROM #tmpCMBank WHERE intBankId = @intBankId
 			
-			--CLOSE SYMMETRIC KEY i21EncryptionSymKey
-	END	
-END
+--			--CLOSE SYMMETRIC KEY i21EncryptionSymKey
+--	END	
+--END
 
 --This will update the Bank Routing No to encrypted value
-IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) < 20)
+IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) < 20) AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBank.strRTN')
 BEGIN
-	UPDATE tblCMBank SET strRTN = strRTN
+	--disable tlbCMBank triggers
+	ALTER TABLE tblCMBank DISABLE TRIGGER trgInsteadOfInsertCMBank
+	ALTER TABLE tblCMBank DISABLE TRIGGER trgInsteadOfUpdateCMBank
+
+	OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+	DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+
+	UPDATE tblCMBank SET strRTN =  dbo.fnAESEncryptASym(strRTN)
+
+	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
+
+	--enable tblCMBank triggers
+	ALTER TABLE tblCMBank ENABLE TRIGGER trgInsteadOfInsertCMBank
+	ALTER TABLE tblCMBank ENABLE TRIGGER trgInsteadOfUpdateCMBank
+
+	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Encrypt tblCMBank.strRTN','1')
 END	
 
 --This will update the Bank Account No to encrypted value
-IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strBankAccountNo) < 20)
+IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strBankAccountNo) < 20) AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strBankAccountNo')
 BEGIN
 
 	OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -160,10 +173,13 @@ BEGIN
 	UPDATE tblCMBankAccount SET strBankAccountNo = dbo.fnAESEncryptASym(strBankAccountNo)
 
 	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
+
+	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Encrypt tblCMBankAccount.strBankAccountNo','1')
 END	
 
 --This will update the  Routing No to encrypted value
-IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strRTN) < 20)
+IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strRTN) < 20) AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strRTN')
 BEGIN
 
 	OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -173,11 +189,14 @@ BEGIN
 	UPDATE tblCMBankAccount SET strRTN = dbo.fnAESEncryptASym(strRTN)
 
 	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
+
+	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Encrypt tblCMBankAccount.strRTN','1')
 END	
 
 
 --This will update the MICR Bank Account No to encrypted value
-IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strMICRBankAccountNo) < 20)
+IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strMICRBankAccountNo) < 20) AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strMICRBankAccountNo')
 BEGIN
 
 	OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -187,11 +206,14 @@ BEGIN
 	UPDATE tblCMBankAccount SET strMICRBankAccountNo = dbo.fnAESEncryptASym(strMICRBankAccountNo)
 
 	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
+
+	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Encrypt tblCMBankAccount.strMICRBankAccountNo','1')
 END	
 
 
 --This will update the MICR Routing No to encrypted value
-IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strMICRRoutingNo) < 20)
+IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strMICRRoutingNo) < 20) AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strMICRRoutingNo')
 BEGIN
 
 	OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -201,6 +223,9 @@ BEGIN
 	UPDATE tblCMBankAccount SET strMICRRoutingNo = dbo.fnAESEncryptASym(strMICRRoutingNo)
 
 	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
+
+	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Encrypt tblCMBankAccount.strMICRRoutingNo','1')
 END	
 
 print('/*******************  END Cash Management Data Fixess *******************/')
