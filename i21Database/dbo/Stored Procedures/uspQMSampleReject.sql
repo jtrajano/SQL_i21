@@ -61,6 +61,7 @@ BEGIN TRY
 		,@intApproveRejectUserId = S.intTestedById
 		,@intSampleItemId = S.intItemId
 		,@intSampleControlPointId = ST.intControlPointId
+		,@intCurrentLotStatusId = S.intLotStatusId
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	WHERE S.intSampleId = @intSampleId
@@ -90,78 +91,71 @@ BEGIN TRY
 	END
 
 	-- Wholesome Sweetener -- JIRA QC-240
-	IF @ysnRequireCustomerApproval = 1
-	BEGIN
-		IF (
-				@intProductTypeId = 6
-				OR @intProductTypeId = 11
-				) -- Lot / Parent Lot
-		BEGIN
-			DECLARE @intCustomsApprovalSampleCount INT
-			DECLARE @intOtherControlPointSampleCount INT
-			DECLARE @intBondedRejectionLotStatusId INT
-
-			SELECT @intCustomsApprovalSampleCount = COUNT(intSampleId)
-			FROM tblQMSample S
-			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
-			WHERE S.intProductTypeId = @intProductTypeId
-				AND S.intProductValueId = @intProductValueId
-				AND S.intSampleId <> @intSampleId
-				AND S.intSampleStatusId IN (
-					3
-					,4
-					)
-				AND ST.intControlPointId = 14 -- Customs Approval Sample
-
-			SELECT @intOtherControlPointSampleCount = COUNT(intSampleId)
-			FROM tblQMSample S
-			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
-			WHERE S.intProductTypeId = @intProductTypeId
-				AND S.intProductValueId = @intProductValueId
-				AND S.intSampleId <> @intSampleId
-				AND S.intSampleStatusId IN (
-					3
-					,4
-					)
-				AND ST.intControlPointId <> 14 -- Customs Approval Sample
-
-			-- If No Customs approval sample is available and current sample is not customs approval, take lot status from bonded status
-			-- If Customs approval sample taken on second time (Some other Sample taken), take lot status from bonded status
-			IF (
-					@intCustomsApprovalSampleCount = 0
-					AND @intSampleControlPointId <> 14
-					)
-				OR (
-					@intOtherControlPointSampleCount > 0
-					AND @intSampleControlPointId = 14
-					)
-			BEGIN
-				DECLARE @intProductId INT
-
-				SELECT TOP 1 @intProductId = intProductId
-				FROM tblQMTestResult
-				WHERE intSampleId = @intSampleId
-
-				SELECT @intBondedRejectionLotStatusId = intBondedRejectionLotStatusId
-				FROM tblQMProduct
-				WHERE intProductId = @intProductId
-
-				IF @intBondedRejectionLotStatusId IS NULL
-				BEGIN
-					RAISERROR (
-							'Bonded Rejection Lot Status is not configured in the quality template.'
-							,16
-							,1
-							)
-				END
-				ELSE
-				BEGIN
-					SET @intLotStatusId = @intBondedRejectionLotStatusId
-				END
-			END
-		END
-	END
-
+	--IF @ysnRequireCustomerApproval = 1
+	--BEGIN
+	--	IF (
+	--			@intProductTypeId = 6
+	--			OR @intProductTypeId = 11
+	--			) -- Lot / Parent Lot
+	--	BEGIN
+	--		DECLARE @intCustomsApprovalSampleCount INT
+	--		DECLARE @intOtherControlPointSampleCount INT
+	--		DECLARE @intBondedRejectionLotStatusId INT
+	--		SELECT @intCustomsApprovalSampleCount = COUNT(intSampleId)
+	--		FROM tblQMSample S
+	--		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+	--		WHERE S.intProductTypeId = @intProductTypeId
+	--			AND S.intProductValueId = @intProductValueId
+	--			AND S.intSampleId <> @intSampleId
+	--			AND S.intSampleStatusId IN (
+	--				3
+	--				,4
+	--				)
+	--			AND ST.intControlPointId = 14 -- Customs Approval Sample
+	--		SELECT @intOtherControlPointSampleCount = COUNT(intSampleId)
+	--		FROM tblQMSample S
+	--		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+	--		WHERE S.intProductTypeId = @intProductTypeId
+	--			AND S.intProductValueId = @intProductValueId
+	--			AND S.intSampleId <> @intSampleId
+	--			AND S.intSampleStatusId IN (
+	--				3
+	--				,4
+	--				)
+	--			AND ST.intControlPointId <> 14 -- Customs Approval Sample
+	--		-- If No Customs approval sample is available and current sample is not customs approval, take lot status from bonded status
+	--		-- If Customs approval sample taken on second time (Some other Sample taken), take lot status from bonded status
+	--		IF (
+	--				@intCustomsApprovalSampleCount = 0
+	--				AND @intSampleControlPointId <> 14
+	--				)
+	--			OR (
+	--				@intOtherControlPointSampleCount > 0
+	--				AND @intSampleControlPointId = 14
+	--				)
+	--		BEGIN
+	--			DECLARE @intProductId INT
+	--			SELECT TOP 1 @intProductId = intProductId
+	--			FROM tblQMTestResult
+	--			WHERE intSampleId = @intSampleId
+	--			SELECT @intBondedRejectionLotStatusId = intBondedRejectionLotStatusId
+	--			FROM tblQMProduct
+	--			WHERE intProductId = @intProductId
+	--			IF @intBondedRejectionLotStatusId IS NULL
+	--			BEGIN
+	--				RAISERROR (
+	--						'Bonded Rejection Lot Status is not configured in the quality template.'
+	--						,16
+	--						,1
+	--						)
+	--			END
+	--			ELSE
+	--			BEGIN
+	--				SET @intLotStatusId = @intBondedRejectionLotStatusId
+	--			END
+	--		END
+	--	END
+	--END
 	SELECT TOP 1 @intUserSampleApproval = ISNULL(intUserSampleApproval, 0)
 	FROM tblQMCompanyPreference
 
@@ -225,29 +219,6 @@ BEGIN TRY
 				,@intLastModifiedUserId
 		END
 	END
-
-	UPDATE dbo.tblQMSample
-	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
-		,intSampleStatusId = 4 -- Rejected
-		,intLotStatusId = (
-			CASE 
-				WHEN @intProductTypeId IN (
-						6
-						,11
-						)
-					THEN @intLotStatusId
-				ELSE intLotStatusId
-				END
-			)
-		,intTestedById = x.intLastModifiedUserId
-		,dtmTestedOn = x.dtmLastModified
-		,intLastModifiedUserId = x.intLastModifiedUserId
-		,dtmLastModified = x.dtmLastModified
-	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intLastModifiedUserId INT
-			,dtmLastModified DATETIME
-			) x
-	WHERE dbo.tblQMSample.intSampleId = @intSampleId
 
 	IF @intProductTypeId = 6 -- Lot
 	BEGIN
@@ -404,6 +375,29 @@ BEGIN TRY
 			WHERE intSeqNo > @intSeqNo
 		END
 	END
+
+	UPDATE dbo.tblQMSample
+	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
+		,intSampleStatusId = 4 -- Rejected
+		,intLotStatusId = (
+			CASE 
+				WHEN @intProductTypeId IN (
+						6
+						,11
+						)
+					THEN @intLotStatusId
+				ELSE intLotStatusId
+				END
+			)
+		,intTestedById = x.intLastModifiedUserId
+		,dtmTestedOn = x.dtmLastModified
+		,intLastModifiedUserId = x.intLastModifiedUserId
+		,dtmLastModified = x.dtmLastModified
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			) x
+	WHERE dbo.tblQMSample.intSampleId = @intSampleId
 
 	EXEC sp_xml_removedocument @idoc
 
