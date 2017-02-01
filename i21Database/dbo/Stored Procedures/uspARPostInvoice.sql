@@ -4122,7 +4122,14 @@ IF @recap = 1
 			dbo.tblGLDetailRecap GLDR 
 				ON (PID.strTransactionId = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  
 				AND GLDR.strCode = @CODE  
-		   
+
+		DELETE GLDR  
+		FROM 
+			@PostInvoiceData PID  
+		INNER JOIN 
+			dbo.tblGLPostRecap GLDR 
+				ON (PID.strTransactionId = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  
+				AND GLDR.strCode = @CODE  		   
 		   
 		BEGIN TRY		
 			INSERT INTO dbo.tblGLDetailRecap (  
@@ -4184,6 +4191,69 @@ IF @recap = 1
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) CreditUnit
+
+
+
+			INSERT INTO tblGLPostRecap(
+			 [strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strJournalLineDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[dblExchangeRate]
+			,[intUserId]
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]
+			,[strModuleName]
+			,[strTransactionForm]
+			,[strTransactionType]
+			,[strAccountId]
+			,[strAccountGroup]
+		)
+		SELECT
+			[strTransactionId]
+			,A.[intTransactionId]
+			,A.[intAccountId]
+			,A.[strDescription]
+			,A.[strJournalLineDescription]
+			,A.[strReference]	
+			,A.[dtmTransactionDate]
+			,Debit.Value
+			,Credit.Value
+			,A.[dblDebitUnit]
+			,A.[dblCreditUnit]
+			,A.[dtmDate]
+			,A.[ysnIsUnposted]
+			,A.[intConcurrencyId]	
+			,A.[dblExchangeRate]
+			,A.[intUserId]
+			,A.[dtmDateEntered]
+			,A.[strBatchId]
+			,A.[strCode]
+			,A.[strModuleName]
+			,A.[strTransactionForm]
+			,A.[strTransactionType]
+			,B.strAccountId
+			,C.strAccountGroup
+		FROM @GLEntries A
+		INNER JOIN dbo.tblGLAccount B 
+			ON A.intAccountId = B.intAccountId
+		INNER JOIN dbo.tblGLAccountGroup C
+			ON B.intAccountGroupId = C.intAccountGroupId
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Credit
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
 				
 		END TRY
 		BEGIN CATCH
