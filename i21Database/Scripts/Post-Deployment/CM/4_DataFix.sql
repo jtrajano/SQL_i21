@@ -178,17 +178,14 @@ BEGIN
 	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Encrypt tblCMBankAccount.strBankAccountNo','1')
 END	
 
---This will update the  Routing No to encrypted value
-IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strRTN) < 20) AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strRTN')
+--This will update the  Routing No to encrypted value based on what is setup in tblCMBank.strRTN
+IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(ISNULL(strRTN,'')) < 20) AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strRTN')
 BEGIN
-
-	OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
-	DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
-	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
-
-	UPDATE tblCMBankAccount SET strRTN = dbo.fnAESEncryptASym(strRTN)
-
-	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
+	
+		UPDATE tblCMBankAccount
+		SET strRTN = Bank.strRTN
+		FROM tblCMBank Bank
+		WHERE tblCMBankAccount.intBankId = Bank.intBankId
 
 	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
 	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Encrypt tblCMBankAccount.strRTN','1')
