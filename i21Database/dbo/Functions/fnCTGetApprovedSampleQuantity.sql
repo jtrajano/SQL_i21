@@ -14,7 +14,7 @@ BEGIN
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId = @intContractDetailId
 
-	SELECT	@result = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, intSampleUOMId, @intUnitMeasureId, dblSampleQty))
+	SELECT	@result = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, intRepresentingUOMId, @intUnitMeasureId, dblRepresentingQty))
 	FROM	tblQMSample 
 	WHERE	intProductTypeId = 8  AND intSampleStatusId = 3 AND intProductValueId = @intContractDetailId
 
