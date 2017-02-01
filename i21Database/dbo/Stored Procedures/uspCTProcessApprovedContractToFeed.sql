@@ -13,7 +13,8 @@ BEGIN TRY
 			@intLastFeedId				INT = 0,
 			@strSQL						NVARCHAR(MAX),
 			@strFeedInsertColumns		NVARCHAR(MAX),
-			@strFeedUpdateColumns		NVARCHAR(MAX)
+			@strFeedUpdateColumns		NVARCHAR(MAX),
+			@strRowState				NVARCHAR(10)
 
 		DECLARE		@IdName TABLE (strIdField  NVARCHAR(MAX),strNameField  NVARCHAR(MAX))
 		INSERT		INTO	@IdName
@@ -40,9 +41,9 @@ BEGIN TRY
 	IF	@ysnFeedExist = 0 OR 
 		EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND ISNULL(strFeedStatus,'') IN ('') AND strRowState = 'Added')
 	BEGIN
-
+		SELECT @strRowState= 'Added'
 		DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
-		
+		INSERTBLOCK:
 		INSERT INTO tblCTContractFeed
 		(
 				intContractHeaderId,		intContractDetailId,		strCommodityCode,	strCommodityDesc,
@@ -61,7 +62,7 @@ BEGIN TRY
 				strContractNumber,			strERPPONumber,				intContractSeq,		strItemNo,
 				strStorageLocation,			dblQuantity,				dblCashPrice,		strQuantityUOM,
 				dtmPlannedAvailabilityDate,	dblBasis,					strCurrency,		dblUnitCashPrice,	
-				strPriceUOM,				'Added',					dtmContractDate,	dtmStartDate,	
+				strPriceUOM,				@strRowState,				dtmContractDate,	dtmStartDate,	
 				dtmEndDate,					GETDATE(),					strSubmittedBy,		strSubmittedByNo,
 				strOrigin
 		FROM	vyuCTContractFeed
@@ -74,7 +75,9 @@ BEGIN TRY
 		FROM	tblCTApprovedContract 
 		WHERE	intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId <> @intApprovedContractId 
 		ORDER BY intApprovedContractId DESC
-
+		SELECT @strRowState= 'Modified'
+		GOTO INSERTBLOCK
+		/*
 		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intApprovedContractId,'intApprovedById,dtmApproved', @strModifiedColumns OUTPUT
 
 		IF ISNULL(@strModifiedColumns,'') <> ''
@@ -115,7 +118,7 @@ BEGIN TRY
 					EXEC sp_executesql @strSQL,N'@intContractDetailId INT', @intContractDetailId =  @intContractDetailId
 				END
 		END
-
+		*/
 	END
 END TRY
 
