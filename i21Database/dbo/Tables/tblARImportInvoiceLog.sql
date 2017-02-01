@@ -1,12 +1,12 @@
 CREATE TABLE [dbo].[tblARImportInvoiceLog](
-	[intImportLogId] [int] IDENTITY(1,1) NOT NULL,
-	[strData] [nvarchar](20) NULL,
-	[strDataType] [nvarchar](10) NULL,	
-	[strDescription] [nvarchar](200) NULL,
-	[intEntityId] [int] NOT NULL,
-	[strLogKey] [nvarchar](100) NOT NULL,
-	[dtmDate] [datetime] NOT NULL,
-	[intConcurrencyId] [int] NOT NULL,
+	[intImportLogId]	INT NOT NULL IDENTITY(1,1),
+	[strData]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strDataType]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
+	[strDescription]	NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[intEntityId]		INT NOT NULL,
+	[strLogKey]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[dtmDate]			DATETIME NOT NULL,
+	[intConcurrencyId]	INT NOT NULL,
  CONSTRAINT [PK_tblARImportInvoiceLog] PRIMARY KEY CLUSTERED 
 (
 	[intImportLogId] ASC

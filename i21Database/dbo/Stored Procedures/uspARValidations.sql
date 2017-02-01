@@ -3,7 +3,8 @@
 	@Sucess BIT = 0 OUTPUT,
 	@Message NVARCHAR(100) = '' OUTPUT,
 	@StartDate DATETIME = NULL,
-	@EndDate DATETIME = NULL
+	@EndDate DATETIME = NULL,
+	@LogKey NVARCHAR(100) = NULL
 
 	AS
 
@@ -461,4 +462,7 @@
 				RETURN;	
 			END
 		 END
+
+	IF @Sucess = 0
+		SET @LogKey = @key
 
