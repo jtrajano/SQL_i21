@@ -3304,7 +3304,7 @@ IF @post = 1
 				,intTransactionDetailId		= Detail.intInvoiceDetailId
 				,strTransactionId			= Header.strInvoiceNumber 
 				,intTransactionTypeId		= @INVENTORY_INVOICE_TYPE
-				,intLotId					= NULL 
+				,intLotId					= LGL.intLotId  
 				,intSubLocationId			= Detail.intCompanyLocationSubLocationId 
 				,intStorageLocationId		= Detail.intStorageLocationId
 				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
@@ -3330,7 +3330,10 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock IST
 					ON Detail.intItemId = IST.intItemId 
-					AND Header.intCompanyLocationId = IST.intLocationId 
+					AND Header.intCompanyLocationId = IST.intLocationId
+			CROSS APPLY
+				dbo.[fnGetLoadDetailLots](Detail.intLoadDetailId) LGL
+
 			WHERE				
 				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
