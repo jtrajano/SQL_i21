@@ -6,7 +6,6 @@
 
 AS
 
-
 SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,strName,convert(numeric(24,6),dblQty) as dblQty,
 convert(numeric(24,6),dblTotPurchased) dblTotPurchased, 
                (dblTotPurchased/SUM(CASE WHEN isnull(dblTotPurchased,0)=0 then 1 else dblTotPurchased end) OVER ())*100  as dblCompanySpend ,0 as intConcurrencyId
@@ -19,77 +18,72 @@ SELECT strName, (isnull(dblQty,0)- isnull(dblReturn,0)) as dblQty ,
               WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end  as dblTotPurchased 
 FROM(
 SELECT e.strName,strContractNumber,
-          dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cd.intUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty 
+             dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
 
-  ,(SELECT round(dblTotalCost,2) -isnull((SELECT dblLineTotal 
+  ,(SELECT round(dblTotalCost,2) -isnull((SELECT sum(dblLineTotal) 
                                          FROM tblICInventoryReturned r
                                                 JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
                                                 JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
                                                 JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
                                                 WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=det.intContractDetailId ),0)
-            FROM tblCTContractDetail det WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(1,6)) as dblFullyPriced
+            FROM tblCTContractDetail det WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(1,6))  dblFullyPriced
 
-                              ,((SELECT 
-               dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cd.intUnitMeasureId, @intUnitMeasureId,cd.dblQuantity)*
-                dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, @intUnitMeasureId,ic.intUnitMeasureId,det.dblBasis+
-                ISNULL(dbo.fnRKGetLatestClosingPrice(intFutureMarketId,intFutureMonthId,getdate()),0)) /
-                case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
+                              ,((SELECT sum(
+               dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, det.intUnitMeasureId, cuc.intUnitMeasureId,det.dblQuantity)*
+                dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cuc.intUnitMeasureId, det.intUnitMeasureId,det.dblBasis+
+                ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,getdate()),0)) /
+                case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end)
            FROM tblCTContractDetail det
+			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
+			  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId 
               join tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
               join tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-              WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(2))-
-              isnull((SELECT dblLineTotal
+              WHERE det.intContractDetailId=cd.intContractDetailId and cd.intPricingTypeId in(2))-
+              isnull((SELECT sum(dblLineTotal) dblLineTotal
                             FROM tblICInventoryReturned r
                                     JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
                                     JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
                                     JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
-                            WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ),0))
-              as dblUnPriced
+                            WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ),0)) dblUnPriced
 
               ,(SELECT distinct
-               dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, @intUnitMeasureId,ic.intUnitMeasureId,
+               dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,
               (((SUM(dblFixationPrice) OVER (PARTITION BY det.intContractDetailId )  * SUM(dblFixationPrice) OVER (PARTITION BY det.intContractDetailId )  +
-                     (isnull(dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,getdate()),0)))
+                     (isnull(dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
                      /cd.dblNoOfLots)+det.dblBasis)*
-                     dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cd.intUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) 
-                                   - isnull((SELECT dblLineTotal
+                     dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, cuc.intUnitMeasureId,ic.intUnitMeasureId,cd.dblQuantity) 
+                                   - isnull((SELECT sum(dblLineTotal) dblLineTotal
                                         FROM tblICInventoryReturned r
                                                 JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
                                                 JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
                                                 JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
                                         WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ),0))/
                      case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
-
-
               FROM vyuCTSearchPriceContract det
               JOIN vyuCTSearchPriceContractDetail detcd on det.intPriceFixationId=detcd.intPriceFixationId 
-              JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
+			  join tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
+			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
+			  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId 
+              
+			  JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
               JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
               WHERE strStatus in('Partially Priced')
               AND det.intContractDetailId=cd.intContractDetailId
               ) as dblParPriced,
 
-              (SELECT dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cd.intUnitMeasureId, @intUnitMeasureId,ri.dblOpenReceive) 
+			(SELECT 
+			   sum(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,ri.dblOpenReceive))			 
               from tblICInventoryReturned r
                      JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
                      JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
-              WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId ) dblReturn
+					 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
+              WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId) 
+			  as dblReturn
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3,6)
+JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId 
 JOIN tblEMEntity e on e.intEntityId=ch.intEntityId
 WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate 
 )t)t1 group by t1.strName
 )t2
-
-
-
-
-
-
-
-
-
-
-
-
