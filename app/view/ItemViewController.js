@@ -874,7 +874,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colContractGradeType: 'strGradeType',
                 colContractYield: 'dblYieldPercent',
                 colContractTolerance: 'dblTolerancePercent',
-                colContractFranchise: 'dblFranchisePercent'
+                colContractFranchise: 'dblFranchisePercent',
+                colContractItemNo: 'strContractItemNo'
             },
 
             grdDocumentAssociation: {

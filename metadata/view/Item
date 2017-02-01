@@ -6154,6 +6154,34 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colContractItemNo",
+                                                                "text": "Contract Item No."
+                                                            },
+                                                            "name": "MyColumn2",
+                                                            "designerId": "93807f15-89b3-4305-a780-3bf6f6318fa8",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "name": "MyTextField4",
+                                                                    "designerId": "0e8c7ee9-773a-4481-92b9-d5819d6dd41d"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 1.5,
                                                                 "itemId": "colContractItemName",
                                                                 "text": "Contract Item Name",
                                                                 "width": 215

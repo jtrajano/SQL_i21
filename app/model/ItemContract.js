@@ -53,7 +53,8 @@ Ext.define('Inventory.model.ItemContract', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strLocationName', type: 'string'},
-        { name: 'strCountry', type: 'string'}
+        { name: 'strCountry', type: 'string'},
+        { name: 'strContractItemNo', type: 'string'}
     ],
 
     validators: [

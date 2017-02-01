@@ -2862,6 +2862,16 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractItemNo',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Contract Item No.',
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colContractItemName',
                                                                         width: 215,
                                                                         dataIndex: 'string',

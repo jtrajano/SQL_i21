@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetse8661e1e5106518890ac9c2631d071353f0d085984f4f82896c9b7919a4b7ec7))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf5a3d28fafbe2c65e3bcfd4e88aef4a6b0f57b621abee5eec562ca9177cfa045))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetse8661e1e5106518890ac9c2631d071353f0d085984f4f82896c9b7919a4b7ec7 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsf5a3d28fafbe2c65e3bcfd4e88aef4a6b0f57b621abee5eec562ca9177cfa045 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "e8661e1e5106518890ac9c2631d071353f0d085984f4f82896c9b7919a4b7ec7"; }
+            get { return "f5a3d28fafbe2c65e3bcfd4e88aef4a6b0f57b621abee5eec562ca9177cfa045"; }
         }
 
         /// <summary>
@@ -2881,12 +2881,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemContract
-        [CodeFirstDatabaseSchema.tblICItemContract](T1.tblICItemContract_intItemContractId, T1.tblICItemContract_intItemId, T1.tblICItemContract_intItemLocationId, T1.tblICItemContract_strContractItemName, T1.tblICItemContract_intCountryId, T1.tblICItemContract_strGrade, T1.tblICItemContract_strGradeType, T1.tblICItemContract_strGarden, T1.tblICItemContract_dblYieldPercent, T1.tblICItemContract_dblTolerancePercent, T1.tblICItemContract_dblFranchisePercent, T1.tblICItemContract_intSort, T1.tblICItemContract_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemContract](T1.tblICItemContract_intItemContractId, T1.tblICItemContract_intItemId, T1.tblICItemContract_intItemLocationId, T1.tblICItemContract_strContractItemNo, T1.tblICItemContract_strContractItemName, T1.tblICItemContract_intCountryId, T1.tblICItemContract_strGrade, T1.tblICItemContract_strGradeType, T1.tblICItemContract_strGarden, T1.tblICItemContract_dblYieldPercent, T1.tblICItemContract_dblTolerancePercent, T1.tblICItemContract_dblFranchisePercent, T1.tblICItemContract_intSort, T1.tblICItemContract_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemContractId AS tblICItemContract_intItemContractId, 
             T.intItemId AS tblICItemContract_intItemId, 
             T.intItemLocationId AS tblICItemContract_intItemLocationId, 
+            T.strContractItemNo AS tblICItemContract_strContractItemNo, 
             T.strContractItemName AS tblICItemContract_strContractItemName, 
             T.intCountryId AS tblICItemContract_intCountryId, 
             T.strGrade AS tblICItemContract_strGrade, 
@@ -6166,12 +6167,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemContracts
-        [iRely.Inventory.Model.tblICItemContract](T1.tblICItemContract_intItemContractId, T1.tblICItemContract_intItemId, T1.tblICItemContract_intItemLocationId, T1.tblICItemContract_strContractItemName, T1.tblICItemContract_intCountryId, T1.tblICItemContract_strGrade, T1.tblICItemContract_strGradeType, T1.tblICItemContract_strGarden, T1.tblICItemContract_dblYieldPercent, T1.tblICItemContract_dblTolerancePercent, T1.tblICItemContract_dblFranchisePercent, T1.tblICItemContract_intSort, T1.tblICItemContract_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemContract](T1.tblICItemContract_intItemContractId, T1.tblICItemContract_intItemId, T1.tblICItemContract_intItemLocationId, T1.tblICItemContract_strContractItemNo, T1.tblICItemContract_strContractItemName, T1.tblICItemContract_intCountryId, T1.tblICItemContract_strGrade, T1.tblICItemContract_strGradeType, T1.tblICItemContract_strGarden, T1.tblICItemContract_dblYieldPercent, T1.tblICItemContract_dblTolerancePercent, T1.tblICItemContract_dblFranchisePercent, T1.tblICItemContract_intSort, T1.tblICItemContract_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemContractId AS tblICItemContract_intItemContractId, 
             T.intItemId AS tblICItemContract_intItemId, 
             T.intItemLocationId AS tblICItemContract_intItemLocationId, 
+            T.strContractItemNo AS tblICItemContract_strContractItemNo, 
             T.strContractItemName AS tblICItemContract_strContractItemName, 
             T.intCountryId AS tblICItemContract_intCountryId, 
             T.strGrade AS tblICItemContract_strGrade, 
