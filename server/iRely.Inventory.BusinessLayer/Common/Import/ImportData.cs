@@ -73,7 +73,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public void Dispose()
         {
-            
+              
         }
     }
 }

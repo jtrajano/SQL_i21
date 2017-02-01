@@ -19,5 +19,7 @@ namespace iRely.Inventory.Model
         public int? intReceiptSourceType { get; set; }
         public int? intShipmentOrderType { get; set; }
         public int? intShipmentSourceType { get; set; }
+        public string strOriginLastTask { get; set; }
+        public string strOriginLineOfBusiness { get; set; }
     }
 }

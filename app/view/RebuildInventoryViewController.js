@@ -179,7 +179,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             },
             function (error) {
                 if (error.timedout)
-                    iRely.Functions.showErrorDialog("Looks like the server is taking to long to respond, this can be caused by either poor connectivity or an error with our servers. Please try again in a while.");
+                    iRely.Functions.showErrorDialog("Looks like the server is taking too long to respond, this can be caused by either poor connectivity or an error with our servers. Please try again in a while.");
                 else
                     iRely.Functions.showErrorDialog(JSON.parse(error.responseText).message);
             }

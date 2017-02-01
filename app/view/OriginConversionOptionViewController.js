@@ -21,6 +21,65 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         "use strict";
         var me = con || this;
         var win = me.getView();
+        
+        ic.utils.ajax({
+            url: '../Inventory/api/CompanyPreference/Get',
+            method: 'get',
+            params: {
+                page: 1,
+                start: 0,
+                limit: 50
+            }
+        })
+        .map(function(res) {
+            var json = JSON.parse(res.responseText);
+            if(json.data && json.data.length > 0) {
+                return  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
+            }
+            return null;
+        })
+        .subscribe(
+            function(pref) {
+                if(pref) {
+                    var lastLob = pref.lob;
+                    if (lastLob && lastLob !== '')
+                        me.getViewModel().set('lineOfBusiness', lastLob);
+                    else {
+                        if (me.getViewModel().get('lineOfBusiness') !== '')
+                            me.getViewModel().set('lineOfBusiness', '');
+                    }
+
+                    var lastTask = pref.task;
+                    if (lastTask && lastTask !== '')
+                        me.getViewModel().set('currentTask', lastTask);
+                    else {
+                        if (me.getViewModel().get('currentTask') !== '')
+                            me.getViewModel().set('currentTask', 'LOB');
+                    }
+
+                    var lob = me.getViewModel().get('lineOfBusiness');
+                    var currentTask = me.getViewModel().get('currentTask');
+
+                    if (lob)
+                        win.up('window').down('#cboLOB').setValue(me.getViewModel().get('lineOfBusiness'));
+                    else
+                        win.up('window').down('#cboLOB').setValue(null);
+
+                    var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
+                    var grains = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
+
+                    if (currentTask && currentTask !== 'LOB') {
+                        if (lob === 'Grain')
+                            originTypes = grains;
+                        var index = _.indexOf(originTypes, currentTask);
+                        if (index !== -1) {
+                            me.getViewModel().set('currentTask', originTypes[index + 1]);
+                        } else
+                            me.getViewModel().set('currentTask', "LOB");
+                    }
+                }
+            }
+        )
     },
 
     onImportButtonClick: function(button, e, eOpts) {
@@ -30,6 +89,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
         var type = null;
         var originType = null;
+        var grainType = null;
         var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
         var grain = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
         
@@ -106,30 +166,34 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             /* ORIGIN CONVERSIONS */
             case "btnOriginUOM":
                 originType = 0;
+                grainType = 0;
                 break;
             case "btnOriginLocations":
                 originType = 1;
+                grainType = 1;
                 break;
             case "btnOriginCommodity":
-                originType = 2;
+                grainType = 2;
+                originType = 1;
                 break;
             case "btnOriginCategoryClass":
-                originType = 3;
+                originType = 2;
                 break;
             case "btnOriginCategoryGLAccts":
-                originType = 4;
+                originType = 3;
                 break;
             case "btnOriginAdditionalGLAccts":
-                originType = 5;
+                originType = 4;
+                grainType = 3;
                 break;
             case "btnOriginItems":
-                originType = 6;
+                originType = 5;
                 break;
             case "btnOriginItemGLAccts":
-                originType = 7;
+                originType = 6;
                 break;
             case "btnOriginBalance":
-                originType = 8;
+                originType = 7;
                 break;
         }
 
@@ -144,8 +208,11 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             });
         }
         else if(originType !== null) {
-            if(lineOfBusiness === 'Grain')
+            if(lineOfBusiness === 'Grain') {
                 originTypes = grain;
+                originType = grainType;
+            }
+
             this.importFromOrigins(this.view.viewModel, originTypes, originType, lineOfBusiness, win);
         }
     },

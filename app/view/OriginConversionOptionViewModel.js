@@ -33,7 +33,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
         },
 
         disableUOM: function(get) {
-            return get('currentTask') !== 'UOM' || !get('hasLob');
+            return (get('currentTask') !== 'UOM' && get('currentTask') != 'LOB') || !get('hasLob');
         },
 
         disableLocations: function(get) {
