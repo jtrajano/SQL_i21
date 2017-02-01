@@ -75,7 +75,7 @@ BEGIN
 					,intCustomerId = A.intCustomerID
 					,strItemNumber = RTRIM(E.vwitm_no) COLLATE Latin1_General_CI_AS 
 					,strItemClass = RTRIM(E.vwitm_class) COLLATE Latin1_General_CI_AS 
-					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0.0) ELSE ISNULL(A.dblWinterDailyUse,0) END)
+					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= G.intBeginSummerMonth AND  MONTH(GETDATE()) < G.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0.0) ELSE ISNULL(A.dblWinterDailyUse,0) END)
 				INTO #tmpStage1
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
