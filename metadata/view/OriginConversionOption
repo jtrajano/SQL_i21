@@ -8,9 +8,10 @@
     "userConfig": {
         "designer|userAlias": "icoriginconversionoption",
         "designer|userClassName": "OriginConversionOption",
-        "height": 1368,
+        "height": 2090,
         "layout": null,
-        "width": null
+        "minWidth": 765,
+        "width": 716
     },
     "name": "MyContainer12",
     "designerId": "467f343c-c005-4700-bed6-351559b316d7",
@@ -462,11 +463,12 @@
                 "bodyPadding": 10,
                 "border": false,
                 "container|align": "stretch",
-                "height": 1460,
+                "height": 2066,
                 "itemId": "pnlImportOrigin",
                 "layout": "vbox",
                 "margin": "0 0 5 0",
-                "title": "Inventory Data Import"
+                "title": "Inventory Data Import",
+                "width": 765
             },
             "name": "MyPanel3",
             "designerId": "931dbf4b-346b-40eb-9ad5-e67bb4efb00b",
@@ -2158,7 +2160,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "bodyPadding": 10,
-                        "height": 216,
+                        "height": 844,
                         "padding": "15 0 0 0",
                         "title": "Origins"
                     },
@@ -2173,9 +2175,176 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "baseCls": null,
+                                "border": null,
+                                "cls": null,
+                                "componentCls": null,
                                 "container|align": "middle",
                                 "container|padding": "",
-                                "itemId": "cntImportItemsOrigins",
+                                "frame": false,
+                                "height": 60,
+                                "itemId": "cntOriginMergeItems",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer33",
+                            "designerId": "5a5c0a32-6fe5-4227-b5c6-f4bdccbf4727",
+                            "cn": [
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "height": 60,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": 2
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "56e43401-01ea-4cb9-98c3-57b8f10e7b78",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "html": "",
+                                                "itemId": null,
+                                                "layout|flex": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Items are created uniquely for each location in Origin. This can result in same item having different item number or different items having the same item number. Such items has to be identified and merged before importing to i21. In i21, an item is shared across locations.\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "fcc76302-6930-4821-bd17-39c9444881fe"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "baseCls": null,
+                                "border": null,
+                                "cls": null,
+                                "componentCls": null,
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "frame": false,
+                                "itemId": "cntOriginLOB",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer42",
+                            "designerId": "705c4fae-c751-45b8-9561-fcb879064e37",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableLob}'",
+                                            "}"
+                                        ],
+                                        "displayField": "strName",
+                                        "fieldLabel": "Line of Business",
+                                        "itemId": "cboLOB",
+                                        "layout|flex": 1,
+                                        "store": [
+                                            "{",
+                                            "    fields: [\"strName\"],",
+                                            "    data: [",
+                                            "        { strName: \"Petro\" },",
+                                            "        { strName: \"Ag\" },",
+                                            "        { strName: \"Grain\" },",
+                                            "        { strName: \"C-Store\" }",
+                                            "    ]",
+                                            "}"
+                                        ],
+                                        "valueField": "strName",
+                                        "width": 361
+                                    },
+                                    "name": "MyComboBox77",
+                                    "configAlternates": {
+                                        "store": "array",
+                                        "bind": "object"
+                                    },
+                                    "designerId": "3cf7e84d-ed96-4fff-9157-f65b03d5115f",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "height": 25,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": 2
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "36268a61-5f96-4628-9211-7c6f71bd7fd4",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "height": 38,
+                                                "itemId": null,
+                                                "layout|flex": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Select Line of Business to begin import\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "bc41693c-c8a1-4c6f-9df2-3afe7898a712"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "height": 49,
+                                "itemId": "cntOriginUOM",
                                 "layout": "hbox",
                                 "margin": "0 0 5 0"
                             },
@@ -2190,13 +2359,29 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableUOM}'",
+                                            "}"
+                                        ],
                                         "height": 40,
-                                        "itemId": "btnImportItemsOrigins",
+                                        "itemId": "btnOriginUOM",
                                         "layout|flex": 1,
-                                        "text": "Import Items"
+                                        "text": "Import Unit of Measures",
+                                        "width": 469
                                     },
                                     "name": "MyButton25",
-                                    "designerId": "a9a4f241-036a-4038-91ce-0d8a423ddc3b"
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "a9a4f241-036a-4038-91ce-0d8a423ddc3b",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.container.Container",
@@ -2206,11 +2391,11 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "container|align": "middle",
-                                        "height": 40,
+                                        "container|align": "stretch",
+                                        "height": 42,
                                         "layout": "hbox",
-                                        "layout|flex": 1,
-                                        "padding": 10
+                                        "layout|flex": 2,
+                                        "padding": 2
                                     },
                                     "name": "MyContainer13",
                                     "designerId": "3f4d3692-939a-4f37-9bfb-f140fc7c8ca1",
@@ -2224,7 +2409,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": null,
-                                                "text": "Import Items From Origins"
+                                                "layout|flex": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Imports unit of measure setup. Users should verify the imported unit types and conversion factors before proceeding to next step.\""
                                             },
                                             "name": "MyLabel9",
                                             "designerId": "312416d1-da40-44b4-a782-35eec2bcc134"
@@ -2243,7 +2430,7 @@
                             "userConfig": {
                                 "container|align": "middle",
                                 "container|padding": "",
-                                "itemId": "cntImportGLAccountsOrigins",
+                                "itemId": "ctnOriginLocations",
                                 "layout": "hbox",
                                 "margin": "0 0 5 0"
                             },
@@ -2258,13 +2445,28 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableLocations}'",
+                                            "}"
+                                        ],
                                         "height": 40,
-                                        "itemId": "btnImportGLAccountsOrigins",
+                                        "itemId": "btnOriginLocations",
                                         "layout|flex": 1,
-                                        "text": "Import GL Accounts"
+                                        "text": "Import Sub Locations and Storage Locations"
                                     },
                                     "name": "MyButton25",
-                                    "designerId": "70b6ba6e-896e-4157-805e-2f715af23d2f"
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "70b6ba6e-896e-4157-805e-2f715af23d2f",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.container.Container",
@@ -2274,11 +2476,11 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "container|align": "middle",
-                                        "height": 40,
+                                        "container|align": "stretch",
+                                        "height": 56,
                                         "layout": "hbox",
-                                        "layout|flex": 1,
-                                        "padding": 10
+                                        "layout|flex": 2,
+                                        "padding": 2
                                     },
                                     "name": "MyContainer13",
                                     "designerId": "b7347a75-f9c8-4ca0-9c67-5e9512f2c368",
@@ -2292,7 +2494,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": null,
-                                                "text": "Import GL Accounts from Origins"
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Imports storage location like elevators and bins. Origin does not have sub locations. System will create a sub location automatically for each company location.\""
                                             },
                                             "name": "MyLabel9",
                                             "designerId": "6ee59d84-8785-47cf-b9dd-6954d9efe2c4"
@@ -2311,7 +2514,7 @@
                             "userConfig": {
                                 "container|align": "middle",
                                 "container|padding": "",
-                                "itemId": "cntImportInventoryReceiptsOrigins",
+                                "itemId": "cntOriginCommodity",
                                 "layout": "hbox",
                                 "margin": "0 0 5 0"
                             },
@@ -2326,13 +2529,28 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableCommodity}'",
+                                            "}"
+                                        ],
                                         "height": 40,
-                                        "itemId": "btnImportInventoryReceiptsOrigins",
+                                        "itemId": "btnOriginCommodity",
                                         "layout|flex": 1,
-                                        "text": "Import Inventory Receipts"
+                                        "text": "Import Commodity"
                                     },
                                     "name": "MyButton25",
-                                    "designerId": "d3e18c4a-d9e4-4cd4-a3f3-53b11566fcde"
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "d3e18c4a-d9e4-4cd4-a3f3-53b11566fcde",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.container.Container",
@@ -2342,11 +2560,11 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "container|align": "middle",
-                                        "height": 40,
+                                        "container|align": "stretch",
+                                        "height": 97,
                                         "layout": "hbox",
-                                        "layout|flex": 1,
-                                        "padding": 10
+                                        "layout|flex": 2,
+                                        "padding": 2
                                     },
                                     "name": "MyContainer13",
                                     "designerId": "60d5db7f-c816-42d2-83a7-e27b72ff6814",
@@ -2359,11 +2577,580 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "height": 36,
                                                 "itemId": null,
-                                                "text": "Import Inventory Receipts from Origins"
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Imports Commodity and GL Accounts. i21 requires category and item. System creates Category and Item data automatically after the import. All company locations will be added to the commodity by default. Manually remove what is not required after the import. Add AP Clearing account to Category → GL Accounts tab after import. AP Clearing account is not available in origin.\""
                                             },
                                             "name": "MyLabel9",
                                             "designerId": "392315e0-215b-4f89-a0c8-c4ed73ac466d"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "height": 49,
+                                "itemId": "cntOriginCategoryClass",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer35",
+                            "designerId": "08146fed-4a51-4511-92c1-2023ebc9983f",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableCategoryClass}'",
+                                            "}"
+                                        ],
+                                        "height": 40,
+                                        "itemId": "btnOriginCategoryClass",
+                                        "layout|flex": 1,
+                                        "text": "Import Category/Class"
+                                    },
+                                    "name": "MyButton25",
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "9b1b7d8e-a3cc-40bd-9904-d108c5e5cc77",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "height": 41,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": 2
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "01c9dd2a-7b2f-4538-a56f-eccd0f84a010",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Imports Class data. Users should verify whether the Inventory types are correct before proceeding to next step.\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "555a8afc-246f-4def-b690-197501e5814f"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "height": 62,
+                                "itemId": "cntOriginCategoryGLAccts",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer36",
+                            "designerId": "5c0241f3-1dff-431d-b2e8-2c301095ac8d",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableCategoryGLAccts}'",
+                                            "}"
+                                        ],
+                                        "height": 40,
+                                        "itemId": "btnOriginCategoryGLAccts",
+                                        "layout|flex": 1,
+                                        "text": "Import GL Accounts for category"
+                                    },
+                                    "name": "MyButton25",
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "37be1e32-c6d7-4269-8dbc-b8ed53ac2c6c",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "height": 51,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": 2
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "46673bb1-1f9e-435a-b57d-2bd6a3977f7b",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "height": 59,
+                                                "itemId": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Imports GL accounts for categories. User should verify the imported gl accounts before proceeding to next step.\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "d98b0800-4d9e-4cf7-887f-df24a54785e1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntOriginAdditionalGLAccts",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer45",
+                            "designerId": "eb968379-1b6e-457a-a6c0-d5d22e56689b",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableAdditionalGLAccts}'",
+                                            "}"
+                                        ],
+                                        "height": 40,
+                                        "itemId": "btnOriginAdditionalGLAccts",
+                                        "layout|flex": 1,
+                                        "text": "Add additional GL Accounts"
+                                    },
+                                    "name": "MyButton25",
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "41479652-b45f-4703-9258-00c3438a4ed2",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "height": 78,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": 2
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "ae8cf984-2dec-4f26-98aa-817c0acc25d7",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "height": 59,
+                                                "itemId": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Additional inventory accounts required by i21 like AP Clearing, Inventory In-transit, Inventory Adjustment and Auto Variance has to be created in Chart of Accounts before doing this step. User should verify the imported gl accounts before proceeding to next step.\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "ed5f6eb8-f5d1-497f-b062-e4935a388f3c"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntOriginItems",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer37",
+                            "designerId": "c71d218d-1a51-4aaa-93ce-5ad2d415628c",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableItems}'",
+                                            "}"
+                                        ],
+                                        "height": 40,
+                                        "itemId": "btnOriginItems",
+                                        "layout|flex": 1,
+                                        "text": "Import Items, Locations and Pricing"
+                                    },
+                                    "name": "MyButton25",
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "c55929c1-f83d-47ce-9ccb-cf356e97520e",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "height": 45,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": 2
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "b2b61252-f0af-429c-8d78-f9bf108d18c7",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "height": 59,
+                                                "itemId": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Imports Items, Item Locations and Pricing. User should verify Item Type, Costing Method and Pricing data before proceeding to next step.\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "1f569cc7-304a-4556-be3c-76ac1cd4c591"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntOriginItemGLAccts",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer40",
+                            "designerId": "c99852c3-05f1-4667-88a2-b576ed6ae437",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableItemGLAccts}'",
+                                            "}"
+                                        ],
+                                        "height": 40,
+                                        "itemId": "btnOriginItemGLAccts",
+                                        "layout|flex": 1,
+                                        "text": "Import GL Accounts for Items"
+                                    },
+                                    "name": "MyButton25",
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "b4636469-a3da-48de-9088-9a533e07ff36",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "height": 90,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": null
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "d0628289-04d0-443d-be50-1986e823eb2a",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "height": 59,
+                                                "itemId": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"This step is optional. GL accounts are not required to be setup for each item. System uses the GL accounts setup for the category. However, if the accounts for the item are different from those setup for the category, use this button to import or manually change only the items which have different gl accounts than its category.\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "4657a862-8ea9-46f9-a784-6ae4c6d677cd"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "height": 23,
+                                "itemId": "cntOriginPostTransaction",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer43",
+                            "designerId": "b3805f3d-df67-4092-80f7-2404ac54eb74",
+                            "cn": [
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 24,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": null
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "343d4c54-ac55-428b-82c6-0fdc859a123c",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "height": 59,
+                                                "itemId": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"This step is done in origin. All inventory transactions has to be posted in origin before importing open balances.\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "499f753e-6679-431b-9301-ed5c4361a101"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "height": 59,
+                                "itemId": "cntOriginBalance",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer44",
+                            "designerId": "8cbd31d6-bdc8-45c4-89e6-73b67077f94c",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bind": [
+                                            "{",
+                                            "    disabled: '{disableBalance}'",
+                                            "}"
+                                        ],
+                                        "height": 40,
+                                        "itemId": "btnOriginBalance",
+                                        "layout|flex": 1,
+                                        "text": "Import Opening Balance"
+                                    },
+                                    "name": "MyButton25",
+                                    "configAlternates": {
+                                        "bind": "object"
+                                    },
+                                    "designerId": "ecabca20-89a0-4b4a-be1c-c25d2913f4a6",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "bind",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 45,
+                                        "layout": "hbox",
+                                        "layout|flex": 2,
+                                        "padding": null
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "410cfc16-0bed-49e4-ab06-6173bb6692ab",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "height": 59,
+                                                "itemId": null,
+                                                "padding": "0 0 0 10",
+                                                "text": "\"Imports opening stock for all items and locations. Grain opening balances must be entered manually after taking a physical reading.\""
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "91bdb6c1-276c-4fe5-aa02-148b417396a3"
                                         }
                                     ]
                                 }

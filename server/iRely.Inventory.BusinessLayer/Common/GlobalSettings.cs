@@ -24,5 +24,6 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         public bool AllowOverwriteOnImport { get; set; }
+        public string LineOfBusiness { get; set; }
     }
 }

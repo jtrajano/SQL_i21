@@ -30,6 +30,8 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
         var type = null;
         var originType = null;
+        var originTypes = ["UOM", "Locations", "Commodity", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
+
         switch (button.itemId) {
             case "btnImportFuelCategories":
                 type = "FuelCategories";
@@ -100,20 +102,39 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             case "btnImportItemPricingLevels":
                 type = "ItemPricingLevels";
                 break;
-            case "btnImportItemsOrigins":
-                originType = "ItemsOrigins";
+            /* ORIGIN CONVERSIONS */
+            case "btnOriginUOM":
+                originType = 0;
                 break;
-            case "btnImportGLAccountsOrigins":
-                originType = "GLAccountsOrigins";
+            case "btnOriginLocations":
+                originType = 1;
                 break;
-            case "btnImportInventoryReceiptsOrigins":
-                originType = "InventoryReceipts";
+            case "btnOriginCommodity":
+                originType = 2;
+                break;
+            case "btnOriginCategoryClass":
+                originType = 3;
+                break;
+            case "btnOriginCategoryGLAccts":
+                originType = 4;
+                break;
+            case "btnOriginAdditionalGLAccts":
+                originType = 5;
+                break;
+            case "btnOriginItems":
+                originType = 6;
+                break;
+            case "btnOriginItemGLAccts":
+                originType = 7;
+                break;
+            case "btnOriginBalance":
+                originType = 8;
                 break;
         }
 
         var allowOverwrite = this.view.viewModel.getData().allowOverwrite;
-
-        if (type != null) {
+        var lineOfBusiness = this.view.viewModel.getData().lineOfBusiness;
+        if (type !== null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
                 method: "POST",
@@ -121,22 +142,23 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 allowOverwrite: allowOverwrite
             });
         }
-        else if(originType != null)
-            this.importFromOrigins(originType, win);
+        else if(originType !== null)
+            this.importFromOrigins(this.view.viewModel, originTypes, originType, lineOfBusiness, win);
     },
 
-    importFromOrigins: function(type, win) {
-        this.ajaxRequest(type, win);
+    importFromOrigins: function(viewModel, originTypes, type, lineOfBusiness, win) {
+        this.ajaxRequest(viewModel, originTypes, type, lineOfBusiness, win);
     },
 
-    ajaxRequest: function (type, win) {
+    ajaxRequest: function (viewModel, originTypes, type, lineOfBusiness, win) {
         jQuery.ajax({
             url: '../Inventory/api/ImportData/ImportOrigins',
             method: 'post',
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId),
-                'X-Import-Type': type
+                'X-Import-Type': originTypes[type],
+                'X-Import-LineOfBusiness': lineOfBusiness
             },
             beforeSend: function(jqXHR, settings) {
                 iRely.Msg.showWait('Importing in progress...');
@@ -155,11 +177,13 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                     type = "warning";
                     msg = "File imported successfully with errors.";
                 }
+                viewModel.set('lineOfBusiness', lineOfBusiness);
+                viewModel.set('currentTask', originTypes[type+1]);
 
                 i21.functions.showCustomDialog(type, 'ok', msg, function() {
                     //win.close();
 
-                    if (data.messages != null && data.messages.length > 0) {
+                    if (data.messages !== null && data.messages.length > 0) {
                         iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
                             data: data
                         });
@@ -169,11 +193,13 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             error: function(jqXHR, status, error) {
                 iRely.Msg.close();
                 var json = JSON.parse(jqXHR.responseText);
+                viewModel.set('lineOfBusiness', lineOfBusiness);
+                viewModel.set('currentTask', originTypes[type+1]);
                 i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
                     function() {
                         //win.close();
 
-                        if (json.messages != null && json.messages.length > 0) {
+                        if (json.messages && json.messages.length > 0) {
                             iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
                                 data: json
                             });
@@ -197,8 +223,20 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
             "#btnAllowOverwrite": {
                 toggle: this.onAllowOverwriteCheckChange
+            },
+
+            "#cboLOB": {
+                select: this.onLOBSelect
             }
         });
+    },
+
+    onLOBSelect: function(combo, record) {
+        var lob = record.get('strName');
+        if(lob) {
+            this.view.viewModel.set('lineOfBusiness', lob);
+            this.view.viewModel.set('currentTask', 'UOM');
+        }
     },
 
     onAllowOverwriteCheckChange: function(button, state) {

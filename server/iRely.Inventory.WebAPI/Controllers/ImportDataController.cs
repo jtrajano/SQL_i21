@@ -37,6 +37,7 @@ namespace iRely.Inventory.WebApi.Controllers
         public async Task<HttpResponseMessage> ImportOrigins()
         {
             var type = Request.Headers.GetValues("X-Import-Type").First();
+            GlobalSettings.Instance.LineOfBusiness = Request.Headers.GetValues("X-Import-LineOfBusiness").First();
             ImportDataResult output = await bl.ImportOrigins(type);
             var response = new
             {

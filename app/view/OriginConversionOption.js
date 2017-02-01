@@ -22,10 +22,13 @@ Ext.define('Inventory.view.OriginConversionOption', {
         'Ext.button.Button',
         'Ext.menu.Menu',
         'Ext.menu.Separator',
-        'Ext.form.Label'
+        'Ext.form.Label',
+        'Ext.form.field.ComboBox'
     ],
 
-    height: 1368,
+    height: 2090,
+    minWidth: 765,
+    width: 716,
 
     items: [
         {
@@ -187,9 +190,10 @@ Ext.define('Inventory.view.OriginConversionOption', {
         {
             xtype: 'panel',
             border: false,
-            height: 1460,
+            height: 2066,
             itemId: 'pnlImportOrigin',
             margin: '0 0 5 0',
+            width: 765,
             bodyPadding: 10,
             title: 'Inventory Data Import',
             layout: {
@@ -1060,14 +1064,16 @@ Ext.define('Inventory.view.OriginConversionOption', {
                 },
                 {
                     xtype: 'panel',
-                    height: 216,
+                    height: 844,
                     padding: '15 0 0 0',
                     bodyPadding: 10,
                     title: 'Origins',
                     items: [
                         {
                             xtype: 'container',
-                            itemId: 'cntImportItemsOrigins',
+                            frame: false,
+                            height: 60,
+                            itemId: 'cntOriginMergeItems',
                             margin: '0 0 5 0',
                             layout: {
                                 type: 'hbox',
@@ -1076,25 +1082,20 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             },
                             items: [
                                 {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemsOrigins',
-                                    text: 'Import Items'
-                                },
-                                {
                                     xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
+                                    flex: 2,
+                                    height: 60,
+                                    padding: 2,
                                     layout: {
                                         type: 'hbox',
-                                        align: 'middle'
+                                        align: 'stretch'
                                     },
                                     items: [
                                         {
                                             xtype: 'label',
-                                            text: 'Import Items From Origins'
+                                            html: '',
+                                            padding: '0 0 0 10',
+                                            text: '"Items are created uniquely for each location in Origin. This can result in same item having different item number or different items having the same item number. Such items has to be identified and merged before importing to i21. In i21, an item is shared across locations."'
                                         }
                                     ]
                                 }
@@ -1102,7 +1103,8 @@ Ext.define('Inventory.view.OriginConversionOption', {
                         },
                         {
                             xtype: 'container',
-                            itemId: 'cntImportGLAccountsOrigins',
+                            frame: false,
+                            itemId: 'cntOriginLOB',
                             margin: '0 0 5 0',
                             layout: {
                                 type: 'hbox',
@@ -1111,25 +1113,51 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             },
                             items: [
                                 {
-                                    xtype: 'button',
+                                    xtype: 'combobox',
                                     flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportGLAccountsOrigins',
-                                    text: 'Import GL Accounts'
+                                    bind: {
+                                        disabled: '{disableLob}'
+                                    },
+                                    itemId: 'cboLOB',
+                                    width: 361,
+                                    fieldLabel: 'Line of Business',
+                                    displayField: 'strName',
+                                    store: {
+                                        fields: [
+                                            'strName'
+                                        ],
+                                        data: [
+                                            {
+                                                strName: 'Petro'
+                                            },
+                                            {
+                                                strName: 'Ag'
+                                            },
+                                            {
+                                                strName: 'Grain'
+                                            },
+                                            {
+                                                strName: 'C-Store'
+                                            }
+                                        ]
+                                    },
+                                    valueField: 'strName'
                                 },
                                 {
                                     xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
+                                    flex: 2,
+                                    height: 25,
+                                    padding: 2,
                                     layout: {
                                         type: 'hbox',
-                                        align: 'middle'
+                                        align: 'stretch'
                                     },
                                     items: [
                                         {
                                             xtype: 'label',
-                                            text: 'Import GL Accounts from Origins'
+                                            height: 38,
+                                            padding: '0 0 0 10',
+                                            text: '"Select Line of Business to begin import"'
                                         }
                                     ]
                                 }
@@ -1137,7 +1165,8 @@ Ext.define('Inventory.view.OriginConversionOption', {
                         },
                         {
                             xtype: 'container',
-                            itemId: 'cntImportInventoryReceiptsOrigins',
+                            height: 49,
+                            itemId: 'cntOriginUOM',
                             margin: '0 0 5 0',
                             layout: {
                                 type: 'hbox',
@@ -1147,16 +1176,328 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             items: [
                                 {
                                     xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableUOM}'
+                                    },
                                     flex: 1,
                                     height: 40,
-                                    itemId: 'btnImportInventoryReceiptsOrigins',
-                                    text: 'Import Inventory Receipts'
+                                    itemId: 'btnOriginUOM',
+                                    width: 469,
+                                    text: 'Import Unit of Measures'
                                 },
                                 {
                                     xtype: 'container',
+                                    flex: 2,
+                                    height: 42,
+                                    padding: 2,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            padding: '0 0 0 10',
+                                            text: '"Imports unit of measure setup. Users should verify the imported unit types and conversion factors before proceeding to next step."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'ctnOriginLocations',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableLocations}'
+                                    },
                                     flex: 1,
                                     height: 40,
-                                    padding: 10,
+                                    itemId: 'btnOriginLocations',
+                                    text: 'Import Sub Locations and Storage Locations'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 56,
+                                    padding: 2,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            padding: '0 0 0 10',
+                                            text: '"Imports storage location like elevators and bins. Origin does not have sub locations. System will create a sub location automatically for each company location."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntOriginCommodity',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableCommodity}'
+                                    },
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnOriginCommodity',
+                                    text: 'Import Commodity'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 97,
+                                    padding: 2,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            height: 36,
+                                            padding: '0 0 0 10',
+                                            text: '"Imports Commodity and GL Accounts. i21 requires category and item. System creates Category and Item data automatically after the import. All company locations will be added to the commodity by default. Manually remove what is not required after the import. Add AP Clearing account to Category → GL Accounts tab after import. AP Clearing account is not available in origin."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            height: 49,
+                            itemId: 'cntOriginCategoryClass',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableCategoryClass}'
+                                    },
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnOriginCategoryClass',
+                                    text: 'Import Category/Class'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 41,
+                                    padding: 2,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            padding: '0 0 0 10',
+                                            text: '"Imports Class data. Users should verify whether the Inventory types are correct before proceeding to next step."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            height: 62,
+                            itemId: 'cntOriginCategoryGLAccts',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableCategoryGLAccts}'
+                                    },
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnOriginCategoryGLAccts',
+                                    text: 'Import GL Accounts for category'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 51,
+                                    padding: 2,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            height: 59,
+                                            padding: '0 0 0 10',
+                                            text: '"Imports GL accounts for categories. User should verify the imported gl accounts before proceeding to next step."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntOriginAdditionalGLAccts',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableAdditionalGLAccts}'
+                                    },
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnOriginAdditionalGLAccts',
+                                    text: 'Add additional GL Accounts'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 78,
+                                    padding: 2,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            height: 59,
+                                            padding: '0 0 0 10',
+                                            text: '"Additional inventory accounts required by i21 like AP Clearing, Inventory In-transit, Inventory Adjustment and Auto Variance has to be created in Chart of Accounts before doing this step. User should verify the imported gl accounts before proceeding to next step."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntOriginItems',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableItems}'
+                                    },
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnOriginItems',
+                                    text: 'Import Items, Locations and Pricing'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 45,
+                                    padding: 2,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            height: 59,
+                                            padding: '0 0 0 10',
+                                            text: '"Imports Items, Item Locations and Pricing. User should verify Item Type, Costing Method and Pricing data before proceeding to next step."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntOriginItemGLAccts',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableItemGLAccts}'
+                                    },
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnOriginItemGLAccts',
+                                    text: 'Import GL Accounts for Items'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 90,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            height: 59,
+                                            padding: '0 0 0 10',
+                                            text: '"This step is optional. GL accounts are not required to be setup for each item. System uses the GL accounts setup for the category. However, if the accounts for the item are different from those setup for the category, use this button to import or manually change only the items which have different gl accounts than its category."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            height: 23,
+                            itemId: 'cntOriginPostTransaction',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 24,
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
@@ -1164,7 +1505,49 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     items: [
                                         {
                                             xtype: 'label',
-                                            text: 'Import Inventory Receipts from Origins'
+                                            height: 59,
+                                            padding: '0 0 0 10',
+                                            text: '"This step is done in origin. All inventory transactions has to be posted in origin before importing open balances."'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            height: 59,
+                            itemId: 'cntOriginBalance',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    bind: {
+                                        disabled: '{disableBalance}'
+                                    },
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnOriginBalance',
+                                    text: 'Import Opening Balance'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 2,
+                                    height: 45,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            height: 59,
+                                            padding: '0 0 0 10',
+                                            text: '"Imports opening stock for all items and locations. Grain opening balances must be entered manually after taking a physical reading."'
                                         }
                                     ]
                                 }

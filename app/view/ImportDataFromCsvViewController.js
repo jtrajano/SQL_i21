@@ -42,6 +42,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                         file: file,
                         importType: params.type,
                         allowOverwrite: params.allowOverwrite,
+                        lineOfBusiness: params.lineOfBusiness,
                         params: params.params,
                         method: params.method,
                         callback: function(records, success, options) {
@@ -81,7 +82,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
             "icimportdatafromcsv #txtBrowseFile": {
                 change: this.onTxtBrowseFileChange
             }
-        })
+        });
     },
 
     ajaxRequest: function (p, win) {
@@ -94,7 +95,8 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                'X-File-Size': p.file.size,
                'X-File-Type': p.file.type,
                'X-Import-Type': p.importType,
-               'X-Import-Allow-Overwrite': p.allowOverwrite ? "true" : "false"
+               'X-Import-Allow-Overwrite': p.allowOverwrite ? "true" : "false",
+               'X-Import-Allow-LineOfBusiness': p.lineOfBusiness
             },
             formData: p.file,
             isUpload: true,
