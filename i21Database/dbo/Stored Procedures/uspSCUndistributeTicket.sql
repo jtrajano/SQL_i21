@@ -3,9 +3,7 @@
 	@intUserId INT,
 	@intEntityId INT,
 	@strInOutFlag NVARCHAR(2)
-	
 AS
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -86,7 +84,7 @@ BEGIN TRY
 				CREATE TABLE #tmpItemShipmentIds (
 					[intInventoryShipmentItemId] [INT] PRIMARY KEY,
 					[intInventoryShipmentId] [INT],
-					[strShipmentNumber] [VARCHAR],
+					[strShipmentNumber] [VARCHAR](100),
 					UNIQUE ([intInventoryShipmentItemId])
 				);
 				INSERT INTO #tmpItemShipmentIds(intInventoryShipmentItemId,intInventoryShipmentId,strShipmentNumber) SELECT  intInventoryShipmentItemId,intInventoryShipmentId,strShipmentNumber FROM vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
@@ -103,8 +101,8 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-					SELECT @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId = @InventoryShipmentId;
-					SELECT @ysnPosted = @ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
+					SELECT @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
+					SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 					IF @ysnPosted =1
 						BEGIN
 							EXEC [dbo].[uspARPostInvoice]
@@ -128,7 +126,7 @@ BEGIN TRY
 								@raiseError			= 1
 						END
 					EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
-					EXEC [dbo].[uspICPostInventoryShipment] 1, 0, @strTransactionId, @intUserId;
+					EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
 					EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
 
 					FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @intInventoryShipmentItemId , @strTransactionId;
