@@ -92,7 +92,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
 
     rebuild: function (data) {
         return ic.utils.ajax({
-            timeout: 120000,
+            timeout: 0, //120000,
             url: '../Inventory/api/InventoryValuation/RebuildInventory',
             method: "post",
             headers: {

@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
         public async Task<int> RebuildInventory(DateTime? startDate, string itemNo, bool isPeriodic = true, bool generateBillGLEntries = false, int? userId = null)
         {
             SqlParameter paramStrNo = string.IsNullOrEmpty(itemNo) ? new SqlParameter("@strItemNo", DBNull.Value)  : new SqlParameter("@strItemNo", itemNo);
-            this.Database.CommandTimeout = 120000;
+            this.Database.CommandTimeout = 0; //120000;
             return await this.Database.ExecuteSqlCommandAsync(
                 "dbo.uspICRebuildInventoryValuation @dtmStartDate, @strItemNo, @isPeriodic, @ysnRegenerateBillGLEntries, @intUserId",
                 new SqlParameter("@dtmStartDate", startDate),
