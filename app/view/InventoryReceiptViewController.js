@@ -5940,7 +5940,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 else {
                     context.configuration.paging.store.load({
                         callback: function(records, options, success) {
-                            console.log(records);
                             me.doOtherChargeTaxCalculate(win);
                         }
                     });
