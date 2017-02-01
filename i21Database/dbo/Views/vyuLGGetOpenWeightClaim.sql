@@ -19,7 +19,8 @@ FROM (
 	Load.dtmScheduledDate,
 	strTransportationMode = CASE WHEN Load.intPurchaseSale = 1 THEN 'Truck' ELSE 'Ocean Vessel' END,
 	Load.dtmETAPOD,
-	dtmLastWeighingDate = Load.dtmETAPOD + 45,
+	dtmLastWeighingDate = Load.dtmETAPOD + ISNULL(ASN.intLastWeighingDays,0),
+	dtmClaimValidTill = Load.dtmETAPOD + ISNULL(ASN.intLastWeighingDays,0) + ISNULL(ASN.intClaimValidTill,0),
 	Load.strBLNumber,
 	Load.dtmBLDate,
 	Load.intWeightUnitMeasureId,
@@ -81,6 +82,7 @@ JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE Load.intPurchaseSal
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
+LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 LEFT JOIN (
 		SELECT SUM(ReceiptItem.dblNet) dblNet, ReceiptItem.intSourceId, ReceiptItem.intLineNo, ReceiptItem.intOrderId 
 		FROM tblICInventoryReceiptItem ReceiptItem 

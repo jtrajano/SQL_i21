@@ -1,6 +1,7 @@
 ﻿CREATE VIEW dbo.vyuLGContainerPositionView
 AS
-SELECT * FROM (
+SELECT *
+FROM (
 	SELECT CH.intContractHeaderId
 		,dtmStartDate = MIN(CD.dtmStartDate)
 		,dtmEndDate = MAX(CD.dtmEndDate)
@@ -22,21 +23,16 @@ SELECT * FROM (
 		,strPriceCurrency = CU.strCurrency
 		,dblSeqQuantity = SUM(CD.dblQuantity)
 		,dblContractQuantity = CH.dblQuantity
+		,strQuantityUOM = MAX(UM.strUnitMeasure)
 		,dblWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), CD.dblQuantity), 0))
 		,dblShippedWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(LoadDetail.intWeightItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), LoadDetail.dblNet), 0))
 		,intNoOfContainers = COUNT(CD.intContractDetailId)
 		,intNoOfApprovals = ISNULL(Samp.intApprovalCount, 0)
 		,intNoOfRejects = ISNULL(RSamp.intApprovalCount, 0)
 		,intNoOfIntegrationRequests = SUM(CAST(ISNULL(LDLink.ysnExported, 0) AS INT))
-		,intTrucksRemaining = (
-			SELECT COUNT(Seq.intContractDetailId)
-			FROM tblCTContractDetail Seq
-			WHERE Seq.intContractHeaderId = CH.intContractHeaderId
-				AND Seq.intItemId = CD.intItemId
-				AND Seq.intContractStatusId NOT IN (5,6)
-			)
+		,intTrucksRemaining = COUNT(CD.intContractDetailId)
 		,strRemarks = CH.strInternalComment
-        ,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, MAX(CD.dtmEndDate)), 2)
+		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, CD.dtmEndDate), 2)
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
@@ -56,8 +52,9 @@ SELECT * FROM (
 		AND ISNULL(LC.ysnRejected, 0) = 0
 	LEFT JOIN (
 		SELECT DISTINCT Seq.intContractHeaderId
-                       ,Seq.intItemId
-					   ,COUNT(*) intApprovalCount
+			,Seq.intContractDetailId
+			,Seq.intItemId
+			,COUNT(*) intApprovalCount
 		FROM tblQMSample Samp
 		JOIN tblQMSampleDetail SampDetail ON SampDetail.intSampleId = Samp.intSampleId
 		JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttributeId
@@ -68,12 +65,14 @@ SELECT * FROM (
 		JOIN tblCTContractDetail Seq ON Seq.intContractDetailId = Samp.intContractDetailId
 		GROUP BY Seq.intItemId
 			,Seq.intContractHeaderId
-		) Samp ON Samp.intContractHeaderId = CH.intContractHeaderId
+			,Seq.intContractDetailId
+		) Samp ON Samp.intContractDetailId = CD.intContractDetailId
 		AND Samp.intItemId = CD.intItemId
 	LEFT JOIN (
 		SELECT DISTINCT Seq.intContractHeaderId
-					   ,Seq.intItemId
-					   ,COUNT(*) intApprovalCount
+			,Seq.intContractDetailId
+			,Seq.intItemId
+			,COUNT(*) intApprovalCount
 		FROM tblQMSample Samp
 		JOIN tblQMSampleDetail SampDetail ON SampDetail.intSampleId = Samp.intSampleId
 		JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttributeId
@@ -84,12 +83,12 @@ SELECT * FROM (
 		JOIN tblCTContractDetail Seq ON Seq.intContractDetailId = Samp.intContractDetailId
 		GROUP BY Seq.intItemId
 			,Seq.intContractHeaderId
-		) RSamp ON RSamp.intContractHeaderId = CH.intContractHeaderId
+			,Seq.intContractDetailId
+		) RSamp ON RSamp.intContractDetailId = CD.intContractDetailId
 		AND RSamp.intItemId = CD.intItemId
-        WHERE ISNULL(LC.ysnRejected, 0) = 0
-        GROUP BY CD.intItemId,I.strItemNo,I.strDescription,CH.strContractNumber,CH.intContractHeaderId
-                        ,CH.strCustomerContract,Pos.strPosition,EY.strName,CB.strDescription,PT.strPricingType
-                        ,U2.strUnitMeasure,CU.strCurrency,CH.dblQuantity
-                        ,Samp.intApprovalCount,RSamp.intApprovalCount,CH.strInternalComment
-        ) tbl
-WHERE intTrucksRemaining > 0 
+	WHERE ISNULL(LC.ysnRejected, 0) = 0
+	GROUP BY CD.intItemId,I.strItemNo,I.strDescription,CH.strContractNumber,CH.intContractHeaderId,CH.strCustomerContract
+		,Pos.strPosition,EY.strName,CB.strDescription,PT.strPricingType,U2.strUnitMeasure,CU.strCurrency,CH.dblQuantity
+		,UM.strUnitMeasure,CD.intNetWeightUOMId,Samp.intApprovalCount,RSamp.intApprovalCount,CH.strInternalComment,CD.dtmEndDate
+	) tbl
+WHERE intTrucksRemaining > 0

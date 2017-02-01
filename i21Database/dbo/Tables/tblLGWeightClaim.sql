@@ -9,6 +9,7 @@
 [dtmETAPOD] DATETIME NULL,
 [dtmLastWeighingDate] DATETIME NULL,
 [dtmActualWeighingDate] DATETIME NULL,
+[dtmClaimValidTill] DATETIME NULL,
 [intPurchaseSale] INT NULL,
 [ysnPosted] BIT NULL,
 [dtmPosted] DATETIME NULL,

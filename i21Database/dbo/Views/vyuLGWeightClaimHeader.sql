@@ -10,6 +10,7 @@ SELECT
 	WC.dtmETAPOD,
 	WC.dtmLastWeighingDate,
 	WC.dtmActualWeighingDate,
+	WC.dtmClaimValidTill,
 	Load.strLoadNumber,
 	Load.dtmScheduledDate,
 	Load.strBLNumber,
