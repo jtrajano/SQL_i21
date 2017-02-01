@@ -117,10 +117,22 @@ BEGIN
 					@intUserId,
 					CONVERT(INT, CONVERT(VARCHAR(8), GETDATE(), 112))
 				FROM tblGLAccount WHERE intAccountId = @Id_update
-		
-				UPDATE tblGLCOACrossReference SET stri21IdNumber = REPLACE(strExternalId ,''.'',''''),
-				intLegacyReferenceId = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21Id = @Id_update		
+				-- prepare coa crossreference 
+				UPDATE coa  SET stri21IdNumber = REPLACE(strExternalId ,''.'',''''),
+				intLegacyReferenceId = (origin.A4GLIdentity) ,
+				strOldId = 
+				CAST(CAST(origin.glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''-'' + 
+				CAST( CAST(origin.glact_acct9_16 AS INT) AS NVARCHAR(50))
+				from tblGLCOACrossReference coa
+				OUTER APPLY (SELECT TOP 1 A4GLIdentity, glact_acct1_8, glact_acct9_16
+				 FROM glactmst ORDER BY A4GLIdentity DESC) origin
+				WHERE inti21Id = @Id_update		
 
+				--sync cross reference mapping with the newly built account
+				INSERT INTO tblGLCrossReferenceMapping (strOldAccountId,intAccountId, intAccountSystemId, intConcurrencyId)
+				SELECT strOldId, inti21Id,1,1 FROM tblGLCOACrossReference
+				WHERE inti21Id = @Id_update
+				
 				--RETAIN THE ORIGINAL VALUE OF glact_acct1_8 IN CASE LENGHT ADJUSTMENT WAS MADE
 				UPDATE A
 				SET A.glact_desc = B.glact_desc,
