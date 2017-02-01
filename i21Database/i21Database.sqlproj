@@ -4925,6 +4925,7 @@
     <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForProcessRefund.sql" />
     <Build Include="dbo\Tables\tblQMSampleTypeUserRole.sql" />
     <Build Include="dbo\Tables\tblCFNetworkSiteTaxGroup.sql" />
+    <Build Include="dbo\Views\vyuEMETExportCustomerTaxExemption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
