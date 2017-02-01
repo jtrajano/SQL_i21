@@ -30,7 +30,6 @@ FROM ptcusmst  WHERE ptcus_cus_no <> ptcus_bill_to
 
 INSERT INTO [dbo].[tblARCustomerFreightXRef]
            ([intEntityCustomerId]
-           ,[intSupplyPointId]
            ,[intCategoryId]
            ,[ysnFreightOnly]
            ,[strFreightType]
@@ -39,11 +38,9 @@ INSERT INTO [dbo].[tblARCustomerFreightXRef]
            ,[dblMinimumUnits]
            ,[ysnFreightInPrice]
            ,[dblFreightMiles]
-           ,[intShipViaId]
            ,[intEntityLocationId]
            ,[strZipCode]
            ,[intConcurrencyId])
-     
 SELECT CUS.intEntityCustomerId
 	  ,CAT.intCategoryId
 	  ,CASE WHEN(DVC.trdvc_frt_only_yn = 'Y') THEN 1 ELSE 0 END
@@ -70,7 +67,6 @@ WHERE DVC.trdvc_cus_no = @CustomerId
 
 INSERT INTO [dbo].[tblARCustomerFreightXRef]
            ([intEntityCustomerId]
-           ,[intSupplyPointId]
            ,[intCategoryId]
            ,[ysnFreightOnly]
            ,[strFreightType]
@@ -79,7 +75,6 @@ INSERT INTO [dbo].[tblARCustomerFreightXRef]
            ,[dblMinimumUnits]
            ,[ysnFreightInPrice]
            ,[dblFreightMiles]
-           ,[intShipViaId]
            ,[intEntityLocationId]
            ,[strZipCode]
            ,[intConcurrencyId])

@@ -377,5 +377,6 @@
     <None Include="Scripts\IC\uspICImportInventoryReceiptsAG.sql" />
     <None Include="Scripts\IC\uspICImportInventoryReceiptsPT.sql" />
     <None Include="Scripts\IC\uspICImportInventoryReceipts_CreateTrigger.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMImportPTTerminalToCustomer.sql" />
   </ItemGroup>
 </Project>
