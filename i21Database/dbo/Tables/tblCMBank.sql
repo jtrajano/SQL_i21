@@ -32,10 +32,10 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 
 			SET NOCOUNT ON 
 
-			--For Encryption and Decryption
-			OPEN SYMMETRIC KEY i21EncryptionSymKey
-			   DECRYPTION BY CERTIFICATE i21EncryptionCert
-			   WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+			 --For Encryption and Decryption
+			OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+			DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+			WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 				-- Proceed in inserting the record the base table (tblCMBank)			
 				INSERT INTO tblCMBank (
@@ -71,7 +71,7 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 						,[strFax]				= i.strFax
 						,[strWebsite]			= i.strWebsite
 						,[strEmail]				= i.strEmail
-						,[strRTN]				= [dbo].fnAESEncrypt(i.strRTN)
+						,[strRTN]				= [dbo].fnAESEncryptASym(i.strRTN)
 						,[intCreatedUserId]		= i.intCreatedUserId
 						,[dtmCreated]			= i.dtmCreated
 						,[intLastModifiedUserId]= i.intLastModifiedUserId
@@ -84,7 +84,7 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
 
-			CLOSE SYMMETRIC KEY i21EncryptionSymKey
+			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 END
 
 GO
@@ -98,9 +98,9 @@ BEGIN
     SET NOCOUNT ON;
 
     --For Encryption and Decryption
-	OPEN SYMMETRIC KEY i21EncryptionSymKey
-       DECRYPTION BY CERTIFICATE i21EncryptionCert
-       WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+	OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+	DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
     UPDATE tblCMBank SET
     strBankName           = i.strBankName
@@ -114,7 +114,7 @@ BEGIN
     ,strFax                  = i.strFax
     ,strWebsite              = i.strWebsite
     ,strEmail              = i.strEmail
-    ,strRTN                  = [dbo].fnAESEncrypt(i.strRTN)
+    ,strRTN                  = [dbo].fnAESEncryptASym(i.strRTN)
     ,intCreatedUserId      = i.intCreatedUserId
     ,dtmCreated              = i.dtmCreated
     ,intLastModifiedUserId= i.intLastModifiedUserId
@@ -136,11 +136,11 @@ BEGIN
     ,strFax       = i.strFax
     ,strWebsite = i.strWebsite
     ,strEmail   = i.strEmail
-	,strRTN		= [dbo].fnAESEncrypt(i.strRTN)
+	,strRTN		= [dbo].fnAESEncryptASym(i.strRTN)
     FROM inserted i
     WHERE tblCMBankAccount.intBankId = i.intBankId
 
-	CLOSE SYMMETRIC KEY i21EncryptionSymKey
+	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 
 END
 GO

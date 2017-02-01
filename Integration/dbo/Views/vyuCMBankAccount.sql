@@ -178,9 +178,9 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 			END		
 
 			--For Encryption and Decryption
-			OPEN SYMMETRIC KEY i21EncryptionSymKey
-			   DECRYPTION BY CERTIFICATE i21EncryptionCert
-			   WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
+			OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+			DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+			WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
 
 			-- Proceed in inserting the record the base table (tblCMBankAccount)			
 			INSERT INTO tblCMBankAccount (
@@ -245,8 +245,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCurrencyId						= i.intCurrencyId
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
-					,strBankAccountNo					= [dbo].fnAESEncrypt(i.strBankAccountNo)
-					,strRTN								= [dbo].fnAESEncrypt(i.strRTN)
+					,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
+					,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
 					,strAddress							= i.strAddress
 					,strZipCode							= i.strZipCode
 					,strCity							= i.strCity
@@ -271,8 +271,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
-					,strMICRRoutingNo					= [dbo].fnAESEncrypt(i.strMICRRoutingNo)
-					,strMICRBankAccountNo				= [dbo].fnAESEncrypt(i.strMICRBankAccountNo)
+					,strMICRRoutingNo					= [dbo].fnAESEncryptASym(i.strMICRRoutingNo)
+					,strMICRBankAccountNo				= [dbo].fnAESEncryptASym(i.strMICRBankAccountNo)
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -293,6 +293,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 			FROM	inserted i 
+
+			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 
 			-- INSERT new records for apcbkmst_origin
@@ -373,7 +375,6 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 		 		
 		EXIT_TRIGGER: 
 
-		CLOSE SYMMETRIC KEY i21EncryptionSymKey
 
 		END
 		')
@@ -405,9 +406,9 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 			END 
 
 			--For Encryption and Decryption
-			OPEN SYMMETRIC KEY i21EncryptionSymKey
-			   DECRYPTION BY CERTIFICATE i21EncryptionCert
-			   WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
+			OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+			DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+			WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
 
 			-- Proceed in updating the base table (tblCMBankAccount)				
 			UPDATE	dbo.tblCMBankAccount 
@@ -417,8 +418,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCurrencyId						= i.intCurrencyId
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
-					,strBankAccountNo					= [dbo].fnAESEncrypt(i.strBankAccountNo)
-					,strRTN								= [dbo].fnAESEncrypt(i.strRTN)
+					,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
+					,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
 					,strAddress							= i.strAddress
 					,strZipCode							= i.strZipCode
 					,strCity							= i.strCity
@@ -443,8 +444,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
-					,strMICRRoutingNo					= [dbo].fnAESEncrypt(i.strMICRRoutingNo)
-					,strMICRBankAccountNo				= [dbo].fnAESEncrypt(i.strMICRBankAccountNo)
+					,strMICRRoutingNo					= [dbo].fnAESEncryptASym(i.strMICRRoutingNo)
+					,strMICRBankAccountNo				= [dbo].fnAESEncryptASym(i.strMICRBankAccountNo)
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -467,6 +468,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
+			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			
 			-- UPDATE modified record for apcbkmst_origin
@@ -593,7 +595,6 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 
 		EXIT_TRIGGER:
 
-		CLOSE SYMMETRIC KEY i21EncryptionSymKey
 		END
 		')
 END
