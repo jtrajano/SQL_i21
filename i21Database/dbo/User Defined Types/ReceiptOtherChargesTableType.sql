@@ -7,9 +7,9 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	[intId] INT IDENTITY PRIMARY KEY CLUSTERED
 
 	-- Linking fields to the Header 
-	,[intEntityVendorId] INT NULL															-- The Vendor. 
+	,[intEntityVendorId] INT NOT NULL															-- The Vendor. 
 	,[strBillOfLadding] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL						-- Bill of Ladding Number
-	,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL						-- Receipt type. It can be a 'Purchase Contract', 'Purchase Order', 'Transfer Order', or 'Direct'. 
+	,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL						-- Receipt type. It can be a 'Purchase Contract', 'Purchase Order', 'Transfer Order', or 'Direct'. 
 	,[intLocationId] INT NOT NULL															-- Company Location	
 	,[intShipViaId] INT NULL																-- ShipVia
 	,[intShipFromId] INT NOT NULL															-- The Vendor Location. 

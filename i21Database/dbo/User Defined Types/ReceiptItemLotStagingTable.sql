@@ -22,7 +22,7 @@ CREATE TYPE [dbo].[ReceiptItemLotStagingTable] AS TABLE
 				
 		--Following fields are needed to add Lot Record	
 		,[intLotId] INT NULL
-		,[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 		,[strLotAlias] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,[intItemUnitMeasureId] INT NULL
 		,[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0))
