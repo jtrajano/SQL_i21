@@ -4,7 +4,7 @@
     [intDocumentMaintenanceId] INT NOT NULL, 
 	[strHeaderFooter] NVARCHAR(25)  COLLATE Latin1_General_CI_AS NULL,
     [intCharacterLimit] INT NOT NULL, 
-    [strMessage] NVARCHAR(MAX) NOT NULL, 
+    [strMessage] NVARCHAR(MAX) NULL DEFAULT '', 
     [blbMessage] VARBINARY(MAX) NULL, 
 	[ysnRecipe] BIT NOT NULL DEFAULT 0,
 	[ysnQuote] BIT NOT NULL DEFAULT 0,
