@@ -34,6 +34,7 @@ SELECT TR.intTestResultId
 		) AS strShipperName
 	,S.strComment
 	,ito1.intOwnerId AS intEntityId
+	,S.intSampleTypeId
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId

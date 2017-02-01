@@ -4934,6 +4934,7 @@
     <Build Include="dbo\Views\vyuQMSampleTypeControlPointUserRole.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeCategoryControlPointUserRole.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeUserRole.sql" />
+    <Build Include="dbo\Views\vyuQMQualityExceptionListUserRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
