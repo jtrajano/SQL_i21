@@ -74,6 +74,7 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120003, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120003)	
 		RETURN 0;
 	END	
 

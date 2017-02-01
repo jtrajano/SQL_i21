@@ -4935,6 +4935,8 @@
     <Build Include="dbo\Views\vyuQMSampleTypeCategoryControlPointUserRole.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeUserRole.sql" />
     <Build Include="dbo\Views\vyuQMQualityExceptionListUserRole.sql" />
+    <Build Include="dbo\Functions\fnARFormatMessage.sql" />
+    <Build Include="dbo\Functions\fnARGetSysMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

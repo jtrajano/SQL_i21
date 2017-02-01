@@ -170,6 +170,7 @@ IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cas
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120005, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120005)
 		RETURN 0;
 	END
 
@@ -177,6 +178,7 @@ IF @ARAccountId IS NOT NULL AND @TransactionType NOT IN ('Customer Prepayment', 
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120062, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120062)
 		RETURN 0;
 	END
 
@@ -185,7 +187,8 @@ IF @ARAccountId IS NULL AND @TransactionType IN ('Cash', 'Cash Refund')
 	BEGIN
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120063, 16, 1, @CompanyLocationId);
+			RAISERROR(120063, 16, 1, @CompanyLocation);
+		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120063, @CompanyLocation, DEFAULT)
 		RETURN 0;
 	END
 
@@ -193,6 +196,7 @@ IF @ARAccountId IS NOT NULL AND @TransactionType IN ('Cash', 'Cash Refund') AND 
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120064, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120064)
 		RETURN 0;
 	END
 
@@ -202,6 +206,7 @@ IF @ARAccountId IS NULL AND @TransactionType = 'Customer Prepayment'
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120065, 16, 1, @CompanyLocation);
+		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120065, @CompanyLocation, DEFAULT)
 		RETURN 0;
 	END
 
@@ -209,6 +214,7 @@ IF  @TransactionType = 'Customer Prepayment' AND NOT EXISTS (SELECT NULL FROM vy
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120066, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120066)
 		RETURN 0;
 	END
 
@@ -217,6 +223,7 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @Entity
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120025, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120025)
 		RETURN 0;
 	END
 
@@ -224,6 +231,7 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @Entity
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120026, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120026)
 		RETURN 0;
 	END	
 	
@@ -231,20 +239,23 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120027, 16, 1);		
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120027)
 		RETURN 0;
 	END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ysnLocationActive = 1)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120028, 16, 1);		
+			RAISERROR(120028, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120028)
 		RETURN 0;
 	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120029, 16, 1);		
+			RAISERROR(120029, 16, 1);	
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120029)	
 		RETURN 0;
 	END
 
@@ -258,6 +269,7 @@ IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHER
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120030, 16, 1);
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120030)	
 		RETURN 0;
 	END
  
@@ -265,27 +277,31 @@ IF ISNULL(@DefaultCurrency,0) = 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120067, 16, 1);
+			SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120067)	
 		RETURN 0;
 	END
 
 IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120068, 16, 1, @TransactionType);		
+			RAISERROR(120068, 16, 1, @TransactionType);
+		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120068, @TransactionType, DEFAULT)
 		RETURN 0;
 	END
 
 IF (@Type NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120069, 16, 1, @TransactionType);		
+			RAISERROR(120069, 16, 1, @TransactionType);
+		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120069, @TransactionType, DEFAULT)
 		RETURN 0;
 	END
 
 IF (@UseOriginIdAsInvoiceNumber = 1 AND EXISTS (SELECT TOP 1 NULL FROM tblARInvoice WHERE strInvoiceNumber = @InvoiceOriginId))
 	BEGIN
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120075, 16, 1, @InvoiceOriginId);		
+			RAISERROR(120075, 16, 1, @InvoiceOriginId);
+		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120075, @InvoiceOriginId, DEFAULT)
 		RETURN 0;
 	END
 	
