@@ -58,7 +58,7 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),
-	CONSTRAINT [UQ_tblCRMOpportunity_strName] UNIQUE ([strName]),
+	--CONSTRAINT [UQ_tblCRMOpportunity_strName] UNIQUE ([strName]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerContactId] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblCRMType_intTypeId] FOREIGN KEY ([intTypeId]) REFERENCES [dbo].[tblCRMType] ([intTypeId]),
