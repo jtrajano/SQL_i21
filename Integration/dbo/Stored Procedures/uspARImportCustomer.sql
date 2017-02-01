@@ -569,7 +569,43 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					DECLARE @EntityLocationId INT
 					SET @EntityLocationId = SCOPE_IDENTITY()
 			
-				 
+					--INSERT MULTIPLE Location based on the Bill to
+					INSERT [dbo].[tblEMEntityLocation]    
+							([intEntityId], 
+							 [strLocationName], 
+							 [strAddress], 
+							 [strCity], 
+							 [strCountry], 
+							 [strState], 
+							 [strZipCode], 
+							 [strNotes],  
+							 [intShipViaId], 
+							 [intTermsId], 
+							 [intWarehouseId], 
+							 [ysnDefaultLocation])
+							select 				
+										ENT.intEntityId, 
+										(RTRIM (CASE WHEN agcus_co_per_ind_cp = ''C'' THEN 
+												   agcus_last_name + agcus_first_name 
+											  WHEN agcus_co_per_ind_cp =''P'' THEN 
+													RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))
+										 END)) +''_'' + CAST(A4GLIdentity AS NVARCHAR),
+										ISNULL(agcus_addr,'''') + CHAR(10) + ISNULL(agcus_addr2,''''),
+										LTRIM(RTRIM(agcus_city)),
+										LTRIM(RTRIM(agcus_country)),
+										LTRIM(RTRIM(agcus_state)),
+										LTRIM(RTRIM(agcus_zip)),
+										NULL,
+										NULL,
+										(SELECT intTermID FROM tblSMTerm WHERE strTermCode = CAST(agcus_terms_cd AS CHAR(10))),
+										NULL,
+										0
+						 from agcusmst  
+						 INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = agcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+						 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
+						 WHERE agcus_cus_no = @originCustomer AND 
+						 agcus_bill_to is not null and agcus_cus_no <> agcus_bill_to AND ETYP.strType = ''Customer''
+						 				 
 					 --INSERT into tblARCustomerToContact
 					DECLARE @CustomerToContactId INT
 				
@@ -1172,6 +1208,42 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					DECLARE @EntityLocationId INT
 					SET @EntityLocationId = SCOPE_IDENTITY()
 
+					--INSERT MULTIPLE Location based on the Bill to
+					INSERT [dbo].[tblEMEntityLocation]    
+							([intEntityId], 
+							 [strLocationName], 
+							 [strAddress], 
+							 [strCity], 
+							 [strCountry], 
+							 [strState], 
+							 [strZipCode], 
+							 [strNotes],  
+							 [intShipViaId], 
+							 [intTermsId], 
+							 [intWarehouseId], 
+							 [ysnDefaultLocation])
+							select 				
+										ENT.intEntityId, 
+										(RTRIM (CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN 
+												   ptcus_last_name + ptcus_first_name 
+											  WHEN ptcus_co_per_ind_cp = ''P'' THEN 
+													RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))
+										 END)) +''_'' + CAST(A4GLIdentity AS NVARCHAR),
+										ISNULL(ptcus_addr,'''') + CHAR(10) + ISNULL(ptcus_addr2,''''),
+										LTRIM(RTRIM(ptcus_city)),
+										LTRIM(RTRIM(ptcus_country)),
+										LTRIM(RTRIM(ptcus_state)),
+										LTRIM(RTRIM(ptcus_zip)),
+										NULL,
+										NULL,
+										NULL,
+										NULL,
+										0
+						 from ptcusmst  
+						 INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+						 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
+						 WHERE ptcus_cus_no = @originCustomer AND 
+						 ptcus_bill_to is not null and ptcus_cus_no <> ptcus_bill_to AND ETYP.strType = ''Customer''
 
 					--INSERT into tblARCustomerToContact
 					DECLARE @CustomerToContactId INT
