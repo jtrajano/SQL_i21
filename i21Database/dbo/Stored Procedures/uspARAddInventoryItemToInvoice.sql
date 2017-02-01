@@ -134,15 +134,15 @@ IF NOT EXISTS(	SELECT NULL
 	END
 
 
-IF EXISTS(	SELECT	NULL 
-			FROM	tblICItem IC 
-			WHERE	IC.[intItemId] = @ItemId AND ISNULL(IC.[strLotTracking], 'No') <> 'No'
-		)
-	BEGIN		
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120076, 16, 1);
-		RETURN 0;
-	END
+--IF EXISTS(	SELECT	NULL 
+--			FROM	tblICItem IC 
+--			WHERE	IC.[intItemId] = @ItemId AND ISNULL(IC.[strLotTracking], 'No') <> 'No'
+--		)
+--	BEGIN		
+--		IF ISNULL(@RaiseError,0) = 1
+--			RAISERROR(120076, 16, 1);
+--		RETURN 0;
+--	END
 	
 IF ISNULL(@RaiseError,0) = 0	
 	BEGIN TRANSACTION

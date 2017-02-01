@@ -4666,6 +4666,7 @@
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
     <Build Include="dbo\Tables\tblPRTaxTableReference.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1096.sql" />
+    <Build Include="dbo\Functions\fnGetLoadDetailLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
