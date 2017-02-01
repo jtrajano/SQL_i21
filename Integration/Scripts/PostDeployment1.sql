@@ -44,7 +44,7 @@ GO
 
 --Inventory Receipt
 GO 
-:r "..\Scripts\IC\trgReceiptNumber.sql"
+:r "..\Scripts\IC\uspICImportInventoryReceipts_CreateTrigger.sql"
 GO
 :r "..\Scripts\IC\uspICImportInventoryReceipts.sql"
 GO 

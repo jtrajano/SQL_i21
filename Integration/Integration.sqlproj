@@ -376,6 +376,6 @@
     <None Include="Scripts\IC\uspICImportInventoryReceipts.sql" />
     <None Include="Scripts\IC\uspICImportInventoryReceiptsAG.sql" />
     <None Include="Scripts\IC\uspICImportInventoryReceiptsPT.sql" />
-    <None Include="Scripts\IC\trgReceiptNumber.sql" />
+    <None Include="Scripts\IC\uspICImportInventoryReceipts_CreateTrigger.sql" />
   </ItemGroup>
 </Project>

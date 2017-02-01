@@ -15,6 +15,9 @@ SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 
 BEGIN
+	-- Create the trigger that creates the receipt id. 
+	EXEC uspICImportInventoryReceipts_CreateTrigger; 
+
 	--================================================
 	--     ONE TIME INVOICE SYNCHRONIZATION	
 	--================================================

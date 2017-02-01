@@ -5628,4 +5628,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[imgEmailSignature]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4559294a-178f-4aa3-ae0e-8b6f550166ce" ChangeDateTime="02/01/2017 07:21:41">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryReceiptItem].[strForexRateType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceiptItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intForexRateTypeId" />
+  </Operation>
 </Operations>

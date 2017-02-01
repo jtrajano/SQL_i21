@@ -175,10 +175,12 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, dblContainerWeightPerQty = ISNULL(LogisticsView.dblContainerWeightPerQty, 0.00)
 		, ContractView.strPricingType
 		, strTaxGroup = SMTaxGroup.strTaxGroup
+		, strForexRateType = forexType.strCurrencyExchangeRateType
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-
+		LEFT JOIN tblSMCurrencyExchangeRateType forexType
+			ON ReceiptItem.intForexRateTypeId = forexType.intCurrencyExchangeRateTypeId
 		LEFT JOIN tblICItem Item 
 			ON Item.intItemId = ReceiptItem.intItemId
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
