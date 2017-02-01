@@ -4930,6 +4930,10 @@
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeNeedPlanDetail.sql" />
     <Build Include="dbo\Views\vyuPRUnpaidEmployeeReport.sql" />
     <Build Include="dbo\Functions\fnGetLoadDetailLots.sql" />
+    <Build Include="dbo\Views\vyuQMSampleListUserRole.sql" />
+    <Build Include="dbo\Views\vyuQMSampleTypeControlPointUserRole.sql" />
+    <Build Include="dbo\Views\vyuQMSampleTypeCategoryControlPointUserRole.sql" />
+    <Build Include="dbo\Views\vyuQMSampleTypeUserRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -52,7 +52,6 @@ SELECT S.intSampleId
 	,WO.strWorkOrderNo
 	,S.strComment
 	,ito1.intOwnerId AS intEntityId
-	,ISNULL(SU.intUserRoleID, 0) AS intUserRoleID
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -79,4 +78,3 @@ LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUO
 LEFT JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
-LEFT JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = ST.intSampleTypeId
