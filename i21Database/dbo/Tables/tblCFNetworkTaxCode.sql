@@ -9,7 +9,8 @@
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblCFNetworkTaxCode_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFNetworkTaxCode] PRIMARY KEY CLUSTERED ([intNetworkTaxCodeId] ASC),
     CONSTRAINT [FK_tblCFNetworkTaxCode_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblCFNetworkTaxCode_tblICCategory] FOREIGN KEY ([intItemCategory]) REFERENCES [dbo].[tblICCategory] ([intCategoryId])
+    CONSTRAINT [FK_tblCFNetworkTaxCode_tblICCategory] FOREIGN KEY ([intItemCategory]) REFERENCES [dbo].[tblICCategory] ([intCategoryId]),
+	CONSTRAINT [FK_tblCFNetworkTaxCode_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId])
 );
 
 

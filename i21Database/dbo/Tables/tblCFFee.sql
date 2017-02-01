@@ -15,6 +15,7 @@
     [intMaximumThreshold]     INT             NULL,
     [dblFeeRate]              NUMERIC (18, 6) NULL,
     [intGLAccountId]          INT             NULL,
+	[intItemId]			      INT			  NULL,
     [intRestrictedByProduct]  INT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFFee_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFFee] PRIMARY KEY CLUSTERED ([intFeeId] ASC),
