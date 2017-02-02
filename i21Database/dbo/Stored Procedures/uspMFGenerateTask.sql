@@ -288,8 +288,10 @@ BEGIN TRY
 				AND R.strInternalCode = 'STOCK'
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
+			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
+			JOIN  dbo.tblICLotStatus LS on LS.intLotStatusId =L.intLotStatusId 
 			WHERE L.intItemId = @intItemId
-				AND L.intLotStatusId = 1
+				AND LS.strPrimaryStatus ='Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.dtmDateCreated BETWEEN (
 							SELECT MIN(dtmDateCreated)
@@ -431,8 +433,9 @@ BEGIN TRY
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 			JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
+			JOIN  dbo.tblICLotStatus LS on LS.intLotStatusId =L.intLotStatusId 
 			WHERE L.intItemId = @intItemId
-				AND L.intLotStatusId = 1
+				AND LS.strPrimaryStatus ='Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND NOT EXISTS (
 					SELECT *
@@ -446,11 +449,11 @@ BEGIN TRY
 							ELSE @intLineItemLotId
 							END
 						), 0)
-				AND LI.intItemOwnerId = (
+				AND IsNULL(LI.intItemOwnerId,0) = (
 					CASE 
 						WHEN @ysnPickByItemOwner = 1
 							THEN @intItemOwnerId
-						ELSE LI.intItemOwnerId
+						ELSE IsNULL(LI.intItemOwnerId,0)
 						END
 					)
 			GROUP BY L.intLotId
@@ -569,8 +572,9 @@ BEGIN TRY
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 			JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
+			JOIN  dbo.tblICLotStatus LS on LS.intLotStatusId =L.intLotStatusId 
 			WHERE L.intItemId = @intItemId
-				AND L.intLotStatusId = 1
+				AND LS.strPrimaryStatus ='Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.dtmDateCreated BETWEEN (
 							SELECT MIN(dtmDateCreated)
@@ -705,8 +709,9 @@ BEGIN TRY
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
 			JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
+			JOIN  dbo.tblICLotStatus LS on LS.intLotStatusId =L.intLotStatusId 
 			WHERE L.intItemId = @intItemId
-				AND L.intLotStatusId = 1
+				AND LS.strPrimaryStatus ='Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND NOT EXISTS (
 					SELECT *
@@ -881,14 +886,14 @@ BEGIN TRY
 				SELECT TOP 1 @intLotRecordId = intLotRecordId
 				FROM @tblLot s
 				WHERE intGroupId = 1
-				ORDER BY ABS(s.dblQty - @dblRequiredQty) ASC
+				ORDER BY intLotRecordId ASC
 
 				IF @intLotRecordId IS NULL
 				BEGIN
-					SELECT TOP 1 @intLotRecordId = @intLotRecordId
+					SELECT TOP 1 @intLotRecordId = intLotRecordId
 					FROM @tblLot s
 					WHERE intGroupId = 2
-					ORDER BY ABS(s.dblQty - @dblRequiredQty) ASC
+					ORDER BY intLotRecordId ASC
 				END
 			END
 

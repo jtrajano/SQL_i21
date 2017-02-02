@@ -71,7 +71,7 @@ BEGIN TRY
 		,@intLotCodeStartingPosition INT
 		,@intLotCodeNoOfDigits INT
 		,@dblLowerToleranceReqQty NUMERIC(18, 6)
-		,@intLotItemId int
+		,@intLotItemId INT
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
@@ -379,9 +379,8 @@ BEGIN TRY
 	JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 	JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
 	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = ri.intItemUOMId
-		JOIN dbo.tblICItemUOM IU ON IU.intItemId = rs.intSubstituteItemId
-			AND IU.intUnitMeasureId = IU1.intUnitMeasureId
-		
+	JOIN dbo.tblICItemUOM IU ON IU.intItemId = rs.intSubstituteItemId
+		AND IU.intUnitMeasureId = IU1.intUnitMeasureId
 	JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
@@ -603,12 +602,14 @@ BEGIN TRY
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 					AND R.strInternalCode = 'STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
-				JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
-				JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
-				JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
+				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
-					AND L.intLotStatusId = 1
+					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
@@ -708,12 +709,14 @@ BEGIN TRY
 				AND SL.ysnAllowConsume = 1
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 				AND R.strInternalCode = 'STOCK'
-				JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
-				JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
-			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
+			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+				AND BS.strPrimaryStatus = 'Active'
+			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
-				AND L.intLotStatusId = 1
+				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.intStorageLocationId = (
 					CASE 
@@ -818,11 +821,13 @@ BEGIN TRY
 					AND SL.ysnAllowConsume = 1
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 					AND R.strInternalCode = 'STOCK'
-					JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
-			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
+				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
-					AND L.intLotStatusId = 1
+					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
@@ -1121,12 +1126,14 @@ BEGIN TRY
 					AND SL.ysnAllowConsume = 1
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 					AND R.strInternalCode = 'STOCK'
-					JOIN dbo.tblICParentLot PL on PL.intParentLotId=L.intParentLotId 
-					JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
-					JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
+				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
-					AND L.intLotStatusId = 1
+					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
@@ -1194,7 +1201,7 @@ BEGIN TRY
 		WHILE (@intLotRecordId IS NOT NULL)
 		BEGIN
 			SELECT @intLotId = NULL
-				,@intLotItemId=NULL
+				,@intLotItemId = NULL
 				,@dblQty = NULL
 				,@ysnSubstituteItem = NULL
 				,@dblMaxSubstituteRatio = NULL
@@ -1203,7 +1210,7 @@ BEGIN TRY
 				,@intItemIssuedUOMId = NULL
 
 			SELECT @intLotId = intLotId
-				,@intLotItemId=intItemId
+				,@intLotItemId = intItemId
 				,@dblQty = dblQty
 				,@ysnSubstituteItem = ysnSubstituteItem
 				,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
@@ -1216,8 +1223,15 @@ BEGIN TRY
 			IF @ysnSubstituteItem = 1
 			BEGIN
 				SELECT @dblReqQty = @dblReqQty * (@dblMaxSubstituteRatio / 100) * @dblSubstituteRatio
-				Select @intUnitMeasureId =intUnitMeasureId from tblICItemUOM Where intItemUOMId=@intRecipeItemUOMId
-				Select @intRecipeItemUOMId= intItemUOMId from tblICItemUOM Where intItemId=@intLotItemId and intUnitMeasureId=@intUnitMeasureId
+
+				SELECT @intUnitMeasureId = intUnitMeasureId
+				FROM tblICItemUOM
+				WHERE intItemUOMId = @intRecipeItemUOMId
+
+				SELECT @intRecipeItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intLotItemId
+					AND intUnitMeasureId = @intUnitMeasureId
 			END
 
 			IF EXISTS (
@@ -1344,7 +1358,10 @@ BEGIN TRY
 						FROM tblMFProductionSummary
 						WHERE intWorkOrderId = @intWorkOrderId
 							AND intItemId = @intLotItemId
-							And intItemTypeId IN (1,3)
+							AND intItemTypeId IN (
+								1
+								,3
+								)
 						)
 				BEGIN
 					SELECT @intCategoryId = intCategoryId
@@ -1394,7 +1411,10 @@ BEGIN TRY
 					SET dblConsumedQuantity = dblConsumedQuantity + @dblReqQty
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
-						And intItemTypeId IN (1,3)
+						AND intItemTypeId IN (
+							1
+							,3
+							)
 				END
 
 				UPDATE @tblLot
@@ -1466,7 +1486,10 @@ BEGIN TRY
 						FROM tblMFProductionSummary
 						WHERE intWorkOrderId = @intWorkOrderId
 							AND intItemId = @intLotItemId
-							And intItemTypeId IN (1,3)
+							AND intItemTypeId IN (
+								1
+								,3
+								)
 						)
 				BEGIN
 					SELECT @intCategoryId = intCategoryId
@@ -1516,7 +1539,10 @@ BEGIN TRY
 					SET dblConsumedQuantity = dblConsumedQuantity + @dblQty
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
-						And intItemTypeId IN (1,3)
+						AND intItemTypeId IN (
+							1
+							,3
+							)
 				END
 
 				UPDATE @tblLot
