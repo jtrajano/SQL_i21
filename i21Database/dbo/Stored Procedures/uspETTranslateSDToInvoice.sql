@@ -92,9 +92,8 @@ BEGIN
 		,strFileName				NVARCHAR(300)
 		,strStatus					NVARCHAR(MAX)
 		,ysnSuccessful				BIT
+		,intInvoiceId				INT
 	)
-
-
 
 	SET @strAllErrorMessage = ''
 
@@ -296,6 +295,9 @@ BEGIN
 					,@ItemUOMId				   = @intItemUOMId
 					,@BOLNumber				   = @strInvoiceNumber
 					,@ItemContractDetailId     = @intContractDetailId
+					,@RaiseError			   = 0
+					,@UseOriginIdAsInvoiceNumber = 1
+					,@InvoiceOriginId         = @strInvoiceNumber
 
 				--GEt the created invoice number
 				SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
@@ -318,6 +320,7 @@ BEGIN
 							,strFileName				
 							,strStatus
 							,ysnSuccessful
+							,intInvoiceId				
 					)
 					SELECT
 							strCustomerNumber = @strCustomerNumber		
@@ -328,6 +331,7 @@ BEGIN
 							,strFileName = ''				
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
+							,intInvoiceId = @intNewInvoiceId
 					
 					GOTO CONTINUELOOP
 
@@ -398,6 +402,7 @@ BEGIN
 							,strFileName				
 							,strStatus
 							,ysnSuccessful
+							,intInvoiceId 
 					)
 					SELECT
 							strCustomerNumber = @strCustomerNumber		
@@ -408,6 +413,7 @@ BEGIN
 							,strFileName = ''				
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
+							,intInvoiceId = @intNewInvoiceId
 					GOTO CONTINUELOOP
 				END
 				/*
@@ -551,16 +557,18 @@ BEGIN
 						,strFileName				
 						,strStatus
 						,ysnSuccessful
+						,intInvoiceId 
 				)
 				SELECT
 						strCustomerNumber = @strCustomerNumber		
-						,strInvoiceNumber =	@strInvoiceNumber		
+						,strInvoiceNumber =	@strNewInvoiceNumber		
 						,strSiteNumber = @strSiteNumber				
 						,dtmDate = @dtmInvoiceDate
 						,intLineItem = 0						
 						,strFileName = ''				
 						,strStatus = 'Successfully created ' + @strNewInvoiceNumber
 						,ysnSuccessful = 1
+						,intInvoiceId = @intNewInvoiceId
 			END
 
 			--Delete the processed detail list
