@@ -232,3 +232,4 @@ LEFT OUTER JOIN
 		ON ARID.[intItemId] = ICI.[intItemId]
 WHERE
 	ISNULL(ARID.[intPrepayTypeId],0) IN (1,2,3)
+	AND ARPAC.ysnApplied = 0
