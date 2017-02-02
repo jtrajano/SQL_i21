@@ -23,6 +23,7 @@ GO
 
 ALTER TABLE [dbo].[tblGLCrossReferenceMapping]  WITH CHECK ADD  CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccountSystem] FOREIGN KEY([intAccountSystemId])
 REFERENCES [dbo].[tblGLAccountSystem] ([intAccountSystemId])
+ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblGLCrossReferenceMapping] CHECK CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccountSystem]
