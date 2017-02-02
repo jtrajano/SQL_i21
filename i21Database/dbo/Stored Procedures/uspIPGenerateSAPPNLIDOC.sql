@@ -56,7 +56,8 @@ Begin
 	   @strBrokerAccount			=	strBrokerAccount   ,
 	   @dtmPostingDate				=	dtmPostingDate ,
        @strStatus					=	strStatus   ,
-	   @strMessage					=	strMessage
+	   @strMessage					=	strMessage,
+	   @strUserName					=	strUserName
 	From tblRKStgMatchPnS Where intStgMatchPnSId=@intMinStageId
 
 	Begin
@@ -68,7 +69,7 @@ Begin
 		Set @strXml +=	@strIDOCHeader
 		Set @strXml +=	'</EDI_DC40>'
 		
-		Set @strXml +=	'<ACC_DOCUMENT SEGMENT="1">'
+		--Set @strXml +=	'<ACC_DOCUMENT SEGMENT="1">'
 
 		--Header
 		Set @strXml += '<E1BPACHE09 SEGMENT="1">'
@@ -103,17 +104,17 @@ Begin
 		Set @strXml += '<E1BPACCR09 SEGMENT="1">'
 		Set @strXml += '<ITEMNO_ACC>'	+ '0000001000'		+ '</ITEMNO_ACC>'
 		Set @strXml += '<CURRENCY>'	+ ISNULL(@strCurrency,'')				+ '</CURRENCY>'
-		Set @strXml += '<AMT_DOCCUR>'	+ ISNULL(CONVERT(VARCHAR,@dblGrossPnL),'')	+ '</AMT_DOCCUR>'
+		Set @strXml += '<AMT_DOCCUR>'	+ Replace(ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblGrossPnL)),''),'.',',')	+ '</AMT_DOCCUR>'
 		Set @strXml +=	'</E1BPACCR09>'
 
 		--Currency items (TM account)
 		Set @strXml += '<E1BPACCR09 SEGMENT="1">'
 		Set @strXml += '<ITEMNO_ACC>'	+ '0000001001'		+ '</ITEMNO_ACC>'
 		Set @strXml += '<CURRENCY>'	+ ISNULL(@strCurrency,'')				+ '</CURRENCY>'
-		Set @strXml += '<AMT_DOCCUR>'	+ ISNULL(CONVERT(VARCHAR,-@dblGrossPnL),'')	+ '</AMT_DOCCUR>'
+		Set @strXml += '<AMT_DOCCUR>'	+ Replace(ISNULL(LTRIM(CONVERT(NUMERIC(38,2),-@dblGrossPnL)),''),'.',',')	+ '</AMT_DOCCUR>'
 		Set @strXml +=	'</E1BPACCR09>'
 
-		Set @strXml +=	'</ACC_DOCUMENT>'
+		--Set @strXml +=	'</ACC_DOCUMENT>'
 
 		Set @strXml += '</IDOC>'
 		Set @strXml +=  '</ACC_DOCUMENT03>'

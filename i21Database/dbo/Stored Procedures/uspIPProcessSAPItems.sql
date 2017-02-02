@@ -45,10 +45,10 @@ Begin
 	If ISNULL(@intCategoryId,0)=0
 		RaisError('Category not found.',16,1)
 
-	If Exists (Select 1 where @strItemNo like '%49600%')
+	If Exists (Select 1 where RIGHT(@strItemNo,8) like '496%')
 		Select @strCommodity='Coffee'
 
-	If Exists (Select 1 where @strItemNo like '%49100%')
+	If Exists (Select 1 where RIGHT(@strItemNo,8) like '491%')
 		Select @strCommodity='Tea'
 
 	Select @intCommodityId=intCommodityId From tblICCommodity Where strCommodityCode=@strCommodity

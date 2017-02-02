@@ -175,12 +175,12 @@ Begin
 				Set @strItemXml += '</E1EDL19>'
 			End
 
-			Set @strItemXml += '<E1EDL41 SEGMENT="1">'
-			Set @strItemXml += '<QUALI>'  +  '001' + '</QUALI>' 
-			Set @strItemXml += '<BSTNR>'  +  ISNULL(@strPONo,'') + '</BSTNR>' 
-			Set @strItemXml += '<POSEX>'  +  ISNULL(@strPOLineItemNo,'') + '</POSEX>' 
-			Set @strItemXml += '<IHREZ>'  +  ISNULL(CONVERT(VARCHAR,@intInventoryReceiptItemId),'') + '</IHREZ>' 
-			Set @strItemXml += '</E1EDL41>'
+			--Set @strItemXml += '<E1EDL41 SEGMENT="1">'
+			--Set @strItemXml += '<QUALI>'  +  '001' + '</QUALI>' 
+			--Set @strItemXml += '<BSTNR>'  +  ISNULL(@strPONo,'') + '</BSTNR>' 
+			--Set @strItemXml += '<POSEX>'  +  ISNULL(@strPOLineItemNo,'') + '</POSEX>' 
+			--Set @strItemXml += '<IHREZ>'  +  ISNULL(CONVERT(VARCHAR,@intInventoryReceiptItemId),'') + '</IHREZ>' 
+			--Set @strItemXml += '</E1EDL41>'
 
 			--Batch Split for Coffee
 			If UPPER(@strCommodityCode)='COFFEE' AND ISNULL(@ysnBatchSplit,0)=1
@@ -203,11 +203,11 @@ Begin
 							+ '<QUALF>'  +  'BAS' + '<QUALF>' 
 							+ '</E1EDL19>'
 
-							+ '<E1EDL41 SEGMENT="1">'
-							+ '<QUALI>'  +  '001' + '</QUALI>' 
-							+ '<BSTNR>'  +  ISNULL(@strPONo,'') + '</BSTNR>' 
-							+ '<POSEX>'  +  ISNULL(@strPOLineItemNo,'') + '</POSEX>' 
-							+ '</E1EDL41>'
+							--+ '<E1EDL41 SEGMENT="1">'
+							--+ '<QUALI>'  +  '001' + '</QUALI>' 
+							--+ '<BSTNR>'  +  ISNULL(@strPONo,'') + '</BSTNR>' 
+							--+ '<POSEX>'  +  ISNULL(@strPOLineItemNo,'') + '</POSEX>' 
+							--+ '</E1EDL41>'
 
 							+ '</E1EDL24>'
 					From tblLGLoadDetailContainerLink lc Join tblLGLoadDetail ld on lc.intLoadDetailId=ld.intLoadDetailId

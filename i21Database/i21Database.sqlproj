@@ -4941,6 +4941,7 @@
     <Build Include="dbo\Stored Procedures\uspETTranslateRPToRecievePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspValidateShippingAdvice.sql" />
     <Build Include="dbo\Functions\fnGetTrucksRemaining.sql" />
+    <Build Include="dbo\Functions\fnGetFirstDateOfWeek.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
