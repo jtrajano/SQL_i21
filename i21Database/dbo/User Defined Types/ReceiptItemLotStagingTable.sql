@@ -6,23 +6,23 @@ CREATE TYPE [dbo].[ReceiptItemLotStagingTable] AS TABLE
 		[intId] INT IDENTITY PRIMARY KEY CLUSTERED
 
 		--Following fields are needed to match the Receipt
-		,[intEntityVendorId] INT NOT NULL
-		,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,[intLocationId] INT NOT NULL    
+		,[intEntityVendorId] INT NULL
+		,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[intLocationId] INT NULL    
 		,[intShipViaId] INT NULL 
-		,[intShipFromId] INT NOT NULL	
-		,[intCurrencyId] INT NOT NULL		
-		,[intSourceType] INT NOT NULL  
+		,[intShipFromId] INT NULL	
+		,[intCurrencyId] INT NULL		
+		,[intSourceType] INT NULL  
 		,[strBillOfLadding] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 
 		--Following fields are needed to match the Receipt Item
-		,[intItemId] INT NOT NULL	
-		,[intSubLocationId] INT NOT NULL
-		,[intStorageLocationId] INT NOT NULL
+		,[intItemId] INT NULL	
+		,[intSubLocationId] INT NULL
+		,[intStorageLocationId] INT NULL
 				
 		--Following fields are needed to add Lot Record	
 		,[intLotId] INT NULL
-		,[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,[strLotAlias] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,[intItemUnitMeasureId] INT NULL
 		,[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0))

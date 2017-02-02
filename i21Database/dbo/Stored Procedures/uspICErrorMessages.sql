@@ -573,7 +573,7 @@ SET @strmessage = 'Lot ID %s is invalid for item %s.'
 EXEC sp_addmessage 80123,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80124) EXEC sp_dropmessage 80124, 'us_english'	
-SET @strmessage = '%s is not a valid Other Charge Item Id.'
+SET @strmessage = 'Other Charge Item Id is invalid or missing.'
 EXEC sp_addmessage 80124,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80125) EXEC sp_dropmessage 80125, 'us_english'	
@@ -601,15 +601,15 @@ SET @strmessage = 'Lot Number is invalid or missing for item %s.'
 EXEC sp_addmessage 80130,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80131) EXEC sp_dropmessage 80131, 'us_english'	
-SET @strmessage = 'Lot Condition %s is invalid for item %s.'
+SET @strmessage = 'Lot Condition %s is invalid for lot %s.'
 EXEC sp_addmessage 80131,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80132) EXEC sp_dropmessage 80132, 'us_english'	
-SET @strmessage = 'Parent Lot Id %s is invalid for item %s.'
+SET @strmessage = 'Parent Lot Id %s is invalid for lot %s.'
 EXEC sp_addmessage 80132,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80133) EXEC sp_dropmessage 80133, 'us_english'	
-SET @strmessage = 'Parent Lot Number is invalid or missing for item %s.'
+SET @strmessage = 'Parent Lot Number is invalid or missing for lot %s.'
 EXEC sp_addmessage 80133,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80134) EXEC sp_dropmessage 80134, 'us_english'
@@ -637,15 +637,15 @@ SET @strmessage = 'Unable to repost. Item id: %s. Transaction id: %s. Batch id: 
 EXEC sp_addmessage 80139,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80140) EXEC sp_dropmessage 80140, 'us_english'	
-SET @strmessage = 'Entity Id is invalid for other charge item %s.'
+SET @strmessage = 'Entity Id is invalid or missing for other charge item %s.'
 EXEC sp_addmessage 80140,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80141) EXEC sp_dropmessage 80141, 'us_english'	
-SET @strmessage = 'Receipt type is invalid for other charge item %s.'
+SET @strmessage = 'Receipt type is invalid or missing for other charge item %s.'
 EXEC sp_addmessage 80141,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80142) EXEC sp_dropmessage 80142, 'us_english'	
-SET @strmessage = 'Location Id is invalid for other charge item %s.'
+SET @strmessage = 'Location Id is invalid or missing for other charge item %s.'
 EXEC sp_addmessage 80142,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80143) EXEC sp_dropmessage 80143, 'us_english'	
@@ -653,23 +653,23 @@ SET @strmessage = 'Ship Via Id is invalid for other charge item %s.'
 EXEC sp_addmessage 80143,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80144) EXEC sp_dropmessage 80144, 'us_english'	
-SET @strmessage = 'Ship From Id is invalid for other charge item %s.'
+SET @strmessage = 'Ship From Id is invalid or missing for other charge item %s.'
 EXEC sp_addmessage 80144,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80145) EXEC sp_dropmessage 80145, 'us_english'	
-SET @strmessage = 'Currency Id is invalid for other charge item %s.'
+SET @strmessage = 'Currency Id is invalid or missing for other charge item %s.'
 EXEC sp_addmessage 80145,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80146) EXEC sp_dropmessage 80146, 'us_english'	
-SET @strmessage = 'Entity Id is invalid for lot %s.'
+SET @strmessage = 'Entity Id is invalid or missing for lot %s.'
 EXEC sp_addmessage 80146,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80147) EXEC sp_dropmessage 80147, 'us_english'	
-SET @strmessage = 'Receipt type is invalid for lot %s.'
+SET @strmessage = 'Receipt type is invalid or missing for lot %s.'
 EXEC sp_addmessage 80147,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80148) EXEC sp_dropmessage 80148, 'us_english'	
-SET @strmessage = 'Location Id is invalid for lot %s.'
+SET @strmessage = 'Location Id is invalid or missing for lot %s.'
 EXEC sp_addmessage 80148,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80149) EXEC sp_dropmessage 80149, 'us_english'	
@@ -677,25 +677,33 @@ SET @strmessage = 'Ship Via Id is invalid for lot %s.'
 EXEC sp_addmessage 80149,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80150) EXEC sp_dropmessage 80150, 'us_english'	
-SET @strmessage = 'Ship From Id is invalid for lot %s.'
+SET @strmessage = 'Ship From Id is invalid or missing for lot %s.'
 EXEC sp_addmessage 80150,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80151) EXEC sp_dropmessage 80151, 'us_english'	
-SET @strmessage = 'Currency Id is invalid for lot %s.'
+SET @strmessage = 'Currency Id is invalid or missing for lot %s.'
 EXEC sp_addmessage 80151,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80152) EXEC sp_dropmessage 80152, 'us_english'	
-SET @strmessage = 'Source Type Id is invalid for lot %s.'
+SET @strmessage = 'Source Type Id is invalid or missing for lot %s.'
 EXEC sp_addmessage 80152,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80153) EXEC sp_dropmessage 80153, 'us_english'	
-SET @strmessage = 'Item Id is invalid for lot %s.'
+SET @strmessage = 'Item Id is invalid or missing for lot %s.'
 EXEC sp_addmessage 80153,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80154) EXEC sp_dropmessage 80154, 'us_english'	
-SET @strmessage = 'Sub Location is invalid for lot %s.'
+SET @strmessage = 'Sub Location is invalid or missing for lot %s.'
 EXEC sp_addmessage 80154,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80155) EXEC sp_dropmessage 80155, 'us_english'	
-SET @strmessage = 'Storage Location is invalid for lot %s.'
+SET @strmessage = 'Storage Location is invalid or missing for lot %s.'
 EXEC sp_addmessage 80155,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80156) EXEC sp_dropmessage 80156, 'us_english'	
+SET @strmessage = 'Item UOM Id is invalid or missing for lot %s.'
+EXEC sp_addmessage 80156,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80157) EXEC sp_dropmessage 80157, 'us_english'	
+SET @strmessage = 'Lot ID %s is invalid for lot %s.'
+EXEC sp_addmessage 80157,11,@strmessage,'us_english','False'

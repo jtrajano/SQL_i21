@@ -7,16 +7,16 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	[intId] INT IDENTITY PRIMARY KEY CLUSTERED
 
 	-- Linking fields to the Header 
-	,[intEntityVendorId] INT NOT NULL															-- The Vendor. 
+	,[intEntityVendorId] INT NULL															-- The Vendor. 
 	,[strBillOfLadding] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL						-- Bill of Ladding Number
-	,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL						-- Receipt type. It can be a 'Purchase Contract', 'Purchase Order', 'Transfer Order', or 'Direct'. 
-	,[intLocationId] INT NOT NULL															-- Company Location	
+	,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL						-- Receipt type. It can be a 'Purchase Contract', 'Purchase Order', 'Transfer Order', or 'Direct'. 
+	,[intLocationId] INT NULL															-- Company Location	
 	,[intShipViaId] INT NULL																-- ShipVia
-	,[intShipFromId] INT NOT NULL															-- The Vendor Location. 
+	,[intShipFromId] INT NULL															-- The Vendor Location. 
 	,[intCurrencyId] INT NULL																-- The currency id used in a transaction. 	
 
 	-- Other Charges Fields		
-	,[intChargeId] INT NOT NULL																-- The item id of Other Charge type. 
+	,[intChargeId] INT NULL																-- The item id of Other Charge type. 
     ,[ysnInventoryCost] BIT NULL DEFAULT ((0))												-- True if allocated cost is included in the stock cost. False if not. 
     ,[strCostMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Per Unit')	-- Additional charge can be calculated by 'Per Unit', 'Percentage', or 'Amount'. 
 	,[intCostCurrencyId] INT NULL															-- The cost currency id used for the other charge. 	
