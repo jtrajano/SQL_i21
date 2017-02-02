@@ -14,6 +14,7 @@ AS
 				dtmTransactionDate,	
 				strFutMarketName,	
 				strFutureMonth,
+				dblLots AS dblNoOfLots,
 				dblLots * intProffitLoss dblLots,	
 				dblPrice dblPrice,	
 				dblLatestPrice,	
