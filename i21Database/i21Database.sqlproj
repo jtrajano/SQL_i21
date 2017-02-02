@@ -4667,6 +4667,7 @@
     <Build Include="dbo\Tables\tblPRTaxTableReference.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1096.sql" />
     <Build Include="dbo\Functions\fnGetLoadDetailLots.sql" />
+    <Build Include="dbo\Functions\fnGetTrucksRemaining.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
