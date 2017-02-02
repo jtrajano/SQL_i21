@@ -91,6 +91,12 @@ IF (@dtmReverseDate IS NULL)
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
 				AND F.dtmCheckPrinted IS NOT NULL 
+
+		--Remove transaction if its on check print spool
+		IF EXISTS (SELECT * FROM tblCMCheckPrintJobSpool Spool INNER JOIN #tmpCMBankTransaction TMP ON Spool.strTransactionId = TMP.strTransactionId)
+		BEGIN
+			DELETE FROM tblCMCheckPrintJobSpool WHERE strTransactionId IN (SELECT strTransactionId FROM #tmpCMBankTransaction)
+		END
 		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 	END
 ELSE
