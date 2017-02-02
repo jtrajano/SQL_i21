@@ -373,6 +373,7 @@ BEGIN TRY
 		,ysnMainItem BIT
 		,intItemUOMId INT
 		,intCategoryId INT
+		,intMainItemId INT
 		)
 	DECLARE @tblICFinalItem TABLE (
 		intItemId INT
@@ -382,6 +383,7 @@ BEGIN TRY
 		,ysnMainItem BIT
 		,intItemUOMId INT
 		,intCategoryId INT
+		,intMainItemId INT
 		)
 	DECLARE @dblProduceQty NUMERIC(38, 20)
 		,@intProduceUOMId INT
@@ -422,6 +424,7 @@ BEGIN TRY
 			,ysnMainItem
 			,intItemUOMId
 			,intCategoryId
+			,intMainItemId
 			)
 		SELECT ri.intItemId
 			,ri.intConsumptionMethodId
@@ -447,6 +450,7 @@ BEGIN TRY
 			,1 AS ysnMainItem
 			,ri.intItemUOMId
 			,I.intCategoryId
+			,NULL
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -498,6 +502,7 @@ BEGIN TRY
 			,0 AS ysnMainItem
 			,IU.intItemUOMId
 			,I.intCategoryId
+			,RSI.intItemId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -556,6 +561,7 @@ BEGIN TRY
 			,ysnMainItem
 			,intItemUOMId
 			,intCategoryId
+			,intMainItemId
 			)
 		SELECT ri.intItemId
 			,ri.intConsumptionMethodId
@@ -593,6 +599,7 @@ BEGIN TRY
 			,1 AS ysnMainItem
 			,ri.intItemUOMId
 			,I.intCategoryId
+			,NULL
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -656,6 +663,7 @@ BEGIN TRY
 			,0 AS ysnMainItem
 			,IU.intItemUOMId
 			,I.intCategoryId
+			,RSI.intItemId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -695,6 +703,7 @@ BEGIN TRY
 		,ysnMainItem
 		,intItemUOMId
 		,intCategoryId
+		,intMainItemId
 		)
 	SELECT intItemId
 		,intConsumptionMethodId
@@ -703,6 +712,7 @@ BEGIN TRY
 		,ysnMainItem
 		,intItemUOMId
 		,intCategoryId
+		,intMainItemId
 	FROM @tblICItem
 	GROUP BY intItemId
 		,intConsumptionMethodId
@@ -710,6 +720,7 @@ BEGIN TRY
 		,ysnMainItem
 		,intItemUOMId
 		,intCategoryId
+		,intMainItemId
 
 	IF @ysnIncludeOutputItem = 1
 	BEGIN
@@ -846,6 +857,20 @@ BEGIN TRY
 			WHERE SL.dblQtyInProdStagingLocation = 0
 			)
 
+	DELETE FI
+	FROM @tblICFinalItem FI
+	WHERE ysnMainItem = 1
+		AND intItemId IN (
+			SELECT SL.intItemId
+			FROM @tblMFQtyInProductionStagingLocation SL
+			WHERE SL.dblQtyInProdStagingLocation = 0
+			)
+		AND EXISTS (
+			SELECT *
+			FROM @tblICFinalItem I
+			WHERE I.intMainItemId = FI.intItemId
+			)
+
 	--BEGIN TRANSACTION
 	INSERT INTO dbo.tblMFProcessCycleCountSession (
 		intSubLocationId
@@ -874,7 +899,7 @@ BEGIN TRY
 		,dblRequiredQty
 		,dblSystemQty
 		,intItemUOMId
-		,intProductionStagingLocationId 
+		,intProductionStagingLocationId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -936,7 +961,11 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId = PSL.intItemId
 		AND RSI.intWorkOrderId = @intWorkOrderId
 	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId = PSL.intItemId
-		AND PS.intWorkOrderId = @intWorkOrderId And intItemTypeId IN (1,3)
+		AND PS.intWorkOrderId = @intWorkOrderId
+		AND intItemTypeId IN (
+			1
+			,3
+			)
 
 	INSERT INTO dbo.tblMFProductionSummary (
 		intWorkOrderId
@@ -951,8 +980,6 @@ BEGIN TRY
 		,dblCountQuantity
 		,dblCountOutputQuantity
 		,dblCountConversionQuantity
-
-
 		,dblCalculatedQuantity
 		,intCategoryId
 		,intItemTypeId
@@ -995,7 +1022,10 @@ BEGIN TRY
 			FROM dbo.tblMFProductionSummary PS
 			WHERE PS.intWorkOrderId = @intWorkOrderId
 				AND PS.intItemId = PSL.intItemId
-				And intItemTypeId IN (1,3)
+				AND intItemTypeId IN (
+					1
+					,3
+					)
 			)
 
 	--COMMIT TRANSACTION
