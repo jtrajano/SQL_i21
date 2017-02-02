@@ -11,8 +11,8 @@ SELECT Trans.intTransactionId
 	, RC.strScheduleCode
 	, RC.strScheduleName
 	, intProductCodeId = CASE WHEN Exception.intTransactionExceptionId IS NULL THEN Trans.intProductCodeId ELSE Exception.intProductCodeId END
-	, strProductCode = CASE WHEN Exception.intTransactionExceptionId IS NULL THEN PC.strProductCode ELSE Exception.strProductCode END
-	, strProductCodeDescription = CASE WHEN Exception.intTransactionExceptionId IS NULL THEN PC.strDescription ELSE Exception.strProductCodeDescription END
+	, strProductCode = CASE WHEN Exception.intTransactionExceptionId IS NULL THEN Trans.strProductCode ELSE Exception.strProductCode END
+	, strProductCodeDescription = CASE WHEN Exception.intTransactionExceptionId IS NULL THEN Trans.strDescription ELSE Exception.strProductCodeDescription END
 	, strTaxCode = Trans.strTaxCode --CASE WHEN Exception.intTransactionExceptionId IS NULL THEN Trans.strTaxCode ELSE Exception.strTaxCode END
 	, strType = Trans.strType --CASE WHEN Exception.intTransactionExceptionId IS NULL THEN Trans.strType ELSE Exception.strType END
 	, strDescription = Trans.strDescription --CASE WHEN Exception.intTransactionExceptionId IS NULL THEN Trans.strDescription ELSE Exception.strDescription END
@@ -73,6 +73,7 @@ SELECT Trans.intTransactionId
 	, Trans.intIntegrationError
 	, Trans.leaf
 	, Exception.intTransactionExceptionId
+	, Exception.ysnDeleted
 FROM tblTFTransaction Trans
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Trans.intProductCodeId

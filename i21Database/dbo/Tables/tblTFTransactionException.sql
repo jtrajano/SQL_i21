@@ -54,10 +54,11 @@
     [strTaxPayerFEIN] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strTaxPayerDBA] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strTaxPayerAddress] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[ysnDeleted] BIT NULL DEFAULT ((0)),
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblTFTransactionException] PRIMARY KEY ([intTransactionExceptionId]), 
     CONSTRAINT [FK_tblTFTransactionException_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId]),
-	CONSTRAINT [FK_tblTFTransactionException_tblTFTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblTFTransaction]([intTransactionId])
+	CONSTRAINT [FK_tblTFTransactionException_tblTFTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblTFTransaction]([intTransactionId]) ON DELETE CASCADE
 )
 
 GO
