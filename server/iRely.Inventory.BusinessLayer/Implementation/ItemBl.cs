@@ -293,19 +293,38 @@ namespace iRely.Inventory.BusinessLayer
                 if(el.Count() > 0)
                     bool.TryParse(el.First(), out excludePhasedOutZeroStockItem);
             }
-            var query = _db.GetQuery<vyuICGetItemStock>()
+
+            if (excludePhasedOutZeroStockItem)
+            {
+                var query = _db.GetQuery<vyuICGetItemStock>()
                 .Include(p => p.tblICItemAccounts)
                 .Include(p => p.tblICItemPricings).Filter(param, true)
-                .Where(p => p.strStatus != "Discontinued" && 
-                    (excludePhasedOutZeroStockItem ? !(p.strStatus == "Phased Out" && p.dblAvailable <= 0) : true));
-            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+                .Where(p => p.strStatus != "Discontinued" || (p.strStatus == "Phased Out" && p.dblAvailable > 0));
 
-            return new SearchResult()
-            {
-                data = data.AsQueryable(),
-                total = await query.CountAsync(),
-                summaryData = await query.ToAggregateAsync(param.aggregates)
-            };
+                var data = await query.ExecuteProjection(param, "strItemNo").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync(),
+					summaryData = await query.ToAggregateAsync(param.aggregates)
+                };
+            }
+            else {
+                var query = _db.GetQuery<vyuICGetItemStock>()
+                .Include(p => p.tblICItemAccounts)
+                .Include(p => p.tblICItemPricings).Filter(param, true)
+                .Where(p => p.strStatus != "Discontinued");
+
+                var data = await query.ExecuteProjection(param, "strItemNo").ToListAsync();
+
+            	return new SearchResult()
+	            {
+    	            data = data.AsQueryable(),
+        	        total = await query.CountAsync(),
+            	    summaryData = await query.ToAggregateAsync(param.aggregates)
+	            };
+            }
         }
 
         /// <summary>
