@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCItemMigrationPt]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCItemMigrationPt]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCItemMigrationPt]
 --** Below Stored Procedure is to migrate inventory and related tables like class, location, unit measure, item pricing, etc.
 --   It loads data into item and related i21 tables like tblICCategory, tblICUnitMeasure, tblICItem,
@@ -457,5 +461,3 @@ SELECT inv.intItemId
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
 	 where ptitm_prc3 > 0 and ptitm_prc3 not in (ptitm_prc1,ptitm_prc2)
 
-
-GO

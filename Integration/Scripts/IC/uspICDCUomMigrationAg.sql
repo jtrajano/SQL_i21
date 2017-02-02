@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCUomMigrationAg]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCUomMigrationAg]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCUomMigrationAg]
 
 AS
@@ -46,8 +50,3 @@ where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS in
 (select upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) 
 COLLATE SQL_Latin1_General_CP1_CS_AS
 from agitmmst where agitm_un_per_pak > 1) 
-
-
-
-GO
-

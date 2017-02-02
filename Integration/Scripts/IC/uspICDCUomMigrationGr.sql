@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCUomMigrationGr]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCUomMigrationGr]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCUomMigrationGr]
 
 AS
@@ -18,7 +22,4 @@ values ('lb', 'lb', 'Weight',1)
 --import units of mesaure from the commodity setup. USe distinct to get unit uoms
 insert into tblICUnitMeasure (strUnitMeasure, strSymbol, strUnitType, intConcurrencyId)
 select distinct gacom_un_desc, gacom_un_desc, case gacom_un_desc when 'BU' then 'Volume' End, 1 from gacommst
-
-
-GO
 

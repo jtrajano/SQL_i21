@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCStorageMigrationAg]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCStorageMigrationAg]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCStorageMigrationAg]
 
 AS
@@ -24,7 +28,4 @@ from
 join tblSMCompanyLocation L on os.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblSMCompanyLocationSubLocation SL on L.intCompanyLocationId = SL.intCompanyLocationId
 
-
-
-GO
 

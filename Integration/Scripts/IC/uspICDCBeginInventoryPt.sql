@@ -1,8 +1,12 @@
-Create PROCEDURE [dbo].[uspICDCBeginInventoryAg]
---** Below Stored Procedure is to migrate origin onhand unit balances from agitmmst table to i21 inventory by creating adjustments.
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCBeginInventoryPt]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCBeginInventoryPt]; 
+GO 
+
+CREATE PROCEDURE [dbo].[uspICDCBeginInventoryPt]
+--** Below Stored Procedure is to migrate origin onhand unit balances from ptitmmst table to i21 inventory by creating adjustments.
 --   Then adjustment posting need to be done in i21 application, which will update the onhand units of inventory.
 --   So here we do not directly update the onhand units from ptitmmst origin table into i21 item tblICItem table, rather we update 
---   i21 table tblICInventoryAdjustment from agitmmst table and then adjustment posting is done which updates tblICItem table. ** 
+--   i21 table tblICInventoryAdjustment from ptitmmst table and then adjustment posting is done which updates tblICItem table. ** 
  @adjLoc NVARCHAR(3),	
  @adjdt  DATETIME , 
  @intEntityUserSecurityId AS INT
@@ -15,7 +19,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 --------------------------------------------------------------------------------------------------------------------------------------------
--- ItemStocks data migration from agitmmst origin table to tblICItem i21 table thru 
+-- ItemStocks data migration from ptitmmst origin table to tblICItem i21 table thru 
 -- tblICInventoryAdjustment and tblICInventoryAdjustmentDetail creation and posting  
 -- Section 9
 --------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,7 +41,7 @@ BEGIN
 	--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
 	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
 
-	select @strAvgLast = agctl_sa_cost_ind from agctlmst where agctl_key = 1
+	select @strAvgLast = ptctl_sa_lst_or_avg_cost from ptctlmst where ptctl_key = 1
 
 	INSERT INTO [dbo].[tblICInventoryAdjustment](
 		intLocationId
@@ -79,20 +83,20 @@ BEGIN
 		@intAdjustmentNo
 		,inv.intItemId
 		,0
-		,agitm_un_on_hand
-		,agitm_un_on_hand
+		,ptitm_on_hand
+		,ptitm_on_hand
 		,uom.intItemUOMId
-		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+		,case when @strAvgLast = 'A' then ptitm_avg_cost else ptitm_cost1 end
 		,sl.intSubLocationId
 		,sl.intStorageLocationId
 		,1
-	FROM	tblICItem inv INNER JOIN agitmmst itm 
-				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+	FROM	tblICItem inv INNER JOIN ptitmmst itm 
+				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.ptitm_itm_no COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblICItemUOM uom 
 				on uom.intItemId = inv.intItemId 
 			left join tblICStorageLocation sl 
-				on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
-	WHERE	agitm_un_on_hand <> 0 
+				on sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS	
+	WHERE	ptitm_on_hand <> 0 
 	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
 
 

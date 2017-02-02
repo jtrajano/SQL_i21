@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCSubLocationMigration]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCSubLocationMigration]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCSubLocationMigration]
 
 AS
@@ -20,6 +24,4 @@ insert into tblSMCompanyLocationSubLocation
 select intCompanyLocationId, strLocationName, strLocationName strDescription, 'Inventory' strClassification, 1 Concurrencyid
 from tblSMCompanyLocation
 
-
-GO
 

@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCatExtraGLAccounts]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCCatExtraGLAccounts]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCCatExtraGLAccounts]
 
 AS
@@ -25,5 +29,3 @@ select top 1 44 intAccountCategoryId, intAccountId from tblGLAccount where strDe
 --select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%Clearing%'
 ) ac
 where C.strInventoryType = 'Inventory' )
-
-GO

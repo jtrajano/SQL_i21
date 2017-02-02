@@ -56,3 +56,41 @@ GO
 GO 
 :r "..\Scripts\IC\uspICImportInventoryReceiptsPTItemTax.sql"
 GO 
+
+-- Inventory
+:r "..\Scripts\IC\uspICDCBeginInventoryAg.sql"
+GO
+:r "..\Scripts\IC\uspICDCBeginInventoryPt.sql"
+GO
+:r "..\Scripts\IC\uspICDCCatExtraGLAccounts.sql"
+GO
+:r "..\Scripts\IC\uspICDCCatGLAcctsMigrationAg.sql"
+GO
+:r "..\Scripts\IC\uspICDCCatGLAcctsMigrationPt.sql"
+GO
+:r "..\Scripts\IC\uspICDCCatMigrationAg.sql"
+GO
+:r "..\Scripts\IC\uspICDCCatMigrationPt.sql"
+GO
+:r "..\Scripts\IC\uspICDCCommodityGLMigrationGr.sql"
+GO
+:r "..\Scripts\IC\uspICDCCommodityMigrationGr.sql"
+GO
+:r "..\Scripts\IC\uspICDCItmGLAcctsMigrationAg.sql"
+GO
+:r "..\Scripts\IC\uspICDCItmGLAcctsMigrationPt.sql"
+GO
+:r "..\Scripts\IC\uspICDCStorageMigrationAg.sql"
+GO
+:r "..\Scripts\IC\uspICDCStorageMigrationGr.sql"
+GO
+:r "..\Scripts\IC\uspICDCStorageMigrationPt.sql"
+GO
+:r "..\Scripts\IC\uspICDCSubLocationMigration.sql"
+GO
+:r "..\Scripts\IC\uspICDCUomMigrationAg.sql"
+GO
+:r "..\Scripts\IC\uspICDCUomMigrationGr.sql"
+GO
+:r "..\Scripts\IC\uspICDCUomMigrationPt.sql"
+GO

@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCommodityGLMigrationGr]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCCommodityGLMigrationGr]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCCommodityGLMigrationGr]
 
 AS
@@ -90,6 +94,3 @@ cross join
 select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%Clearing%'
 ) ac
 where C.strInventoryType = 'Inventory' )
-
-
-GO

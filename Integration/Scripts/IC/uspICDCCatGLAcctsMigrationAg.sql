@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCatGLAcctsMigrationAg]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCCatGLAcctsMigrationAg]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCCatGLAcctsMigrationAg]
 --** Below Stored Procedure is to migrate inventory related gl accounts from origin to i21 tables such as tblICCategoryAccount, tblICItemAccount. **
 
@@ -155,6 +159,3 @@ INSERT INTO tblICCategoryAccount (
 	WHERE coa.strExternalId = cls.agcls_pur_acct_no
 	and cat.strInventoryType = 'Other Charge'
 )
-
-GO
-

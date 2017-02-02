@@ -1,4 +1,8 @@
-Create PROCEDURE [dbo].[uspICDCItmGLAcctsMigrationAg]
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCItmGLAcctsMigrationPt]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCItmGLAcctsMigrationPt]; 
+GO 
+
+Create PROCEDURE [dbo].[uspICDCItmGLAcctsMigrationPt]
 --** Below Stored Procedure is to migrate inventory related gl accounts from origin to i21 tables such as tblICCategoryAccount, tblICItemAccount. **
 
 AS
@@ -8,9 +12,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
----------------------------------------------------------------------------------------------------
 
---** From Inventory (agitmmst) table below 2 accounts (Sales and Variance account) are mapped 
+
+--========================================================================================================================
+--** From Inventory (ptitmmst) table below 2 accounts (Sales and Variance account) are mapped 
 --   into tblICItemAccount table removing duplicates and ignoring the invalid accounts. **
 -- select top 1 as multiple locations are repeated in origin table
 -- update accounts for type 'Inventory' 
@@ -27,11 +32,11 @@ Cross Apply
 	--,seg.intAccountCategoryId
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Sales Account') intAccountCategoryId
 	,act.intAccountId
-	FROM agitmmst AS itm 
-	INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.agitm_sls_acct 
+	FROM ptitmmst AS itm 
+	INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
+	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_sls_acct 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
-	WHERE coa.strExternalId = itm.agitm_sls_acct
+	WHERE coa.strExternalId = itm.ptitm_sls_acct
 	and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 	and I.intItemId = inv.intItemId) as ac
 
@@ -48,11 +53,11 @@ Cross Apply
 	--,seg.intAccountCategoryId
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Cost of Goods') intAccountCategoryId
 	,act.intAccountId
-	FROM agitmmst AS itm 
-	INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.agitm_pur_acct 
+	FROM ptitmmst AS itm 
+	INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
+	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_pur_acct 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
-	WHERE coa.strExternalId = itm.agitm_pur_acct
+	WHERE coa.strExternalId = itm.ptitm_pur_acct
 	and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 	and I.intItemId = inv.intItemId) as ac
 
@@ -70,11 +75,11 @@ Cross Apply
 	--,seg.intAccountCategoryId
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Income') intAccountCategoryId
 	,act.intAccountId
-	FROM agitmmst AS itm 
-	INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.agitm_sls_acct 
+	FROM ptitmmst AS itm 
+	INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
+	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_sls_acct 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
-	WHERE coa.strExternalId = itm.agitm_sls_acct
+	WHERE coa.strExternalId = itm.ptitm_sls_acct
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
 
@@ -91,13 +96,11 @@ Cross Apply
 	--,seg.intAccountCategoryId
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Expense') intAccountCategoryId
 	,act.intAccountId
-	FROM agitmmst AS itm 
-	INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.agitm_pur_acct 
+	FROM ptitmmst AS itm 
+	INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
+	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_pur_acct 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
-	WHERE coa.strExternalId = itm.agitm_pur_acct
+	WHERE coa.strExternalId = itm.ptitm_pur_acct
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
-
-GO
 

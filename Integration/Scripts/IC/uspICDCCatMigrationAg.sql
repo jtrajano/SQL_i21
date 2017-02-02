@@ -1,3 +1,7 @@
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCatMigrationAg]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCCatMigrationAg]; 
+GO 
+
 Create PROCEDURE [dbo].[uspICDCCatMigrationAg]
 --** Below Stored Procedure is to migrate inventory and related tables like class and unit measure.
 --   It loads data into item and related i21 tables like tblICCategory, tblICUnitMeasure **
@@ -46,6 +50,4 @@ FROM agclsmst oc
 --Tax groups in category maintenance will be setup manually by AR team
 --====================================================================
 
-
-GO
 

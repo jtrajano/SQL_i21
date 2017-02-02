@@ -220,23 +220,3 @@
 
 -- C-Store
 :r "..\dbo\Views\vyustpbkmst.sql"
-
--- Inventory
-:r "..\dbo\Stored Procedures\uspICDCBeginInventoryAg.sql"
-:r "..\dbo\Stored Procedures\uspICDCBeginInventoryPt.sql"
-:r "..\dbo\Stored Procedures\uspICDCCatExtraGLAccounts.sql"
-:r "..\dbo\Stored Procedures\uspICDCCatGLAcctsMigrationAg.sql"
-:r "..\dbo\Stored Procedures\uspICDCCatGLAcctsMigrationPt.sql"
-:r "..\dbo\Stored Procedures\uspICDCCatMigrationAg.sql"
-:r "..\dbo\Stored Procedures\uspICDCCatMigrationPt.sql"
-:r "..\dbo\Stored Procedures\uspICDCCommodityGLMigrationGr.sql"
-:r "..\dbo\Stored Procedures\uspICDCCommodityMigrationGr.sql"
-:r "..\dbo\Stored Procedures\uspICDCItmGLAcctsMigrationAg.sql"
-:r "..\dbo\Stored Procedures\uspICDCItmGLAcctsMigrationPt.sql"
-:r "..\dbo\Stored Procedures\uspICDCStorageMigrationAg.sql"
-:r "..\dbo\Stored Procedures\uspICDCStorageMigrationGr.sql"
-:r "..\dbo\Stored Procedures\uspICDCStorageMigrationPt.sql"
-:r "..\dbo\Stored Procedures\uspICDCSubLocationMigration.sql"
-:r "..\dbo\Stored Procedures\uspICDCUomMigrationAg.sql"
-:r "..\dbo\Stored Procedures\uspICDCUomMigrationGr.sql"
-:r "..\dbo\Stored Procedures\uspICDCUomMigrationPt.sql"
