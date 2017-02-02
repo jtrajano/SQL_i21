@@ -172,7 +172,7 @@ BEGIN
 		IF RTRIM(LTRIM(LOWER(@valueReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order')
 			BEGIN
 				--Receipt Type is invalid or missing.
-				RAISERROR(80108, 11, 1);
+				RAISERROR(80134, 11, 1);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -187,7 +187,7 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @valueEntityId)
 			BEGIN
 				-- Vendor Id is invalid or missing.
-				RAISERROR(80109, 11, 1);
+				RAISERROR(80135, 11, 1);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -202,7 +202,7 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityLocation WHERE intEntityId = @valueEntityId AND intEntityLocationId = @valueShipFromId)
 			BEGIN
 				-- Ship From Id is invalid or missing.
-				RAISERROR(80110, 11, 1);
+				RAISERROR(80136, 11, 1);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -217,7 +217,7 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE intCompanyLocationId = @valueLocationId)
 			BEGIN
 				-- Location Id is invalid or missing.
-				RAISERROR(80111, 11, 1);
+				RAISERROR(80137, 11, 1);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -235,7 +235,7 @@ BEGIN
 				DECLARE @valueShipViaIdStr NVARCHAR(50)
 				SET @valueShipViaIdStr = CAST(@valueShipViaId AS NVARCHAR(50))
 				-- Ship Via Id {Ship Via Id} is invalid.
-				RAISERROR(80112, 11, 1, @valueShipViaIdStr);
+				RAISERROR(80138, 11, 1, @valueShipViaIdStr);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
 			END
@@ -479,7 +479,6 @@ BEGIN
 		SELECT TOP 1 @valueItemId = RawData.intItemId
 		FROM   @ReceiptEntries RawData	   
 		WHERE RawData.intItemId NOT IN (SELECT intItemId FROM tblICItem)
-		ORDER BY RawData.intItemId ASC
 
 		IF @valueItemId IS NOT NULL
 			BEGIN
@@ -497,7 +496,6 @@ BEGIN
 		SELECT TOP 1 @valueTaxGroupId = RawData.intTaxGroupId
 		FROM	@ReceiptEntries RawData 	   
 		WHERE RawData.intTaxGroupId NOT IN (SELECT intTaxGroupId FROM tblSMTaxGroup) 
-		ORDER BY RawData.intTaxGroupId ASC
 
 		IF @valueTaxGroupId IS NOT NULL
 			BEGIN
@@ -515,7 +513,6 @@ BEGIN
 		SELECT TOP 1 @valueContractHeaderId = RawData.intContractHeaderId
 		FROM	@ReceiptEntries RawData 	   
 		WHERE RawData.intContractHeaderId NOT IN (SELECT intContractHeaderId FROM tblCTContractHeader)
-		ORDER BY RawData.intContractHeaderId ASC
 
 		IF @valueContractHeaderId IS NOT NULL
 			BEGIN
@@ -533,11 +530,10 @@ BEGIN
 		SELECT TOP 1 @valueContractHeaderId = RawData.intContractHeaderId
 		FROM	@ReceiptEntries RawData	   
 		WHERE RawData.intContractDetailId IS NULL OR RawData.intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = RawData.intContractHeaderId)
-		ORDER BY RawData.intContractDetailId ASC
 
 		IF @valueContractHeaderId IS NOT NULL
 			BEGIN
-				SET @valueContractHeaderIdStr =  CAST(@valueContractHeaderId AS NVARCHAR(50))
+				SET @valueContractHeaderIdStr =  CAST(@valueContractHeaderId AS NVARCHAR(50));
 				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
 				RAISERROR(80119, 11, 1, @valueContractHeaderIdStr);
 				ROLLBACK TRANSACTION;
@@ -552,7 +548,6 @@ BEGIN
 		FROM	@ReceiptEntries RawData 		   
 		WHERE RawData.intItemUOMId IS NULL OR
 			  RawData.intItemUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)
-		ORDER BY RawData.intItemUOMId ASC
 
 		IF @getItemId IS NOT NULL
 			BEGIN
@@ -574,7 +569,6 @@ BEGIN
 		SELECT TOP 1 @valueSubLocationId = RawData.intSubLocationId, @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries	RawData
 		WHERE RawData.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = RawData.intLocationId)
-		ORDER BY RawData.intSubLocationId ASC
 
 		IF @valueSubLocationId IS NOT NULL
 			BEGIN
@@ -596,7 +590,6 @@ BEGIN
 		SELECT TOP 1 @valueStorageLocationId = RawData.intStorageLocationId, @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData 	   
 		WHERE RawData.intStorageLocationId NOT IN (SELECT intStorageLocationId FROM tblICStorageLocation WHERE intLocationId = RawData.intLocationId AND intSubLocationId = RawData.intSubLocationId)
-		ORDER BY RawData.intStorageLocationId ASC
 
 		IF @valueStorageLocationId IS NOT NULL
 			BEGIN
@@ -616,9 +609,7 @@ BEGIN
 
 		SELECT TOP 1 @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData 	   
-		WHERE (RawData.dblNet > 0 OR RawData.dblGross > 0)
-			  AND (RawData.intGrossNetUOMId IS NULL OR RawData.intGrossNetUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
-		ORDER BY RawData.intGrossNetUOMId ASC
+		WHERE ((RawData.dblNet > 0 OR RawData.dblGross > 0) AND RawData.intGrossNetUOMId IS NULL) OR (RawData.intGrossNetUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
 
 		IF @getItemId IS NOT NULL
 			BEGIN
@@ -640,7 +631,6 @@ BEGIN
 		FROM	@ReceiptEntries RawData 	   
 		WHERE RawData.dblCost > 0
 			  AND (RawData.intCostUOMId IS NULL OR RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
-		ORDER BY RawData.intCostUOMId ASC
 
 		IF @getItemId IS NOT NULL
 			BEGIN
@@ -662,7 +652,6 @@ BEGIN
 		SELECT TOP 1 @valueLotId = RawData.intLotId, @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData	   
 		WHERE RawData.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = RawData.intItemId)
-		ORDER BY RawData.intLotId ASC
 
 		IF @valueLotId IS NOT NULL
 			BEGIN
@@ -846,7 +835,7 @@ BEGIN
 		-- Validate Other Charge Entity Id
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
 		FROM @OtherCharges RawData
-		WHERE RawData.intEntityVendorId IS NULL OR RawData.intEntityVendorId NOT IN (SELECT intEntityVendorId FROM tblEMEntity)
+		WHERE RawData.intEntityVendorId IS NULL OR RawData.intEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
 
 		IF @valueChargeId IS NOT NULL
 			BEGIN
@@ -1008,7 +997,7 @@ BEGIN
 
 				DECLARE @valueCostCurrencyIdStr NVARCHAR(50)
 				SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
-				-- Currency Id %s is invalid for other charge item %s.
+				-- Cost Currency Id %s is invalid for other charge item %s.
 				RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
@@ -1545,7 +1534,7 @@ BEGIN
 							-- Validate Lot Entity Id
 							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 							FROM @LotEntries ItemLot
-							WHERE ItemLot.intEntityVendorId IS NULL OR ItemLot.intEntityVendorId NOT IN (SELECT intEntityVendorId FROM tblEMEntity)
+							WHERE ItemLot.intEntityVendorId IS NULL OR ItemLot.intEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
 
 							IF @valueLotRecordNo IS NOT NULL
 								BEGIN

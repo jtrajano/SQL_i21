@@ -581,7 +581,7 @@ SET @strmessage = 'Cost Method for Other Charge item %s is invalid or missing.'
 EXEC sp_addmessage 80125,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80126) EXEC sp_dropmessage 80126, 'us_english'	
-SET @strmessage = 'Currency Id is invalid or missing for other charge item %s.'
+SET @strmessage = 'Cost Currency Id is invalid or missing for other charge item %s.'
 EXEC sp_addmessage 80126,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80127) EXEC sp_dropmessage 80127, 'us_english'	
