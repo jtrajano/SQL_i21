@@ -34,6 +34,8 @@ SELECT	CH.intContractHeaderId,
 		CH.dblQuantityPerLoad,
 		CH.ysnCategory,
 		CH.ysnMultiplePriceFixation,
+
+		PR.strName AS strProducer,
 		CY.strDescription			AS	strCommodityDescription,
 		W1.strWeightGradeDesc		AS	strGrade,
 		W2.strWeightGradeDesc		AS	strWeight,
@@ -64,7 +66,7 @@ SELECT	CH.intContractHeaderId,
 FROM	tblCTContractHeader					CH	
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
 JOIN	tblEMEntity							EY	ON	EY.intEntityId						=		CH.intEntityId						LEFT
-
+JOIN	tblEMEntity							PR	ON	PR.intEntityId						=		CH.intProducerId					LEFT
 JOIN	tblICCommodityUnitMeasure			CS	ON	CS.intCommodityId					=		CH.intCommodityId				
 												AND	CS.ysnStockUnit						=		1									LEFT
 JOIN	tblICUnitMeasure					U1	ON	U1.intUnitMeasureId					=		CS.intUnitMeasureId					LEFT
