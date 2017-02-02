@@ -1,12 +1,95 @@
 ﻿GO
+-----------Voyager-------------
+DECLARE @vygerImportHeader INT
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Voyager') =  0)
+BEGIN
 
+	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Voyager', N'Delimiter', N'Space', NULL, NULL, 1, 24)
+	SET @vygerImportHeader = SCOPE_IDENTITY();
+
+END
+
+ELSE
+
+BEGIN 
+
+	SELECT TOP 1 @vygerImportHeader = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Voyager'
+	DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @vygerImportHeader
+	DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @vygerImportHeader
+
+END
+
+
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Transaction Date', 0, 164, NULL, 1, 4, N'YYYYMMDD')
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 1, 1, NULL, N'tblCFTransaction', N'dtmTransactionDate', NULL, 8, N'', 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Site Number', 0, 184, NULL, 0, 3, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 2, 0, NULL, N'tblCFSite', N'strSiteNumber', NULL, 13, N'', 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Card Number', 0, 156, NULL, 2, 3, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 3, 2, NULL, N'tblCFCard', N'strCardNumber', NULL, 5, NULL, 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Vehicle Number', 0, 86, NULL, 0, 3, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 4, 0, NULL, N'tblCFVehicle', N'strVehicleNumber', NULL, 6, NULL, 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Odometer', 0, 289, NULL, 0, 3, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 5, 0, NULL, N'tblCFTransaction', N'intOdometer', NULL, 7, NULL, 1, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Sequence Number', 0, 0, NULL, 0, 2, NULL)
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Pump Number', 0, 0, NULL, 0, 1, NULL)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Product Id', 0, 250, NULL, 0, 3, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 7, 0, NULL, N'tblCFItem', N'strProductNumber', NULL, 2, NULL, 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Quantity', 0, 260, NULL, 0, 3, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 8, 0, NULL, N'tblCFTransaction', N'dblQuantity', NULL, 8, NULL, 1, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Transfer Cost', 0, 0, NULL, 0, 1, NULL)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Price', 0, 268, NULL, 0, 3, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 9, 0, NULL, N'tblCFTransaction', N'dblOriginalGrossPrice', NULL, 8, NULL, 1, 2)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'ISO', 0, 0, NULL, 0, 1, NULL)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Site Address', 0, 197, NULL, 0, 2, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 10, 0, NULL, NULL, NULL, NULL, 25, NULL, 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Site City', 0, 222, NULL, 0, 2, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 11, 0, NULL, NULL, NULL, NULL, 17, NULL, 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Site State', 0, 239, NULL, 0, 1, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 12, 0, NULL, NULL, NULL, NULL, 2, NULL, 1, 4)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Site Zip', 0, 241, NULL, 0, 4, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 13, 0, NULL, NULL, NULL, NULL, 5, NULL, 1, 4)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Site Name', 0, 1010, NULL, 0, 3, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 16, 0, NULL, NULL, NULL, NULL, 25, NULL, 1, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Transaction Time', 0, 172, NULL, 1, 2, N'HHMM')
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 14, 0, NULL, NULL, NULL, NULL, 4, NULL, 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) VALUES (@vygerImportHeader, N'Account', 0, 2, NULL, 2, 1, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 15, 0, NULL, NULL, NULL, NULL, 9, NULL, 1, 1)
+-----------Voyager-------------
+
+
+-----------Pac Pride-------------
+DECLARE @pacpridePK INT
 IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Pac Pride') =  0)
 BEGIN
 
 INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Pac Pride', N'Delimiter', N'Comma', NULL, N'', 1, 1)
-
-DECLARE @pacpridePK INT
 SET @pacpridePK = SCOPE_IDENTITY();
+
+END
+ELSE
+BEGIN
+	SELECT TOP 1 @pacpridePK = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Pac Pride'
+	DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @pacpridePK
+	DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @pacpridePK
+END
 
 INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
 VALUES (@pacpridePK, N'Transaction Date', 0, 10, NULL, 0, 4, NULL)
@@ -147,19 +230,26 @@ INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordM
 VALUES (@pacpridePK, N'BuyingHost', 0, 16, NULL, 0, 3, NULL)
 INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
 VALUES (@pacpridePK, SCOPE_IDENTITY(), 62, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 3)
-
-END
-
+-----------Pac Pride-------------
 
 
+-----------Petrovend-------------
+DECLARE @petrovendPK INT
 IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Petrovend') =  0)
 BEGIN
 
 INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) 
 VALUES (N'Petrovend', N'Delimiter', N'Space', NULL, NULL, 1, 6)
 
-DECLARE @petrovendPK INT
 SET @petrovendPK = SCOPE_IDENTITY()
+
+END
+ELSE
+BEGIN
+	SELECT TOP 1 @petrovendPK = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Petrovend'
+	DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @petrovendPK
+	DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @petrovendPK
+END
 
 INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
 VALUES (@petrovendPK, N'Transaction Date', 0, 84, NULL, NULL, 1, N'YYMMDD')
@@ -220,18 +310,26 @@ INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordM
 VALUES (@petrovendPK, N'ISO', 0, 32, NULL, NULL, 2, NULL)
 INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
 VALUES (@petrovendPK, SCOPE_IDENTITY(), 12, NULL, NULL, N'tblCFCreditCard', N'strPrefix', NULL, 4, NULL, 1, 2)
+-----------Petrovend-------------
 
-END
 
-
+-----------NBS-------------
+DECLARE @nbsPK INT
 IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'NBS') =  0)
 BEGIN
 
 INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) 
 VALUES (N'NBS', N'Delimiter', N'Space', NULL, NULL, 1, 6)
 
-DECLARE @nbsPK INT
 SET @nbsPK = SCOPE_IDENTITY()
+
+END
+ELSE
+BEGIN
+	SELECT TOP 1 @nbsPK = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'NBS'
+	DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @nbsPK
+	DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @nbsPK
+END
 
 
 INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
@@ -300,5 +398,4 @@ INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordM
 VALUES (@nbsPK, N'Quantity', 0, 167, NULL, 0, 2, N'5 Implied Decimals')
 INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
 VALUES (@nbsPK, N'Price', 0, 175, NULL, 0, 2, N'2 Implied Decimals')
-
-END
+-----------NBS-------------
