@@ -87,7 +87,8 @@ BEGIN TRY
 		WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 		UPDATE	FD
-		SET		FD.dblNoOfLots			=	CD.dblNoOfLots
+		SET		FD.dblNoOfLots			=	CD.dblNoOfLots,
+				FD.dblQuantity			=	CD.dblQuantity
 		FROM	tblCTPriceFixation			PF 
 		JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
 		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
