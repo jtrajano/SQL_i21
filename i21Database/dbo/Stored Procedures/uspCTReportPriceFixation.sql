@@ -105,6 +105,7 @@ BEGIN TRY
 			CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END AS strBuyer,
 			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+			dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
 			FY.strCurrency + '/' + TY.strCurrency AS strCurrencyExchangeRate,
 			CD.dblRate,
 			LTRIM(

@@ -176,6 +176,7 @@ BEGIN TRY
 			CH.strPrintableRemarks,			
 			AN.strComment	AS strArbitrationComment,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+			dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
 			PR.strName AS strProducer,
 			PO.strPosition,
 			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' strCaller,

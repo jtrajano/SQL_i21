@@ -24,6 +24,7 @@ BEGIN TRY
 	
 	SELECT	PF.intPriceFixationId,
 			PD.dtmFixationDate,
+			CONVERT(NVARCHAR(50),PD.dtmFixationDate,106) AS dtmFixationDateDesc,
 			MA.strFutMarketName,
 			MO.strFutureMonth,
 			PD.[dblNoOfLots],
