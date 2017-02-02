@@ -11,8 +11,8 @@
 		strSMTPSsl, intInterfaceSystemId, strQuotingSystemBatchUserID, strQuotingSystemBatchUserPassword, strInterfaceWebServicesURL, ysnAllowForContractPricing,
 		ysnInterfaceToTargetOrders, ysnAllowUseForClosingPrices, ysnAllowUseForEndOfMonth, ysnInterfaceToScales, intSaveHistoryEveryId, strIntervalStartTime,
 		strIntervalEndTime, strIntervalUpdatesMinutes, strQuotesDecimalsShown, strHelperUrlDomain, ysnEnableCreditCardProcessing, strMerchantId, strMerchantPassword, 
-		strPaymentServer, [strDateFormat], [strNumberFormat], [intLockedRecordExpiration], [ysnValidatePassword], [intMultiCurrencyId], intCompanySetupId)
-		VALUES(0, 0, 0, 'Production', 0, 'Summit', '', '', 0, '', '', '', '', 0, 'None', 0, '', '', '', 0, 0, 0, 0, 0, 0, '','', '', '', '', 0, '', '', '', '', '', '', '', @multiCurrencyId, @companySetupId)
+		strPaymentServer, [strDateFormat], [strNumberFormat], [intCurrencyDecimal], [intLockedRecordExpiration], [ysnValidatePassword], [intMultiCurrencyId], intCompanySetupId)
+		VALUES(0, 0, 0, 'Production', 0, 'Summit', '', '', 0, '', '', '', '', 0, 'None', 0, '', '', '', 0, 0, 0, 0, 0, 0, '','', '', '', '', 0, '', '', '', '', '', 2, '', '', @multiCurrencyId, @companySetupId)
 	END
 ELSE
 	BEGIN
@@ -44,6 +44,11 @@ ELSE
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE strSourceSystem = '')
 		BEGIN
 			UPDATE tblSMCompanyPreference SET strSourceSystem = 'Summit' WHERE intCompanyPreferenceId = 1
+		END
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE intCurrencyDecimal IS NULL)
+		BEGIN
+			UPDATE tblSMCompanyPreference SET intCurrencyDecimal = 2 WHERE intCurrencyDecimal IS NULL
 		END
 
 		IF EXISTS(SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
