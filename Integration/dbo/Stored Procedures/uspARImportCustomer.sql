@@ -622,6 +622,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						intBillToId = @EntityLocationId,
 						intShipToId = @EntityLocationId
 					WHERE intEntityCustomerId = @EntityId 
+
+					--INSERT AR CUSTOMER SPECIAL PRICE
+					EXEC uspARImportCustomerSpecialPrice @originCustomer
 					
 					COMMIT TRANSACTION
 				END TRY
@@ -1263,6 +1266,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 					--INSERT TERMINAL TO CUSTOMER FREIGHT
 					EXEC uspEMImportPTTerminalToCustomer @originCustomer
+
+					--INSERT AR CUSTOMER SPECIAL PRICE
+					EXEC uspARImportCustomerSpecialPrice @originCustomer
 
 					COMMIT TRANSACTION
 					
