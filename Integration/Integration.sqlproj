@@ -378,5 +378,25 @@
     <None Include="Scripts\IC\uspICImportInventoryReceiptsPT.sql" />
     <None Include="Scripts\IC\uspICImportInventoryReceipts_CreateTrigger.sql" />
     <Build Include="dbo\Stored Procedures\uspEMImportPTTerminalToCustomer.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCBeginInventoryAg.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCBeginInventoryPt.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCCatExtraGLAccounts.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCCatGLAcctsMigrationAg.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCCatGLAcctsMigrationPt.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCCatMigrationAg.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCCatMigrationPt.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCCommodityGLMigrationGr.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCCommodityMigrationGr.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCItemMigrationAg.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCItemMigrationPt.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCItmGLAcctsMigrationAg.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCItmGLAcctsMigrationPt.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCStorageMigrationAg.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCStorageMigrationGr.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCStorageMigrationPt.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCSubLocationMigration.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCUomMigrationAg.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCUomMigrationGr.sql" />
+    <None Include="dbo\Stored Procedures\uspICDCUomMigrationPt.sql" />
   </ItemGroup>
 </Project>
