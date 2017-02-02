@@ -96,6 +96,9 @@ BEGIN TRY
 			,strBatchNumber
 			,dblDeliveredQty
 			,strUnitOfMeasure
+			,dblNetWt
+			,dblGrossWt
+			,strWeightUOM
 			,intHigherPositionRef
 			,strDocumentCategory
 			,strReferenceDataInfo
@@ -145,6 +148,9 @@ BEGIN TRY
 			,LD.strLoadNumber
 			,LD.dblQuantity
 			,LD.strItemUOM
+			,LD.dblGross
+			,LD.dblNet
+			,LD.strWeightItemUOM
 			,Row_NUMBER() OVER (
 				PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
 				)
@@ -279,6 +285,9 @@ BEGIN TRY
 			,strBatchNumber
 			,dblDeliveredQty
 			,strUnitOfMeasure
+			,dblNetWt
+			,dblGrossWt
+			,strWeightUOM
 			,intHigherPositionRef
 			,strDocumentCategory
 			,strReferenceDataInfo
@@ -327,6 +336,9 @@ BEGIN TRY
 			,LD.strLoadNumber
 			,LD.dblQuantity
 			,LD.strItemUOM
+			,LD.dblGross
+			,LD.dblNet
+			,LD.strWeightItemUOM
 			,Row_NUMBER() OVER (
 				PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
 				)
