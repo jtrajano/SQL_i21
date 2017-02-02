@@ -112,8 +112,7 @@ BEGIN
 	END
 
 	-- Validate Sub Location
-	IF NOT EXISTS (SELECT 1 FROM tblSMCompanyLocationSubLocation SubLocation INNER JOIN tblICItemStockUOM StockUOM ON SubLocation.intCompanyLocationSubLocationId = StockUOM.intSubLocationId
-					WHERE SubLocation.intCompanyLocationSubLocationId = @intSubLocationId AND SubLocation.intCompanyLocationId = @intLocationId AND StockUOM.intItemId = @intItemId)
+	IF NOT EXISTS (SELECT 1 FROM tblSMCompanyLocationSubLocation SubLocation WHERE SubLocation.intCompanyLocationSubLocationId = @intSubLocationId AND SubLocation.intCompanyLocationId = @intLocationId)
 		BEGIN
 			-- Sub Location is invalid or missing for item {item}.
 			RAISERROR(80097, 11, 1, @strItemNo);
@@ -123,8 +122,7 @@ BEGIN
 	-- Validate Storage Location if specified
 	IF @intStorageLocationId IS NOT NULL
 		BEGIN
-			IF NOT EXISTS (SELECT 1 FROM tblICStorageLocation StorageLocation INNER JOIN tblICItemStockUOM StockUOM ON StorageLocation.intStorageLocationId = StockUOM.intStorageLocationId
-							WHERE StorageLocation.intLocationId = @intLocationId AND StorageLocation.intSubLocationId = @intSubLocationId AND StorageLocation.intStorageLocationId = @intStorageLocationId AND StockUOM.intItemId=@intItemId)
+			IF NOT EXISTS (SELECT 1 FROM tblICStorageLocation StorageLocation WHERE StorageLocation.intLocationId = @intLocationId AND StorageLocation.intSubLocationId = @intSubLocationId AND StorageLocation.intStorageLocationId = @intStorageLocationId)
 				BEGIN
 					-- Storage Location is invalid for item {item}
 					RAISERROR(80098, 11, 1, @strItemNo);
@@ -173,13 +171,26 @@ BEGIN
 	END
 
 	-- Validate Item UOM Id
-	IF NOT EXISTS (SELECT 1 FROM tblICItemStockUOM StockUOM WHERE StockUOM.intItemUOMId = @intItemUOMId AND StockUOM.intItemId = @intItemId AND StockUOM.intItemLocationId = @intItemLocationId AND StockUOM.intSubLocationId = @intSubLocationId)
+	IF @intItemUOMId IS NOT NULL AND @intItemUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM)
 		BEGIN
-			-- Invalid UOM Id or no existing stocks found for item {item} with the specified UOM Id
+			-- UOM Id is invalid for item {Item}
 			RAISERROR(80104,11,1,@strItemNo);
 			GOTO _Exit;
 		END
 
+	-- If Item has no existing Stocks, create a new stock
+	IF @intItemId NOT IN (SELECT intItemId FROM tblICItemStock)
+		BEGIN
+			EXEC dbo.uspICPostStockQuantity
+				@intItemId
+				,@intItemLocationId
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@intItemUOMId
+				,@dblNewQty
+				,1
+				,@intLotId
+		END
 	--------------------------------------
 	-- Transaction: Quantity Adjustment -- 
 	--------------------------------------

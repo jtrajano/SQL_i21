@@ -493,7 +493,7 @@ SET @strmessage = 'Cannot return %s because it is a Transfer Order.'
 EXEC sp_addmessage 80103,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80104) EXEC sp_dropmessage 80104, 'us_english'	
-SET @strmessage = 'Invalid UOM Id or no existing stocks found for item %s with the specified UOM Id'
+SET @strmessage = 'UOM Id is invalid for item %s.'
 EXEC sp_addmessage 80104,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80105) EXEC sp_dropmessage 80105, 'us_english'	
