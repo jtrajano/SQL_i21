@@ -1,10 +1,10 @@
-﻿CREATE PROCEDURE uspQMGetLineQuality
-	@strStart NVARCHAR(10) = '0'
+﻿CREATE PROCEDURE uspQMGetLineQuality @strStart NVARCHAR(10) = '0'
 	,@strLimit NVARCHAR(10) = '1'
 	,@strFilterCriteria NVARCHAR(MAX) = ''
 	,@strSortField NVARCHAR(MAX) = 'intSampleId'
 	,@strSortDirection NVARCHAR(5) = 'DESC'
 	,@strLocationId NVARCHAR(10) = '0'
+	,@strUserRoleID NVARCHAR(10) = '0'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -30,10 +30,15 @@ BEGIN TRY
 	   JOIN tblQMSample AS S ON S.intWorkOrderId = W.intWorkOrderId
 			AND S.intProductTypeId = 12
 			AND S.intProductValueId = W.intWorkOrderId
-			AND S.intLocationId =' + @strLocationId + 
-		'
-	   JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
-	   JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+			AND S.intLocationId =' + @strLocationId + '
+	   JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+
+	IF (@strUserRoleID <> '0')
+	BEGIN
+		SET @SQL = @SQL + ' JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId AND SU.intUserRoleID =' + @strUserRoleID
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 	   JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
 	   JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
 	   JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
@@ -82,8 +87,14 @@ BEGIN TRY
 			AND S.intProductValueId = W.intWorkOrderId
 			AND S.intLocationId =' + @strLocationId + 
 		'
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
-		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId'
+		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+
+	IF (@strUserRoleID <> '0')
+	BEGIN
+		SET @SQL = @SQL + ' JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId AND SU.intUserRoleID =' + @strUserRoleID
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN

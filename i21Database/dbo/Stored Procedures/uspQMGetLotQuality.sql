@@ -1,10 +1,10 @@
-﻿CREATE PROCEDURE uspQMGetLotQuality
-	@strStart NVARCHAR(10) = '0'
+﻿CREATE PROCEDURE uspQMGetLotQuality @strStart NVARCHAR(10) = '0'
 	,@strLimit NVARCHAR(10) = '1'
 	,@strFilterCriteria NVARCHAR(MAX) = ''
 	,@strSortField NVARCHAR(MAX) = 'intSampleId'
 	,@strSortDirection NVARCHAR(5) = 'DESC'
 	,@strLocationId NVARCHAR(10) = '0'
+	,@strUserRoleID NVARCHAR(10) = '0'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -30,8 +30,14 @@ BEGIN TRY
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
 			AND S.intProductTypeId = 6
-			AND S.intLocationId =' + @strLocationId + '
-		JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId
+			AND S.intLocationId =' + @strLocationId
+
+	IF (@strUserRoleID <> '0')
+	BEGIN
+		SET @SQL = @SQL + ' JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId AND SU.intUserRoleID =' + @strUserRoleID
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId
 		JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 		JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
      ) t  
@@ -82,8 +88,14 @@ BEGIN TRY
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
 			AND S.intProductTypeId = 6
 			AND S.intLocationId =' 
-		+ @strLocationId + '
-		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+		+ @strLocationId
+
+	IF (@strUserRoleID <> '0')
+	BEGIN
+		SET @SQL = @SQL + ' JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId AND SU.intUserRoleID =' + @strUserRoleID
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 		LEFT JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = LI.intItemOwnerId'
 

@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE uspQMGetLineQualityColumns
-	@strLocationId NVARCHAR(10) = '0'
+﻿CREATE PROCEDURE uspQMGetLineQualityColumns @strLocationId NVARCHAR(10) = '0'
+	,@strUserRoleID NVARCHAR(10) = '0'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -23,10 +23,15 @@ BEGIN TRY
 	   JOIN tblICItem AS I ON I.intItemId = W.intItemId  
 	   JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 	   JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId
-		  AND S.intLocationId =' + @strLocationId + 
-		'
-	   JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
-	   JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+		  AND S.intLocationId =' + @strLocationId + '
+	   JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+
+	IF (@strUserRoleID <> '0')
+	BEGIN
+		SET @SQL = @SQL + ' JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId AND SU.intUserRoleID =' + @strUserRoleID
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 	   JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 	   JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
 	   JOIN tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId

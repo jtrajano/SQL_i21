@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE uspQMGetContractQualityColumns
-	@strLocationId NVARCHAR(10) = '0'
+﻿CREATE PROCEDURE uspQMGetContractQualityColumns @strLocationId NVARCHAR(10) = '0'
+	,@strUserRoleID NVARCHAR(10) = '0'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -14,8 +14,7 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
 
-	SET @SQL = 
-		'SELECT @PropList = Stuff((  
+	SET @SQL = 'SELECT @PropList = Stuff((  
     SELECT ''] INT,['' + strPropertyName  
     FROM (  
      SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName  
@@ -25,8 +24,14 @@ BEGIN TRY
      JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId  
      JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
 		AND S.intLocationId =' + @strLocationId + '
-     JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
-     JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
+     JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+
+	IF (@strUserRoleID <> '0')
+	BEGIN
+		SET @SQL = @SQL + ' JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId AND SU.intUserRoleID =' + @strUserRoleID
+	END
+
+	SET @SQL = @SQL + ' JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
      JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
      JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
      JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId  
