@@ -197,7 +197,7 @@ BEGIN TRY
 		,WP.dblQuantity
 		,WP.intItemUOMId
 		,WP.intWorkOrderId
-		,WP.intItemId
+		,W.intItemId
 		,I.intCategoryId
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
@@ -844,6 +844,13 @@ BEGIN TRY
 								THEN 1
 							ELSE @dblTInput
 							END
+					UPDATE ##tblMFFinalInputItemYield
+					SET dblActualYield = ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
+						,dblTotalInput = @dblTInput
+						,dblTotalOutput = @dblTOutput
+						,dblStandardYield = 100
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intInputItemId = @intInputItemId
 				END
 				ELSE
 				BEGIN
@@ -859,15 +866,16 @@ BEGIN TRY
 								THEN 1
 							ELSE (@dblTInput - @dblTOutput)
 							END
+					UPDATE ##tblMFFinalInputItemYield
+					SET dblActualYield = ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
+						,dblTotalInput = @dblTInput
+						,dblTotalOutput = @dblTOutput
+						,dblStandardYield = Case When @dblRequiredQty=0 or @dblRequiredQty is null then 0 else 100 End
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intInputItemId = @intInputItemId
 				END
 
-				UPDATE ##tblMFFinalInputItemYield
-				SET dblActualYield = ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
-					,dblTotalInput = @dblTInput
-					,dblTotalOutput = @dblTOutput
-					,dblStandardYield = 100
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND intInputItemId = @intInputItemId
+
 
 				SELECT @intInputItemId = MIN(intInputItemId)
 				FROM ##tblMFFinalInputItemYield
@@ -1658,6 +1666,19 @@ BEGIN TRY
 								THEN 1
 							ELSE @dblTInput
 							END
+
+					UPDATE ##tblMFFinalInputItemYieldByDate
+					SET dblActualYield = CASE 
+							WHEN @intInputItemId = @intItemId
+								THEN ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
+							ELSE ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
+							END
+						,dblTotalInput = @dblTInput
+						,dblTotalOutput = @dblTOutput
+						,dblStandardYield = 100
+					WHERE intYieldId = @intYieldId
+					AND intInputItemId = @intInputItemId
+
 				END
 				ELSE
 				BEGIN
@@ -1672,19 +1693,21 @@ BEGIN TRY
 								THEN 1
 							ELSE (@dblTInput - @dblTOutput)
 							END
+
+					UPDATE ##tblMFFinalInputItemYieldByDate
+					SET dblActualYield = CASE 
+							WHEN @intInputItemId = @intItemId
+								THEN ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
+							ELSE ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
+							END
+						,dblTotalInput = @dblTInput
+						,dblTotalOutput = @dblTOutput
+						,dblStandardYield = Case When @dblRequiredQty is null or @dblRequiredQty=0 Then 0 else 100 end
+					WHERE intYieldId = @intYieldId
+						AND intInputItemId = @intInputItemId
 				END
 
-				UPDATE ##tblMFFinalInputItemYieldByDate
-				SET dblActualYield = CASE 
-						WHEN @intInputItemId = @intItemId
-							THEN ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
-						ELSE ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
-						END
-					,dblTotalInput = @dblTInput
-					,dblTotalOutput = @dblTOutput
-					,dblStandardYield = 100
-				WHERE intYieldId = @intYieldId
-					AND intInputItemId = @intInputItemId
+				
 
 				SELECT @intInputItemId = MIN(intInputItemId)
 				FROM ##tblMFFinalInputItemYieldByDate
