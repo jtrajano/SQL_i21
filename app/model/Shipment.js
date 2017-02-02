@@ -24,6 +24,7 @@ Ext.define('Inventory.model.Shipment', {
         { name: 'intEntityCustomerId', type: 'int', allowNull: true },
         { name: 'intShipToLocationId', type: 'int', allowNull: true },
         { name: 'intFreightTermId', type: 'int', allowNull: true },
+        { name: 'intCurrencyId', type: 'int', allowNull: true },
         { name: 'strBOLNumber', type: 'string' },
         { name: 'intShipViaId', type: 'int', allowNull: true },
         { name: 'strVessel', type: 'string' },
@@ -53,7 +54,8 @@ Ext.define('Inventory.model.Shipment', {
         {type: 'presence', field: 'intOrderType'},
         {type: 'presence', field: 'intShipFromLocationId'},
         //{type: 'presence', field: 'intShipToLocationId'},
-        {type: 'presence', field: 'intFreightTermId'}
+        {type: 'presence', field: 'intFreightTermId'},
+        {type: 'presence', field: 'intCurrencyId'}
     ],
 
     validate: function(options) {

@@ -29,6 +29,7 @@ namespace iRely.Inventory.Model
         public int? intEntityCustomerId { get; set; }
         public int? intShipToLocationId { get; set; }
         public int? intFreightTermId { get; set; }
+        public int? intCurrencyId { get; set; }
         public string strBOLNumber { get; set; }
         public int? intShipViaId { get; set; }
         public string strVessel { get; set; }

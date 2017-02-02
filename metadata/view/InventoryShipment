@@ -512,7 +512,7 @@
                                                         "itemId": "cboOrderType",
                                                         "labelAlign": "top",
                                                         "labelWidth": 110,
-                                                        "layout|flex": 1,
+                                                        "layout|flex": 1.25,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
                                                         "name": null,
@@ -563,7 +563,7 @@
                                                         "itemId": "cboSourceType",
                                                         "labelAlign": "top",
                                                         "labelWidth": 110,
-                                                        "layout|flex": 1,
+                                                        "layout|flex": 1.25,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
                                                         "name": null,
@@ -620,7 +620,7 @@
                                                         "itemId": "cboCustomer",
                                                         "labelAlign": "top",
                                                         "labelWidth": 60,
-                                                        "layout|flex": 1.3,
+                                                        "layout|flex": 1.5,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
                                                         "name": null,
@@ -694,11 +694,12 @@
                                                         "fieldLabel": "Requested Arrival",
                                                         "itemId": "dtmRequestedArrival",
                                                         "labelAlign": "top",
-                                                        "layout|flex": 0.8,
+                                                        "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
                                                         "name": null,
-                                                        "readOnly": null
+                                                        "readOnly": null,
+                                                        "width": null
                                                     },
                                                     "name": "MyDateField9",
                                                     "designerId": "3b57a957-2365-4ab2-a4ad-66b93fcdfd08"
@@ -761,6 +762,85 @@
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCurrencyID',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strCurrency',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Currency',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "    {",
+                                                            "\t\tdataIndex: 'ysnSubCurrency',",
+                                                            "\t\tdataType: 'boolean',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intMainCurrencyId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "    {",
+                                                            "        dataIndex: 'intSubCurrencyCent',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'SubCurrency Cent',",
+                                                            "        hidden: true",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strCurrency",
+                                                        "enableDrillDown": true,
+                                                        "fieldLabel": "Currency",
+                                                        "itemId": "cboCurrency",
+                                                        "labelAlign": "top",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "margin": "0 5 0 0",
+                                                        "name": null,
+                                                        "readOnly": null,
+                                                        "valueField": "intCurrencyID",
+                                                        "width": 60
+                                                    },
+                                                    "name": "MyComboBox16",
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
+                                                    },
+                                                    "designerId": "aabeafa4-4c91-497d-942f-4544c8b6dbe4",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]

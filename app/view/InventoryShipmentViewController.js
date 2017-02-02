@@ -229,6 +229,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 store: '{freightTerm}',
                 readOnly: '{current.ysnPosted}'
             },
+            cboCurrency: {
+                value: '{current.intCurrencyId}',                
+                readOnly: '{current.ysnPosted}',
+                store: '{currency}',
+                defaultFilters: [
+                    {
+                        column: 'ysnSubCurrency',
+                        value: false
+                    }
+                ]
+            },            
             cboCustomer: {
                 value: '{current.intEntityCustomerId}',
                 store: '{customer}',
@@ -1246,7 +1257,22 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         else if (combo.itemId === 'cboForexRateType') {
             current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
             current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
-            current.set('dblForexRate', 0.00);
+            current.set('dblForexRate', null);
+
+            // me.getForexRate(
+            //     win.viewModel.data.current.get('intCurrencyId'),
+            //     current.get('intForexRateTypeId'),
+            //     win.viewModel.data.current.get('dtmShipDate'),
+            //     function(successResult){
+            //         if (successResult && successResult.length > 0){
+            //             current.set('dblForexRate', successResult[0].dblRate);
+            //         }
+            //     },
+            //     function(failureResult){
+            //         var jsonData = Ext.decode(failureResult.responseText);
+            //         iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+            //     }
+            // );            
         }        
         
     },
@@ -2891,6 +2917,48 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },      
 
+    getForexRate: function(currencyId, forexRateTypeId, date, successFn, failureFn){
+        ic.utils.ajax({
+            url: '../i21/api/CurrencyExchangeRate/GetCurrencyExchangeRateDetail',
+            params:{
+                currencyId: currencyId,
+                rateTypeId: forexRateTypeId,
+                validFromDate: date
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            function(successResponse) {
+                if (successFn){
+                    successFn(successResponse);
+                }
+            }
+            , function(failureResponse) {
+                if (failureFn){
+                    failureFn(failureResponse);
+                }
+            }
+        );
+    },    
+
+    onCurrencyDrilldown: function (combo) {
+        iRely.Functions.openScreen('i21.view.Currency', { viewConfig: { modal: true } });
+    },   
+
+    // onCurrencySelect: function (combo, records, eOpts) {
+    //     if (records.length <= 0)
+    //         return;
+
+    //     var win = combo.up('window');
+    //     var current = win.viewModel.data.current;
+
+    //     if (current) {
+    //         var subCurrencyCents = records[0].get('intSubCurrencyCent');
+    //         subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
+    //         current.set('intSubCurrencyCents', subCurrencyCents);
+    //     }
+    // },    
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -2999,8 +3067,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboChargeForexRateType": {
                 select: this.onChargeSelect
+            },
+            "#cboCurrency": {
+                drilldown: this.onCurrencyDrilldown
+                //select: this.onCurrencySelect
             }
-            
         })
     }
 

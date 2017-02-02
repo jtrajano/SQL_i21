@@ -224,6 +224,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         chargeForexRateType: {
             type: 'smcurrencyexchangeratetypebuffered'
+        },
+        currency: {
+            type: 'currencybuffered'
         }        
     },
 

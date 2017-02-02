@@ -241,7 +241,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         flex: 1
                                                                     }
                                                                 ],
-                                                                flex: 1,
+                                                                flex: 1.25,
                                                                 itemId: 'cboOrderType',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Order Type',
@@ -266,7 +266,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         flex: 1
                                                                     }
                                                                 ],
-                                                                flex: 1,
+                                                                flex: 1.25,
                                                                 itemId: 'cboSourceType',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Source Type',
@@ -298,7 +298,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         flex: 1
                                                                     }
                                                                 ],
-                                                                flex: 1.3,
+                                                                flex: 1.5,
                                                                 itemId: 'cboCustomer',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Customer',
@@ -327,7 +327,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             },
                                                             {
                                                                 xtype: 'datefield',
-                                                                flex: 0.8,
+                                                                flex: 1,
                                                                 itemId: 'dtmRequestedArrival',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Requested Arrival',
@@ -369,6 +369,53 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 labelWidth: 110,
                                                                 displayField: 'strFreightTerm',
                                                                 valueField: 'intFreightTermId'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intCurrencyID',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strCurrency',
+                                                                        dataType: 'string',
+                                                                        text: 'Currency',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'ysnSubCurrency',
+                                                                        dataType: 'boolean',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'intMainCurrencyId',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'intSubCurrencyCent',
+                                                                        dataType: 'numeric',
+                                                                        text: 'SubCurrency Cent',
+                                                                        hidden: true
+                                                                    }
+                                                                ],
+                                                                enableDrillDown: true,
+                                                                itemId: 'cboCurrency',
+                                                                margin: '0 5 0 0',
+                                                                width: 60,
+                                                                fieldLabel: 'Currency',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110,
+                                                                displayField: 'strCurrency',
+                                                                valueField: 'intCurrencyID'
                                                             },
                                                             {
                                                                 xtype: 'textfield',

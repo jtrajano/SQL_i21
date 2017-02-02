@@ -40,7 +40,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.intCreatedUserId).HasColumnName("intCreatedUserId");
-            this.Property(t => t.intShipToCompanyLocationId).HasColumnName("intShipToCompanyLocationId"); 
+            this.Property(t => t.intShipToCompanyLocationId).HasColumnName("intShipToCompanyLocationId");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
 
             this.HasMany(p => p.tblICInventoryShipmentItems)
                 .WithRequired(p => p.tblICInventoryShipment)
