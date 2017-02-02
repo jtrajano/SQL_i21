@@ -145,6 +145,8 @@ BEGIN TRY
 
 			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract'
 
+			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
+
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
 				SELECT	@intContractDetailId = MIN(intContractDetailId)
