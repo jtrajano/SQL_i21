@@ -117,6 +117,13 @@ BEGIN
 			WHERE intLotId = @intLotId
 			)
 	BEGIN
+		Declare @strLotNumber nvarchar(50),@intBondStatusId int
+		Select @strLotNumber=strLotNumber from tblICLot Where intLotId=@intLotId
+
+		Select @intBondStatusId=NULL
+
+		Select @intBondStatusId=LI.intBondStatusId from tblMFLotInventory LI JOIN tblICLot L on L.intLotId=LI.intLotId Where L.strLotNumber=@strLotNumber
+
 		SELECT @ysnRequireCustomerApproval = ysnRequireCustomerApproval
 		FROM tblICItem
 		WHERE intItemId = @intItemId
@@ -126,13 +133,13 @@ BEGIN
 			,intBondStatusId
 			)
 		SELECT @intLotId
-			,CASE 
+			,IsNULL(@intBondStatusId,(CASE 
 				WHEN @ysnRequireCustomerApproval = 1
 					THEN (
 							SELECT intBondStatusId
 							FROM tblMFCompanyPreference
 							)
 				ELSE NULL
-				END
+				END))
 	END
 END
