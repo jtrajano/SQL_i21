@@ -199,11 +199,14 @@ BEGIN TRY
 					) AS Seq
 				,LC.dblQuantity
 				,LC.strItemUOM
+				,LC.dblNetWt
+				,LC.dblGrossWt
+				,LC.strWeightUnitMeasure
 				,@strRowState
 				,GETDATE()
 			FROM vyuLGLoadContainerView LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-			JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 			WHERE LC.intLoadId = @intLoadId
 		END
 	END
@@ -377,6 +380,9 @@ BEGIN TRY
 					) AS Seq
 				,LC.dblQuantity
 				,LC.strItemUOM
+				,LC.dblNetWt
+				,LC.dblGrossWt
+				,LC.strWeightUnitMeasure
 				,@strRowState
 			FROM vyuLGLoadContainerView LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId

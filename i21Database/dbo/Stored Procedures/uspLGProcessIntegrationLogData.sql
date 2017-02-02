@@ -164,6 +164,9 @@ BEGIN TRY
 					) AS Seq
 				,LC.dblQuantity
 				,LC.strItemUOM
+				,LC.dblNetWt
+				,LC.dblGrossWt
+				,LC.strWeightUnitMeasure
 				,'Added'
 				,GETDATE()
 			FROM vyuLGLoadContainerView LC
