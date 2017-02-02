@@ -4939,6 +4939,7 @@
     <Build Include="dbo\Functions\fnARFormatMessage.sql" />
     <Build Include="dbo\Functions\fnARGetSysMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspETTranslateRPToRecievePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspValidateShippingAdvice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
