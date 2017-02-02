@@ -344,6 +344,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\034_UpdateEntityEmail.sql
 :r .\EM\036_MoveTheTermsPerType.sql
 :r .\EM\037_DefaultDataLocationPayee.sql
+:r .\EM\038_UpdateEncryptionUsed.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
