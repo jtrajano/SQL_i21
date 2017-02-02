@@ -17,5 +17,55 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.icoriginconversionoption',
 
-    allowOverwrite: false
+    data: {
+        allowOverwrite: false,
+        lineOfBusiness: '',
+        currentTask: 'LOB'
+    },
+
+    formulas: {
+        hasLob: function(get) {
+            return !iRely.Functions.isEmpty(get('lineOfBusiness'));
+        },
+        
+        disableLob: function(get) {
+            return get('currentTask') !== 'LOB' && get('currentTask') !== 'UOM';
+        },
+
+        disableUOM: function(get) {
+            return (get('currentTask') !== 'UOM' && get('currentTask') != 'LOB') || !get('hasLob');
+        },
+
+        disableLocations: function(get) {
+            return get('currentTask') !== 'Locations' || !get('hasLob');
+        },
+
+        disableCommodity: function(get) {
+            return get('currentTask') !== 'Commodity' || !get('hasLob') || get('lineOfBusiness') !== 'Grain';
+        },
+
+        disableCategoryClass: function(get) {
+            return get('currentTask') !== 'CategoryClass' || !get('hasLob');
+        },
+
+        disableCategoryGLAccts: function(get) {
+            return get('currentTask') !== 'CategoryGLAccts' || !get('hasLob');
+        },
+
+        disableAdditionalGLAccts: function(get) {
+            return get('currentTask') !== 'AdditionalGLAccts' || !get('hasLob');
+        },
+
+        disableItems: function(get) {
+            return get('currentTask') !== 'Items' || !get('hasLob');
+        },
+
+        disableItemGLAccts: function(get) {
+            return get('currentTask') !== 'ItemGLAccts' || !get('hasLob');
+        },
+
+        disableBalance: function(get) {
+            return get('currentTask') !== 'Balance' || !get('hasLob');
+        },
+    }
 });

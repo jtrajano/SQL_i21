@@ -18,6 +18,8 @@ Ext.define('Inventory.model.CompanyPreference', {
         { name: 'strReceiptType', type: 'string'},
         { name: 'intReceiptSourceType', type: 'int', allowNull: true},
         { name: 'intShipmentOrderType', type: 'int', allowNull: true},
-        { name: 'intShipmentSourceType', type: 'int', allowNull: true}
+        { name: 'intShipmentSourceType', type: 'int', allowNull: true},
+        { name: 'strOriginLastTask', type: 'string' },
+        { name: 'strOriginLineOfBusiness', type: 'string' }
     ]
 });

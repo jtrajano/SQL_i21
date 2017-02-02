@@ -17,6 +17,7 @@ Ext.define('Inventory.store.CompanyPreference', {
             storeId: 'CompanyPreference',
             pageSize: 50,
             batchActions: true,
+            autoLoad: true,
             proxy: {
                 type: 'rest',
                 api: {

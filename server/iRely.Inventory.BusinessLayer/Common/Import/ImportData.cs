@@ -8,6 +8,7 @@ using iRely.Inventory.Model;
 using System.IO;
 using System.Linq.Expressions;
 using iRely.Common;
+using System.Data.SqlClient;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -39,22 +40,20 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<ImportDataResult> ImportOrigins(string type)
         {
             var sql = string.Empty;
-            if (type == "ItemsOrigins")
-                sql = "EXEC uspICDCItemMigration";
-            else if (type == "GLAccountsOrigins")
-                sql = "uspICDCGLAcctsMigration";
-            else if (type == "InventoryReceipts")
-                sql = "uspICImportInventoryReceiptOrigins";
+            var lob = GlobalSettings.Instance.LineOfBusiness;
+            SqlParameter pLob = new SqlParameter("@strLineOfBusiness", lob);
+            SqlParameter pType = new SqlParameter("@strType", type);
+            sql = "EXEC dbo.uspICImportDataFromOrigin @strLineOfBusiness, @strType";
 
             var res = new ImportDataResult()
             {
-                Description = "Import from Origins",
+                Description = "Import from Origin",
                 Info = "success"
             };
 
             try
             {
-                await context.ContextManager.Database.ExecuteSqlCommandAsync(sql);
+                await context.ContextManager.Database.ExecuteSqlCommandAsync(sql, pLob, pType);
             }
             catch (Exception ex)
             {
@@ -74,7 +73,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public void Dispose()
         {
-            
+              
         }
     }
 }
