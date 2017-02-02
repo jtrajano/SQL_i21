@@ -454,7 +454,7 @@ BEGIN TRY
 
 	DROP TABLE #tmpRC
 	
-	IF (NOT EXISTS(SELECT TOP 1 1 FROM @TFTransaction) AND @IsEdi = 0)
+	IF (NOT EXISTS(SELECT TOP 1 1 FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid) AND @IsEdi = 0)
 	BEGIN
 		INSERT INTO tblTFTransaction (uniqTransactionGuid
 			, intTaxAuthorityId

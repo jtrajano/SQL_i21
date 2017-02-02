@@ -764,7 +764,7 @@ BEGIN TRY
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 	END
 
-	IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpInvoiceTransaction) AND @IsEdi = 0)
+	IF(NOT EXISTS (SELECT TOP 1 1 FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid) AND @IsEdi = 0)
 	BEGIN
 		INSERT INTO tblTFTransaction (uniqTransactionGuid
 			, intTaxAuthorityId
