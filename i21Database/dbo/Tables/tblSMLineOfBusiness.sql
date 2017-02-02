@@ -5,6 +5,7 @@
 	[intEntityId] [int] NOT NULL,
 	[strSICCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnVisibleOnWeb] [bit] NOT NULL DEFAULT 1,
+	[intSegmentCodeId] [int] NULL,
 	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblSMLineOfBusiness] PRIMARY KEY CLUSTERED ([intLineOfBusinessId] ASC),
@@ -48,6 +49,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMLineOfBusiness',
     @level2type = N'COLUMN',
     @level2name = N'strSICCode'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Visible on Web',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMLineOfBusiness',
+    @level2type = N'COLUMN',
+    @level2name = N'intSegmentCodeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Visible on Web',
