@@ -16,7 +16,8 @@ Ext.define('Inventory.model.UnitMeasure', {
         { name: 'intUnitMeasureId', type: 'int'},
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strSymbol', type: 'string'},
-        { name: 'strUnitType', type: 'string'}
+        { name: 'strUnitType', type: 'string'},
+        { name: 'intDecimalPlaces', type: 'int', allowNull: true, defaultValue: 6 }
     ],
 
     validators: [

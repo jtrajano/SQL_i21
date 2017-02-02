@@ -29,7 +29,8 @@ Ext.define('Inventory.view.InventoryUOM', {
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
-        'Ext.toolbar.Paging'
+        'Ext.toolbar.Paging',
+        'Inventory.ux.UnitMeasureField'
     ],
 
     height: 550,
@@ -136,6 +137,13 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         },
                                         items: [
                                             {
+                                                xtype: 'unitmeasurefield',
+                                                itemId: 'txtum',
+                                                fieldLabel: 'Unit Measures',
+                                                labelWidth: 80,
+                                                bind: { unitMeasure: 'LB'}
+                                            },
+                                            {
                                                 xtype: 'textfield',
                                                 itemId: 'txtUnitMeasure',
                                                 fieldLabel: 'Unit Measure',
@@ -174,7 +182,9 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                         minWidth: 110,
                                                         width: 110,
                                                         fieldLabel: 'Decimals',
-                                                        labelWidth: 57
+                                                        labelWidth: 57,
+                                                        displayField: 'value',
+                                                        valueField: 'value'
                                                     }
                                                 ]
                                             },
