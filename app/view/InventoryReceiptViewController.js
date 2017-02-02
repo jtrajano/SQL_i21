@@ -668,7 +668,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         origUpdateField: 'intTaxGroupId',
                         store: '{taxGroup}',
                     }
-                }
+                },
+                colForexRateType: {
+                    dataIndex: 'strForexRateType',
+                    editor: {
+                        origValueField: 'intCurrencyExchangeRateTypeId',
+                        origUpdateField: 'intForexRateTypeId',
+                        store: '{forexRateType}'
+                    }
+                },
+                colForexRate: {
+                    dataIndex: 'dblForexRate' 
+                }  
             },
 
             /*pnlLotTracking: {
@@ -973,6 +984,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         origUpdateField: 'intTaxGroupId',
                         store: '{taxGroup}',
                     }
+                },
+                colChargeForexRateType: {
+                    dataIndex: 'strForexRateType',
+                    editor: {
+                        origValueField: 'intCurrencyExchangeRateTypeId',
+                        origUpdateField: 'intForexRateTypeId',
+                        store: '{chargeForexRateType}'
+                    }
+                },
+                colChargeForexRate: {
+                    dataIndex: 'dblForexRate' 
                 }
             },
 
@@ -1956,6 +1978,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
+        else if (combo.itemId === 'cboForexRateType') {
+            current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
+            current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
+            current.set('dblForexRate', 0.00);
+        }        
 
         // Calculate the taxes
         // win.viewModel.data.currentReceiptItem = current;
@@ -4984,6 +5011,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('dblTax', 0);
             }
         }
+
+        if (combo.itemId === 'cboChargeForexRateType') {
+            current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
+            current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
+            current.set('dblForexRate', 0.00);
+        }        
+        
     },
 
     onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
@@ -6479,7 +6513,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboCostVendor": {
                 select: this.onChargeSelect
+            },
+            "#cboForexRateType": {
+                select: this.onReceiptItemSelect
+            },
+            "#cboChargeForexRateType": {
+                select: this.onChargeSelect
             }
+
         })
     }
 

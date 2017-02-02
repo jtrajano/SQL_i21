@@ -58,7 +58,10 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'ysnSubCurrency', type: 'boolean', allowNull: true  },
         { name: 'dblTax', type: 'float' },
         { name: 'intTaxGroupId', type: 'int', allowNull: true },
-        { name: 'strTaxGroup', type: 'string'}
+        { name: 'strTaxGroup', type: 'string'},
+        { name: 'intForexRateTypeId', type: 'int', allowNull: true },
+        { name: 'strForexRateType', type: 'string'},
+        { name: 'dblForexRate', type: 'float', allowNull: true }        
     ],
 
     validators: [
