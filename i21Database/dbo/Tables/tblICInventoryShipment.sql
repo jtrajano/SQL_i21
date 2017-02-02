@@ -25,6 +25,7 @@ Type the overview for the table here.
 		[intShipToCompanyLocationId] INT NULL, 
 		[intFreightTermId] INT NOT NULL, 
 		[strBOLNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[intCurrencyId] INT NULL, 
 		[intShipViaId] INT NULL, 
 		[strVessel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strProNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -51,7 +52,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipment_tblEMEntityLocation] FOREIGN KEY ([intShipToLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_ShipToCompanyLocation] FOREIGN KEY ([intShipToCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [AK_tblICInventoryShipment_strShipmentNumber] UNIQUE ([strShipmentNumber]), 
-		CONSTRAINT [FK_tblICInventoryShipment_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) 
+		CONSTRAINT [FK_tblICInventoryShipment_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
+		CONSTRAINT [FK_tblICInventoryShipment_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 	)
 	GO
 
