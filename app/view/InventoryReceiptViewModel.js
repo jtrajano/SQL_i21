@@ -331,7 +331,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         forexRateType: {
             type: 'smcurrencyexchangeratetypebuffered'
-        }
+        },
+        chargeForexRateType: {
+            type: 'smcurrencyexchangeratetypebuffered'
+        }        
     },
 
     formulas: {
