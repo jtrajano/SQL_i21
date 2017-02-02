@@ -22,6 +22,7 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, ShipmentCharge.intEntityVendorId
 	, Vendor.strVendorId
 	, strVendorName = Vendor.strName
+	, strForexRateType = forexRateType.strCurrencyExchangeRateType
 FROM tblICInventoryShipmentCharge ShipmentCharge
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ShipmentCharge.intChargeId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = ShipmentCharge.intCostUOMId
@@ -29,3 +30,4 @@ FROM tblICInventoryShipmentCharge ShipmentCharge
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = ShipmentCharge.intEntityVendorId
 	LEFT JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ShipmentCharge.intContractId
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ShipmentCharge.intCurrencyId
+	LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON ShipmentCharge.intForexRateTypeId = forexRateType.intCurrencyExchangeRateTypeId

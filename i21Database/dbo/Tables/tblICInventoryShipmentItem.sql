@@ -34,7 +34,9 @@ Type the overview for the table here.
 		[intDiscountSchedule] INT NULL,
 		[intStorageScheduleTypeId] INT NULL,
 		[intSort] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intForexRateTypeId] INT NULL, 
+		[dblForexRate] NUMERIC(18, 6) NULL,
+		[intConcurrencyId] INT NULL DEFAULT ((0)),		
 		CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -46,7 +48,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblGRDiscountId] FOREIGN KEY ([intDiscountSchedule]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblCTWeightGrade_Grades] FOREIGN KEY ([intDestinationGradeId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblCTWeightGrade_Weights] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId])
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblCTWeightGrade_Weights] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCurrencyExchangeRateType] FOREIGN KEY ([intForexRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 	)
 
 	GO

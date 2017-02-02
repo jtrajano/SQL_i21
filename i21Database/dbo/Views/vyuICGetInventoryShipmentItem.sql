@@ -52,6 +52,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strDestinationWeights = DestWeights.strWeightGradeDesc
 	, intDestinationGradeId = ShipmentItem.intDestinationGradeId
 	, strDestinationGrades = DestGrades.strWeightGradeDesc
+	, strForexRateType = forexRateType.strCurrencyExchangeRateType
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
@@ -68,3 +69,4 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblGRStorageType StorageType ON StorageType.intStorageScheduleTypeId = ShipmentItem.intStorageScheduleTypeId
 	LEFT JOIN tblCTWeightGrade DestWeights ON DestWeights.intWeightGradeId = ShipmentItem.intDestinationWeightId
 	LEFT JOIN tblCTWeightGrade DestGrades ON DestGrades.intWeightGradeId = ShipmentItem.intDestinationGradeId
+	LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON ShipmentItem.intForexRateTypeId = forexRateType.intCurrencyExchangeRateTypeId
