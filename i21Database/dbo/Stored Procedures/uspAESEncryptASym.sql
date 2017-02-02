@@ -9,7 +9,7 @@ BEGIN
 	DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
 	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
-	SELECT @encryptedText = dbo.fnAESEncrypt(@plainText)
+	SELECT @encryptedText = dbo.fnAESEncryptASym(@plainText)
     
 	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
     

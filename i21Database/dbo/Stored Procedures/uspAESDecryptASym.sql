@@ -4,7 +4,7 @@
 AS
 BEGIN
 
-	SELECT @decryptedText = dbo.fnAESDecrypt(@encryptedText)
+	SELECT @decryptedText = dbo.fnAESDecryptASym(@encryptedText)
 
     RETURN
 
