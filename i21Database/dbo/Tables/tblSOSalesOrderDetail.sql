@@ -70,6 +70,6 @@
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [dbo].[tblGRStorageType] ([intStorageScheduleTypeId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
-	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
-	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
+	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
+	--CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
 );

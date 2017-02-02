@@ -119,7 +119,7 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblMFRecipeItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
-	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
+	--CONSTRAINT [FK_tblARInvoiceDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblCTWeightGrade_intDestinationGradeId] FOREIGN KEY ([intDestinationGradeId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),
     CONSTRAINT [FK_tblARInvoiceDetail_tblCTWeightGrade_intDestinationWeightId] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId])
