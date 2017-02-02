@@ -52,7 +52,7 @@ BEGIN
 	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 	--Insert into temp table
-	SELECT intBankId, dbo.fnAESDecrypt(strRTN) as strRTN INTO #tmpCMBank FROM tblCMBank
+	SELECT intBankId, ISNULL(dbo.fnAESDecrypt(strRTN),strRTN) as strRTN INTO #tmpCMBank FROM tblCMBank
 
 	--loop thru the records and update tblCMBank.strRTN
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCMBank)
@@ -67,10 +67,10 @@ BEGIN
 
 	--Insert into temp table
 	SELECT intBankAccountId, 
-		dbo.fnAESDecrypt(strBankAccountNo) as strBankAccountNo, 
-		dbo.fnAESDecrypt(strRTN) as strRTN,
-		dbo.fnAESDecrypt(strMICRBankAccountNo) as strMICRBankAccountNo,
-		dbo.fnAESDecrypt(strMICRRoutingNo) as strMICRRoutingNo 
+		ISNULL(dbo.fnAESDecrypt(strBankAccountNo),strBankAccountNo) as strBankAccountNo, 
+		ISNULL(dbo.fnAESDecrypt(strRTN),strRTN) as strRTN,
+		ISNULL(dbo.fnAESDecrypt(strMICRBankAccountNo),strMICRBankAccountNo) as strMICRBankAccountNo,
+		ISNULL(dbo.fnAESDecrypt(strMICRRoutingNo),strMICRRoutingNo) as strMICRRoutingNo 
 	INTO #tmpCMBankAccount FROM tblCMBankAccount
 
 
