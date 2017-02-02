@@ -97,27 +97,52 @@ BEGIN TRY
 		  ,intInventoryReceiptItemId
 		  ,intContractDetailId)
 	SELECT WC.intWeightClaimId
- 		  ,WC.strReferenceNumber
-		  ,WCD.intWeightClaimDetailId
-		  ,WCD.intPartyEntityId
-		  ,WCD.dblFromNet AS dblNetShippedWeight
-		  ,WCD.dblWeightLoss AS dblWeightLoss
-		  ,WCD.dblFranchiseWt AS dblFranchiseWeight
-		  ,(WCD.dblWeightLoss-WCD.dblFranchiseWt) AS dblQtyReceived
-		  ,WCD.dblUnitPrice AS dblCost
-		  ,1 AS dblCostUnitQty
-		  ,1 AS dblWeightUnitQty
-		  ,1 AS dblUnitQty
-		  ,WCD.intPriceItemUOMId AS intWeightUOMId
-		  ,UM.intUnitMeasureId AS intUOMId
-		  ,WCD.intPriceItemUOMId AS intCostUOMId
-		  ,WCD.intItemId
-		  ,CH.intContractHeaderId
-		  ,NULL as intInventoryReceiptItemId
-		  ,WCD.intContractDetailId
+		,WC.strReferenceNumber
+		,WCD.intWeightClaimDetailId
+		,WCD.intPartyEntityId
+		,WCD.dblFromNet AS dblNetShippedWeight
+		,WCD.dblWeightLoss AS dblWeightLoss
+		,WCD.dblFranchiseWt AS dblFranchiseWeight
+		,(WCD.dblWeightLoss - WCD.dblFranchiseWt) AS dblQtyReceived
+		,CASE 
+			WHEN AD.ysnSeqSubCurrency = 1
+				THEN dbo.fnCTConvertQtyToTargetItemUOM((
+							SELECT TOP (1) IU.intItemUOMId
+							FROM tblICItemUOM IU
+							WHERE IU.intItemId = CD.intItemId
+								AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+							), AD.intSeqPriceUOMId, AD.dblSeqPrice) / 100
+			ELSE dbo.fnCTConvertQtyToTargetItemUOM((
+						SELECT TOP (1) IU.intItemUOMId
+						FROM tblICItemUOM IU
+						WHERE IU.intItemId = CD.intItemId
+							AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+						), AD.intSeqPriceUOMId, AD.dblSeqPrice)
+			END AS dblCost
+		,1 AS dblCostUnitQty
+		,1 AS dblWeightUnitQty
+		,1 AS dblUnitQty
+		,(SELECT TOP (1) IU.intItemUOMId
+			FROM tblICItemUOM IU
+			WHERE IU.intItemId = CD.intItemId
+				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+		 ) AS intWeightUOMId
+		,(SELECT TOP (1) IU.intItemUOMId
+			FROM tblICItemUOM IU
+			WHERE IU.intItemId = CD.intItemId
+				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+		 ) AS intUOMId
+		,WCD.intPriceItemUOMId AS intCostUOMId
+		,WCD.intItemId
+		,CH.intContractHeaderId
+		,NULL AS intInventoryReceiptItemId
+		,WCD.intContractDetailId
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
+	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
+	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
+	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
