@@ -4938,6 +4938,7 @@
     <Build Include="dbo\Views\vyuQMQualityExceptionListUserRole.sql" />
     <Build Include="dbo\Functions\fnARFormatMessage.sql" />
     <Build Include="dbo\Functions\fnARGetSysMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspETTranslateRPToRecievePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
