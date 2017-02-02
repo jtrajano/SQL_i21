@@ -62,6 +62,7 @@ Type the overview for the table here.
 		--CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 		CONSTRAINT [Check_AllowOnlyWeightOrVolumeTypeOnGrossNetUOM] CHECK (dbo.fnICIsShrinkableUOM(intWeightUOMId) = 1),
 		--CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId])
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCurrencyExchangeRateType] FOREIGN KEY ([intForexRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]), 
 	)
 	GO
 

@@ -32,6 +32,7 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, Location.strLocationName
 	, Receipt.strBillOfLading
 	, strReceiptVendor = ReceiptVendor.strName
+	, strForexRateType = forexRateType.strCurrencyExchangeRateType
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -43,3 +44,4 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Receipt.intLocationId
 	LEFT JOIN tblEMEntity ReceiptVendor ON ReceiptVendor.intEntityId = Receipt.intEntityVendorId
+	LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON ReceiptCharge.intForexRateTypeId = forexRateType.intCurrencyExchangeRateTypeId
