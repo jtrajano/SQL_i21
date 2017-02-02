@@ -1838,7 +1838,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter110",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2504,6 +2504,99 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "dataIndex": "strForexRateType",
+                                                                "itemId": "colForexRateType",
+                                                                "text": "Forex Rate Type",
+                                                                "width": 150
+                                                            },
+                                                            "name": "MyColumn63",
+                                                            "designerId": "393e224b-b7a1-45d5-85e5-7a1e17cd0733",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCurrencyExchangeRateTypeId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Forex Rate Type Id',",
+                                                                            "\t\tflex: 1,",
+                                                                            "        hidden: true",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'strCurrencyExchangeRateType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Forex Rate Type',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Description',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strCurrencyExchangeRateType",
+                                                                        "itemId": "cboForexRateType",
+                                                                        "valueField": "strCurrencyExchangeRateType"
+                                                                    },
+                                                                    "name": "MyComboBox4",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "c7c8b808-e223-4194-81f7-c7c6fa9bd865",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": null,
+                                                                "dataIndex": "dblForexRate",
+                                                                "dataType": null,
+                                                                "format": null,
+                                                                "itemId": "colForexRate",
+                                                                "text": "Forex Rate",
+                                                                "width": 85
+                                                            },
+                                                            "name": "MyNumberColumn23",
+                                                            "designerId": "0cb27029-de46-41a9-a2b5-1550bed9b42e",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
                                                                 "dataIndex": "strUOM",
                                                                 "itemId": "colWeightUOM",
                                                                 "text": "Weight UOM",
@@ -3073,7 +3166,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter111",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3647,7 +3740,7 @@
                                                         "layout|flex": null,
                                                         "width": 198
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter112",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3661,7 +3754,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
+                                                "flex": null,
                                                 "itemId": "colContract",
                                                 "text": "Contract No"
                                             },
@@ -3719,7 +3812,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
+                                                "flex": null,
                                                 "headerDrillDownClick": "onItemHeaderClick",
                                                 "headerDrillDownText": "Open",
                                                 "itemId": "colOtherCharge",
@@ -3798,7 +3891,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
+                                                "flex": null,
                                                 "itemId": "colOnCostType",
                                                 "text": "On Cost"
                                             },
@@ -3813,7 +3906,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
+                                                "flex": null,
                                                 "itemId": "colCostMethod",
                                                 "text": "Price Method"
                                             },
@@ -3867,7 +3960,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": "colChargeCurrency",
-                                                "text": "Currency"
+                                                "text": "Cost Currency"
                                             },
                                             "name": "MyColumn55",
                                             "designerId": "82a72f8e-9096-4c27-98b9-8e8403884f9d",
@@ -3932,6 +4025,73 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strForexRateType",
+                                                "itemId": "colChargeForexRateType",
+                                                "text": "Forex Rate Type",
+                                                "width": 150
+                                            },
+                                            "name": "MyColumn66",
+                                            "designerId": "9ae0b154-2aa9-4f2c-8084-c197fa305393",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCurrencyExchangeRateTypeId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Forex Rate Type Id',",
+                                                            "\t\tflex: 1,",
+                                                            "        hidden: true",
+                                                            "\t},",
+                                                            "    {",
+                                                            "\t\tdataIndex: 'strCurrencyExchangeRateType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Forex Rate Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strCurrencyExchangeRateType",
+                                                        "itemId": "cboChargeForexRateType",
+                                                        "valueField": "strCurrencyExchangeRateType"
+                                                    },
+                                                    "name": "MyComboBox4",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "05ce70a1-2add-442d-a04d-b651e1f00105",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -3939,7 +4099,33 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
+                                                "align": null,
+                                                "dataIndex": "dblForexRate",
+                                                "dataType": null,
+                                                "format": null,
+                                                "itemId": "colChargeForexRate",
+                                                "text": "Forex Rate",
+                                                "width": 85
+                                            },
+                                            "name": "MyNumberColumn24",
+                                            "designerId": "46213dbf-2bcd-4699-99cf-088c74c04284",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": null,
                                                 "format": "0,000.000000",
                                                 "itemId": "colRate",
                                                 "text": "Rate"
@@ -3970,7 +4156,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
+                                                "flex": null,
                                                 "itemId": "colCostUOM",
                                                 "text": "UOM"
                                             },
@@ -4042,7 +4228,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
+                                                "flex": null,
                                                 "itemId": "colChargeAmount",
                                                 "text": "Amount"
                                             },
@@ -4072,9 +4258,10 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 0.7,
+                                                "flex": null,
                                                 "itemId": "colAccrue",
-                                                "text": "Accrue"
+                                                "text": "Accrue",
+                                                "width": 45
                                             },
                                             "name": "MyCheck6",
                                             "designerId": "ca98a097-437a-43d2-bfbe-a3e51ccf8e64",
@@ -4099,11 +4286,12 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
+                                                "flex": null,
                                                 "headerDrillDownClick": "onVendorHeaderClick",
                                                 "headerDrillDownText": "Open",
                                                 "itemId": "colCostVendor",
-                                                "text": "Vendor"
+                                                "text": "Vendor",
+                                                "width": 200
                                             },
                                             "name": "MyColumn47",
                                             "designerId": "0a286d8d-47f5-446a-99c9-d8a99663cd1d",
@@ -4178,9 +4366,10 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 0.7,
+                                                "flex": null,
                                                 "itemId": "colPrice",
-                                                "text": "Price"
+                                                "text": "Price",
+                                                "width": 40
                                             },
                                             "name": "MyCheck",
                                             "designerId": "7344297e-a8a8-4ca5-9a5d-727f5204d7b1"
@@ -4231,6 +4420,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "flex": null,
                                                 "itemId": "colAllocatePriceBy",
                                                 "text": "Allocate Price By"
                                             },

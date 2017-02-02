@@ -25,7 +25,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'i21.store.CurrencyBuffered',
         'Logistics.store.PickedLots',
         'Grain.store.BufferedStorageTakeOut',
-        'ContractManagement.store.WeightGradeBuffered'
+        'ContractManagement.store.WeightGradeBuffered',
+        'i21.store.CurrencyExchangeRateTypeBuffered'
     ],
 
     data: {
@@ -217,7 +218,13 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         customerStorage: {
             type: 'grbufferedstoragetakeout',
             pageSize: 25 // Override the pageSize of the Grain store.
-        }
+        },
+        forexRateType: {
+            type: 'smcurrencyexchangeratetypebuffered'
+        },
+        chargeForexRateType: {
+            type: 'smcurrencyexchangeratetypebuffered'
+        }        
     },
 
     formulas: {

@@ -553,7 +553,18 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colLineTotal: 'dblLineTotal',
-                colNotes: 'strNotes'
+                colNotes: 'strNotes',
+                colForexRateType: {
+                    dataIndex: 'strForexRateType',
+                    editor: {
+                        origValueField: 'intCurrencyExchangeRateTypeId',
+                        origUpdateField: 'intForexRateTypeId',
+                        store: '{forexRateType}'
+                    }
+                },
+                colForexRate: {
+                    dataIndex: 'dblForexRate' 
+                }                  
             },
 
             btnRemoveLot: {
@@ -711,7 +722,18 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         store: '{vendor}'
                     }
                 },
-                colPrice: 'ysnPrice'
+                colPrice: 'ysnPrice',
+                colChargeForexRateType: {
+                    dataIndex: 'strForexRateType',
+                    editor: {
+                        origValueField: 'intCurrencyExchangeRateTypeId',
+                        origUpdateField: 'intForexRateTypeId',
+                        store: '{chargeForexRateType}'
+                    }
+                },
+                colChargeForexRate: {
+                    dataIndex: 'dblForexRate' 
+                }
             }
         }
     },
@@ -1219,8 +1241,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         else if (combo.itemId === 'cboCustomerStorage') {
             current.set('intStorageScheduleTypeId', records[0].get('intStorageTypeId'));
-
         }
+
+        else if (combo.itemId === 'cboForexRateType') {
+            current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
+            current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
+            current.set('dblForexRate', 0.00);
+        }        
+        
     },
 
     onLotSelect: function(combo, records, eOpts) {
@@ -2135,6 +2163,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         else {
             current.set('dblRate', record.get('dblAmount'));
         }
+
+        if (combo.itemId === 'cboChargeForexRateType') {
+            current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
+            current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
+            current.set('dblForexRate', 0.00);
+        }           
     },
 
     onQualityClick: function(button, e, eOpts) {
@@ -2959,7 +2993,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#txtComments": {
                 specialKey: this.onSpecialKeyTab
-            }            
+            },
+            "#cboForexRateType": {
+                select: this.onItemNoSelect
+            },
+            "#cboChargeForexRateType": {
+                select: this.onChargeSelect
+            }
+            
         })
     }
 

@@ -61,7 +61,10 @@ Ext.define('Inventory.model.ShipmentItem', {
             depends: ['dblQuantity', 'dblUnitPrice']
         },
         { name: 'intCustomerStorageId', type: 'int', allowNull: true},
-        { name: 'strStorageTypeDescription', type: 'string' }
+        { name: 'strStorageTypeDescription', type: 'string' },
+        { name: 'intForexRateTypeId', type: 'int', allowNull: true },
+        { name: 'strForexRateType', type: 'string'},
+        { name: 'dblForexRate', type: 'float', allowNull: true }                
     ],
 
     validators: [

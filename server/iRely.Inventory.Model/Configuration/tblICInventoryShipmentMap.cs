@@ -161,6 +161,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStorageScheduleTypeId).HasColumnName("intStorageScheduleTypeId");
             this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
             this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
 
             this.HasMany(p => p.tblICInventoryShipmentItemLots)
                 .WithRequired(p => p.tblICInventoryShipmentItem)
@@ -194,6 +196,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
 
             this.HasOptional(p => p.vyuICGetInventoryShipmentCharge)
                 .WithRequired(p => p.tblICInventoryShipmentCharge);
@@ -230,6 +234,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
             this.Property(t => t.strVendorName).HasColumnName("strVendorName");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
         }
     }
 
@@ -315,6 +320,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
             this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.strStorageTypeDescription).HasColumnName("strStorageTypeDescription");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
         }
     }
 

@@ -1222,6 +1222,47 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colForexRateType',
+                                                                        width: 150,
+                                                                        dataIndex: 'strForexRateType',
+                                                                        text: 'Forex Rate Type',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCurrencyExchangeRateTypeId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Forex Rate Type Id',
+                                                                                    flex: 1,
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCurrencyExchangeRateType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Forex Rate Type',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboForexRateType',
+                                                                            displayField: 'strCurrencyExchangeRateType',
+                                                                            valueField: 'strCurrencyExchangeRateType'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataIndex: 'dblForexRate',
+                                                                        itemId: 'colForexRate',
+                                                                        width: 85,
+                                                                        text: 'Forex Rate'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colWeightUOM',
                                                                         width: 100,
                                                                         dataIndex: 'strUOM',
@@ -1762,7 +1803,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colContract',
                                                         text: 'Contract No',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1790,7 +1830,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         headerDrillDownText: 'Open',
                                                         itemId: 'colOtherCharge',
                                                         text: 'Other Charges',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1821,14 +1860,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colOnCostType',
-                                                        text: 'On Cost',
-                                                        flex: 1
+                                                        text: 'On Cost'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCostMethod',
                                                         text: 'Price Method',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1847,7 +1884,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colChargeCurrency',
-                                                        text: 'Currency',
+                                                        text: 'Cost Currency',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1885,10 +1922,50 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'strForexRateType',
+                                                        itemId: 'colChargeForexRateType',
+                                                        width: 150,
+                                                        text: 'Forex Rate Type',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCurrencyExchangeRateTypeId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Forex Rate Type Id',
+                                                                    flex: 1,
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCurrencyExchangeRateType',
+                                                                    dataType: 'string',
+                                                                    text: 'Forex Rate Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboChargeForexRateType',
+                                                            displayField: 'strCurrencyExchangeRateType',
+                                                            valueField: 'strCurrencyExchangeRateType'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colChargeForexRate',
+                                                        width: 85,
+                                                        dataIndex: 'dblForexRate',
+                                                        text: 'Forex Rate'
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colRate',
                                                         text: 'Rate',
-                                                        flex: 1,
                                                         format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numericfield'
@@ -1898,7 +1975,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCostUOM',
                                                         text: 'UOM',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1937,7 +2013,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colChargeAmount',
                                                         text: 'Amount',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'numericfield'
                                                         }
@@ -1945,8 +2020,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAccrue',
+                                                        width: 45,
                                                         text: 'Accrue',
-                                                        flex: 0.7,
                                                         editor: {
                                                             xtype: 'checkboxfield'
                                                         }
@@ -1956,8 +2031,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         headerDrillDownText: 'Open',
                                                         headerDrillDownClick: 'onVendorHeaderClick',
                                                         itemId: 'colCostVendor',
+                                                        width: 200,
                                                         text: 'Vendor',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1988,8 +2063,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colPrice',
-                                                        text: 'Price',
-                                                        flex: 0.7
+                                                        width: 40,
+                                                        text: 'Price'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

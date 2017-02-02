@@ -200,6 +200,8 @@ namespace iRely.Inventory.Model
         public int? intStorageScheduleTypeId  { get; set; }
         public int? intDestinationGradeId { get; set; }
         public int? intDestinationWeightId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public decimal? dblForexRate { get; set; }
 
         private string _orderNumber;
         [NotMapped]
@@ -677,6 +679,26 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _forexRateType;
+        [NotMapped]
+        public string strForexRateType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_forexRateType))
+                    if (vyuICGetInventoryShipmentItem != null)
+                        return vyuICGetInventoryShipmentItem.strForexRateType;
+                    else
+                        return null;
+                else
+                    return _forexRateType;
+            }
+            set
+            {
+                _forexRateType = value;
+            }
+        }
+
         public vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem { get; set; }
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
@@ -734,6 +756,7 @@ namespace iRely.Inventory.Model
         public int? intDiscountSchedule { get; set; }
         public string strDiscountSchedule { get; set; }
         public string strStorageTypeDescription { get; set; }
+        public string strForexRateType { get; set; }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
     }
@@ -754,6 +777,8 @@ namespace iRely.Inventory.Model
         public int? intEntityVendorId { get; set; }
         public bool? ysnPrice { get; set; }
         public int? intSort { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public decimal? dblForexRate { get; set; }
 
         private string _contractNo;
         [NotMapped]
@@ -924,6 +949,26 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _forexRateType;
+        [NotMapped]
+        public string strForexRateType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_forexRateType))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strForexRateType;
+                    else
+                        return null;
+                else
+                    return _forexRateType;
+            }
+            set
+            {
+                _forexRateType = value;
+            }
+        }
+
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
         public vyuICGetInventoryShipmentCharge vyuICGetInventoryShipmentCharge { get; set; }
     }
@@ -951,6 +996,7 @@ namespace iRely.Inventory.Model
         public int? intEntityVendorId { get; set; }
         public string strVendorId { get; set; }
         public string strVendorName { get; set; }
+        public string strForexRateType { get; set; }
 
         public tblICInventoryShipmentCharge tblICInventoryShipmentCharge { get; set; }
     }
