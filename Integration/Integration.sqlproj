@@ -400,5 +400,6 @@
     <None Include="Scripts\IC\uspICDCUomMigrationPt.sql" />
     <None Include="dbo\Stored Procedures\uspARImportCustomerSpecialPrice.sql" />
     <None Include="dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql" />
+    <None Include="dbo\Stored Procedures\uspTRImportTruck.sql" />
   </ItemGroup>
 </Project>
