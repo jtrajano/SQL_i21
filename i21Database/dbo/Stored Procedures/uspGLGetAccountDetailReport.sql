@@ -98,7 +98,7 @@ BEGIN
 			@dtmDateTo,
 			@filterTable
 		)
-		SELECT @sqlCte += 'select * from result'
+		SELECT @sqlCte += 'select * from [result]'
 		EXEC (@sqlCte)
    END
 END
