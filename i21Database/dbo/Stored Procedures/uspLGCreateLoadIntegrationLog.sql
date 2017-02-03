@@ -34,9 +34,13 @@ BEGIN TRY
 			,strContractBasisDesc
 			,strBillOfLading
 			,strShippingLine
+			,strShippingLineAccountNo
 			,strExternalShipmentNumber
 			,strDateQualifier
 			,dtmScheduledDate
+			,dtmETAPOD
+			,dtmETAPOL
+			,dtmBLDate
 			,strRowState
 			,dtmFeedCreated
 			)
@@ -74,12 +78,18 @@ BEGIN TRY
                 )
 			,L.strBLNumber
 			,L.strShippingLine
+			,V.strVendorAccountNum
 			,L.strExternalShipmentNumber
 			,'015' AS strDateQualifier
 			,L.dtmScheduledDate
+			,L.dtmETAPOD
+			,L.dtmETAPOL
+			,L.dtmBLDate
 			,@strRowState
 			,GETDATE()
 		FROM vyuLGLoadView L
+		LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
+		LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
 		WHERE intLoadId = @intLoadId
 
 		SELECT @intLoadStgId = SCOPE_IDENTITY()
@@ -227,9 +237,13 @@ BEGIN TRY
 			,strContractBasisDesc
 			,strBillOfLading
 			,strShippingLine
+			,strShippingLineAccountNo
 			,strExternalShipmentNumber
 			,strDateQualifier
 			,dtmScheduledDate
+			,dtmETAPOD
+			,dtmETAPOL
+			,dtmBLDate
 			,strRowState
 			)
 		SELECT intLoadId
@@ -264,11 +278,17 @@ BEGIN TRY
 				)
 			,L.strBLNumber
 			,L.strShippingLine
+			,V.strVendorAccountNum
 			,L.strExternalShipmentNumber
 			,'015' AS strDateQualifier
 			,L.dtmScheduledDate
+			,L.dtmETAPOD
+			,L.dtmETAPOL
+			,L.dtmBLDate
 			,@strRowState
 		FROM vyuLGLoadView L
+		LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
+		LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
 		WHERE intLoadId = @intLoadId
 
 		SELECT @intLoadStgId = SCOPE_IDENTITY()
