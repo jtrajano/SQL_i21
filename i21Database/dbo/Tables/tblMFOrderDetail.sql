@@ -18,9 +18,9 @@
 		,[intSanitizationOrderDetailsId] INT
 		,[strLineItemNote] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,[intCreatedById] INT NULL
-		,[dtmCreatedOn] DATETIME DEFAULT GETDATE() NOT NULL
+		,[dtmCreatedOn] DATETIME DEFAULT GETDATE() NULL
 		,[intLastUpdateById] INT NULL
-		,[dtmLastUpdateOn] DATETIME DEFAULT GETDATE() NOT NULL
+		,[dtmLastUpdateOn] DATETIME DEFAULT GETDATE() NULL
 		
 		,CONSTRAINT [PK_tblMFOrderLineItem_intOrderLineItemId] PRIMARY KEY ([intOrderDetailId])
 		,CONSTRAINT [FK_tblMFOrderLineItem_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY ([intOrderHeaderId]) REFERENCES [tblMFOrderHeader]([intOrderHeaderId]) ON DELETE CASCADE
