@@ -4950,6 +4950,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnAdjustStockFromSAP.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromSAP.sql" />
     <Build Include="dbo\Views\vyuRKGetContractBalanceLotForHeader.sql" />
+    <Build Include="dbo\User Defined Types\ETTranslateRPToReceivePaymentTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
