@@ -185,7 +185,23 @@ BEGIN
 	RETURN -1
 END 
 
--- Check if the item is using Average Costing and the transaction is Actual Costing 
+/*
+	Check if the item is using Average Costing and the transaction is Actual Costing 
+
+	Exception: 
+		Allow it to happen Inventory Transfer. It will reduce the stock first using AVG and transfer it to the new location for ACTUAL COSTING. It will be reduce by the Sale Invoice 
+		using Actual Costing. It will not mess up the inventory valuation because the actual cost is the same average cost. 
+	
+		To illustrate: 
+
+		strTransactionId                         dblQty                                  dblCost                                 intCostingMethod strName             
+		---------------------------------------- --------------------------------------- --------------------------------------- ---------------- --------------------
+		INVTRN-3101                              -9829.00000000000000000000              1.01616662017389385428                  1                Inventory Transfer  
+		INVTRN-3101                              9829.00000000000000000000               1.01616662017389385428                  5                Inventory Transfer  
+		SI-34906                                 -9829.00000000000000000000              1.01616662017389385428                  5                Invoice
+
+		The Average Cost of the item will remain as 1.01616662017389385428. 
+*/
 SELECT @strItemNo = NULL
 		, @intItemId = NULL 
 		, @strTransactionId = NULL 
@@ -194,17 +210,20 @@ SELECT TOP 1
 		@strTransactionId = strTransactionId
 		,@strItemNo = i.strItemNo
 		,@intItemId = iv.intItemId
-FROM	@ItemsToValidate iv INNER JOIN tblICItem i ON iv.intItemId = i.intItemId
+FROM	@ItemsToValidate iv 
+		INNER JOIN tblICItem i ON iv.intItemId = i.intItemId
 		CROSS APPLY dbo.fnGetCostingMethodAsTable(iv.intItemId, iv.intItemLocationId) icm
-		INNER JOIN tblICCostingMethod cm
-			ON cm.intCostingMethodId = icm.CostingMethod
+		INNER JOIN tblICCostingMethod cm ON cm.intCostingMethodId = icm.CostingMethod
+		INNER JOIN tblICInventoryTransactionType ty ON iv.intTransactionTypeId = ty.intTransactionTypeId
 WHERE	strActualCostId IS NOT NULL 
 		AND cm.strCostingMethod = 'AVERAGE COST'
 		AND iv.dblQty > 0 
+		AND ty.strName NOT IN ('Inventory Transfer') 
 
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Costing method mismatch. {Item No} is set to use Ave Costing. {Trans Id} is going to use Actual costing. It can''t be used together. You can fix it by changing the costing method to FIFO or LIFO.'
+	-- '{Item No} is set to use AVG Costing and it will be received in {Receipt Id} as Actual costing. Average cost computation will be messed up. Try receiving the stocks using Inventory Receipt instead of Transport Load.'
 	RAISERROR(80094, 11, 1, @strItemNo, @strTransactionId)
 	RETURN -1
 END 
