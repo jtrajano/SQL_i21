@@ -15,7 +15,7 @@ intBankId
 ,strFax
 ,strWebsite
 ,strEmail
-,ISNULL(dbo.fnAESDecryptASym(strRTN), strRTN) AS strRTN
+,ISNULL(dbo.fnAESDecryptASym(strRTN), strRTN) COLLATE Latin1_General_CI_AS AS strRTN
 ,intCreatedUserId
 ,dtmCreated
 ,intLastModifiedUserId
