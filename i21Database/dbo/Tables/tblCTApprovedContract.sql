@@ -19,6 +19,8 @@
 	strOrigin	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	[dblQuantity] [numeric](18, 6),
 	[intQtyUOMId] [int], -- From tblICUnitMeasure not tblICItemUOM
+	[dblNetWeight] [numeric](18, 6),
+	[intNetWeightUOMId] [int], -- From tblICUnitMeasure not tblICItemUOM
 	[intFutureMarketId] [int],
 	[intFutureMonthId] INT,
 	[dblFutures] [numeric](18, 6),
@@ -31,5 +33,7 @@
 	[intPurchasingGroupId] INT,
 
 	[intApprovedById]	INT,
-	[dtmApproved]	DATETIME
+	[dtmApproved]	DATETIME,
+
+	CONSTRAINT [PK_tblCTApprovedContract_intApprovedContractId] PRIMARY KEY CLUSTERED (intApprovedContractId ASC)
 )

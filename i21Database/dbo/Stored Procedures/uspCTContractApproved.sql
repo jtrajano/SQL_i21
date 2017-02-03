@@ -22,7 +22,7 @@ BEGIN TRY
 			dblBasis,				dblCashPrice,			intCurrencyId,
 			intPriceUOMId,			intSubLocationId,		intStorageLocationId,
 			intPurchasingGroupId,	intApprovedById,		dtmApproved,
-			strOrigin
+			strOrigin,				dblNetWeight,			intNetWeightUOMId
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -52,12 +52,15 @@ BEGIN TRY
 			CD.intPurchasingGroupId,
 			@intApprovedById,
 			GETDATE(),
-			OG.strCountry AS strOrigin
+			OG.strCountry AS strOrigin,
+			CD.dblNetWeight,
+			WU.intUnitMeasureId AS intNetWeightUOMId
 
 	FROM	tblCTContractDetail		CD 
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId			LEFT
 	JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId	LEFT
+	JOIN	tblICItemUOM			WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId	LEFT
 	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId			
 										AND	CA.strType					=	'Origin'				LEFT
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		

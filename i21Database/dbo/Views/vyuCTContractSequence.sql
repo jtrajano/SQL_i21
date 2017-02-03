@@ -70,5 +70,5 @@ AS
 	--										AND	CA.strType					=	'Origin'					LEFT
 	JOIN	tblSMPurchasingGroup		PG	ON	PG.intPurchasingGroupId		=	CD.intPurchasingGroupId		LEFT
 	JOIN	tblICStorageLocation		SL	ON	SL.intStorageLocationId		=	CD.intStorageLocationId		LEFT
-	JOIN	tblEMEntity					CE	ON	EY.intEntityId				=	CD.intCreatedById			LEFT
+	JOIN	tblEMEntity					CE	ON	CE.intEntityId				=	CD.intCreatedById			LEFT
 	JOIN	tblSMCompanyLocationSubLocation	UL	ON	UL.intCompanyLocationSubLocationId	=	CD.intSubLocationId

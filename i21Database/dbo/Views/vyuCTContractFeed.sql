@@ -5,15 +5,19 @@ AS
 
 	SELECT	CD.intContractHeaderId,			CD.intContractDetailId,		CH.strCommodityCode,	CH.strCommodityDescription		AS strCommodityDesc,
 			CH.strContractBasis,			CD.strSubLocation,			CH.strCreatedBy,		CH.strContractBasisDescription	AS strContractBasisDesc,	
-			CD.strCreatedByNo,				CH.strTermCode AS strTerm,	CD.strPurchasingGroup,	VE.strVendorAccountNum			AS strEntityNo,	
+			CD.strCreatedByNo,				CH.strTerm,					CD.strPurchasingGroup,	CH.strEntityNumber				AS strEntityNo,	
 			CH.strContractNumber,			CD.strERPPONumber,			CD.intContractSeq,		CD.strItemNo,
-			CD.strStorageLocation,			CD.dblQuantity,				CD.dblCashPrice,		CD.strItemUOM	AS strQuantityUOM,
-			CD.dtmPlannedAvailabilityDate,	CD.dblBasis,				CD.strCurrency,			CD.dblCashPrice / 100.0	AS dblUnitCashPrice,	
+			CD.strStorageLocation,			CD.dblQuantity,				CD.dblCashPrice,		CD.strItemUOM					AS strQuantityUOM,
+			CD.dtmPlannedAvailabilityDate,	CD.dblBasis,				CD.strCurrency,			CD.dblCashPrice / 100.0			AS dblUnitCashPrice,	
 			CD.strPriceUOM,					CH.dtmContractDate,			CD.dtmStartDate,		CD.dtmEndDate,
 			AE.intEntityId	AS intSubmittedById,
 			AE.strName		AS strSubmittedBy,
 			ISNULL(AE.strExternalERPId,UE.strExternalERPId)	AS strSubmittedByNo,
-			OG.strCountry	AS strOrigin
+			OG.strCountry	AS strOrigin,
+			CD.dblNetWeight,
+			CD.strNetWeightUOM,
+			VE.strVendorAccountNum,
+			CH.strTermCode
 
 	FROM	vyuCTContractSequence	CD
 	JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
