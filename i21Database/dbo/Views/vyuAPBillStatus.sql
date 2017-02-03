@@ -30,7 +30,7 @@ SELECT
 			THEN 'Invalid Withheld'
 		WHEN CAST((CASE WHEN A.intTransactionType !=1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END) AS DECIMAL(18,2)) != OpenPayables.dblAmountDue 
 			THEN 'Payables amount due do not matched with voucher amount due.'
-		WHEN A.dblTotal != GLData.dblCredit AND A.ysnOrigin = 0 THEN 'Voucher and GL amount do not match.'
+		WHEN A.ysnPosted = 1 AND A.dblTotal != ISNULL(GLData.dblCredit,0) AND A.ysnOrigin = 0 THEN 'Voucher and GL amount do not match.'
 		WHEN A.intBillId IS NULL AND GLRecord.intTransactionId IS NOT NULL THEN 'GL Record exists but not in voucher table.'
 		WHEN (A.ysnPaid = 1 AND (CASE WHEN A.intTransactionType !=1 THEN A.dblTotal * -1 ELSE A.dblTotal END)
 				 != ((CASE WHEN A.intTransactionType !=1 THEN A.dblPayment * -1 ELSE A.dblPayment END)
@@ -103,10 +103,10 @@ OUTER APPLY
 ) OpenPayables
 OUTER APPLY (
 	SELECT
-		SUM(dblCredit) dblCredit
+		ABS(SUM(dblCredit - dblDebit)) dblCredit
 	FROM tblGLDetail G
 	INNER JOIN vyuGLAccountDetail H ON G.intAccountId = H.intAccountId
-	WHERE G.strTransactionType = 'Bill'
+	WHERE G.strTransactionForm = 'Bill'
 	AND A.strBillId = G.strTransactionId AND A.intBillId = G.intTransactionId
 	AND G.ysnIsUnposted = 0
 	AND H.intAccountCategoryId = (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account')
@@ -115,7 +115,7 @@ OUTER APPLY (
 OUTER APPLY (
 	SELECT TOP 1 F.intTransactionId, F.strTransactionId
 	FROM tblGLDetail F
-	WHERE F.strTransactionType = 'Bill'
+	WHERE F.strTransactionForm = 'Bill'
 	AND A.intBillId = F.intTransactionId AND A.strBillId = F.strTransactionId
 	AND F.ysnIsUnposted = 0
 ) GLRecord 
