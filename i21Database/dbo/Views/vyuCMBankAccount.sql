@@ -11,8 +11,8 @@ SELECT	i21.intBankAccountId
 		,i21.intCurrencyId
 		,i21.intBankAccountType
 		,i21.strContact
-		,ISNULL(dbo.fnAESDecryptASym(i21.strBankAccountNo),strBankAccountNo) AS strBankAccountNo
-		,ISNULL(dbo.fnAESDecryptASym(i21.strRTN),strRTN) AS strRTN
+		,ISNULL(dbo.fnAESDecryptASym(i21.strBankAccountNo),strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo
+		,ISNULL(dbo.fnAESDecryptASym(i21.strRTN),strRTN) COLLATE Latin1_General_CI_AS AS strRTN
 		,i21.strAddress
 		,i21.strZipCode
 		,i21.strCity
@@ -37,8 +37,8 @@ SELECT	i21.intBankAccountId
 		,i21.strEFTCompanyId
 		,i21.strEFTBankName
 		,i21.strMICRDescription
-		,ISNULL(dbo.fnAESDecryptASym(i21.strMICRRoutingNo),strMICRRoutingNo) AS strMICRRoutingNo
-		,ISNULL(dbo.fnAESDecryptASym(i21.strMICRBankAccountNo),strMICRBankAccountNo) AS strMICRBankAccountNo
+		,ISNULL(dbo.fnAESDecryptASym(i21.strMICRRoutingNo),strMICRRoutingNo) COLLATE Latin1_General_CI_AS AS strMICRRoutingNo
+		,ISNULL(dbo.fnAESDecryptASym(i21.strMICRBankAccountNo),strMICRBankAccountNo) COLLATE Latin1_General_CI_AS AS strMICRBankAccountNo
 		,i21.intMICRBankAccountSpacesCount
 		,i21.intMICRBankAccountSpacesPosition
 		,i21.intMICRCheckNoSpacesCount
