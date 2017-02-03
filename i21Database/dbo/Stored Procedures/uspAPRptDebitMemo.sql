@@ -50,6 +50,7 @@ BEGIN
 		'' AS strItemNo,
 		'' AS strLPlant,
 		'' AS strCountryOfOrigin,
+		'' AS strDateLocation,
 		0 AS intBillId,
 		0 AS intContractSeq,
 		0 AS intUnitOfMeasureId,

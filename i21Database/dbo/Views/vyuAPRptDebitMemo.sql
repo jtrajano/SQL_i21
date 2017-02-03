@@ -3,7 +3,7 @@ AS
 
 SELECT 
 	(SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
-	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	,(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone))
 	,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone))
 	,A.intBillId
@@ -29,6 +29,7 @@ SELECT
 	,M.strBillOfLading
 	,ISNULL(N2.strCountry,O.strCountry) AS strCountryOrigin
 	,P.strSubLocationName strLPlant
+	,strDateLocation = Q.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107)
 FROM tblAPBill A
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId) ON A.intEntityVendorId = B.intEntityVendorId
 INNER JOIN tblAPBillDetail C2 ON A.intBillId = C2.intBillId
@@ -48,4 +49,5 @@ LEFT JOIN tblSMCurrency I ON I.intMainCurrencyId = A.intCurrencyId AND I.ysnSubC
 LEFT JOIN tblEMEntity L ON A.intContactId = L.intEntityId
 LEFT JOIN tblSMCountry O ON H.intOriginId = O.intCountryID
 LEFT JOIN tblSMCompanyLocationSubLocation P ON D2.intSubLocationId = P.intCompanyLocationSubLocationId
+LEFT JOIN tblSMCompanyLocation Q ON A.intStoreLocationId = Q.intCompanyLocationId
 WHERE A.intTransactionType = 3
