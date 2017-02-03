@@ -4956,6 +4956,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleContractUnSlice.sql" />
     <Build Include="dbo\Views\vyuSMForex.sql" />
     <Build Include="dbo\Functions\fnGetForexRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetForexRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
