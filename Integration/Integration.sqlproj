@@ -399,5 +399,6 @@
     <None Include="Scripts\IC\uspICDCUomMigrationGr.sql" />
     <None Include="Scripts\IC\uspICDCUomMigrationPt.sql" />
     <None Include="dbo\Stored Procedures\uspARImportCustomerSpecialPrice.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql" />
   </ItemGroup>
 </Project>
