@@ -16,7 +16,7 @@
 		intTransactionId = null,
 		dtmDatePaid = null
 
-	from vyuARCustomerHistory
+	from vyuARCustomerHistory where strTransactionType <> 'CF Trans'
 	union
 	select 
 		intEntityId = intEntityVendorId,
