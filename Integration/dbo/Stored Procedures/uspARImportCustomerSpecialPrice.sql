@@ -1,3 +1,9 @@
+GO
+
+IF EXISTS (select top 1 1 from sys.procedures where name = 'uspARImportCustomerSpecialPrice')
+	DROP PROCEDURE uspARImportCustomerSpecialPrice
+GO
+
 
 CREATE PROCEDURE [dbo].[uspARImportCustomerSpecialPrice]
 		@CustomerId NVARCHAR(50) = NULL
@@ -212,5 +218,14 @@ BEGIN
 		WHERE PDV.ptpdv_cus_no = @CustomerId
 	END
 
+		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpagcusname')
+			DROP TABLE tmpagcusname
+
+		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpptcusname')
+			DROP TABLE tmpptcusname
+
+		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpvndname')
+			DROP TABLE tmpvndname
+
 END
-GO
+

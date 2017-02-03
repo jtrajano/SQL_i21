@@ -398,6 +398,6 @@
     <None Include="Scripts\IC\uspICDCUomMigrationAg.sql" />
     <None Include="Scripts\IC\uspICDCUomMigrationGr.sql" />
     <None Include="Scripts\IC\uspICDCUomMigrationPt.sql" />
-    <Build Include="dbo\Stored Procedures\uspARImportCustomerSpecialPrice.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportCustomerSpecialPrice.sql" />
   </ItemGroup>
 </Project>
