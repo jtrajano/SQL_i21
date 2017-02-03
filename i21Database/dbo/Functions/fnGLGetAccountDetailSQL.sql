@@ -171,7 +171,7 @@ AS
 	IF @strAccountIdFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1 UNION ALL SELECT strAccountId FROM cteRetainAccount)'
 	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + CASE WHEN @Where1 <> 'Where' THEN  @Where1 ELSE '' END + ' GROUP BY strAccountId),
 		cte1  AS( SELECT * FROM RAWREPORT	A join cteInactive B ON B.accountId = A.strAccountId AND B.id = A.intGLDetailId)'
-	SELECT @sqlCte +=' , result as (select ' + @cols1  + '
+	SELECT @sqlCte +=' , [result] as (select ' + @cols1  + '
 	,ISNULL(ROUND( CASE WHEN ' + @intRetainAccount + '= A.intAccountId  THEN C.beginBalance ELSE B.beginBalance END,2),0) AS dblBeginBalance
 	,[dblBeginBalanceUnit] = CASE WHEN (ISNULL( CASE WHEN ' + @intRetainAccount + '= A.intAccountId  THEN C.beginBalanceUnit ELSE B.beginBalanceUnit END, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0
 					ELSE CAST(ISNULL(ISNULL(CASE WHEN ' + @intRetainAccount + '= A.intAccountId  THEN C.beginBalanceUnit ELSE B.beginBalanceUnit END, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
