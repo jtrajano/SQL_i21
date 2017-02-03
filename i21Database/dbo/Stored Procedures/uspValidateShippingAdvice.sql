@@ -68,7 +68,7 @@ BEGIN
 	BEGIN
 		SET @strErrorMessage = 'Sample(s) were rejected for the contract '+ @strContractSeq + '.'
 	END
-	ELSE IF (@dblLoadQty > @dblContainerQty)
+	ELSE IF ((@dblLoadQty > @dblContainerQty) Or ISNULL(@strSampleStatus,'') = 'Received')
 	BEGIN
 		SET @strErrorMessage = 'Shipment qty is more than the approved sample qty for the contract '+ @strContractSeq + '.'		
 	END
