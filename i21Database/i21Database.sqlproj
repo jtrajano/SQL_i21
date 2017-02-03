@@ -4953,6 +4953,7 @@
     <Build Include="dbo\User Defined Types\ETTranslateRPToReceivePaymentTable.sql" />
     <Build Include="dbo\Views\vyuCTDashboardJDE.sql" />
     <Build Include="dbo\Views\vyuTMDegreeReadingSeasonYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleContractUnSlice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
