@@ -46,7 +46,7 @@ Begin
 
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intContractDetailId=intContractDetailId 
-		From tblCTContractDetail Where strERPPONumber=@strPONo AND intItemId=@intItemId AND strERPItemNumber=@strPOItemNo
+		From tblCTContractDetail Where strERPPONumber=@strPONo AND intItemId=@intItemId AND CAST(strERPItemNumber AS INT)=CAST(@strPOItemNo AS INT)
 
 		If ISNULL(@intItemId,0)=0 RaisError('Item not found',16,1)
 		If ISNULL(@intContractDetailId,0)=0 RaisError('Contract Sequence not found',16,1)

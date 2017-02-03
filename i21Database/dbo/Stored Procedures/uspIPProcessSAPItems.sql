@@ -96,7 +96,7 @@ Begin --Inventory Item
 If ISNULL(@intItemId,0)=0 --Create
 Begin
 	Insert Into tblICItem(strItemNo,strDescription,strShortName,strType,strLotTracking,strInventoryTracking,intCategoryId,intCommodityId,strStatus,intLifeTime)
-	Select strItemNo,strDescription,LEFT(strDescription,50),'Inventory','Yes - Manual','Lot Level',@intCategoryId,@intCommodityId,'Active',0
+	Select strItemNo,strDescription,LEFT(strDescription,50),'Inventory','Yes - Manual/Serial Number','Lot Level',@intCategoryId,@intCommodityId,'Active',0
 	From tblIPItemStage Where strItemNo=@strItemNo AND intStageItemId=@intStageItemId
 
 	Select @intItemId=SCOPE_IDENTITY()

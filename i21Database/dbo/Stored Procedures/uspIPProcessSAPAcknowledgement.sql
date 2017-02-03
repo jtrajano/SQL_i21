@@ -161,13 +161,20 @@ Begin
 	Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
+		If Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
+			Select TOP 1 @intLoadId=intLoadId From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
+
 		If @strStatus=53 --Success
 		Begin
 			Update tblLGLoad  Set strExternalShipmentNumber=@strParam
 			Where intLoadId=@intLoadId
 
+			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo
+
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='SUCCESS',strExternalShipmentNumber=@strParam
-			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')=''
+			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
+
+			Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,'SUCCESS')
@@ -178,7 +185,7 @@ Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
-			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')=''
+			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,@strMessage)

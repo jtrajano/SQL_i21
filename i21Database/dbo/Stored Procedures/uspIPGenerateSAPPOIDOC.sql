@@ -45,7 +45,8 @@ Declare @intMinSeq					INT,
 		@strContractFeedIds			NVARCHAR(MAX),
 		@strERPPONumber1			NVARCHAR (100),
 		@strCertificates			NVARCHAR(MAX),
-		@strOrigin					NVARCHAR(100)
+		@strOrigin					NVARCHAR(100),
+		@strContractItemNo			NVARCHAR(500)
 
 Declare @tblOutput AS Table
 (
@@ -158,16 +159,16 @@ Begin
 			@strSubLocation				= strSubLocation , --L-Plant / PLANT 
 			@strCreatedBy				= strCreatedBy , 
 			@strCreatedByNo				= strSubmittedByNo , 
-			@strEntityNo				= strEntityNo , --VENDOR 
-			@strTerm					= strTerm  , --PMNTTRMS / VEND_PART 
+			@strEntityNo				= strVendorAccountNum , --VENDOR 
+			@strTerm					= strTermCode  , --PMNTTRMS / VEND_PART 
 			@strPurchasingGroup			= strPurchasingGroup, 
 			@strContractNumber			= strContractNumber  ,
 			@strERPPONumber				= strERPPONumber  ,
 			@intContractSeq				= intContractSeq, --PO_ITEM 
 			@strItemNo					= strItemNo  ,
 			@strStorageLocation			= strStorageLocation , --STGE_LOC 
-			@dblQuantity				= dblQuantity,
-			@strQuantityUOM				= strQuantityUOM , --PO_UNIT
+			@dblQuantity				= dblNetWeight,
+			@strQuantityUOM				= strNetWeightUOM , --PO_UNIT
 			@dblCashPrice				= dblCashPrice, --NET_PRICE
 			@dblUnitCashPrice			= dblUnitCashPrice, --PRICE_UNIT 
 			@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate, --DELIVERY_DATE 
@@ -178,7 +179,8 @@ Begin
 			@strCurrency				= strCurrency ,--CURRENCY 
 			@strPriceUOM				= strPriceUOM , --COND_UNIT 
 			@strRowState				= strRowState ,
-			@strFeedStatus				= strFeedStatus
+			@strFeedStatus				= strFeedStatus,
+			@strContractItemNo			= strContractItemNo
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
 		--Find Doc Type
@@ -286,7 +288,10 @@ Begin
 				--Item
 				Set @strXml += '<E1BPMEPOITEM SEGMENT="1">'
 				Set @strXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-				Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
+				If UPPER(@strCommodityCode)='TEA'
+					Set @strXml += '<MATERIAL>'		+ ISNULL(ISNULL(@strContractItemNo,@strItemNo),'')				+ '</MATERIAL>'
+				ELSE
+					Set @strXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
 				Set @strXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
 				Set @strXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
 				Set @strXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractDetailId),'')	+ '</TRACKINGNO>'

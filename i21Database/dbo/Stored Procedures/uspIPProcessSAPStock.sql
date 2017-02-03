@@ -48,7 +48,7 @@ Begin
 
 		Exec [uspICAdjustStockFromSAP]	 @dtmQtyChange			= NULL
 										,@intItemId				= @intItemId
-										,@strLotNumber			= NULL
+										,@strLotNumber			= 'FIFO'
 										,@intLocationId			= @intLocationId
 										,@intSubLocationId		= @intSubLocationId
 										,@intStorageLocationId	= NULL
