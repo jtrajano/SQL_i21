@@ -244,13 +244,18 @@ BEGIN
 									  END)
 		END 
 	END
+	ELSE IF (@strNetworkType = 'Voyager')
+	BEGIN 
+		SET @strTransactionType = 'Local/Network'
+	END
 	 
 
+	DECLARE @ysnCreateSite BIT 
 	------------------------------------------------------------
 	--					AUTO CREATE SITE
 	-- if transaction is remote or ext remote				  --
 	------------------------------------------------------------
-	IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND (@strPPSiteType = 'N' OR @strPPSiteType = 'R'))
+	IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND (@strPPSiteType = 'N' OR @strPPSiteType = 'R') AND @strNetworkType = 'PacPride')
 		BEGIN 
 			
 			INSERT INTO tblCFSite
@@ -301,6 +306,51 @@ BEGIN
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
 
+	END
+	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'Voyager')
+	BEGIN
+		DECLARE @intTaxGroupByState INT = NULL
+
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strState
+		END
+		
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
+		END
+
+		INSERT INTO tblCFSite
+			(
+				 intNetworkId		
+				,strSiteNumber	
+				,strSiteName
+				,strDeliveryPickup	
+				,intARLocationId	
+				,strControllerType	
+				,strTaxState		
+				,strSiteAddress		
+				,strSiteCity			
+				,strSiteType
+				,intTaxGroupId
+			)
+			SELECT
+				intNetworkId			= @intNetworkId
+				,strSiteNumber			= @strSiteId
+				,strSiteName			= @strSiteId
+				,strDeliveryPickup		= 'Pickup'
+				,intARLocationId		= @intNetworkLocation
+				,strControllerType		= 'Voyager'
+				,strTaxState			= @strSiteState
+				,strSiteAddress			= @strSiteAddress	
+				,strSiteCity			= @strSiteCity	
+				,strSiteType			= 'Extended Remote'
+				,intTaxGroupId			= @intTaxGroupByState
+				
+
+			SET @intSiteId = SCOPE_IDENTITY();
+			SET @ysnSiteCreated = 1;
 	END
 	
 	--FIND CARD--
