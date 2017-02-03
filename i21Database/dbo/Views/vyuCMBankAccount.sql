@@ -88,9 +88,9 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 			SET NOCOUNT ON 
 
 			--For Encryption and Decryption
-			OPEN SYMMETRIC KEY i21EncryptionSymKey
-			   DECRYPTION BY CERTIFICATE i21EncryptionCert
-			   WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+			OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+			DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+			WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 				-- Proceed in inserting the record the base table (tblCMBankAccount)			
 				INSERT INTO tblCMBankAccount (
@@ -155,8 +155,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intCurrencyId						= i.intCurrencyId
 						,intBankAccountType					= i.intBankAccountType
 						,strContact							= i.strContact
-						,strBankAccountNo					= [dbo].fnAESEncrypt(i.strBankAccountNo)
-						,strRTN								= [dbo].fnAESEncrypt(i.strRTN)
+						,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
+						,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
 						,strAddress							= i.strAddress
 						,strZipCode							= i.strZipCode
 						,strCity							= i.strCity
@@ -181,8 +181,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEFTCompanyId					= i.strEFTCompanyId
 						,strEFTBankName						= i.strEFTBankName
 						,strMICRDescription					= i.strMICRDescription
-						,strMICRRoutingNo					= [dbo].fnAESEncrypt(i.strMICRRoutingNo)
-						,strMICRBankAccountNo				= [dbo].fnAESEncrypt(i.strMICRBankAccountNo)
+						,strMICRRoutingNo					= [dbo].fnAESEncryptASym(i.strMICRRoutingNo)
+						,strMICRBankAccountNo				= [dbo].fnAESEncryptASym(i.strMICRBankAccountNo)
 						,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 						,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 						,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -206,7 +206,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
 
-			CLOSE SYMMETRIC KEY i21EncryptionSymKey
+			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 
 END
 
@@ -220,9 +220,9 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 
 		SET NOCOUNT ON
 
-		--For Encryption and Decryption
-		OPEN SYMMETRIC KEY i21EncryptionSymKey
-			DECRYPTION BY CERTIFICATE i21EncryptionCert
+			--For Encryption and Decryption
+			OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+			DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
 			WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 			-- Proceed in updating the base table (tblCMBankAccount)				
@@ -233,8 +233,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intCurrencyId						= i.intCurrencyId
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
-					,strBankAccountNo					= [dbo].fnAESEncrypt(i.strBankAccountNo)
-					,strRTN								= [dbo].fnAESEncrypt(i.strRTN)
+					,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
+					,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
 					,strAddress							= i.strAddress
 					,strZipCode							= i.strZipCode
 					,strCity							= i.strCity
@@ -259,8 +259,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
-					,strMICRRoutingNo					= [dbo].fnAESEncrypt(i.strMICRRoutingNo)
-					,strMICRBankAccountNo				= [dbo].fnAESEncrypt(i.strMICRBankAccountNo)
+					,strMICRRoutingNo					= [dbo].fnAESEncryptASym(i.strMICRRoutingNo)
+					,strMICRBankAccountNo				= [dbo].fnAESEncryptASym(i.strMICRBankAccountNo)
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -286,5 +286,5 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER:
 
-			CLOSE SYMMETRIC KEY i21EncryptionSymKey
+			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 END

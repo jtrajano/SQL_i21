@@ -4942,6 +4942,11 @@
     <Build Include="dbo\Stored Procedures\uspValidateShippingAdvice.sql" />
     <Build Include="dbo\Functions\fnGetTrucksRemaining.sql" />
     <Build Include="dbo\Functions\fnGetFirstDateOfWeek.sql" />
+    <Build Include="dbo\Functions\fnAESDecryptASym.sql" />
+    <Build Include="dbo\Functions\fnAESEncryptASym.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESDecryptASym.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESEncryptASym.sql" />
+    <None Include="Scripts\Post-Deployment\EM\038_UpdateEncryptionUsed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
