@@ -4947,6 +4947,8 @@
     <Build Include="dbo\Stored Procedures\uspAESDecryptASym.sql" />
     <Build Include="dbo\Stored Procedures\uspAESEncryptASym.sql" />
     <None Include="Scripts\Post-Deployment\EM\038_UpdateEncryptionUsed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnAdjustStockFromSAP.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromSAP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
