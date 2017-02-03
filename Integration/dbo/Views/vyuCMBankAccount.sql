@@ -17,8 +17,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intCurrencyId
 				,i21.intBankAccountType
 				,i21.strContact
-				,i21.strBankAccountNo
-				,i21.strRTN
+				,ISNULL(dbo.fnAESDecryptASym(i21.strBankAccountNo),strBankAccountNo) AS strBankAccountNo
+				,ISNULL(dbo.fnAESDecryptASym(i21.strRTN),strRTN) AS strRTN
 				,i21.strAddress
 				,i21.strZipCode
 				,i21.strCity
@@ -43,8 +43,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.strEFTCompanyId
 				,i21.strEFTBankName
 				,i21.strMICRDescription
-				,i21.strMICRRoutingNo
-				,i21.strMICRBankAccountNo
+				,ISNULL(dbo.fnAESDecryptASym(i21.strMICRRoutingNo),strMICRRoutingNo) AS strMICRRoutingNo
+				,ISNULL(dbo.fnAESDecryptASym(i21.strMICRBankAccountNo),strMICRBankAccountNo) AS strMICRBankAccountNo
 				,i21.intMICRBankAccountSpacesCount
 				,i21.intMICRBankAccountSpacesPosition
 				,i21.intMICRCheckNoSpacesCount
