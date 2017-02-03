@@ -14,6 +14,8 @@ strUnitMeasure,strCommodityCode,strLocationName,strCurrency,substring(fm.strFutu
 strFutureMonth strFutureMonthYearWOSymbol,
  substring(om.strOptionMonth,0,4) + '(' +fom.strOptSymbol+')'+convert(nvarchar,om.intYear)  strOptionMonthYear,
   		strOptionMonth strOptionMonthYearWOSymbol
+		,(SELECT TOP 1 chn.strContractNumber FROM tblCTContractHeader chn where chn.intContractHeaderId = cd.intContractHeaderId)  + ' - ' + CONVERT(varchar,cd.intContractSeq) as strContractSeq,
+		ch.strContractNumber strContractNumber
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].tblEMEntity AS e1 ON ft.[intTraderId] = e1.[intEntityId]
@@ -31,3 +33,6 @@ LEFT OUTER JOIN [dbo].[tblCMBank] AS b ON ft.[intBankId] = b.[intBankId]
 LEFT OUTER JOIN [dbo].[tblCMBankAccount] AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
 LEFT OUTER JOIN [dbo].[tblSMCurrency] AS bc ON ft.[intCurrencyId] = bc.[intCurrencyID]
 LEFT OUTER JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN [dbo].[tblRKAssignFuturesToContractSummary] AS cs ON cs.[intFutOptAssignedId] = ft.[intFutOptTransactionId]
+LEFT OUTER JOIN [dbo].[tblCTContractHeader] AS ch ON ch.[intContractHeaderId] = cs.[intContractHeaderId]
+LEFT OUTER JOIN [dbo].[tblCTContractDetail] AS cd ON cd.[intContractDetailId] = cs.[intContractDetailId] 

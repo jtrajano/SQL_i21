@@ -4949,6 +4949,7 @@
     <None Include="Scripts\Post-Deployment\EM\038_UpdateEncryptionUsed.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnAdjustStockFromSAP.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromSAP.sql" />
+    <Build Include="dbo\Views\vyuRKGetContractBalanceLotForHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

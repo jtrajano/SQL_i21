@@ -88,8 +88,8 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
  SELECT      
 	 @intAssignFuturesToContractHeaderId,    
 	 1,  
-	intContractHeaderId,
-	intContractDetailId,
+	case when isnull(intContractHeaderId,0) = 0 then null else intContractHeaderId end intContractHeaderId,
+	case when isnull(intContractDetailId,0) = 0 then null else intContractDetailId end intContractDetailId,
 	dtmMatchDate,
 	intFutOptTransactionId,
 	dblAssignedLots,
