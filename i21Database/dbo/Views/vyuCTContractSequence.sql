@@ -19,7 +19,7 @@ AS
 			CL.strLocationName,		IM.strShortName,		PM.strUnitMeasure			AS	strPriceUOM,			
 			CU.intMainCurrencyId,	CU.strCurrency,			PU.intUnitMeasureId			AS	intPriceUnitMeasureId,
 			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,
-			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')						AS	strFutureMonth,
+			IC.strContractItemNo,	IC.strContractItemName,	REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')AS	strFutureMonth,
 			SL.strName AS strStorageLocation,				UL.strSubLocationName		AS	strSubLocation,
 			PG.strName	AS strPurchasingGroup,				CE.strEntityNo				AS	strCreatedByNo,
 
@@ -51,7 +51,8 @@ AS
 	JOIN	tblICCommodity				CO	ON	CO.intCommodityId			=	CH.intCommodityId			LEFT
 			
 	JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
-	JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
+	JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT
+	JOIN	tblICItemContract			IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT	
 	JOIN	tblICItem					IM	ON	IM.intItemId				=	CD.intItemId				LEFT
 	JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId				=	CD.intItemUOMId				LEFT
 	JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId			=	QU.intUnitMeasureId			LEFT

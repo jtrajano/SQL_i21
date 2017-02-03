@@ -15,6 +15,7 @@
 	[dtmStartDate] [datetime],
 	[dtmEndDate] [datetime],
 	[dtmPlannedAvailabilityDate] [datetime],
+	[intItemContractId] [int],
 	[intItemId] [int],
 	strOrigin	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	[dblQuantity] [numeric](18, 6),

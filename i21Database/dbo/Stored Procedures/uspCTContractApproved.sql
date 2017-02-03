@@ -22,7 +22,8 @@ BEGIN TRY
 			dblBasis,				dblCashPrice,			intCurrencyId,
 			intPriceUOMId,			intSubLocationId,		intStorageLocationId,
 			intPurchasingGroupId,	intApprovedById,		dtmApproved,
-			strOrigin,				dblNetWeight,			intNetWeightUOMId
+			strOrigin,				dblNetWeight,			intNetWeightUOMId,
+			intItemContractId
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -54,7 +55,8 @@ BEGIN TRY
 			GETDATE(),
 			OG.strCountry AS strOrigin,
 			CD.dblNetWeight,
-			WU.intUnitMeasureId AS intNetWeightUOMId
+			WU.intUnitMeasureId AS intNetWeightUOMId,
+			CD.intItemContractId
 
 	FROM	tblCTContractDetail		CD 
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
@@ -66,6 +68,7 @@ BEGIN TRY
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractDetailId	=	CASE WHEN @intContractDetailId IS NULL THEN CD.intContractDetailId ELSE @intContractDetailId END
+	AND		CD.intContractStatusId	<> 2
 
 	SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY
 

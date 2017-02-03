@@ -55,7 +55,7 @@ BEGIN TRY
 				strPriceUOM,				strRowState,				dtmContractDate,	dtmStartDate,	
 				dtmEndDate,					dtmFeedCreated,				strSubmittedBy,		strSubmittedByNo,
 				strOrigin,					dblNetWeight,				strNetWeightUOM,	strVendorAccountNum,
-				strTermCode
+				strTermCode,				strContractItemNo,			strContractItemName
 		)
 		SELECT	intContractHeaderId,		intContractDetailId,		strCommodityCode,	strCommodityDesc,
 				strContractBasis,			strContractBasisDesc,		strSubLocation,		strCreatedBy,
@@ -66,7 +66,7 @@ BEGIN TRY
 				strPriceUOM,				@strRowState,				dtmContractDate,	dtmStartDate,	
 				dtmEndDate,					GETDATE(),					strSubmittedBy,		strSubmittedByNo,
 				strOrigin,					dblNetWeight,				strNetWeightUOM,	strVendorAccountNum,
-				strTermCode
+				strTermCode,				strContractItemNo,			strContractItemName
 		FROM	vyuCTContractFeed
 		WHERE	intContractDetailId = @intContractDetailId
 
@@ -78,6 +78,7 @@ BEGIN TRY
 		WHERE	intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId <> @intApprovedContractId 
 		ORDER BY intApprovedContractId DESC
 		SELECT @strRowState= 'Modified'
+		DELETE FROM tblCTApprovedContract WHERE intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId	< @intPrevApprovedContractId
 		GOTO INSERTBLOCK
 		/*
 		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intApprovedContractId,'intApprovedById,dtmApproved', @strModifiedColumns OUTPUT
