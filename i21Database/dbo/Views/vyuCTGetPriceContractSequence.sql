@@ -39,49 +39,41 @@ AS
 
 		UNION ALL
 
-		SELECT 	CD.intContractHeaderId,
+		SELECT 	CH.intContractHeaderId,
 				CAST (NULL AS INT)				AS	intContractDetailId, 
-				MAX(CD.intFutureMarketId)		AS	intOriginalFutureMarketId,
-				MAX(CD.intFutureMonthId)		AS	intOriginalFutureMonthId,
+				CH.intFutureMarketId			AS	intOriginalFutureMarketId,
+				CH.intFutureMonthId				AS	intOriginalFutureMonthId,
 				CAST (NULL AS NUMERIC(18,6))	AS	dblOriginalBasis,
-				SUM(CD.dblNoOfLots)				AS	dblTotalLots,
+				CH.dblNoOfLots					AS	dblTotalLots,
 				CAST(NULL AS NUMERIC(18,6))		AS	dblAdditionalCost,
 				CU.intCommodityUnitMeasureId	AS	intFinalPriceUOMId,
-				CAST(NULL AS NUMERIC(18, 6))	AS	dblQuantity,
+				CH.dblQuantity,
 				CAST (NULL AS INT)				AS	intItemUOMId,
-				QM.strUnitMeasure				AS	strPriceUOM,
-				CAST (NULL AS NVARCHAR(40))		AS	strItemUOM,
-				MAX(CD.strFutMarketName)		AS	strFutureMarket,
-				MAX(strFutureMonth)				AS	strFutureMonth,
+				PM.strUnitMeasure				AS	strPriceUOM,
+				QM.strUnitMeasure				AS	strItemUOM,
+				MA.strFutMarketName				AS	strFutureMarket,
+				MO.strFutureMonth				AS	strFutureMonth,
 				CAST (NULL AS INT)				AS	intContractSeq,
-				strContractType,
-				strEntityName,
-				CD.strContractNumber,					
+				CT.strContractType,
+				EY.strName						AS	strEntityName,
+				CH.strContractNumber,					
 				CY.strCurrency					AS	strMarketCurrency,
-				UM.strUnitMeasure				AS	strMarketUOM,				
-				CD.ysnMultiplePriceFixation				
+				PM.strUnitMeasure				AS	strMarketUOM,				
+				CH.ysnMultiplePriceFixation				
 
-		FROM	vyuCTContractSequence		CD	
-		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CD.intCommodityId AND CU.ysnDefault = 1 
-		JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId		=	CU.intUnitMeasureId
-		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	(
-																					SELECT  TOP 1 DT.intFutureMarketId  
-																					FROM	tblCTContractDetail DT 
-																					WHERE	DT.intContractHeaderId = CD.intContractHeaderId
-																				)
+		FROM	tblCTContractHeader			CH	
+		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
+		JOIN	tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
+		--JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CH.intCommodityId AND CU.ysnDefault = 1 
+		--JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId		=	CU.intUnitMeasureId
+		JOIN	tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
+		JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId
+		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CH.intFutureMarketId
+		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CH.intCommodityId 
+												AND CU.intUnitMeasureId		=	MA.intUnitMeasureId
+		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId		=	CH.intFutureMonthId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
-		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId		=	MA.intUnitMeasureId	
-		WHERE	ISNULL(CD.ysnMultiplePriceFixation,0) = 1
-		GROUP BY	CD.intContractHeaderId,
-					CU.intCommodityUnitMeasureId,
-					QM.strUnitMeasure,
-					strContractType,
-					strEntityName,
-					CD.strContractNumber,					
-					CY.strCurrency,
-					UM.strUnitMeasure,				
-					CD.ysnMultiplePriceFixation
+		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	MA.intUnitMeasureId	
+		WHERE	ISNULL(ysnMultiplePriceFixation,0) = 1
+		AND		CH.intContractHeaderId	IN	(SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId <> 2)
 	)t
-
-
-

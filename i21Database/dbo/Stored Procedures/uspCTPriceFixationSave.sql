@@ -149,6 +149,17 @@ BEGIN TRY
 
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
+
+				UPDATE	CH
+				SET		CH.intFutureMarketId	=	PF.intOriginalFutureMarketId,
+						CH.intFutureMonthId		=	PF.intOriginalFutureMonthId,
+						CH.intPricingTypeId		=	2,
+						CH.dblFutures			=	NULL,
+						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+				FROM	tblCTContractHeader		CH
+				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
 				SELECT	@intContractDetailId = MIN(intContractDetailId)
 				FROM	tblCTContractDetail 
 				WHERE	intContractHeaderId = @intContractHeaderId 
@@ -314,6 +325,17 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+			IF	@ysnMultiplePriceFixation = 1
+			BEGIN
+				UPDATE	CH
+				SET		CH.intFutureMarketId	=	@intNewFutureMarketId,
+						CH.intFutureMonthId		=	@intNewFutureMonthId,
+						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+				FROM	tblCTContractHeader		CH
+				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+			END
 		END
 		ELSE
 		BEGIN
@@ -325,6 +347,17 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+			IF	@ysnMultiplePriceFixation = 1
+			BEGIN
+				UPDATE	CH
+				SET		CH.intFutureMarketId	=	PF.intOriginalFutureMarketId,
+						CH.intFutureMonthId		=	PF.intOriginalFutureMonthId,
+						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+				FROM	tblCTContractHeader		CH
+				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+			END
 		END
 
 		IF	@dblLotsUnfixed = 0
@@ -342,6 +375,17 @@ BEGIN TRY
 			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+			IF	@ysnMultiplePriceFixation = 1
+			BEGIN
+				UPDATE	CH
+				SET		CH.intPricingTypeId		=	1,
+						CH.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
+						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+				FROM	tblCTContractHeader		CH
+				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+			END
 		END
 		ELSE
 		BEGIN
@@ -354,6 +398,17 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+			IF	@ysnMultiplePriceFixation = 1
+			BEGIN
+				UPDATE	CH
+				SET		CH.intPricingTypeId		=	2,
+						CH.dblFutures			=	NULL,
+						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+				FROM	tblCTContractHeader		CH
+				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+			END
 		END
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId

@@ -186,39 +186,23 @@ BEGIN
 
       SET @intFutOptTransactionId = SCOPE_IDENTITY()
 
-		SET @strXml = '<root><Transaction>';
-		SET @strXml = @strXml + '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
-		SET @strXml = @strXml + '<intContractDetailId>#ID#</intContractDetailId>'
-		SET @strXml = @strXml + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
-		SET @strXml = @strXml + '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
-		SET @strXml = @strXml + '<intHedgedLots>#LOT#</intHedgedLots>'
-		SET @strXml = @strXml + '<dblAssignedLots>0</dblAssignedLots>'
-		SET @strXml = @strXml + '<ysnIsHedged>1</ysnIsHedged>'
-		SET @strXml = @strXml + '</Transaction></root>'
-
 	  SELECT @ysnMultiplePriceFixation = ysnMultiplePriceFixation FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
-	  IF @ysnMultiplePriceFixation = 1 
-	  BEGIN
-		
-		SELECT  @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
-		WHILE ISNULL(@intContractDetailId,0) > 0
-		BEGIN
-			SELECT @dblNoOfLots = dblNoOfLots FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-			SET @strXmlNew = REPLACE(@strXml,'#ID#',LTRIM(@intContractDetailId))
-			SET @strXmlNew = REPLACE(@strXmlNew,'#LOT#',LTRIM(@dblNoOfLots))
-			EXEC uspRKAssignFuturesToContractSummarySave @strXmlNew
+	SET @strXml = '<root><Transaction>';
+	IF ISNULL(@ysnMultiplePriceFixation,0) = 1
+		SET @strXml = @strXml + '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
+	IF ISNULL(@ysnMultiplePriceFixation,0) = 0
+		SET @strXml = @strXml + '<intContractDetailId>'+LTRIM(@intContractDetailId)+'</intContractDetailId>'
+	SET @strXml = @strXml + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
+	SET @strXml = @strXml + '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
+	SET @strXml = @strXml + '<intHedgedLots>'+LTRIM(@intNoOfContract)+'</intHedgedLots>'
+	SET @strXml = @strXml + '<dblAssignedLots>0</dblAssignedLots>'
+	SET @strXml = @strXml + '<ysnIsHedged>1</ysnIsHedged>'
+	SET @strXml = @strXml + '</Transaction></root>'
 
-			SELECT  @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
-		END
-	  END
-	  ELSE
-	  BEGIN
-			SET @strXmlNew = REPLACE(@strXml,'#ID#',LTRIM(@intContractDetailId))
-			SET @strXmlNew = REPLACE(@strXmlNew,'#LOT#',LTRIM(@intNoOfContract))
-			EXEC uspRKAssignFuturesToContractSummarySave @strXmlNew
-	  END
+
+	  EXEC uspRKAssignFuturesToContractSummarySave @strXml
 END
   
 END TRY    

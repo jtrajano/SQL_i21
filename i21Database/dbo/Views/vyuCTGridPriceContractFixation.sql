@@ -2,12 +2,12 @@
 
 AS 
 
-	WITH cteContractDetail AS
-	(
-		SELECT	ROW_NUMBER() OVER (PARTITION BY intContractHeaderId ORDER BY intContractSeq DESC) AS intRowNum,
-				DT.intContractHeaderId, DT.intFutureMarketId, DT.intFutureMonthId, strFutMarketName, strFutureMonth, strContractType, strEntityName, strContractNumber, ysnMultiplePriceFixation
-		FROM	vyuCTContractSequence DT 
-	)
+	--WITH cteContractDetail AS
+	--(
+	--	SELECT	ROW_NUMBER() OVER (PARTITION BY intContractHeaderId ORDER BY intContractSeq DESC) AS intRowNum,
+	--			DT.intContractHeaderId, DT.intFutureMarketId, DT.intFutureMonthId, strFutMarketName, strFutureMonth, strContractType, strEntityName, strContractNumber, ysnMultiplePriceFixation
+	--	FROM	vyuCTContractSequence DT 
+	--)
 
 	SELECT * FROM
 	(
@@ -92,29 +92,34 @@ AS
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
 
+				CH.dblQuantity,
+				PM.strUnitMeasure		AS	strPriceUOM,
+				QM.strUnitMeasure		AS	strItemUOM,
 				NULL,
-				QM.strUnitMeasure AS strPriceUOM,
+				CH.intFutureMarketId,
+				MA.strFutMarketName		AS	strFutureMarket,
+				CH.intFutureMonthId,
+				MO.strFutureMonth,
 				NULL,
-				NULL,
-				CD.intFutureMarketId,
-				CD.strFutMarketName AS strFutureMarket,
-				CD.intFutureMonthId,
-				CD.strFutureMonth,
-				NULL,
-				CD.strContractType,
-				CD.strEntityName,
-				CD.strContractNumber,
-				NULL	AS dblConvertedBasis,
-				CY.strCurrency	AS strMarketCurrency,
-				UM.strUnitMeasure AS strMarketUOM,
-				CD.ysnMultiplePriceFixation
+				CT.strContractType,
+				EY.strName				AS	strEntityName,
+				CH.strContractNumber,
+				NULL					AS	dblConvertedBasis,
+				CY.strCurrency			AS	strMarketCurrency,
+				UM.strUnitMeasure		AS	strMarketUOM,
+				CH.ysnMultiplePriceFixation
 
 		FROM	tblCTPriceFixation	PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	PF.intFinalPriceUOMId 
-		JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId		=	CU.intUnitMeasureId
-		JOIN	cteContractDetail			CD	ON	CD.intContractHeaderId	=	PF.intContractHeaderId AND CD.intRowNum = 1
-		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
+		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	CU.intUnitMeasureId
+		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	PF.intContractHeaderId
+		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CH.intFutureMarketId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId		=	MA.intUnitMeasureId	
-		WHERE	ISNULL(CD.ysnMultiplePriceFixation,0) = 1
+		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId		=	CH.intFutureMonthId
+		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
+		JOIN	tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
+		JOIN	tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
+		JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId
+		WHERE	ISNULL(CH.ysnMultiplePriceFixation,0) = 1
 	)t
