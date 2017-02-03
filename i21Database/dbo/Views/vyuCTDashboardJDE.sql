@@ -1,0 +1,73 @@
+﻿CREATE VIEW [dbo].[vyuCTDashboardJDE]
+AS
+SELECT 
+	 CSeq.intContractDetailId
+	,CSeq.strContractNumber
+	,CSeq.intContractSeq
+	,CSeq.strEntityName AS strSupplier
+	,PR.strName AS strProducer
+	,CSeq.dtmStartDate
+	,CSeq.dtmEndDate
+	,CD.strLoadingPointType
+	,LP.strCity AS strLoadingPoint
+	,CD.strDestinationPointType
+	,LP.strCity AS strDestinationPoint
+	,DC.strCity AS strDestinationCity
+	,CD.strShippingTerm
+	,SL.strName AS strShippingLine
+	,CD.strVessel
+	,Shp.strName AS strShipper
+	,SB.strSubLocationName
+	,SLoc.strName AS strStorageLocationName
+	,CSeq.dblQuantity
+	,CSeq.strItemUOM
+	,CSeq.dblNetWeight
+	,dbo.fnCTConvertQuantityToTargetItemUOM(CSeq.intItemId, U7.intUnitMeasureId, U8.intUnitMeasureId, CSeq.dblNetWeight) [NetWeight-MT]
+	,CSeq.strNetWeightUOM
+	,CD.strFixationBy
+	,CSeq.strPricingType
+	,CSeq.strCurrency
+	,CSeq.strFutMarketName
+	,CSeq.strFutureMonth
+	,CSeq.dblFutures
+	,CSeq.dblBasis
+	,CSeq.dblCashPrice
+	,CD.dblTotalCost
+	,FR.strOrigin
+	,PG.strName AS strPurchasingGroup
+	,CSeq.strContractType
+	,CD.intNumberOfContainers
+	,CSeq.strItemNo
+	,ProductType.strDescription AS strProductType
+	,CS.strContractStatus
+	,(CSeq.dblQuantity - CSeq.dblBalance) AS dblQtyShortClosed
+	,FT.strFreightTerm
+	,SV.strShipVia
+	,Book.strBook
+	,SubBook.strSubBook
+	,CD.strInvoiceNo
+	,IC.strCertificationName
+FROM vyuCTContractSequence CSeq
+JOIN tblCTContractDetail CD ON CD.intContractDetailId = CSeq.intContractDetailId
+JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CSeq.intContractHeaderId
+JOIN tblICItem Item ON Item.intItemId = CSeq.intItemId
+LEFT JOIN tblEMEntity PR ON PR.intEntityId = CH.intProducerId
+LEFT JOIN tblSMCity LP ON LP.intCityId = CD.intLoadingPortId
+LEFT JOIN tblSMCity DC ON DC.intCityId = CD.intDestinationCityId
+LEFT JOIN tblSMCompanyLocationSubLocation SB ON SB.intCompanyLocationSubLocationId = CD.intSubLocationId
+LEFT JOIN tblICStorageLocation SLoc ON SLoc.intStorageLocationId = CD.intStorageLocationId
+LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CSeq.intContractStatusId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
+LEFT JOIN tblSMShipVia SV ON SV.[intEntityShipViaId] = CD.intShipViaId
+LEFT JOIN tblEMEntity SL ON SL.intEntityId = CD.intShippingLineId
+LEFT JOIN tblEMEntity Shp ON Shp.intEntityId = CD.intShipperId
+LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+LEFT JOIN tblCTFreightRate FR ON FR.intFreightRateId = CD.intFreightRateId
+LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId
+LEFT JOIN tblCTBook Book ON Book.intBookId = CSeq.intBookId
+LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = CSeq.intSubBookId
+LEFT JOIN tblCTContractCertification CC ON CC.intContractDetailId = CSeq.intContractDetailId
+LEFT JOIN tblICCertification IC ON IC.intCertificationId = CC.intCertificationId
+LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = CSeq.intNetWeightUOMId
+LEFT JOIN tblICUnitMeasure U7 ON U7.intUnitMeasureId = WU.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure U8 ON 1 = 1 AND U8.strUnitMeasure = 'Metric Ton'

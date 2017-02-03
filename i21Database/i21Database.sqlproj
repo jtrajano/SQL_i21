@@ -4951,6 +4951,7 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromSAP.sql" />
     <Build Include="dbo\Views\vyuRKGetContractBalanceLotForHeader.sql" />
     <Build Include="dbo\User Defined Types\ETTranslateRPToReceivePaymentTable.sql" />
+    <Build Include="dbo\Views\vyuCTDashboardJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
