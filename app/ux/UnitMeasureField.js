@@ -19,12 +19,37 @@ Ext.define('Inventory.ux.UnitMeasureField', {
     border: 0,
 
     publishes: [
-        'unitMeasure'
+        'getUnitMeasure',
+        'setUnitMeasure',
+        'getQuantity',
+        'setQuantity'
     ],
 
     config: {
-        unitMeasure: null,
-        quantity: 0.00
+         unitMeasure: null,
+         quantity: 0.00
+    },
+
+    getUnitMeasure: function() {
+        if(this.viewModel)
+            return this.viewModel.get('unitMeasure');
+        return null;
+    },
+
+    setUnitMeasure: function(value) {
+        if(this.viewModel)
+            this.viewModel.set('unitMeasure', value);
+    },
+
+    getQuantity: function() {
+        if(this.viewModel)
+            return this.viewModel.get('quantity');
+        return null;
+    },
+
+    setQuantity: function(value) {
+        if(this.viewModel)
+            this.viewModel.set('quantity', value);
     },
 
     initComponent: function(options) {
@@ -33,16 +58,31 @@ Ext.define('Inventory.ux.UnitMeasureField', {
         var txtQuantity = this.down('#_001txtQuantity');
         var cboUnitMeasure = this.down('#_001cboUnitMeasure');
         var store = Ext.create('Inventory.store.BufferedUnitMeasure', { pageSize: 50 });
+        if(this.defaultFilters)
+            cboUnitMeasure.defaultFilters = this.defaultFilters;
         cboUnitMeasure.bindStore(store);
         store.load();
+        var uomId = parseInt(this.viewModel.get('unitMeasure'));
+        cboUnitMeasure.setValue(uomId);
+        var uom = cboUnitMeasure.findRecordByValue(uomId);
+        if(uom && uom.get('strUnitMeasure'))
+            cboUnitMeasure.setRawValue(uom.get('strUnitMeasure'));
+        else
+            cboUnitMeasure.setRawValue(uomId);
+        cboUnitMeasure.on('select', this.onUnitMeasurementChange);
+    },
 
-        if(this.config.unitMeasure) {
-            var qty = this.quantity;
-            var uom = this.unitMeasure;
-            txtQuantity.setValue(qty);
-            cboUnitMeasure.setRawValue(uom);
+    onUnitMeasurementChange: function(combo, records, eOptss) {
+        var txtQuantity = combo.up('window').down('#_001txtQuantity');
+        if(records && records.length > 0) {
+            var decimal = records[0].get('intDecimalPlaces');
+            if(!decimal)
+                decimal = 6;
+            txtQuantity.setDecimalPrecision(decimal);
+            txtQuantity.setDecimalToDisplay(decimal);
+            var val = txtQuantity.getValue();
+            txtQuantity.setValue(val);
         }
-        console.log(options);
     },
 
     items: [
@@ -55,12 +95,15 @@ Ext.define('Inventory.ux.UnitMeasureField', {
             },
             items: [
                 {
-                    xtype: 'currencynumberfield',
-                    decimalPrecision: 4,
+                    xtype: 'numberfield',
+                    decimalPrecision: 6,
                     flex: 3,
                     itemId: '_001txtQuantity',
                     margin: '0 5 0 0',
                     fieldLabel: 'Quantity',
+                    bind: {
+                        value: '{quantity}'
+                    },
                     labelWidth: 80,
                 },
                 {
@@ -102,10 +145,14 @@ Ext.define('Inventory.ux.UnitMeasureField', {
                             flex: 1
                         }
                     ],
+                    dataIndex: 'intUnitMeasureId',
                     displayField: 'strUnitMeasure',
                     valueField: 'intUnitMeasureId',
                     labelWidth: 60,
                     hideLabel: true,
+                    bind: {
+                        value: '{unitMeasure}'
+                    }
                 }
             ]
         }

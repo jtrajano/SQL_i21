@@ -140,8 +140,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 xtype: 'unitmeasurefield',
                                                 itemId: 'txtum',
                                                 fieldLabel: 'Unit Measures',
-                                                labelWidth: 80,
-                                                bind: { unitMeasure: 'LB'}
+                                                labelWidth: 80
                                             },
                                             {
                                                 xtype: 'textfield',

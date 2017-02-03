@@ -50,7 +50,8 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             },
 
             txtum: {
-                unitMeasure: '{getUOM}'
+                unitMeasure: '{current.intUnitMeasureId}',
+                quantity: '{getQuantity}'
             },
 
             grdConversion: {
