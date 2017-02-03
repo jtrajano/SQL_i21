@@ -73,11 +73,12 @@ BEGIN
 	WHERE	strReceiptType = @RECEIPT_TYPE_INVENTORY_RETURN
 			AND ISNULL(@ysnPost, 0) = 1
 
-	-- Negate the Qty if unposting the transaction. 
+	-- Negate the Qty if unposting the transaction, except for Inventory Return 
 	UPDATE	@ItemsFromInventoryReceipt
 	SET		dblQty = -dblQty 
 			,intLoadReceive = -intLoadReceive 
 	WHERE	ISNULL(@ysnPost, 0) = 0 
+			AND strReceiptType <> @RECEIPT_TYPE_INVENTORY_RETURN 
 END
 
 -- Get the receipt-type and source-type from tblICInventoryReceipt
