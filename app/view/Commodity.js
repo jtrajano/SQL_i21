@@ -587,21 +587,22 @@ Ext.define('Inventory.view.Commodity', {
                                                                 dataIndex: 'strFieldName',
                                                                 text: 'Unit Qty',
                                                                 flex: 3,
-                                                                //format: '0,000.000000##',
                                                                 renderer: function(value, cell, record) {
-                                                                    var decimals = record.data.tblICUnitMeasure.intDecimalPlaces;
-                                                                    if(iRely.Functions.isEmpty(decimals))
-                                                                        decimals = 2;
-                                                                    if(decimals > 0) {
-                                                                        var format = "0,000.";
-                                                                        for(var i = 0; i < decimals; i++)
+                                                                    var decimals = 2;
+                                                                    if(record.data.tblICUnitMeasure) {
+                                                                        if(record.data.tblICUnitMeasure.data)
+                                                                            decimals = record.data.tblICUnitMeasure.data.intDecimalPlaces;
+                                                                        else
+                                                                            decimals = record.data.tblICUnitMeasure.intDecimalPlaces;
+                                                                        if(iRely.Functions.isEmpty(decimals))
+                                                                            decimals = 2;
+                                                                        var format = "";
+                                                                        for (var i = 0; i < decimals; i++)
                                                                             format += "0";
-                                                                        format += "##";
-                                                                        var formatted = Ext.util.Format.number(value, format);
-                                                                        var result = parseFloat(formatted);
-                                                                        return result;
+                                                                        var formatted = numeral(value).format('0,0.[' + format + ']');
+                                                                        return formatted;
                                                                     }
-                                                                    return parseInt(value);
+                                                                    return value;
                                                                 },
                                                                 editor: {
                                                                     xtype: 'numberfield',

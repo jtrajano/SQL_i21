@@ -309,6 +309,29 @@ Ext.define('Inventory.view.CommodityViewController', {
         }
     },
 
+    onUOMUnitQty: function(editor, newValue, oldValue) {
+        var selection = editor.up('grid').getSelectionModel().selected;
+        var decimals = 2;
+
+        if(selection && selection.items && selection.items.length > 0) {
+            if(selection.items[0].data.tblICUnitMeasure) {
+                if(selection.items[0].data.tblICUnitMeasure.data)
+                    decimals = selection.items[0].data.tblICUnitMeasure.data.intDecimalPlaces;
+                else
+                    decimals = selection.items[0].data.tblICUnitMeasure.intDecimalPlaces;
+                    
+                if(iRely.Functions.isEmpty(decimals))
+                    decimals = 2;
+                var format = "";
+                for (var i = 0; i < decimals; i++)
+                    format += "0";
+                
+                var formatted = numeral(newValue).format('0,0.[' + format + ']');
+                editor.setValue(formatted);
+            }
+        }
+    },
+
     onUOMSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -324,13 +347,12 @@ Ext.define('Inventory.view.CommodityViewController', {
             var colUOMUnitQty = _.findWhere(grid.getColumns(), { itemId: 'colUOMUnitQty' });
             if(colUOMUnitQty) {
                 var editor = colUOMUnitQty.getEditor();
-                var decimals = records[0].get('intDecimalPlaces');
-                editor.setDecimalPrecision(decimals);
-                editor.setDecimalToDisplay(decimals);
-                var format = "0,000.";
-                for(var i = 0; i < decimals; i++)
+                var decimals = records[0].get('intDecimalPlaces');                
+                var format = "";
+                for (var i = 0; i < decimals; i++)
                     format += "0";
-                editor.format = format + "##";
+                var formatted = numeral(current.get('dblUnitQty')).format('0,0.[' + format + ']');
+                editor.setValue(formatted);
             }
 
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
@@ -479,6 +501,9 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
             "#cboAccountId": {
                 select: this.onAccountSelect
+            },
+            "#txtUOMUnitQty": {
+                change: this.onUOMUnitQty
             },
             "#colUOMStockUnit": {
                 beforecheckchange: this.onUOMStockUnitCheckChange
