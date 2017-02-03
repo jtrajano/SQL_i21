@@ -49,11 +49,6 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                 store: '{decimalPlaces}'
             },
 
-            txtum: {
-                unitMeasure: '{current.intUnitMeasureId}',
-                quantity: '{getQuantity}'
-            },
-
             grdConversion: {
                 colOtherUOM: {
                     dataIndex: 'strUnitMeasure',

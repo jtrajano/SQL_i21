@@ -76,15 +76,6 @@ Ext.define('Inventory.view.InventoryUOMViewModel', {
     },
 
     formulas: {
-        getUOM: function(get) {
-            //return { quantity: 2345, unitMeasure: 'LB' };
-            return 4;
-        },
-
-        getQuantity: function(get) {
-            return 97648782.566;
-        },
-
         getReadUOMApi: function(get) {
             switch(get('current.strUnitType')){
                 case 'Area':

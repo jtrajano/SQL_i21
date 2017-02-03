@@ -55,8 +55,8 @@ Ext.define('Inventory.ux.UnitMeasureField', {
     initComponent: function(options) {
         this.callParent(arguments);
     
-        var txtQuantity = this.down('#_001txtQuantity');
-        var cboUnitMeasure = this.down('#_001cboUnitMeasure');
+        var txtQuantity = this.down('numberfield');
+        var cboUnitMeasure = this.down('gridcombobox');
         var store = Ext.create('Inventory.store.BufferedUnitMeasure', { pageSize: 50 });
         if(this.defaultFilters)
             cboUnitMeasure.defaultFilters = this.defaultFilters;
@@ -73,7 +73,7 @@ Ext.define('Inventory.ux.UnitMeasureField', {
     },
 
     onUnitMeasurementChange: function(combo, records, eOptss) {
-        var txtQuantity = combo.up('window').down('#_001txtQuantity');
+        var txtQuantity = combo.up('window').down('numberfield');
         if(records && records.length > 0) {
             var decimal = records[0].get('intDecimalPlaces');
             if(!decimal)
@@ -98,7 +98,6 @@ Ext.define('Inventory.ux.UnitMeasureField', {
                     xtype: 'numberfield',
                     decimalPrecision: 6,
                     flex: 3,
-                    itemId: '_001txtQuantity',
                     margin: '0 5 0 0',
                     fieldLabel: 'Quantity',
                     bind: {
@@ -109,37 +108,31 @@ Ext.define('Inventory.ux.UnitMeasureField', {
                 {
                     xtype: 'gridcombobox',
                     flex: 1,
-                    itemId: '_001cboUnitMeasure',
                     margin: '0 0 0 0',
                     fieldLabel: '',
                     columns: [
                         { 
-                            itemId: '_001colUnitMeasureId',
                             dataIndex: 'intUnitMeasureId',
                             text: 'Id',
                             flex: 1,
                             hidden: true
                         },
                         { 
-                            itemId: '_001colUnitMeasure',
                             dataIndex: 'strUnitMeasure',
                             text: 'Unit Measure',
                             flex: 1
                         },
                         { 
-                            itemId: '_001colSymbol',
                             dataIndex: 'strSymbol',
                             text: 'Symbol',
                             flex: 1
                         },
                         { 
-                            itemId: '_001colUnitType',
                             dataIndex: 'strUnitType',
                             text: 'Type',
                             flex: 1
                         },
                         { 
-                            itemId: '_001colDecimalPlaces',
                             dataIndex: 'intDecimalPlaces',
                             text: 'Decimal Places',
                             flex: 1

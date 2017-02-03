@@ -567,6 +567,12 @@ Ext.define('Inventory.view.Commodity', {
                                                                             dataType: 'string',
                                                                             text: 'Unit Type',
                                                                             flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'intDecimalPlaces',
+                                                                            dataType: 'int',
+                                                                            text: 'Decimals',
+                                                                            flex: 1
                                                                         }
                                                                     ],
                                                                     itemId: 'cboUOM',
@@ -581,9 +587,25 @@ Ext.define('Inventory.view.Commodity', {
                                                                 dataIndex: 'strFieldName',
                                                                 text: 'Unit Qty',
                                                                 flex: 3,
-                                                                format: '0,000.000000##',
+                                                                //format: '0,000.000000##',
+                                                                renderer: function(value, cell, record) {
+                                                                    var decimals = record.data.tblICUnitMeasure.intDecimalPlaces;
+                                                                    if(iRely.Functions.isEmpty(decimals))
+                                                                        decimals = 2;
+                                                                    if(decimals > 0) {
+                                                                        var format = "0,000.";
+                                                                        for(var i = 0; i < decimals; i++)
+                                                                            format += "0";
+                                                                        format += "##";
+                                                                        var formatted = Ext.util.Format.number(value, format);
+                                                                        var result = parseFloat(formatted);
+                                                                        return result;
+                                                                    }
+                                                                    return parseInt(value);
+                                                                },
                                                                 editor: {
                                                                     xtype: 'numberfield',
+                                                                    itemId: 'txtUOMUnitQty',
                                                                     fieldStyle: 'text-align:right',
                                                                     hideTrigger: true
                                                                 }

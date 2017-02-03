@@ -318,9 +318,21 @@ Ext.define('Inventory.view.CommodityViewController', {
         var plugin = grid.getPlugin('cepUOM');
         var current = plugin.getActiveRecord();
         var uomConversion = win.viewModel.storeInfo.uomConversion;
-
+        
         if (combo.column.itemId === 'colUOMCode')
         {
+            var colUOMUnitQty = _.findWhere(grid.getColumns(), { itemId: 'colUOMUnitQty' });
+            if(colUOMUnitQty) {
+                var editor = colUOMUnitQty.getEditor();
+                var decimals = records[0].get('intDecimalPlaces');
+                editor.setDecimalPrecision(decimals);
+                editor.setDecimalToDisplay(decimals);
+                var format = "0,000.";
+                for(var i = 0; i < decimals; i++)
+                    format += "0";
+                editor.format = format + "##";
+            }
+
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
             current.set('tblICUnitMeasure', records[0]);
 
