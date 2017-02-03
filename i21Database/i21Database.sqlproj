@@ -4954,6 +4954,8 @@
     <Build Include="dbo\Views\vyuCTDashboardJDE.sql" />
     <Build Include="dbo\Views\vyuTMDegreeReadingSeasonYear.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractUnSlice.sql" />
+    <Build Include="dbo\Views\vyuSMForex.sql" />
+    <Build Include="dbo\Functions\fnGetForexRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
