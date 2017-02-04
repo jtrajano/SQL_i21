@@ -4962,6 +4962,7 @@
     <Build Include="dbo\Tables\tblLGLoadLSPStg.sql" />
     <Build Include="dbo\Tables\tblLGLoadDetailLSPStg.sql" />
     <Build Include="dbo\Tables\tblLGLoadContainerLSPStg.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateLoadIntegrationLSPLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
