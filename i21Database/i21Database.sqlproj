@@ -4959,6 +4959,9 @@
     <Build Include="dbo\Stored Procedures\uspSMGetForexRate.sql" />
     <Build Include="dbo\Stored Procedures\uspLGLoadContractCopy.sql" />
     <Build Include="dbo\Stored Procedures\uspLGLoadContractSlice.sql" />
+    <Build Include="dbo\Tables\tblLGLoadLSPStg.sql" />
+    <Build Include="dbo\Tables\tblLGLoadDetailLSPStg.sql" />
+    <Build Include="dbo\Tables\tblLGLoadContainerLSPStg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
