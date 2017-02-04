@@ -4957,6 +4957,8 @@
     <Build Include="dbo\Views\vyuSMForex.sql" />
     <Build Include="dbo\Functions\fnGetForexRate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetForexRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGLoadContractCopy.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGLoadContractSlice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
