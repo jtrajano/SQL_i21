@@ -177,6 +177,22 @@ GO
 		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Arrange User Role Menus - Role Menu', 'Arrange User Role Menus - Role Menu', GETDATE())
 	END
+
+	/* ARRANGE SYSTEM MANAGER MENUS */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (System Manager)')
+	BEGIN
+		UPDATE RoleMenu SET intSort = MasterMenu.intSort
+		FROM tblSMUserRoleMenu RoleMenu
+		INNER JOIN tblSMMasterMenu MasterMenu ON RoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE intParentMenuID IN (1, 13)
+		
+		PRINT N'ARRANGE USER ROLE MENUS'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (System Manager)', 'Arrange User Role Menus - Role Menu (System Manager)', GETDATE())
+	END
+
+
+
 GO
 	/* REPLACE ActivityEmail-1 TO 1 */
 	--UPDATE tblSMTransaction SET strRecordNo = '0'
