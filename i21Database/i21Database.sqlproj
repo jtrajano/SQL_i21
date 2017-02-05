@@ -4967,6 +4967,23 @@
     <Build Include="dbo\Tables\tblCTNotification.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportAOP.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportAOPDetail.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptItemStage.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptStage.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptItemContainerStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageLSPReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessLSPReceipt.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptArchive.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptError.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptItemArchive.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptItemError.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptItemContainerArchive.sql" />
+    <Build Include="dbo\Tables\tblIPReceiptItemContainerError.sql" />
+    <Build Include="dbo\Tables\tblIPShipmentETAStage.sql" />
+    <Build Include="dbo\Tables\tblIPShipmentETAArchive.sql" />
+    <Build Include="dbo\Tables\tblIPShipmentETAError.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageLSPShipmentETA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessLSPShipmentETA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateLSPShipmentIDOC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
