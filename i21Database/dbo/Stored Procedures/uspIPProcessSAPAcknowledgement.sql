@@ -111,11 +111,11 @@ Begin
 			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo 
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
 
-			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='SUCCESS',strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
+			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success',strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'SUCCESS')
+			Values(@strMesssageType,'Success')
 		End
 
 		If @strStatus<>53 --Error
@@ -137,11 +137,11 @@ Begin
 
 		If @strStatus=53 --Success
 		Begin
-			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='SUCCESS'
+			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success'
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'SUCCESS')
+			Values(@strMesssageType,'Success')
 		End
 
 		If @strStatus<>53 --Error
@@ -171,13 +171,13 @@ Begin
 
 			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo
 
-			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='SUCCESS',strExternalShipmentNumber=@strParam
+			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success',strExternalShipmentNumber=@strParam
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
 
 			Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo
 
 			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'SUCCESS')
+			Values(@strMesssageType,'Success')
 		End
 
 		If @strStatus<>53 --Error
@@ -206,7 +206,7 @@ Begin
 			Update tblICInventoryReceiptItem  Set ysnExported=1 Where intInventoryReceiptId=@intReceiptId
 
 			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'SUCCESS')
+			Values(@strMesssageType,'Success')
 		End
 
 		If @strStatus<>53 --Error
@@ -223,10 +223,10 @@ Begin
 	Begin
 		If @strStatus=53 --Success
 		Begin
-			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage='SUCCESS' Where intMatchNo=@strParam AND ISNULL(strStatus,'')=''
+			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage='Success' Where intMatchNo=@strParam AND ISNULL(strStatus,'')=''
 
 			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'SUCCESS')
+			Values(@strMesssageType,'Success')
 		End
 
 		If @strStatus<>53 --Error
@@ -234,6 +234,32 @@ Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage=@strMessage Where intMatchNo=@strParam AND ISNULL(strStatus,'')=''
+
+			Insert Into @tblMessage(strMessageType,strMessage)
+			Values(@strMesssageType,@strMessage)
+		End
+	End
+
+	--LSP Shipment
+	If @strMesssageType='SHPMNT'
+	Begin
+		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
+
+		If @strStatus=53 --Success
+		Begin
+			Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
+			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
+
+			Insert Into @tblMessage(strMessageType,strMessage)
+			Values(@strMesssageType,'Success')
+		End
+
+		If @strStatus<>53 --Error
+		Begin
+			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
+
+			Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
+			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,@strMessage)
