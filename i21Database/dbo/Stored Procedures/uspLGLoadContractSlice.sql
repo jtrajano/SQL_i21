@@ -84,8 +84,6 @@ BEGIN TRY
 			END = @intParentContractDetailId AND intShipmentType = 2
 
 
-	SELECT * FROM @ParentLoad--
-
 	SELECT @intMinLoadRecordId = MIN(intLoadRecordId) FROM @ParentLoad 
 
 	WHILE (@intMinLoadRecordId > 0)

@@ -97,6 +97,8 @@ BEGIN TRY
 	
 	--Unslice
 	EXEC uspQMSampleContractUnSlice @intContractHeaderId,1
+	EXEC uspLGLoadContractUnSlice @intContractHeaderId
+
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
 
 END TRY
