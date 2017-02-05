@@ -4984,6 +4984,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageLSPShipmentETA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessLSPShipmentETA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateLSPShipmentIDOC.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGLoadContractUnSlice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
