@@ -4964,6 +4964,7 @@
     <Build Include="dbo\Tables\tblLGLoadContainerLSPStg.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadIntegrationLSPLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeSaveContract.sql" />
+    <Build Include="dbo\Tables\tblCTNotification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
