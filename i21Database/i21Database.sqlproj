@@ -4963,6 +4963,7 @@
     <Build Include="dbo\Tables\tblLGLoadDetailLSPStg.sql" />
     <Build Include="dbo\Tables\tblLGLoadContainerLSPStg.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadIntegrationLSPLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTBeforeSaveContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
