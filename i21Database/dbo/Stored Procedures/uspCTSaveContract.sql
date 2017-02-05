@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTContractSave]
+﻿CREATE PROCEDURE [dbo].[uspCTSaveContract]
 	
 	@intContractHeaderId int,
 	@strXML	NVARCHAR(MAX)
@@ -26,60 +26,6 @@ BEGIN TRY
 			@strContractNumber			=	strContractNumber
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId			=	@intContractHeaderId
-
-	IF @strXML = 'Delete'
-	BEGIN
-		SET	@Action = @strXML
-		SET @Condition = 'intContractHeaderId = ' + STR(@intContractHeaderId)
-		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTContractDetail', @Condition, @strXML OUTPUT,null,'intContractDetailId,''Delete'' AS strRowState'
-	END
-
-	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML   
-
-	IF OBJECT_ID('tempdb..#ProcessDetail') IS NOT NULL  	
-		DROP TABLE #ProcessDetail	
-
-	SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intUniqueId,* 
-	INTO	#ProcessDetail
-	FROM	OPENXML(@idoc,'tblCTContractDetails/tblCTContractDetail',2)          
-	WITH	(intContractDetailId	INT,strRowState	NVARCHAR(50))      
-
-	SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail
-
-	WHILE ISNULL(@intUniqueId,0) > 0
-	BEGIN
-		SELECT @intContractDetailId = intContractDetailId,@strRowState = strRowState FROM #ProcessDetail WHERE intUniqueId = @intUniqueId
-		IF(@strRowState = 'Delete')
-		BEGIN
-			IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strFeedStatus,'') ='')
-			BEGIN
-				DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND  ISNULL(strFeedStatus,'') =''
-				IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId)
-				BEGIN
-					INSERT	INTO tblCTContractFeed (intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,strItemNo,strRowState,dtmFeedCreated)
-					SELECT	TOP 1 intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,
-							(SELECT TOP 1 strItemNo FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strItemNo,'') <> '') strItemNo,
-							'Delete',GETDATE()
-					FROM	tblCTContractFeed
-					WHERE	intContractDetailId = @intContractDetailId
-					ORDER BY intContractFeedId DESC
-				END
-			END
-			ELSE
-			BEGIN
-				INSERT	INTO tblCTContractFeed (intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,strItemNo,strRowState,dtmFeedCreated)
-				SELECT	TOP 1 intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,
-						(SELECT TOP 1 strItemNo FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strItemNo,'') <> '') strItemNo,
-						'Delete',GETDATE()
-				FROM	tblCTContractFeed
-				WHERE	intContractDetailId = @intContractDetailId
-				ORDER BY intContractFeedId DESC
-			END
-		END
-		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail WHERE intUniqueId > @intUniqueId
-	END
-
-	SELECT @intContractDetailId = NULL
 
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 	
@@ -131,8 +77,9 @@ BEGIN TRY
 		WHERE	strContractNumber = @strContractNumber AND ysnImported = 0
 	END
 
+	--Slice
 	EXEC uspQMSampleContractSlice @intContractHeaderId
-
+	EXEC uspLGLoadContractSlice @intContractHeaderId
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
 END TRY
 
