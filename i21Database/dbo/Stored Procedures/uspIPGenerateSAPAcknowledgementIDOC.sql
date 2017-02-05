@@ -81,6 +81,23 @@ If @strMsgType='PreShipment Sample'
 	SELECT intStageSampleId,'QCERT','51',strErrorMessage,'E','Sample Number',strSampleNo,strPONo,strPOItemNo,'tblIPPreShipmentSampleError','intStageSampleId','strImportStatus'
 	FROM tblIPPreShipmentSampleError Where ISNULL(strImportStatus,'')<>'Ack Sent'
 
+If @strMsgType='LSP Receipt'
+	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
+	SELECT  intStageReceiptId,'WHSCON','53','Success','S','Goods Receipt Number',strDeliveryNo,strDeliveryNo,'','tblIPReceiptArchive','intStageReceiptId','strImportStatus'
+	FROM tblIPReceiptArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
+	UNION
+	SELECT  intStageReceiptId,'WHSCON','51','Success','E','Goods Receipt Number',strDeliveryNo,strDeliveryNo,'','tblIPReceiptError','intStageReceiptId','strImportStatus'
+	FROM tblIPReceiptError Where ISNULL(strImportStatus,'')<>'Ack Sent'
+
+If @strMsgType='LSP ETA'
+	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
+	SELECT  intStageShipmentETAId,'WHSCON','53','Success','S','Goods Receipt Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAArchive','intStageShipmentETAId','strImportStatus'
+	FROM tblIPShipmentETAArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
+	UNION
+	SELECT  intStageShipmentETAId,'WHSCON','51','Success','E','Goods Receipt Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAError','intStageShipmentETAId','strImportStatus'
+	FROM tblIPShipmentETAError Where ISNULL(strImportStatus,'')<>'Ack Sent'
+
+
 Select @intMinRowNo=MIN(intRowNo) From @tblAcknowledgement
 
 While(@intMinRowNo is not null) --Loop Start
