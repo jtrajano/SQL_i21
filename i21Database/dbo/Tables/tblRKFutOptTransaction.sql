@@ -66,6 +66,6 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTContractHeader_intContractHeaderId] FOREIGN KEY([intContractHeaderId])REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY(intCurrencyExchangeRateTypeId)REFERENCES [dbo].[tblSMCurrencyExchangeRateType] (intCurrencyExchangeRateTypeId),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank] ([intBankId]),
-	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFuturesMonth_intRollingMonthId] FOREIGN KEY ([intRollingMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
-	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId]),
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFuturesMonth_intRollingMonthId] FOREIGN KEY ([intRollingMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId])
 )
