@@ -1156,7 +1156,16 @@ BEGIN TRY
 		IF EXISTS (
 				SELECT SUM(dblQty)
 				FROM @tblLot
-				HAVING SUM(dblQty) < [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
+				HAVING SUM(dblQty) < (CASE 
+						WHEN (
+								SELECT Count(*)
+								FROM @tblLot
+								WHERE ysnSubstituteItem = 1
+								) >= 1
+							THEN @dblLowerToleranceReqQty
+						ELSE
+							[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
+						END)
 				)
 		BEGIN
 			IF @ysnExcessConsumptionAllowed = 0
@@ -1237,7 +1246,13 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT SUM(dblQty)
 					FROM @tblLot
-					HAVING SUM(dblQty) < [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
+					HAVING SUM(dblQty) < (
+							CASE 
+								WHEN @ysnSubstituteItem = 0
+									THEN [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
+								ELSE @dblLowerToleranceReqQty
+								END
+							)
 					)
 			BEGIN
 				IF @ysnExcessConsumptionAllowed = 1
