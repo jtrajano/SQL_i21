@@ -327,7 +327,7 @@ BEGIN
 	 ELSE
 		BEGIN
 			ROLLBACK TRAN @TransactionName
-			EXEC dbo.uspGLPostRecap 
+			EXEC dbo.uspGLPostRecapOld 
 					@GLEntries
 					,@intTransactionId
 					,@strTransactionId

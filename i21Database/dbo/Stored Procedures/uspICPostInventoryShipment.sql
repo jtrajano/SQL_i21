@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICPostInventoryShipment]
+CREATE PROCEDURE [dbo].[uspICPostInventoryShipment]
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
@@ -851,6 +851,9 @@ BEGIN
 	ROLLBACK TRAN @TransactionName
 	EXEC dbo.uspGLPostRecap 
 			@GLEntries
+			,@intTransactionId
+			,@strTransactionId
+			,'IC'
 			,@intEntityUserSecurityId
 	COMMIT TRAN @TransactionName
 END 
