@@ -46,7 +46,7 @@ LEFT JOIN (tblICItemUOM G INNER JOIN tblICUnitMeasure G2 ON G.intUnitMeasureId =
 LEFT JOIN (tblICItemUOM K INNER JOIN tblICUnitMeasure K2 ON K.intUnitMeasureId = K2.intUnitMeasureId) ON C2.intWeightUOMId = K.intItemUOMId
 LEFT JOIN tblSMCurrency J ON A.intCurrencyId = J.intCurrencyID
 LEFT JOIN tblSMCurrency I ON I.intMainCurrencyId = A.intCurrencyId AND I.ysnSubCurrency = 1
-LEFT JOIN tblEMEntity L ON A.intContactId = L.intEntityId
+LEFT JOIN tblEMEntity L ON A.intEntityId = L.intEntityId
 LEFT JOIN tblSMCountry O ON H.intOriginId = O.intCountryID
 LEFT JOIN tblSMCompanyLocationSubLocation P ON D2.intSubLocationId = P.intCompanyLocationSubLocationId
 LEFT JOIN tblSMCompanyLocation Q ON A.intStoreLocationId = Q.intCompanyLocationId
