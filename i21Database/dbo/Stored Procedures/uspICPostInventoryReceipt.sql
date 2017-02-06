@@ -3,6 +3,7 @@
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -35,8 +36,7 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
 
 -- Posting variables
-DECLARE @strBatchId AS NVARCHAR(40) 
-		,@strItemNo AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT
 		,@ysnAllowBlankGLEntries AS BIT = 1
 
@@ -262,6 +262,7 @@ END
 
 -- Get the next batch number
 BEGIN 
+	SET @strBatchId = NULL 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
 	IF @@ERROR <> 0 GOTO Post_Exit;
 END
