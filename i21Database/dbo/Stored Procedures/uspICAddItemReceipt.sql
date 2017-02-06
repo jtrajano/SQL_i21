@@ -230,7 +230,7 @@ BEGIN
 		WHERE RawHeaderData.intId = @intId
 
 
-		IF @valueShipViaId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE intEntityShipViaId = @valueShipViaId)
+		IF @valueShipViaId > 0 AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE intEntityShipViaId = @valueShipViaId)
 			BEGIN
 				DECLARE @valueShipViaIdStr NVARCHAR(50)
 				SET @valueShipViaIdStr = CAST(@valueShipViaId AS NVARCHAR(50))
@@ -262,7 +262,7 @@ BEGIN
 		FROM	@ReceiptEntries RawData
 		WHERE RawData.intFreightTermId NOT IN (SELECT intFreightTermId FROM tblSMFreightTerms)
 
-		IF @valueFreightTermId IS NOT NULL
+		IF @valueFreightTermId > 0
 			BEGIN
 				DECLARE @valueFreightTermIdStr NVARCHAR(50)
 				SET @valueFreightTermIdStr = CAST(@valueFreightTermId AS NVARCHAR(50))
@@ -480,7 +480,7 @@ BEGIN
 		FROM   @ReceiptEntries RawData	   
 		WHERE RawData.intItemId NOT IN (SELECT intItemId FROM tblICItem)
 
-		IF @valueItemId IS NOT NULL
+		IF @valueItemId > 0
 			BEGIN
 				DECLARE @valueItemIdStr NVARCHAR(50)
 				SET @valueItemIdStr = CAST(@valueItemId AS NVARCHAR(50))
@@ -497,7 +497,7 @@ BEGIN
 		FROM	@ReceiptEntries RawData 	   
 		WHERE RawData.intTaxGroupId NOT IN (SELECT intTaxGroupId FROM tblSMTaxGroup) 
 
-		IF @valueTaxGroupId IS NOT NULL
+		IF @valueTaxGroupId > 0
 			BEGIN
 				DECLARE @valueTaxGroupIdStr NVARCHAR(50)
 				SET @valueTaxGroupIdStr = CAST(@valueTaxGroupId AS NVARCHAR(50))
@@ -514,7 +514,7 @@ BEGIN
 		FROM	@ReceiptEntries RawData 	   
 		WHERE RawData.intContractHeaderId NOT IN (SELECT intContractHeaderId FROM tblCTContractHeader)
 
-		IF @valueContractHeaderId IS NOT NULL
+		IF @valueContractHeaderId > 0
 			BEGIN
 				DECLARE @valueContractHeaderIdStr NVARCHAR(50)
 				SET @valueContractHeaderIdStr = CAST(@valueContractHeaderId AS NVARCHAR(50))
@@ -531,7 +531,7 @@ BEGIN
 		FROM	@ReceiptEntries RawData	   
 		WHERE RawData.intContractDetailId IS NULL OR RawData.intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = RawData.intContractHeaderId)
 
-		IF @valueContractHeaderId IS NOT NULL
+		IF @valueContractHeaderId > 0
 			BEGIN
 				SET @valueContractHeaderIdStr =  CAST(@valueContractHeaderId AS NVARCHAR(50));
 				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
@@ -549,7 +549,7 @@ BEGIN
 		WHERE RawData.intItemUOMId IS NULL OR
 			  RawData.intItemUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)
 
-		IF @getItemId IS NOT NULL
+		IF @getItemId > 0
 			BEGIN
 				SELECT @getItem = strItemNo
 				FROM tblICItem
@@ -570,7 +570,7 @@ BEGIN
 		FROM	@ReceiptEntries	RawData
 		WHERE RawData.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = RawData.intLocationId)
 
-		IF @valueSubLocationId IS NOT NULL
+		IF @valueSubLocationId > 0
 			BEGIN
 				SELECT @getItem = strItemNo
 				FROM tblICItem
@@ -591,7 +591,7 @@ BEGIN
 		FROM	@ReceiptEntries RawData 	   
 		WHERE RawData.intStorageLocationId NOT IN (SELECT intStorageLocationId FROM tblICStorageLocation WHERE intLocationId = RawData.intLocationId AND intSubLocationId = RawData.intSubLocationId)
 
-		IF @valueStorageLocationId IS NOT NULL
+		IF @valueStorageLocationId > 0
 			BEGIN
 				SELECT @getItem = strItemNo
 				FROM tblICItem
@@ -609,9 +609,10 @@ BEGIN
 
 		SELECT TOP 1 @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData 	   
-		WHERE ((RawData.dblNet > 0 OR RawData.dblGross > 0) AND RawData.intGrossNetUOMId IS NULL) OR (RawData.intGrossNetUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
+		WHERE ((RawData.dblNet > 0 OR RawData.dblGross > 0) AND (RawData.intGrossNetUOMId IS NULL OR RawData.intGrossNetUOMId < 1)) OR 
+			  (RawData.intGrossNetUOMId > 0 AND (RawData.intGrossNetUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)))
 
-		IF @getItemId IS NOT NULL
+		IF @getItemId > 0
 			BEGIN
 				SELECT @getItem = strItemNo
 				FROM tblICItem
@@ -632,7 +633,7 @@ BEGIN
 		WHERE RawData.dblCost > 0
 			  AND (RawData.intCostUOMId IS NULL OR RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
 
-		IF @getItemId IS NOT NULL
+		IF @getItemId > 0
 			BEGIN
 				SELECT @getItem = strItemNo
 				FROM tblICItem
@@ -653,7 +654,7 @@ BEGIN
 		FROM	@ReceiptEntries RawData	   
 		WHERE RawData.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = RawData.intItemId)
 
-		IF @valueLotId IS NOT NULL
+		IF @valueLotId > 0
 			BEGIN
 				SELECT @getItem = strItemNo
 				FROM tblICItem
@@ -837,7 +838,7 @@ BEGIN
 		FROM @OtherCharges RawData
 		WHERE RawData.intEntityVendorId IS NULL OR RawData.intEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
 
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -857,7 +858,7 @@ BEGIN
 		FROM @OtherCharges RawData
 		WHERE RawData.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(RawData.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order'))
 
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -877,7 +878,7 @@ BEGIN
 		FROM @OtherCharges RawData
 		WHERE RawData.intLocationId IS NULL OR RawData.intLocationId NOT IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation)
 		
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -895,9 +896,9 @@ BEGIN
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
 		FROM @OtherCharges RawData
-		WHERE RawData.intShipViaId IS NOT NULL AND RawData.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
+		WHERE RawData.intShipViaId > 0 AND RawData.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
 
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -917,7 +918,7 @@ BEGIN
 		FROM @OtherCharges RawData
 		WHERE RawData.intShipFromId IS NULL OR RawData.intShipFromId NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = RawData.intEntityVendorId)
 
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -934,9 +935,9 @@ BEGIN
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
 		FROM @OtherCharges RawData
-		WHERE RawData.intCurrencyId IS NOT NULL AND RawData.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
+		WHERE RawData.intCurrencyId > 0 AND RawData.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
 
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -968,7 +969,7 @@ BEGIN
 		WHERE RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount')
 		ORDER BY RawData.strCostMethod ASC
 
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -989,7 +990,7 @@ BEGIN
 		FROM	@OtherCharges RawData 
 		WHERE RawData.intCostCurrencyId NOT IN (SELECT intCurrencyId FROM tblSMCurrency)
 
-		IF @valueCostCurrencyId IS NOT NULL
+		IF @valueCostCurrencyId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -1009,10 +1010,10 @@ BEGIN
 
 		SELECT @valueChargeId = RawData.intChargeId
 		FROM   @OtherCharges RawData 
-		WHERE ((RawData.intCostUOMId IS NOT NULL AND RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intChargeId)) OR
-			  (RawData.intCostUOMId IS NULL AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) = 'per unit'))
+		WHERE ((RawData.intCostUOMId > 0 AND RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intChargeId)) OR
+			  ((RawData.intCostUOMId IS NULL OR RawData.intCostUOMId < 1) AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) = 'per unit'))
 
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -1033,7 +1034,7 @@ BEGIN
 		FROM	@OtherCharges RawData
 		WHERE RawData.intOtherChargeEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
 
-		IF @valueOtherChargeVendorId IS NOT NULL
+		IF @valueOtherChargeVendorId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -1051,9 +1052,9 @@ BEGIN
 
 		SELECT @valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData
-		WHERE RawData.strAllocateCostBy IS NULL OR RTRIM(LTRIM(LOWER(RawData.strAllocateCostBy))) NOT IN ('', 'unit', 'stock unit', 'cost')
+		WHERE RawData.strAllocateCostBy IS NOT NULL AND RTRIM(LTRIM(LOWER(RawData.strAllocateCostBy))) NOT IN ('', 'unit', 'stock unit', 'cost')
 
-		IF @valueChargeId IS NOT NULL
+		IF @valueChargeId > 0
 			BEGIN
 				SELECT @valueCharge = strItemNo
 				FROM tblICItem
@@ -1073,7 +1074,7 @@ BEGIN
 		WHERE RawData.intContractHeaderId NOT IN (SELECT intContractHeaderId FROM tblCTContractHeader)
 		ORDER BY RawData.intContractHeaderId ASC
 
-		IF @valueOtherChargeContractHeaderId IS NOT NULL
+		IF @valueOtherChargeContractHeaderId > 0
 			BEGIN
 				DECLARE @valueOtherChargeContractHeaderIdStr AS NVARCHAR(50)
 				SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
@@ -1088,11 +1089,11 @@ BEGIN
 
 		SELECT TOP 1 @valueOtherChargeContractHeaderId = RawData.intContractHeaderId
 		FROM	@OtherCharges RawData
-		WHERE  ((RawData.intContractHeaderId IS NOT NULL AND RawData.intContractDetailId IS NULL) OR
-				(RawData.intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = RawData.intContractHeaderId)))
+		WHERE  (RawData.intContractHeaderId > 0 AND 
+				(RawData.intContractDetailId IS NULL OR RawData.intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = RawData.intContractHeaderId)))
 		ORDER BY RawData.intContractDetailId ASC
 
-		IF @valueOtherChargeContractHeaderId IS NOT NULL
+		IF @valueOtherChargeContractHeaderId > 0
 			BEGIN
 				SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
 				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
@@ -1106,10 +1107,10 @@ BEGIN
 
 		SELECT TOP 1 @valueOtherChargeTaxGroupId = RawData.intTaxGroupId	
 		FROM	@OtherCharges RawData
-		WHERE RawData.intTaxGroupId IS NOT NULL AND RawData.intTaxGroupId NOT IN (SELECT intTaxGroupId FROM tblSMTaxGroup) 
+		WHERE RawData.intTaxGroupId > 0 AND RawData.intTaxGroupId NOT IN (SELECT intTaxGroupId FROM tblSMTaxGroup) 
 		ORDER BY RawData.intTaxGroupId ASC
 
-		IF @valueOtherChargeTaxGroupId IS NOT NULL
+		IF @valueOtherChargeTaxGroupId > 0
 			BEGIN
 				DECLARE @valueOtherChargeTaxGroupIdStr NVARCHAR(50)
 				SET @valueOtherChargeTaxGroupIdStr = CAST(@valueOtherChargeTaxGroupId AS NVARCHAR(50))
@@ -1579,7 +1580,7 @@ BEGIN
 
 							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 							FROM @LotEntries ItemLot
-							WHERE ItemLot.intShipViaId IS NOT NULL AND ItemLot.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
+							WHERE ItemLot.intShipViaId > 0 AND ItemLot.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
 
 							IF @valueLotRecordNo IS NOT NULL
 								BEGIN
@@ -1609,7 +1610,7 @@ BEGIN
 
 							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 							FROM @LotEntries ItemLot
-							WHERE ItemLot.intCurrencyId IS NULL OR ItemLot.intCurrencyId IS NOT NULL AND ItemLot.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
+							WHERE ItemLot.intCurrencyId IS NULL OR ItemLot.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
 
 							IF @valueLotRecordNo IS NOT NULL
 								BEGIN
@@ -1688,7 +1689,7 @@ BEGIN
 							WHERE ItemLot.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId)
 							ORDER BY ItemLot.intLotId ASC
 
-							IF @valueLotRecordLotId IS NOT NULL
+							IF @valueLotRecordLotId > 0
 								BEGIN
 									DECLARE @valueLotRecordLotIdStr NVARCHAR(50)
 									SET @valueLotRecordLotIdStr = CAST(@valueLotRecordLotId AS NVARCHAR(50))
@@ -1706,10 +1707,10 @@ BEGIN
 							SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
 							FROM @LotEntries ItemLot
 							WHERE ItemLot.strLotNumber IS NULL 
-									OR (ItemLot.intLotId IS NOT NULL AND ItemLot.strLotNumber NOT IN (SELECT strLotNumber FROM tblICLot WHERE intLotId = ItemLot.intLotId))
+									OR (ItemLot.intLotId > 0 AND ItemLot.strLotNumber NOT IN (SELECT strLotNumber FROM tblICLot WHERE intLotId = ItemLot.intLotId))
 							ORDER BY ItemLot.strLotNumber ASC
 
-							IF @valueLotRecordItemId IS NOT NULL
+							IF @valueLotRecordItemId > 0
 								BEGIN
 									SELECT @valueLotRecordItemNo = strItemNo
 									FROM tblICItem
@@ -1766,7 +1767,7 @@ BEGIN
 							WHERE ItemLot.intParentLotId NOT IN (SELECT intParentLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId AND intLotId = ItemLot.intLotId)
 							ORDER BY ItemLot.intParentLotId ASC
 
-							IF @valueLotRecordParentLotId IS NOT NULL
+							IF @valueLotRecordParentLotId > 0
 								BEGIN
 									SET @valueLotRecordParentLotIdStr = CAST(@valueLotRecordParentLotId AS NVARCHAR(50))
 									-- Parent Lot Id {Parent Lot Id} is invalid for lot {Lot Number}.
@@ -1781,7 +1782,7 @@ BEGIN
 
 							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 							FROM @LotEntries ItemLot
-							WHERE ItemLot.intParentLotId IS NOT NULL
+							WHERE ItemLot.intParentLotId > 0
 									AND (ItemLot.strParentLotNumber IS NULL OR
 									(ItemLot.strParentLotNumber NOT IN (SELECT strParentLotNumber FROM tblICParentLot WHERE intItemId = ItemLot.intItemId AND intParentLotId = ItemLot.intParentLotId)))
 							ORDER BY ItemLot.strParentLotNumber ASC
