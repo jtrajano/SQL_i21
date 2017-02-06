@@ -6,6 +6,7 @@
 	[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[intControlPointId] INT NOT NULL, 
 	[ysnFinalApproval] BIT NOT NULL CONSTRAINT [DF_tblQMSampleType_ysnFinalApproval] DEFAULT 0, 
+	strApprovalBase NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSampleType_dtmCreated] DEFAULT GetDate(),
