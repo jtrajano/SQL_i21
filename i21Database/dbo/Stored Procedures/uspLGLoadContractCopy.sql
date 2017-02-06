@@ -255,7 +255,7 @@ BEGIN TRY
 		,intCustomerEntityId
 		,intCustomerEntityLocationId
 		,intItemId
-		,intPContractDetailId
+		,@intNewContractDetailId
 		,intSContractDetailId
 		,intPCompanyLocationId
 		,intSCompanyLocationId
