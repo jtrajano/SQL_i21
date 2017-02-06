@@ -7,7 +7,6 @@
 	,@strBatchId NVARCHAR(50) = NULL
 	,@isSuccessful BIT = 0 OUTPUT
 	,@message_id INT = 0 OUTPUT
-
 AS
 BEGIN
 
@@ -141,6 +140,7 @@ BEGIN
 		,intDepartmentId		INT
 		,strDepartment			NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,intProfitCenter		INT
+		,intLOB					INT
 	)
 
 	INSERT INTO #tmpEarning 
@@ -153,6 +153,7 @@ BEGIN
 		,intDepartmentId
 		,strDepartment
 		,intProfitCenter
+		,intLOB
 	)
 	SELECT 
 		A.intPaycheckId
@@ -162,7 +163,8 @@ BEGIN
 		,dblAmount = A.dblTotal * (B.dblPercentage / 100)
 		,C.intDepartmentId
 		,C.strDepartment
-		,C.intProfitCenter 
+		,C.intProfitCenter
+		,C.intLOB
 	FROM (
 		SELECT intPaycheckId, intEmployeeEarningId, intTypeEarningId, strCalculationType, intEmployeeDepartmentId, dblTotal FROM tblPRPaycheckEarning) A 
 		LEFT JOIN tblPREmployeeEarningDistribution B
@@ -179,7 +181,13 @@ BEGIN
 	DECLARE @intEarningTempDepartmentId INT
 	DECLARE @intEarningTempAccountId INT
 	DECLARE @intEarningTempProfitCenter INT
+	DECLARE @intEarningTempLOB INT
+	DECLARE @intEarningTempFinalAccountId INT
 	DECLARE @strMsg NVARCHAR(MAX) = ''
+
+	DECLARE @intEarningTempOrigPrimaryAccount INT
+	DECLARE @intEarningTempOrigProfitCenter INT
+	DECLARE @intEarningTempOrigLOB INT
 
 	--Validate Earning GL Distribution
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningTemp)
@@ -188,40 +196,60 @@ BEGIN
 					,@intEarningTempDepartmentId = intDepartmentId
 					,@intEarningTempAccountId = intAccountId
 				    ,@intEarningTempProfitCenter = intProfitCenter
+					,@intEarningTempLOB = intLOB
+					,@intEarningTempFinalAccountId = NULL
 					FROM #tmpEarningTemp
 
-		--Step 1: Get the Account Segment Mapping of the Account
-		SELECT A.intAccountId, A.intAccountSegmentId, C.strStructureName INTO #tmpSelectedAccountMap 
-		FROM tblGLAccountSegmentMapping A 
-			LEFT JOIN tblGLAccountSegment B ON A.intAccountSegmentId = B.intAccountSegmentId 
-			LEFT JOIN tblGLAccountStructure C ON B.intAccountStructureId = C.intAccountStructureId
-			WHERE intAccountId = @intEarningTempAccountId
+		--Step 1: Get the original Segments of the Account
+		SELECT TOP 1 @intEarningTempOrigPrimaryAccount = [Primary Account], @intEarningTempOrigProfitCenter = [Location], @intEarningTempOrigLOB = [LOB]
+		FROM (
+			SELECT 
+				A.intAccountId
+				,D.strAccountId
+				,B.intAccountSegmentId
+				,strStructureName = CASE WHEN (LOWER(C.strStructureName) IN ('lob', 'line of business')) THEN 'LOB' ELSE C.strStructureName END
+			FROM tblGLAccountSegmentMapping A
+			INNER JOIN tblGLAccountSegment B ON B.intAccountSegmentId = A.intAccountSegmentId
+			INNER JOIN tblGLAccountStructure C ON C.intAccountStructureId = B.intAccountStructureId
+			INNER JOIN tblGLAccount D ON A.intAccountId = D.intAccountId
+		) AS S
+		PIVOT
+		(
+			MAX(intAccountSegmentId)
+			FOR [strStructureName] IN ([Primary Account], [Location], [LOB])
+		) AS PVT
+		WHERE [intAccountId] = @intEarningTempAccountId
 
-		--Step 2: Replace the Profit Center Segment with what is specified in the Employee Location
-		UPDATE #tmpSelectedAccountMap SET intAccountSegmentId = @intEarningTempProfitCenter
-		WHERE strStructureName = 'Location'
+		--Step 2: Get the Account that uses the acquired Primary Account, Profit Center, and LOB
+		SELECT TOP 1 @intEarningTempFinalAccountId = intAccountId
+		FROM (
+			SELECT 
+				A.intAccountId
+				,D.strAccountId
+				,B.intAccountSegmentId
+				,strStructureName = CASE WHEN (LOWER(C.strStructureName) IN ('lob', 'line of business')) THEN 'LOB' ELSE C.strStructureName END
+			FROM tblGLAccountSegmentMapping A
+			INNER JOIN tblGLAccountSegment B ON B.intAccountSegmentId = A.intAccountSegmentId
+			INNER JOIN tblGLAccountStructure C ON C.intAccountStructureId = B.intAccountStructureId
+			INNER JOIN tblGLAccount D ON A.intAccountId = D.intAccountId
+		) AS S
+		PIVOT
+		(
+			MAX(intAccountSegmentId)
+			FOR [strStructureName] IN ([Primary Account], [Location], [LOB])
+		) AS PVT
+		WHERE [Primary Account] = @intEarningTempOrigPrimaryAccount
+			AND ISNULL([Location], 0) = ISNULL(@intEarningTempProfitCenter, ISNULL(@intEarningTempOrigProfitCenter, 0))
+			AND ISNULL([LOB], 0) = ISNULL(@intEarningTempLOB, ISNULL(@intEarningTempOrigLOB, 0))
 
-		--Step 3: Loop each Segment and Use Process of Elimination to find the correct account
-		DECLARE @intAccountSegmentId INT
-		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpSelectedAccountMap)
-		BEGIN
-			SELECT TOP 1 @intAccountSegmentId = intAccountSegmentId FROM #tmpSelectedAccountMap
-
-			IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLAccountSegmentMapping'))
-				SELECT * INTO #tmpGLAccountSegmentMapping FROM tblGLAccountSegmentMapping 
-				WHERE intAccountId IN (SELECT intAccountId FROM tblGLAccountSegmentMapping WHERE intAccountSegmentId = @intAccountSegmentId)
-			ELSE
-				DELETE FROM #tmpGLAccountSegmentMapping 
-				WHERE intAccountId NOT IN (SELECT intAccountId FROM #tmpGLAccountSegmentMapping WHERE intAccountSegmentId = @intAccountSegmentId)
-
-			SELECT * FROM #tmpGLAccountSegmentMapping
-			DELETE FROM #tmpSelectedAccountMap WHERE intAccountSegmentId = @intAccountSegmentId 
-		END
-
-		--Step 4: The remaining Account Id after the elimination is the Account Id to use, if no Id remains, return error
-		IF EXISTS(SELECT TOP 1 1 FROM #tmpGLAccountSegmentMapping)
-			--Update Earnings Account using the account with corresponding Department Location
-			UPDATE #tmpEarning SET intAccountId = (SELECT TOP 1 intAccountId FROM #tmpGLAccountSegmentMapping) WHERE intAccountId = @intEarningTempAccountId
+		--Step 3: Replace the Earning Account with the Distribution Account
+		IF (@intEarningTempFinalAccountId IS NOT NULL) 
+			UPDATE #tmpEarning SET intAccountId = @intEarningTempFinalAccountId 
+			WHERE intTypeEarningId = @intEarningTempEarningId 
+				AND intAccountId = @intEarningTempAccountId 
+				AND ISNULL(intDepartmentId, 0) = ISNULL(@intEarningTempDepartmentId, 0)
+				AND ISNULL(intProfitCenter, 0) = ISNULL(@intEarningTempProfitCenter, 0)
+				AND ISNULL(intLOB, 0) = ISNULL(@intEarningTempLOB, 0)
 		ELSE
 			SELECT @strMsg = 'One or more accounts for ''' 
 				+ (SELECT TOP 1 strEarning FROM tblPRTypeEarning WHERE intTypeEarningId = @intEarningTempEarningId) + ''''
@@ -239,15 +267,12 @@ BEGIN
 
 		DELETE FROM #tmpEarningTemp 
 			WHERE intTypeEarningId = @intEarningTempEarningId
-			AND ISNULL(intDepartmentId, 0) = ISNULL(@intEarningTempDepartmentId, 0)
 			AND intAccountId = @intEarningTempAccountId
-			AND intProfitCenter = @intEarningTempProfitCenter
-
-		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpSelectedAccountMap')) DROP TABLE #tmpSelectedAccountMap
-		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLAccountSegmentMapping')) DROP TABLE #tmpGLAccountSegmentMapping
-		
+			AND ISNULL(intDepartmentId, 0) = ISNULL(@intEarningTempDepartmentId, 0)
+			AND ISNULL(intProfitCenter, 0) = ISNULL(@intEarningTempProfitCenter, 0)
+			AND ISNULL(intLOB, 0) = ISNULL(@intEarningTempLOB, 0)
 	END
-	 
+
 	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
 	INSERT INTO @BankTransactionDetail
 		([dtmDate]
@@ -1102,5 +1127,3 @@ END
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAccrueTimeOff')) DROP TABLE #tmpAccrueTimeOff
-
-GO
