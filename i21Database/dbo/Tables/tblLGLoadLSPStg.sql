@@ -4,35 +4,35 @@
 		[intLoadId] INT,
 		[strTransactionType] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		[strLoadNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+		[strCompanyLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+		[strSubLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		[strShipmentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-		[strPartnerQualifier] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- PARTNER_Q 
-		[strLanguage] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- LANGUAGE  
-		[strVendorName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Vendor Name
-		[strVendorAddress] NVARCHAR(1000) COLLATE Latin1_General_CI_AS, -- Vendor Name
-		[strVendorPostalCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Vendor Name
-		[strVendorCity] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Vendor Name
-		[strVendorTelePhoneNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Vendor Name
-		[strVendorTeleFaxNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Vendor Name
-		[strVendorCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Vendor Name
-
-		[strOriginName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Origin Name
-		[strOriginAddress] NVARCHAR(1000) COLLATE Latin1_General_CI_AS, -- OriginName
-		[strOriginPostalCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Origin Name
-		[strOriginCity] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Origin Name
-		[strOriginTelePhoneNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Origin Name
-		[strOriginTeleFaxNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Origin Name
-		[strOriginCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- OriginName
-		[strOriginRegion] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Origin Name
-
-		[strDestinationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Destination Name
-		[strDestinationAddress] NVARCHAR(1000) COLLATE Latin1_General_CI_AS, -- Destination Name
-		[strDestinationPostalCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Destination Name
-		[strDestinationCity] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Destination Name
-		[strDestinationTelePhoneNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Destination Name
-		[strDestinationTeleFaxNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Destination Name
-		[strDestinationCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Destination Name
-		[strDestinationRegion] NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- Destination Name
-
+		[strPartnerQualifier] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strLanguage] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strVendorName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strVendorAddress] NVARCHAR(1000) COLLATE Latin1_General_CI_AS, 
+		[strVendorPostalCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strVendorCity] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strVendorTelePhoneNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strVendorTeleFaxNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strVendorCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strVendorAccNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strOriginName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strOriginAddress] NVARCHAR(1000) COLLATE Latin1_General_CI_AS, 
+		[strOriginPostalCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strOriginCity] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strOriginTelePhoneNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strOriginTeleFaxNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strOriginCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strOriginRegion] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strDestinationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strDestinationAddress] NVARCHAR(1000) COLLATE Latin1_General_CI_AS, 
+		[strDestinationPostalCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strDestinationCity] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strDestinationTelePhoneNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strDestinationTeleFaxNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strDestinationCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+		[strDestinationRegion] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 		[strContractBasis] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		[strContractBasisDesc] NVARCHAR(500) COLLATE Latin1_General_CI_AS, 
 		[strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
@@ -47,5 +47,8 @@
 		[strRowState] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 		[strFeedStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 		[dtmFeedCreated] DATETIME,
+		[dblTotalGross] NUMERIC(18,6),
+		[dblTotalNet] NUMERIC(18,6),
+		[strWeightUOM] NVARCHAR(10) COLLATE Latin1_General_CI_AS,
 		[strMessage] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	)
