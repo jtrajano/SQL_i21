@@ -4990,6 +4990,7 @@
     <Build Include="dbo\Stored Procedures\uspGLPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspLGLoadContractUnSlice.sql" />
     <Build Include="dbo\Tables\tblMFReportCategoryByCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
