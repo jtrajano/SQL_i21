@@ -34,8 +34,8 @@ Ext.define('Inventory.CommonIC', {
 
             .enterData('Text Field','ItemNo', item)
             .enterData('Text Field','Description', itemdesc)
-            .selectComboBoxRowValue('Category', category, 'cboCategory',0)
-            .selectComboBoxRowValue('Commodity', commodity, 'strCommodityCode',0)
+            .selectComboBoxRowValue('Category', category, 'cboCategory',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'strCommodityCode',1)
             .selectComboBoxRowNumber('LotTracking', lottrack)
 
             .clickTab('Setup')
