@@ -76,7 +76,7 @@ DECLARE @EIN NVARCHAR(50)
 		AND strFormCode = @FormCodeParam
 	 
 	SELECT TOP 1 @LicenseNumber = strConfiguration 
-		FROM tblTFReportingComponentConfiguration config INNER JOIN tblTFReportingComponent rc 
+		FROM vyuTFGetReportingComponentConfiguration config INNER JOIN tblTFReportingComponent rc 
 			ON config.intReportingComponentId = rc.intReportingComponentId 
 		WHERE rc.strFormCode = @FormCodeParam 
 		AND config.strTemplateItemId = 'SF-900-LicenseNumber'
@@ -122,7 +122,7 @@ DECLARE @EIN NVARCHAR(50)
 
 		INSERT INTO @tblTempSummaryItem (TaxReportSummaryItemId)  -- GET SUMMARY ITEMS TABLE HELPER BY FORM AND TA THEN INSERT INTO TBLTEMPSUMMARY
 		SELECT intReportingComponentConfigurationId 
-		FROM tblTFReportingComponentConfiguration config INNER JOIN tblTFReportingComponent rc 
+		FROM vyuTFGetReportingComponentConfiguration config INNER JOIN tblTFReportingComponent rc 
 				ON config.intReportingComponentId = rc.intReportingComponentId 
 			WHERE rc.strFormCode = @FormCodeParam 
 		ORDER BY config.intReportingComponentConfigurationId DESC
@@ -141,7 +141,7 @@ DECLARE @EIN NVARCHAR(50)
 							 @ReportSection = config.strReportSection,
 							 @TemplateSegment = config.strSegment,
 							 @TemplateConfiguration = config.strConfiguration
-						FROM tblTFReportingComponentConfiguration config
+						FROM vyuTFGetReportingComponentConfiguration config
 						INNER JOIN tblTFReportingComponent rc 
 						ON config.intReportingComponentId = rc.intReportingComponentId
 						WHERE intReportingComponentConfigurationId = @ParamId 
