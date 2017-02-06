@@ -167,9 +167,14 @@ GO
 				[strType]        	=        N'General Journal',
 				[strMessage]		=        N'{0} {1} {2} left unposted.',
 				[strQuery]  		=        N'Select intJournalId FROM vyuGLPostRemind WHERE intEntityId = {0}',
-				[strNamespace]      =        N'GeneralLedger.view.GeneralJournal?unposted=1',
+				[strNamespace]      =        N'i21.view.BatchPosting?module=General Ledger',--N'GeneralLedger.view.GeneralJournal?unposted=1',
 				[intSort]           =        8
 	END	
+	ELSE
+	BEGIN
+		UPDATE [tblSMReminderList] SET [strNamespace] = 'i21.view.BatchPosting?module=General Ledger' 
+		WHERE [strReminder] = N'Post' AND [strType] = N'General Journal'
+	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9)
 	BEGIN
