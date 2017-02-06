@@ -4988,6 +4988,7 @@
     <Build Include="dbo\Tables\tblSMApproverConfigurationDetail.sql" />
     <Build Include="dbo\Tables\tblSMApproverConfigurationApprovalFor.sql" />
     <Build Include="dbo\Stored Procedures\uspLGLoadContractUnSlice.sql" />
+    <Build Include="dbo\Tables\tblMFReportCategoryByCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
