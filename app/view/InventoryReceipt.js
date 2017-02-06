@@ -139,6 +139,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
+                                        hidden: true,
                                         itemId: 'btnPostPreview',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post Preview'

@@ -267,6 +267,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
+                                "hidden": true,
                                 "icon": null,
                                 "itemId": "btnPostPreview",
                                 "layout|flex": null,

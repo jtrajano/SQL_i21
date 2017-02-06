@@ -241,14 +241,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 disabled: '{current.ysnOrigin}',
                 hidden: '{hideUnpostButton}'
             },
-            btnPostPreview: {
-                disabled: '{current.ysnOrigin}',
-                hidden: '{hidePostButton}'
-            },
-            btnUnpostPreview: {
-                disabled: '{current.ysnOrigin}',
-                hidden: '{hideUnpostButton}'
-            },
+            // btnPostPreview: {
+            //     disabled: '{current.ysnOrigin}',
+            //     hidden: '{hidePostButton}'
+            // },
+            // btnUnpostPreview: {
+            //     disabled: '{current.ysnOrigin}',
+            //     hidden: '{hideUnpostButton}'
+            // },
             btnReturn: {
                 hidden: '{checkHideReturnButton}'
             },
@@ -3202,140 +3202,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         else {
             iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
-        }
-    },
-
-    onReceiveClick: function (button, e, eOpts) {
-        var me = this;
-        var win = button.up('window');
-        var context = win.context;
-        var current = win.viewModel.data.current;
-        var btnPost = win.down('#btnPost');
-        var pnlLotTracking = win.down('#pnlLotTracking');
-        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
-        
-        //Hide Lot Grid
-        pnlLotTracking.setVisible(false);
-        //Deselect all rows in Item Grid
-        grdInventoryReceipt.getSelectionModel().deselectAll();
-
-        var postReceipt = function () {
-            var doPost = function () {
-                var strReceiptNumber = current.get('strReceiptNumber');
-                var posted = current.get('ysnPosted');
-                var options = {
-                    postURL: (current.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
-                    strTransactionId: strReceiptNumber,
-                    isPost: !posted,
-                    isRecap: false,
-                    callback: me.onAfterReceive,
-                    scope: me
-                };
-
-                CashManagement.common.BusinessRules.callPostRequest(options);
-            };
-
-            var isValid = true;
-            if (current) {
-                if (current.tblICInventoryReceiptItems()) {
-                    if (current.tblICInventoryReceiptItems().data.items) {
-
-                    }
-                }
-            }
-            // If there is no data change, do the post.
-            if (!context.data.hasChanges()) {
-                doPost();
-                return;
-            }
-
-            // Save has data changes first before doing the post.
-            context.data.saveRecord({
-                successFn: function () {
-                    doPost();
-                }
-            });
-        }
-
-        if (current) {
-
-            var buttonAction = function (button) {
-                if (button === 'yes') {
-                    // If there is no data change, do the post.
-                    if (!context.data.hasChanges()) {
-                        me.doOtherChargeCalculate(win);
-                        var task = new Ext.util.DelayedTask(function () {
-                            postReceipt();
-                        });
-                        task.delay(3000);
-                        return;
-                    }
-
-                    // Save has data changes first before doing the post.
-                    context.data.saveRecord({
-                        successFn: function () {
-                            me.doOtherChargeCalculate(win);
-                            var task = new Ext.util.DelayedTask(function () {
-                                postReceipt();
-                            });
-                            task.delay(3000);
-                        }
-                    });
-                }
-            }
-
-            var ReceivedGrossDiscrepancyItems = '';
-
-            if (current.tblICInventoryReceiptItems()) {
-                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (row) {
-                    if (!row.dummy) {
-                        //If there is Gross, check if the value is equivalent to Received Quantity
-                        if (row.get('intWeightUOMId') !== null) {
-                            var receiptItemQty = row.get('dblOpenReceive');
-                            var receiptUOMCF = row.get('dblItemUOMConvFactor');
-                            var weightUOMCF = row.get('dblWeightUOMConvFactor');
-
-                            if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
-                            if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
-                            if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
-
-                            //var totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF;
-                            var totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
-
-                            if (row.get('dblGross') !== totalGross) {
-                                ReceivedGrossDiscrepancyItems = ReceivedGrossDiscrepancyItems + row.get('strItemNo') + '<br/>'
-                            }
-                        }
-
-                    }
-                });
-            }
-
-            if (ReceivedGrossDiscrepancyItems !== '' && button.text === 'Post') {
-                iRely.Functions.showCustomDialog('question', 'yesno', 'Received and Gross quantities are not equal for the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?', buttonAction);
-            }
-            else {
-                // If there is no data change, do the post.
-                if (!context.data.hasChanges()) {
-                    me.doOtherChargeCalculate(win);
-                    var task = new Ext.util.DelayedTask(function () {
-                        postReceipt();
-                    });
-                    task.delay(3000);
-                    return;
-                }
-
-                // Save has data changes first before doing the post.
-                context.data.saveRecord({
-                    successFn: function () {
-                        me.doOtherChargeCalculate(win);
-                        var task = new Ext.util.DelayedTask(function () {
-                            postReceipt();
-                        });
-                        task.delay(3000);
-                    }
-                });
-            }
         }
     },
 
@@ -6364,6 +6230,124 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         });
     },
+
+    onReceiveClick: function (button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+        var currentRecord = win.viewModel.data.current;
+        var btnPost = win.down('#btnPost');
+        var pnlLotTracking = win.down('#pnlLotTracking');
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+        
+        //Hide Lot Grid
+        pnlLotTracking.setVisible(false);
+        //Deselect all rows in Item Grid
+        grdInventoryReceipt.getSelectionModel().deselectAll();
+
+        var doPost = function (currentRecord){
+            ic.utils.ajax({
+                url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
+                params:{
+                    strTransactionId: currentRecord.get('strReceiptNumber'),
+                    isPost: currentRecord.get('ysnPosted') ? false : true,
+                    isRecap: false
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    me.onAfterReceive(true);
+                }
+                ,function(failureResponse) {                    
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    me.onAfterReceive(false, jsonData.message.statusText);
+                }
+            )
+        };  
+
+        if (currentRecord) {
+            var buttonAction = function (button) {
+                if (button === 'yes') {
+                    // If there is no data change, do the post.
+                    if (!context.data.hasChanges()) {
+                        me.doOtherChargeCalculate(
+                            win
+                            ,doPost(currentRecord)                        
+                        );
+                        return;
+                    }
+
+                    // Save has data changes first before doing the post.
+                    context.data.saveRecord({
+                        successFn: function () {
+                            me.doOtherChargeCalculate(
+                                win
+                                ,doPost(currentRecord)
+                            );
+                        }
+                    });
+                }
+            }
+
+            var ReceivedGrossDiscrepancyItems = '';
+
+            if (currentRecord.tblICInventoryReceiptItems()) {
+                Ext.Array.each(currentRecord.tblICInventoryReceiptItems().data.items, function (row) {
+                    if (!row.dummy) {
+                        //If there is Gross, check if the value is equivalent to Received Quantity
+                        if (row.get('intWeightUOMId') !== null) {
+                            var receiptItemQty = row.get('dblOpenReceive');
+                            var receiptUOMCF = row.get('dblItemUOMConvFactor');
+                            var weightUOMCF = row.get('dblWeightUOMConvFactor');
+
+                            if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
+                            if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
+                            if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
+
+                            //var totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF;
+                            var totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
+
+                            if (row.get('dblGross') !== totalGross) {
+                                ReceivedGrossDiscrepancyItems = ReceivedGrossDiscrepancyItems + row.get('strItemNo') + '<br/>'
+                            }
+                        }
+
+                    }
+                });
+            }
+
+            if (ReceivedGrossDiscrepancyItems !== '' && button.text === 'Post') {
+                iRely.Functions.showCustomDialog(
+                    'question', 
+                    'yesno', 
+                    'Received and Gross quantities are not equal for the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?', 
+                    buttonAction
+                );
+            }
+            else {
+                // If there is no data change, do the post.
+                if (!context.data.hasChanges()) {
+                    me.doOtherChargeCalculate(
+                        win,
+                        doPost(currentRecord)
+                    );
+                    return;
+                }
+
+                // Save has data changes first before doing the post.
+                context.data.saveRecord({
+                    successFn: function () {
+                        me.doOtherChargeCalculate(
+                            win,
+                            doPost(currentRecord)
+                        );                        
+                    }
+                });
+            }
+        }
+    },
+    
 
     init: function (application) {
         this.control({
