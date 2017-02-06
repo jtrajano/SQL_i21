@@ -1,5 +1,6 @@
-﻿--EXEC uspQMSampleContractUnSlice 4
+﻿--EXEC uspQMSampleContractUnSlice 1,2
 CREATE PROCEDURE uspQMSampleContractUnSlice @intContractHeaderId INT
+	,@intUserId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -12,7 +13,7 @@ BEGIN TRY
 	DECLARE @strSampleNumber NVARCHAR(30)
 		,@strSampleId NVARCHAR(MAX)
 		,@strDetails NVARCHAR(MAX)
-		,@intUserId INT
+		,@intSampleId INT
 	DECLARE @intCRowNo INT
 		,@intCContractDetailId INT
 		,@intCParentDetailId INT
@@ -62,10 +63,6 @@ BEGIN TRY
 	-- Parent contract sequence. ie., from which sequence it sliced
 	SELECT TOP 1 @intOrgParentDetailId = intCParentDetailId
 	FROM @ContractSliceDetail
-	
-	SELECT @intUserId = intLastModifiedById
-	FROM tblCTContractDetail
-	WHERE intContractDetailId = @intOrgParentDetailId
 
 	-- Parent contract sequence samples
 	INSERT INTO @ParentContractSample
@@ -132,7 +129,7 @@ BEGIN TRY
 
 			IF (LEN(@strSampleId) > 0)
 			BEGIN
-				SET @strDetails += '{"change":"intContractDetailId","iconCls":"small-gear","from":"' + LTRIM(@intCContractDetailId) + '","to":"' + LTRIM(@intOrgParentDetailId) + '","leaf":true}'
+				SET @strDetails = '{"change":"intContractDetailId","iconCls":"small-gear","from":"' + LTRIM(@intCContractDetailId) + '","to":"' + LTRIM(@intOrgParentDetailId) + '","leaf":true}'
 
 				EXEC uspSMAuditLog @keyValue = @strSampleId
 					,@screenName = 'Quality.view.QualitySample'
@@ -149,59 +146,77 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		-- Delete contract sequence samples for the merged sequences
-		DELETE
+		SELECT @intOrgUnitMeasureId = intUnitMeasureId
+		FROM tblCTContractDetail
+		WHERE intContractDetailId = @intOrgParentDetailId
+
+		DECLARE @MergedSampleDetail TABLE (
+			intSampleId INT
+			,intContractDetailId INT
+			)
+
+		INSERT INTO @MergedSampleDetail
+		SELECT intSampleId
+			,intContractDetailId
 		FROM tblQMSample
 		WHERE intContractDetailId IN (
 				SELECT intCContractDetailId
 				FROM @ContractSliceDetail
 				)
 
-		SELECT @intSRowNo = MIN(intSRowNo)
-		FROM @ParentContractSample
+		-- Contract Available Places
+		UPDATE tblQMSample
+		SET intContractDetailId = @intOrgParentDetailId
+			,intConcurrencyId = (intConcurrencyId + 1)
+			,intRepresentingUOMId = @intOrgUnitMeasureId
+		WHERE intContractDetailId IN (
+				SELECT intCContractDetailId
+				FROM @ContractSliceDetail
+				)
 
-		WHILE (@intSRowNo > 0)
+		-- Contract Samples
+		UPDATE tblQMSample
+		SET intProductValueId = @intOrgParentDetailId
+		WHERE intProductTypeId = 8
+			AND intProductValueId IN (
+				SELECT intCContractDetailId
+				FROM @ContractSliceDetail
+				)
+
+		UPDATE tblQMTestResult
+		SET intProductValueId = @intOrgParentDetailId
+			,intConcurrencyId = (intConcurrencyId + 1)
+		WHERE intProductTypeId = 8
+			AND intProductValueId IN (
+				SELECT intCContractDetailId
+				FROM @ContractSliceDetail
+				)
+
+		-- Audit Log
+		SELECT @intSampleId = MIN(intSampleId)
+		FROM @MergedSampleDetail
+
+		WHILE (@intSampleId > 0)
 		BEGIN
-			SELECT @intSRowNo = intSRowNo
-				,@intSSampleId = intSSampleId
-				,@intSContractDetailId = intSContractDetailId
-				,@dblSRepresentingQty = dblSRepresentingQty
-				,@intSRepresentingUOMId = intSRepresentingUOMId
-			FROM @ParentContractSample
-			WHERE intSRowNo = @intSRowNo
+			SELECT @intCContractDetailId = intContractDetailId
+			FROM @MergedSampleDetail
+			WHERE intSampleId = @intSampleId
 
-			SELECT @dblOrgQuantity = dblQuantity
-				,@intOrgUnitMeasureId = intUnitMeasureId
-			FROM tblCTContractDetail
-			WHERE intContractDetailId = @intOrgParentDetailId
-
-			IF (@dblSRepresentingQty < @dblOrgQuantity)
+			IF (@intSampleId > 0)
 			BEGIN
-				-- Update sample representing qty for the original parent contract sequence
-				UPDATE tblQMSample
-				SET dblRepresentingQty = @dblOrgQuantity
-					,intRepresentingUOMId = @intOrgUnitMeasureId
-					,intConcurrencyId = (intConcurrencyId + 1)
-				WHERE intSampleId = @intSSampleId
+				SET @strDetails = '{"change":"intContractDetailId","iconCls":"small-gear","from":"' + LTRIM(@intCContractDetailId) + '","to":"' + LTRIM(@intOrgParentDetailId) + '","leaf":true}'
 
-				SELECT @strSampleId = CONVERT(NVARCHAR, @intSSampleId)
-
-				IF (LEN(@strSampleId) > 0)
-				BEGIN
-					SET @strDetails = '{"change":"dblRepresentingQty","iconCls":"small-gear","from":"' + LTRIM(@dblSRepresentingQty) + '","to":"' + LTRIM(@dblOrgQuantity) + '","leaf":true}'
-
-					EXEC uspSMAuditLog @keyValue = @strSampleId
-						,@screenName = 'Quality.view.QualitySample'
-						,@entityId = @intUserId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@details = @strDetails
-				END
+				EXEC uspSMAuditLog @keyValue = @intSampleId
+					,@screenName = 'Quality.view.QualitySample'
+					,@entityId = @intUserId
+					,@actionType = 'Updated'
+					,@actionIcon = 'small-tree-modified'
+					,@details = @strDetails
 			END
 
-			SELECT @intSRowNo = MIN(intSRowNo)
-			FROM @ParentContractSample
-			WHERE intSRowNo > @intSRowNo
+			SELECT @intSampleId = MIN(intSampleId)
+			FROM @MergedSampleDetail
+			WHERE intSampleId > @intSampleId
 		END
 	END
 END TRY
