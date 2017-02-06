@@ -1,9 +1,8 @@
-﻿CREATE PROCEDURE uspGLPostRecap
+﻿CREATE PROCEDURE uspGLPostRecapOld
 	@RecapTable RecapTableType READONLY 
 	,@intTransactionId AS INT
 	,@strTransactionId AS NVARCHAR(50)
 	,@strCode AS NVARCHAR(50)
-	,@intEntityUserSecurityId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -13,14 +12,9 @@ SET XACT_ABORT ON
 --SET ANSI_WARNINGS OFF
 
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
-DELETE	FROM tblGLPostRecap 
+DELETE	FROM tblGLDetailRecap 
 WHERE	strTransactionId = @strTransactionId
 		AND intTransactionId = @intTransactionId
-
--- DELETE Results 1 DAYS OLDER	
-DELETE	FROM tblGLPostRecap 
-WHERE	dbo.fnDateLessThan(dtmDateEntered, GETDATE()) = 1
-		AND intEntityId = @intEntityUserSecurityId;
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @RecapTable)
 BEGIN 
@@ -31,12 +25,10 @@ END
 
 -- INSERT THE RECAP DATA. 
 -- THE RECAP DATA WILL BE STORED IN A PERMANENT TABLE SO THAT WE CAN QUERY IT LATER USING A BUFFERED STORE. 
-INSERT INTO tblGLPostRecap (
+INSERT INTO tblGLDetailRecap (
 		[dtmDate]
 		,[strBatchId]
 		,[intAccountId]
-		,[strAccountId]
-		,[strAccountGroup]
 		,[dblDebit]
 		,[dblCredit]
 		,[dblDebitUnit]
@@ -49,10 +41,10 @@ INSERT INTO tblGLPostRecap (
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
 		,[strJournalLineDescription]
-		,[intJournalLineNo]			
+		,[intJournalLineNo]
 		,[ysnIsUnposted]
 		,[intUserId]
-		,[intEntityId]				
+		,[intEntityId]
 		,[strTransactionId]
 		,[intTransactionId]
 		,[strTransactionType]
@@ -63,18 +55,12 @@ INSERT INTO tblGLPostRecap (
 -- RETRIEVE THE DATA FROM THE TABLE VARIABLE. 
 SELECT	[dtmDate]
 		,[strBatchId]
-		,[intAccountId] = gl.intAccountId
-		,[strAccountId] = gl.strAccountId
-		,[strAccountGroup] = gg.strAccountGroup
-		,[dblDebit]				= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
-										WHEN [dblDebit] < 0 THEN 0
-										ELSE [dblDebit] END 
-		,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
-										WHEN [dblCredit] < 0 THEN 0
-										ELSE [dblCredit] END	
-		,[dblDebitUnit]			= ISNULL(udtRecap.[dblDebitUnit], 0)
-		,[dblCreditUnit]		= ISNULL(udtRecap.[dblCreditUnit], 0)
-		,[strDescription] = udtRecap.strDescription
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
 		,[strCode]
 		,[strReference]
 		,[intCurrencyId]
@@ -82,20 +68,16 @@ SELECT	[dtmDate]
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
 		,[strJournalLineDescription]
-		,[intJournalLineNo]			
+		,[intJournalLineNo]
 		,[ysnIsUnposted]
 		,[intUserId]
-		,[intEntityId]				
+		,[intEntityId]
 		,[strTransactionId]
 		,[intTransactionId]
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		,[intConcurrencyId] = 1
-FROM	@RecapTable udtRecap INNER JOIN tblGLAccount gl
-			ON udtRecap.intAccountId = gl.intAccountId
-		INNER JOIN tblGLAccountGroup gg
-			ON gg.intAccountGroupId = gl.intAccountGroupId
-
+		,[intConcurrencyId]
+FROM	@RecapTable
 
 _Exit: 

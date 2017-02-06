@@ -2153,7 +2153,7 @@
     <None Include="Scripts\Utility\IC\IC-1024\Fix the item average cost.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOrderCommitted.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLPostRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLPostRecapOld.sql" />
     <None Include="Scripts\Utility\IC\IC-1092\Fix Inventory Adjustment Cost for Outgoing stocks.sql" />
     <None Include="Scripts\Utility\IC\IC-1092\Fix Inventory Adjustments.sql" />
     <None Include="Scripts\Utility\IC\IC-1092\Fix missing GL entries for Inventory Adj posting.sql" />
@@ -4987,6 +4987,7 @@
     <Build Include="dbo\Tables\tblSMApproverConfiguration.sql" />
     <Build Include="dbo\Tables\tblSMApproverConfigurationDetail.sql" />
     <Build Include="dbo\Tables\tblSMApproverConfigurationApprovalFor.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLPostRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

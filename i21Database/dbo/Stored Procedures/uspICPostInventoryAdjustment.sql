@@ -529,7 +529,7 @@ BEGIN
 	IF @adjustmentTypeRequiresGLEntries = 1
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
-		EXEC dbo.uspGLPostRecap 
+		EXEC dbo.uspGLPostRecapOld 
 				@GLEntries
 				,@intTransactionId
 				,@strTransactionId

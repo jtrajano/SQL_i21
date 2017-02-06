@@ -1011,7 +1011,12 @@ END
 IF @ysnRecap = 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspCMPostRecap @GLEntries
+	EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intTransactionId
+			,@strTransactionId
+			,'IC'
+			,@intEntityUserSecurityId
 	COMMIT TRAN @TransactionName
 END 
 
