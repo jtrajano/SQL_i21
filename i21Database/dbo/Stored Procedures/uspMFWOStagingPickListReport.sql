@@ -63,7 +63,7 @@ BEGIN
 
 	IF ISNULL(@intCustomerEntityId,0) <> 0 
 	BEGIN
-		SELECT TOP 1 @strShipmentPickListNotes = DMM.strMessage FROM tblSMDocumentMaintenance DM
+		SELECT TOP 1 @strShipmentPickListNotes = Replace(Replace(CONVERT(VarChar(max), blbMessage),'<p>',''),'</p>','') FROM tblSMDocumentMaintenance DM
 		JOIN tblSMDocumentMaintenanceMessage DMM ON DM.intDocumentMaintenanceId = DMM.intDocumentMaintenanceId
 		WHERE intEntityCustomerId = @intCustomerEntityId
 	END
