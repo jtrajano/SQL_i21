@@ -712,6 +712,12 @@ BEGIN TRY
 	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
 	WHERE SW.intWorkOrderId = @intWorkOrderId
 
+	UPDATE OH
+	SET intOrderStatusId = 10
+	FROM dbo.tblMFOrderHeader OH
+	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = OH.intOrderHeaderId
+	WHERE SW.intWorkOrderId = @intWorkOrderId
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 
