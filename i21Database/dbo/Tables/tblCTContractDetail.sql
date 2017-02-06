@@ -111,6 +111,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dtmCreated DATETIME,
 	intLastModifiedById INT,
 	dtmLastModified DATETIME,
+	[ysnInvoice] BIT NULL DEFAULT 0, 
+	[ysnProvisionalInvoice] BIT NULL DEFAULT 0, 
+	[ysnQuantityFinal] BIT NULL DEFAULT 0, 
 	
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
