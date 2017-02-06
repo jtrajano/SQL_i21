@@ -12,6 +12,10 @@
 	strTransactionNumber  nvarchar(200) COLLATE Latin1_General_CI_AS,
 	ysnSent BIT,
 	strErrorMsg  nvarchar(MAX) COLLATE Latin1_General_CI_AS,
+	strScheme  nvarchar(200) COLLATE Latin1_General_CI_AS,
+	strAuthority  nvarchar(200) COLLATE Latin1_General_CI_AS,
+	strApplicationPath  nvarchar(200) COLLATE Latin1_General_CI_AS,
+	strToken  nvarchar(200) COLLATE Latin1_General_CI_AS,
 	intConcurrencyId INT NOT NULL, 
 	CONSTRAINT PK_tblCTNotification_intNotificationId PRIMARY KEY CLUSTERED (intNotificationId ASC)
 )
