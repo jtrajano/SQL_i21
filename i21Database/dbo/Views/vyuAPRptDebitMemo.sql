@@ -18,7 +18,7 @@ SELECT
 		ELSE 'Each' END AS strUnitMeasure
 	,C2.dblQtyReceived
 	,C2.dblCost
-	,CASE WHEN C2.intCostUOMId > 0 THEN G2.strUnitMeasure
+	,CASE --WHEN C2.intWeightUOMId > 0 THEN K2.strUnitMeasure
 		WHEN C2.intWeightUOMId > 0 THEN K2.strUnitMeasure
 		WHEN C2.intUnitOfMeasureId > 0 THEN F2.strUnitMeasure
 		ELSE 'Each' END AS strCostUOM
@@ -30,6 +30,15 @@ SELECT
 	,ISNULL(N2.strCountry,O.strCountry) AS strCountryOrigin
 	,P.strSubLocationName strLPlant
 	,strDateLocation = Q.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107)
+	,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
+	(	
+	  SELECT TOP 1
+	  intAttachmentId
+	  FROM tblSMAttachment
+	  WHERE strScreen = 'SystemManager.CompanyPreference'
+	  AND strComment = 'Footer'
+	  ORDER BY intAttachmentId DESC
+	)) AS strFooter
 FROM tblAPBill A
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId) ON A.intEntityVendorId = B.intEntityVendorId
 INNER JOIN tblAPBillDetail C2 ON A.intBillId = C2.intBillId

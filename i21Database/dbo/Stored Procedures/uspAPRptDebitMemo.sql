@@ -51,6 +51,7 @@ BEGIN
 		'' AS strLPlant,
 		'' AS strCountryOfOrigin,
 		'' AS strDateLocation,
+		'' AS strFooter,
 		0 AS intBillId,
 		0 AS intContractSeq,
 		0 AS intUnitOfMeasureId,
