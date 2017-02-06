@@ -43,7 +43,9 @@ FROM
 			,cc.dblActual
 			,cc.dblActualPer
 			,he.dblNetImpactInDefCurrency dblNetImpact
-			,he.dblFuturesVolume
+			,he.dblLong
+			,he.dblShort
+			,CASE WHEN he.dblLong >=he.dblShort THEN he.dblShort ELSE he.dblLong END AS dblFuturesVolume
 			,CASE 
 				WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId, cd.intPriceUnitMeasureId, cd.intUnitMeasureId, cd.dblDetailQuantity), 0) = 0
 					THEN NULL
@@ -85,9 +87,10 @@ FROM
 		(
 			SELECT 
 				intContractDetailId
-				,SUM(dblNoOfLots) dblFuturesVolume
+				,CASE WHEN dblLots > 0 THEN  SUM(dblLots) ELSE 0 END AS dblLong
+				,CASE WHEN dblLots < 0 THEN  ABS(SUM(dblLots)) ELSE 0 END AS dblShort 				
 				,SUM(dblNetImpactInDefCurrency) dblNetImpactInDefCurrency
 			FROM vyuCTContractCostEnquiryHedge
-			GROUP BY intContractDetailId
+			GROUP BY intContractDetailId,dblLots
 		) he ON he.intContractDetailId = cd.intContractDetailId
 ) t
