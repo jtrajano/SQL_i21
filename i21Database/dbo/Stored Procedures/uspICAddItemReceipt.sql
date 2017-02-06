@@ -1052,7 +1052,7 @@ BEGIN
 
 		SELECT @valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData
-		WHERE RawData.strAllocateCostBy IS NOT NULL AND RTRIM(LTRIM(LOWER(RawData.strAllocateCostBy))) NOT IN ('', 'unit', 'stock unit', 'cost')
+		WHERE RawData.strAllocateCostBy IS NOT NULL AND RTRIM(LTRIM(LOWER(RawData.strAllocateCostBy))) NOT IN ('unit', 'stock unit', 'cost')
 
 		IF @valueChargeId > 0
 			BEGIN
