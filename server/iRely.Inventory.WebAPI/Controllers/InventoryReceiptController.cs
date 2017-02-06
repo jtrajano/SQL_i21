@@ -48,7 +48,11 @@ namespace iRely.Inventory.WebApi
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = receipt,
+                data = new
+                {
+                    strBatchId = result.strBatchId,
+                    strTransactionId = receipt.strTransactionId
+                },
                 success = !result.HasError,
                 message = new
                 {
@@ -67,7 +71,12 @@ namespace iRely.Inventory.WebApi
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = receipt,
+                data = new
+                {
+                    strBatchId = result.strBatchId,
+                    strTransactionId = receipt.strTransactionId
+                },
+
                 success = !result.HasError,
                 message = new
                 {

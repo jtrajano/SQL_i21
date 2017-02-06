@@ -7166,6 +7166,54 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "designer|createAlias": "glrecaptab",
+                                "itemId": "pnlPostPreview",
+                                "layout": null,
+                                "title": "Post Preview"
+                            },
+                            "name": "MyPanel12",
+                            "designerId": "339d7559-9d8b-4f8e-8c8a-2a69931eec2b",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": null,
+                                        "itemId": "tabPostPreview"
+                                    },
+                                    "name": "TabConfig22",
+                                    "designerId": "2e1a54f8-d74b-43e5-9017-4e23a917622a"
+                                },
+                                {
+                                    "type": "viewcontrollereventbinding",
+                                    "reference": {
+                                        "name": "listeners",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fn": "onPnlRecapBeforeShow",
+                                        "name": "beforeshow",
+                                        "scope": "me"
+                                    },
+                                    "name": "onPnlRecapBeforeShow",
+                                    "designerId": "f2374048-36c4-4921-ae2e-f69d1098dd04"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": null,
                                 "itemId": "pgeAuditLog",
                                 "layout": "fit",
                                 "title": "Audit Log"

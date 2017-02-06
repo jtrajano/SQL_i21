@@ -36,6 +36,15 @@ namespace iRely.Inventory.BusinessLayer
             public int intEntityId { get; set; }
         }
 
+        public class GLPostResult
+        {
+            public Exception BaseException { get; set; }
+            public ServerException Exception { get; set; }
+            public bool HasError { get; set; }
+            public int RowsAffected { get; set; }
+            public string strBatchId { get; set; }
+        }
+
         public static string GetStartingNumber(StartingNumber transaction)
         {
             var _db = new Repository(new Inventory.Model.InventoryEntities());

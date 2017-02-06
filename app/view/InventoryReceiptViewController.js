@@ -3,7 +3,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     alias: 'controller.icinventoryreceipt',
     requires: [
         'CashManagement.common.Text',
-        'CashManagement.common.BusinessRules'
+        'CashManagement.common.BusinessRules'        
     ],
 
     config: {
@@ -6311,6 +6311,72 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             }
         }
+    },
+
+    onPnlRecapBeforeShow: function(){
+        var me = this;
+        var win = button.up('window');
+        var cboCurrency = win.down('#cboCurrency');
+        var context = win.context;
+        var pnlLotTracking = win.down('#pnlLotTracking');
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+
+        //Hide Lot Tracking Grid
+        pnlLotTracking.setVisible(false);
+        //Deselect all rows in Item Grid
+        grdInventoryReceipt.getSelectionModel().deselectAll();
+
+        var doRecap = function (recapButton, currentRecord, currency) {
+
+            // Call the buildRecapData to generate the recap data
+            CashManagement.common.BusinessRules.buildRecapData({
+                postURL: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
+                strTransactionId: currentRecord.get('strReceiptNumber'),
+                ysnPosted: currentRecord.get('ysnPosted'),
+                scope: me,
+                success: function (response) {
+                    
+                    var postResult = Ext.decode(response.responseText);
+                    var batchId = postResult.data.strBatchId; 
+
+                    if (batchId){
+                        me.bindRecapGrid(batchId);
+                    }
+                },
+                failure: function (message) {
+                    // Show why recap failed.
+                    var msgBox = iRely.Functions;
+                    msgBox.showCustomDialog(
+                        msgBox.dialogType.ERROR,
+                        msgBox.dialogButtonType.OK,
+                        message
+                    );
+                }
+            });
+        };
+
+        // If there is no data change, calculate the charge and do the recap. 
+        if (!context.data.hasChanges()) {
+            me.doOtherChargeCalculate(win);
+            var task = new Ext.util.DelayedTask(function () {
+                doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+            });
+            task.delay(3000);
+
+            return;
+        }
+
+        // Save has data changes first before anything else. 
+        context.data.saveRecord({
+            successFn: function () {
+                me.doOtherChargeCalculate(win);
+                var task = new Ext.util.DelayedTask(function () {
+                    doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+                });
+                task.delay(3000);
+            }
+        });
+
     },
 
     init: function (application) {
