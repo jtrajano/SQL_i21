@@ -1983,20 +1983,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
             current.set('dblForexRate', null);
 
-            // me.getForexRate(
-            //     win.viewModel.data.current.get('intCurrencyId'),
-            //     current.get('intForexRateTypeId'),
-            //     win.viewModel.data.current.get('dtmReceiptDate'),
-            //     function(successResult){
-            //         if (successResult && successResult.length > 0){
-            //             current.set('dblForexRate', successResult[0].dblRate);
-            //         }
-            //     },
-            //     function(failureResult){
-            //         var jsonData = Ext.decode(failureResult.responseText);
-            //         iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
-            //     }
-            // );
+            iRely.Functions.getForexRate(
+                win.viewModel.data.current.get('intCurrencyId'),
+                current.get('intForexRateTypeId'),
+                win.viewModel.data.current.get('dtmReceiptDate'),
+                function(successResponse){
+                    if (successResponse && successResponse.length > 0){
+                        current.set('dblForexRate', successResponse[0].dblRate);
+                    }
+                },
+                function(failureResponse){
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            );
         }        
 
         // Calculate the taxes
@@ -5030,7 +5030,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (combo.itemId === 'cboChargeForexRateType') {
             current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
             current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
-            current.set('dblForexRate', 0.00);
+            current.set('dblForexRate', null);
+
+            iRely.Functions.getForexRate(
+                win.viewModel.data.current.get('intCurrencyId'),
+                current.get('intForexRateTypeId'),
+                win.viewModel.data.current.get('dtmReceiptDate'),
+                function(successResponse){
+                    if (successResponse && successResponse.length > 0){
+                        current.set('dblForexRate', successResponse[0].dblRate);
+                    }
+                },
+                function(failureResponse){
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            );            
         }        
         
     },
@@ -6296,30 +6311,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             }
         }
-    },
-
-    getForexRate: function(currencyId, forexRateTypeId, date, successFn, failureFn){
-        ic.utils.ajax({
-            url: '../i21/api/CurrencyExchangeRate/GetCurrencyExchangeRateDetail',
-            params:{
-                currencyId: currencyId,
-                rateTypeId: forexRateTypeId,
-                validFromDate: date
-            },
-            method: 'get'  
-        })
-        .subscribe(
-            function(successResponse) {
-                if (successFn){
-                    successFn(successResponse);
-                }
-            }
-            , function(failureResponse) {
-                if (failureFn){
-                    failureFn(failureResponse);
-                }
-            }
-        );
     },
 
     init: function (application) {
