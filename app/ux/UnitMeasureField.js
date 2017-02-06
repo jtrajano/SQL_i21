@@ -1,3 +1,18 @@
+var decimalPlaces = function(){
+   function isInt(n){
+      return typeof n === 'number' && 
+             parseFloat(n) == parseInt(n, 10) && !isNaN(n);
+   }
+   return function(n){
+      var a = Math.abs(n);
+      var c = a, count = 1;
+      while(!isInt(c) && isFinite(c)){
+         c = a * Math.pow(10,count++);
+      }
+      return count-1;
+   };
+}();
+
 Ext.define('Inventory.ux.UnitMeasureField', {
     extend: 'Ext.panel.Panel',
     xtype: 'unitmeasurefield',
@@ -54,7 +69,7 @@ Ext.define('Inventory.ux.UnitMeasureField', {
 
     initComponent: function(options) {
         this.callParent(arguments);
-    
+        
         var txtQuantity = this.down('numberfield');
         var cboUnitMeasure = this.down('gridcombobox');
         var store = Ext.create('Inventory.store.BufferedUnitMeasure', { pageSize: 50 });
@@ -70,18 +85,50 @@ Ext.define('Inventory.ux.UnitMeasureField', {
         else
             cboUnitMeasure.setRawValue(uomId);
         cboUnitMeasure.on('select', this.onUnitMeasurementChange);
+        txtQuantity.on('change', this.onQuantityChange);
+    },
+
+    onQuantityChange: function(textfield, newValue, oldValue) {
+        var panel = textfield.up('panel');
+        var cboUnitMeasure = panel.down('gridcombobox');
+
+        var decimal = 2;
+        if(cboUnitMeasure.selection)
+            decimal = cboUnitMeasure.selection.get('intDecimalPlaces');
+        var format = "";
+        for (var i = 0; i < decimal; i++)
+            format += "0";
+        if(decimal === 0) {
+            textfield.setDecimalPrecision(0);
+            textfield.setDecimalToDisplay(0);
+            var f = numeral(newValue).format('0,0');
+            textfield.setValue(f);
+            textfield.setRawValue(f);
+        } else {
+            var formatted = numeral(newValue).format('0,0.[' + format + ']');
+            var decimalToDisplay = decimalPlaces(numeral(formatted)._value);
+            textfield.setDecimalPrecision(decimal);
+            textfield.setDecimalToDisplay(decimalToDisplay);
+            textfield.setValue(formatted);
+            textfield.setRawValue(formatted);  
+        }
     },
 
     onUnitMeasurementChange: function(combo, records, eOptss) {
-        var txtQuantity = combo.up('window').down('numberfield');
+        var panel = combo.up('panel');
+        var txtQuantity = panel.down('numberfield');
         if(records && records.length > 0) {
-            var decimal = records[0].get('intDecimalPlaces');
-            if(!decimal)
-                decimal = 6;
-            txtQuantity.setDecimalPrecision(decimal);
-            txtQuantity.setDecimalToDisplay(decimal);
+            var decimal = records[0].get('intDecimalPlaces');      
+            var format = "";
+            for (var i = 0; i < decimal; i++)
+                format += "0";
             var val = txtQuantity.getValue();
-            txtQuantity.setValue(val);
+            var formatted = numeral(val).format('0,0.[' + format + ']');
+            var decimalToDisplay = decimalPlaces(numeral(formatted)._value);
+            txtQuantity.setDecimalPrecision(decimal);
+            txtQuantity.setDecimalToDisplay(decimalToDisplay);
+            txtQuantity.setValue(formatted);
+            txtQuantity.setRawValue(formatted);
         }
     },
 
@@ -96,9 +143,10 @@ Ext.define('Inventory.ux.UnitMeasureField', {
             items: [
                 {
                     xtype: 'numberfield',
-                    decimalPrecision: 6,
                     flex: 3,
                     margin: '0 5 0 0',
+                    decimalPrecision: 6,
+                    decimalToDisplay: 6,
                     fieldLabel: 'Quantity',
                     bind: {
                         value: '{quantity}'
