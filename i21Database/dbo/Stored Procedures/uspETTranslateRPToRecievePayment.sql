@@ -35,6 +35,7 @@ BEGIN
 		,strStatus					NVARCHAR(MAX)
 		,ysnSuccessful				BIT
 		,intInvoiceId				INT
+		,strRecordId                NVARCHAR(5)
 	)
 
 	SET @strAllErrorMessage = ''
@@ -48,7 +49,7 @@ BEGIN
 	FROM @StagingTable
 	WHERE strRecordType = 'C'
 
-	SELECT * 	FROM #tmpSDToInvoice tmp--debug
+	--SELECT * 	FROM #tmpSDToInvoice tmp--debug
 
 	IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpUniqueInvoiceList')) 
 		BEGIN
@@ -150,6 +151,7 @@ BEGIN
 							,strStatus
 							,ysnSuccessful
 							,intInvoiceId				
+							,strRecordId
 					)
 					SELECT
 							strCustomerNumber = @strCustomerNumber		
@@ -158,9 +160,10 @@ BEGIN
 							,dtmDate = @dtmPaymentDate					
 							,intLineItem = 0--@intLineItem		
 							,strFileName = ''				
-							,strStatus = @strErrorMessage
+							,strStatus = 'Importing Failed'
 							,ysnSuccessful = 0
 							,intInvoiceId = @intNewPaymentId--@intNewInvoiceId
+							,strRecordId = @intNewPaymentId
 				END
 
 			ELSE
@@ -176,6 +179,7 @@ BEGIN
 						,strStatus
 						,ysnSuccessful
 						,intInvoiceId 
+						,strRecordId
 				)
 
 				SELECT
@@ -188,6 +192,7 @@ BEGIN
 						,strStatus = 'Successfully created '-- + @strNewPaymentNumber
 						,ysnSuccessful = 1
 						,intInvoiceId = @intNewPaymentId
+						,strRecordId = @intNewPaymentId
 
 						--select * from @ResultTableLog--debug
 				END
