@@ -168,6 +168,22 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intStagingId
 
+	DECLARE @tblMFStageLocation TABLE (intStageLocationId INT)
+
+	INSERT INTO @tblMFStageLocation
+	SELECT intStagingLocationId
+	FROM tblMFManufacturingProcessMachine
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intProductionStagingLocationId IS NOT NULL
+	
+	UNION
+	
+	SELECT strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 76
+
 	BEGIN TRANSACTION
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
@@ -283,6 +299,7 @@ BEGIN TRY
 			,dblWeight
 			,intWeightUOMId
 			,dblWeightPerUnit
+			,dblRequiredQty
 			,intUnitsPerLayer
 			,intLayersPerPallet
 			,intPreferenceId
@@ -305,6 +322,11 @@ BEGIN TRY
 				END
 			,ri.intItemUOMId
 			,IU.dblUnitQty
+			,CASE 
+				WHEN C.strCategoryCode = @strPackagingCategory
+					THEN CAST(CEILING((ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
+				ELSE (ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))
+				END
 			,ISNULL(NULL, I.intUnitPerLayer)
 			,ISNULL(NULL, I.intLayerPerPallet)
 			,(
@@ -340,6 +362,71 @@ BEGIN TRY
 				)
 			AND ri.intConsumptionMethodId = 1
 
+		DECLARE @tblMFRequiredQty TABLE (
+			intItemId INT
+			,dblRequiredQty DECIMAL(38, 20)
+			)
+
+		INSERT INTO @tblMFRequiredQty (
+			intItemId
+			,dblRequiredQty
+			)
+		SELECT OD1.intItemId
+			,IsNULL(sum(OD.dblRequiredQty),0)
+		From @OrderDetail OD1 
+		LEFT JOIN tblMFOrderDetail OD ON OD1.intItemId = OD.intItemId 
+		and OD.intOrderHeaderId in (Select OH.intOrderHeaderId from tblMFOrderHeader OH Where OH.intOrderTypeId =1 and OH.intOrderStatusId <>10)
+		Group by OD1.intItemId
+
+		DECLARE @tblMFStagedQty TABLE (
+			intItemId INT
+			,dblStagedQty DECIMAL(38, 20)
+			)
+
+		INSERT INTO @tblMFStagedQty (
+			intItemId
+			,dblStagedQty
+			)
+		SELECT OD1.intItemId
+			,IsNULL(sum(CASE 
+						WHEN L.intWeightUOMId IS NULL
+							THEN L.dblQty
+						ELSE L.dblWeight
+						END), 0)
+		FROM @OrderDetail OD1
+		LEFT JOIN dbo.tblICLot L ON L.intItemId = OD1.intItemId
+		WHERE L.intStorageLocationId IN (
+				SELECT intStageLocationId
+				FROM @tblMFStageLocation
+				)
+		GROUP BY OD1.intItemId
+
+		DECLARE @tblMFRemainingQty TABLE (
+			intItemId INT
+			,dblRemainingQty DECIMAL(38, 20)
+			)
+
+		INSERT INTO @tblMFRemainingQty (
+			intItemId
+			,dblRemainingQty
+			)
+		SELECT R.intItemId
+			,(
+				CASE 
+					WHEN IsNULL(dblStagedQty,0) - IsNULL(dblRequiredQty,0) > 0
+						THEN IsNULL(dblStagedQty,0) - IsNULL(dblRequiredQty,0)
+					ELSE 0
+					END
+				)
+		FROM @tblMFRequiredQty R
+		LEFT JOIN @tblMFStagedQty S ON S.intItemId = R.intItemId
+
+		UPDATE OD
+		SET dblQty = Case When dblQty - R.dblRemainingQty<0 Then 0 Else dblQty - R.dblRemainingQty End
+			,dblWeight = Case When dblWeight - R.dblRemainingQty<0 Then 0 Else dblWeight - R.dblRemainingQty End
+		FROM @OrderDetail OD
+		LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
+
 		SELECT @intWorkOrderId = intWorkOrderId
 			,@intProductId = intItemId
 			,@dblPlannedQty = dblPlannedQty
@@ -353,6 +440,7 @@ BEGIN TRY
 			,dblWeight
 			,intWeightUOMId
 			,dblWeightPerUnit
+			,dblRequiredQty
 			,intUnitsPerLayer
 			,intLayersPerPallet
 			,intPreferenceId
@@ -367,6 +455,7 @@ BEGIN TRY
 			,dblWeight
 			,intWeightUOMId
 			,dblWeightPerUnit
+			,dblRequiredQty
 			,intUnitsPerLayer
 			,intLayersPerPallet
 			,intPreferenceId
@@ -400,14 +489,16 @@ BEGIN TRY
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 				AND R.strInternalCode = 'STOCK'
 			LEFT JOIN dbo.tblMFTask T ON T.intLotId = L.intLotId
-			JOIN dbo.tblMFLotInventory LI On LI.intLotId=L.intLotId
-			JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
+			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+				AND BS.strPrimaryStatus = 'Active'
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 
-			IF @dblAvailableQty IS NULL OR @dblAvailableQty < 0
+			IF @dblAvailableQty IS NULL
+				OR @dblAvailableQty < 0
 			BEGIN
 				SELECT @dblAvailableQty = 0
 
@@ -480,9 +571,13 @@ BEGIN TRY
 					JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 						AND R.strInternalCode = 'STOCK'
 					LEFT JOIN dbo.tblMFTask T ON T.intLotId = L.intLotId
+					JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+					JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+					JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 					WHERE L.intItemId = @intSubstituteItemId
 						AND L.intLocationId = @intLocationId
-						AND L.intLotStatusId = 1
+						AND LS.strPrimaryStatus = 'Active'
 						AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 
 					IF @dblAvailableQty IS NULL

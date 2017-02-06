@@ -8,6 +8,7 @@
 	,[intWeightUOMId]					INT
 	,[dblWeightPerUnit]					NUMERIC(18, 6)
 	,[intWeightPerUnitUOMId]			INT
+	,[dblRequiredQty]						NUMERIC(18, 6)
 	,[intLotId]							INT
 	,[strLotAlias]						NVARCHAR(100)
 	,[intUnitsPerLayer]					INT
