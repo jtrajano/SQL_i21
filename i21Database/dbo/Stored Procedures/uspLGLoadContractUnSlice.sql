@@ -52,7 +52,8 @@ BEGIN TRY
 		RETURN;
 
 	-- Parent contract sequence. ie., from which sequence it sliced
-	SELECT TOP 1 @intParentContractDetailId = intCParentDetailId
+	SELECT TOP 1 @intParentContractDetailId = intCParentDetailId,
+				 @intCContractDetailId = intCContractDetailId
 	FROM @ContractSliceDetail
 
 	SELECT @intUserId = intLastModifiedById
@@ -90,7 +91,7 @@ BEGIN TRY
 				WHEN L.intPurchaseSale = 1
 					THEN LD.intPContractDetailId
 				ELSE LD.intSContractDetailId
-				END = @intParentContractDetailId
+				END = @intCContractDetailId
 			AND intShipmentType = 2
 
 		SELECT @intMinLoadRecordId = MIN(intLoadRecordId)
@@ -117,13 +118,13 @@ BEGIN TRY
 			FROM tblCTContractDetail
 			WHERE intContractDetailId = @intParentContractDetailId
 
-			IF (@dblOrgLoadDetailQty < @dblOrgContractDetailQty)
+			IF (@dblOrgLoadDetailQty <= @dblOrgContractDetailQty)
 			BEGIN
 				-- Update sample representing qty for the original parent contract sequence
 				UPDATE tblLGLoadDetail
-				SET dblQuantity = @dblOrgContractDetailQty
-					,dblNet = dbo.fnCTConvertQtyToTargetItemUOM(intItemId, intWeightItemUOMId, @dblOrgContractDetailQty)
-					,dblGross = dbo.fnCTConvertQtyToTargetItemUOM(intItemId, intWeightItemUOMId, @dblOrgContractDetailQty)
+				SET dblQuantity += @dblOrgContractDetailQty
+					,dblNet += dbo.fnCTConvertQtyToTargetItemUOM(intItemId, intWeightItemUOMId, @dblOrgContractDetailQty)
+					,dblGross += dbo.fnCTConvertQtyToTargetItemUOM(intItemId, intWeightItemUOMId, @dblOrgContractDetailQty)
 				WHERE intLoadDetailId = @intOrgLoadIDetaild
 			END
 
