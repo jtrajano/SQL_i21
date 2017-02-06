@@ -8,6 +8,7 @@
 		,[dblWeight] NUMERIC(18, 6)
 		,[intWeightUOMId] INT
 		,[dblWeightPerQty] NUMERIC(18, 6)
+		,[dblRequiredQty] NUMERIC(18, 6)
 		,[intLotId] INT
 		,[strLotAlias] NVARCHAR(32) COLLATE Latin1_General_CI_AS NULL
 		,[intUnitsPerLayer] INT
