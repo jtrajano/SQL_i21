@@ -208,6 +208,6 @@ BEGIN
 	@strYear AS strYear,
     @companyLogo AS blbHeaderLogo,
 	@ReportFooter AS blbFooterLogo,
-	'Annual Operating Planning, '+@strCommodityCode+', '+@strYear AS strCaption
+	'Annual Operation Planning, '+@strCommodityCode+', '+@strYear AS strCaption
 
 END

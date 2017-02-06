@@ -2710,11 +2710,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Amendment
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.Amendments' WHERE strMenuName = 'Amendment' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Annual Operating Planning' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId)
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Annual Operating Planning'
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Annual Operation Planning' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Annual Operating Planning', N'Contract Management', @ContractManagementParentMenuId, N'Annual Operating Planning', N'Maintenance', N'Screen', N'ContractManagement.view.AnnualOperatingPlanning', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Annual Operation Planning', N'Contract Management', @ContractManagementParentMenuId, N'Annual Operation Planning', N'Maintenance', N'Screen', N'ContractManagement.view.AnnualOperatingPlanning', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.AnnualOperatingPlanning' WHERE strMenuName = 'Annual Operating Planning' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.AnnualOperatingPlanning' WHERE strMenuName = 'Annual Operation Planning' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Need Plan' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 

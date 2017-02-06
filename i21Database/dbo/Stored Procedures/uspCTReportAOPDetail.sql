@@ -205,7 +205,7 @@ BEGIN
 							JOIN tblICItem IM ON IM.intItemId=Item.intItemId 
 							LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId
 							LEFT JOIN tblCTAOPDetail AD ON AD.intItemId=Item.intItemId
-							WHERE Item.intCommodityId='+LTRIM(@IntCommodityId)+' AND Item.strStatus <> ''Discontinued'' AND  AD.intItemId IS NULL'
+							WHERE Item.strType IN (''Raw Material'',''Inventory'') AND Item.intCommodityId='+LTRIM(@IntCommodityId)+' AND Item.strStatus <> ''Discontinued'' AND  AD.intItemId IS NULL'
 		EXEC (@SqlInsert)
 
 		--SELECT * FROM #tblCoffeeNeedPlan 
