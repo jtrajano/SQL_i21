@@ -148,7 +148,7 @@ IF @Type = 'CF Tran'
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120076, 16, 1)
+			RAISERROR(120077, 16, 1)
 		RETURN 0;
 	END
 	
@@ -157,7 +157,7 @@ IF @Type = 'CF Invoice'
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120077, 16, 1)
+			RAISERROR(120078, 16, 1)
 		RETURN 0;
 	END
 
@@ -166,7 +166,7 @@ IF @Type = 'Meter Billing'
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120078, 16, 1)
+			RAISERROR(120079, 16, 1)
 		RETURN 0;
 	END
 
