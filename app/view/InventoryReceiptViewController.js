@@ -5981,7 +5981,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    doOtherChargeCalculate: function(win) {
+    doOtherChargeCalculate: function(win, successCallback, failureCallback) {
         var context = win.context;
         var current = win.viewModel.data.current;
         var me = win.controller;
@@ -6007,15 +6007,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             me.doOtherChargeTaxCalculate(win);
                         }
                     });
-                    // var task = new Ext.util.DelayedTask(new function () {
-                        
-                    // });
-                    // task.delay(1700);
+
+                    if (successCallback) successCallback();
                 };
             }
             ,function(failureResponse) {
                 var jsonData = Ext.decode(failureResponse.responseText);
                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
+
+                if (failureCallback) failureCallback();
             }
         );        
     },
@@ -6318,36 +6318,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = component.up('window');
         var context = win.context;
 
-        // var doRecap = function (currentRecord, currency) {
-
-        //     // Call the buildRecapData to generate the recap data
-        //     CashManagement.common.BusinessRules.buildRecapData({
-        //         postURL: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
-        //         strTransactionId: currentRecord.get('strReceiptNumber'),
-        //         ysnPosted: currentRecord.get('ysnPosted'),
-        //         scope: me,
-        //         success: function (response) {
-                    
-        //             var postResult = Ext.decode(response.responseText);
-        //             var batchId = postResult.data.strBatchId; 
-
-        //             if (batchId){
-        //                 me.bindRecapGrid(batchId);
-        //             }
-        //         },
-        //         failure: function (message) {
-        //             // Show why recap failed.
-        //             var msgBox = iRely.Functions;
-        //             msgBox.showCustomDialog(
-        //                 msgBox.dialogType.ERROR,
-        //                 msgBox.dialogButtonType.OK,
-        //                 message
-        //             );
-        //         }
-        //     });
-        // };
-
-
         var doRecap = function (currentRecord){
             ic.utils.ajax({
                 url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
@@ -6367,24 +6337,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }                    
                 }
                 ,function(failureResponse) {
-                    // Show why recap failed.
-                    var msgBox = iRely.Functions;
-                    msgBox.showCustomDialog(
-                        msgBox.dialogType.ERROR,
-                        msgBox.dialogButtonType.OK,
-                        failureResponse
-                    );
+                    // Show Post Preview failed.
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
                 }
             )
         };    
 
         // If there is no data change, calculate the charge and do the recap. 
         if (!context.data.hasChanges()) {
-            me.doOtherChargeCalculate(win);
-            var task = new Ext.util.DelayedTask(function () {
-                doRecap(win.viewModel.data.current);
-            });
-            task.delay(3000);
+            me.doOtherChargeCalculate(
+                win, 
+                doRecap(win.viewModel.data.current)
+            );
 
             return;
         }
@@ -6392,14 +6357,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Save has data changes first before anything else. 
         context.data.saveRecord({
             successFn: function () {
-                me.doOtherChargeCalculate(win);
-                var task = new Ext.util.DelayedTask(function () {
-                    doRecap(win.viewModel.data.current);
-                });
-                task.delay(3000);
+                me.doOtherChargeCalculate(
+                    win, 
+                    doRecap(win.viewModel.data.current)
+                );                
             }
         });
-
     },
 
     init: function (application) {
