@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTBeforeSaveContract]
 		
-	@intContractHeaderId int,
-	@strXML	NVARCHAR(MAX)
+	@intContractHeaderId	INT,
+	@intUserId				INT,
+	@strXML					NVARCHAR(MAX)
 	
 AS
 
@@ -91,12 +92,14 @@ BEGIN TRY
 			UPDATE tblCTContractDetail SET intParentDetailId = @intParentDetailId,ysnSlice = 0 WHERE intContractDetailId = @intContractDetailId
 		END
 
+		UPDATE tblCTContractDetail SET intParentDetailId = NULL WHERE intParentDetailId = @intContractDetailId
+
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail WHERE intUniqueId > @intUniqueId
 	END
 
 	
 	--Unslice
-	EXEC uspQMSampleContractUnSlice @intContractHeaderId,1
+	EXEC uspQMSampleContractUnSlice @intContractHeaderId,@intUserId
 	EXEC uspLGLoadContractUnSlice @intContractHeaderId
 
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
