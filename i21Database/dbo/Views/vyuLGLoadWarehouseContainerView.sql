@@ -47,6 +47,7 @@ SELECT   L.intLoadId
 		,LWC.intLoadWarehouseContainerId
 		,CLSL.strSubLocationName
 		,WRMH.strServiceContractNo
+		,CLSLV.intEntityId 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
@@ -54,6 +55,7 @@ LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId =  LDCL.intLoadContaine
 LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+LEFT JOIN tblEMEntity CLSLV ON CLSLV.intEntityId = CLSL.intVendorId
 LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
 LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
