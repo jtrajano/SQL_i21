@@ -110,7 +110,7 @@ AS
 				CH.ysnMultiplePriceFixation
 
 		FROM	tblCTPriceFixation	PF	
-		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	PF.intFinalPriceUOMId 
+		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
 		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	CU.intUnitMeasureId
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	PF.intContractHeaderId
 		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CH.intFutureMarketId
