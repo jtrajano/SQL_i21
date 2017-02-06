@@ -3,6 +3,7 @@
     [strDepartment]    NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]   NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [intProfitCenter]  INT           NULL,
+    [intLOB]		   INT           NULL,
     [intSort]          INT           NULL,
     [intConcurrencyId] INT           DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPRDepartment] PRIMARY KEY CLUSTERED ([intDepartmentId] ASC),
@@ -66,3 +67,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRDepartment',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Line of Business',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRDepartment',
+    @level2type = N'COLUMN',
+    @level2name = N'intLOB'
