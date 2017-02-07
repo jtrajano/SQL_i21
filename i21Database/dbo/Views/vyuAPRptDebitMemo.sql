@@ -30,7 +30,14 @@ SELECT
 	,ISNULL(N2.strCountry,O.strCountry) AS strCountryOrigin
 	,P.strSubLocationName strLPlant
 	,strDateLocation = Q.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107)
-	,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
+	,U.strBankName
+	,S.strBankAccountHolder
+	,S.strIBAN
+	,S.strSWIFT
+	,T.strTerm
+	,A.strRemarks
+	,U.strCountry + ', ' + U.strCity + ' ' + U.strState AS strBankAddress
+ 	,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
 	(	
 	  SELECT TOP 1
 	  intAttachmentId
@@ -59,4 +66,7 @@ LEFT JOIN tblEMEntity L ON A.intContactId = L.intEntityId
 LEFT JOIN tblSMCountry O ON H.intOriginId = O.intCountryID
 LEFT JOIN tblSMCompanyLocationSubLocation P ON D2.intSubLocationId = P.intCompanyLocationSubLocationId
 LEFT JOIN tblSMCompanyLocation Q ON A.intStoreLocationId = Q.intCompanyLocationId
+LEFT JOIN tblCMBankAccount S ON S.intBankAccountId = A.intBankInfoId
+LEFT JOIN tblCMBank U ON U.intBankId = S.intBankId
+LEFT JOIN tblSMTerm T ON A.intTermsId = T.intTermID
 WHERE A.intTransactionType = 3
