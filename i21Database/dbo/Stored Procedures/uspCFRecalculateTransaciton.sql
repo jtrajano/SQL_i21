@@ -1,7 +1,8 @@
-﻿CREATE  PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
- @ProductId				INT				
-,@CardId				INT				
+ @ProductId				INT							
+,@CardId				INT	
+,@VehicleId				INT				
 ,@SiteId				INT    
 ,@TransactionDate		DATETIME			    
 ,@Quantity				NUMERIC(18,6)     
@@ -60,6 +61,7 @@ BEGIN
 	DECLARE @dblTransferCost				NUMERIC(18,6)
 	DECLARE @dblOriginalPrice				NUMERIC(18,6)
 	DECLARE @intCardId						INT
+	DECLARE @intVehicleId					INT
 	DECLARE @intTaxGroupId					INT
 
 	DECLARE @dblPrice						NUMERIC(18,6)
@@ -188,6 +190,7 @@ BEGIN
 	SET @ysnPostedOrigin	= @PostedOrigin
 	SET @ysnPostedCSV		= @PostedCSV	
 	SET @ysnCreditCardUsed = @CreditCardUsed
+	SET @intVehicleId = @VehicleId
 	SET @intCardId = @CardId
 	SET @dblQuantity = @Quantity
 	SET @dtmTransactionDate = @TransactionDate
@@ -773,24 +776,24 @@ BEGIN
 					,[strNotes]						
 				FROM [fnConstructLineItemTaxDetail] 
 				(
-					 @dblQuantity
-					,(@dblOriginalPrice * @dblQuantity)
-					,@LineItemTaxDetailStagingTable
-					,1
-					,@intItemId
-					,@intCustomerId
-					,@intLocationId
-					,NULL
-					,0
-					,@dtmTransactionDate
-					,NULL
-					,1
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					, 1 --@DisregardExemptionSetup
-					, 0
+					 @dblQuantity										 
+					,(@dblOriginalPrice * @dblQuantity)					 
+					,@LineItemTaxDetailStagingTable						 
+					,1													 
+					,@intItemId											 
+					,@intCustomerId										 
+					,@intLocationId										 
+					,NULL												 
+					,0													 
+					,@dtmTransactionDate								 
+					,NULL												 
+					,1													 
+					,NULL												 
+					,NULL												 
+					,@intCardId												 
+					,@intVehicleId												 
+					, 1 --@DisregardExemptionSetup						 
+					, 0													 
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -841,8 +844,8 @@ BEGIN
 					,1
 					,NULL
 					,NULL
-					,NULL
-					,NULL
+					,@intCardId		
+					,@intVehicleId
 					,0 -- @DisregardExemptionSetup
 					,0
 				)
@@ -900,8 +903,8 @@ BEGIN
 					,1
 					,NULL
 					,NULL
-					,NULL
-					,NULL
+					,@intCardId		
+					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
 				)
@@ -954,8 +957,8 @@ BEGIN
 					,1
 					,NULL
 					,NULL
-					,NULL
-					,NULL
+					,@intCardId		
+					,@intVehicleId
 					,0 --@DisregardExemptionSetup
 					,0
 				)
@@ -1080,8 +1083,8 @@ BEGIN
 					,1
 					,NULL
 					,NULL
-					,NULL
-					,NULL
+					,@intCardId		
+					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
 				)
@@ -1134,8 +1137,8 @@ BEGIN
 					,1
 					,NULL
 					,NULL
-					,NULL
-					,NULL
+					,@intCardId		
+					,@intVehicleId
 					,0 -- @DisregardExemptionSetup
 					,0
 				)
@@ -1196,8 +1199,8 @@ BEGIN
 					,1
 					,NULL
 					,NULL
-					,NULL
-					,NULL
+					,@intCardId		
+					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
 				)
@@ -1250,8 +1253,8 @@ BEGIN
 					,1
 					,NULL
 					,NULL
-					,NULL
-					,NULL
+					,@intCardId		
+					,@intVehicleId
 					,0 --@DisregardExemptionSetup
 					,0
 				)
