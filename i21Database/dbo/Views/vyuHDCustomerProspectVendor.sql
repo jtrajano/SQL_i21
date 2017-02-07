@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuHDCustomerProspectVendor]
 	AS
 		select
-		select
 			intEntityCustomerId
 			,strCustomerNumber
 			,strName
