@@ -59,6 +59,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intArbitrationId] INT NULL,
 	[intProducerId] INT NULL,
 	[ysnClaimsToProducer] BIT,
+	[ysnRiskToProducer] BIT,
 	[ysnExported] BIT NULL,
 	[dtmExported] DATETIME NULL,
 	intCreatedById INT,
