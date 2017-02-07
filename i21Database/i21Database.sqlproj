@@ -4991,6 +4991,7 @@
     <Build Include="dbo\Stored Procedures\uspLGLoadContractUnSlice.sql" />
     <Build Include="dbo\Tables\tblMFReportCategoryByCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacard.sql" />
+    <Build Include="dbo\Views\vyuSMApproverConfigurationUsers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5179,5 +5180,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\Reports\5_DeleteInvalidReports.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\23_ApproverConfigurationApprovalFor.sql" />
   </ItemGroup>
 </Project>
