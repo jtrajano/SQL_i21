@@ -15,6 +15,7 @@
 	strFLOId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strTerm NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	ysnDeleted BIT DEFAULT 0,
 	dtmCreated DATETIME NULL DEFAULT((getdate())),
 	strCreatedUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,

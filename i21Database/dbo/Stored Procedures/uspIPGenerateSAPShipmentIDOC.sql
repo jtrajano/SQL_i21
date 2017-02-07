@@ -47,7 +47,8 @@ Declare @intMinHeader				INT,
 		@dblGrossWeight				NUMERIC(38,20),
 		@dblNetWeight				NUMERIC(38,20),
 		@strWeightUOM				NVARCHAR(50),
-		@dtmETAPOD					DATETIME
+		@dtmETAPOD					DATETIME,
+		@intNoOfContainer			INT
 
 Declare @tblDetail AS Table
 (
@@ -76,7 +77,7 @@ Declare @tblDetail AS Table
 
 Declare @tblContainer AS Table
 (
-	intLoadContainerStgId INT,
+	intRowNo INT IDENTITY(1,1),
 	intLoadContainerId	INT,
 	strContainerNo NVARCHAR(100),
 	strContainerSizeCode NVARCHAR(100)
@@ -118,7 +119,6 @@ Begin
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
 	From tblLGLoadDetail ld Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityId Where intLoadId = @intLoadId
 
-	--If Exists (Select 1 From tblLGLoad Where intLoadId=@intLoadId AND intLoadShippingInstructionId is not null)
 	If ISNULL(@strExternalDeliveryNumber,'')<>''
 		Set @strHeaderRowState='MODIFIED'
 	Else
@@ -138,8 +138,6 @@ Begin
 	--Header
 	Set @strXml += '<E1EDL20 SEGMENT="1">'
 	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
-	--Set @strXml += '<INCO1>'	+ ISNULL(@strContractBasis,'')			+ '</INCO1>'
-	--Set @strXml += '<INCO2>'	+ ISNULL(@strContractBasisDesc,'')		+ '</INCO2>'
 	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')			+ '</BOLNR>'
 	Set @strXml += '<TRAID>'	+ ISNULL(@strShippingLine,'')			+ '</TRAID>'
 	Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')				+ '</LIFEX>'
@@ -176,13 +174,10 @@ Begin
 		strSubLocation,strStorageLocation,strContainerNo,dblQuantity,strUOM,strPONo,strPOLineItemNo,strShipItemRefNo,strRowState,strCommodityCode,
 		dblGrossWeight,dblNetWeight,strWeightUOM)
 	Select sd.intLoadStgId,sd.intLGLoadDetailStgId,sd.intLoadId,sd.intLoadDetailId,
-		--CASE WHEN ISNULL(sd.strExternalShipmentItemNumber,'')='' THEN  (10 * ROW_NUMBER() OVER(ORDER BY intLGLoadDetailStgId ASC)) ELSE sd.strExternalShipmentItemNumber END strDeliveryItemNo,
 		(10 * ROW_NUMBER() OVER(ORDER BY intLGLoadDetailStgId ASC)) strDeliveryItemNo,
 		'',sd.strItemNo,sd.strSubLocationName,sd.strStorageLocationName,
 		CASE WHEN @strTransactionType='Shipping Instructions' THEN '' 
-		ELSE (Select TOP 1 c.strContainerNumber 
-			From tblLGLoadContainer c Join tblLGLoadDetailContainerLink cl on c.intLoadContainerId=cl.intLoadContainerId Where cl.intLoadDetailId=sd.intLoadDetailId)
-		END,
+		Else sd.strExternalPOBatchNumber End,
 		sd.dblDeliveredQty,sd.strUnitOfMeasure,sd.strExternalPONumber,sd.strExternalPOItemNumber,sd.intSIDetailId,sd.strRowState,sd.strCommodityCode,
 		sd.dblGrossWt,sd.dblNetWt,sd.strWeightUOM
 		From tblLGLoadDetailStg sd
@@ -199,6 +194,16 @@ Begin
 		Begin
 			Set @ysnBatchSplit=1
 		End
+	End
+
+	If @strTransactionType='Shipment'
+	Begin
+		If UPPER(@strCommodityCode)='COFFEE' AND @ysnBatchSplit=0
+			Update d Set d.strContainerNo=c.strContainerNumber From @tblDetail d Join tblLGLoadDetailContainerLink cl on d.intLoadDetailId=cl.intLoadDetailId 
+			Join tblLGLoadContainer c on c.intLoadContainerId=cl.intLoadContainerId
+
+		If UPPER(@strCommodityCode)='COFFEE' AND @ysnBatchSplit=1
+			Update @tblDetail Set strContainerNo=''
 	End
 
 	Set @strItemXml=''
@@ -229,16 +234,20 @@ Begin
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
 			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
-			Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
+			If ISNULL(@ysnBatchSplit,0)=0
+				Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
+			Else
+				Set @strItemXml += '<WERKS>'  +  '' + '</WERKS>' 
 			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 			Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
 			Set @strItemXml += '<KDMAT>'  +  ISNULL(@strItemNo,'') + '</KDMAT>' 
-			Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</LFIMG>'
+			If ISNULL(@ysnBatchSplit,0)=0
+				Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</LFIMG>'
+			Else
+				Set @strItemXml += '<LFIMG>'  +  '' + '</LFIMG>'
 			Set @strItemXml += '<VRKME>'  +  ISNULL(@strWeightUOM,'') + '</VRKME>' 
-
-			--Set @strItemXml += '<E1EDL43 SEGMENT="1">'
-			--Set @strItemXml += '<QUALF>'  +  'C' + '</QUALF>' 
-			--Set @strItemXml += '</E1EDL43>'
+			If ISNULL(@ysnBatchSplit,0)=1
+				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
 
 			If UPPER(@strHeaderRowState)='MODIFIED'
 			Begin
@@ -253,15 +262,6 @@ Begin
 				Set @strItemXml += '<QUALF>'  +  'DEL' + '</QUALF>' 
 				Set @strItemXml += '</E1EDL19>'
 			End
-			--Else
-			--Begin
-			--	If ISNULL(@ysnBatchSplit,0)=0 AND (UPPER(@strRowState)='ADDED' OR UPPER(@strRowState)='MODIFIED')
-			--	Begin
-			--		Set @strItemXml += '<E1EDL19 SEGMENT="1">'
-			--		Set @strItemXml += '<QUALF>'  +  'QUA' + '</QUALF>' 
-			--		Set @strItemXml += '</E1EDL19>'
-			--	End
-			--End
 
 			Set @strItemXml += '<E1EDL41 SEGMENT="1">'
 			Set @strItemXml += '<QUALI>'  +  '001' + '</QUALI>' 
@@ -278,17 +278,22 @@ Begin
 				If (Select COUNT(1) From tblLGLoadDetailContainerLink lc Join tblLGLoadDetail ld on lc.intLoadDetailId=ld.intLoadDetailId
 					Where ld.intLoadId=@intLoadId AND lc.intLoadDetailId=@intLoadDetailId)>1
 				Begin
+					Set @strContainerXml=NULL
 					Select @strContainerXml=COALESCE(@strContainerXml, '') 
 							+ '<E1EDL24 SEGMENT="1">'
 							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,(900000 + ROW_NUMBER() OVER(ORDER BY c.intLoadContainerId ASC))),'') + '</POSNR>' 
 							+ '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
-							+ '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
+							+ '<WERKS>'  +  '' + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 							+ '<CHARG>'  +  ISNULL(c.strContainerNumber,'') + '</CHARG>' 
 							+ '<KDMAT>'  +  ISNULL(@strItemNo,'') + '</KDMAT>' 
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),c.dblNetWt)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(um.strUnitMeasure,'')) + '</VRKME>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
+
+							+ '<E1EDL19 SEGMENT="1">'
+							+ '<QUALF>'  +  'QUA' + '</QUALF>' 
+							+ '</E1EDL19>'
 
 							+ '<E1EDL19 SEGMENT="1">'
 							+ '<QUALF>'  +  'BAS' + '</QUALF>' 
@@ -317,30 +322,33 @@ Begin
 	If UPPER(@strCommodityCode)='TEA'
 	Begin
 			Set @strContainerXml=''
+			Set @intNoOfContainer=1
 
 			Delete From @tblContainer
 
-			Insert Into @tblContainer(intLoadContainerStgId,intLoadContainerId,strContainerNo,strContainerSizeCode)
-			Select c.intLoadContainerStgId,c.intLoadContainerId,c.strContainerNo,c.strContainerSizeCode
+			Insert Into @tblContainer(intLoadContainerId,strContainerNo,strContainerSizeCode)
+			Select DISTINCT c.intLoadContainerId,c.strContainerNo,c.strContainerSizeCode
 			From tblLGLoadContainerStg c Where c.intLoadStgId=@intMinHeader
 
-			Select @intMinContainer=Min(intLoadContainerStgId) From @tblContainer
+			Select @intMinContainer=Min(intRowNo) From @tblContainer
 
 			While(@intMinContainer is not null) --Loop Container
 			Begin
 				Select @strContainerNo=strContainerNo,@strContainerSizeCode=strContainerSizeCode,@intLoadContainerId=intLoadContainerId
-				From @tblContainer Where intLoadContainerStgId=@intMinContainer
+				From @tblContainer Where intRowNo=@intMinContainer
 
 					Set @strContainerXml += '<E1EDL37 SEGMENT="1">'
 					Set @strContainerXml += '<EXIDV>'  +  ISNULL(@strContainerNo,'') + '</EXIDV>' 
 					Set @strContainerXml += '<VHILM>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM>' 
 					Set @strContainerXml += '<VHART>'  +  '0002' + '</VHART>' 
+					Set @strContainerXml += '<VHILM_KU>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM_KU>' 
 
 					Set @strContainerItemXml=NULL
 					Select @strContainerItemXml=COALESCE(@strContainerItemXml, '') 
 					+ '<E1EDL44 SEGMENT="1">'
-					+ '<VBELN>'  +  ISNULL(@strExternalDeliveryNumber,'') + '</VBELN>' 
-					+ '<POSNR>'  +  ISNULL(ld.strExternalShipmentItemNumber,'') + '</POSNR>'
+					--+ '<VBELN>'  +  ISNULL(@strExternalDeliveryNumber,'') + '</VBELN>' 
+					+ '<POSNR>'  +  CASE WHEN ISNULL(ld.strExternalShipmentItemNumber,'')='' THEN ISNULL(CONVERT(VARCHAR,(10 * @intNoOfContainer * ROW_NUMBER() OVER(ORDER BY cl.intLoadDetailContainerLinkId ASC))),'')
+					ELSE ISNULL(ld.strExternalShipmentItemNumber,'') END + '</POSNR>'
 					+ '<VEMNG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),cl.dblQuantity)),'') + '</VEMNG>'
 					+ '<VEMEH>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(ld.strUnitOfMeasure,'')) + '</VEMEH>'
 					+ '</E1EDL44>'			 
@@ -350,20 +358,23 @@ Begin
 					Set @strContainerXml += ISNULL(@strContainerItemXml,'')
 					Set @strContainerXml += '</E1EDL37>'
 
-				Select @intMinContainer=Min(intLoadContainerStgId) From @tblContainer Where intLoadContainerStgId>@intMinContainer
+					--Get the total items so that POSNR value will sequence to next number for the new Container
+					Select @intNoOfContainer= COUNT(cl.intLoadDetailContainerLinkId) + 1
+					From tblLGLoadDetailContainerLink cl Join tblLGLoadDetailStg ld on cl.intLoadDetailId=ld.intLoadDetailId
+					Where intLoadContainerId=@intLoadContainerId
+
+				Select @intMinContainer=Min(intRowNo) From @tblContainer Where intRowNo>@intMinContainer
 			End --Loop Container End
 
+			Set @strItemXml += ISNULL(@strContainerXml,'')
 	End
 
 	--Final Xml
-	Set @strXml += ISNULL(@strItemXml,'') + ISNULL(@strContainerXml,'')
+	Set @strXml += ISNULL(@strItemXml,'')
 
 	Set @strXml += '</E1EDL20>'
 	Set @strXml += '</IDOC>'
 	Set @strXml +=  '</DELVRY07>'
-
-	--Set @strLoadStgIds=NULL
-	--Select @strLoadStgIds=COALESCE(CONVERT(VARCHAR,@strLoadStgIds) + ',', '') + intLoadStgId From @tblDetail
 
 	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml)
 	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml)
