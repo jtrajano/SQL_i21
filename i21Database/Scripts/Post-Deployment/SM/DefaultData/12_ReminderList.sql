@@ -616,3 +616,26 @@ BEGIN
 END
 
 GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unsigned' AND [strType] = N'Contract')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT [strReminder]        =        N'Unsigned',
+			[strType]        	=        N'Contract',
+			[strMessage]		=        N'{0} {1} {2} Unsigned.',
+			[strQuery]  		=        N'	SELECT	intContractHeaderId 
+											FROM	tblCTContractHeader CH,	
+													tblCTEvent EV											
+											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+											WHERE	ISNULL(ysnSigned,0) = 0 AND EV.strEventName = ''Unsigned Contract Alert'' AND ER.intEntityId = {0}
+											',
+			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Unsigned', 
+			[intSort]            =        20
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strMessage] = N'{0} {1} {2} Unsigned.'
+	WHERE [strReminder] = N'Unsigned' AND [strType] = N'Contract' 
+END
+
+GO
