@@ -18,6 +18,7 @@ BEGIN
   DECLARE @IntWeekId int
   DECLARE @IntYear int
   DECLARE @companyLogo varbinary(max)
+  DECLARE @ReportFooter varbinary(max)
 
   IF LTRIM(RTRIM(@xmlParam)) = ''
     SET @xmlParam = NULL
@@ -82,6 +83,19 @@ BEGIN
 	  FROM tblSMAttachment
 	  WHERE strScreen = 'SystemManager.CompanyPreference'
 	  AND strComment = 'Header'
+	  ORDER BY intAttachmentId DESC
+  )
+
+  SELECT
+  @ReportFooter = blbFile
+  FROM tblSMUpload
+  WHERE intAttachmentId = 
+  (
+	  SELECT TOP 1
+	  intAttachmentId
+	  FROM tblSMAttachment
+	  WHERE strScreen = 'SystemManager.CompanyPreference'
+	  AND strComment = 'Footer'
 	  ORDER BY intAttachmentId DESC
   )
 
@@ -227,6 +241,7 @@ BEGIN
     @IntCommodityId AS IntCommodityId,
     @IntUOMId AS IntUOMId,
     @strNeedPlan AS strNeedPlan,
-    @companyLogo AS blbHeaderLogo
+    @companyLogo AS blbHeaderLogo,
+	@ReportFooter AS blbFooterLogo
 
 END
