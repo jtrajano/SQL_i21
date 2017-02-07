@@ -127,6 +127,8 @@ BEGIN TRY
 			FROM @ParentContractSample
 			WHERE intRowNo = @intParentRowNo
 
+			SELECT @dblDelRepresentingQty = NULL
+
 			SELECT @intDelContractDetailId = intContractDetailId
 				,@intDelSampleId = intSampleId
 				,@dblDelRepresentingQty = dblRepresentingQty
@@ -136,13 +138,13 @@ BEGIN TRY
 				AND intSampleStatusId = @intSampleStatusId
 
 			UPDATE tblQMSample
-			SET dblRepresentingQty += @dblDelRepresentingQty
+			SET dblRepresentingQty += ISNULL(@dblDelRepresentingQty, 0)
 			WHERE intSampleId = @intSampleId
 
 			DELETE tblQMSample
 			WHERE intSampleId = @intDelSampleId
 
-			IF (@intSampleId > 0)
+			IF (@intSampleId > 0 AND ISNULL(@dblDelRepresentingQty, 0) > 0)
 			BEGIN
 				SET @strDetails = '{"change":"dblRepresentingQty","iconCls":"small-gear","from":"' + LTRIM(@dblRepresentingQty) + '","to":"' + LTRIM(@dblRepresentingQty + @dblDelRepresentingQty) + '","leaf":true}'
 

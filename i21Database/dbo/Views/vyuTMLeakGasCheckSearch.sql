@@ -32,7 +32,8 @@ AS
 		ON I.intTankTypeId = J.intTankTypeId
 	LEFT JOIN tblTMDeviceType K
 		ON I.intDeviceTypeId = K.intDeviceTypeId
-	CROSS APPLY fnTMLastLeakGasCheckTable(A.intSiteID) G
+	LEFT JOIN vyuTMLastLeakGasCheckTable G
+		ON A.intSiteID = G.intSiteID
 	WHERE ISNULL(I.ysnAppliance,0) = 0
 		AND K.strDeviceType = 'Tank'
 		AND A.ysnActive = 1
