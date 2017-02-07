@@ -13,20 +13,6 @@ BEGIN TRY
 	DECLARE @strSampleNumber NVARCHAR(30)
 		,@strSampleId NVARCHAR(MAX)
 		,@strDetails NVARCHAR(MAX)
-		,@intSampleId INT
-	DECLARE @intCRowNo INT
-		,@intCContractDetailId INT
-		,@intCParentDetailId INT
-		,@dblCQuantity NUMERIC(18, 6)
-		,@intCUnitMeasureId INT
-		,@intSRowNo INT
-		,@intSSampleId INT
-		,@intSContractDetailId INT
-		,@dblSRepresentingQty NUMERIC(18, 6)
-		,@intSRepresentingUOMId INT
-		,@intOrgParentDetailId INT
-		,@dblOrgQuantity NUMERIC(18, 6)
-		,@intOrgUnitMeasureId INT
 	DECLARE @ContractSliceDetail TABLE (
 		intCRowNo INT IDENTITY(1, 1)
 		,intCContractDetailId INT
@@ -35,12 +21,37 @@ BEGIN TRY
 		,intCUnitMeasureId INT
 		)
 	DECLARE @ParentContractSample TABLE (
-		intSRowNo INT IDENTITY(1, 1)
-		,intSSampleId INT
-		,intSContractDetailId INT
-		,dblSRepresentingQty NUMERIC(18, 6)
-		,intSRepresentingUOMId INT
+		intRowNo INT IDENTITY(1, 1)
+		,intContractDetailId INT
+		,intSampleId INT
+		,intSampleTypeId INT
+		,intSampleStatusId INT
+		,dblRepresentingQty NUMERIC(18, 6)
+		,intRepresentingUOMId INT
 		)
+	DECLARE @DeleteContractSample TABLE (
+		intRowNo INT IDENTITY(1, 1)
+		,intContractDetailId INT
+		,intSampleId INT
+		,intSampleTypeId INT
+		,intSampleStatusId INT
+		,dblRepresentingQty NUMERIC(18, 6)
+		,intRepresentingUOMId INT
+		)
+	DECLARE @intSampleId INT
+		,@intContractDetailId INT
+		,@dblRepresentingQty NUMERIC(18, 6)
+		,@intRepresentingUOMId INT
+		,@intSampleTypeId INT
+		,@intSampleStatusId INT
+		,@intMergeContractDetailId INT
+	DECLARE @intParentRowNo INT
+		,@intDeleteRowNum INT
+		,@intDelContractDetailId INT
+		,@intDelSampleId INT
+		,@dblDelRepresentingQty NUMERIC(18, 6)
+		,@intDelRepresentingUOMId INT
+	DECLARE @intCRowNo INT
 
 	-- Only Unsliced. ie., existing contract sequence records got merged only (not the parent)
 	INSERT INTO @ContractSliceDetail
@@ -61,150 +72,79 @@ BEGIN TRY
 		RETURN;
 
 	-- Parent contract sequence. ie., from which sequence it sliced
-	SELECT TOP 1 @intOrgParentDetailId = intCParentDetailId
+	SELECT TOP 1 @intContractDetailId = intCParentDetailId
 	FROM @ContractSliceDetail
 
-	-- Parent contract sequence samples
-	INSERT INTO @ParentContractSample
-	SELECT intSampleId
-		,intContractDetailId
-		,dblRepresentingQty
-		,intRepresentingUOMId
-	FROM tblQMSample
-	WHERE intProductTypeId = 8
-		AND intProductValueId = @intOrgParentDetailId
-	ORDER BY intSampleId DESC
+	SELECT @intCRowNo = MIN(intCRowNo)
+	FROM @ContractSliceDetail
 
-	IF (
-			(
-				SELECT COUNT(1)
-				FROM @ParentContractSample
-				) < 1
-			)
+	WHILE (@intCRowNo > 0)
 	BEGIN
-		-- Move child sequence samples to parent sequence no
-		SELECT @intCRowNo = MIN(intCRowNo)
+		SELECT @intMergeContractDetailId = intCContractDetailId
 		FROM @ContractSliceDetail
+		WHERE intCRowNo = @intCRowNo
 
-		WHILE (@intCRowNo > 0)
-		BEGIN
-			SELECT @intCRowNo = intCRowNo
-				,@intCContractDetailId = intCContractDetailId
-			FROM @ContractSliceDetail
-			WHERE intCRowNo = @intCRowNo
+		DELETE
+		FROM @ParentContractSample
 
-			SELECT @dblOrgQuantity = dblQuantity
-				,@intOrgUnitMeasureId = intUnitMeasureId
-			FROM tblCTContractDetail
-			WHERE intContractDetailId = @intOrgParentDetailId
-
-			DECLARE @OldSampleDetail TABLE (intSampleId INT)
-
-			INSERT INTO @OldSampleDetail
-			SELECT intSampleId
-			FROM tblQMSample
-			WHERE intContractDetailId = @intCContractDetailId
-
-			-- Contract Available Places
-			UPDATE tblQMSample
-			SET intContractDetailId = @intOrgParentDetailId
-				,intConcurrencyId = (intConcurrencyId + 1)
-				,intRepresentingUOMId = @intOrgUnitMeasureId
-			WHERE intContractDetailId = @intCContractDetailId
-
-			-- Contract Samples
-			UPDATE tblQMSample
-			SET intProductValueId = @intOrgParentDetailId
-			WHERE intProductTypeId = 8
-				AND intProductValueId = @intCContractDetailId
-
-			UPDATE tblQMTestResult
-			SET intProductValueId = @intOrgParentDetailId
-				,intConcurrencyId = (intConcurrencyId + 1)
-			WHERE intProductTypeId = 8
-				AND intProductValueId = @intCContractDetailId
-
-			SELECT @strSampleId = COALESCE(@strSampleId + ',', '') + CONVERT(NVARCHAR, intSampleId)
-			FROM @OldSampleDetail
-
-			IF (LEN(@strSampleId) > 0)
-			BEGIN
-				SET @strDetails = '{"change":"intContractDetailId","iconCls":"small-gear","from":"' + LTRIM(@intCContractDetailId) + '","to":"' + LTRIM(@intOrgParentDetailId) + '","leaf":true}'
-
-				EXEC uspSMAuditLog @keyValue = @strSampleId
-					,@screenName = 'Quality.view.QualitySample'
-					,@entityId = @intUserId
-					,@actionType = 'Updated'
-					,@actionIcon = 'small-tree-modified'
-					,@details = @strDetails
-			END
-
-			SELECT @intCRowNo = MIN(intCRowNo)
-			FROM @ContractSliceDetail
-			WHERE intCRowNo > @intCRowNo
-		END
-	END
-	ELSE
-	BEGIN
-		SELECT @intOrgUnitMeasureId = intUnitMeasureId
-		FROM tblCTContractDetail
-		WHERE intContractDetailId = @intOrgParentDetailId
-
-		DECLARE @MergedSampleDetail TABLE (
-			intSampleId INT
-			,intContractDetailId INT
-			)
-
-		INSERT INTO @MergedSampleDetail
-		SELECT intSampleId
-			,intContractDetailId
+		-- Parent contract sequence samples
+		INSERT INTO @ParentContractSample
+		SELECT intContractDetailId
+			,intSampleId
+			,intSampleTypeId
+			,intSampleStatusId
+			,dblRepresentingQty
+			,intRepresentingUOMId
 		FROM tblQMSample
-		WHERE intContractDetailId IN (
-				SELECT intCContractDetailId
-				FROM @ContractSliceDetail
-				)
-
-		-- Contract Available Places
-		UPDATE tblQMSample
-		SET intContractDetailId = @intOrgParentDetailId
-			,intConcurrencyId = (intConcurrencyId + 1)
-			,intRepresentingUOMId = @intOrgUnitMeasureId
-		WHERE intContractDetailId IN (
-				SELECT intCContractDetailId
-				FROM @ContractSliceDetail
-				)
-
-		-- Contract Samples
-		UPDATE tblQMSample
-		SET intProductValueId = @intOrgParentDetailId
 		WHERE intProductTypeId = 8
-			AND intProductValueId IN (
-				SELECT intCContractDetailId
-				FROM @ContractSliceDetail
-				)
+			AND intProductValueId = @intContractDetailId
+		ORDER BY intSampleId DESC
 
-		UPDATE tblQMTestResult
-		SET intProductValueId = @intOrgParentDetailId
-			,intConcurrencyId = (intConcurrencyId + 1)
+		DELETE
+		FROM @DeleteContractSample
+
+		INSERT INTO @DeleteContractSample
+		SELECT intContractDetailId
+			,intSampleId
+			,intSampleTypeId
+			,intSampleStatusId
+			,dblRepresentingQty
+			,intRepresentingUOMId
+		FROM tblQMSample
 		WHERE intProductTypeId = 8
-			AND intProductValueId IN (
-				SELECT intCContractDetailId
-				FROM @ContractSliceDetail
-				)
+			AND intProductValueId = @intMergeContractDetailId
 
-		-- Audit Log
-		SELECT @intSampleId = MIN(intSampleId)
-		FROM @MergedSampleDetail
+		SELECT @intParentRowNo = MIN(intRowNo)
+		FROM @ParentContractSample
 
-		WHILE (@intSampleId > 0)
+		WHILE ISNULL(@intParentRowNo, 0) > 0
 		BEGIN
-			SELECT @intCContractDetailId = intContractDetailId
-			FROM @MergedSampleDetail
+			SELECT @intSampleId = intSampleId
+				,@intSampleTypeId = intSampleTypeId
+				,@intSampleStatusId = intSampleStatusId
+				,@dblRepresentingQty = dblRepresentingQty
+				,@intRepresentingUOMId = intRepresentingUOMId
+			FROM @ParentContractSample
+			WHERE intRowNo = @intParentRowNo
+
+			SELECT @intDelContractDetailId = intContractDetailId
+				,@intDelSampleId = intSampleId
+				,@dblDelRepresentingQty = dblRepresentingQty
+				,@intDelRepresentingUOMId = intRepresentingUOMId
+			FROM @DeleteContractSample
+			WHERE intSampleTypeId = @intSampleTypeId
+				AND intSampleStatusId = @intSampleStatusId
+
+			UPDATE tblQMSample
+			SET dblRepresentingQty += @dblDelRepresentingQty
 			WHERE intSampleId = @intSampleId
+
+			DELETE tblQMSample
+			WHERE intSampleId = @intDelSampleId
 
 			IF (@intSampleId > 0)
 			BEGIN
-				SET @strDetails = '{"change":"intContractDetailId","iconCls":"small-gear","from":"' + LTRIM(@intCContractDetailId) + '","to":"' + LTRIM(@intOrgParentDetailId) + '","leaf":true}'
+				SET @strDetails = '{"change":"dblRepresentingQty","iconCls":"small-gear","from":"' + LTRIM(@dblRepresentingQty) + '","to":"' + LTRIM(@dblRepresentingQty + @dblDelRepresentingQty) + '","leaf":true}'
 
 				EXEC uspSMAuditLog @keyValue = @intSampleId
 					,@screenName = 'Quality.view.QualitySample'
@@ -214,10 +154,54 @@ BEGIN TRY
 					,@details = @strDetails
 			END
 
-			SELECT @intSampleId = MIN(intSampleId)
-			FROM @MergedSampleDetail
-			WHERE intSampleId > @intSampleId
+			SELECT @intParentRowNo = MIN(intRowNo)
+			FROM @ParentContractSample
+			WHERE intRowNo > @intParentRowNo
 		END
+
+		DECLARE @OldSampleDetail TABLE (intSampleId INT)
+
+		INSERT INTO @OldSampleDetail
+		SELECT intSampleId
+		FROM tblQMSample
+		WHERE intContractDetailId = @intMergeContractDetailId
+
+		-- Contract Available Places
+		UPDATE tblQMSample
+		SET intContractDetailId = @intContractDetailId
+			,intConcurrencyId = (intConcurrencyId + 1)
+		WHERE intContractDetailId = @intMergeContractDetailId
+
+		-- Contract Samples
+		UPDATE tblQMSample
+		SET intProductValueId = @intContractDetailId
+		WHERE intProductTypeId = 8
+			AND intProductValueId = @intMergeContractDetailId
+
+		UPDATE tblQMTestResult
+		SET intProductValueId = @intContractDetailId
+			,intConcurrencyId = (intConcurrencyId + 1)
+		WHERE intProductTypeId = 8
+			AND intProductValueId = @intMergeContractDetailId
+
+		SELECT @strSampleId = COALESCE(@strSampleId + ',', '') + CONVERT(NVARCHAR, intSampleId)
+		FROM @OldSampleDetail
+
+		IF (LEN(@strSampleId) > 0)
+		BEGIN
+			SET @strDetails = '{"change":"intContractDetailId","iconCls":"small-gear","from":"' + LTRIM(@intMergeContractDetailId) + '","to":"' + LTRIM(@intContractDetailId) + '","leaf":true}'
+
+			EXEC uspSMAuditLog @keyValue = @strSampleId
+				,@screenName = 'Quality.view.QualitySample'
+				,@entityId = @intUserId
+				,@actionType = 'Updated'
+				,@actionIcon = 'small-tree-modified'
+				,@details = @strDetails
+		END
+
+		SELECT @intCRowNo = MIN(intCRowNo)
+		FROM @ContractSliceDetail
+		WHERE intCRowNo > @intCRowNo
 	END
 END TRY
 
