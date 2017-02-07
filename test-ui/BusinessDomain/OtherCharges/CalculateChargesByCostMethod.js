@@ -23,8 +23,8 @@ StartTest (function (t) {
                 'OC - LTI - 01'
                 , 'Test Lotted Item For Other Charges'
                 , 3
-                , 'Category-1'
-                , 'Commodity-1'
+                , 'Grains'
+                , 'OC - Commodity - 01'
                 , 'LB'
                 , 'LB'
                 , 10
