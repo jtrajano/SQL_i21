@@ -336,6 +336,7 @@ Ext.define('Inventory.CommonIC', {
      */
 
 
+
     addDiscountItem: function (t,next, item, itemshort,itemdesc){
         var engine = new iRely.FunctionalTest();
         engine.start(t, next)
@@ -383,8 +384,60 @@ Ext.define('Inventory.CommonIC', {
             .displayText('Setup Item Pricing Successful')
             .clickButton('Close')
             .addResult('Crate Other Carge Discount Item Successful')
+            .done();
 
         },
+
+
+    addOtherChargeItem: function (t,next, item, description) {
+        new iRely.FunctionalTest().start(t, next)
+
+
+            //Add Other Charge Item
+            .displayText('===== Adding Other Charge Item =====')
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Items','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('icitem')
+            .enterData('Text Field','ItemNo', item)
+            .selectComboBoxRowNumber('Type',6,0)
+            .enterData('Text Field','Description', description)
+            .selectComboBoxRowValue('Category', 'Other Charges', 'Category',0)
+            .displayText('===== Setup Item UOM=====')
+            .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
+            .enterGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
+            .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
+            .enterGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '1')
+            .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
+            .enterGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '1')
+            .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
+            .enterGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '1')
+            .selectGridComboBoxRowValue('UnitOfMeasure',5,'strUnitMeasure','KG','strUnitMeasure')
+            .enterGridData('UnitOfMeasure', 5, 'colDetailUnitQty', '1')
+            .waitUntilLoaded('')
+            .clickTab('Setup')
+            .displayText('===== Setup Item Location=====')
+            .clickTab('Location')
+            .clickButton('AddLocation')
+            .waitUntilLoaded('')
+            .clickButton('Save')
+            .clickButton('Close')
+            .clickButton('AddLocation')
+            .waitUntilLoaded('')
+            .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
+            .clickButton('Save')
+            .clickButton('Close')
+            .clickButton('Save')
+            .clickButton('Close')
+            .waitUntilLoaded()
+            .clickMenuFolder('Inventory','Folder')
+            .displayText('===== Other Charge Item Created =====')
+            .done();
+
+    },
+
+
+
 
         /**
          * IC Open Screens

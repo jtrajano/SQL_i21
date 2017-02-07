@@ -390,6 +390,54 @@ Harness.start(
             }
 
         ]
+    },
+
+    {
+        group: 'BusinessDomain',
+        items: [
+            {
+                group: 'StockChecking',
+                items: [
+                    {
+                        url: 'BusinessDomain/StockChecking/ICStockCheckingLotted.js?v=' + version,
+                        title: 'ICStockCheckingLotted',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
+                    },
+                    {
+                        url: 'BusinessDomain/StockChecking/ICStockCheckingNonLotted.js?v=' + version,
+                        title: 'ICStockCheckingNonLotted',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
+                    }
+
+                ]
+            },
+            {
+                group: 'OtherCharges',
+                items: [
+                    {
+                        url: 'BusinessDomain/OtherCharges/CalculateChargesByCostMethod.js?v=' + version,
+                        title: 'CalculateChargesByCostMethod',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
+                    }
+
+                ]
+            }
+
+
+        ]
     }
+
 
 );
