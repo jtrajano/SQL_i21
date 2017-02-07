@@ -19,9 +19,13 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[tblSCTruckDriverReference]
 				   ([strData]
+				   ,[intEntityId]
 				   ,[strRecordType]
 				   ,[intConcurrencyId])
-		SELECT distinct trhst_tractor_trailor
+		SELECT distinct trhst_tractor_trailor,
+				(select top 1 shp.intEntityShipViaId from tblSMShipVia shp where 
+				 strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS 
+				 =HST.trhst_pur_carrier COLLATE SQL_Latin1_General_CP1_CS_AS)
 			   ,'T'
 			   ,1 
 		FROM trhstmst HST
