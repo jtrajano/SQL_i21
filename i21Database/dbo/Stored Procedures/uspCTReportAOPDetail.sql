@@ -213,30 +213,30 @@ BEGIN
 		SET @SqlSelect ='SELECT [intNeedPlanKey],[strCommodityCode],[strShortName],[strItemNo],[strProductType],dbo.fnRemoveTrailingZeroes([dblVolume]) AS[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM]'
 
 		IF 	@FirstBasisItem  IS NOT NULL
-		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(ISNULL([' + @FirstBasisItem + '],0)) AS Column1'
+		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @FirstBasisItem + ']) AS Column1'
 		
 		IF 	@SecondBasisItem  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(ISNULL([' + @SecondBasisItem + '],0)) AS Column2'
+		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @SecondBasisItem + ']) AS Column2'
 		
 		IF 	@ThirdBasisItem  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(ISNULL([' + @ThirdBasisItem + '],0)) AS Column3'
+		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @ThirdBasisItem + ']) AS Column3'
 		
 		IF 	@FourthBasisItem  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(ISNULL([' + @FourthBasisItem + '],0)) AS Column4'
+		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @FourthBasisItem + ']) AS Column4'
 		
 		IF 	@FifthBasisItem  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(ISNULL([' + @FifthBasisItem + '],0)) AS Column5'
+		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(' + @FifthBasisItem + ']) AS Column5'
 		
 		IF 	@SixthBasisItem  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(ISNULL([' + @SixthBasisItem + '],0)) AS Column6'
+		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @SixthBasisItem + ']) AS Column6'
 
 		IF 	@SeventhBasisItem  IS NOT NULL														
-				SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(ISNULL([' + @SeventhBasisItem + '],0)) AS Column7'
+				SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @SeventhBasisItem + ']) AS Column7'
 		
 		IF 	@EighthBasisItem  IS NOT NULL														
-				SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(ISNULL([' + @EighthBasisItem + '],0)) AS Column8'
+				SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @EighthBasisItem + ']) AS Column8'
 
-		SET @SqlSelect=@SqlSelect+' ,dbo.fnRemoveTrailingZeroes(ISNULL(dblTotalPremium,0)) AS dblTotalPremium  FROM #tblCoffeeNeedPlan ORDER BY [intNeedPlanKey]'
+		SET @SqlSelect=@SqlSelect+' ,dbo.fnRemoveTrailingZeroes(dblTotalPremium) AS dblTotalPremium  FROM #tblCoffeeNeedPlan ORDER BY [intNeedPlanKey]'
 
 		--SELECT @SqlSelect
 		
