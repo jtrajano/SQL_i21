@@ -41,7 +41,7 @@ DECLARE @EIN NVARCHAR(50)
 			@DatePeriod = dtmDate,
 			@DateBegin = dtmReportingPeriodBegin,
 			@DateEnd = dtmReportingPeriodEnd
-		FROM tblTFTransaction 
+		FROM vyuTFGetTransaction 
 		WHERE uniqTransactionGuid = @Guid 
 		AND strFormCode = @FormCodeParam
 
@@ -133,14 +133,14 @@ DECLARE @EIN NVARCHAR(50)
 						IF @TemplateItemId = 'GT-103-Summary-001'
 							BEGIN
 						--1. Total Gallons Sold for Period
-								SET @QueryTransaction = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @QueryTransaction = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @TFTransactionSummaryTotal
 								EXEC(@QueryTransaction)
 							END
 							ELSE IF @TemplateItemId = 'GT-103-Summary-002'
 							BEGIN
 						--2. Total Exempt Gallons Sold for Period
-								SET @QueryTransaction = 'SELECT SUM(dblTaxExempt) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @QueryTransaction = 'SELECT SUM(dblTaxExempt) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @TFTransactionSummaryTotal
 								EXEC(@QueryTransaction)
 							END
@@ -375,7 +375,7 @@ DECLARE @EIN NVARCHAR(50)
 												SELECT @TotalGallonsSold = ISNULL(SUM(dblQtyShipped), 0),
 														@TotalExemptGallonsSold = ISNULL(SUM(dblTaxExempt), 0),
 														@GasolineUseTaxCollected = ISNULL(SUM(dblTax), 0)
-													FROM tblTFTransaction 
+													FROM vyuTFGetTransaction 
 													WHERE strScheduleCode = @paramTempScheduleCode 
 													AND uniqTransactionGuid = @Guid 
 													AND strFormCode = @FormCodeParam
@@ -385,7 +385,7 @@ DECLARE @EIN NVARCHAR(50)
 												SELECT @TotalGallonsSold = ISNULL(SUM(dblQtyShipped), 0),
 														@TotalExemptGallonsSold = ISNULL(SUM(dblTaxExempt), 0),
 														@GasolineUseTaxCollected = ISNULL(SUM(dblTax), 0)
-													FROM tblTFTransaction 
+													FROM vyuTFGetTransaction 
 													WHERE strScheduleCode = @paramTempScheduleCode 
 													AND strType = @Type 
 													AND uniqTransactionGuid = @Guid 
@@ -406,7 +406,7 @@ DECLARE @EIN NVARCHAR(50)
 										BEGIN
 											SELECT @ReceiptTotalGallsPurchased = ISNULL(SUM(dblGross), 0),
 													@GasolineUseTaxPaid = ISNULL(SUM(dblTax), 0)
-												FROM tblTFTransaction 
+												FROM vyuTFGetTransaction 
 												WHERE strScheduleCode = @paramTempScheduleCode 
 												AND uniqTransactionGuid = @Guid 
 												AND strFormCode = @FormCodeParam
@@ -415,7 +415,7 @@ DECLARE @EIN NVARCHAR(50)
 										BEGIN
 											SELECT @ReceiptTotalGallsPurchased = ISNULL(SUM(dblGross), 0),
 													@GasolineUseTaxPaid = ISNULL(SUM(dblTax), 0) 
-												FROM tblTFTransaction 
+												FROM vyuTFGetTransaction 
 												WHERE strScheduleCode = @paramTempScheduleCode 
 												AND strType = @Type 
 												AND uniqTransactionGuid = @Guid 
@@ -433,7 +433,7 @@ DECLARE @EIN NVARCHAR(50)
 
 			DECLARE @isTransactionEmpty NVARCHAR(20)
 			SELECT TOP 1 @isTransactionEmpty = strProductCode 
-				FROM tblTFTransaction 
+				FROM vyuTFGetTransaction 
 				WHERE uniqTransactionGuid = @Guid 
 				AND strFormCode = @FormCodeParam
 				IF(@isTransactionEmpty = 'No record found.')

@@ -7,7 +7,7 @@
 
 AS
 
-DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM tblTFTransaction WHERE strFormCode = @FormCodeParam)
+DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM vyuTFGetTransaction WHERE strFormCode = @FormCodeParam)
 IF (@FCode IS NOT NULL)
 BEGIN
 
@@ -71,7 +71,7 @@ DECLARE @EIN NVARCHAR(50)
 		@TPStateTaxID = strTaxPayerIdentificationNumber,
 		@TPFEIN = strTaxPayerFEIN,
 		@TPDBA = strTaxPayerDBA
-		FROM tblTFTransaction
+		FROM vyuTFGetTransaction
 		WHERE uniqTransactionGuid = @Guid 
 		AND strFormCode = @FormCodeParam
 	 
@@ -155,28 +155,28 @@ DECLARE @EIN NVARCHAR(50)
 						IF @TemplateItemId = 'SF-900-Summary-001'
 							BEGIN
 							--1. Total Receipts (From Section A, Line 5 on back of return)
-								SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblGross) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-002'
 							BEGIN
 							--2. Total Non-Taxable Disbursements (From Section B, Line 11 on back of return)
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-003'
 							BEGIN
 							--3. Taxable Gallons Sold or Used (From Section B, Line 3, on back of return)
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''5'',''11'') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''5'',''11'') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-004'
 							BEGIN
 							--4. Gallons Received Tax Paid (From Section A, Line 1, on back of return)
-								SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + '''' 
+								SET @Query = 'SELECT SUM(dblGross) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + '''' 
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
@@ -325,35 +325,35 @@ DECLARE @EIN NVARCHAR(50)
 						IF @TemplateItemId = 'SF-900-Summary-023'
 							BEGIN
 							--1. Gallons Received Tax Paid (Carry forward to Section 2, Line 4 on front of return)
-								SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblGross) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-024'
 							BEGIN
 							--2. Gallons Received for Export (To be completed only by licensed exporters)
-								SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblGross) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-025'
 							BEGIN
 							--3. Gallons of Nontaxable Fuel Received and Sold or Used For a Taxable Purpose
-								SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblGross) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						IF @TemplateItemId = 'SF-900-Summary-026'
 							BEGIN
 							--4. Gallons Imported Via Truck, Barge, or Rail, Tax Unpaid
-								SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblGross) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-027'
 							BEGIN
 							--5. Total Receipts (Add Lines 1 through 4, carry forward to Section 2, Line 1 on
-								SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblGross) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
@@ -362,14 +362,14 @@ DECLARE @EIN NVARCHAR(50)
 						ELSE IF @TemplateItemId = 'SF-900-Summary-029'
 							BEGIN
 							--1. Gallons Delivered Tax Collected and Gallons Blended or Dyed Fuel Used
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						IF @TemplateItemId = 'SF-900-Summary-030'
 							BEGIN
 							--2. Diversions (Special fuel only)                  +/-
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
@@ -383,56 +383,56 @@ DECLARE @EIN NVARCHAR(50)
 						ELSE IF @TemplateItemId = 'SF-900-Summary-032'
 							BEGIN
 							--4. Gallons Delivered Via Rail, Pipeline, or Vessel to Licensed Suppliers, Tax
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-033'
 							BEGIN
 							--5. Gallons Disbursed on Exchange for Other Suppliers or Permissive Suppliers
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						IF @TemplateItemId = 'SF-900-Summary-034'
 							BEGIN
 							--6. Gallons Exported by License Holder
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-035'
 							BEGIN
 							--7. Gallons Sold to Unlicensed Exporters for Export
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-036'
 							BEGIN
 							--8. Gallons Sold to Licensed Exporters for Export
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-037'
 							BEGIN
 							--9. Gallons of Undyed Fuel Sold to the U.S. Government - Tax Exempt
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-038'
 							BEGIN
 							--10. Gallons Sold of Tax Exempt Dyed Fuel
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-039'
 							BEGIN
 							--11. Total Non-Taxable Disbursements (Add Lines 4 through 10; carry forward to
-								SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+								SET @Query = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
@@ -497,7 +497,7 @@ DECLARE @EIN NVARCHAR(50)
 				SET @SummaryItemCount = @SummaryItemCount - 1
 			END
 			DECLARE @isTransactionEmpty NVARCHAR(20)
-				SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+				SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 				IF(@isTransactionEmpty = 'No record found.')
 					BEGIN
 						UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam

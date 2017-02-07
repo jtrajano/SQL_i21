@@ -514,6 +514,6 @@ DECLARE @TRRCId NVARCHAR(50)
 		DECLARE @TRHasResult INT
 		SELECT TOP 1 @TRHasResult = intTransactionId FROM tblTFTransaction
 		IF(@TRHasResult IS NULL AND @IsEdi = 'false')
-			BEGIN
-				INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, 'SF-401', 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
-			END
+		BEGIN
+			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, 'SF-401', 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+		END
