@@ -1199,7 +1199,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'unitmeasurecolumn',
                                                                                 itemId: 'colUOMQtyToReceive',
-                                                                                text: 'Quantity to Receives',
+                                                                                text: 'Qty to Receive',
                                                                                 width: 100,
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblOpenReceive',
@@ -1208,70 +1208,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     valueField: 'intUnitMeasureId',
                                                                                     displayField: 'strUnitMeasure'
                                                                                 }
-                                                                            },
-                                                                            {
-                                                                                xtype: 'gridcolumn',
-                                                                                itemId: 'colUOM',
-                                                                                text: 'Receipt UOM',
-                                                                                editor: {
-                                                                                    xtype: 'gridcombobox',
-                                                                                    columns: [
-                                                                                        {
-                                                                                            dataIndex: 'intItemUnitMeasureId',
-                                                                                            dataType: 'numeric',
-                                                                                            text: 'Unit Of Measure Id',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strUnitMeasure',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Unit Measure',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strUnitType',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Unit Type',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'dblUnitQty',
-                                                                                            dataType: 'float',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            xtype: 'checkcolumn',
-                                                                                            dataIndex: 'ysnStockUnit',
-                                                                                            dataType: 'boolean',
-                                                                                            text: 'Stock Unit',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'dblLastCost',
-                                                                                            dataType: 'float',
-                                                                                            hidden: true
-                                                                                        }
-                                                                                    ],
-                                                                                    itemId: 'cboItemUOM',
-                                                                                    displayField: 'strUnitMeasure',
-                                                                                    valueField: 'strUnitMeasure'
-                                                                                }
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numbercolumn',
-                                                                                dataType: 'numeric',
-                                                                                itemId: 'colQtyToReceive',
-                                                                                width: 100,
-                                                                                align: 'right',
-                                                                                dataIndex: 'dblQtyToReceive',
-                                                                                text: 'Qty to Receive',
-                                                                                format: '0,000.##',
-                                                                                editor: {
-                                                                                    xtype: 'numberfield',
-                                                                                    itemId: 'txtQtyToReceive',
-                                                                                    minValue: 0
-                                                                                }
-                                                                            },
+                                                                            },                                                          
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
