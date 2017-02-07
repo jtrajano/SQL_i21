@@ -101,7 +101,9 @@ BEGIN
 				FROM tblTMSiteDevice AA
 				INNER JOIN tblTMDevice BB
 					ON AA.intDeviceId = BB.intDeviceId
-				WHERE ISNULL(BB.ysnAppliance,0) = 0
+				INNER JOIN tblTMDeviceType CC
+					ON CC.intDeviceTypeId = BB.intDeviceTypeId
+				WHERE ISNULL(BB.ysnAppliance,0) = 0 AND CC.strDeviceType = ''Tank''
 			) Q
 				ON A.intSiteID = Q.intSiteID
 				AND Q.intCntId = 1
@@ -217,7 +219,9 @@ BEGIN
 				FROM tblTMSiteDevice AA
 				INNER JOIN tblTMDevice BB
 					ON AA.intDeviceId = BB.intDeviceId
-				WHERE ISNULL(BB.ysnAppliance,0) = 0
+				INNER JOIN tblTMDeviceType CC
+					ON CC.intDeviceTypeId = BB.intDeviceTypeId
+				WHERE ISNULL(BB.ysnAppliance,0) = 0 AND CC.strDeviceType = ''Tank''
 			) Q
 				ON A.intSiteID = Q.intSiteID
 				AND Q.intCntId = 1
