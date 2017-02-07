@@ -336,7 +336,7 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
-        .waitUntilLoaded('icinventoryreceipt')
+        .waitUntilLoaded('')
         .verifyData('Combo Box','ReceiptType','Purchase Order')
         .verifyData('Combo Box','Vendor','ABC Trucking')
         .verifyData('Combo Box','Currency','USD')

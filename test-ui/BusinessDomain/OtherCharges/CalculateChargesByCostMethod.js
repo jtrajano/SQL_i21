@@ -2,36 +2,36 @@ StartTest (function (t) {
     var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
-        //region Pre-Setup Create Lotted Item and Other Charge Item
-        .displayText('===== Pre-setup New Commodity =====')
-        .addFunction(function(next){
-            commonIC.addCommodity (t,next, 'OC - Commodity - 01', 'Commodity with UOM and No Attribute Setup')
-        })
-
-
-        .displayText('===== Pre-setup Add New Other Charge Item=====')
-        .addFunction(function(next){
-            commonIC.addOtherChargeItem (t,next, 'OtherCharge - 01', 'Test Other Charge Item')
-        })
-
-
-        //Add Lotted Item
-        .displayText('===== Pre-setup Add Lot Tracked Item =====')
-        .addFunction(function(next){
-            commonIC.addInventoryItem
-            (t,next,
-                'OC - LTI - 01'
-                , 'Test Lotted Item For Other Charges'
-                , 3
-                , 'Grains'
-                , 'OC - Commodity - 01'
-                , 'LB'
-                , 'LB'
-                , 10
-                , 10
-                , 40
-            )
-        })
+//        //region Pre-Setup Create Lotted Item and Other Charge Item
+//        .displayText('===== Pre-setup New Commodity =====')
+//        .addFunction(function(next){
+//            commonIC.addCommodity (t,next, 'OC - Commodity - 01', 'Commodity with UOM and No Attribute Setup')
+//        })
+//
+//
+//        .displayText('===== Pre-setup Add New Other Charge Item=====')
+//        .addFunction(function(next){
+//            commonIC.addOtherChargeItem (t,next, 'OtherCharge - 01', 'Test Other Charge Item')
+//        })
+//
+//
+//        //Add Lotted Item
+//        .displayText('===== Pre-setup Add Lot Tracked Item =====')
+//        .addFunction(function(next){
+//            commonIC.addInventoryItem
+//            (t,next,
+//                'OC - LTI - 01'
+//                , 'Test Lotted Item For Other Charges'
+//                , 3
+//                , 'Grains'
+//                , 'OC - Commodity - 01'
+//                , 'LB'
+//                , 'LB'
+//                , 10
+//                , 10
+//                , 40
+//            )
+//        })
 
         //region Cost Method is Percentage - Inventory Cost unchecked
         .displayText('=====  Scenario 1. Create Direct IR for Lotted Item Cost Method is Percentage - Inventory Cost unchecked  =====')

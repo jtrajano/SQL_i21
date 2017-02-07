@@ -5,15 +5,15 @@ StartTest (function (t) {
 
         //region
 
-//        //Add Category
-//        .addFunction(function(next){
-//            commonIC.addCategory (t,next, 'Category-1', 'Test Category Description', 2)
-//        })
-//
-//        //Add Commodity
-//        .addFunction(function(next){
-//            commonIC.addCommodity (t,next, 'Commodity-1', 'Test Commodity Description')
-//        })
+        //Add Category
+        .addFunction(function(next){
+            commonIC.addCategory (t,next, 'Category-1', 'Test Category Description', 2)
+        })
+
+        //Add Commodity
+        .addFunction(function(next){
+            commonIC.addCommodity (t,next, 'Commodity-1', 'Test Commodity Description')
+        })
 
         //Add Non Lotted Item
         .addFunction(function(next){
