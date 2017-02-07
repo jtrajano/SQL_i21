@@ -3222,7 +3222,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'glrecaptab',
-                                        itemId: 'pnlPostPreview',
+                                        itemId: 'pgePostPreview',
                                         title: 'Post Preview',
                                         tabConfig: {
                                             xtype: 'tab',

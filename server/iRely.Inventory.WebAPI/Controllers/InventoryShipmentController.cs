@@ -45,17 +45,42 @@ namespace iRely.Inventory.WebApi
         {
             var result = _bl.PostTransaction(shipment, shipment.isRecap);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            if (result.HasError)
             {
-                data = shipment,
-                success = !result.HasError,
-                message = new
+                return Request.CreateResponse(HttpStatusCode.Conflict, new
                 {
-                    statusText = result.Exception.Message,
-                    status = result.Exception.Error,
-                    button = result.Exception.Button.ToString()
-                }
-            });
+                    data = new
+                    {
+                        strBatchId = result.strBatchId,
+                        strTransactionId = shipment.strTransactionId
+                    },
+                    success = false,
+                    message = new
+                    {
+                        statusText = result.Exception.Message,
+                        status = result.Exception.Error,
+                        button = result.Exception.Button.ToString()
+                    }
+                });
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.Accepted, new
+                {
+                    data = new
+                    {
+                        strBatchId = result.strBatchId,
+                        strTransactionId = shipment.strTransactionId
+                    },
+                    success = true,
+                    message = new
+                    {
+                        statusText = result.Exception.Message,
+                        status = result.Exception.Error,
+                        button = result.Exception.Button.ToString()
+                    }
+                });
+            }
         }
 
         public struct ShipmentParam

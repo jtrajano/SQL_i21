@@ -187,12 +187,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnUnpost: {
                 hidden: '{hideUnpostButton}'
             },
-            btnPostPreview: {
-                hidden: '{hidePostButton}'
-            },
-            btnUnpostPreview: {
-                hidden: '{hideUnpostButton}'    
-            },
+            // btnPostPreview: {
+            //     hidden: '{hidePostButton}'
+            // },
+            // btnUnpostPreview: {
+            //     hidden: '{hideUnpostButton}'    
+            // },
             btnInvoice: {
                 hidden: '{!current.ysnPosted}'
             },
@@ -1378,41 +1378,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 ]
             });
         }
-    },
-
-    onPostClick: function(button, e, eOpts) {
-        var me = this;
-        var win = button.up('window');
-        var context = win.context;
-
-        var doPost = function() {
-            var strShipmentNumber = me.getCurrentValue('strShipmentNumber');
-            var posted = me.getCurrentValue('ysnPosted');
-
-            var options = {
-                postURL             : '../Inventory/api/InventoryShipment/Ship',
-                strTransactionId    : strShipmentNumber,
-                isPost              : !posted,
-                isRecap             : false,
-                callback            : me.onAfterShip,
-                scope               : me
-            };
-
-            CashManagement.common.BusinessRules.callPostRequest(options);
-        };
-
-        // If there is no data change, do the post.
-        if (!context.data.hasChanges()){
-            doPost();
-            return;
-        }
-
-        // Save has data changes first before doing the post.
-        context.data.saveRecord({
-            successFn: function() {
-                doPost();
-            }
-        });
     },
 
     onRecapClick: function(button, e, eOpts) {
@@ -2936,19 +2901,88 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         iRely.Functions.openScreen('i21.view.Currency', { viewConfig: { modal: true } });
     },   
 
-    // onCurrencySelect: function (combo, records, eOpts) {
-    //     if (records.length <= 0)
-    //         return;
+    onPnlRecapBeforeShow: function(component, eOpts){
+        var me = this;
+        var win = component.up('window');
+        var context = win.context;
 
-    //     var win = combo.up('window');
-    //     var current = win.viewModel.data.current;
+        var doRecap = function (currentRecord){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryShipment/Ship',
+                params:{
+                    strTransactionId: currentRecord.get('strShipmentNumber'),
+                    isPost: currentRecord.get('ysnPosted') ? false : true,
+                    isRecap: true
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    var postResult = Ext.decode(successResponse.responseText);
+                    var batchId = postResult.data.strBatchId;
+                    if (batchId) {
+                        me.bindRecapGrid(batchId);
+                    }                    
+                }
+                ,function(failureResponse) {
+                    // Show Post Preview failed.
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            )
+        };    
 
-    //     if (current) {
-    //         var subCurrencyCents = records[0].get('intSubCurrencyCent');
-    //         subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
-    //         current.set('intSubCurrencyCents', subCurrencyCents);
-    //     }
-    // },    
+        // If there is no data change, calculate the charge and do the recap. 
+        if (!context.data.hasChanges()) {
+            doRecap(win.viewModel.data.current);
+        }
+
+        // Save has data changes first before anything else. 
+        context.data.saveRecord({
+            successFn: function () {
+                doRecap(win.viewModel.data.current);             
+            }
+        });
+    }, 
+
+    onPostClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doPost = function (currentRecord){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryShipment/Ship',
+                params:{
+                    strTransactionId: currentRecord.get('strShipmentNumber'),
+                    isPost: currentRecord.get('ysnPosted') ? false : true,
+                    isRecap: false
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    me.onAfterShip(true);
+                }
+                ,function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    me.onAfterShip(false, jsonData.message.statusText);
+                }
+            )
+        };    
+
+        // If there is no data change, calculate the charge and do the recap. 
+        if (!context.data.hasChanges()) {
+            doPost(win.viewModel.data.current);
+        }
+
+        // Save has data changes first before anything else. 
+        context.data.saveRecord({
+            successFn: function () {
+                doPost(win.viewModel.data.current);             
+            }
+        });
+    },    
 
     init: function(application) {
         this.control({
