@@ -20,6 +20,7 @@ BEGIN TRY
 		,@intParentLotId INT
 		,@intChildLotCount INT
 		,@intLotRecordId INT
+		,@ysnSetExpiryDateByParentLot BIT
 	DECLARE @tblLotsWithSameParentLot TABLE (
 		intLotRecordId INT Identity(1, 1)
 		,strLotNumber NVARCHAR(100)
@@ -41,9 +42,19 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	SELECT @intChildLotCount = COUNT(*)
-	FROM tblICLot
-	WHERE intParentLotId = @intParentLotId
+	SELECT @ysnSetExpiryDateByParentLot = ysnSetExpiryDateByParentLot
+	FROM tblMFCompanyPreference
+
+	IF @ysnSetExpiryDateByParentLot = 1
+	BEGIN
+		SELECT @intChildLotCount = COUNT(*)
+		FROM tblICLot
+		WHERE intParentLotId = @intParentLotId
+	END
+	ELSE
+	BEGIN
+		SELECT @intChildLotCount = 0
+	END
 
 	SELECT @dtmDate = GETDATE()
 

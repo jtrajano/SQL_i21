@@ -2431,3 +2431,7 @@ UPDATE tblMFPatternDetail
 SET ysnPaddingZero = 1
 WHERE ysnPaddingZero IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET ysnSetExpiryDateByParentLot = 1
+WHERE ysnSetExpiryDateByParentLot IS NULL
+GO
