@@ -8,7 +8,11 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS OFF
+
+DECLARE @Ids AS Id
+INSERT INTO @Ids(intId) SELECT @InvoiceId
+EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @TransactionType	= 1
 
 EXEC dbo.[uspARUpdatePricingHistory] 2, @InvoiceId, @UserId
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @InvoiceId, @ForDelete
