@@ -178,7 +178,7 @@ BEGIN TRY
 			ELSE IF @TemplateItemId = 'MF-360-Summary-002'
 			BEGIN
 				DECLARE @E1 NVARCHAR(50)
-				SET @E1 = (SELECT SUM(CAST(strConfiguration AS INT)) FROM vyuTFGetReportingComponentConfiguration WHERE strTemplateItemId IN('MF-360-Summary-024','MF-360-Summary-025'))
+				SET @E1 = (SELECT ISNULL(SUM(CAST(strConfiguration AS INT)), 0) FROM vyuTFGetReportingComponentConfiguration WHERE strTemplateItemId IN('MF-360-Summary-024','MF-360-Summary-025'))
 				SET @Query = 'SELECT ISNULL(SUM(dblQtyShipped), 0) + ' + @E1 + ' FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @ScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''' AND strType = ''Gasoline / Aviation Gasoline / Gasohol'''  
 				INSERT INTO @tblTempSummaryTotal
 				EXEC(@Query)
