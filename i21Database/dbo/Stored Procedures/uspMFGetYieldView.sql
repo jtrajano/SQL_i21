@@ -537,7 +537,7 @@ BEGIN TRY
 		INTO ##tblMFInputItemYield
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = TR.intWorkOrderId
+		JOIN dbo.tblICItem I ON I.intItemId = TR.intItemId
 		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intInputItemId
 			AND RI.intWorkOrderId = W.intWorkOrderId
 		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
@@ -611,7 +611,7 @@ BEGIN TRY
 			,TR.intCategoryId
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = TR.intWorkOrderId
+		JOIN dbo.tblICItem I ON I.intItemId = TR.intItemId
 		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intInputItemId
 			AND RI.intWorkOrderId = W.intWorkOrderId
 		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
