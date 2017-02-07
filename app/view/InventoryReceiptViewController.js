@@ -1095,6 +1095,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
             /*'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +*/
             'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
+            'tblICInventoryReceiptItems.tblICUnitMeasure,' +
             'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge,' + 
             'tblICInventoryReceiptCharges.tblICInventoryReceiptChargeTaxes',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {

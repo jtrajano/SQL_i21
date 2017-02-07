@@ -100,8 +100,8 @@ Ext.define('Inventory.ux.UnitMeasureField', {
             cboUnitMeasure.setRawValue(uom.get('strUnitMeasure'));
         else
             cboUnitMeasure.setRawValue(uomId);
-        cboUnitMeasure.on('select', this.onUnitMeasurementChange);
-        txtQuantity.on('change', this.onQuantityChange);
+        //cboUnitMeasure.on('select', this.onUnitMeasurementChange);
+       // txtQuantity.on('change', this.onQuantityChange);
     },
 
     onQuantityChange: function(textfield, newValue, oldValue) {
@@ -122,7 +122,7 @@ Ext.define('Inventory.ux.UnitMeasureField', {
             textfield.setRawValue(f);
         } else {
             var formatted = numeral(newValue).format('0,0.[' + format + ']');
-            var decimalToDisplay = decimalPlaces(numeral(formatted)._value);
+            var decimalToDisplay = (((numeral(formatted)._value).toString()).split('.')[1] || []).length; //decimalPlaces(numeral(formatted)._value);
             textfield.setDecimalPrecision(decimal);
             textfield.setDecimalToDisplay(decimalToDisplay);
             textfield.setValue(formatted);
@@ -140,7 +140,7 @@ Ext.define('Inventory.ux.UnitMeasureField', {
                 format += "0";
             var val = txtQuantity.getValue();
             var formatted = numeral(val).format('0,0.[' + format + ']');
-            var decimalToDisplay = decimalPlaces(numeral(formatted)._value);
+            var decimalToDisplay = (((numeral(formatted)._value).toString()).split('.')[1] || []).length; //decimalPlaces(numeral(formatted)._value);
             txtQuantity.setDecimalPrecision(decimal);
             txtQuantity.setDecimalToDisplay(decimalToDisplay);
             txtQuantity.setValue(formatted);

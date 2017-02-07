@@ -250,7 +250,8 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
         public bool? ysnSubCurrency { get; set; }
         public int? intTaxGroupId { get; set; }
-        
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+
         private string _orderNumber;
         [NotMapped]
         public string strOrderNumber

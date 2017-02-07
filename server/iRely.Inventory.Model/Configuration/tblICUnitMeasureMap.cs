@@ -24,6 +24,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.vyuICGetUOMConversions)
                 .WithRequired(p => p.tblICUnitMeasure)
                 .HasForeignKey(p => p.intStockUnitMeasureId);
+            this.HasMany(p => p.tblICInventoryReceiptItems)
+                .WithOptional(p => p.tblICUnitMeasure)
+                .HasForeignKey(p => p.intUnitMeasureId);
         }
     }
 

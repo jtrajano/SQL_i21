@@ -569,76 +569,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     displayField: 'strUnitMeasure'
                                                                 }
                                                             },
-                                                            {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colUOMCode',
-                                                                dataIndex: 'strFieldName',
-                                                                text: 'UOM',
-                                                                flex: 3,
-                                                                editor: {
-                                                                    xtype: 'gridcombobox',
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'intUnitMeasureId',
-                                                                            dataType: 'numeric',
-                                                                            text: 'Unit Of Measure ID',
-                                                                            hidden: true
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strUnitMeasure',
-                                                                            dataType: 'string',
-                                                                            text: 'Unit Measure',
-                                                                            flex: 1
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strUnitType',
-                                                                            dataType: 'string',
-                                                                            text: 'Unit Type',
-                                                                            flex: 1
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'intDecimalPlaces',
-                                                                            dataType: 'int',
-                                                                            text: 'Decimals',
-                                                                            flex: 1
-                                                                        }
-                                                                    ],
-                                                                    itemId: 'cboUOM',
-                                                                    displayField: 'strUnitMeasure',
-                                                                    valueField: 'strUnitMeasure'
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'numbercolumn',
-                                                                itemId: 'colUOMUnitQty',
-                                                                align: 'right',
-                                                                dataIndex: 'strFieldName',
-                                                                text: 'Unit Qty',
-                                                                flex: 3,
-                                                                renderer: function(value, cell, record) {
-                                                                    var decimals = 2;
-                                                                    if(record.data.tblICUnitMeasure) {
-                                                                        if(record.data.tblICUnitMeasure.data)
-                                                                            decimals = record.data.tblICUnitMeasure.data.intDecimalPlaces;
-                                                                        else
-                                                                            decimals = record.data.tblICUnitMeasure.intDecimalPlaces;
-                                                                        if(iRely.Functions.isEmpty(decimals))
-                                                                            decimals = 2;
-                                                                        var format = "";
-                                                                        for (var i = 0; i < decimals; i++)
-                                                                            format += "0";
-                                                                        var formatted = numeral(value).format('0,0.[' + format + ']');
-                                                                        return formatted;
-                                                                    }
-                                                                    return value;
-                                                                },
-                                                                editor: {
-                                                                    xtype: 'numberfield',
-                                                                    itemId: 'txtUOMUnitQty',
-                                                                    fieldStyle: 'text-align:right',
-                                                                    hideTrigger: true
-                                                                }
-                                                            },
+                                                            
                                                             {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colUOMStockUnit',
@@ -658,7 +589,8 @@ Ext.define('Inventory.view.Commodity', {
                                                             itemId: 'grvUom'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                            selType: 'checkboxmodel'
+                                                            selType: 'checkboxmodel',
+                                                            mode: 'SINGLE'
                                                         }),
                                                         plugins: [
                                                             {

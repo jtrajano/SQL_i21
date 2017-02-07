@@ -35,7 +35,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.column.Date',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Time',
-        'Ext.toolbar.Paging'
+        'Ext.toolbar.Paging',
+        'Inventory.ux.GridUnitMeasureColumn',
+        'Inventory.ux.GridUnitMeasureField',
+        'Inventory.ux.UnitMeasureField'
     ],
 
     height: 700,
@@ -1191,6 +1194,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 dataIndex: 'dblQtyOrdered',
                                                                                 text: 'Received so far',
                                                                                 format: '0,000.##'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'unitmeasurecolumn',
+                                                                                itemId: 'colUOMQtyToReceive',
+                                                                                text: 'Quantity to Receives',
+                                                                                width: 100,
+                                                                                align: 'right',
+                                                                                dataIndex: 'dblOpenReceive',
+                                                                                editor: {
+                                                                                    xtype: 'gridunitmeasurefield',
+                                                                                    valueField: 'intUnitMeasureId',
+                                                                                    displayField: 'strUnitMeasure'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',

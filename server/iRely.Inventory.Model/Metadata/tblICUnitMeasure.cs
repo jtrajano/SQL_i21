@@ -39,6 +39,7 @@ namespace iRely.Inventory.Model
         
         public ICollection<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
         public ICollection<tblICCommodityOrigin> tblICCommodityOrigins { get; set; }
+        public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
     }
 
     public class tblICUnitMeasureConversion : BaseEntity
