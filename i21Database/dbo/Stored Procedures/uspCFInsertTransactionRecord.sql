@@ -813,6 +813,7 @@ BEGIN
 		EXEC dbo.uspCFRecalculateTransaciton 
 		 @ProductId						=	@intProductId
 		,@CardId						=	@intCardId
+		,@VehicleId						=	@intVehicleId
 		,@SiteId						=	@intSiteId
 		,@TransactionDate				=	@dtmTransactionDate
 		,@Quantity						=	@dblQuantity
