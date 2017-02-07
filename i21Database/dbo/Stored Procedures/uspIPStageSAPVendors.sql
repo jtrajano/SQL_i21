@@ -33,7 +33,8 @@ BEGIN TRY
 		strTerm NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		dtmCreated DATETIME NULL DEFAULT((getdate())),
-		strCreatedUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		strCreatedUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		strMarkForDeletion NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	)
 
 	DECLARE @tblVendorContact TABLE (
@@ -55,6 +56,7 @@ BEGIN TRY
 		,strFLOId
 		,dtmCreated
 		,strCreatedUserName
+		,strMarkForDeletion
 		)
 	SELECT NAME1
 		,STRAS
@@ -68,6 +70,7 @@ BEGIN TRY
 		,KTOKK
 		,CASE WHEN ISDATE(ERDAT)=0 THEN NULL ELSE ERDAT END
 		,ERNAM
+		,LOEVM
 	FROM OPENXML(@idoc, 'CREMAS06/IDOC/E1LFA1M', 2) WITH (
 			 NAME1 NVARCHAR(100)
 			,STRAS NVARCHAR(MAX)
@@ -81,6 +84,7 @@ BEGIN TRY
 			,KTOKK NVARCHAR(100)
 			,ERDAT NVARCHAR(50)
 			,ERNAM NVARCHAR(100)
+			,LOEVM NVARCHAR(50)
 			)
 
 	If NOT Exists (Select 1 From @tblVendor)
@@ -106,8 +110,8 @@ BEGIN TRY
 	Begin Tran
 
 	--Add to Staging tables
-	Insert into tblIPEntityStage(strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,strEntityType,strCurrency,strTerm)
-	Select strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,'Vendor',strCurrency,strTerm
+	Insert into tblIPEntityStage(strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,strEntityType,strCurrency,strTerm,ysnDeleted)
+	Select strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,'Vendor',strCurrency,strTerm,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END
 	From @tblVendor
 
 	Select @intStageEntityId=SCOPE_IDENTITY()
