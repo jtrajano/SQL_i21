@@ -3,6 +3,7 @@
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -34,8 +35,7 @@ DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 -- Get the Inventory Shipment batch number
-DECLARE @strBatchId AS NVARCHAR(40) 
-		,@strItemNo AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
 		,@ysnAllowBlankGLEntries AS BIT = 1
 		,@intItemId AS INT
 
@@ -273,9 +273,13 @@ BEGIN
 		END 
 	END
 END
+
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
-IF @@ERROR <> 0 GOTO Post_Exit    
+BEGIN 
+	SET @strBatchId = NULL 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+	IF @@ERROR <> 0 GOTO Post_Exit    
+END 
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
