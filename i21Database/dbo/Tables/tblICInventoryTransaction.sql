@@ -36,7 +36,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[dblValue] NUMERIC(38, 20) NULL, 
 		[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[intCurrencyId] INT NULL,
-		[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
+		[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL, -- OBSOLETE, use dblForexRate instead. 
 		[intTransactionId] INT NOT NULL, 
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionDetailId] INT NULL, 
@@ -54,6 +54,8 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[strDescription] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 
 		[intFobPointId] TINYINT NULL,
 		[ysnNoGLPosting] BIT NULL DEFAULT 0, 
+		[intForexRateTypeId] INT NULL,
+		[dblForexRate] NUMERIC(38, 20) NOT NULL DEFAULT 1, 
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 

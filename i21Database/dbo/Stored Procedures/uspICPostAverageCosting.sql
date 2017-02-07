@@ -43,7 +43,7 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	,@dblCost AS NUMERIC(38,20)	
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
-	,@dblExchangeRate AS NUMERIC(38,20)
+	--,@dblExchangeRate AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -51,6 +51,8 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255)
 	,@intEntityUserSecurityId AS INT
+	,@intForexRateTypeId AS INT
+	,@dblForexRate NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -119,7 +121,7 @@ BEGIN
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
 				,@intCurrencyId = @intCurrencyId
-				,@dblExchangeRate = @dblExchangeRate
+				--,@dblExchangeRate = @dblExchangeRate
 				,@intTransactionId = @intTransactionId
 				,@intTransactionDetailId = @intTransactionDetailId
 				,@strTransactionId = @strTransactionId
@@ -133,6 +135,8 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@intCostingMethod = @AVERAGECOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+				,@intForexRateTypeId = @intForexRateTypeId
+				,@dblForexRate = @dblForexRate
 
 		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
 		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
@@ -192,7 +196,7 @@ BEGIN
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
 				,@intCurrencyId = @intCurrencyId
-				,@dblExchangeRate = @dblExchangeRate
+				--,@dblExchangeRate = @dblExchangeRate
 				,@intTransactionId = @intTransactionId
 				,@intTransactionDetailId = @intTransactionDetailId
 				,@strTransactionId = @strTransactionId
@@ -206,6 +210,8 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@intCostingMethod = @AVERAGECOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT			
+				,@intForexRateTypeId = @intForexRateTypeId
+				,@dblForexRate = @dblForexRate
 
 		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -258,7 +264,7 @@ BEGIN
 							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 							,@dblSalesPrice = @dblSalesPrice
 							,@intCurrencyId = @intCurrencyId
-							,@dblExchangeRate = @dblExchangeRate
+							--,@dblExchangeRate = @dblExchangeRate
 							,@intTransactionId = @intTransactionId
 							,@intTransactionDetailId = @intTransactionDetailId
 							,@strTransactionId = @strTransactionId
@@ -272,6 +278,8 @@ BEGIN
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
 							,@intCostingMethod = @AVERAGECOST
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
+							,@intForexRateTypeId = @intForexRateTypeId
+							,@dblForexRate = @dblForexRate
 				END 
 			END
 			
@@ -332,7 +340,7 @@ BEGIN
 					,@dblValue = @dblValue
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
-					,@dblExchangeRate = @dblExchangeRate
+					--,@dblExchangeRate = @dblExchangeRate
 					,@intTransactionId = @intTransactionId
 					,@intTransactionDetailId = @intTransactionDetailId
 					,@strTransactionId = @strTransactionId
@@ -346,6 +354,8 @@ BEGIN
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@intCostingMethod = @AVERAGECOST
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
+					,@intForexRateTypeId = @intForexRateTypeId
+					,@dblForexRate = @dblForexRate
 		END 
 	END 
 END 

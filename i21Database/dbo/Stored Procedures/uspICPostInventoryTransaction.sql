@@ -11,7 +11,7 @@
 	,@dblValue NUMERIC(38,20)
 	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT
-	,@dblExchangeRate NUMERIC (38,20)
+	--,@dblExchangeRate NUMERIC (38,20) -- OBSOLETE 
 	,@intTransactionId INT
 	,@intTransactionDetailId INT 
 	,@strTransactionId NVARCHAR(40)
@@ -27,6 +27,8 @@
 	,@InventoryTransactionIdentityId INT OUTPUT 
 	,@intFobPointId TINYINT = NULL 
 	,@intInTransitSourceLocationId INT = NULL 
+	,@intForexRateTypeId INT = NULL
+	,@dblForexRate NUMERIC(38, 20) = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -74,6 +76,8 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intCostingMethod]
 		,[intFobPointId]
 		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -86,7 +90,7 @@ SELECT	[intItemId]							= @intItemId
 		,[dblValue]							= ISNULL(@dblValue, 0)
 		,[dblSalesPrice]					= ISNULL(@dblSalesPrice, 0)
 		,[intCurrencyId]					= @intCurrencyId
-		,[dblExchangeRate]					= ISNULL(@dblExchangeRate, 1)
+		,[dblExchangeRate]					= ISNULL(@dblForexRate, 1)
 		,[intTransactionId]					= @intTransactionId
 		,[intTransactionDetailId]			= @intTransactionDetailId
 		,[strTransactionId]					= @strTransactionId
@@ -105,6 +109,8 @@ SELECT	[intItemId]							= @intItemId
 		,[intCostingMethod]					= @intCostingMethod
 		,[intFobPointId]					= @intFobPointId
 		,[intInTransitSourceLocationId]		= @intInTransitSourceLocationId
+		,[intForexRateTypeId]				= @intForexRateTypeId
+		,[dblForexRate]						= @dblForexRate
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 

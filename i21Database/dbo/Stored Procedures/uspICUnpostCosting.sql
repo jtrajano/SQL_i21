@@ -255,6 +255,8 @@ BEGIN
 			,[strDescription]
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -288,6 +290,9 @@ BEGIN
 			,[strDescription]						= ActualTransaction.strDescription
 			,[intFobPointId]						= ActualTransaction.intFobPointId
 			,[intInTransitSourceLocationId]			= ActualTransaction.intInTransitSourceLocationId
+			,[intForexRateTypeId]					= ActualTransaction.intForexRateTypeId
+			,[dblForexRate]							= ActualTransaction.dblForexRate
+
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
@@ -577,8 +582,8 @@ BEGIN
 					,[dblValue]								=	dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
 																- dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) 
 					,[dblSalesPrice]						= 0
-					,[intCurrencyId]						= @intCurrencyId
-					,[dblExchangeRate]						= @dblExchangeRate
+					,[intCurrencyId]						= NULL -- @intCurrencyId
+					,[dblExchangeRate]						= 1 -- @dblExchangeRate
 					,[intTransactionId]						= @intTransactionId
 					,[strTransactionId]						= @strTransactionId
 					,[strBatchId]							= @strBatchId

@@ -14,7 +14,7 @@ CREATE PROCEDURE [dbo].[uspICPostLIFO]
 	,@dblCost AS NUMERIC(38,20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
-	,@dblExchangeRate AS NUMERIC(38,20)
+	--,@dblExchangeRate AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -22,6 +22,8 @@ CREATE PROCEDURE [dbo].[uspICPostLIFO]
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255)
 	,@intEntityUserSecurityId AS INT
+	,@intForexRateTypeId AS INT
+	,@dblForexRate NUMERIC(38, 20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -104,7 +106,7 @@ BEGIN
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
-					,@dblExchangeRate = @dblExchangeRate
+					--,@dblExchangeRate = @dblExchangeRate
 					,@intTransactionId = @intTransactionId
 					,@intTransactionDetailId = @intTransactionDetailId
 					,@strTransactionId = @strTransactionId
@@ -118,6 +120,8 @@ BEGIN
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@intCostingMethod = @LIFO
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+					,@intForexRateTypeId = @intForexRateTypeId
+					,@dblForexRate = @dblForexRate
 		
 			-- Insert the record the the LIFO-out table
 			INSERT INTO dbo.tblICInventoryLIFOOut (
@@ -159,7 +163,7 @@ BEGIN
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
 				,@intCurrencyId = @intCurrencyId
-				,@dblExchangeRate = @dblExchangeRate
+				--,@dblExchangeRate = @dblExchangeRate
 				,@intTransactionId = @intTransactionId
 				,@intTransactionDetailId = @intTransactionDetailId
 				,@strTransactionId = @strTransactionId
@@ -173,6 +177,8 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@intCostingMethod = @LIFO
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
+				,@intForexRateTypeId = @intForexRateTypeId
+				,@dblForexRate = @dblForexRate
 
 		-- Repeat call on uspICIncreaseStockInLIFO until @dblAddQty is completely distributed to the negative cost LIFO buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -225,7 +231,7 @@ BEGIN
 							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 							,@dblSalesPrice = @dblSalesPrice
 							,@intCurrencyId = @intCurrencyId
-							,@dblExchangeRate = @dblExchangeRate
+							--,@dblExchangeRate = @dblExchangeRate
 							,@intTransactionId = @intTransactionId
 							,@intTransactionDetailId = @intTransactionDetailId
 							,@strTransactionId = @strTransactionId
@@ -239,6 +245,8 @@ BEGIN
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
 							,@intCostingMethod = @AVERAGECOST
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
+							,@intForexRateTypeId = @intForexRateTypeId
+							,@dblForexRate = @dblForexRate
 				END 
 			END
 
