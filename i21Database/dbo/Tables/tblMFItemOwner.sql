@@ -1,7 +1,7 @@
 ﻿CREATE TABLE tblMFItemOwner (
 	intItemOwnerId INT NOT NULL IDENTITY(1, 1)
 	,intConcurrencyId INT NULL CONSTRAINT [DF_tblMFItemOwner_intConcurrencyId] DEFAULT 0
-	,intItemId INT NOT NULL
+	,intItemId INT NULL
 	,intOwnerId INT NOT NULL
 	,intReceivedLife INT
 
