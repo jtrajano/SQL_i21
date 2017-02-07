@@ -39,7 +39,7 @@ BEGIN TRY
 	IF @strXML = 'Delete'
 	BEGIN
 		SET	@strAction = @strXML
-		SET @Condition = 'intPriceContractId = ' + STR(@intPriceContractId)
+		SET @Condition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
 		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTPriceFixation', @Condition, @strXML OUTPUT,null,'intPriceFixationId,intContractHeaderId,intContractDetailId,''Delete'' AS strRowState'
 	END
 
@@ -110,31 +110,31 @@ BEGIN TRY
 			BEGIN
 				SET @strXML = '<root>'
 				IF ISNULL(@intFutOptTransactionId,0) > 0
-					SET @strXML = @strXML +  '<intFutOptTransactionId>' + STR(@intFutOptTransactionId) + '</intFutOptTransactionId>'
+					SET @strXML = @strXML +  '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
 				SET @strXML = @strXML +  '<intFutOptTransactionHeaderId>1</intFutOptTransactionHeaderId>'
-				SET @strXML = @strXML +  '<intContractHeaderId>' + STR(@intContractHeaderId) + '</intContractHeaderId>'
+				SET @strXML = @strXML +  '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
 				IF ISNULL(@intContractDetailId,0) > 0
-					SET @strXML = @strXML +  '<intContractDetailId>' + STR(@intContractDetailId) + '</intContractDetailId>'
+					SET @strXML = @strXML +  '<intContractDetailId>' + LTRIM(@intContractDetailId) + '</intContractDetailId>'
 				SET @strXML = @strXML +  '<dtmTransactionDate>' + LTRIM(GETDATE()) + '</dtmTransactionDate>'
-				SET @strXML = @strXML +  '<intEntityId>' + STR(@intBrokerId) + '</intEntityId>'
-				SET @strXML = @strXML +  '<intBrokerageAccountId>' + STR(@intBrokerageAccountId) + '</intBrokerageAccountId>'
-				SET @strXML = @strXML +  '<intFutureMarketId>' + STR(@intFutureMarketId) + '</intFutureMarketId>'
+				SET @strXML = @strXML +  '<intEntityId>' + LTRIM(@intBrokerId) + '</intEntityId>'
+				SET @strXML = @strXML +  '<intBrokerageAccountId>' + LTRIM(@intBrokerageAccountId) + '</intBrokerageAccountId>'
+				SET @strXML = @strXML +  '<intFutureMarketId>' + LTRIM(@intFutureMarketId) + '</intFutureMarketId>'
 				SET @strXML = @strXML +  '<intInstrumentTypeId>1</intInstrumentTypeId>'
-				SET @strXML = @strXML +  '<intCommodityId>' + STR(@intCommodityId) + '</intCommodityId>'
-				SET @strXML = @strXML +  '<intLocationId>' + STR(@intLocationId) + '</intLocationId>'
-				SET @strXML = @strXML +  '<intTraderId>' + STR(@intTraderId) + '</intTraderId>'
-				SET @strXML = @strXML +  '<intCurrencyId>' + STR(@intCurrencyId) + '</intCurrencyId>'
+				SET @strXML = @strXML +  '<intCommodityId>' + LTRIM(@intCommodityId) + '</intCommodityId>'
+				SET @strXML = @strXML +  '<intLocationId>' + LTRIM(@intLocationId) + '</intLocationId>'
+				SET @strXML = @strXML +  '<intTraderId>' + LTRIM(@intTraderId) + '</intTraderId>'
+				SET @strXML = @strXML +  '<intCurrencyId>' + LTRIM(@intCurrencyId) + '</intCurrencyId>'
 				SET @strXML = @strXML +  '<intSelectedInstrumentTypeId>1</intSelectedInstrumentTypeId>'
 				SET @strXML = @strXML +  '<strBuySell>' + @strBuySell + '</strBuySell>'
-				SET @strXML = @strXML +  '<intNoOfContract>' + STR(@intNoOfContract) + '</intNoOfContract>'
-				SET @strXML = @strXML +  '<intFutureMonthId>' + STR(@intHedgeFutureMonthId) + '</intFutureMonthId>'
-				SET @strXML = @strXML +  '<dblPrice>' + STR(@dblHedgePrice) + '</dblPrice>'
+				SET @strXML = @strXML +  '<intNoOfContract>' + LTRIM(@intNoOfContract) + '</intNoOfContract>'
+				SET @strXML = @strXML +  '<intFutureMonthId>' + LTRIM(@intHedgeFutureMonthId) + '</intFutureMonthId>'
+				SET @strXML = @strXML +  '<dblPrice>' + LTRIM(@dblHedgePrice) + '</dblPrice>'
 				SET @strXML = @strXML +  '<strStatus>' + 'Filled' + '</strStatus>'
 				SET @strXML = @strXML +  '<dtmFilledDate>' + LTRIM(GETDATE()) + '</dtmFilledDate>'
 				if ISNULL(@intBookId,0) > 0
-					SET @strXML = @strXML +  '<intBookId>' + STR(@intBookId) + '</intBookId>'
+					SET @strXML = @strXML +  '<intBookId>' + LTRIM(@intBookId) + '</intBookId>'
 				if ISNULL(@intSubBookId,0) > 0
-					SET @strXML = @strXML +  '<intSubBookId>' + STR(@intSubBookId) + '</intSubBookId>'
+					SET @strXML = @strXML +  '<intSubBookId>' + LTRIM(@intSubBookId) + '</intSubBookId>'
 				SET @strXML = @strXML +  '</root>'
 
 				EXEC uspRKAutoHedge @strXML,@intOutputId OUTPUT
