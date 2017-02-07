@@ -47,13 +47,13 @@ Ext.define('Inventory.ux.UnitMeasureField', {
 
     getUnitMeasure: function() {
         if(this.viewModel)
-            return this.viewModel.get('unitMeasure');
+            return this.viewModel.get('unitMeasureId');
         return null;
     },
 
     setUnitMeasure: function(value) {
         if(this.viewModel)
-            this.viewModel.set('unitMeasure', value);
+            this.viewModel.set('unitMeasureId', value);
     },
 
     getQuantity: function() {
@@ -67,6 +67,22 @@ Ext.define('Inventory.ux.UnitMeasureField', {
             this.viewModel.set('quantity', value);
     },
 
+    getValue: function() {
+        return {
+            quantity: this.getQuantity(),
+            unitMeasureId: this.getUnitMeasure()
+        };
+    },
+
+    setValue: function(value) {
+        if(value) {
+            if(value.unitMeasureId)
+                this.setUnitMeasure(value.unitMeasureId);
+            if(value.quantity)
+                this.setQuantity(value.quantity);
+        }
+    },
+
     initComponent: function(options) {
         this.callParent(arguments);
         
@@ -77,7 +93,7 @@ Ext.define('Inventory.ux.UnitMeasureField', {
             cboUnitMeasure.defaultFilters = this.defaultFilters;
         cboUnitMeasure.bindStore(store);
         store.load();
-        var uomId = parseInt(this.viewModel.get('unitMeasure'));
+        var uomId = parseInt(this.viewModel.get('unitMeasureId'));
         cboUnitMeasure.setValue(uomId);
         var uom = cboUnitMeasure.findRecordByValue(uomId);
         if(uom && uom.get('strUnitMeasure'))
@@ -192,7 +208,7 @@ Ext.define('Inventory.ux.UnitMeasureField', {
                     labelWidth: 60,
                     hideLabel: true,
                     bind: {
-                        value: '{unitMeasure}'
+                        value: '{unitMeasureId}'
                     }
                 }
             ]

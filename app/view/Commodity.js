@@ -34,7 +34,10 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Date',
-        'Ext.toolbar.Paging'
+        'Ext.toolbar.Paging',
+        'Inventory.ux.UnitMeasureField',
+        'Inventory.ux.GridUnitMeasureField',
+        'Inventory.ux.GridUnitMeasureColumn'
     ],
 
     height: 635,
@@ -158,6 +161,18 @@ Ext.define('Inventory.view.Commodity', {
                                                             align: 'stretch'
                                                         },
                                                         items: [
+                                                            {
+                                                                xtype: 'unitmeasurefield',
+                                                                itemId: 'untUOM',
+                                                                fieldLabel: 'Unit Qty',
+                                                                labelWidth: 140
+                                                            },
+                                                            {
+                                                                xtype: 'unitmeasurefield',
+                                                                itemId: 'untUOM2',
+                                                                fieldLabel: 'Unit Qty',
+                                                                labelWidth: 140
+                                                            },
                                                             {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtCommodityCode',
@@ -541,6 +556,13 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         columns: [
+                                                            {
+                                                                xtype: 'unitmeasurecolumn',
+                                                                itemId: 'colOrdered',
+                                                                text: 'Ordered',
+                                                                flex: 3,
+                                                                align: 'right'
+                                                            },
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colUOMCode',
