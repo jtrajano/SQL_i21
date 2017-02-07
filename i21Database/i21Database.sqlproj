@@ -4991,6 +4991,7 @@
     <Build Include="dbo\Tables\tblMFReportCategoryByCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacard.sql" />
     <Build Include="dbo\Views\vyuSMApproverConfigurationUsers.sql" />
+    <Build Include="dbo\Views\vyuHDParticipant.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
