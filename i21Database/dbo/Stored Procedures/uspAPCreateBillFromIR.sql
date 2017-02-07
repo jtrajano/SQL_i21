@@ -65,21 +65,6 @@ SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompany
 --END
 
 --Make sure all items were not yet billed.
-IF NOT EXISTS (
-	SELECT	TOP 1 1 
-	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
-				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			INNER JOIN #tmpReceiptIds tmp
-				ON ri.intInventoryReceiptId = tmp.intInventoryReceiptId
-	WHERE	ri.dblOpenReceive <> ri.dblBillQty
-			AND r.strReceiptType = 'inventory Return'			
-)
-BEGIN 
-	-- Debit Memo is no longer needed. All items have Debit Memo.
-	RAISERROR(80110, 11, 1)  
-END
-
---Make sure all items were not yet billed.
 IF NOT EXISTS(
 	SELECT	TOP 1 1 
 	FROM	tblICInventoryReceiptItem r INNER JOIN #tmpReceiptIds tmp
@@ -87,8 +72,23 @@ IF NOT EXISTS(
 	WHERE	r.dblOpenReceive <> r.dblBillQty
 )
 BEGIN
-	-- Voucher is no longer needed. All items have Voucher.
-	RAISERROR(80111, 11, 1)  
+	IF EXISTS (
+		SELECT	TOP 1 1 
+		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
+					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				INNER JOIN #tmpReceiptIds tmp
+					ON ri.intInventoryReceiptId = tmp.intInventoryReceiptId
+		WHERE	r.strReceiptType = 'Inventory Return'	
+	)
+	BEGIN 
+		-- Debit Memo is no longer needed. All items have Debit Memo.
+		RAISERROR(80110, 11, 1)  
+	END 
+	ELSE 
+	BEGIN 
+		-- Voucher is no longer needed. All items have Voucher.
+		RAISERROR(80111, 11, 1)  
+	END 
 END
 
 --removed first the constraint
