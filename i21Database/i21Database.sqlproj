@@ -5006,6 +5006,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetDetailedInventory.sql" />
     <Build Include="dbo\Views\vyuTMLastLeakGasCheckTable.sql" />
+    <Build Include="dbo\Views\vyuCTDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
