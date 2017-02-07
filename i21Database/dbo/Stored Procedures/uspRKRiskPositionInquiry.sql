@@ -41,11 +41,31 @@ DECLARE @List as Table (
      CustVendor nvarchar(50) COLLATE Latin1_General_CI_AS,       
      dblNoOfLot decimal(24,10),  
      dblQuantity decimal(24,10),
-       intOrderByHeading int,
-       intOrderBySubHeading int,
-       intContractHeaderId int ,
-       intFutOptTransactionHeaderId int       
+     intOrderByHeading int,
+     intOrderBySubHeading int,
+     intContractHeaderId int ,
+     intFutOptTransactionHeaderId int       
      )  
+
+DECLARE @RollCost as Table (  
+     intRowNumber int,  
+     strFutMarketName  nvarchar(200) COLLATE Latin1_General_CI_AS,  
+     strCommodityCode  nvarchar(50) COLLATE Latin1_General_CI_AS,  
+     strFutureMonth  nvarchar(20) COLLATE Latin1_General_CI_AS,
+	 intFutureMarketId int,
+	 intCommodityId int,
+	 intFutureMonthId int,
+     dblWtAvgOpenLongPosition  numeric(24,10),  
+     dblAvgPriceOld  numeric(24,10),  
+     dblLongQty  numeric(24,10),  
+     dblShortQty numeric(24,10),  
+     dblOriginalQty  numeric(24,10),  
+     dblWtAvgPosition numeric(24,10)
+     ) 
+DECLARE @dtmCurrentDate datetime 
+SET @dtmCurrentDate = getdate()
+INSERT INTO @RollCost(intRowNumber,strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId,dblWtAvgOpenLongPosition,dblAvgPriceOld,dblLongQty, dblShortQty,dblOriginalQty,dblWtAvgPosition)
+EXEC uspRKRollCost @dtmFromDate='01-01-2001', @dtmToDate= @dtmCurrentDate
        
 BEGIN  
 INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId)  
@@ -415,22 +435,22 @@ SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract) a
   strTradeNo, TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity, intContractHeaderId,intFutOptTransactionHeaderId   from  
 (  
 SELECT DISTINCT 'Terminal position (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
-   strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
+  fm.strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
   case when ft.strBuySell='Buy' then (ft.intNoOfContract*@dblContractSize) else -(ft.intNoOfContract*@dblContractSize) end as dblQuantity  
-  , null as intContractHeaderId,ft.intFutOptTransactionHeaderId  
+  ,null as intContractHeaderId,ft.intFutOptTransactionHeaderId  
 FROM tblRKFutOptTransaction ft  
 JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
 JOIN tblEMEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=1  
-JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
-WHERE  intCommodityId=@intCommodityId 
+JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0
+WHERE  ft.intCommodityId=@intCommodityId 
 AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end 
 AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end
 AND ft.intFutureMarketId=@intFutureMarketId   
 and dtmFutureMonthsDate >= @dtmFutureMonthsDate  
 )t  
-    
+   
 UNION   
   
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,  
@@ -614,9 +634,6 @@ FROM (
         AND cl.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cl.intCompanyLocationId else @intCompanyLocationId end)t2
 GROUP BY strAccountNumber
 
-
-	   
-
 BEGIN
 	DECLARE @DemandFinal1 as Table (  
      dblQuantity  numeric(24,10),  
@@ -682,7 +699,6 @@ WHERE @dtmPeriod1=CONVERT(DATETIME,'01 '+strFutureMonth)
 AND fm.intFutureMarketId = @intFutureMarketId and mm.intCommodityId=@intCommodityId
 
 IF @strFutureMonth1 IS NULL
-	--SELECT @strFutureMonth1=strFutureMonth FROM tblRKFuturesMonth where @dtmPeriod1<CONVERT(DATETIME,'01 '+strFutureMonth)
 
 		SELECT top 1 @strFutureMonth1=strFutureMonth FROM tblRKFuturesMonth fm
 		JOIN tblRKCommodityMarketMapping mm on mm.intFutureMarketId= fm.intFutureMarketId 
@@ -753,6 +769,7 @@ BEGIN
 	WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
 	GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
 END
+
 if (@strRiskView <> 'Processor')
 BEGIN
 --- Switch Position ---------
@@ -829,22 +846,30 @@ IF NOT EXISTS ( SELECT *
        BEGIN
               DELETE FROM @List where Selection like '%F&O%'
        END
-	    
-	   --select * from @List where PriceStatus like '%Net Net%'
 
+INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,TransactionDate)  
+SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract) as dblNoOfContract,getdate() TransactionDate FROM  
+(  
+SELECT DISTINCT 'Terminal position (Avg Long Price)' as Selection,'Avg Long Price' as PriceStatus,  
+  ft.strFutureMonth, 'Avg Long Price' as strAccountNumber,
+   dblWtAvgOpenLongPosition as dblNoOfContract
+FROM @RollCost ft
+WHERE  ft.intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId and CONVERT(DATETIME,'01 '+ ft.strFutureMonth) >= CONVERT(DATETIME,'01 '+ @strParamFutureMonth))t  
+	    
 update @List set intOrderByHeading=1 WHERE Selection in ('Physical position / Differential cover','Physical position / Basis risk')
 update @List set intOrderByHeading=2 WHERE Selection = 'Specialities & Low grades'
 update @List set intOrderByHeading=3 WHERE Selection = 'Total speciality delta fixed'
 update @List set intOrderByHeading=4 WHERE Selection = 'Terminal position (a. in lots )'
-update @List set intOrderByHeading=5 WHERE Selection like ('%Terminal position (b.%')
-update @List set intOrderByHeading=6 WHERE Selection = 'Delta options'
-update @List set intOrderByHeading=7 WHERE Selection = 'F&O'
-update @List set intOrderByHeading=8 WHERE Selection like ('%Total F&O(b. in%')
-update @List set intOrderByHeading=9 WHERE Selection in('Outright coverage','Net market risk')
-update @List set intOrderByHeading=10 WHERE Selection in('Outright coverage(Weeks)','Net market risk(Weeks)')
-update @List set intOrderByHeading=11 WHERE Selection = 'To Purchase'
-update @List set intOrderByHeading=12 WHERE Selection in('Switch position','Futures required')
-
+update @List set intOrderByHeading=5 WHERE Selection = 'Terminal position (Avg Long Price)'
+update @List set intOrderByHeading=6 WHERE Selection like ('%Terminal position (b.%')
+update @List set intOrderByHeading=7 WHERE Selection = 'Delta options'
+update @List set intOrderByHeading=8 WHERE Selection = 'F&O'
+update @List set intOrderByHeading=9 WHERE Selection like ('%Total F&O(b. in%')
+update @List set intOrderByHeading=10 WHERE Selection in('Outright coverage','Net market risk')
+update @List set intOrderByHeading=11 WHERE Selection in('Outright coverage(Weeks)','Net market risk(Weeks)')
+update @List set intOrderByHeading=12 WHERE Selection = 'To Purchase'
+update @List set intOrderByHeading=13 WHERE Selection in('Switch position','Futures required')
+  
 DECLARE @ListFinal as Table (  
      intRowNumber1 int identity(1,1),  
 	 intRowNumber int,

@@ -5,6 +5,7 @@ SELECT top 100 percent CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutureMonthId)
 LEFT(strFutureMonth,3) strFutureMonth,replace(strFutureMonth,' ','('+strSymbol+') ' ) strFutureMonthYear, intFutureMonthId,dtmFirstNoticeDate,
 dtmLastTradingDate as dtmLastTradingDate,
 strFutureMonth strFutureMonthYearWOSymbol,
+strFutureMonth strRollingMonth,
 ysnExpired,
 intFutureMarketId,CONVERT(DATETIME,'01 '+strFutureMonth) as dtmMonthYear 
 FROM tblRKFuturesMonth  
