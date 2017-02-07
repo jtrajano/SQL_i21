@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSymbol).HasColumnName("strSymbol");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
+            this.Property(t => t.intDecimalPlaces).HasColumnName("intDecimalPlaces");
 
             this.HasMany(p => p.tblICUnitMeasureConversions)
                 .WithRequired(p => p.tblICUnitMeasure)
@@ -23,6 +24,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.vyuICGetUOMConversions)
                 .WithRequired(p => p.tblICUnitMeasure)
                 .HasForeignKey(p => p.intStockUnitMeasureId);
+            this.HasMany(p => p.tblICInventoryReceiptItems)
+                .WithOptional(p => p.tblICUnitMeasure)
+                .HasForeignKey(p => p.intUnitMeasureId);
         }
     }
 

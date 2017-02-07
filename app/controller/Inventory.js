@@ -92,6 +92,7 @@ Ext.define('Inventory.controller.Inventory', {
     init: function() {
         Ext.Loader.loadScript("../Inventory/app/lib/underscore.js");
         Ext.Loader.loadScript("../Inventory/app/lib/rx.all.js");
+        Ext.Loader.loadScript("../Inventory/app/lib/numeraljs/numeral.js");
         
         Ext.Ajax.request({
             timeout: 120000,

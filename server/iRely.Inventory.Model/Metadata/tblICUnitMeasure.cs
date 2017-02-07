@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
         public string strUnitMeasure { get; set; }
         public string strSymbol { get; set; }
         public string strUnitType { get; set; }
+        public int? intDecimalPlaces { get; set; }
 
         public ICollection<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
 
@@ -38,6 +39,7 @@ namespace iRely.Inventory.Model
         
         public ICollection<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
         public ICollection<tblICCommodityOrigin> tblICCommodityOrigins { get; set; }
+        public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
     }
 
     public class tblICUnitMeasureConversion : BaseEntity

@@ -251,8 +251,9 @@ namespace iRely.Inventory.Model
         public bool? ysnSubCurrency { get; set; }
         public int? intTaxGroupId { get; set; }
         public int? intForexRateTypeId { get; set; }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public decimal? dblForexRate { get; set; }
-        
+
         private string _orderNumber;
         [NotMapped]
         public string strOrderNumber

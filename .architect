@@ -10583,8 +10583,8 @@
         "topInstance": "34891930-f35a-4d0a-8ef3-46166df54de1"
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "34891930-f35a-4d0a-8ef3-46166df54de1",
+        "selectedInstance": "d9d992ca-8e63-480f-882c-41d63efc4231"
     },
     "editMode": "design",
     "userSettings": {

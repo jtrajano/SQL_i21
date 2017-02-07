@@ -34,7 +34,10 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Date',
-        'Ext.toolbar.Paging'
+        'Ext.toolbar.Paging',
+        'Inventory.ux.UnitMeasureField',
+        'Inventory.ux.GridUnitMeasureField',
+        'Inventory.ux.GridUnitMeasureColumn'
     ],
 
     height: 635,
@@ -158,6 +161,18 @@ Ext.define('Inventory.view.Commodity', {
                                                             align: 'stretch'
                                                         },
                                                         items: [
+                                                            {
+                                                                xtype: 'unitmeasurefield',
+                                                                itemId: 'untUOM',
+                                                                fieldLabel: 'Unit Qty',
+                                                                labelWidth: 140
+                                                            },
+                                                            {
+                                                                xtype: 'unitmeasurefield',
+                                                                itemId: 'untUOM2',
+                                                                fieldLabel: 'Unit Qty',
+                                                                labelWidth: 140
+                                                            },
                                                             {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtCommodityCode',
@@ -542,52 +557,19 @@ Ext.define('Inventory.view.Commodity', {
                                                         ],
                                                         columns: [
                                                             {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colUOMCode',
-                                                                dataIndex: 'strFieldName',
-                                                                text: 'UOM',
+                                                                xtype: 'unitmeasurecolumn',
+                                                                itemId: 'colOrdered',
+                                                                text: 'Ordered',
                                                                 flex: 3,
-                                                                editor: {
-                                                                    xtype: 'gridcombobox',
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'intUnitMeasureId',
-                                                                            dataType: 'numeric',
-                                                                            text: 'Unit Of Measure ID',
-                                                                            hidden: true
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strUnitMeasure',
-                                                                            dataType: 'string',
-                                                                            text: 'Unit Measure',
-                                                                            flex: 1
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strUnitType',
-                                                                            dataType: 'string',
-                                                                            text: 'Unit Type',
-                                                                            flex: 1
-                                                                        }
-                                                                    ],
-                                                                    itemId: 'cboUOM',
-                                                                    displayField: 'strUnitMeasure',
-                                                                    valueField: 'strUnitMeasure'
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'numbercolumn',
-                                                                itemId: 'colUOMUnitQty',
                                                                 align: 'right',
-                                                                dataIndex: 'strFieldName',
-                                                                text: 'Unit Qty',
-                                                                flex: 3,
-                                                                format: '0,000.000000##',
+                                                                dataIndex: 'dblUnitQty',
                                                                 editor: {
-                                                                    xtype: 'numberfield',
-                                                                    fieldStyle: 'text-align:right',
-                                                                    hideTrigger: true
+                                                                    xtype: 'gridunitmeasurefield',
+                                                                    valueField: 'intUnitMeasureId',
+                                                                    displayField: 'strUnitMeasure'
                                                                 }
                                                             },
+                                                            
                                                             {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colUOMStockUnit',
@@ -607,7 +589,8 @@ Ext.define('Inventory.view.Commodity', {
                                                             itemId: 'grvUom'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                            selType: 'checkboxmodel'
+                                                            selType: 'checkboxmodel',
+                                                            mode: 'SINGLE'
                                                         }),
                                                         plugins: [
                                                             {
