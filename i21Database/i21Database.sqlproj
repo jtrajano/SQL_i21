@@ -4999,6 +4999,11 @@
     <Build Include="dbo\Views\vyuMFGetRMUsageByLot.sql" />
     <Build Include="dbo\Views\vyuMFGetPMUsage.sql" />
     <Build Include="dbo\Views\vyuMFGetOverAndUnderWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetReceivingSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShippedSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventoryAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetDetailedInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
