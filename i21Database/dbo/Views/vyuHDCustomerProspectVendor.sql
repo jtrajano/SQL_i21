@@ -12,6 +12,7 @@
 			,tblEMEntityType c
 		where b.intEntityId = a.intEntityVendorId
 			and c.intEntityId = b.intEntityId
+			and a.intEntityVendorId not in (select intEntityCustomerId from tblARCustomer)
 
 		union all
 
@@ -27,3 +28,4 @@
 			,tblEMEntityType c
 		where b.intEntityId = a.intEntityCustomerId
 			and c.intEntityId = b.intEntityId
+			and a.intEntityCustomerId not in (select intEntityVendorId from tblAPVendor)
