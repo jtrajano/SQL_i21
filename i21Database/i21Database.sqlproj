@@ -4989,6 +4989,11 @@
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacard.sql" />
     <Build Include="dbo\Views\vyuSMApproverConfigurationUsers.sql" />
     <Build Include="dbo\Views\vyuHDParticipant.sql" />
+    <Build Include="dbo\Views\vyuMFGetProduction.sql" />
+    <Build Include="dbo\Views\vyuMFGetRMUsage.sql" />
+    <Build Include="dbo\Views\vyuMFGetRMUsageByLot.sql" />
+    <Build Include="dbo\Views\vyuMFGetPMUsage.sql" />
+    <Build Include="dbo\Views\vyuMFGetOverAndUnderWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
