@@ -453,7 +453,7 @@ BEGIN TRY
 			INSERT INTO @tblSchedule (strSchedule)
 			EXEC(@SchedQuery)
 			DECLARE @TOTAL NUMERIC(18,2)
-			SET @TOTAL = (SELECT SUM(CONVERT(NUMERIC(18, 2), strConfiguration)) FROM vyuTFGetReportingComponentConfiguration WHERE strFormCode = @FormCodeParam AND strScheduleCode = 'E-1') + (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+			SET @TOTAL = (SELECT ISNULL(SUM(CONVERT(NUMERIC(18, 2), strConfiguration)), 0) FROM vyuTFGetReportingComponentConfiguration WHERE strFormCode = @FormCodeParam AND strScheduleCode = 'E-1') + (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 			INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
 			VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 1, 'Details','Gasoline / Aviation Gasoline / Gasohol A', '',@TOTAL, @ItemDescription, CAST(GETDATE() AS DATE))
 			INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
