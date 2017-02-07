@@ -561,7 +561,13 @@ Ext.define('Inventory.view.Commodity', {
                                                                 itemId: 'colOrdered',
                                                                 text: 'Ordered',
                                                                 flex: 3,
-                                                                align: 'right'
+                                                                align: 'right',
+                                                                dataIndex: 'dblUnitQty',
+                                                                editor: {
+                                                                    xtype: 'gridunitmeasurefield',
+                                                                    valueField: 'intUnitMeasureId',
+                                                                    displayField: 'strUnitMeasure'
+                                                                }
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',

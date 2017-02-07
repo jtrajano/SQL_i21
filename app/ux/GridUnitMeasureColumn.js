@@ -8,9 +8,9 @@ Ext.define('Inventory.ux.GridUnitMeasureColumn', {
         return record.get('dblUnitQty').toString() + ' ' + record.get('strUnitMeasure');
     },
 
-    getEditor: function() {
-        return Ext.create('Inventory.ux.GridUnitMeasureField', {
-            data: arguments[0]
-        });
-    }
+    // getEditor: function() {
+    //     return Ext.create('Inventory.ux.GridUnitMeasureField', {
+    //         data: arguments[0]
+    //     });
+    // }
 });
