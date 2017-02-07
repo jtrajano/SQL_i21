@@ -8,5 +8,5 @@
    	CONSTRAINT [PK_tblRKM2MConfiguration_intM2MConfigurationId] PRIMARY KEY ([intM2MConfigurationId]), 
     CONSTRAINT [FK_tblRKM2MConfiguration_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblRKM2MConfiguration_tblCTContractBasis_intContractBasisId] FOREIGN KEY ([intContractBasisId]) REFERENCES [tblCTContractBasis]([intContractBasisId]),
-    CONSTRAINT [UK_tblRKM2MConfiguration_tblICItem_intItemId] UNIQUE (intItemId)	
+    CONSTRAINT [UK_tblRKM2MConfiguration_tblICItem_intItemId] UNIQUE (intItemId,intContractBasisId)	
 )
