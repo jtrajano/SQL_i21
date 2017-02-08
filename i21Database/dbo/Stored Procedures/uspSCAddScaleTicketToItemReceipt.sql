@@ -132,7 +132,10 @@ SELECT
 		--									WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
 		--										AND ItemUOM.intItemId = SC.intItemId
 		--							 )
-		,intCostUOMId				= CNT.intPriceItemUOMId
+		,intCostUOMId				= CASE
+										WHEN ISNULL(CNT.intPriceItemUOMId,0) = 0 THEN LI.intItemUOMId 
+										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
+									END
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
 										WHEN LI.intTransactionDetailId IS NOT NULL THEN CNT.intContractHeaderId
@@ -228,7 +231,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 												END
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
-		,[intCostUOMId]						= @intTicketItemUOMId
+		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
 		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
@@ -261,6 +264,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
+		INNER JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId
 		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
 
 		--Insert record for fee
@@ -303,7 +307,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 												WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblTicketFees
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
-		,[intCostUOMId]						= @intTicketItemUOMId
+		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(SCSetup.intDefaultFeeItemId, @intTicketItemUOMId)
 		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
@@ -387,7 +391,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
-								,[intCostUOMId]						= ContractCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -439,7 +443,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
-								,[intCostUOMId]						= LoadCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -493,7 +497,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
-								,[intCostUOMId]						= ContractCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -547,7 +551,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
-								,[intCostUOMId]						= ContractCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -602,7 +606,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
-								,[intCostUOMId]						= LoadCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -708,7 +712,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
-								,[intCostUOMId]						= ContractCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -759,7 +763,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
-								,[intCostUOMId]						= ContractCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -815,7 +819,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
-								,[intCostUOMId]						= LoadCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -868,7 +872,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
-								,[intCostUOMId]						= LoadCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -923,7 +927,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
-								,[intCostUOMId]						= ContractCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -974,7 +978,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
-								,[intCostUOMId]						= ContractCost.intItemUOMId
+								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(ContractCost.intItemId, ContractCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
