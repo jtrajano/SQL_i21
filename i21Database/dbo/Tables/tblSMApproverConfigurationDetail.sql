@@ -8,5 +8,6 @@
 	[intApprovalForId]						INT												NOT NULL DEFAULT 0,
 	[intSort]								INT												NOT NULL, 
     [intConcurrencyId]						INT												NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_tblSMApproverConfigurationDetail_tblSMApproverConfigurationApprovalFor] FOREIGN KEY ([intApprovalForId]) REFERENCES tblSMApproverConfigurationApprovalFor([intApprovalForId]),
+    CONSTRAINT [FK_tblSMApproverConfigurationDetail_tblSMApproverConfigurationApprovalFor] FOREIGN KEY ([intApprovalForId]) REFERENCES tblSMApproverConfigurationApprovalFor([intApprovalForId]), 
+    CONSTRAINT [AK_tblSMApproverConfigurationDetail] UNIQUE ([intApproverConfigurationId], [intScreenId], [intApprovalForId], [intValueId], [strValue])
 )
