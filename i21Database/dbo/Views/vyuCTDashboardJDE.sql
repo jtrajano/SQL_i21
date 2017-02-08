@@ -47,6 +47,11 @@ SELECT
 	,SubBook.strSubBook
 	,CD.strInvoiceNo
 	,Certification.strCertificationName
+	,CH.intContractHeaderId
+	,ISNULL(CD.dblScheduleQty,0) AS dblScheduleQty
+	,ISNULL(CD.ysnInvoice,0) AS ysnInvoice
+	,ISNULL(CD.ysnProvisionalInvoice,0) AS ysnProvisionalInvoice
+	,ISNULL(CD.ysnQuantityFinal,0) AS ysnQuantityFinal
 FROM vyuCTContractSequence CSeq
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = CSeq.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CSeq.intContractHeaderId
