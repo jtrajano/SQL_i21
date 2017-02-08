@@ -106,27 +106,17 @@ INNER JOIN tblARCustomer O
 	ON O.intEntityCustomerId = F.intEntityId
 LEFT JOIN tblSMTaxGroup P
 	ON C.intLeaseTaxGroupId = P.intTaxGroupId
-CROSS APPLY (
-	SELECT TOP 1 
+LEFT JOIN vyuTMSiteDeliveryHistoryTotal HH
+	ON A.intSiteID = HH.intSiteId AND HH.intCurrentSeasonYear = HH.intSeasonYear
+LEFT JOIN vyuTMSiteDeliveryHistoryTotal II
+	ON A.intSiteID = II.intSiteId AND (II.intCurrentSeasonYear - 1) = II.intSeasonYear
+LEFT JOIN vyuTMSiteDeliveryHistoryTotal JJ
+	ON A.intSiteID = JJ.intSiteId AND (JJ.intCurrentSeasonYear - 2) = JJ.intSeasonYear
+,(	SELECT TOP 1 
 		ysnEnableLeaseBillingAboveMinUse 
 		,strLeaseBillingIncentiveCalculation
 	FROM tblTMPreferenceCompany
 )Q
-OUTER APPLY (
-	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-	WHERE intSiteId = A.intSiteID
-		AND intCurrentSeasonYear = intSeasonYear
-)HH
-OUTER APPLY (
-	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-	WHERE intSiteId = A.intSiteID
-		AND intCurrentSeasonYear = intSeasonYear
-)II
-OUTER APPLY (
-	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-	WHERE intSiteId = A.intSiteID
-		AND intCurrentSeasonYear = intSeasonYear
-)JJ
 WHERE O.ysnActive = 1
 	AND C.strLeaseStatus <> 'Inactive'
 	AND B.strOwnership <> 'Customer Owned'
