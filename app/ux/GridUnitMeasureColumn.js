@@ -1,46 +1,52 @@
-var decimalPlaces = function(){
-   function isInt(n){
-      return typeof n === 'number' && 
-             parseFloat(n) == parseInt(n, 10) && !isNaN(n);
-   }
-   return function(n){
-      var a = Math.abs(n);
-      var c = a, count = 1;
-      while(!isInt(c) && isFinite(c)){
-         c = a * Math.pow(10,count++);
-      }
-      return count-1;
-   };
-}();
-
 Ext.define('Inventory.ux.GridUnitMeasureColumn', {
     extend: 'Ext.grid.column.Column',
     alias: 'widget.unitmeasurecolumn',
 
-    requires: ['Inventory.ux.GridUnitMeasureField'],
+    renderer: function(value, cell, record) {
+        var me = cell.column;
+        var qtyField = me.dataIndex;
+        var decimalField = me.decimalPrecisionField ? me.decimalPrecisionField : 'intDecimalPlaces';
+        var uomField = me.displayField ? me.displayField : 'strUnitMeasure';
 
-    renderer: function(e, column, record) {
-        var qty = record.get(column.column.dataIndex);
-        if(!qty)
-            qty = 0.00;
-        var decimal = 2;
-        if(record.get('intItemUOMDecimalPlaces'))
-            decimal = record.get('intItemUOMDecimalPlaces');
-        decimal = 6;
-        var format = "";
-        for (var i = 0; i < decimal; i++)
-            format += "0";
+        var qty = 0.000000;
+        var uom = "";
+        var decimal = 6;
+        if(record.get(qtyField))
+            qty = record.get(qtyField);
+        if(record.get(decimalField))
+            decimal = record.get(decimalField);
+        if(record.get(uomField))
+            uom = record.get(uomField);
+        var o = me.getRoundedNumberObject(qty, decimal);
+        var strQty = "";
+        if(o)
+            strQty = o.formatted;
 
-        var result = qty.toString();
+        return strQty + ' ' + uom;
+    },
 
-        if(decimal === 0) {
-            result = numeral(qty).format('0,0');
-        } else {
-            var formatted = numeral(qty).format('0,0.[' + format + ']');
-            //decimalPlaces(numeral(formatted)._value);
-            result = formatted;
+    getRoundedNumberObject: function(value, decimals) {
+        var zeroes = "";
+        for(var i = 0; i < decimals; i++) {
+            zeroes += "0";
         }
-        
-        return result + ' ' + record.get('strUnitMeasure');
+
+        var pattern = "0,0.[" + zeroes + "]";
+        var precision = decimals;
+        var decimalToDisplay = decimals;
+
+        var formatted = numeral(value).format(pattern);
+        var decimalDigits = (((numeral(formatted)._value).toString()).split('.')[1] || []);
+        var decimalPlaces = decimalDigits.length;
+
+        return {
+            value: value,
+            zeroes: zeroes,
+            pattern: pattern,
+            precision: precision,
+            formatted: formatted,
+            decimalPlaces: decimalPlaces,
+            decimalDigits: decimalDigits
+        };
     }
 });

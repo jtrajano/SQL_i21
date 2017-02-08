@@ -1198,12 +1198,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 format: '0,000.##'
                                                                             },
                                                                             {
-                                                                                xtype: 'gridcolumn',
+                                                                                xtype: 'unitmeasurecolumn',
                                                                                 itemId: 'colUOMQtyToReceive',
                                                                                 text: 'Qty to Receive',
                                                                                 width: 100,
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblOpenReceive',
+                                                                                decimalPrecisionField: 'intItemUOMDecimalPlaces',
+                                                                                displayField: 'strUnitMeasure',
                                                                                 editor: {
                                                                                     xtype: 'griduomfield',
                                                                                     itemId: 'gumReceiveQty',

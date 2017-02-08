@@ -1,23 +1,3 @@
-var decimalPlaces = function(){
-   function isInt(n){
-      return typeof n === 'number' && 
-             parseFloat(n) == parseInt(n, 10) && !isNaN(n);
-   }
-   return function(n){
-      var a = Math.abs(n);
-      var c = a, count = 1;
-      while(!isInt(c) && isFinite(c)){
-         c = a * Math.pow(10,count++);
-      }
-      return count-1;
-   };
-}();
-/**
- * The following fields are required in the grid:
- * 1. intUnitMeasureId
- * 2. strUnitMeasure
- * 3. dblUnitQty
- */
 Ext.define('Inventory.ux.GridUOMField', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.griduomfield',
@@ -25,9 +5,14 @@ Ext.define('Inventory.ux.GridUOMField', {
         field: 'Ext.form.field.Field'
     },
 
+    config: {
+        defaultDecimals: 6
+    },
+
     initComponent: function() {
         this.callParent(arguments);
         var me = this;
+        me.flex = 1;
         var panel = me.items.items[0];
         var cbo = panel.items.items[1];
         var txt = panel.items.items[0];
@@ -60,6 +45,13 @@ Ext.define('Inventory.ux.GridUOMField', {
         var txt = panel.items.items[0];
         var grid = me.column.container.component.grid;
         var selection = grid.selection;
+        var decimalField = 'intDecimalPlaces';
+        if(me.column.config.decimalPrecisionField)
+            decimalField = me.column.config.decimalPrecisionField;
+        var decimals = 6;
+        if(selection.get(decimalField))
+            decimals = selection.get(decimalField);
+
         var currentValue = {
             quantity: value,
             id: selection.get(me.getValueField()),
@@ -69,10 +61,14 @@ Ext.define('Inventory.ux.GridUOMField', {
         cbo.setValue(currentValue.id);
         cbo.setRawValue(currentValue.uom);
 
-        var numObj = this.getRoundedNumberObject(currentValue.quantity, 6, 6);
-        txt.setDecimalPrecision(numObj.precision);
-        txt.setDecimalToDisplay(numObj.decimalPlaces);
         txt.setValue(currentValue.quantity);
+        this.setupQuantity(txt, currentValue.quantity, decimals);
+    },
+
+    setupQuantity: function(txt, value, decimals) {
+        var numObj = this.getRoundedNumberObject(value, decimals);
+        txt.setDecimalPrecision(numObj.precision);
+        txt.setDecimalToDisplay(numObj.decimalPlaces);    
     },
 
     setupCombobox: function(me, cbo) {
@@ -87,9 +83,14 @@ Ext.define('Inventory.ux.GridUOMField', {
         this.setupStore(me, cbo);
     },
 
-    getRoundedNumberObject: function(value, decimals, defaultDecimals) {
+    getNumberPrecisionNoTrailing: function(value) {
+        var num = this.getRoundedNumberObject(value, 6, 6);
+        return num.decimalPlaces ? num.decimalPlaces : 6;
+    },
+
+    getRoundedNumberObject: function(value, decimals) {
         if(!decimals)
-            decimals = defaultDecimals ? defaultDecimals : 6;
+            decimals = this.defaultDecimals ? this.defaultDecimals : 6;
         var zeroes = "";
         for(var i = 0; i < decimals; i++) {
             zeroes += "0";
@@ -100,8 +101,8 @@ Ext.define('Inventory.ux.GridUOMField', {
         var decimalToDisplay = decimals;
 
         var formatted = numeral(value).format(pattern);
-        var formattedNoTrailingZeroes = (((numeral(formatted)._value).toString()).split('.')[1] || []);
-        var decimalPlaces = formattedNoTrailingZeroes.length;
+        var decimalDigits = (((numeral(formatted)._value).toString()).split('.')[1] || []);
+        var decimalPlaces = decimalDigits.length;
 
         return {
             value: value,
@@ -110,13 +111,12 @@ Ext.define('Inventory.ux.GridUOMField', {
             precision: precision,
             formatted: formatted,
             decimalPlaces: decimalPlaces,
-            formattedNoTrailingZeroes: formattedNoTrailingZeroes,
-            decimals: decimals
+            decimalDigits: decimalDigits
         };
     },
 
     setupComboboxEvents: function(cbo) {
-        cbo.on('select', this.onSelectUOM);
+        cbo.on('select', this.onSelect);
         cbo.on('expand', this.onDropdown);
     },
 
@@ -132,7 +132,7 @@ Ext.define('Inventory.ux.GridUOMField', {
             });
     },
 
-    onSelectUOM: function(combo, records, options) {
+    onSelect: function(combo, records, options) {
         var me = this.up('panel');
         var grid = me.column.container.component.grid;
         var selection = grid.selection;
@@ -187,7 +187,7 @@ Ext.define('Inventory.ux.GridUOMField', {
 
     getDisplayField: function() {
         var me = this;
-        return me.displayField;
+        return me.displayField ? me.displayField : me.valueField;
     },
 
     getUpdateField: function() {
