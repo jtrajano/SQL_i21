@@ -31,16 +31,6 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'i21.store.CountryBufferedStore',
         'i21.store.PurchasingGroupBuffered'
     ],
-    formulas: {
-        getQuantity: function(get) {
-            return 5;
-        },
-
-        getUnitMeasureId: function(get) {
-            return 6;
-        }
-    },
-    
     stores: {
         purchasinggroups: {
             type: 'smpurchasinggroupbuffered',
