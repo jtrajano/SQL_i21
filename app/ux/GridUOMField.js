@@ -68,9 +68,13 @@ Ext.define('Inventory.ux.GridUOMField', {
         
         cbo.setValue(currentValue.id);
         cbo.setRawValue(currentValue.uom);
+
+        var numObj = this.getRoundedNumberObject(currentValue.quantity, 6, 6);
+        txt.setDecimalPrecision(numObj.precision);
+        txt.setDecimalToDisplay(numObj.decimalPlaces);
         txt.setValue(currentValue.quantity);
     },
-    
+
     setupCombobox: function(me, cbo) {
         var grid = me.column.container.component.grid;
         var selection = grid.selection;
@@ -81,10 +85,6 @@ Ext.define('Inventory.ux.GridUOMField', {
         this.setupComboboxFilters(me, cbo);
         this.setupComboboxEvents(cbo);
         this.setupStore(me, cbo);
-    },
-
-    formatDisplay: function(value) {
-        return 0.00;
     },
 
     getRoundedNumberObject: function(value, decimals, defaultDecimals) {
@@ -100,11 +100,12 @@ Ext.define('Inventory.ux.GridUOMField', {
         var decimalToDisplay = decimals;
 
         var formatted = numeral(value).format(pattern);
-        var formattedNoTrailingZeroes = (formatted._value.toString().split(".")[1] || []);
-        var decimalPlaces = formattedTrimmed.length;
+        var formattedNoTrailingZeroes = (((numeral(formatted)._value).toString()).split('.')[1] || []);
+        var decimalPlaces = formattedNoTrailingZeroes.length;
 
         return {
             value: value,
+            zeroes: zeroes,
             pattern: pattern,
             precision: precision,
             formatted: formatted,
