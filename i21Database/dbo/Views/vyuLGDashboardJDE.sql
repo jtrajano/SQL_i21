@@ -3,7 +3,7 @@ AS
 SELECT DISTINCT 
  LH.strLoadNumber
 ,CP.strPositionType
-,LH.dblQuantity
+,LH.dblQuantity AS dblLoadQuantity
 ,LH.dtmBLDate
 ,CASE 
 	WHEN (SELECT COUNT(1) FROM tblLGLoadDocuments T WHERE T.intLoadId=LH.intLoadId AND ISNULL(T.ysnReceived,0)=0 )>0 THEN 'N' 
