@@ -29,16 +29,18 @@ Declare @intMinHeader				INT,
 		@intContractDetailId		INT,
 		@intInventoryReceiptItemId	INT,
 		@strContainerItemXml		NVARCHAR(MAX),
-		@strContainerSizeCode		NVARCHAR(10),
+		@strContainerSizeCode		NVARCHAR(100),
 		@intLoadContainerId			INT,
-		@intNoOfContainer			INT
+		@intNoOfContainer			INT,
+		@strReceiptNo				NVARCHAR(50)
 
 Declare @tblReceiptHeader AS Table
 (
 	intInventoryReceiptId INT,
 	strDeliveryNo NVARCHAR(100),
 	dtmReceiptDate DATETIME,
-	intLoadId INT
+	intLoadId INT,
+	strReceiptNo NVARCHAR(100)
 )
 
 Declare @tblReceiptDetail AS Table
@@ -78,19 +80,19 @@ Declare @tblOutput AS Table
 
 Select @strReceiptIDOCHeader=dbo.fnIPGetSAPIDOCHeader('RECEIPT')
 
-Insert Into @tblReceiptHeader(intInventoryReceiptId,strDeliveryNo,dtmReceiptDate,intLoadId)
-Select DISTINCT r.intInventoryReceiptId,l.strExternalShipmentNumber,r.dtmReceiptDate,l.intLoadId
+Insert Into @tblReceiptHeader(intInventoryReceiptId,strDeliveryNo,dtmReceiptDate,intLoadId,strReceiptNo)
+Select DISTINCT r.intInventoryReceiptId,l.strExternalShipmentNumber,r.dtmReceiptDate,l.intLoadId,r.strReceiptNumber
 From tblICInventoryReceiptItem ri 
 Join tblICInventoryReceipt r on ri.intInventoryReceiptId=r.intInventoryReceiptId
 JOIN vyuLGLoadContainerPurchaseContracts s ON s.intPContractDetailId = ri.intLineNo
 JOIN tblLGLoad l on s.intLoadId=l.intLoadId
-Where r.intSourceType=2 AND r.ysnPosted=1 AND ri.ysnExported IS NULL
+Where r.intSourceType=2 AND r.ysnPosted=1 AND ri.ysnExported IS NULL AND ISNULL(l.strExternalShipmentNumber,'')<>''
 
 Select @intMinHeader=Min(intInventoryReceiptId) From @tblReceiptHeader
 
 While(@intMinHeader is not null)
 Begin
-	Select @strSAPDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate,@intLoadId=intLoadId 
+	Select @strSAPDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate,@intLoadId=intLoadId,@strReceiptNo=strReceiptNo 
 	From @tblReceiptHeader Where intInventoryReceiptId=@intMinHeader
 
 	--Get the Details
@@ -126,10 +128,10 @@ Begin
 	End
 
 	--Update Delivery Item No
-	Update d Set d.strDeliveryItemNo=t.strDeliveryItemNo
-	From @tblReceiptDetail d Join 
-	(Select intInventoryReceiptItemId, (10 * ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId ASC)) strDeliveryItemNo From @tblReceiptDetail) t
-	on d.intInventoryReceiptItemId=t.intInventoryReceiptItemId
+	--Update d Set d.strDeliveryItemNo=t.strDeliveryItemNo
+	--From @tblReceiptDetail d Join 
+	--(Select intInventoryReceiptItemId, (10 * ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId ASC)) strDeliveryItemNo From @tblReceiptDetail) t
+	--on d.intInventoryReceiptItemId=t.intInventoryReceiptItemId
 
 	If UPPER(@strCommodityCode)='COFFEE' AND @ysnBatchSplit=1
 		Update @tblReceiptDetail Set strContainerNo=''
@@ -147,6 +149,7 @@ Begin
 
 	Set @strXml += '<E1EDL20 SEGMENT="1">'
 	Set @strXml += '<VBELN>' + ISNULL(@strSAPDeliveryNo,'') + '</VBELN>'
+	Set @strXml += '<LIFEX>' + ISNULL(@strReceiptNo,'') + '</LIFEX>'
 
 	Set @strXml += '<E1EDL18 SEGMENT="1">'
 	Set @strXml += '<QUALF>' + 'PGI' + '</QUALF>'
@@ -209,7 +212,7 @@ Begin
 				Set @strContainerXml=NULL
 				Select @strContainerXml=COALESCE(@strContainerXml, '') 
 						+ '<E1EDL24 SEGMENT="1">'
-						+ '<POSNR>'	 +	ISNULL(CONVERT(VARCHAR,(900000 + ROW_NUMBER() OVER(ORDER BY ri.intInventoryReceiptItemId ASC))),'')  + '</POSNR>' 
+						+ '<POSNR>'	 +	ISNULL(cl.strExternalContainerId,'')  + '</POSNR>' 
 						+ '<MATNR>'  +  ISNULL(ri.strItemNo,'') + '</MATNR>' 
 						+ '<WERKS>'  +  ISNULL(ri.strSubLocationName,'') + '</WERKS>' 
 						+ '<LGORT>'  +  ISNULL(ri.strStorageLocationName,'') + '</LGORT>' 
@@ -222,70 +225,18 @@ Begin
 						+ '<QUALF>'  +  'QUA' + '</QUALF>' 
 						+ '</E1EDL19>'
 
-						+ '<E1EDL19 SEGMENT="1">'
-						+ '<QUALF>'  +  'BAS' + '</QUALF>' 
-						+ '</E1EDL19>'
-
 						+ '</E1EDL24>'
 				From vyuICGetInventoryReceiptItem ri 
+				Join tblLGLoadDetailContainerLink cl on ri.intSourceId=cl.intLoadDetailId AND ri.intContainerId=cl.intLoadContainerId
+				Join tblLGLoadDetail ld on ri.intSourceId=ld.intLoadDetailId AND ri.intItemId=ld.intItemId
 				Where ri.intInventoryReceiptId=@intMinHeader AND ri.intSourceId=@intLoadDetailId
+				Order By cl.intLoadDetailContainerLinkId
 
 				Set @strItemXml += ISNULL(@strContainerXml,'')
 			End
 
 		Select @intMinDetail=Min(intRowNo) From @tblReceiptDetail Where intRowNo>@intMinDetail
 	End --Loop Detail End
-
-	--For Tea
-	If UPPER(@strCommodityCode)='TEA'
-	Begin
-			Set @strContainerXml=''
-			Set @intNoOfContainer=1
-
-			Delete From @tblContainer
-
-			Insert Into @tblContainer(intLoadContainerId,strContainerNo,strContainerSizeCode)
-			Select DISTINCT ri.intContainerId,ri.strContainer,''
-			From vyuICGetInventoryReceiptItem ri
-			Where ri.intInventoryReceiptId=@intMinHeader
-
-			Select @intMinContainer=Min(intRowNo) From @tblContainer
-
-			While(@intMinContainer is not null) --Loop Container
-			Begin
-				Select @strContainerNo=strContainerNo,@strContainerSizeCode=strContainerSizeCode,@intLoadContainerId=intLoadContainerId
-				From @tblContainer Where intRowNo=@intMinContainer
-
-					Set @strContainerXml += '<E1EDL37 SEGMENT="1">'
-					Set @strContainerXml += '<EXIDV>'  +  ISNULL(@strContainerNo,'') + '</EXIDV>' 
-					Set @strContainerXml += '<VHILM>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM>' 
-					Set @strContainerXml += '<VHART>'  +  '0002' + '</VHART>' 
-					--Set @strContainerXml += '<VHILM_KU>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM_KU>' 
-
-					Set @strContainerItemXml=NULL
-					Select @strContainerItemXml=COALESCE(@strContainerItemXml, '') 
-					+ '<E1EDL44 SEGMENT="1">'
-					+ '<VBELN>'  +  ISNULL(@strSAPDeliveryNo,'') + '</VBELN>' 
-					+ '<POSNR>'  +  ISNULL(CONVERT(VARCHAR,(10 * @intNoOfContainer * ROW_NUMBER() OVER(ORDER BY ri.intInventoryReceiptItemId ASC))),'')
-					+ '<VEMNG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),ri.dblNetWgt)),'') + '</VEMNG>'
-					+ '<VEMEH>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(ri.strWeightUOM,'')) + '</VEMEH>'
-					+ '</E1EDL44>'			 
-					From vyuICGetInventoryReceiptItem ri
-					Where ri.intContainerId=@intLoadContainerId AND ri.intInventoryReceiptId=@intMinHeader
-
-					Set @strContainerXml += ISNULL(@strContainerItemXml,'')
-					Set @strContainerXml += '</E1EDL37>'
-
-					--Get the total items so that POSNR value will sequence to next number for the new Container
-					Select @intNoOfContainer= COUNT(1) + 1
-					From vyuICGetInventoryReceiptItem ri
-					Where ri.intContainerId=@intLoadContainerId AND ri.intInventoryReceiptId=@intMinHeader
-
-				Select @intMinContainer=Min(intRowNo) From @tblContainer Where intRowNo>@intMinContainer
-			End --Loop Container End
-
-			Set @strItemXml += ISNULL(@strContainerXml,'')
-	End
 
 	--Final Xml
 	Set @strXml += ISNULL(@strItemXml,'')

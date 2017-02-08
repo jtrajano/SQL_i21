@@ -11,8 +11,6 @@ BEGIN TRY
 		
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
-	DECLARE @strItemNo NVARCHAR(50)
-	DECLARE @intStageItemId int
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -33,7 +31,8 @@ BEGIN TRY
 	)
 
 	DECLARE @tblItemUOM TABLE (
-	 strUOM NVARCHAR(50)
+	  strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	 ,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	 ,dblNumerator NUMERIC(38,20)
 	 ,dblDenominator NUMERIC(38,20)
 	 )
@@ -75,21 +74,23 @@ BEGIN TRY
 
 	Update @tblItem Set strShortName=x.MAKTX
 		FROM OPENXML(@idoc, 'MATMAS03/IDOC/E1MARAM/E1MAKTM', 2) WITH (
-			 MAKTX NVARCHAR(50)
+			  MATNR NVARCHAR(50) '../MATNR'
+			 ,MAKTX NVARCHAR(50)
 			 ,SPRAS NVARCHAR(50)) x
+			 Join @tblItem i on x.MATNR=i.strItemNo
 		Where x.SPRAS='E'
 
-	Insert Into @tblItemUOM(strUOM,dblNumerator,dblDenominator)
-		SELECT MEINH
+	Insert Into @tblItemUOM(strItemNo,strUOM,dblNumerator,dblDenominator)
+		SELECT MATNR
+		,MEINH
 		,UMREZ
 		,UMREN
 	FROM OPENXML(@idoc, 'MATMAS03/IDOC/E1MARAM/E1MARMM', 2) WITH (
-			 MEINH NVARCHAR(50)
+			 MATNR NVARCHAR(50) '../MATNR'
+			,MEINH NVARCHAR(50)
 			,UMREZ NUMERIC(38,20)
 			,UMREN NUMERIC(38,20)
 	)
-
-	Select @strItemNo=strItemNo From @tblItem
 
 	Begin Tran
 
@@ -98,11 +99,9 @@ BEGIN TRY
 	Select strItemNo,dtmCreatedDate,strCreatedBy,dtmModifiedDate,strModifiedBy,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,strItemType,strStockUOM,strSKUItemNo,strShortName
 	From @tblItem
 
-	Select @intStageItemId=SCOPE_IDENTITY()
-
 	Insert Into tblIPItemUOMStage(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
-	Select @intStageItemId,@strItemNo,strUOM,dblNumerator,dblDenominator
-	From @tblItemUOM
+	Select i.intStageItemId,i.strItemNo,strUOM,dblNumerator,dblDenominator
+	From @tblItemUOM iu Join tblIPItemStage i on iu.strItemNo=i.strItemNo
 
 	Commit Tran
 

@@ -311,6 +311,14 @@ Begin
 					Join tblICUnitMeasure um on c.intWeightUnitMeasureId=um.intUnitMeasureId
 					Where ld.intLoadId=@intLoadId AND lc.intLoadDetailId=@intLoadDetailId
 
+					--Update the POSNR in container link table
+					Update t Set t.strExternalContainerId=t1.intRowNo
+					From tblLGLoadDetailContainerLink t Join
+					(
+					Select lc.intLoadDetailContainerLinkId,(900000 + ROW_NUMBER() OVER(ORDER BY lc.intLoadContainerId ASC)) intRowNo
+					From tblLGLoadDetailContainerLink lc Where lc.intLoadId=@intLoadId AND lc.intLoadDetailId=@intLoadDetailId
+					) t1 on t.intLoadDetailContainerLinkId=t1.intLoadDetailContainerLinkId
+
 					Set @strItemXml += ISNULL(@strContainerXml,'')
 				End
 			End
@@ -357,6 +365,16 @@ Begin
 
 					Set @strContainerXml += ISNULL(@strContainerItemXml,'')
 					Set @strContainerXml += '</E1EDL37>'
+
+					--Update the POSNR in container link table
+					Update t Set t.strExternalContainerId=t1.intRowNo
+					From tblLGLoadDetailContainerLink t Join
+					(
+					Select cl.intLoadDetailContainerLinkId,CASE WHEN ISNULL(ld.strExternalShipmentItemNumber,'')='' THEN ISNULL(CONVERT(VARCHAR,(10 * @intNoOfContainer * ROW_NUMBER() OVER(ORDER BY cl.intLoadDetailContainerLinkId ASC))),'')
+					ELSE ISNULL(ld.strExternalShipmentItemNumber,'') END intRowNo
+					From tblLGLoadDetailContainerLink cl Join tblLGLoadDetailStg ld on cl.intLoadDetailId=ld.intLoadDetailId 
+					Where cl.intLoadContainerId=@intLoadContainerId
+					) t1 on t.intLoadDetailContainerLinkId=t1.intLoadDetailContainerLinkId
 
 					--Get the total items so that POSNR value will sequence to next number for the new Container
 					Select @intNoOfContainer= COUNT(cl.intLoadDetailContainerLinkId) + 1
