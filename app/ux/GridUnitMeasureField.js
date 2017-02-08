@@ -1,147 +1,29 @@
-var decimalPlaces = function(){
-   function isInt(n){
-      return typeof n === 'number' && 
-             parseFloat(n) == parseInt(n, 10) && !isNaN(n);
-   }
-   return function(n){
-      var a = Math.abs(n);
-      var c = a, count = 1;
-      while(!isInt(c) && isFinite(c)){
-         c = a * Math.pow(10,count++);
-      }
-      return count-1;
-   };
-}();
 /**
- * The following fields are required in the grid:
- * 1. intUnitMeasureId
- * 2. strUnitMeasure
- * 3. dblUnitQty
+ * @author Wendell Wayne H. Estrada
+ * @copyright 2017 iRely Philippines
  */
 Ext.define('Inventory.ux.GridUnitMeasureField', {
-    extend: 'Inventory.ux.UnitMeasureField',
+    extend: 'Ext.panel.Panel',
     alias: 'widget.gridunitmeasurefield',
     mixins: {
-        field: 'Ext.form.field.Base'
+        field: 'Ext.form.field.Field'
     },
 
-    publishes: [
-        'getValue',
-        'setValue'
-    ],
+    config: {
+        defaultDecimals: 6
+    },
 
     initComponent: function() {
         this.callParent(arguments);
-
-        var panel = this.items.items[0];
-        var txt = panel.items.items[0];
+        var me = this;
+        me.flex = 1;
+        var panel = me.items.items[0];
         var cbo = panel.items.items[1];
-        txt.hideLabel = true;
-        txt.flex = 1;
-        panel.margin = 0;
-
-        var grid = this.column.container.component.grid;
+        var txt = panel.items.items[0];
+        var grid = me.column.container.component.grid;
         var selection = grid.selection;
-        var val = { quantity: selection.get(this.column.dataIndex), unitMeasureId: selection.get(this.valueField) };
-        var uom = cbo.findRecordByValue(val.unitMeasureId);
-        if(uom && uom.get('strUnitMeasure'))
-            cbo.setRawValue(uom.get('strUnitMeasure'));
-        else
-            cbo.setRawValue(selection.get(this.displayField));
-        
-        this.setValue(val);
-        cbo.setValue(val.unitMeasureId);
-        cbo.on('select', this.onUnitMeasurementChange);
-    },
 
-    onQuantityChange: function(textfield, newValue, oldValue) {
-        return;
-        var panel = textfield.up('panel');
-        var cboUnitMeasure = panel.down('gridcombobox');
-        var grid = panel.column.container.component.grid;
-
-        var decimal = 6;
-        if(cboUnitMeasure.selection) {
-            decimal = cboUnitMeasure.selection.get('intDecimalPlaces');
-
-            var format = "";
-            for (var i = 0; i < decimal; i++)
-                format += "0";
-            if(decimal === 0) {
-                textfield.setDecimalPrecision(0);
-                textfield.setDecimalToDisplay(0);
-                var f = numeral(newValue).format('0,0');
-                textfield.setValue(f);
-                textfield.setRawValue(f);
-            } else {
-                var formatted = numeral(newValue).format('0,0.[' + format + ']');
-                var decimalToDisplay = (((numeral(formatted)._value).toString()).split('.')[1] || []).length;//decimalPlaces(numeral(formatted)._value);
-                textfield.setDecimalPrecision(decimal);
-                textfield.setDecimalToDisplay(decimalToDisplay);
-                textfield.setValue(formatted);
-                textfield.setRawValue(formatted);  
-            }
-        }
-        else {
-            var store = Ext.create('Inventory.store.BufferedUnitMeasure', { pageSize: 50 });
-            cboUnitMeasure.bindStore(store);
-            store.load({
-                callback: function(records, op, success) {
-                    if(success) {
-                        var m = _.map(records, function(a) { return a.data; });
-                        var f = _.filter(m, function(a) { return a.intUnitMeasureId === grid.selection.get('intUnitMeasureId'); });
-                        
-                        cboUnitMeasure.setValue(grid.selection.get('intUnitMeasureId'));
-                        cboUnitMeasure.setRawValue(grid.selection.get('strUnitMeasure'));
-                        
-                        if(f && f.length > 0)
-                            decimal = f[0].intDecimalPlaces;
-                        
-                        var format = "";
-                        for (var i = 0; i < decimal; i++)
-                            format += "0";
-                        if(decimal === 0) {
-                            textfield.setDecimalPrecision(0);
-                            textfield.setDecimalToDisplay(0);
-                            var f = numeral(newValue).format('0,0');
-                            textfield.setValue(f);
-                            textfield.setRawValue(f);
-                        } else {
-                            var formatted = numeral(newValue).format('0,0.[' + format + ']');
-                            var decimalToDisplay = (((numeral(formatted)._value).toString()).split('.')[1] || []).length;//decimalPlaces(numeral(formatted)._value);
-                            textfield.setDecimalPrecision(decimal);
-                            textfield.setDecimalToDisplay(decimalToDisplay);
-                            textfield.setValue(formatted);
-                            textfield.setRawValue(formatted);  
-                        }
-                    }
-                }
-            });
-        }
-    },
-
-    onUnitMeasurementChange: function(combo, records, eOptss) {
-        var panel = combo.up('panel');
-        var txtQuantity = panel.down('numberfield');
-        if(records && records.length > 0) {
-            var decimal = records[0].get('intDecimalPlaces');      
-            var format = "";
-            for (var i = 0; i < decimal; i++)
-                format += "0";
-            var val = txtQuantity.getValue();
-            if(decimal === null)
-                decimal = 6;
-            var formatted = numeral(val).format('0,0.[' + format + ']');
-            var decimalToDisplay = (((numeral(formatted)._value).toString()).split('.')[1] || []).length; //decimalPlaces(numeral(formatted)._value);
-            txtQuantity.setDecimalPrecision(decimal);
-            txtQuantity.setDecimalToDisplay(decimalToDisplay);
-            txtQuantity.setValue(formatted);
-            txtQuantity.setRawValue(formatted);
-
-            var grid = panel.column.container.component.grid;
-            grid.selection.set(panel.valueField, records[0].get('intUnitMeasureId'));
-            grid.selection.set(panel.displayField, records[0].get('strUnitMeasure'));
-        }
+        this.setupCombobox(me, cbo);
     },
 
     constructor: function(config) {
@@ -149,88 +31,307 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
     },
 
     getValue : function(){
-        var vm = this.viewModel;
-        return vm.get('quantity');
-    },
-
-    setValue : function(value){
         var me = this;
-        var grid = me.column.container.component.grid;
-        var selection = grid.selection;
-        var val = { quantity: value, unitMeasureId: selection.get(me.valueField) };
-        var qty = null;
-        var uomId = null;
         var panel = me.items.items[0];
         var cbo = panel.items.items[1];
         var txt = panel.items.items[0];
-        var store = Ext.create('Inventory.store.BufferedUnitMeasure', { pageSize: 50 });
+        var grid = me.column.container.component.grid;
+        var selection = grid.selection;
 
-        if(val) {
-            if(val.quantity) {
-                qty = val.quantity;
-                //me.viewModel.set('quantity', qty);
+        var value = txt.getValue();
+        var selectedDecimals = me.getSelectedDecimals(cbo);
+        var decimals = me.getBoundDecimals(me, selection);
+        decimals = selectedDecimals ? selectedDecimals : decimals;
+
+        /*  ===========================================================
+            =       Detect changes and format decimal precision       =
+            ===========================================================
+            TODO: This code block is kinda problematic.
+        *   Issue: Sometimes, when click the editor multiple times, 
+                the decimal part is lost.
+        */
+        if(txt.lastValue) {
+            if(txt.lastValue !== value) {
+                var lastValue = txt.lastValue;
+                value = me.getPrecisionNumber(lastValue, decimals);
             }
-
-            if(val.unitMeasureId) {
-                uomId = val.unitMeasureId;
-                //me.viewModel.set('unitMeasureId', uomId);
-            }
-
-            // if(me.storeConfig) {
-            //     store = Ext.create(me.storeConfig.type, { pageSize: 50 });
-                
-            //     if(me.storeConfig.defaultFilters) {
-            //         var vm = grid.gridMgr.configuration.viewModel;
-
-            //         var df = _.map(me.storeConfig.defaultFilters, function(filter) {
-            //             var nf = {};
-            //             nf.column = filter.column;
-            //             if(filter.source === 'grid') {
-            //                 nf.value = selection.get(filter.valueField);
-            //             } else if (filter.source === 'current') {
-            //                 nf.value = vm.data.current.get(filter.valueField);
-            //             }
-            //             nf.conjunction = (filter.conjunction ? filter.conjunction : 'and');
-            //             nf.condition = (filter.condition ? filter.condition : 'eq');
-            //             return nf;
-            //         });
-            //         cbo.defaultFilters = df;
-            //     }
-            // }
-            // cbo.bindStore(store);
-            // store.load({
-            //     callback: function(records, op, success) {
-            //         if(success) {
-            //             var uoms = _.map(records, function(a) { return a.data; });
-            //             var intUOMId = grid.selection.get(me.valueField);
-            //             //var filtered = _.filter(uoms, function(a) { return a.intUnitMeasureId === intUOMId; });
-
-            //             cbo.setValue(grid.selection.get(me.valueField));
-            //             cbo.setRawValue(grid.selection.get(me.displayField));
-            //             var decimal = 6;
-            //             if(uoms && uoms.length > 0)
-            //                 decimal = uoms[0].intDecimalPlaces;
-                        
-            //             var format = "";
-            //             for (var i = 0; i < decimal; i++)
-            //                 format += "0";
-            //             if(decimal === 0) {
-            //                 txt.setDecimalPrecision(0);
-            //                 txt.setDecimalToDisplay(0);
-            //                 var f = numeral(qty).format('0,0');
-            //                 txt.setValue(numeral(qty)._value);
-            //                 txt.setRawValue(f);
-            //             } else {
-            //                 var formatted = numeral(qty).format('0,0.[' + format + ']');
-            //                 var decimalToDisplay = (((numeral(formatted)._value).toString()).split('.')[1] || []).length;
-            //                 txt.setDecimalPrecision(decimal);
-            //                 txt.setDecimalToDisplay(decimalToDisplay);
-            //                 txt.setValue(numeral(qty)._value);
-            //                 txt.setRawValue(formatted);
-            //             }
-            //         }
-            //     }
-            // });
         }
-    }
+        me.setupQuantity(txt, value, decimals);
+
+        return value;
+    },
+
+    getBoundDecimals: function(me, data) {
+        var decimalField = 'intDecimalPlaces';
+        if(me.column.config.decimalPrecisionField)
+            decimalField = me.column.config.decimalPrecisionField;
+        var decimals = 6;
+        if(data.get(decimalField))
+            decimals = data.get(decimalField);
+        if(!decimals)
+            decimals = me.defaultDecimals;
+        return decimals;
+    },
+
+    getSelectedDecimals: function(cbo) {
+        var me = this;
+        if(cbo.selection) {
+            var decimals = cbo.selection.get(me.getLookupDecimalPrecisionField());
+            if(decimals)
+                return decimals;
+        }
+        return null;
+    },
+
+    setValue: function(value) {
+        var me = this;
+        var panel = me.items.items[0];
+        var cbo = panel.items.items[1];
+        var txt = panel.items.items[0];
+        var grid = me.column.container.component.grid;
+        var selection = grid.selection;
+        var decimals = me.getBoundDecimals(me, selection);
+
+        var currentValue = {
+            quantity: value,
+            id: selection.get(me.getValueField()),
+            uom: selection.get(me.getDisplayField())
+        };
+        
+        cbo.setValue(currentValue.id);
+        cbo.setRawValue(currentValue.uom);
+
+        txt.setValue(currentValue.quantity);
+        me.setupQuantity(txt, currentValue.quantity, decimals);
+    },
+
+    setupQuantity: function(txt, value, decimals) {
+        var numObj = this.getPrecisionNumberObject(value, decimals);
+        txt.setDecimalPrecision(numObj.precision);
+        txt.setDecimalToDisplay(numObj.decimalPlaces);    
+    },
+
+    setupCombobox: function(me, cbo) {
+        var grid = me.column.container.component.grid;
+        var selection = grid.selection;
+
+        cbo.displayField = me.getDisplayField();
+        cbo.valueField = me.getValueField();
+        
+        //TODO: Setup custom gridcombobox columns
+        this.setupComboboxFilters(me, cbo);
+        this.setupComboboxEvents(cbo);
+        this.setupStore(me, cbo);
+    },
+
+    getNumberDecimalPlacesNoTrailing: function(value, decimals) {
+        var num = this.getPrecisionNumberObject(value, decimals);
+        return num.decimalPlaces ? num.decimalPlaces : 6;
+    },
+
+    getPrecisionNumber: function(value, decimals) {
+        var num = this.getPrecisionNumberObject(value, decimals);
+        if(!num)
+            return value;
+        return num.precisionValue ? num.precisionValue : value;
+    },
+
+    getPrecisionNumberObject: function(value, decimals) {
+        if(!decimals)
+            decimals = this.defaultDecimals ? this.defaultDecimals : 6;
+        var zeroes = "";
+        for(var i = 0; i < decimals; i++) {
+            zeroes += "0";
+        }
+
+        var pattern = "0,0.[" + zeroes + "]";
+        var precision = decimals;
+        var decimalToDisplay = decimals;
+
+        var formatted = numeral(value).format(pattern);
+        var precisionValue = numeral(value)._value;
+        var decimalDigits = (((numeral(formatted)._value).toString()).split('.')[1] || []);
+        var decimalPlaces = decimalDigits.length;
+
+        return {
+            value: value,
+            precisionValue: precisionValue,
+            zeroes: zeroes,
+            pattern: pattern,
+            precision: precision,
+            formatted: formatted,
+            decimalPlaces: decimalPlaces,
+            decimalDigits: decimalDigits
+        };
+    },
+
+    setupComboboxEvents: function(cbo) {
+        cbo.on('select', this.onSelect);
+        cbo.on('expand', this.onDropdown);
+    },
+
+    onDropdown: function(combo) {
+        var me = this.up('panel');
+        var store = combo.getStore();
+        me.setupComboboxFilters(me, combo);
+        if(store)
+            store.load({
+                callback: function(records, op, success) {
+                    
+                }
+            });
+    },
+
+    onSelect: function(combo, records, options) {
+        var me = this.up('panel');
+        var column = me.column;
+        var txt = me.items.items[0].items.items[0];
+        var grid = column.container.component.grid;
+        var selection = grid.selection;
+        if(records.length > 0) {
+            var value = records[0].get(me.getLookupValueField());
+            var display = records[0].get(me.getLookupDisplayField());
+            var decimals = records[0].get(me.getLookupDecimalPrecisionField());
+            if(value)
+                selection.set(me.getUpdateField(), value);
+            if(display)
+                selection.set(me.getDisplayField(), display);
+            if(decimals)
+                selection.set(column.decimalPrecisionField, decimals);
+            
+             me.setupQuantity(txt, value, decimals); 
+        }
+    },
+
+    setupComboboxFilters: function(me, cbo) {
+        var grid = me.column.container.component.grid;
+        var selection = grid.selection;
+
+        var cfg = me.storeConfig;
+        if(cfg) {
+            if(cfg.defaultFilters) {
+                var vm = grid.gridMgr.configuration.viewModel;
+                var filters = _.map(cfg.defaultFilters, function(filter) {
+                    var actualFilter = {};
+                    actualFilter.column = filter.column;
+                    if(filter.source === 'grid') {
+                        actualFilter.value = selection.get(filter.valueField);
+                    } else if (filter.source === 'current') {
+                        if(vm && vm.data.current)
+                            actualFilter.value = vm.data.current.get(filter.valueField);
+                    }
+                    actualFilter.conjunction = (filter.conjunction ? filter.conjunction : 'and');
+                    actualFilter.condition = (filter.condition ? filter.condition : 'eq');
+                    return actualFilter;
+                });
+                cbo.defaultFilters = filters;    
+            }
+        }
+    },
+
+    createStore: function(type, cfg) {
+        return Ext.create(type, cfg ? cfg : { pageSize: 50, autoLoad: true });
+    },
+
+    setupStore: function(me, cbo) {
+        var cfg = me.storeConfig;
+        var store = this.createStore('Inventory.store.BufferedUnitMeasure');
+        if(cfg && cfg.type)
+            store = this.createStore(cfg.type);
+        cbo.bindStore(store);
+    },
+
+    getValueField: function() {
+        var me = this;
+        return me.valueField;
+    },
+
+    getDisplayField: function() {
+        var me = this;
+        return me.displayField ? me.displayField : me.valueField;
+    },
+
+    getUpdateField: function() {
+        var me = this;
+        return me.updateField ? me.updateField : me.valueField;
+    },
+
+    getLookupValueField: function() {
+        var me = this;
+        return me.lookupvalueField ? me.lookupvalueField : me.valueField;
+    },
+
+    getLookupDisplayField: function() {
+        var me = this;
+        return me.lookupDisplayField ? me.lookupDisplayField : me.displayField;
+    },
+
+    getLookupDecimalPrecisionField: function() {
+        var me = this;
+        return me.decimalsField ? me.decimalsField : 'intDecimalPlaces';
+    },
+
+    items: [
+        {
+            xtype: 'container',
+            margin: '0 0 0 0',
+            flex: 1,
+            layout: {
+                type: 'hbox',
+                align: 'stretch'
+            },
+            items: [
+                {
+                    xtype: 'numberfield',
+                    flex: 1,
+                    margin: '0 2 0 0',
+                    decimalPrecision: 6,
+                    decimalToDisplay: 6,
+                    fieldLabel: 'Quantity',
+                    hideLabel: true,
+                    labelWidth: 80,
+                },
+                {
+                    xtype: 'gridcombobox',
+                    flex: 1,
+                    margin: '0 0 0 0',
+                    fieldLabel: '',
+                    columns: [
+                        { 
+                            dataIndex: 'intUnitMeasureId',
+                            text: 'Id',
+                            flex: 1,
+                            hidden: true
+                        },
+                        { 
+                            dataIndex: 'strUnitMeasure',
+                            text: 'Unit Measure',
+                            flex: 1
+                        },
+                        { 
+                            dataIndex: 'strSymbol',
+                            text: 'Symbol',
+                            flex: 1
+                        },
+                        { 
+                            dataIndex: 'strUnitType',
+                            text: 'Type',
+                            flex: 1
+                        },
+                        { 
+                            dataIndex: 'intDecimalPlaces',
+                            text: 'Decimal Places',
+                            flex: 1,
+                            hidden: true
+                        }
+                    ],
+                    dataIndex: 'intUnitMeasureId',
+                    displayField: 'strUnitMeasure',
+                    valueField: 'intUnitMeasureId',
+                    labelWidth: 60,
+                    hideLabel: true,
+                }
+            ]
+        }
+    ]
 });

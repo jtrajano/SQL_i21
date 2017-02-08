@@ -37,9 +37,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.form.field.Time',
         'Ext.toolbar.Paging',
         'Inventory.ux.GridUnitMeasureColumn',
-        'Inventory.ux.GridUnitMeasureField',
-        'Inventory.ux.UnitMeasureField',
-        'Inventory.ux.GridUOMField'
+        'Inventory.ux.GridUnitMeasureField'
     ],
 
     height: 700,
@@ -1207,7 +1205,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 decimalPrecisionField: 'intItemUOMDecimalPlaces',
                                                                                 displayField: 'strUnitMeasure',
                                                                                 editor: {
-                                                                                    xtype: 'griduomfield',
+                                                                                    xtype: 'gridunitmeasurefield',
                                                                                     itemId: 'gumReceiveQty',
                                                                                     valueField: 'intItemUOMId',
                                                                                     updateField: 'intUnitMeasureId',
