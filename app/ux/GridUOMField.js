@@ -49,6 +49,8 @@ Ext.define('Inventory.ux.GridUOMField', {
                 value = me.getPrecisionNumber(lastValue, decimals);
             }
         }
+        me.setupQuantity(txt, value, decimals);
+        
         return value;
     },
 
@@ -59,6 +61,8 @@ Ext.define('Inventory.ux.GridUOMField', {
         var decimals = 6;
         if(data.get(decimalField))
             decimals = data.get(decimalField);
+        if(!decimals)
+            decimals = me.defaultDecimals;
         return decimals;
     },
 
@@ -177,9 +181,9 @@ Ext.define('Inventory.ux.GridUOMField', {
         var grid = column.container.component.grid;
         var selection = grid.selection;
         if(records.length > 0) {
-            var value = records[0].get(me.getLookupValueField()) || null;
-            var display = records[0].get(me.getLookupDisplayField()) || null;
-            var decimals = records[0].get(me.getLookupDecimalPrecisionField()) || null;
+            var value = records[0].get(me.getLookupValueField());
+            var display = records[0].get(me.getLookupDisplayField());
+            var decimals = records[0].get(me.getLookupDecimalPrecisionField());
             if(value)
                 selection.set(me.getUpdateField(), value);
             if(display)

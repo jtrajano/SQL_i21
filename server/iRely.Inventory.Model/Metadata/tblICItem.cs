@@ -510,6 +510,7 @@ namespace iRely.Inventory.Model
         public decimal? dblAverageCost { get; set; }
         public decimal? dblEndMonthCost { get; set; }
         public int? intSort { get; set; }
+        public int? intDecimalPlaces { get; set; }
 
         public vyuICGetItemStock vyuICGetItemStock { get; set; }
     }
