@@ -26,6 +26,7 @@ BEGIN TRY
 		,@TRANCOUNT INT
 		,@intProductionStagingId INT
 		,@intProductionStageLocationId INT
+		,@intPMStageLocationId int 
 
 	SELECT @TRANCOUNT = @@TRANCOUNT
 
@@ -389,6 +390,7 @@ BEGIN TRY
 		,@intProduceUOMId INT
 		,@strPackagingCategory NVARCHAR(50)
 		,@intPackagingCategoryId INT
+		,@intPMCategoryId int
 
 	SELECT @dblProduceQty = SUM(dblPhysicalCount)
 		,@intProduceUOMId = MIN(intPhysicalItemUOMId)
@@ -413,6 +415,10 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
+
+	Select @intPMCategoryId=intCategoryId 
+	From tblICCategory
+	Where strCategoryCode =@strPackagingCategory
 
 	IF @dblProduceQty IS NOT NULL
 	BEGIN
@@ -776,6 +782,12 @@ BEGIN TRY
 			AND intAttributeId = @intProductionStagingId
 	END
 
+	SELECT @intPMStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 90--PM Staging Location
+
 	DECLARE @tblMFQtyInProductionStagingLocation TABLE (
 		intItemId INT
 		,dblQtyInProductionStagingLocation NUMERIC(18, 6)
@@ -804,11 +816,15 @@ BEGIN TRY
 		AND L.intLotStatusId = 1
 		AND L.dtmExpiryDate > GETDATE()
 		AND L.dblQty > 0
-		AND L.intStorageLocationId = CASE 
+		AND (L.intStorageLocationId = CASE 
 			WHEN I.intConsumptionMethodId = 2
 				THEN I.intStorageLocationId
 			ELSE @intProductionStageLocationId
-			END
+			END OR L.intStorageLocationId = CASE 
+			WHEN I.intConsumptionMethodId = 2
+				THEN I.intStorageLocationId
+			ELSE @intPMStageLocationId
+			END)
 	GROUP BY I.intItemId
 		,I.intItemUOMId
 
@@ -923,7 +939,7 @@ BEGIN TRY
 			WHERE PS.intItemId = I.intItemId
 			)
 		,I.intItemUOMId
-		,@intProductionStageLocationId
+		,Case When I.intCategoryId =@intPMCategoryId Then  @intPMStageLocationId Else @intProductionStageLocationId End
 		,@intUserId
 		,@dtmCurrentDateTime
 		,@intUserId

@@ -47,6 +47,7 @@ BEGIN TRY
 		,intLineNo
 		,intSanitizationOrderDetailsId
 		,strLineItemNote
+		,intStagingLocationId 
 		,intCreatedById
 		,dtmCreatedOn
 		,intLastUpdateById
@@ -70,6 +71,7 @@ BEGIN TRY
 		,intLineNo
 		,intSanitizationOrderDetailsId
 		,strLineItemNote
+		,intStagingLocationId 
 		,@intLastUpdateById
 		,GETDATE()
 		,@intLastUpdateById
