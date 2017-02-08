@@ -393,6 +393,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
             this.Property(t => t.strPricingType).HasColumnName("strPricingType");
             this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.intItemUOMDecimalPlaces).HasColumnName("intItemUOMDecimalPlaces");
         }
     }
 

@@ -37,7 +37,7 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         var txt = panel.items.items[0];
         var cbo = panel.items.items[1];
         txt.hideLabel = true;
-        txt.flex = 2;
+        txt.flex = 1;
         panel.margin = 0;
 
         var grid = this.column.container.component.grid;
@@ -154,61 +154,83 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
     },
 
     setValue : function(value){
-        var grid = this.column.container.component.grid;
+        var me = this;
+        var grid = me.column.container.component.grid;
         var selection = grid.selection;
-        var val = { quantity: value, unitMeasureId: selection.get(this.valueField) };
+        var val = { quantity: value, unitMeasureId: selection.get(me.valueField) };
         var qty = null;
         var uomId = null;
-        var panel = this.items.items[0];
+        var panel = me.items.items[0];
         var cbo = panel.items.items[1];
         var txt = panel.items.items[0];
+        var store = Ext.create('Inventory.store.BufferedUnitMeasure', { pageSize: 50 });
 
         if(val) {
             if(val.quantity) {
                 qty = val.quantity;
-                this.viewModel.set('quantity', qty);
+                //me.viewModel.set('quantity', qty);
             }
 
             if(val.unitMeasureId) {
                 uomId = val.unitMeasureId;
-                this.viewModel.set('unitMeasureId', uomId);
+                //me.viewModel.set('unitMeasureId', uomId);
             }
 
+            // if(me.storeConfig) {
+            //     store = Ext.create(me.storeConfig.type, { pageSize: 50 });
+                
+            //     if(me.storeConfig.defaultFilters) {
+            //         var vm = grid.gridMgr.configuration.viewModel;
 
-            var store = Ext.create('Inventory.store.BufferedUnitMeasure', { pageSize: 50 });
-            cbo.bindStore(store);
-            store.load({
-                callback: function(records, op, success) {
-                    if(success) {
-                        var m = _.map(records, function(a) { return a.data; });
-                        var filtered = _.filter(m, function(a) { return a.intUnitMeasureId === grid.selection.get('intUnitMeasureId'); });
+            //         var df = _.map(me.storeConfig.defaultFilters, function(filter) {
+            //             var nf = {};
+            //             nf.column = filter.column;
+            //             if(filter.source === 'grid') {
+            //                 nf.value = selection.get(filter.valueField);
+            //             } else if (filter.source === 'current') {
+            //                 nf.value = vm.data.current.get(filter.valueField);
+            //             }
+            //             nf.conjunction = (filter.conjunction ? filter.conjunction : 'and');
+            //             nf.condition = (filter.condition ? filter.condition : 'eq');
+            //             return nf;
+            //         });
+            //         cbo.defaultFilters = df;
+            //     }
+            // }
+            // cbo.bindStore(store);
+            // store.load({
+            //     callback: function(records, op, success) {
+            //         if(success) {
+            //             var uoms = _.map(records, function(a) { return a.data; });
+            //             var intUOMId = grid.selection.get(me.valueField);
+            //             //var filtered = _.filter(uoms, function(a) { return a.intUnitMeasureId === intUOMId; });
 
-                        cbo.setValue(grid.selection.get('intUnitMeasureId'));
-                        cbo.setRawValue(grid.selection.get('strUnitMeasure'));
-
-                        if(filtered && filtered.length > 0)
-                            decimal = filtered[0].intDecimalPlaces;
+            //             cbo.setValue(grid.selection.get(me.valueField));
+            //             cbo.setRawValue(grid.selection.get(me.displayField));
+            //             var decimal = 6;
+            //             if(uoms && uoms.length > 0)
+            //                 decimal = uoms[0].intDecimalPlaces;
                         
-                        var format = "";
-                        for (var i = 0; i < decimal; i++)
-                            format += "0";
-                        if(decimal === 0) {
-                            txt.setDecimalPrecision(0);
-                            txt.setDecimalToDisplay(0);
-                            var f = numeral(qty).format('0,0');
-                            txt.setValue(numeral(qty)._value);
-                            txt.setRawValue(f);
-                        } else {
-                            var formatted = numeral(qty).format('0,0.[' + format + ']');
-                            var decimalToDisplay = (((numeral(formatted)._value).toString()).split('.')[1] || []).length;
-                            txt.setDecimalPrecision(decimal);
-                            txt.setDecimalToDisplay(decimalToDisplay);
-                            txt.setValue(numeral(qty)._value);
-                            txt.setRawValue(formatted);
-                        }
-                    }
-                }
-            });
+            //             var format = "";
+            //             for (var i = 0; i < decimal; i++)
+            //                 format += "0";
+            //             if(decimal === 0) {
+            //                 txt.setDecimalPrecision(0);
+            //                 txt.setDecimalToDisplay(0);
+            //                 var f = numeral(qty).format('0,0');
+            //                 txt.setValue(numeral(qty)._value);
+            //                 txt.setRawValue(f);
+            //             } else {
+            //                 var formatted = numeral(qty).format('0,0.[' + format + ']');
+            //                 var decimalToDisplay = (((numeral(formatted)._value).toString()).split('.')[1] || []).length;
+            //                 txt.setDecimalPrecision(decimal);
+            //                 txt.setDecimalToDisplay(decimalToDisplay);
+            //                 txt.setValue(numeral(qty)._value);
+            //                 txt.setRawValue(formatted);
+            //             }
+            //         }
+            //     }
+            // });
         }
     }
 });

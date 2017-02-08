@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa058187fb5fea68151839aba4440a16f5794bc9a6932e12fdf3e88657fc71b66))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetscf7bcf92940490fff9d3504fe4257ba7b048bdfd4eb35222103a0a8a4ae0522b))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsa058187fb5fea68151839aba4440a16f5794bc9a6932e12fdf3e88657fc71b66 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetscf7bcf92940490fff9d3504fe4257ba7b048bdfd4eb35222103a0a8a4ae0522b : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "a058187fb5fea68151839aba4440a16f5794bc9a6932e12fdf3e88657fc71b66"; }
+            get { return "cf7bcf92940490fff9d3504fe4257ba7b048bdfd4eb35222103a0a8a4ae0522b"; }
         }
 
         /// <summary>
@@ -4041,7 +4041,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICInventoryReceiptItemLookUp
-        [CodeFirstDatabaseSchema.vyuICInventoryReceiptItemLookUp](T1.vyuICInventoryReceiptItemLookUp_intInventoryReceiptItemId, T1.vyuICInventoryReceiptItemLookUp_intInventoryReceiptId, T1.vyuICInventoryReceiptItemLookUp_strOrderNumber, T1.vyuICInventoryReceiptItemLookUp_strSourceNumber, T1.vyuICInventoryReceiptItemLookUp_dtmDate, T1.vyuICInventoryReceiptItemLookUp_dblOrdered, T1.vyuICInventoryReceiptItemLookUp_strItemNo, T1.vyuICInventoryReceiptItemLookUp_strItemDescription, T1.vyuICInventoryReceiptItemLookUp_strLotTracking, T1.vyuICInventoryReceiptItemLookUp_strOrderUOM, T1.vyuICInventoryReceiptItemLookUp_dblReceived, T1.vyuICInventoryReceiptItemLookUp_dblOrderUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_strUnitMeasure, T1.vyuICInventoryReceiptItemLookUp_strUnitType, T1.vyuICInventoryReceiptItemLookUp_strSubLocationName, T1.vyuICInventoryReceiptItemLookUp_strStorageLocationName, T1.vyuICInventoryReceiptItemLookUp_strGrade, T1.vyuICInventoryReceiptItemLookUp_intCommodityId, T1.vyuICInventoryReceiptItemLookUp_strWeightUOM, T1.vyuICInventoryReceiptItemLookUp_strContainer, T1.vyuICInventoryReceiptItemLookUp_dblItemUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_dblWeightUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_dblGrossMargin, T1.vyuICInventoryReceiptItemLookUp_strLifeTimeType, T1.vyuICInventoryReceiptItemLookUp_intLifeTime, T1.vyuICInventoryReceiptItemLookUp_strCostUOM, T1.vyuICInventoryReceiptItemLookUp_dblCostUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_ysnLoad, T1.vyuICInventoryReceiptItemLookUp_dblAvailableQty, T1.vyuICInventoryReceiptItemLookUp_strDiscountSchedule, T1.vyuICInventoryReceiptItemLookUp_dblFranchise, T1.vyuICInventoryReceiptItemLookUp_dblContainerWeightPerQty, T1.vyuICInventoryReceiptItemLookUp_strSubCurrency, T1.vyuICInventoryReceiptItemLookUp_strPricingType, T1.vyuICInventoryReceiptItemLookUp_strTaxGroup, T1.vyuICInventoryReceiptItemLookUp_strForexRateType)
+        [CodeFirstDatabaseSchema.vyuICInventoryReceiptItemLookUp](T1.vyuICInventoryReceiptItemLookUp_intInventoryReceiptItemId, T1.vyuICInventoryReceiptItemLookUp_intInventoryReceiptId, T1.vyuICInventoryReceiptItemLookUp_strOrderNumber, T1.vyuICInventoryReceiptItemLookUp_strSourceNumber, T1.vyuICInventoryReceiptItemLookUp_dtmDate, T1.vyuICInventoryReceiptItemLookUp_dblOrdered, T1.vyuICInventoryReceiptItemLookUp_strItemNo, T1.vyuICInventoryReceiptItemLookUp_strItemDescription, T1.vyuICInventoryReceiptItemLookUp_strLotTracking, T1.vyuICInventoryReceiptItemLookUp_strOrderUOM, T1.vyuICInventoryReceiptItemLookUp_dblReceived, T1.vyuICInventoryReceiptItemLookUp_dblOrderUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_strUnitMeasure, T1.vyuICInventoryReceiptItemLookUp_strUnitType, T1.vyuICInventoryReceiptItemLookUp_strSubLocationName, T1.vyuICInventoryReceiptItemLookUp_strStorageLocationName, T1.vyuICInventoryReceiptItemLookUp_strGrade, T1.vyuICInventoryReceiptItemLookUp_intCommodityId, T1.vyuICInventoryReceiptItemLookUp_strWeightUOM, T1.vyuICInventoryReceiptItemLookUp_strContainer, T1.vyuICInventoryReceiptItemLookUp_dblItemUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_dblWeightUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_dblGrossMargin, T1.vyuICInventoryReceiptItemLookUp_strLifeTimeType, T1.vyuICInventoryReceiptItemLookUp_intLifeTime, T1.vyuICInventoryReceiptItemLookUp_strCostUOM, T1.vyuICInventoryReceiptItemLookUp_dblCostUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_ysnLoad, T1.vyuICInventoryReceiptItemLookUp_dblAvailableQty, T1.vyuICInventoryReceiptItemLookUp_strDiscountSchedule, T1.vyuICInventoryReceiptItemLookUp_dblFranchise, T1.vyuICInventoryReceiptItemLookUp_dblContainerWeightPerQty, T1.vyuICInventoryReceiptItemLookUp_strSubCurrency, T1.vyuICInventoryReceiptItemLookUp_strPricingType, T1.vyuICInventoryReceiptItemLookUp_strTaxGroup, T1.vyuICInventoryReceiptItemLookUp_strForexRateType, T1.vyuICInventoryReceiptItemLookUp_intItemUOMId, T1.vyuICInventoryReceiptItemLookUp_intItemUOMDecimalPlaces)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICInventoryReceiptItemLookUp_intInventoryReceiptItemId, 
@@ -4080,6 +4080,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strPricingType AS vyuICInventoryReceiptItemLookUp_strPricingType, 
             T.strTaxGroup AS vyuICInventoryReceiptItemLookUp_strTaxGroup, 
             T.strForexRateType AS vyuICInventoryReceiptItemLookUp_strForexRateType, 
+            T.intItemUOMId AS vyuICInventoryReceiptItemLookUp_intItemUOMId, 
+            T.intItemUOMDecimalPlaces AS vyuICInventoryReceiptItemLookUp_intItemUOMDecimalPlaces, 
             True AS _from0
         FROM InventoryEntities.vyuICInventoryReceiptItemLookUps AS T
     ) AS T1");
@@ -7334,7 +7336,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICInventoryReceiptItemLookUps
-        [iRely.Inventory.Model.vyuICInventoryReceiptItemLookUp](T1.vyuICInventoryReceiptItemLookUp_intInventoryReceiptItemId, T1.vyuICInventoryReceiptItemLookUp_intInventoryReceiptId, T1.vyuICInventoryReceiptItemLookUp_strOrderNumber, T1.vyuICInventoryReceiptItemLookUp_strSourceNumber, T1.vyuICInventoryReceiptItemLookUp_dtmDate, T1.vyuICInventoryReceiptItemLookUp_dblOrdered, T1.vyuICInventoryReceiptItemLookUp_strItemNo, T1.vyuICInventoryReceiptItemLookUp_strItemDescription, T1.vyuICInventoryReceiptItemLookUp_strLotTracking, T1.vyuICInventoryReceiptItemLookUp_strOrderUOM, T1.vyuICInventoryReceiptItemLookUp_dblReceived, T1.vyuICInventoryReceiptItemLookUp_dblOrderUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_strUnitMeasure, T1.vyuICInventoryReceiptItemLookUp_strUnitType, T1.vyuICInventoryReceiptItemLookUp_strSubLocationName, T1.vyuICInventoryReceiptItemLookUp_strStorageLocationName, T1.vyuICInventoryReceiptItemLookUp_strGrade, T1.vyuICInventoryReceiptItemLookUp_intCommodityId, T1.vyuICInventoryReceiptItemLookUp_strWeightUOM, T1.vyuICInventoryReceiptItemLookUp_strContainer, T1.vyuICInventoryReceiptItemLookUp_dblItemUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_dblWeightUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_dblGrossMargin, T1.vyuICInventoryReceiptItemLookUp_strLifeTimeType, T1.vyuICInventoryReceiptItemLookUp_intLifeTime, T1.vyuICInventoryReceiptItemLookUp_strCostUOM, T1.vyuICInventoryReceiptItemLookUp_dblCostUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_ysnLoad, T1.vyuICInventoryReceiptItemLookUp_dblAvailableQty, T1.vyuICInventoryReceiptItemLookUp_strDiscountSchedule, T1.vyuICInventoryReceiptItemLookUp_dblFranchise, T1.vyuICInventoryReceiptItemLookUp_dblContainerWeightPerQty, T1.vyuICInventoryReceiptItemLookUp_strSubCurrency, T1.vyuICInventoryReceiptItemLookUp_strPricingType, T1.vyuICInventoryReceiptItemLookUp_strTaxGroup, T1.vyuICInventoryReceiptItemLookUp_strForexRateType)
+        [iRely.Inventory.Model.vyuICInventoryReceiptItemLookUp](T1.vyuICInventoryReceiptItemLookUp_intInventoryReceiptItemId, T1.vyuICInventoryReceiptItemLookUp_intInventoryReceiptId, T1.vyuICInventoryReceiptItemLookUp_strOrderNumber, T1.vyuICInventoryReceiptItemLookUp_strSourceNumber, T1.vyuICInventoryReceiptItemLookUp_dtmDate, T1.vyuICInventoryReceiptItemLookUp_dblOrdered, T1.vyuICInventoryReceiptItemLookUp_strItemNo, T1.vyuICInventoryReceiptItemLookUp_strItemDescription, T1.vyuICInventoryReceiptItemLookUp_strLotTracking, T1.vyuICInventoryReceiptItemLookUp_strOrderUOM, T1.vyuICInventoryReceiptItemLookUp_dblReceived, T1.vyuICInventoryReceiptItemLookUp_dblOrderUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_strUnitMeasure, T1.vyuICInventoryReceiptItemLookUp_strUnitType, T1.vyuICInventoryReceiptItemLookUp_strSubLocationName, T1.vyuICInventoryReceiptItemLookUp_strStorageLocationName, T1.vyuICInventoryReceiptItemLookUp_strGrade, T1.vyuICInventoryReceiptItemLookUp_intCommodityId, T1.vyuICInventoryReceiptItemLookUp_strWeightUOM, T1.vyuICInventoryReceiptItemLookUp_strContainer, T1.vyuICInventoryReceiptItemLookUp_dblItemUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_dblWeightUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_dblGrossMargin, T1.vyuICInventoryReceiptItemLookUp_strLifeTimeType, T1.vyuICInventoryReceiptItemLookUp_intLifeTime, T1.vyuICInventoryReceiptItemLookUp_strCostUOM, T1.vyuICInventoryReceiptItemLookUp_dblCostUOMConvFactor, T1.vyuICInventoryReceiptItemLookUp_ysnLoad, T1.vyuICInventoryReceiptItemLookUp_dblAvailableQty, T1.vyuICInventoryReceiptItemLookUp_strDiscountSchedule, T1.vyuICInventoryReceiptItemLookUp_dblFranchise, T1.vyuICInventoryReceiptItemLookUp_dblContainerWeightPerQty, T1.vyuICInventoryReceiptItemLookUp_strSubCurrency, T1.vyuICInventoryReceiptItemLookUp_strPricingType, T1.vyuICInventoryReceiptItemLookUp_strTaxGroup, T1.vyuICInventoryReceiptItemLookUp_strForexRateType, T1.vyuICInventoryReceiptItemLookUp_intItemUOMId, T1.vyuICInventoryReceiptItemLookUp_intItemUOMDecimalPlaces)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICInventoryReceiptItemLookUp_intInventoryReceiptItemId, 
@@ -7373,6 +7375,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strPricingType AS vyuICInventoryReceiptItemLookUp_strPricingType, 
             T.strTaxGroup AS vyuICInventoryReceiptItemLookUp_strTaxGroup, 
             T.strForexRateType AS vyuICInventoryReceiptItemLookUp_strForexRateType, 
+            T.intItemUOMId AS vyuICInventoryReceiptItemLookUp_intItemUOMId, 
+            T.intItemUOMDecimalPlaces AS vyuICInventoryReceiptItemLookUp_intItemUOMDecimalPlaces, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICInventoryReceiptItemLookUp AS T
     ) AS T1");

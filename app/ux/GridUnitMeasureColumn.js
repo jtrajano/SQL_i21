@@ -24,8 +24,8 @@ Ext.define('Inventory.ux.GridUnitMeasureColumn', {
         if(!qty)
             qty = 0.00;
         var decimal = 2;
-        if(record.get('tblICUnitMeasure') && record.get('tblICUnitMeasure').intDecimalPlaces)
-            decimal = record.get('tblICUnitMeasure').intDecimalPlaces;
+        if(record.get('intItemUOMDecimalPlaces'))
+            decimal = record.get('intItemUOMDecimalPlaces');
         decimal = 6;
         var format = "";
         for (var i = 0; i < decimal; i++)
