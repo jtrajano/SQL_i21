@@ -35,7 +35,26 @@ Ext.define('Inventory.ux.GridUOMField', {
         var selection = grid.selection;
 
         var value = txt.getValue();
+        /* Detect changes and format decimal precision */
+        if(txt.lastValue) {
+            if(txt.lastValue !== value) {
+                var lastValue = txt.lastValue;
+
+                var decimals = me.getBoundDecimals(me, selection);
+                value = me.getPrecisionNumber(lastValue, decimals);
+            }
+        }
         return value;
+    },
+
+    getBoundDecimals: function(me, data) {
+        var decimalField = 'intDecimalPlaces';
+        if(me.column.config.decimalPrecisionField)
+            decimalField = me.column.config.decimalPrecisionField;
+        var decimals = 6;
+        if(data.get(decimalField))
+            decimals = data.get(decimalField);
+        return decimals;
     },
 
     setValue: function(value) {
@@ -45,12 +64,7 @@ Ext.define('Inventory.ux.GridUOMField', {
         var txt = panel.items.items[0];
         var grid = me.column.container.component.grid;
         var selection = grid.selection;
-        var decimalField = 'intDecimalPlaces';
-        if(me.column.config.decimalPrecisionField)
-            decimalField = me.column.config.decimalPrecisionField;
-        var decimals = 6;
-        if(selection.get(decimalField))
-            decimals = selection.get(decimalField);
+        var decimals = me.getBoundDecimals(me, selection);
 
         var currentValue = {
             quantity: value,
@@ -62,7 +76,7 @@ Ext.define('Inventory.ux.GridUOMField', {
         cbo.setRawValue(currentValue.uom);
 
         txt.setValue(currentValue.quantity);
-        this.setupQuantity(txt, currentValue.quantity, decimals);
+        me.setupQuantity(txt, currentValue.quantity, decimals);
     },
 
     setupQuantity: function(txt, value, decimals) {
@@ -83,9 +97,16 @@ Ext.define('Inventory.ux.GridUOMField', {
         this.setupStore(me, cbo);
     },
 
-    getNumberPrecisionNoTrailing: function(value) {
-        var num = this.getRoundedNumberObject(value, 6, 6);
+    getNumberDecimalPlacesNoTrailing: function(value, decimals) {
+        var num = this.getRoundedNumberObject(value, decimals);
         return num.decimalPlaces ? num.decimalPlaces : 6;
+    },
+
+    getPrecisionNumber: function(value, decimals) {
+        var num = this.getRoundedNumberObject(value, decimals);
+        if(!num)
+            return value;
+        return num.precisionValue ? num.precisionValue : value;
     },
 
     getRoundedNumberObject: function(value, decimals) {
@@ -101,11 +122,13 @@ Ext.define('Inventory.ux.GridUOMField', {
         var decimalToDisplay = decimals;
 
         var formatted = numeral(value).format(pattern);
+        var precisionValue = numeral(value)._value;
         var decimalDigits = (((numeral(formatted)._value).toString()).split('.')[1] || []);
         var decimalPlaces = decimalDigits.length;
 
         return {
             value: value,
+            precisionValue: precisionValue,
             zeroes: zeroes,
             pattern: pattern,
             precision: precision,
