@@ -11,7 +11,7 @@ DECLARE @SQLString NVARCHAR(MAX) = '';
 
 BEGIN
 
-    -- tblLGLoad
+   -- tblLGLoad
     SET @SQLString = N'MERGE tblLGLoad AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblLGLoad]) AS Source
         ON (Target.intLoadId = Source.intLoadId)

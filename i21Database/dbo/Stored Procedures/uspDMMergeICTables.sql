@@ -11,7 +11,7 @@ DECLARE @SQLString NVARCHAR(MAX) = '';
 
 BEGIN
 
-    -- tblICItem
+   -- tblICItem
     SET @SQLString = N'MERGE tblICItem AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblICItem]) AS Source
         ON (Target.intItemId = Source.intItemId)
