@@ -219,6 +219,9 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
                     } else if (filter.source === 'current') {
                         if(vm && vm.data.current)
                             actualFilter.value = vm.data.current.get(filter.valueField);
+                    } else {
+                        if(filter.value)
+                            actualFilter.value = filter.value;
                     }
                     actualFilter.conjunction = (filter.conjunction ? filter.conjunction : 'and');
                     actualFilter.condition = (filter.condition ? filter.condition : 'eq');
@@ -243,7 +246,7 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
 
     getValueField: function() {
         var me = this;
-        return me.valueField;
+        return me.valueField ? me.valueField : 'intUnitMeasureId';
     },
 
     getDisplayField: function() {
