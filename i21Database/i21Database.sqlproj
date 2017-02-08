@@ -5001,6 +5001,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetDetailedInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRollCost.sql" />
     <Build Include="dbo\Views\vyuCTDocument.sql" />
+    <Build Include="dbo\Views\vyuLGDashboardJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
