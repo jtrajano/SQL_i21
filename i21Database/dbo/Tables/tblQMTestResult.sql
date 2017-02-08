@@ -34,6 +34,7 @@
 	[strFormula] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, 
 	[intListItemId] INT, 
 	[strIsMandatory] NVARCHAR(20) COLLATE Latin1_General_CI_AS DEFAULT 'No', 
+	dtmPropertyValueCreated DATETIME, 
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMTestResult_dtmCreated] DEFAULT GetDate(),

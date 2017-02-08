@@ -229,6 +229,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -267,6 +268,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
