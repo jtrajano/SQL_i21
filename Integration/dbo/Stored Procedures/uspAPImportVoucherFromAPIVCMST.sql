@@ -123,7 +123,7 @@ SELECT
 	[dblPayment]			=	CASE WHEN A.apivc_status_ind = 'P' THEN
 									(CASE WHEN (A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A') THEN A.apivc_orig_amt
 										ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END)
-									- A.apivc_disc_taken --DO NOT USE apivc_net_amt directly as there are origin transaction that the net amount do not subtract the discount
+									- (CASE WHEN B.apivc_net_amt + ISNULL(B.apivc_disc_taken,0) = B.apivc_orig_amt THEN ISNULL(B.apivc_disc_taken,0) ELSE 0 END) --DO NOT USE apivc_net_amt directly as there are origin transaction that the net amount do not subtract the discount
 								ELSE 0 END,
 	[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = 'P' THEN 0 ELSE 
 										CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
@@ -148,7 +148,7 @@ SELECT
 										ELSE 1
 										END
 									END),
-	[dblDiscount]			=	ISNULL(A.apivc_disc_taken,0),
+	[dblDiscount]			=	CASE WHEN B.apivc_net_amt + ISNULL(B.apivc_disc_taken,0) = B.apivc_orig_amt THEN ISNULL(B.apivc_disc_taken,0) ELSE 0 END, --THERE ARE DISCOUNT TAKE BUT DID NOT DEDUCTED TO CHECK AMOUNT
 	[dblWithheld]			=	A.apivc_wthhld_amt,
 	[intShipToId]			=	@userLocation,
 	[intShipFromId]			=	loc.intEntityLocationId,
