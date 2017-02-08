@@ -17,7 +17,7 @@ Ext.define('Inventory.ux.GridUnitMeasureColumn', {
             decimal = record.get(decimalField);
         if(record.get(uomField))
             uom = record.get(uomField);
-        var o = me.getRoundedNumberObject(qty, decimal);
+        var o = me.getPrecisionNumberObject(qty, decimal);
         var strQty = "";
         if(o)
             strQty = o.formatted;

@@ -1212,6 +1212,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     valueField: 'intItemUOMId',
                                                                                     updateField: 'intUnitMeasureId',
                                                                                     displayField: 'strUnitMeasure',
+                                                                                    decimalsField: 'intDecimalPlaces',
                                                                                     storeConfig: {
                                                                                         type: 'Inventory.store.BufferedItemPricingView',
                                                                                         defaultFilters: [

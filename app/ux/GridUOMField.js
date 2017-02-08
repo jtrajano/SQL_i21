@@ -1,3 +1,7 @@
+/**
+ * @author Wendell Wayne H. Estrada
+ * @copyright 2017 iRely Philippines
+ */
 Ext.define('Inventory.ux.GridUOMField', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.griduomfield',
@@ -35,11 +39,13 @@ Ext.define('Inventory.ux.GridUOMField', {
         var selection = grid.selection;
 
         var value = txt.getValue();
+        var selectedDecimals = me.getSelectedDecimals(cbo);
+        var decimals = me.getBoundDecimals(me, selection);
+        decimals = selectedDecimals ? selectedDecimals : decimals;
         /* Detect changes and format decimal precision */
         if(txt.lastValue) {
             if(txt.lastValue !== value) {
                 var lastValue = txt.lastValue;
-                var decimals = me.getBoundDecimals(me, selection);
                 value = me.getPrecisionNumber(lastValue, decimals);
             }
         }
@@ -54,6 +60,16 @@ Ext.define('Inventory.ux.GridUOMField', {
         if(data.get(decimalField))
             decimals = data.get(decimalField);
         return decimals;
+    },
+
+    getSelectedDecimals: function(cbo) {
+        var me = this;
+        if(cbo.selection) {
+            var decimals = cbo.selection.get(me.getLookupDecimalPrecisionField());
+            if(decimals)
+                return decimals;
+        }
+        return null;
     },
 
     setValue: function(value) {
@@ -79,7 +95,7 @@ Ext.define('Inventory.ux.GridUOMField', {
     },
 
     setupQuantity: function(txt, value, decimals) {
-        var numObj = this.getRoundedNumberObject(value, decimals);
+        var numObj = this.getPrecisionNumberObject(value, decimals);
         txt.setDecimalPrecision(numObj.precision);
         txt.setDecimalToDisplay(numObj.decimalPlaces);    
     },
@@ -91,18 +107,19 @@ Ext.define('Inventory.ux.GridUOMField', {
         cbo.displayField = me.getDisplayField();
         cbo.valueField = me.getValueField();
         
+        //TODO: Setup custom gridcombobox columns
         this.setupComboboxFilters(me, cbo);
         this.setupComboboxEvents(cbo);
         this.setupStore(me, cbo);
     },
 
     getNumberDecimalPlacesNoTrailing: function(value, decimals) {
-        var num = this.getRoundedNumberObject(value, decimals);
+        var num = this.getPrecisionNumberObject(value, decimals);
         return num.decimalPlaces ? num.decimalPlaces : 6;
     },
 
     getPrecisionNumber: function(value, decimals) {
-        var num = this.getRoundedNumberObject(value, decimals);
+        var num = this.getPrecisionNumberObject(value, decimals);
         if(!num)
             return value;
         return num.precisionValue ? num.precisionValue : value;
@@ -156,11 +173,19 @@ Ext.define('Inventory.ux.GridUOMField', {
 
     onSelect: function(combo, records, options) {
         var me = this.up('panel');
-        var grid = me.column.container.component.grid;
+        var column = me.column;
+        var grid = column.container.component.grid;
         var selection = grid.selection;
         if(records.length > 0) {
-            selection.set(me.getUpdateField(), records[0].get(me.getLookupValueField()));
-            selection.set(me.getDisplayField(), records[0].get(me.getLookupDisplayField()));
+            var value = records[0].get(me.getLookupValueField()) || null;
+            var display = records[0].get(me.getLookupDisplayField()) || null;
+            var decimals = records[0].get(me.getLookupDecimalPrecisionField()) || null;
+            if(value)
+                selection.set(me.getUpdateField(), value);
+            if(display)
+                selection.set(me.getDisplayField(), display);
+            if(decimals)
+                selection.set(column.decimalPrecisionField, decimals);
         }
     },
 
@@ -225,6 +250,11 @@ Ext.define('Inventory.ux.GridUOMField', {
     getLookupDisplayField: function() {
         var me = this;
         return me.lookupDisplayField ? me.lookupDisplayField : me.displayField;
+    },
+
+    getLookupDecimalPrecisionField: function() {
+        var me = this;
+        return me.decimalsField ? me.decimalsField : 'intDecimalPlaces';
     },
 
     items: [
