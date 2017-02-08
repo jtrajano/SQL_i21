@@ -25,7 +25,7 @@ Ext.define('Inventory.ux.GridUnitMeasureColumn', {
         return strQty + ' ' + uom;
     },
 
-    getRoundedNumberObject: function(value, decimals) {
+    getPrecisionNumberObject: function(value, decimals) {
         var zeroes = "";
         for(var i = 0; i < decimals; i++) {
             zeroes += "0";
@@ -36,11 +36,13 @@ Ext.define('Inventory.ux.GridUnitMeasureColumn', {
         var decimalToDisplay = decimals;
 
         var formatted = numeral(value).format(pattern);
+        var precisionValue = numeral(value)._value;
         var decimalDigits = (((numeral(formatted)._value).toString()).split('.')[1] || []);
         var decimalPlaces = decimalDigits.length;
 
         return {
             value: value,
+            precisionValue: precisionValue,
             zeroes: zeroes,
             pattern: pattern,
             precision: precision,

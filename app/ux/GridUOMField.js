@@ -39,7 +39,6 @@ Ext.define('Inventory.ux.GridUOMField', {
         if(txt.lastValue) {
             if(txt.lastValue !== value) {
                 var lastValue = txt.lastValue;
-
                 var decimals = me.getBoundDecimals(me, selection);
                 value = me.getPrecisionNumber(lastValue, decimals);
             }
@@ -109,7 +108,7 @@ Ext.define('Inventory.ux.GridUOMField', {
         return num.precisionValue ? num.precisionValue : value;
     },
 
-    getRoundedNumberObject: function(value, decimals) {
+    getPrecisionNumberObject: function(value, decimals) {
         if(!decimals)
             decimals = this.defaultDecimals ? this.defaultDecimals : 6;
         var zeroes = "";
