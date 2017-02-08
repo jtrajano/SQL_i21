@@ -1,6 +1,7 @@
 var Harness = Siesta.Harness.Browser.ExtJS,
     version = Math.floor(Math.random() * 9999) + 1,
     commonIC = 'Common/CommonIC.js?v='+version,
+    commonICST = 'Common/CommonICSmokeTest.js?v='+version,
     functionalTest = '../../TestFramework/FunctionalTest.js?v='+version;
 
 Harness.configure({
@@ -385,7 +386,17 @@ Harness.start(
                 title: 'ICOpenScreens',
                 preload: [
                     functionalTest,
-                    commonIC
+                    commonIC,
+                    commonICST
+                ]
+            },
+            {
+                url: 'SmokeTesting/ICAddMaintenance.js?v='+version,
+                title: 'ICAddMaintenance',
+                preload: [
+                    functionalTest,
+                    commonIC,
+                    commonICST
                 ]
             },
             {
@@ -393,7 +404,8 @@ Harness.start(
                 title: 'ICSmokeTests',
                 preload: [
                     functionalTest,
-                    commonIC
+                    commonIC,
+                    commonICST
                 ]
             }
 

@@ -1,10 +1,10 @@
 StartTest (function (t) {
-    var commonIC = Ext.create('Inventory.CommonIC');
+    var commonICST = Ext.create('Inventory.CommonICSmokeTest');
     new iRely.FunctionalTest().start(t)
 
                 //Open IC Screens
         .addFunction(function(next){
-            commonIC.openICScreens (t,next)
+            commonICST.openICScreens (t,next)
         })
 
         .done();

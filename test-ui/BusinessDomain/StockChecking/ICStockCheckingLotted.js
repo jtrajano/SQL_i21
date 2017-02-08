@@ -114,7 +114,7 @@ StartTest (function (t) {
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-012')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
         .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
         .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
