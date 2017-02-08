@@ -11,8 +11,6 @@ BEGIN TRY
 		
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
-	DECLARE @strEntityName NVARCHAR(100)
-	DECLARE @intStageEntityId int
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -38,6 +36,7 @@ BEGIN TRY
 	)
 
 	DECLARE @tblVendorContact TABLE (
+		[strAccountNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strFirstName] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		[strLastName] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		[strPhone] NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -57,6 +56,8 @@ BEGIN TRY
 		,dtmCreated
 		,strCreatedUserName
 		,strMarkForDeletion
+		,strTerm
+		,strCurrency
 		)
 	SELECT NAME1
 		,STRAS
@@ -71,6 +72,8 @@ BEGIN TRY
 		,CASE WHEN ISDATE(ERDAT)=0 THEN NULL ELSE ERDAT END
 		,ERNAM
 		,LOEVM
+		,ZTERM
+		,WAERS
 	FROM OPENXML(@idoc, 'CREMAS06/IDOC/E1LFA1M', 2) WITH (
 			 NAME1 NVARCHAR(100)
 			,STRAS NVARCHAR(MAX)
@@ -85,27 +88,25 @@ BEGIN TRY
 			,ERDAT NVARCHAR(50)
 			,ERNAM NVARCHAR(100)
 			,LOEVM NVARCHAR(50)
+			,ZTERM NVARCHAR(100) 'E1LFM1M/ZTERM'
+			,WAERS NVARCHAR(50) 'E1LFM1M/WAERS'
 			)
 
 	If NOT Exists (Select 1 From @tblVendor)
 		RaisError('Unable to process. Xml tag (CREMAS06/IDOC/E1LFA1M) not found.',16,1)
 
-	Update @tblVendor Set strTerm=x.ZTERM,strCurrency=x.WAERS
-		FROM OPENXML(@idoc, 'CREMAS06/IDOC/E1LFA1M/E1LFM1M', 2) WITH (
-			 ZTERM NVARCHAR(100)
-			,WAERS NVARCHAR(50)) x
-
-	Insert Into @tblVendorContact(strFirstName,strLastName,strPhone)
-		SELECT NAMEV
+	Insert Into @tblVendorContact(strAccountNo,strFirstName,strLastName,strPhone)
+		SELECT
+		 LIFNR 
+		,NAMEV
 		,NAME1
 		,TELF1
 	FROM OPENXML(@idoc, 'CREMAS06/IDOC/E1LFA1M/E1KNVKM', 2) WITH (
-			 NAMEV NVARCHAR(100)
+			 LIFNR NVARCHAR(50) '../LIFNR'
+			,NAMEV NVARCHAR(100)
 			,NAME1 NVARCHAR(100)
 			,TELF1 NVARCHAR(50)
 	)
-
-	Select @strEntityName=strName From @tblVendor
 
 	Begin Tran
 
@@ -114,11 +115,10 @@ BEGIN TRY
 	Select strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,'Vendor',strCurrency,strTerm,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END
 	From @tblVendor
 
-	Select @intStageEntityId=SCOPE_IDENTITY()
-
 	Insert Into tblIPEntityContactStage(intStageEntityId,strEntityName,strFirstName,strLastName,strPhone)
-	Select @intStageEntityId,@strEntityName,strFirstName,strLastName,strPhone
-	From @tblVendorContact
+	Select s.intStageEntityId,vc.strAccountNo,vc.strFirstName,vc.strLastName,vc.strPhone
+	From @tblVendorContact vc 
+	Join tblIPEntityStage s on s.strAccountNo=vc.strAccountNo
 
 	Commit Tran
 

@@ -204,9 +204,7 @@ Begin
 
 		Select @intReceiptId=r.intInventoryReceiptId
 		From tblICInventoryReceipt r 
-		Join tblICInventoryReceiptItem ri on r.intInventoryReceiptId=ri.intInventoryReceiptId 
-		Join tblLGLoad lg on ri.intSourceId=lg.intLoadId
-		Where lg.strExternalShipmentNumber=@strParam AND strReceiptType='Purchase Contract' AND r.intSourceType=2
+		Where r.strReceiptNumber=@strRefNo
 
 		If @strStatus IN (52,53) --Success
 		Begin

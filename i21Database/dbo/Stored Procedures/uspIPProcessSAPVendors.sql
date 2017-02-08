@@ -8,6 +8,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+Declare @intMinVendor INT
 Declare @strVendorName nvarchar(100)
 Declare @ErrMsg nvarchar(max)
 Declare @intStageEntityId int
@@ -35,14 +36,41 @@ Declare @intUserId Int
 Declare @strUserName NVARCHAR(100)
 Declare @intCountryId INT
 Declare @ysnDeleted bit
+Declare @strFinalErrMsg NVARCHAR(MAX)=''
 
 DECLARE @tblEntityContactIdOutput table (intEntityId int)
 
-Select TOP 1 @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency,@strAccountNo=strAccountNo,@ysnDeleted=ISNULL(ysnDeleted,0)
-From tblIPEntityStage Where strEntityType='Vendor'
+Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor'
 
-If ISNULL(@intStageEntityId,0)=0
-	RaisError('No data found.',16,1)
+While(@intMinVendor is not null)
+Begin
+Begin Try
+
+Set @strVendorName = NULL
+Set @intEntityId = NULL
+Set @strEntityNo = NULL
+Set @strTerm = NULL
+Set @intTermId = NULL
+Set @strCurrency = NULL
+Set @intCurrencyId = NULL
+Set @intEntityLocationId = NULL
+Set @strCity = NULL
+Set @strCountry = NULL
+Set @strZipCode = NULL
+Set @strAddress = NULL
+Set @strAddress1 = NULL
+Set @strAccountNo = NULL
+Set @strTaxNo = NULL
+Set @strFLOId = NULL
+Set @intEntityContactId = NULL
+Set @strPhone = NULL
+Set @intCountryId = NULL
+Set @ysnDeleted = 0
+
+Delete From @tblEntityContactIdOutput
+
+Select @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency,@strAccountNo=strAccountNo,@ysnDeleted=ISNULL(ysnDeleted,0)
+From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId=@intMinVendor
 
 Select @intEntityId=intEntityVendorId From tblAPVendor Where strVendorAccountNum=@strAccountNo
 Select @intTermId=intTermID From tblSMTerm Where strTermCode=@strTerm
@@ -73,7 +101,7 @@ Begin
 	If Not Exists (Select 1 From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId)
 		RaisError('Contact Name is required.',16,1)
 
-	If (Select ISNULL(strFirstName,'') From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId)=''
+	If (Select TOP 1 ISNULL(strFirstName,'') From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId)=''
 		RaisError('Contact Name is required.',16,1)
 
 	Select @intCountryId=c.intCountryID,@strCountry=c.strCountry 
@@ -267,7 +295,7 @@ End
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
 
 	Insert Into tblIPEntityContactArchive(intStageEntityId,strEntityName,strFirstName,strLastName,strPhone)
-	Select @intNewStageEntityId,@strVendorName,strFirstName,strLastName,strPhone
+	Select @intNewStageEntityId,strEntityName,strFirstName,strLastName,strPhone
 	From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 
 	Delete From tblIPEntityStage Where intStageEntityId=@intStageEntityId
@@ -283,6 +311,7 @@ BEGIN CATCH
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()
+	SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 	--Move to Error
 	Insert into tblIPEntityError(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus)
@@ -292,11 +321,22 @@ BEGIN CATCH
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
 
 	Insert Into tblIPEntityContactError(intStageEntityId,strEntityName,strFirstName,strLastName,strPhone)
-	Select @intNewStageEntityId,@strVendorName,strFirstName,strLastName,strPhone
+	Select @intNewStageEntityId,strEntityName,strFirstName,strLastName,strPhone
 	From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 
 	Delete From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 	Delete From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
+END CATCH
+
+	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor
+End
+
+If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
+
+END TRY
+
+BEGIN CATCH
+	SET @ErrMsg = ERROR_MESSAGE()
 
 	RAISERROR (
 			@ErrMsg

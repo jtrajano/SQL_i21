@@ -313,7 +313,7 @@ Begin
 				Set @strItemXml += '<QUANTITY>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'')		+ '</QUANTITY>'
 				Set @strItemXml += '<PO_UNIT>'		+ ISNULL(@strQuantityUOM,'')		+ '</PO_UNIT>'
 				Set @strItemXml += '<ORDERPR_UN>'	+ ISNULL(@strPriceUOM,'')			+ '</ORDERPR_UN>'
-				Set @strItemXml += '<NET_PRICE>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblUnitCashPrice * 1000)),'0.00')	+ '</NET_PRICE>'
+				Set @strItemXml += '<NET_PRICE>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblCashPrice * 1000)),'0.00')	+ '</NET_PRICE>'
 				Set @strItemXml += '<PRICE_UNIT>'	+ '1000'	+ '</PRICE_UNIT>'
 				If ISNULL(@dblCashPrice,0)=0
 					Set @strItemXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
@@ -343,10 +343,8 @@ Begin
 					Set @strItemXXml += '<ORDERPR_UN>'	+ 'X'		+ '</ORDERPR_UN>'
 				If @dblCashPrice IS NOT NULL
 					Set @strItemXXml += '<NET_PRICE>'	+ 'X'		+ '</NET_PRICE>'
-				If @dblUnitCashPrice IS NOT NULL
-					Set @strItemXXml += '<PRICE_UNIT>'	+ 'X'		+ '</PRICE_UNIT>'
-				--If ISNULL(@dblCashPrice,0)=0
-					Set @strItemXXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
+				Set @strItemXXml += '<PRICE_UNIT>'	+ 'X'		+ '</PRICE_UNIT>'
+				Set @strItemXXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
 				Set @strItemXXml += '<CONF_CTRL>'		+ 'X'	+ '</CONF_CTRL>'
 				If @strTerm IS NOT NULL
 					Set @strItemXXml += '<VEND_PART>'	+ ' '		+ '</VEND_PART>'
@@ -395,8 +393,7 @@ Begin
 					Set @strCondXXml += '<CURRENCY>'		+ 'X'		+ '</CURRENCY>'
 				If @strPriceUOM IS NOT NULL
 					Set @strCondXXml += '<COND_UNIT>'	+ 'X'		+ '</COND_UNIT>'
-				If @dblUnitCashPrice IS NOT NULL
-					Set @strCondXXml += '<COND_P_UNT>'	+ 'X'	+ '</COND_P_UNT>'
+				Set @strCondXXml += '<COND_P_UNT>'	+ 'X'	+ '</COND_P_UNT>'
 				Set @strCondXXml += '<CHANGE_ID>'		+ 'X'	+ '</CHANGE_ID>'
 				Set @strCondXXml += '</E1BPMEPOCONDX>'
 
@@ -431,6 +428,14 @@ Begin
 						Set @strTextXml += '<TEXT_LINE>'	+  '0' + '</TEXT_LINE>' 
 						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
 					End
+				End
+
+				If UPPER(@strCommodityCode)='TEA'
+				Begin
+						Set @strTextXml += '<E1BPMEPOTEXTHEADER>'
+						Set @strTextXml += '<TEXT_ID>'		+ 'L15' + '</TEXT_ID>' 
+						Set @strTextXml += '<TEXT_LINE>'	+  'N' + '</TEXT_LINE>' 
+						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
 				End
 			End
 
