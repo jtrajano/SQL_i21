@@ -22,10 +22,10 @@ StartTest (function (t) {
                 'NLTI - 01'
                 , 'Test Non Lotted Item Description'
                 , 4
-                , 'Category-1'
-                , 'Commodity-1'
-                , 'LB'
-                , 'LB'
+//                , 'Category-1'
+//                , 'Commodity-1'
+//                , 'LB'
+//                , 'LB'
                 , 10
                 , 10
                 , 40
@@ -39,10 +39,10 @@ StartTest (function (t) {
                 'LTI - 01'
                 , 'Test Lotted Item Description'
                 , 3
-                , 'Category-1'
-                , 'Commodity-1'
-                , 'LB'
-                , 'LB'
+//                , 'Category-1'
+//                , 'Commodity-1'
+//                , 'LB'
+//                , 'LB'
                 , 10
                 , 10
                 , 40

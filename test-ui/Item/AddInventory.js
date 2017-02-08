@@ -21,6 +21,7 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .verifyStatusMessage('Saved')
         .clickButton('Close')
+        .clickMenuFolder('Inventory','Folder')
         .displayText('===== Add Commodity Done =====')
         //endregion
 

@@ -3,23 +3,18 @@ StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
         //region PreCondition
-        .displayText('===== Pre-setup Add New Commodity =====')
-        .addFunction(function(next){
-            commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Commodity with UOM and No Attribute Setup')
-        })
-
         .displayText('===== Pre-setup Add New Lotted Item =====')
         //Add Lotted Item
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'SC - LTI - 01'
+                'SC - LTI - 15'
                 , 'Test Lotted Item For Other Charges'
                 , 3
-                , 'Grains'
-                , 'SC - Commodity - 01'
-                , 'LB'
-                , 'LB'
+//                , 'Grains'
+//                , 'SC - Commodity - 01'
+//                , 'LB'
+//                , 'LB'
                 , 10
                 , 10
                 , 40
@@ -33,10 +28,11 @@ StartTest (function (t) {
         .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
         .clickMenuScreen('Purchase Orders','Screen')
         .clickButton('New')
-        .waitUntilLoaded('appurchaseorder')
-        .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
         .waitUntilLoaded('')
-        .selectGridComboBoxRowValue('Items',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectComboBoxRowNumber('VendorId',1,0)
+//        .selectComboBoxRowValue('VendorId', 'Frito-Lay', 'VendorId',1)
+        .waitUntilLoaded('')
+        .selectGridComboBoxRowValue('Items',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('Items',1,'strUOM','LB','strUOM')
         .enterGridData('Items', 1, 'colQtyOrdered', '100')
         .verifyGridData('Items', 1, 'colTotal', '1000')
@@ -50,8 +46,8 @@ StartTest (function (t) {
         .displayText('=====  Checking Item Stock =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
@@ -75,7 +71,7 @@ StartTest (function (t) {
 
 //        .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
 //        .clickMenuScreen('Purchase Orders','Screen')
-//        .doubleClickSearchRowValue('ABC Trucking', 'strVendorName', 1)
+//        .doubleClickSearchRowValue('Frito-Lay', 'strVendorName', 1)
 //        .waitUntilLoaded()
 //        .clickButton('Process')
 //        .addResult('Processing PO to IR',3000)
@@ -86,13 +82,14 @@ StartTest (function (t) {
         .clickMenuScreen('Inventory Receipts','Screen')
         .clickButton('New')
         .selectComboBoxRowNumber('ReceiptType',2,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
+        .selectComboBoxRowNumber('Vendor',4,0)
+//        .selectComboBoxRowValue('Vendor', 'Frito-Lay', 'Vendor',1)
         .waitUntilLoaded()
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
         .waitUntilLoaded('')
-        .verifyData('Combo Box','Vendor','ABC Trucking')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'SC - LTI - 01')
+        .verifyData('Combo Box','Vendor','Frito-Lay')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'SC - LTI - 15')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -117,7 +114,7 @@ StartTest (function (t) {
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-012')
         .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
         .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
         .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
@@ -133,8 +130,8 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 2, 'colStockLocation', '0001 - Fort Wayne')
@@ -167,7 +164,7 @@ StartTest (function (t) {
 //        .waitUntilLoaded()
 //        .waitUntilLoaded('icinventoryreceipt')
 //        .addResult('Successfully Opened',4000)
-//        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'SC - LTI - 01')
+//        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'SC - LTI - 15')
 //        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
 //        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
 //        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
@@ -203,11 +200,11 @@ StartTest (function (t) {
 
 
         .selectComboBoxRowNumber('Customer',1,0)
-        //.selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
+        //.selectComboBoxRowValue('Customer', 'Frito-Lay', 'Customer',1)
         .enterData('Text Field','BOLNo','Test BOL - 01')
         .selectComboBoxRowNumber('FreightTerm',3,0)
         //.selectComboBoxRowValue('FreightTerm', 'Truck', 'FreightTerm',1)
-        .selectGridComboBoxRowValue('SalesOrder',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('SalesOrder',1,'strItemNo','SC - LTI - 15','strItemNo')
         .addResult('Item Selected',1500)
         .enterGridData('SalesOrder', 1, 'colOrdered', '20')
         .verifyGridData('SalesOrder', 1, 'colPrice', '14')
@@ -227,8 +224,8 @@ StartTest (function (t) {
         .displayText('=====  Checking Item Stock =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 2, 'colStockLocation', '0001 - Fort Wayne')
@@ -269,7 +266,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','Customer','Apple Spice Sales')
         .verifyData('Combo Box','FreightTerms','Truck')
 
-        .verifyGridData('InventoryShipment', 1, 'colItemNumber', 'SC - LTI - 01')
+        .verifyGridData('InventoryShipment', 1, 'colItemNumber', 'SC - LTI - 15')
         .verifyGridData('InventoryShipment', 1, 'colUOM', 'LB')
         .verifyGridData('InventoryShipment', 1, 'colUnitPrice', '14')
         .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
@@ -297,8 +294,8 @@ StartTest (function (t) {
         .displayText('=====  Checking Item Stock =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 2, 'colStockLocation', '0001 - Fort Wayne')
@@ -326,9 +323,9 @@ StartTest (function (t) {
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16050-0001-012')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '200')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
+//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0001-012')
         .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '200')
         .clickButton('Post')
         .waitUntilLoaded('')
@@ -343,8 +340,8 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 2, 'colStockLocation', '0001 - Fort Wayne')
@@ -392,8 +389,8 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 2, 'colStockLocation', '0001 - Fort Wayne')
@@ -427,7 +424,7 @@ StartTest (function (t) {
         //.selectComboBoxRowValue('ToLocation', '0001 - Fort Wayne', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -448,8 +445,8 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 2, 'colStockLocation', '0001 - Fort Wayne')
@@ -482,14 +479,14 @@ StartTest (function (t) {
         //.selectComboBoxRowValue('ToLocation', '0001 - Fort Wayne', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
         .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
         .verifyGridData('InventoryTransfer', 1, 'colAvailableQty', '70')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',2,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',2,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',2,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',2,'strFromStorageLocationName','RM Bin 1','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 2, 'colOwnershipType', 'Own')
@@ -511,7 +508,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('ToLocation',2,0)
         //.selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Bin 1','strFromStorageLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
@@ -533,8 +530,8 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 1, 'colStockLocation', '0002 - Indianapolis')
@@ -581,7 +578,7 @@ StartTest (function (t) {
         //.selectComboBoxRowValue('ToLocation', '0001 - Fort Wayne', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Bin 1','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -604,7 +601,7 @@ StartTest (function (t) {
         //.selectComboBoxRowValue('ToLocation', '0001 - Fort Wayne', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Indy','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','Indy Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -631,7 +628,7 @@ StartTest (function (t) {
         .clickCheckBox('ShipmentRequired', true)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Bin 1','strFromStorageLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
@@ -660,8 +657,8 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 1, 'colStockLocation', '0002 - Indianapolis')
@@ -704,13 +701,13 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('ReceiptType',3,0)
         .selectComboBoxRowNumber('Transferor',1,0)
         //.selectComboBoxRowValue('Transferor', '0001 - Fort Wayne', 'Transferor',0)
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
         .waitUntilLoaded('icinventoryreceipt')
         .verifyData('Combo Box','ReceiptType','Transfer Order')
         .verifyData('Combo Box','Transferor','0001 - Fort Wayne')
         .verifyData('Combo Box','Location','0002 - Indianapolis')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'SC - LTI - 01')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'SC - LTI - 15')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '2')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -757,8 +754,8 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 1, 'colStockLocation', '0002 - Indianapolis')
@@ -806,7 +803,7 @@ StartTest (function (t) {
         //.selectComboBoxRowValue('ToLocation', '0001 - Fort Wayne', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Bin 1','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -829,7 +826,7 @@ StartTest (function (t) {
         //.selectComboBoxRowValue('ToLocation', '0001 - Fort Wayne', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Indy','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','Indy Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -854,7 +851,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('AdjustmentType',1,0)
         .enterData('Text Field','Description','Test Quantity Change')
 
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
         .enterGridData('InventoryAdjustment', 1, 'colAdjustByQuantity', '5')
         .verifyGridData('InventoryAdjustment', 1, 'colUnitCost', '10')
@@ -863,9 +860,9 @@ StartTest (function (t) {
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '50')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16040-0001-000')
+//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16040-0001-000')
         .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '50')
         .clickButton('Post')
         .waitUntilLoaded('')
@@ -878,8 +875,8 @@ StartTest (function (t) {
          //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 1, 'colStockLocation', '0002 - Indianapolis')
@@ -915,7 +912,6 @@ StartTest (function (t) {
         .waitUntilLoaded()
 
 
-
         .displayText('===== Inventory Adjustment Decrease Stock of Lotted Item =====')
         .clickMenuScreen('Inventory Adjustments','Screen')
         .waitUntilLoaded()
@@ -925,7 +921,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('AdjustmentType',1,0)
         .enterData('Text Field','Description','Test Quantity Change')
 
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','SC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','SC - LTI - 15','strItemNo')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
         .enterGridData('InventoryAdjustment', 1, 'colAdjustByQuantity', '-5')
         .verifyGridData('InventoryAdjustment', 1, 'colUnitCost', '10')
@@ -934,9 +930,9 @@ StartTest (function (t) {
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '50')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16040-0001-000')
+//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16040-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '50')
         .clickButton('Post')
         .waitUntilLoaded('')
@@ -949,8 +945,8 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SC - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .doubleClickSearchRowValue('SC - LTI - 15', 'strItemNo', 1)
+        .waitUntilLoaded('')
         .clickTab('Stock')
         .waitUntilLoaded()
         .verifyGridData('Stock', 1, 'colStockLocation', '0002 - Indianapolis')
