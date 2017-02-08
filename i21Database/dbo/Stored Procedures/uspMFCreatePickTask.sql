@@ -4,6 +4,7 @@
 		@intEntityUserSecurityId INT,
 		@intAssigneeId INT = 0, 
 		@dtmReleaseDate NVARCHAR(32) = NULL
+		,@intItemId int=NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -17,7 +18,7 @@ BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @intDirectionId INT
 	DECLARE @intStatusId INT
-	DECLARE @intItemId INT
+	--DECLARE @intItemId INT
 	DECLARE @intCount INT
 	DECLARE @dblLotQty NUMERIC(18,6)
 	DECLARE @dblLotWeight NUMERIC(18,6)
@@ -33,6 +34,12 @@ BEGIN TRY
 		   @intToStorageLocationId = intStagingLocationId
 	FROM tblMFOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
+
+	SELECT 
+		   @intToStorageLocationId = IsNULL(intStagingLocationId,@intToStorageLocationId)
+	FROM tblMFOrderDetail
+	WHERE intOrderHeaderId = @intOrderHeaderId
+	and intItemId=@intItemId 
 
 	SELECT @intFromStorageLocationId = intStorageLocationId
 		  ,@dblLotQty = dblQty

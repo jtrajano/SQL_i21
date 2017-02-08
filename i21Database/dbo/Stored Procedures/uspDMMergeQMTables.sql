@@ -11,7 +11,7 @@ DECLARE @SQLString NVARCHAR(MAX) = '';
 
 BEGIN
 
-    -- tblQMTicketDiscount
+ -- tblQMTicketDiscount
     SET @SQLString = N'MERGE tblQMTicketDiscount AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblQMTicketDiscount]) AS Source
         ON (Target.intTicketDiscountId = Source.intTicketDiscountId)

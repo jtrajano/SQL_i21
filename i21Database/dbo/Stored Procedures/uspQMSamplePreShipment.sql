@@ -557,6 +557,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -595,6 +596,7 @@ BEGIN TRY
 		,''
 		,NULL
 		,PP.strIsMandatory
+		,NULL
 		,@intUserId
 		,@dtmCreated
 		,@intUserId

@@ -34,10 +34,11 @@ Declare @dtmDate DateTime
 Declare @intUserId Int
 Declare @strUserName NVARCHAR(100)
 Declare @intCountryId INT
+Declare @ysnDeleted bit
 
 DECLARE @tblEntityContactIdOutput table (intEntityId int)
 
-Select TOP 1 @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency,@strAccountNo=strAccountNo 
+Select TOP 1 @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency,@strAccountNo=strAccountNo,@ysnDeleted=ISNULL(ysnDeleted,0)
 From tblIPEntityStage Where strEntityType='Vendor'
 
 If ISNULL(@intStageEntityId,0)=0
@@ -140,7 +141,7 @@ Begin
 
 	--Ship Via
 	Insert Into tblSMShipVia(intEntityShipViaId,strShipVia,strShippingService,intSort)
-	Values(@intEntityId,@strVendorName,'None',0)
+	Values(@intEntityId,LEFT(@strVendorName + '[' + @strAccountNo + ']',100),'None',0)
 
 	--Add Audit Trail Record
 	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intEntityId) + '","keyValue":' + CONVERT(VARCHAR,@intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
@@ -157,6 +158,19 @@ Begin
 End
 Else
 Begin --Update
+	If @ysnDeleted=1
+		Begin
+			Update tblEMEntity Set ysnActive=0 Where intEntityId=@intEntityId
+			Update tblAPVendor Set ysnPymtCtrlActive=0,ysnDeleted=1 Where intEntityVendorId=@intEntityId
+
+			GOTO MOVE_TO_ARCHIVE
+		End
+	Else			
+		Begin
+			Update tblEMEntity Set ysnActive=1 Where intEntityId=@intEntityId
+			Update tblAPVendor Set ysnPymtCtrlActive=1,ysnDeleted=0 Where intEntityVendorId=@intEntityId
+		End
+
 	Select TOP 1 @intEntityLocationId=intEntityLocationId From tblEMEntityLocation Where intEntityId=@intEntityId
 
 	Select @strAddress=strAddress,@strAddress1=strAddress1,@strCity=strCity,@strCountry=strCountry,@strZipCode=strZipCode,
@@ -243,9 +257,11 @@ Begin --Update
 	on t1.intRowNo=t2.intRowNo
 End
 
+	MOVE_TO_ARCHIVE:
+
 	--Move to Archive
-	Insert into tblIPEntityArchive(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName)
-	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName
+	Insert into tblIPEntityArchive(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName)
+	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
@@ -269,8 +285,8 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	--Move to Error
-	Insert into tblIPEntityError(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus)
-	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,dtmCreated,strCreatedUserName,@ErrMsg,'Failed'
+	Insert into tblIPEntityError(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus)
+	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,@ErrMsg,'Failed'
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intNewStageEntityId=SCOPE_IDENTITY()

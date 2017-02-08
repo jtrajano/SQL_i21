@@ -4,7 +4,8 @@
 					@intEntityUserSecurityId INT, 
 					@dblSplitAndPickWeight DECIMAL(24, 10), 
 					@intTaskTypeId INT, 
-					@intAssigneeId INT = 0
+					@intAssigneeId INT = 0,
+				    @intItemId int=NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -18,7 +19,7 @@ BEGIN TRY
 	DECLARE @dblLotWeight AS NUMERIC(18, 6)
 	DECLARE @intWeightUOMId INT
 	DECLARE @intDirectionId INT
-	DECLARE @intItemId INT
+	--DECLARE @intItemId INT
 	DECLARE @intStatusId INT
 	DECLARE @dtmReleaseDate DATETIME
 	DECLARE @dblSplitAndPickQty NUMERIC(18,6)
@@ -29,6 +30,12 @@ BEGIN TRY
 	       @intToStorageLocationId = intStagingLocationId
 	FROM tblMFOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
+
+	SELECT 
+		  @intToStorageLocationId = IsNULL(intStagingLocationId,@intToStorageLocationId)
+	FROM tblMFOrderDetail
+	WHERE intOrderHeaderId = @intOrderHeaderId
+	and intItemId=@intItemId
 
 	SELECT @dblSplitAndPickQty = @dblSplitAndPickWeight/(Case When dblWeightPerQty=0 Then 1 Else dblWeightPerQty End)
 		  ,@intItemUOMId = intItemUOMId

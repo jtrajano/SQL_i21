@@ -18,4 +18,5 @@
 	,[intLineNo]						INT
 	,[intSanitizationOrderDetailsId]	INT
 	,[strLineItemNote]					NVARCHAR(MAX)
+	,intStagingLocationId				int
 	,[strLastUpdateBy]					NVARCHAR(100))

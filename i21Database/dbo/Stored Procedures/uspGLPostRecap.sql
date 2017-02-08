@@ -1,8 +1,5 @@
 ﻿CREATE PROCEDURE uspGLPostRecap
 	@RecapTable RecapTableType READONLY 
-	,@intTransactionId AS INT
-	,@strTransactionId AS NVARCHAR(50)
-	,@strCode AS NVARCHAR(50)
 	,@intEntityUserSecurityId AS INT = NULL 
 AS
 
@@ -12,6 +9,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 --SET ANSI_WARNINGS OFF
 
+DECLARE @intTransactionId INT , @strTransactionId NVARCHAR(50)
+SELECT TOP 1 @intTransactionId = intTransactionId, 
+	@strTransactionId = strTransactionId FROM @RecapTable 
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
 DELETE	FROM tblGLPostRecap 
 WHERE	strTransactionId = @strTransactionId
@@ -39,6 +39,8 @@ INSERT INTO tblGLPostRecap (
 		,[strAccountGroup]
 		,[dblDebit]
 		,[dblCredit]
+		,[dblDebitForeign]
+		,[dblCreditForeign]
 		,[dblDebitUnit]
 		,[dblCreditUnit]
 		,[strDescription]
@@ -72,6 +74,13 @@ SELECT	[dtmDate]
 		,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 										WHEN [dblCredit] < 0 THEN 0
 										ELSE [dblCredit] END	
+		,[dblDebitForeign]		= CASE	WHEN [dblCreditForeign] < 0 THEN ABS([dblCreditForeign])
+										WHEN [dblDebitForeign] < 0 THEN 0
+										ELSE [dblDebitForeign] END 
+								
+		,[dblCreditForeign]		= CASE	WHEN [dblDebitForeign] < 0 THEN ABS([dblDebitForeign])
+										WHEN [dblCreditForeign] < 0 THEN 0
+										ELSE [dblCreditForeign] END
 		,[dblDebitUnit]			= ISNULL(udtRecap.[dblDebitUnit], 0)
 		,[dblCreditUnit]		= ISNULL(udtRecap.[dblCreditUnit], 0)
 		,[strDescription] = udtRecap.strDescription

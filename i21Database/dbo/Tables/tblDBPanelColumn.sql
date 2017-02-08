@@ -27,6 +27,7 @@
     [intCannedPanelId] INT NOT NULL DEFAULT ((0)), 
     [strDataType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strDrillDownScreenName] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
+	[strDrillDownScreenKey] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_dbo.tblDBPanelColumn] PRIMARY KEY CLUSTERED ([intPanelColumnId] ASC),
     CONSTRAINT [FK_dbo.tblDBPanelColumn_dbo.tblDBPanel_intPanelID] FOREIGN KEY ([intPanelId]) REFERENCES [dbo].[tblDBPanel] ([intPanelId]) ON DELETE CASCADE
 );

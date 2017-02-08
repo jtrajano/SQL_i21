@@ -48,6 +48,9 @@ BEGIN TRY
 		,@intProductId INT
 		,@intSubstituteItemId INT
 		,@intSubstituteItemUOMId INT
+		,@intPMCategoryId int
+		,@intPMStageLocationId int
+		,@intStagingLocationId int
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -117,6 +120,10 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
 
+	Select @intPMCategoryId=intCategoryId 
+	From tblICCategory
+	Where strCategoryCode =@strPackagingCategory
+
 	SELECT @intBlendProductionStagingUnitId = intBlendProductionStagingUnitId
 	FROM tblSMCompanyLocation
 	WHERE intCompanyLocationId = @intLocationId
@@ -168,6 +175,12 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intStagingId
 
+	SELECT @intPMStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 90--PM Staging Location
+
 	DECLARE @tblMFStageLocation TABLE (intStageLocationId INT)
 
 	INSERT INTO @tblMFStageLocation
@@ -183,6 +196,8 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 76
+	UNION
+	SELECT @intPMStageLocationId
 
 	BEGIN TRANSACTION
 
@@ -306,6 +321,7 @@ BEGIN TRY
 			,intLineNo
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
+			,intStagingLocationId
 			)
 		SELECT @intOrderHeaderId
 			,ri.intItemId
@@ -338,6 +354,7 @@ BEGIN TRY
 				)
 			,NULL
 			,''
+			,Case When C.intCategoryId=@intPMCategoryId Then @intPMStageLocationId Else NULL End
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.ysnActive = 1
@@ -360,7 +377,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId = 1
+			AND ri.intConsumptionMethodId in (1,2)
 
 		DECLARE @tblMFRequiredQty TABLE (
 			intItemId INT
@@ -447,6 +464,7 @@ BEGIN TRY
 			,intLineNo
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
+			,intStagingLocationId 
 			)
 		SELECT intOrderHeaderId
 			,intItemId
@@ -462,6 +480,7 @@ BEGIN TRY
 			,intLineNo
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
+			,intStagingLocationId 
 		FROM @OrderDetail
 
 		SELECT @dblMinQtyCanBeProduced = - 1
@@ -475,11 +494,13 @@ BEGIN TRY
 				,@dblQty = NULL
 				,@dblRequiredQty = NULL
 				,@intItemUOMId = NULL
+				,@intStagingLocationId=NULL
 
 			SELECT @intItemId = intItemId
 				,@dblQty = dblQty
 				,@dblRequiredQty = dblQty
 				,@intItemUOMId = intItemUOMId
+				,@intStagingLocationId =intStagingLocationId 
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
@@ -605,6 +626,7 @@ BEGIN TRY
 							,intLineNo
 							,intSanitizationOrderDetailsId
 							,strLineItemNote
+							,intStagingLocationId
 							)
 						SELECT @intOrderHeaderId
 							,intItemId
@@ -625,6 +647,7 @@ BEGIN TRY
 								)
 							,NULL
 							,''
+							,@intStagingLocationId
 						FROM tblICItem
 						WHERE intItemId = @intSubstituteItemId
 
@@ -648,6 +671,7 @@ BEGIN TRY
 							,intLineNo
 							,intSanitizationOrderDetailsId
 							,strLineItemNote
+							,intStagingLocationId
 							)
 						SELECT @intOrderHeaderId
 							,intItemId
@@ -668,6 +692,7 @@ BEGIN TRY
 								)
 							,NULL
 							,''
+							,@intStagingLocationId
 						FROM tblICItem
 						WHERE intItemId = @intSubstituteItemId
 

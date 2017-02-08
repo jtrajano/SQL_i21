@@ -29,11 +29,36 @@ DECLARE @totalRecords INT
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @error NVARCHAR(200)
 
+--=====================================================================================================================================
+--  VALIDATE REFUND DETAILS
+---------------------------------------------------------------------------------------------------------------------------------------
+IF(@ysnPosted = 1)
+BEGIN
+	DECLARE  @validateRefundCustomer TABLE(
+		[intRefundCustomerId] INT,
+		[intCustomerVolumeId] INT
+	)
+
+	INSERT INTO @validateRefundCustomer
+	SELECT	RC.intRefundCustomerId,
+			CV.intCustomerVolumeId
+	FROM tblPATRefundCustomer RC
+	INNER JOIN tblPATRefund R
+		ON R.intRefundId = RC.intRefundId
+	INNER JOIN tblPATCustomerVolume CV
+		ON CV.intRefundCustomerId = RC.intRefundCustomerId
+
+	IF EXISTS(SELECT 1 FROM @validateRefundCustomer)
+	BEGIN
+		SET @error = 'There are volumes that were already processed which made the record obsolete. Please delete this refund record.';
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback
+	END
+END
 
 --=====================================================================================================================================
 --  GET REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
-
 SELECT R.intRefundId, 
 		R.intFiscalYearId, 
 		R.dtmRefundDate, 
@@ -212,10 +237,29 @@ END CATCH
 --=====================================================================================================================================
 -- 	UPDATE CUSTOMER VOLUME TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
+	IF(@ysnPosted = 1)
+	BEGIN
+		UPDATE CV
+		SET CV.intRefundCustomerId = tRD.intRefundCustomerId
+		FROM tblPATCustomerVolume CV
+		INNER JOIN #tmpRefundData tRD
+			ON CV.intCustomerPatronId = tRD.intCustomerId AND CV.intFiscalYear = tRD.intFiscalYearId 
+		WHERE CV.ysnRefundProcessed = 0 AND CV.intRefundCustomerId IS NULL
+	END
+	ELSE
+	BEGIN
+		UPDATE CV
+		SET CV.intRefundCustomerId = null
+		FROM tblPATCustomerVolume CV
+		INNER JOIN #tmpRefundData tRD
+			ON CV.intRefundCustomerId = tRD.intRefundCustomerId
+	END
 
 	UPDATE tblPATCustomerVolume
 	SET ysnRefundProcessed = @ysnPosted
 	WHERE intFiscalYear = @intFiscalYearId AND intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
+	
+
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 

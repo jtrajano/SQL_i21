@@ -1,22 +1,23 @@
 ﻿CREATE VIEW [dbo].[vyuEMEntityTransaction]
 	AS 
 	select 	 
-		intEntityId = intEntityCustomerId,
+		intEntityId = a.intEntityCustomerId,
 		strBillId = '' COLLATE Latin1_General_CI_AS,
-		strTransactionNumber = strTransactionNumber COLLATE Latin1_General_CI_AS,
-		strTransactionType = strTransactionType COLLATE Latin1_General_CI_AS,
-		dblTransactionTotal,
-		dblAmountPaid,
-		dblAmountDue,
-		ysnPaid = Cast(ysnPaid as bit),
-		strEntityNo = strCustomerNumber COLLATE Latin1_General_CI_AS,
-		dtmDate = dtmDate,
+		strTransactionNumber = a.strTransactionNumber COLLATE Latin1_General_CI_AS,
+		strTransactionType = a.strTransactionType COLLATE Latin1_General_CI_AS,
+		a.dblTransactionTotal,
+		a.dblAmountPaid,
+		a.dblAmountDue,
+		ysnPaid = Cast(a.ysnPaid as bit),
+		strEntityNo = a.strCustomerNumber COLLATE Latin1_General_CI_AS,
+		dtmDate = a.dtmDate,
 		strPaymentInfo = null,
 		intPaymentId = null	,
 		intTransactionId = null,
 		dtmDatePaid = null
-
-	from vyuARCustomerHistory where strTransactionType <> 'CF Trans'
+	from vyuARCustomerHistory a	
+		left join tblARInvoice b on a.strTransactionNumber = b.strInvoiceNumber
+			where (b.intInvoiceId is null or  b.strType <> 'CF Tran') and a.intEntityCustomerId = 74
 	union
 	select 
 		intEntityId = intEntityVendorId,

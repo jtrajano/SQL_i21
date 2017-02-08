@@ -454,7 +454,37 @@ BEGIN
 							CASE	
 									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
 										-- Convert the Cost UOM to Gross/Net UOM. 
-										dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+
+										CASE	-- When item is NOT a Lot, use the cost line item. 
+												WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+
+													dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+													
+												--------------------------------------------------------------------------------------------------------
+												-- Cleaned weight scenario. 
+												--------------------------------------------------------------------------------------------------------
+												-- When item is a LOT, recalculate the cost. 
+												-- Below is an example: 
+												-- 1. Receive a stock at $1/LB. Net weight received is 100lb. So this means line total is $100. $1 x $100 = $100. 
+												-- 2. Lot can be cleaned. So after a lot is cleaned, net weight on lot level is reduced to 80 lb. 
+												-- 3. Value of the line total will still remain at $100. 
+												-- 4. So this means, cost needs to be changed from $1/LB to $1.25/LB.
+												-- 5. Receiving 80lbs @ $1.25/lb is $100. This will match the value of the line item with the lot item. 
+												ELSE 
+													dbo.fnDivide(
+														dbo.fnMultiply(
+															dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+															, ISNULL(DetailItem.dblNet, 0)
+														)
+														,
+														CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+																	dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+																-- Calculate the Net Qty
+																ELSE 
+																	ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+														END 
+													)
+										END 
 										+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 
 									-- If Gross/Net UOM is missing, 
@@ -809,7 +839,37 @@ BEGIN
 							CASE	
 									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
 										-- Convert the Cost UOM to Gross/Net UOM. 
-										dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+
+										CASE	-- When item is NOT a Lot, use the cost line item. 
+												WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+
+													dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+													
+												--------------------------------------------------------------------------------------------------------
+												-- Cleaned weight scenario. 
+												--------------------------------------------------------------------------------------------------------
+												-- When item is a LOT, recalculate the cost. 
+												-- Below is an example: 
+												-- 1. Receive a stock at $1/LB. Net weight received is 100lb. So this means line total is $100. $1 x $100 = $100. 
+												-- 2. Lot can be cleaned. So after a lot is cleaned, net weight on lot level is reduced to 80 lb. 
+												-- 3. Value of the line total will still remain at $100. 
+												-- 4. So this means, cost needs to be changed from $1/LB to $1.25/LB.
+												-- 5. Receiving 80lbs @ $1.25/lb is $100. This will match the value of the line item with the lot item. 
+												ELSE 
+													dbo.fnDivide(
+														dbo.fnMultiply(
+															dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+															, ISNULL(DetailItem.dblNet, 0)
+														)
+														,
+														CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+																	dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+																-- Calculate the Net Qty
+																ELSE 
+																	ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+														END 
+													)
+										END 
 										+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 
 									-- If Gross/Net UOM is missing, 
@@ -1197,9 +1257,6 @@ BEGIN
 	ROLLBACK TRAN @TransactionName
 	EXEC dbo.uspGLPostRecap 
 			@GLEntries
-			,@intTransactionId
-			,@strTransactionId
-			,'IC'
 			,@intEntityUserSecurityId
 	COMMIT TRAN @TransactionName
 END 

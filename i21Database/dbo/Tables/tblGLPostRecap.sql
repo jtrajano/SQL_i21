@@ -7,6 +7,8 @@ CREATE TABLE [dbo].[tblGLPostRecap](
     [strAccountGroup]           NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [dblDebit]                  NUMERIC (18, 6)  NULL,
     [dblCredit]                 NUMERIC (18, 6)  NULL,
+	[dblDebitForeign]                  NUMERIC (18, 6)  NULL,
+    [dblCreditForeign]                 NUMERIC (18, 6)  NULL,
     [dblDebitUnit]              NUMERIC (18, 6)  NULL,
     [dblCreditUnit]             NUMERIC (18, 6)  NULL,
     [strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,

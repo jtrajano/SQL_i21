@@ -234,14 +234,14 @@ GO
 				[strType]			=        N'Transaction',
 				[strMessage]		=        N'{0} {1} {2} unapproved.',
 				[strQuery]			=        N'SELECT intTransactionId 
-												 FROM tblSMApproval A
-												 WHERE  A.ysnCurrent = 1 AND 
-														A.strStatus IN (''Waiting for Approval'') AND
-														(
-															A.intApproverId = {0} 
-															OR 
-															{0} IN (select intEntityUserSecurityId from tblSMApproverGroupUserSecurity WHERE intApproverGroupId = A.intApproverGroupId)
-														)',
+												FROM tblSMApproval A
+												WHERE  A.ysnCurrent = 1 AND 
+													A.strStatus IN (''Waiting for Approval'') AND
+													(
+														A.intApproverId = {0}
+														OR 
+														{0} IN (select intApproverId from tblSMApproverConfigurationForApprovalGroup where intApprovalId = A.intApprovalId)
+													)',
 				[strNamespace]		=        N'i21.view.Approval?activeTab=Pending',
 				[intSort]			=        11
 	END
@@ -249,14 +249,14 @@ GO
 	BEGIN
 		UPDATE [tblSMReminderList]
 		SET	[strQuery] =        N'SELECT intTransactionId 
-                                 FROM tblSMApproval A
-                                 WHERE  A.ysnCurrent = 1 AND 
-										A.strStatus IN (''Waiting for Approval'') AND
-										(
-											A.intApproverId = {0} 
-											OR 
-											{0} IN (select intEntityUserSecurityId from tblSMApproverGroupUserSecurity WHERE intApproverGroupId = A.intApproverGroupId)
-										)'
+												FROM tblSMApproval A
+												WHERE  A.ysnCurrent = 1 AND 
+													A.strStatus IN (''Waiting for Approval'') AND
+													(
+														A.intApproverId = {0}
+														OR 
+														{0} IN (select intApproverId from tblSMApproverConfigurationForApprovalGroup where intApprovalId = A.intApprovalId)
+													)'
 		WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction'
 	END
 
@@ -613,6 +613,29 @@ BEGIN
 	UPDATE [tblSMReminderList]
 	SET	[strMessage] = N'{0} {1} {2} unconfirmed.'
 	WHERE [strReminder] = N'Empty' AND [strType] = N'Contract' 
+END
+
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unsigned' AND [strType] = N'Contract')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT [strReminder]        =        N'Unsigned',
+			[strType]        	=        N'Contract',
+			[strMessage]		=        N'{0} {1} {2} Unsigned.',
+			[strQuery]  		=        N'	SELECT	intContractHeaderId 
+											FROM	tblCTContractHeader CH,	
+													tblCTEvent EV											
+											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+											WHERE	ISNULL(ysnSigned,0) = 0 AND EV.strEventName = ''Unsigned Contract Alert'' AND ER.intEntityId = {0}
+											',
+			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Unsigned', 
+			[intSort]            =        20
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strMessage] = N'{0} {1} {2} Unsigned.'
+	WHERE [strReminder] = N'Unsigned' AND [strType] = N'Contract' 
 END
 
 GO

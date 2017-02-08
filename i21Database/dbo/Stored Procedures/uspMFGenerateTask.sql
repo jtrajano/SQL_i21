@@ -833,6 +833,7 @@ BEGIN TRY
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@dblSplitAndPickWeight = @dblRequiredWeight
 						,@intTaskTypeId = 2
+						,@intItemId=@intItemId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 
@@ -847,6 +848,7 @@ BEGIN TRY
 					EXEC [uspMFCreatePickTask] @intOrderHeaderId = @intOrderHeaderId
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
+						,@intItemId=@intItemId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
 
@@ -869,6 +871,7 @@ BEGIN TRY
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
 							,@dblSplitAndPickWeight = @dblRemainingLotWeight
 							,@intTaskTypeId = 2
+							,@intItemId=@intItemId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 					END
@@ -879,6 +882,7 @@ BEGIN TRY
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
 							,@dblSplitAndPickWeight = @dblRequiredWeight
 							,@intTaskTypeId = 2
+							,@intItemId=@intItemId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
 					END
