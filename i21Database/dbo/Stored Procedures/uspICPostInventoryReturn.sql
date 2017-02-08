@@ -3,6 +3,7 @@
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -36,8 +37,7 @@ DECLARE @INVENTORY_RETURN_TYPE AS INT = 42
 		,@RECEIPT_TYPE_INVENTORY_RETURN AS NVARCHAR(50) = 'Inventory Return'
 
 -- Posting variables
-DECLARE @strBatchId AS NVARCHAR(40) 
-		,@strItemNo AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT
 		,@ysnAllowBlankGLEntries AS BIT = 1
 
@@ -242,7 +242,8 @@ BEGIN
 END
 
 -- Get the next batch number
-BEGIN 
+BEGIN	
+	SET @strBatchId = NULL 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
 	IF @@ERROR <> 0 GOTO Post_Exit;
 END
@@ -1010,7 +1011,9 @@ END
 IF @ysnRecap = 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspCMPostRecap @GLEntries
+	EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityUserSecurityId
 	COMMIT TRAN @TransactionName
 END 
 
