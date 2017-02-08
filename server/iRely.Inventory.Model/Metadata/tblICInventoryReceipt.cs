@@ -451,6 +451,39 @@ namespace iRely.Inventory.Model
                 _uom = value;
             }
         }
+
+        private int? _uomId;
+        [NotMapped]
+        public int? intItemUOMId
+        {
+            get
+            {
+                if (vyuICInventoryReceiptItemLookUp != null)
+                    return vyuICInventoryReceiptItemLookUp.intItemUOMId;
+                return null;
+            }
+            set
+            {
+                this._uomId = value;
+            }
+        }
+
+        private int? _uomDecimals;
+        [NotMapped]
+        public int? intItemUOMDecimalPlaces
+        {
+            get
+            {
+                if (vyuICInventoryReceiptItemLookUp != null)
+                    return vyuICInventoryReceiptItemLookUp.intItemUOMDecimalPlaces;
+                return null;
+            }
+            set
+            {
+                this._uomDecimals = value;
+            }
+        }
+
         private string _uomType;
         [NotMapped]
         public string strUnitType
@@ -1047,6 +1080,8 @@ namespace iRely.Inventory.Model
         public string strPricingType { get; set; }
         public string strTaxGroup { get; set; }
         public string strForexRateType { get; set; }
+        public int? intItemUOMId { get; set; }
+        public int? intItemUOMDecimalPlaces { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

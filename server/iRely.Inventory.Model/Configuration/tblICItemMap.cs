@@ -525,6 +525,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost").HasPrecision(38, 20);
             this.Property(t => t.dblEndMonthCost).HasColumnName("dblEndMonthCost").HasPrecision(38, 20);
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intDecimalPlaces).HasColumnName("intDecimalPlaces");
         }
     }
 
