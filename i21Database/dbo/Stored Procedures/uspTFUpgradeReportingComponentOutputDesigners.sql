@@ -29,43 +29,38 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCOD.strFormCode COLLATE Latin1_General_CI_AS
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCOD.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = RCOD.strType COLLATE Latin1_General_CI_AS
+	ORDER BY RCOD.intScheduleColumnId
 
-	MERGE	
-	INTO	tblTFReportingComponentField
-	WITH	(HOLDLOCK) 
-	AS		TARGET
-	USING (
-		SELECT * FROM #tmpRCOD
-	) AS SOURCE
-		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
-			AND TARGET.strColumn = SOURCE.strColumn
+	UPDATE tblTFReportingComponentField
+	SET intReportingComponentId	= SOURCE.intReportingComponentId
+		, strColumn				= SOURCE.strColumn
+		, strCaption			= SOURCE.strCaption
+		, strFormat				= SOURCE.strFormat
+		, strFooter				= SOURCE.strFooter
+		, intWidth				= SOURCE.intWidth
+	FROM #tmpRCOD SOURCE
+	WHERE tblTFReportingComponentField.intReportingComponentId = SOURCE.intReportingComponentId
+		AND tblTFReportingComponentField.strColumn = SOURCE.strColumn
 
-	WHEN MATCHED THEN 
-		UPDATE
-		SET 
-			intReportingComponentId	= SOURCE.intReportingComponentId
-			, strColumn				= SOURCE.strColumn
-			, strCaption			= SOURCE.strCaption
-			, strFormat				= SOURCE.strFormat
-			, strFooter				= SOURCE.strFooter
-			, intWidth				= SOURCE.intWidth
-	WHEN NOT MATCHED BY TARGET THEN 
-		INSERT (
-			intReportingComponentId
-			, strColumn
-			, strCaption
-			, strFormat
-			, strFooter
-			, intWidth
-		)
-		VALUES (
-			SOURCE.intReportingComponentId
-			, SOURCE.strColumn
-			, SOURCE.strCaption
-			, SOURCE.strFormat
-			, SOURCE.strFooter
-			, SOURCE.intWidth
-		);
+	INSERT INTO tblTFReportingComponentField(
+		intReportingComponentId
+		, strColumn
+		, strCaption
+		, strFormat
+		, strFooter
+		, intWidth
+	)
+	SELECT SOURCE.intReportingComponentId
+		, SOURCE.strColumn
+		, SOURCE.strCaption
+		, SOURCE.strFormat
+		, SOURCE.strFooter
+		, SOURCE.intWidth
+	FROM #tmpRCOD SOURCE
+	LEFT JOIN tblTFReportingComponentField TARGET ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
+		AND TARGET.strColumn = SOURCE.strColumn
+	WHERE ISNULL(TARGET.intReportingComponentFieldId, '') = ''
+	ORDER BY SOURCE.intScheduleColumnId
 
 	-- Delete existing Reporting Component Output Designers that is not within Source
 	DELETE FROM tblTFReportingComponentField

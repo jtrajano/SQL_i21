@@ -8,7 +8,7 @@
 	[intConcurrencyId] INT NULL DEFAULT((1)),
 	CONSTRAINT [PK_tblTFFilingPacket] PRIMARY KEY CLUSTERED([intFilingPacketId]),
 	CONSTRAINT [FK_tblTFFilingPacket_tblTFTaxAuthority] FOREIGN KEY([intTaxAuthorityId]) REFERENCES [tblTFTaxAuthority] ([intTaxAuthorityId]),
-	CONSTRAINT [FK_tblTFFilingPacket_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [tblTFReportingComponent] ([intReportingComponentId])
+	CONSTRAINT [FK_tblTFFilingPacket_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [tblTFReportingComponent] ([intReportingComponentId]) ON DELETE CASCADE
 )
 
 GO
