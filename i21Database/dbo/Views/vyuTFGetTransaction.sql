@@ -79,4 +79,4 @@ LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Trans.in
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Trans.intProductCodeId
 LEFT JOIN tblICItem Item ON Item.intItemId = Trans.intItemId
 LEFT JOIN vyuTFGetTransactionException Exception ON Exception.intTransactionId = Trans.intTransactionId
-WHERE Exception.ysnDeleted != 1
+WHERE ISNULL(Exception.ysnDeleted, 0) != 1
