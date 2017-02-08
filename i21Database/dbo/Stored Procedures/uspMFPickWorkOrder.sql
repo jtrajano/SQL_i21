@@ -72,6 +72,8 @@ BEGIN TRY
 		,@intLotCodeNoOfDigits INT
 		,@dblLowerToleranceReqQty NUMERIC(18, 6)
 		,@intLotItemId INT
+		,@intPMCategoryId int
+		,@intPMStageLocationId int
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
@@ -139,6 +141,12 @@ BEGIN TRY
 			AND intAttributeId = @intProductionStagingId
 	END
 
+	SELECT @intPMStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 90--PM Staging Location
+
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Is Yield Adjustment Allowed'
@@ -165,6 +173,10 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
+
+	Select @intPMCategoryId=intCategoryId 
+	From tblICCategory
+	Where strCategoryCode =@strPackagingCategory
 
 	IF @intTransactionCount = 0
 		BEGIN TRAN
@@ -501,7 +513,7 @@ BEGIN TRY
 				AND IU.ysnStockUnit = 1
 			WHERE S.intItemId = @intItemId
 				AND IL.intLocationId = @intLocationId
-				AND S.intStorageLocationId = (
+				AND (S.intStorageLocationId = (
 					CASE 
 						WHEN @intConsumptionMethodId = 1
 							THEN ISNULL(@intProductionStageLocationId, S.intStorageLocationId)
@@ -509,6 +521,16 @@ BEGIN TRY
 							THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
 						ELSE S.intStorageLocationId
 						END
+					) or 
+					S.intStorageLocationId = (
+					CASE 
+						WHEN @intConsumptionMethodId = 1
+							THEN ISNULL(@intPMStageLocationId, S.intStorageLocationId)
+						WHEN @intConsumptionMethodId = 2
+							THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
+						ELSE S.intStorageLocationId
+						END
+					)
 					)
 				AND S.dblOnHand - S.dblUnitReserved > 0
 		END
@@ -611,7 +633,7 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND L.intStorageLocationId = (
+					AND (L.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
 								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
@@ -619,7 +641,15 @@ BEGIN TRY
 								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 							ELSE L.intStorageLocationId
 							END
-						)
+						) OR L.intStorageLocationId = (
+						CASE 
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+							ELSE L.intStorageLocationId
+							END
+						))
 					AND L.dblQty > 0
 				ORDER BY CASE 
 						WHEN @ysnPickByLotCode = 0
@@ -718,7 +748,7 @@ BEGIN TRY
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND L.intStorageLocationId = (
+				AND (L.intStorageLocationId = (
 					CASE 
 						WHEN @intConsumptionMethodId = 1
 							THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
@@ -726,7 +756,16 @@ BEGIN TRY
 							THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 						ELSE L.intStorageLocationId
 						END
-					)
+					) or L.intStorageLocationId = (
+					CASE 
+						WHEN @intConsumptionMethodId = 1
+							THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+						WHEN @intConsumptionMethodId = 2
+							THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+						ELSE L.intStorageLocationId
+						END
+					))
+
 				AND L.dblQty > 0
 			ORDER BY CASE 
 					WHEN @ysnPickByLotCode = 0
@@ -829,7 +868,7 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND L.intStorageLocationId = (
+					AND (L.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
 								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
@@ -837,7 +876,16 @@ BEGIN TRY
 								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 							ELSE L.intStorageLocationId
 							END
-						)
+						) or
+						L.intStorageLocationId = (
+						CASE 
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+							ELSE L.intStorageLocationId
+							END
+						))
 					AND L.dblQty = 0
 				ORDER BY IsNULL(L.dtmManufacturedDate, L.dtmDateCreated) DESC
 
@@ -1135,7 +1183,7 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND L.intStorageLocationId = (
+					AND (L.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
 								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
@@ -1143,6 +1191,15 @@ BEGIN TRY
 								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 							ELSE L.intStorageLocationId
 							END
+						) or L.intStorageLocationId = (
+						CASE 
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+							ELSE L.intStorageLocationId
+							END
+						)
 						)
 					AND L.dblQty > 0
 				ORDER BY CASE 
