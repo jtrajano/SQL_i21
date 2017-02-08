@@ -14,7 +14,8 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         'Inventory.store.BufferedItemStockUOMView',
         'Inventory.store.BufferedLot',
         'i21.store.CompanyLocationBuffered',
-        'i21.store.CompanyLocationSubLocationBuffered'
+        'i21.store.CompanyLocationSubLocationBuffered',
+        'Inventory.store.BufferedItemStockUOMForAdjustmentView'
     ],
 
     stores: {
@@ -37,7 +38,8 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             type: 'icbufferedstoragelocation'
         },
         itemUOM: {
-            type: 'icbuffereditemunitmeasure'
+            //type: 'icbuffereditemunitmeasure'
+             type: 'icbuffereditemstockuomforadjustmentview'
         },
         status: {
             autoLoad: true,

@@ -247,12 +247,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                                 conjunction: 'and',
                                 condition: 'gt'
                             },
-                            {
+                           /* {
                                 column: 'ysnStockUnit',
                                 value: true,
                                 conjunction: 'and',
                                 condition: 'eq'
-                            }
+                            }*/
                         ]
                     }
                 },
@@ -360,11 +360,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                                 value: '{grdPhysicalCount.selection.intItemId}',
                                 conjunction: 'and'
                             },
-                            
                             {
                                 column: 'intLocationId',
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'dblOnHand',
+                                value: 0,
+                                conjunction: 'and',
+                                condition: 'noteq'
                             }
                         ]
                     }
@@ -1068,6 +1073,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         if (records.length <= 0)
             return;
 
+        var win = combo.up('window');
         var grid = combo.up('grid');
         var plugin = grid ? grid.getPlugin('cepPhysicalCount') : null;
         var current = plugin ? plugin.getActiveRecord() : null;
@@ -1085,13 +1091,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('dblSystemCount', null);
                     current.set('intItemUOMId', records[0].get('intStockUOMId'));
                     current.set('strUnitMeasure', records[0].get('strStockUOM'));
-                    me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
+                    /*me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
                         if (err) {
                             iRely.Functions.showErrorDialog(val);
                         } else {
                             current.set('dblSystemCount', val);
                         }
-                    });
+                    });*/
+                    me.getStockQuantity(current, win);
                     if (current.get('strCountLine') === '' || current.get('strCountLine') === null) {
                         var win = combo.up('window');
                         var currentItems = win.viewModel.data.current;
@@ -1126,15 +1133,26 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
                     current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
+                    current.set('intItemUOMId', records[0].get('intItemUOMId'));
+                    current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
                     break;
                 case 'cboStorageLocation':
                     current.set('strSubLocationName', records[0].get('strSubLocationName'));
                     current.set('intSubLocationId', records[0].get('intSubLocationId'));
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
+                    current.set('intItemUOMId', records[0].get('intItemUOMId'));
+                    current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
                     break;
                 case 'cboLotNo':
                     current.set('strLotAlias', records[0].get('strLotAlias'));
                     current.set('dblSystemCount', records[0].get('dblQty'));
+                    break;
+                case 'cboUOM':
+                    current.set('dblSystemCount', records[0].get('dblOnHand'));
+                    current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
+                    current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+                    current.set('strSubLocationName', records[0].get('strSubLocationName'));
+                    current.set('intSubLocationId', records[0].get('intSubLocationId'));
                     break;
             }
         }
@@ -1208,10 +1226,50 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             }
     },
 
+    getStockQuantity: function (record, win) {
+        var vm = win.viewModel;
+        var current = vm.data.current;
+        var locationId = current.get('intLocationId'),
+            itemId = record.get('intItemId'),
+            subLocationId = record.get('intSubLocationId'),
+            storageLocationId = record.get('intStorageLocationId');
+        var qty = 0;
+
+        ic.utils.ajax({
+            timeout: 120000,   
+            url: '../Inventory/api/Item/GetItemStockUOMSummary',
+            params: {
+                ItemId: itemId,
+                LocationId: locationId,
+                SubLocationId: subLocationId,
+                StorageLocationId: storageLocationId
+            } 
+        })
+        .map(function(x) { return Ext.decode(x.responseText); })
+        .subscribe(
+            function(data) {
+                if (data.success) {
+                    if (data.data.length > 0) {
+                        var stockRecord = data.data[0];
+                        qty = stockRecord.dblOnHand;
+                    }
+                }
+                else {
+                    iRely.Functions.showErrorDialog(data.message.statusText);
+                }
+                record.set('dblSystemCount', qty);
+            },
+            function(error) {
+                var json = Ext.decode(error.responseText);
+                iRely.Functions.showErrorDialog(json.ExceptionMessage);
+            }
+        );
+    },
+
     init: function (application) {
         this.control({
             "#cboUOM": {
-                select: this.onUOMSelect
+                select: this.onInventoryCountDetailSelect
             },
             "#cboCountGroup": {
                 select: this.onCountGroupSelect
