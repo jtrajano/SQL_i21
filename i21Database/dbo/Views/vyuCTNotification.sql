@@ -19,18 +19,42 @@ AS
 	
 		UNION ALL
 
-		SELECT	CH.intContractHeaderId,		intContractSeq,			dtmStartDate,				dtmEndDate,
-				dblQuantity,				dblFutures,				dblBasis,					dblCashPrice,
-				dblScheduleQty,				dblNoOfLots,			'' AS strItemNo,			strPricingType,
-				'' AS strFutMarketName,		'' AS strItemUOM,		'' AS strLocationName,		'' AS strPriceUOM,
+		SELECT	CH.intContractHeaderId,		NULL AS intContractSeq,	 NULL AS dtmStartDate,		NULL AS dtmEndDate,
+				CH.dblQuantity,		NULL AS dblFutures,		 NULL AS dblBasis,			NULL AS dblCashPrice,
+				NULL AS dblScheduleQty,		NULL AS  dblNoOfLots,	 '' AS strItemNo,			PT.strPricingType,
+				'' AS strFutMarketName,		UOM.strUnitMeasure AS strItemUOM,		'' AS strLocationName,		'' AS strPriceUOM,
 				'' AS strCurrency,			'' AS strFutureMonth,	'' AS strStorageLocation,	'' AS strSubLocation,
-				'' AS strPurchasingGroup,	'' AS strCreatedByNo,	strContractNumber,			dtmContractDate,
-				strContractType,			strCommodityCode,		strEntityName,
+				'' AS strPurchasingGroup,	'' AS strCreatedByNo,	strContractNumber,			CH.dtmContractDate,
+				CT.strContractType,			COM.strCommodityCode,	E.strName strEntityName,
 				'Empty' AS strNotificationType
 
-		FROM	vyuCTContractHeaderView CH	LEFT
-		JOIN	tblCTContractDetail		CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
-		WHERE	CD.intContractHeaderId IS NULL 
+		FROM tblCTContractHeader CH
+		JOIN tblICCommodity COM ON COM.intCommodityId=CH.intCommodityId
+		JOIN tblCTPricingType PT ON PT.intPricingTypeId=CH.intPricingTypeId
+		JOIN tblEMEntity E ON E.intEntityId=CH.intEntityId
+		JOIN tblCTContractType CT ON CT.intContractTypeId=CH.intContractTypeId
+		JOIN tblICCommodityUnitMeasure CUOM ON CUOM.intCommodityUnitMeasureId=CH.intCommodityUOMId
+		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=CUOM.intUnitMeasureId
+
+		UNION ALL
+
+		SELECT	CH.intContractHeaderId,		NULL AS intContractSeq,			 NULL AS dtmStartDate,		  NULL AS dtmEndDate,
+				CH.dblQuantity,				NULL AS dblFutures,				 NULL AS dblBasis,			  NULL AS dblCashPrice,
+				NULL AS dblScheduleQty,		NULL AS dblNoOfLots,			 '' AS strItemNo,			  PT.strPricingType,
+				'' AS strFutMarketName,		UOM.strUnitMeasure AS strItemUOM,		'' AS strLocationName,		'' AS strPriceUOM,
+				'' AS strCurrency,			'' AS strFutureMonth,			 '' AS strStorageLocation,	  '' AS strSubLocation,
+				'' AS strPurchasingGroup,	'' AS strCreatedByNo,			strContractNumber,			  CH.dtmContractDate,
+				 CT.strContractType,		COM.strCommodityCode,			E.strName AS strEntityName,
+				'Unsigned' AS strNotificationType
+
+		FROM tblCTContractHeader CH
+		JOIN tblICCommodity COM ON COM.intCommodityId=CH.intCommodityId
+		JOIN tblCTPricingType PT ON PT.intPricingTypeId=CH.intPricingTypeId
+		JOIN tblEMEntity E ON E.intEntityId=CH.intEntityId
+		JOIN tblCTContractType CT ON CT.intContractTypeId=CH.intContractTypeId
+		JOIN tblICCommodityUnitMeasure CUOM ON CUOM.intCommodityUnitMeasureId=CH.intCommodityUOMId
+		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=CUOM.intUnitMeasureId
+		WHERE ISNULL(ysnSigned,0) = 0 
 	)t
 
 	
