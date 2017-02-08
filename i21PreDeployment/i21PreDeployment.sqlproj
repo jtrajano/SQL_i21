@@ -151,6 +151,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Charges.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Update_M2M_Computation_Setup.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\9_DropTblSMAlternateApproverGroup.sql" />
+    <None Include="Scripts\Pre-Deployment\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
