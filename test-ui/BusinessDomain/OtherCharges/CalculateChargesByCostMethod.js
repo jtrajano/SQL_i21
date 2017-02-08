@@ -2,36 +2,32 @@ StartTest (function (t) {
     var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
-//        //region Pre-Setup Create Lotted Item and Other Charge Item
-//        .displayText('===== Pre-setup New Commodity =====')
-//        .addFunction(function(next){
-//            commonIC.addCommodity (t,next, 'OC - Commodity - 01', 'Commodity with UOM and No Attribute Setup')
-//        })
-//
-//
-//        .displayText('===== Pre-setup Add New Other Charge Item=====')
-//        .addFunction(function(next){
-//            commonIC.addOtherChargeItem (t,next, 'OtherCharge - 01', 'Test Other Charge Item')
-//        })
-//
-//
-//        //Add Lotted Item
-//        .displayText('===== Pre-setup Add Lot Tracked Item =====')
-//        .addFunction(function(next){
-//            commonIC.addInventoryItem
-//            (t,next,
-//                'OC - LTI - 01'
-//                , 'Test Lotted Item For Other Charges'
-//                , 3
+        //region Pre-Setup Create Lotted Item and Other Charge Item
+
+
+        .displayText('===== Pre-setup Add New Other Charge Item=====')
+        .addFunction(function(next){
+            commonIC.addOtherChargeItem (t,next, 'OtherCharge - 04', 'Test Other Charge Item')
+        })
+
+
+        //Add Lotted Item
+        .displayText('===== Pre-setup Add Lot Tracked Item =====')
+        .addFunction(function(next){
+            commonIC.addInventoryItem
+            (t,next,
+                'OC - LTI - 04'
+                , 'Test Lotted Item For Other Charges'
+                , 3
 //                , 'Grains'
 //                , 'OC - Commodity - 01'
 //                , 'LB'
 //                , 'LB'
-//                , 10
-//                , 10
-//                , 40
-//            )
-//        })
+                , 10
+                , 10
+                , 40
+            )
+        })
 
         //region Cost Method is Percentage - Inventory Cost unchecked
         .displayText('=====  Scenario 1. Create Direct IR for Lotted Item Cost Method is Percentage - Inventory Cost unchecked  =====')
@@ -40,10 +36,11 @@ StartTest (function (t) {
         .clickButton('New')
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
+        .selectComboBoxRowNumber('Vendor',1,0)
+//        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
         .selectComboBoxRowNumber('Location',1,0)
         //.selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','OC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','OC - LTI - 04','strItemNo')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
         .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
@@ -68,11 +65,11 @@ StartTest (function (t) {
 
         //Calculate Charge Amount
         .clickTab('FreightInvoice')
-        .selectGridComboBoxRowValue('Charges',1,'strItemNo','OtherCharge - 01','strItemNo')
+        .selectGridComboBoxRowValue('Charges',1,'strItemNo','OtherCharge - 04','strItemNo')
         .selectGridComboBoxRowNumber('Charges',1,'colCostMethod',2)
         .selectGridComboBoxRowValue('Charges',1,'strCurrency','USD','strCurrency')
         .enterGridData('Charges', 1, 'colRate', '10')
-        .clickGridCheckBox('Charges',0, 'strItemNo', 'OtherCharge - 01', 'ysnAccrue', true)
+        .clickGridCheckBox('Charges',0, 'strItemNo', 'OtherCharge - 04', 'ysnAccrue', true)
         .clickButton('CalculateCharges')
         .waitUntilLoaded()
         .waitUntilLoaded()
@@ -84,7 +81,7 @@ StartTest (function (t) {
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-012')
         .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
         .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
         .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
@@ -103,10 +100,11 @@ StartTest (function (t) {
         .clickButton('New')
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
+        .selectComboBoxRowNumber('Vendor',1,0)
+        //.selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
         .selectComboBoxRowNumber('Location',1,0)
         //.selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','OC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','OC - LTI - 04','strItemNo')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
         .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
@@ -131,13 +129,13 @@ StartTest (function (t) {
 
         //Calculate Charge Amount
         .clickTab('FreightInvoice')
-        .selectGridComboBoxRowValue('Charges',1,'strItemNo','OtherCharge - 01','strItemNo')
+        .selectGridComboBoxRowValue('Charges',1,'strItemNo','OtherCharge - 04','strItemNo')
         .selectGridComboBoxRowNumber('Charges',1,'colCostMethod',1)
         .selectGridComboBoxRowValue('Charges',1,'strCurrency','USD','strCurrency')
         .enterGridData('Charges', 1, 'colRate', '0.5')
         .selectGridComboBoxRowValue('Charges',1,'strCostUOM','LB','strCostUOM')
         .selectGridComboBoxRowNumber('Charges',1,'colChargeUOM',1)
-        .clickGridCheckBox('Charges',0, 'strItemNo', 'OtherCharge - 01', 'ysnAccrue', true)
+        .clickGridCheckBox('Charges',0, 'strItemNo', 'OtherCharge - 04', 'ysnAccrue', true)
         .clickButton('CalculateCharges')
         .waitUntilLoaded()
         .waitUntilLoaded()
@@ -149,7 +147,7 @@ StartTest (function (t) {
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-012')
         .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
         .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
         .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
@@ -167,10 +165,11 @@ StartTest (function (t) {
         .clickButton('New')
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
+        .selectComboBoxRowNumber('Vendor',1,0)
+        //.selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
         .selectComboBoxRowNumber('Location',1,0)
         //.selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','OC - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','OC - LTI - 04','strItemNo')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
         .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
@@ -195,11 +194,11 @@ StartTest (function (t) {
 
         //Calculate Charge Amount
         .clickTab('FreightInvoice')
-        .selectGridComboBoxRowValue('Charges',1,'strItemNo','OtherCharge - 01','strItemNo')
+        .selectGridComboBoxRowValue('Charges',1,'strItemNo','OtherCharge - 04','strItemNo')
         .selectGridComboBoxRowNumber('Charges',1,'colCostMethod',3)
         .selectGridComboBoxRowValue('Charges',1,'strCurrency','USD','strCurrency')
         .enterGridData('Charges', 1, 'colChargeAmount', '30')
-        .clickGridCheckBox('Charges',0, 'strItemNo', 'OtherCharge - 01', 'ysnAccrue', true)
+        .clickGridCheckBox('Charges',0, 'strItemNo', 'OtherCharge - 04', 'ysnAccrue', true)
         .clickButton('CalculateCharges')
         .waitUntilLoaded()
         .waitUntilLoaded()
@@ -211,7 +210,7 @@ StartTest (function (t) {
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-012')
         .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
         .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
         .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
