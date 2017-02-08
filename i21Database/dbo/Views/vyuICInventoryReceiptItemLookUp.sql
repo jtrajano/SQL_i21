@@ -7,6 +7,8 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strItemDescription = Item.strDescription
 		, Item.strLotTracking
 		, strUnitMeasure = ItemUnitMeasure.strUnitMeasure
+		, intItemUOMId = ItemUnitMeasure.intUnitMeasureId
+		, intItemUOMDecimalPlaces = ItemUnitMeasure.intDecimalPlaces
 		, strUnitType = ItemUnitMeasure.strUnitType
 		, SubLocation.strSubLocationName
 		, strStorageLocationName = StorageLocation.strName
