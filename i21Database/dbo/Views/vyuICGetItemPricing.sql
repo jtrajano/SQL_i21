@@ -22,6 +22,7 @@ SELECT
 	UOM.intUnitMeasureId,
 	UOM.strUnitMeasure,
 	UOM.strUnitType,
+	UOM.intDecimalPlaces,
 	ItemUOM.ysnStockUnit,
 	ItemUOM.ysnAllowPurchase,
 	ItemUOM.ysnAllowSale,
