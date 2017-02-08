@@ -49,8 +49,9 @@ Ext.define('Inventory.ux.GridUOMField', {
                 value = me.getPrecisionNumber(lastValue, decimals);
             }
         }
-        me.setupQuantity(txt, value, decimals);
-        
+
+        me.setupQuantity(txt, value, decimals); // TODO: kinda problematic
+
         return value;
     },
 
@@ -178,6 +179,7 @@ Ext.define('Inventory.ux.GridUOMField', {
     onSelect: function(combo, records, options) {
         var me = this.up('panel');
         var column = me.column;
+        var txt = me.items.items[0].items.items[0];
         var grid = column.container.component.grid;
         var selection = grid.selection;
         if(records.length > 0) {
@@ -190,6 +192,8 @@ Ext.define('Inventory.ux.GridUOMField', {
                 selection.set(me.getDisplayField(), display);
             if(decimals)
                 selection.set(column.decimalPrecisionField, decimals);
+            
+             me.setupQuantity(txt, value, decimals); 
         }
     },
 
