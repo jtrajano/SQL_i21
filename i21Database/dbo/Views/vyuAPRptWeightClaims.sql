@@ -171,5 +171,7 @@ FROM (
 		strCostCurrency,
 		ysnSubCurrency
 ) Claim
-WHERE dblQtyBillCreated = dblContractItemQty --make sure we fully billed the contract item
+WHERE 1= CASE WHEN dblPrepaidTotal IS NULL THEN 1 ELSE 
+			CASE WHEN dblQtyBillCreated = dblContractItemQty THEN 1 ELSE 0 END--make sure we fully billed the contract item
+		END
 AND dblWeightLoss > dblFranchiseWeight -- Make sure the weight loss is greater then the tolerance
