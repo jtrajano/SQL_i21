@@ -15,11 +15,11 @@ BEGIN
 	DECLARE @dblQty AS NUMERIC(18,6) = 15.25
 
 	DECLARE @result AS NUMERIC(18,6) 
-	DECLARE @Expected AS NUMERIC(18,6) = (15.25 * 50 / 44.0925) -- Equals 17.293190451 but rounded to 6 decimal places. Final result is 17.293190
+	DECLARE @expected AS NUMERIC(18,6) = (15.25 * 50 / 44.092452437) -- Equals 17.293190451 but rounded to 6 decimal places. Final result is 17.293190
 
 	-- Act
 	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@intItemUOMIdFrom, @intItemUOMIdTo, @dblQty)
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @Expected, @result;
+	EXEC tSQLt.AssertEquals @expected, @result;
 END
