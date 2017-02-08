@@ -4987,11 +4987,27 @@
     <Build Include="dbo\Tables\tblSMApproverConfiguration.sql" />
     <Build Include="dbo\Tables\tblSMApproverConfigurationDetail.sql" />
     <Build Include="dbo\Tables\tblSMApproverConfigurationApprovalFor.sql" />
+    <Build Include="dbo\Tables\tblSMApproverConfigurationForTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspLGLoadContractUnSlice.sql" />
     <Build Include="dbo\Tables\tblMFReportCategoryByCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacard.sql" />
     <Build Include="dbo\Views\vyuSMApproverConfigurationUsers.sql" />
+    <Build Include="dbo\Views\vyuHDParticipant.sql" />
+    <Build Include="dbo\Views\vyuMFGetProduction.sql" />
+    <Build Include="dbo\Views\vyuMFGetRMUsage.sql" />
+    <Build Include="dbo\Views\vyuMFGetRMUsageByLot.sql" />
+    <Build Include="dbo\Views\vyuMFGetPMUsage.sql" />
+    <Build Include="dbo\Views\vyuMFGetOverAndUnderWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRollCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetReceivingSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShippedSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventoryAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetDetailedInventory.sql" />
+    <Build Include="dbo\Views\vyuTMLastLeakGasCheckTable.sql" />
+    <Build Include="dbo\Views\vyuCTDocument.sql" />
+    <Build Include="dbo\Views\vyuLGDashboardJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

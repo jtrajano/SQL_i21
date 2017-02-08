@@ -38,8 +38,8 @@ DECLARE @strMICRPreview						AS NVARCHAR(100),
 
 
 SELECT					
- @strRoutingNumber					= [dbo].fnAESDecrypt(strMICRRoutingNo)					
-,@strAccountNumber					= [dbo].fnAESDecrypt(strMICRBankAccountNo)		
+ @strRoutingNumber					= [dbo].fnAESDecryptASym(strMICRRoutingNo)					
+,@strAccountNumber					= [dbo].fnAESDecryptASym(strMICRBankAccountNo)		
 ,@intMICRBankAccountSpacesCount		= intMICRBankAccountSpacesCount		
 ,@intMICRBankAccountSpacesPosition	= intMICRBankAccountSpacesPosition	
 ,@intMICRCheckNoSpacesCount			= intMICRCheckNoSpacesCount

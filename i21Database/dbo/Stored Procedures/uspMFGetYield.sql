@@ -69,9 +69,9 @@ BEGIN
 			,SUM(dblOutputQuantity) AS dblOutputQuantity
 			,SUM(dblCountQuantity) AS dblCountQuantity
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
-			,0 AS dblYieldQuantity
+			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
 					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -115,7 +115,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
 					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -161,7 +161,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
 					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -199,7 +199,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
 					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage

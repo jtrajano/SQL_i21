@@ -106,7 +106,7 @@ Begin
 	Begin
 		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=@strRefNo AND intContractTypeId=1
 
-		If @strStatus=53 --Success
+		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo 
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
@@ -118,7 +118,7 @@ Begin
 			Values(@strMesssageType,'Success')
 		End
 
-		If @strStatus<>53 --Error
+		If @strStatus NOT IN (52,53) --Error
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -135,7 +135,7 @@ Begin
 	Begin
 		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=@strRefNo AND intContractTypeId=1
 
-		If @strStatus=53 --Success
+		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success'
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus='Awt Ack'
@@ -144,7 +144,7 @@ Begin
 			Values(@strMesssageType,'Success')
 		End
 
-		If @strStatus<>53 --Error
+		If @strStatus NOT IN (52,53) --Error
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -157,6 +157,7 @@ Begin
 	End
 
 	--Shipment
+	DESADV:
 	If @strMesssageType='DESADV'
 	Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
@@ -164,23 +165,23 @@ Begin
 		If Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
 			Select TOP 1 @intLoadId=intLoadId From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
 
-		If @strStatus=53 --Success
+		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblLGLoad  Set strExternalShipmentNumber=@strParam
 			Where intLoadId=@intLoadId
 
-			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo
+			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo And intLoadId=@intLoadId
 
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success',strExternalShipmentNumber=@strParam
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
 
-			Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo
+			Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo AND intLoadId=@intLoadId
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,'Success')
 		End
 
-		If @strStatus<>53 --Error
+		If @strStatus NOT IN (52,53) --Error
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -195,13 +196,19 @@ Begin
 	--Receipt
 	If @strMesssageType='WHSCON'
 	Begin
+		If Exists (Select 1 From tblLGLoad Where strLoadNumber=@strRefNo)
+		Begin
+			Set @strMesssageType='DESADV'
+			GOTO DESADV
+		End
+
 		Select @intReceiptId=r.intInventoryReceiptId
 		From tblICInventoryReceipt r 
 		Join tblICInventoryReceiptItem ri on r.intInventoryReceiptId=ri.intInventoryReceiptId 
 		Join tblLGLoad lg on ri.intSourceId=lg.intLoadId
 		Where lg.strExternalShipmentNumber=@strParam AND strReceiptType='Purchase Contract' AND r.intSourceType=2
 
-		If @strStatus=53 --Success
+		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblICInventoryReceiptItem  Set ysnExported=1 Where intInventoryReceiptId=@intReceiptId
 
@@ -209,7 +216,7 @@ Begin
 			Values(@strMesssageType,'Success')
 		End
 
-		If @strStatus<>53 --Error
+		If @strStatus NOT IN (52,53) --Error
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -221,7 +228,7 @@ Begin
 	--Profit & Loss
 	If @strMesssageType='ACC_DOCUMENT'
 	Begin
-		If @strStatus=53 --Success
+		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage='Success' Where intMatchNo=@strParam AND ISNULL(strStatus,'')=''
 
@@ -229,7 +236,7 @@ Begin
 			Values(@strMesssageType,'Success')
 		End
 
-		If @strStatus<>53 --Error
+		If @strStatus NOT IN (52,53) --Error
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -245,7 +252,7 @@ Begin
 	Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
-		If @strStatus=53 --Success
+		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
@@ -254,7 +261,7 @@ Begin
 			Values(@strMesssageType,'Success')
 		End
 
-		If @strStatus<>53 --Error
+		If @strStatus NOT IN (52,53) --Error
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 

@@ -77,8 +77,8 @@ FROM @temp_xml_table
 WHERE [fieldname] = 'intTransactionId'
 
 --For Encryption and Decryption
-OPEN SYMMETRIC KEY i21EncryptionSymKey
-	DECRYPTION BY CERTIFICATE i21EncryptionCert
+OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+	DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
 	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 -- Report Query:  
@@ -273,4 +273,4 @@ GROUP BY
 	tblPRPaycheck.dblDeductionTotal, tblPRPaycheck.dblNetPayTotal,
 	tblPRPaycheck.ysnVoid
 
-CLOSE SYMMETRIC KEY i21EncryptionSymKey
+CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym

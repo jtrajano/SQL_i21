@@ -142,6 +142,33 @@ IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 			RAISERROR(120037, 16, 1)
 		RETURN 0;
 	END
+	
+IF @Type = 'CF Tran'
+    BEGIN    
+        IF ISNULL(@RaiseError,0) = 0
+            ROLLBACK TRANSACTION        
+        IF ISNULL(@RaiseError,0) = 1
+            RAISERROR(120077, 16, 1)
+        RETURN 0;
+    END
+      
+IF @Type = 'CF Invoice'
+    BEGIN    
+        IF ISNULL(@RaiseError,0) = 0
+            ROLLBACK TRANSACTION        
+        IF ISNULL(@RaiseError,0) = 1
+            RAISERROR(120078, 16, 1)
+        RETURN 0;
+    END
+  
+IF @Type = 'Meter Billing'
+    BEGIN    
+        IF ISNULL(@RaiseError,0) = 0
+            ROLLBACK TRANSACTION        
+        IF ISNULL(@RaiseError,0) = 1
+            RAISERROR(120079, 16, 1)
+        RETURN 0;
+    END
 
 --VALIDATE INVOICES THAT HAS CONTRACTS
 IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID 

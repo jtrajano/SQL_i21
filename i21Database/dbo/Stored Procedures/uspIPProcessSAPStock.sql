@@ -18,7 +18,8 @@ Declare @intMinRowNo int,
 		@intLocationId int,
 		@intEntityUserId int,
 		@intSourceId int=1,
-		@ErrMsg NVARCHAR(MAX)
+		@ErrMsg NVARCHAR(MAX),
+		@intMinRowNo1 int
 
 DECLARE @tblStock TABLE (
 [intRowNo] INT IDENTITY(1,1),
@@ -46,6 +47,8 @@ Begin
 		Select @intSubLocationId=intCompanyLocationSubLocationId 
 		From tblSMCompanyLocationSubLocation Where strSubLocationName=@strSubLocation AND intCompanyLocationId=@intLocationId
 
+		Begin Tran
+
 		Exec [uspICAdjustStockFromSAP]	 @dtmQtyChange			= NULL
 										,@intItemId				= @intItemId
 										,@strLotNumber			= 'FIFO'
@@ -58,14 +61,42 @@ Begin
 										,@intEntityUserId		= @intEntityUserId
 										,@intSourceId			= @intSourceId
 
+		--Adjust Qty in SubLocation in other Location as 0
+		Select @intMinRowNo1=MIN(intCompanyLocationId) From tblSMCompanyLocation Where intCompanyLocationId<>@intLocationId
+		While (@intMinRowNo1 is not null)
+		Begin
+			Select @intSubLocationId=intCompanyLocationSubLocationId 
+			From tblSMCompanyLocationSubLocation Where strSubLocationName=@strSubLocation AND intCompanyLocationId=@intMinRowNo1
+
+			Exec [uspICAdjustStockFromSAP]	 @dtmQtyChange			= NULL
+											,@intItemId				= @intItemId
+											,@strLotNumber			= 'FIFO'
+											,@intLocationId			= @intMinRowNo1
+											,@intSubLocationId		= @intSubLocationId
+											,@intStorageLocationId	= NULL
+											,@intItemUOMId			= NULL
+											,@dblNewQty				= 0
+											,@dblCost				= NULL 
+											,@intEntityUserId		= @intEntityUserId
+											,@intSourceId			= @intSourceId			
+
+			Select @intMinRowNo1=MIN(intCompanyLocationId) From tblSMCompanyLocation Where intCompanyLocationId<>@intLocationId AND intCompanyLocationId>@intMinRowNo1
+		End
+
 		--Move to Archive
 		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
 		Select strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId,'Success',''
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
+
+		Commit Tran
 	END TRY
 	BEGIN CATCH
+		IF XACT_STATE() != 0
+			AND @@TRANCOUNT > 0
+			ROLLBACK TRANSACTION
+
 		SET @ErrMsg = ERROR_MESSAGE()
 
 		--Move to Error

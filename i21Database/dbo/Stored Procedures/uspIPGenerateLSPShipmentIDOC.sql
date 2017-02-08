@@ -46,6 +46,7 @@ Declare @intMinHeader				INT,
 		@dblGrossWeight				NUMERIC(38,20),
 		@dblNetWeight				NUMERIC(38,20),
 		@strWeightUOM				NVARCHAR(50),
+		@dtmETAPOL					DATETIME,
 		@dtmETAPOD					DATETIME,
 		@strAddressXml				NVARCHAR(MAX)
 
@@ -111,7 +112,8 @@ Begin
 		@strExternalDeliveryNumber	=	strExternalShipmentNumber, 
 		@dtmScheduledDate			=   dtmScheduledDate,
 		@strFeedStatus				=	strFeedStatus,
-		@dtmETAPOD					=	dtmETAPOD
+		@dtmETAPOD					=	dtmETAPOD,
+		@dtmETAPOL					=	dtmETAPOL
 	From tblLGLoadLSPStg Where intLoadStgId=@intMinHeader
 
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
@@ -140,7 +142,7 @@ Begin
 		+ '<PARTNER_Q>'		+ 'SP'									+ '</PARTNER_Q>'
 		+ '<PARTNER_ID>'	+ ISNULL(@strVendorAccountNo,'')		+ '</PARTNER_ID>'
 		+ '<LANGUAGE>'		+ 'EN'									+ '</LANGUAGE>'
-		+ '<NAME1>'			+ ISNULL(strVendorAddress,'')			+ '</NAME1>'
+		+ '<NAME1>'			+ ISNULL(strVendorName,'')			+ '</NAME1>'
 		+ '<STREET1>'		+ ISNULL(strVendorAddress,'')			+ '</STREET1>'
 		+ '<POSTL_COD1>'	+ ISNULL(strVendorPostalCode,'')		+ '</POSTL_COD1>'
 		+ '<CITY1>'			+ ISNULL(strVendorCity,'')				+ '</CITY1>'
@@ -155,7 +157,7 @@ Begin
 		+ '<QUALI>'		+ '001'	+ '</QUALI>'
 		+ '<E1ADRM6 SEGMENT="1">'
 		+ '<LANGUAGE>'		+ 'EN'	+ '</LANGUAGE>'
-		+ '<NAME1>'			+ ISNULL(strOriginAddress,'')			+ '</NAME1>'
+		+ '<NAME1>'			+ ISNULL(strOriginName,'')			+ '</NAME1>'
 		+ '<STREET1>'		+ ISNULL(strOriginAddress,'')			+ '</STREET1>'
 		+ '<POSTL_COD1>'	+ ISNULL(strOriginPostalCode,'')		+ '</POSTL_COD1>'
 		+ '<CITY1>'			+ ISNULL(strOriginCity,'')				+ '</CITY1>'
@@ -169,7 +171,7 @@ Begin
 		+ '<QUALI>'		+ '002'	+ '</QUALI>'
 		+ '<E1ADRM6 SEGMENT="1">'
 		+ '<LANGUAGE>'		+ 'EN'	+ '</LANGUAGE>'
-		+ '<NAME1>'			+ ISNULL(strDestinationAddress,'')			+ '</NAME1>'
+		+ '<NAME1>'			+ ISNULL(strDestinationName,'')			+ '</NAME1>'
 		+ '<STREET1>'		+ ISNULL(strDestinationAddress,'')			+ '</STREET1>'
 		+ '<POSTL_COD1>'	+ ISNULL(strDestinationPostalCode,'')		+ '</POSTL_COD1>'
 		+ '<CITY1>'			+ ISNULL(strDestinationCity,'')				+ '</CITY1>'
@@ -183,7 +185,6 @@ Begin
 	From tblLGLoadLSPStg Where intLoadStgId=@intMinHeader
 
 	Set @strXml += ISNULL(@strAddressXml,'')
-
 
 	Set @strXml += '<E1EDL20 SEGMENT="1">'
 	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
@@ -205,7 +206,7 @@ Begin
 
 	Set @strXml += '<E1EDT13 SEGMENT="1">'
 	Set @strXml += '<QUALF>'	+ '007'			+ '</QUALF>'
-	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')		+ '</NTANF>'
+	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOL,112),'')		+ '</NTANF>'
 	Set @strXml += '<NTANZ>'	+ '000000'		+ '</NTANZ>'
 	Set @strXml += '<NTEND>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')		+ '</NTEND>'
 	Set @strXml += '<NTENZ>'	+ '000000'		+ '</NTENZ>'

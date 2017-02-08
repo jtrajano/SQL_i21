@@ -85,12 +85,12 @@ FROM
 		) cc ON cc.intContractDetailId = cd.intContractDetailId
 		LEFT JOIN 
 		(
-			SELECT 
-				intContractDetailId
-				,CASE WHEN dblLots > 0 THEN  SUM(dblLots) ELSE 0 END AS dblLong
-				,CASE WHEN dblLots < 0 THEN  ABS(SUM(dblLots)) ELSE 0 END AS dblShort 				
-				,SUM(dblNetImpactInDefCurrency) dblNetImpactInDefCurrency
-			FROM vyuCTContractCostEnquiryHedge
-			GROUP BY intContractDetailId,dblLots
+		    SELECT 
+		    intContractDetailId
+		   ,(SELECT ISNULL(SUM(dblLots),0) FROM vyuCTContractCostEnquiryHedge Hed WHERE Hed.intContractDetailId = b.intContractDetailId AND dblLots > 0)  AS dblLong
+		   ,(SELECT ISNULL(ABS(SUM(dblLots)),0) FROM vyuCTContractCostEnquiryHedge Hed WHERE Hed.intContractDetailId = b.intContractDetailId AND dblLots < 0) AS dblShort     
+		   ,SUM(dblNetImpactInDefCurrency) dblNetImpactInDefCurrency
+			FROM vyuCTContractCostEnquiryHedge b
+			GROUP BY intContractDetailId
 		) he ON he.intContractDetailId = cd.intContractDetailId
 ) t
