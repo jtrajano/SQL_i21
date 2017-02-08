@@ -234,14 +234,14 @@ GO
 				[strType]			=        N'Transaction',
 				[strMessage]		=        N'{0} {1} {2} unapproved.',
 				[strQuery]			=        N'SELECT intTransactionId 
-												 FROM tblSMApproval A
-												 WHERE  A.ysnCurrent = 1 AND 
-														A.strStatus IN (''Waiting for Approval'') AND
-														(
-															A.intApproverId = {0} 
-															OR 
-															{0} IN (select intEntityUserSecurityId from tblSMApproverGroupUserSecurity WHERE intApproverGroupId = A.intApproverGroupId)
-														)',
+												FROM tblSMApproval A
+												WHERE  A.ysnCurrent = 1 AND 
+													A.strStatus IN (''Waiting for Approval'') AND
+													(
+														A.intApproverId = {0}
+														OR 
+														{0} IN (select intApproverId from tblSMApproverConfigurationForApprovalGroup where intApprovalId = A.intApprovalId)
+													)',
 				[strNamespace]		=        N'i21.view.Approval?activeTab=Pending',
 				[intSort]			=        11
 	END
@@ -249,14 +249,14 @@ GO
 	BEGIN
 		UPDATE [tblSMReminderList]
 		SET	[strQuery] =        N'SELECT intTransactionId 
-                                 FROM tblSMApproval A
-                                 WHERE  A.ysnCurrent = 1 AND 
-										A.strStatus IN (''Waiting for Approval'') AND
-										(
-											A.intApproverId = {0} 
-											OR 
-											{0} IN (select intEntityUserSecurityId from tblSMApproverGroupUserSecurity WHERE intApproverGroupId = A.intApproverGroupId)
-										)'
+												FROM tblSMApproval A
+												WHERE  A.ysnCurrent = 1 AND 
+													A.strStatus IN (''Waiting for Approval'') AND
+													(
+														A.intApproverId = {0}
+														OR 
+														{0} IN (select intApproverId from tblSMApproverConfigurationForApprovalGroup where intApprovalId = A.intApprovalId)
+													)'
 		WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction'
 	END
 
