@@ -53,7 +53,7 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetLocationStockOnHand(int intLocationId, int intItemId)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOM>()
-                .Where(w => w.intLocationId == intLocationId && w.intItemId == intItemId)
+                .Where(w => w.intLocationId == intLocationId && w.intItemId == intItemId && w.ysnStockUnit == true)
                 .GroupBy(o => o.intLocationId)
                 .Select(g => new { dblOnHand = g.Sum(i => i.dblOnHand) });
             var data = await query.ToListAsync();
