@@ -4669,6 +4669,7 @@
     <Build Include="dbo\Functions\fnGetLoadDetailLots.sql" />
     <Build Include="dbo\Functions\fnGetTrucksRemaining.sql" />
     <Build Include="dbo\Views\vyuTMLastLeakGasCheckTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateForm73.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
