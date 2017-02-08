@@ -1,8 +1,5 @@
 ﻿CREATE PROCEDURE uspGLPostRecap
 	@RecapTable RecapTableType READONLY 
-	,@intTransactionId AS INT
-	,@strTransactionId AS NVARCHAR(50)
-	,@strCode AS NVARCHAR(50)
 	,@intEntityUserSecurityId AS INT = NULL 
 AS
 
@@ -12,6 +9,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 --SET ANSI_WARNINGS OFF
 
+DECLARE @intTransactionId INT , @strTransactionId NVARCHAR(50)
+SELECT TOP 1 @intTransactionId = intTransactionId, 
+	@strTransactionId = strTransactionId FROM @RecapTable 
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
 DELETE	FROM tblGLPostRecap 
 WHERE	strTransactionId = @strTransactionId
