@@ -39,6 +39,7 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT
 		,@ysnAllowBlankGLEntries AS BIT = 1
+		,@intFunctionalCurrencyId AS INT 
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
@@ -267,6 +268,11 @@ BEGIN
 	IF @@ERROR <> 0 GOTO Post_Exit;
 END
 
+-- Get the functional currency
+BEGIN 
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
@@ -370,6 +376,8 @@ BEGIN
 				,intStorageLocationId
 				,strActualCostId
 				,intInTransitSourceLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -493,6 +501,8 @@ BEGIN
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
+				,intForexRateTypeId = DetailItem.intForexRateTypeId
+				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -514,7 +524,24 @@ BEGIN
 
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-  
+
+		-- Update currency fields to functional currency. 
+		BEGIN 
+			UPDATE	itemCost
+			SET		dblExchangeRate = 1
+					,dblForexRate = 1
+					,intCurrencyId = @intFunctionalCurrencyId
+			FROM	@ItemsForPost itemCost
+			WHERE	ISNULL(itemCost.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId 
+
+			UPDATE	itemCost
+			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					,dblSalesPrice = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+			FROM	@ItemsForPost itemCost
+			WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
+		END
+		  
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 		BEGIN 
@@ -539,6 +566,8 @@ BEGIN
 					,intStorageLocationId
 					,strActualCostId
 					,intInTransitSourceLocationId
+					,intForexRateTypeId
+					,dblForexRate
 			)
 			SELECT 
 					intItemId  
@@ -560,53 +589,10 @@ BEGIN
 					,intStorageLocationId
 					,strActualCostId
 					,intInTransitSourceLocationId
+					,intForexRateTypeId
+					,dblForexRate
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
-
-			---- Gather the item returns
-			--INSERT INTO @ReturnItemsForPost (
-			--		intItemId  
-			--		,intItemLocationId 
-			--		,intItemUOMId  
-			--		,dtmDate  
-			--		,dblQty  
-			--		,dblUOMQty  
-			--		,dblCost  
-			--		,dblSalesPrice  
-			--		,intCurrencyId  
-			--		,dblExchangeRate  
-			--		,intTransactionId  
-			--		,intTransactionDetailId   
-			--		,strTransactionId  
-			--		,intTransactionTypeId  
-			--		,intLotId 
-			--		,intSubLocationId
-			--		,intStorageLocationId
-			--		,strActualCostId
-			--		,intInTransitSourceLocationId	
-			--)
-			--SELECT 
-			--		intItemId  
-			--		,intItemLocationId 
-			--		,intItemUOMId  
-			--		,dtmDate  
-			--		,dblQty  
-			--		,dblUOMQty  
-			--		,dblCost  
-			--		,dblSalesPrice  
-			--		,intCurrencyId  
-			--		,dblExchangeRate  
-			--		,intTransactionId  
-			--		,intTransactionDetailId   
-			--		,strTransactionId  
-			--		,intTransactionTypeId  
-			--		,intLotId 
-			--		,intSubLocationId
-			--		,intStorageLocationId
-			--		,strActualCostId
-			--		,intInTransitSourceLocationId
-			--FROM	@ItemsForPost
-			--WHERE	dblQty < 0 
 			
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
@@ -657,51 +643,6 @@ BEGIN
 
 				IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			END
-		
-			---- Call the post routine for posting the return items 
-			--IF EXISTS (SELECT TOP 1 1 FROM @ReturnItemsForPost)
-			--BEGIN 			
-			--	INSERT INTO @GLEntries (
-			--			[dtmDate] 
-			--			,[strBatchId]
-			--			,[intAccountId]
-			--			,[dblDebit]
-			--			,[dblCredit]
-			--			,[dblDebitUnit]
-			--			,[dblCreditUnit]
-			--			,[strDescription]
-			--			,[strCode]
-			--			,[strReference]
-			--			,[intCurrencyId]
-			--			,[dblExchangeRate]
-			--			,[dtmDateEntered]
-			--			,[dtmTransactionDate]
-			--			,[strJournalLineDescription]
-			--			,[intJournalLineNo]
-			--			,[ysnIsUnposted]
-			--			,[intUserId]
-			--			,[intEntityId]
-			--			,[strTransactionId]
-			--			,[intTransactionId]
-			--			,[strTransactionType]
-			--			,[strTransactionForm]
-			--			,[strModuleName]
-			--			,[intConcurrencyId]
-			--			,[dblDebitForeign]	
-			--			,[dblDebitReport]	
-			--			,[dblCreditForeign]	
-			--			,[dblCreditReport]	
-			--			,[dblReportingRate]	
-			--			,[dblForeignRate]
-			--	)
-			--	EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
-			--			@ReturnItemsForPost  
-			--			,@strBatchId  
-			--			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-			--			,@intEntityUserSecurityId
-
-			--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
-			--END
 		END
 	END 
 
@@ -726,6 +667,8 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 				,intInTransitSourceLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -847,6 +790,8 @@ BEGIN
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
+				,intForexRateTypeId = DetailItem.intForexRateTypeId
+				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 					
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -865,11 +810,28 @@ BEGIN
 					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
+
+		-- Update currency fields to functional currency. 
+		BEGIN 
+			UPDATE	storageCost
+			SET		dblExchangeRate = 1
+					,dblForexRate = 1
+					,intCurrencyId = @intFunctionalCurrencyId
+			FROM	@StorageItemsForPost storageCost
+			WHERE	ISNULL(storageCost.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId 
+
+			UPDATE	storageCost
+			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					,dblSalesPrice = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+			FROM	@StorageItemsForPost storageCost
+			WHERE	storageCost.intCurrencyId <> @intFunctionalCurrencyId 
+		END
   
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 
-			EXEC	@intReturnValue = dbo.uspICPostStorage
+			EXEC @intReturnValue = dbo.uspICPostStorage
 					@StorageItemsForPost  
 					,@strBatchId  
 					,@intEntityUserSecurityId
