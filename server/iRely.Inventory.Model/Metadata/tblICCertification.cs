@@ -21,6 +21,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
         public ICollection<tblICItemCertification> tblICItemCertifications { get; set; }
+        public ICollection<tblICDocument> tblICDocuments { get; set; }
     }
 
     public class tblICCertificationCommodity : BaseEntity

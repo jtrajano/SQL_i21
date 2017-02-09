@@ -28,7 +28,10 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
                 {dataIndex: 'intDocumentId',text: "Document Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strDocumentName', text: 'Document Name', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
-                {dataIndex: 'ysnStandard',text: 'Standard', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
+                {dataIndex: 'ysnStandard',text: 'Standard', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'},
+                {dataIndex: 'strCertificationName', text: 'Certification Name', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strCertificationCode', text: 'Certification Code', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strCertificationIdName', text: 'Certification Id', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {
@@ -45,7 +48,11 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
                 value: '{current.intCommodityId}',
                 store: '{commodity}'
             },
-            chkStandard: '{current.ysnStandard}'
+            chkStandard: '{current.ysnStandard}',
+            cboCertification: {
+                value: '{current.intCertificationId}',
+                store: '{certification}'
+            }
         }
     },
 
