@@ -25,6 +25,10 @@ BEGIN
 	IF @factor2 = 1 
 		RETURN @factor1; 
 
+	-- Return zero if multiplying by zero. 
+	IF @factor1 = 0 OR @factor2 = 0 
+		RETURN 0;
+		
 	SELECT @sign = SIGN(@factor1) * SIGN(@factor2) 
 
 	-- Raw result is in string. 

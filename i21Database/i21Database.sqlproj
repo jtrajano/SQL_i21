@@ -5008,6 +5008,8 @@
     <Build Include="dbo\Views\vyuTMLastLeakGasCheckTable.sql" />
     <Build Include="dbo\Views\vyuCTDocument.sql" />
     <Build Include="dbo\Views\vyuLGDashboardJDE.sql" />
+    <Build Include="dbo\Functions\fnGetDebitForeign.sql" />
+    <Build Include="dbo\Functions\fnGetCreditForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
