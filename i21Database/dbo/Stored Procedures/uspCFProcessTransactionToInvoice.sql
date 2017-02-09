@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
+﻿CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
 	 @TransactionId				INT
 	,@UserId					INT	
 	,@Post						BIT	= NULL
@@ -198,7 +196,7 @@ SELECT
     ,[dblLicenseAmount]						= NULL
 	,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
 	,[ysnRecomputeTax]						= (CASE 
-													WHEN @ysnRemoteTransaction = 1 OR @UpdateAvailableDiscount = 1
+													WHEN @ysnRemoteTransaction = 1 OR @UpdateAvailableDiscount = 1 OR cfSiteItem.intTaxGroupId IS NULL
 													THEN 0
 													ELSE 1
 											   END)

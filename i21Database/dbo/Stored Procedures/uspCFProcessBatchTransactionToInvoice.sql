@@ -192,7 +192,7 @@ END
 					,[dblLicenseAmount]						= NULL
 					,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
 					,[ysnRecomputeTax]						= (CASE 
-																	WHEN @ysnRemoteTransaction = 1
+																	WHEN @ysnRemoteTransaction = 1 OR cfSiteItem.intTaxGroupId IS NULL
 																	THEN 0
 																	ELSE 1
 															   END)
