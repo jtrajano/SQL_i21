@@ -192,14 +192,29 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
             var value = records[0].get(me.getLookupValueField());
             var display = records[0].get(me.getLookupDisplayField());
             var decimals = records[0].get(me.getLookupDecimalPrecisionField());
+            decimals = decimals ? decimals : me.defaultDecimals;
+
             if(value)
                 selection.set(me.getUpdateField(), value);
             if(display)
                 selection.set(me.getDisplayField(), display);
-            if(decimals)
-                selection.set(column.decimalPrecisionField, decimals);
+            selection.set(column.decimalPrecisionField, decimals);
             
-             me.setupQuantity(txt, value, decimals); 
+            me.updateExtraFields(selection, records[0]);
+            
+            me.setupQuantity(txt, value, decimals); 
+        }
+    },
+
+    updateExtraFields: function(currentRecord, lookupRecord) {
+        var me = this;
+        if(me.extraUpdateFields) {
+            _.each(me.extraUpdateFields, function(f) {
+                if(f.sourceField && f.lookupField) {
+                    var rec = lookupRecord.get(f.lookupField);
+                    selection.set(f.sourceField, rec);
+                }
+            });
         }
     },
 
@@ -228,6 +243,16 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
                     return actualFilter;
                 });
                 cbo.defaultFilters = filters;    
+            }
+            var cboConfig = cfg.comboBoxConfig;
+            if(cboConfig) {
+                var columns = cboConfig.columns;
+                if(columns)
+                    cbo.columns = columns;
+                if(cboConfig.displayField)
+                    cbo.displayField = cboConfig.displayField;
+                if(cboConfig.valueField)
+                    cbo.valueField = cboConfig.valueField;
             }
         }
     },
@@ -261,7 +286,7 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
 
     getLookupValueField: function() {
         var me = this;
-        return me.lookupvalueField ? me.lookupvalueField : me.valueField;
+        return me.lookupValueField ? me.lookupValueField : me.valueField;
     },
 
     getLookupDisplayField: function() {
