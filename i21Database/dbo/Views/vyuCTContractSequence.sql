@@ -12,6 +12,7 @@ AS
 			CD.dblNoOfLots,			CD.intItemUOMId,		CD.dblNetWeight,	
 			CD.intBookId,			CD.intSubBookId,		CD.intDiscountScheduleCodeId,
 			CD.strERPPONumber,		CD.intSplitFromId,		CD.dtmPlannedAvailabilityDate,
+			CD.strERPItemNumber,	CD.strERPBatchNumber,
 
 			--Detail Join
 			IM.strItemNo,			PT.strPricingType,		IM.strDescription			AS	strItemDescription,
