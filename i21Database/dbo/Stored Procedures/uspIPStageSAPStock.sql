@@ -47,8 +47,9 @@ BEGIN TRY
 
 	--Add to Staging tables
 	Insert into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId)
-	Select strItemNo,strSubLocation,strStockType,dblQuantity,@strSessionId
-	From @tblStock Where UPPER(strStockType) like 'WB%' OR UPPER(strStockType) like 'KB%' OR UPPER(strStockType) like 'LK%'
+	Select '0000000000' + strItemNo,strSubLocation,strStockType,dblQuantity,@strSessionId
+	From @tblStock Where (UPPER(strStockType) like 'WB%' OR UPPER(strStockType) like 'KB%' OR UPPER(strStockType) like 'LK%')
+	AND (RIGHT(strItemNo,8) like '496%' OR RIGHT(strItemNo,8) like '491%')
 
 END TRY
 

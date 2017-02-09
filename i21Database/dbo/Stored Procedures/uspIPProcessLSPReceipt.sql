@@ -12,14 +12,12 @@ Declare @intMinRowNo int,
 		@ErrMsg NVARCHAR(MAX),
 		@strDeliveryNo NVARCHAR(50),
 		@dtmReceiptDate DATETIME,
-		@intLoadId INT,
 		@intLocationId INT,
 		@intNewStageReceiptId INT,
 		@strReceiptNo NVARCHAR(50),
-		@intReceiptId INT
-
-Declare @ReceiptEntries AS ReceiptStagingTable
-Declare @LotEntries AS ReceiptItemLotStagingTable
+		@intReceiptId INT,
+		@strFinalErrMsg NVARCHAR(MAX)='',
+		@intUserId INT
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
@@ -31,54 +29,68 @@ Begin
 		Select @strDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
-		Select @intLoadId=intLoadId From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo
+		If Not Exists (Select 1 From  tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo)
+			RaisError('Invalid Delivery No.',16,1)
+
+		If Exists (Select 1 From tblSMUserSecurity Where strUserName='irelyadmin')
+			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity Where strUserName='irelyadmin'
+		Else
+			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity
 
 		Begin Tran
 
-		--Receipt Items
-		Insert Into @ReceiptEntries(strReceiptType,intSourceType,intEntityVendorId,intLocationId,dtmDate,intCurrencyId,intShipFromId,
-					intItemId,intItemLocationId,intItemUOMId,dblQty,intSubLocationId,intStorageLocationId)
-			Select 'Purchase Contract',2,ld.intVendorEntityId,@intLocationId,@dtmReceiptDate,null,null,
-			i.intItemId,il.intItemLocationId,iu.intItemUOMId,ri.dblQuantity,csl.intCompanyLocationSubLocationId,sl.intStorageLocationId
+			EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT
+
+			--Receipt
+			Insert into tblICInventoryReceipt(strReceiptType,intSourceType,intEntityVendorId,intLocationId,
+			strReceiptNumber,dtmReceiptDate,intCurrencyId,intReceiverId,ysnPrepaid,ysnInvoicePaid,intShipFromId,strBillOfLading,intCreatedUserId,intEntityId)
+			Select TOP 1 'Purchase Contract',2,ld.intVendorEntityId,@intLocationId,@strReceiptNo,
+			@dtmReceiptDate,v.intCurrencyId,@intUserId,0,0,el.intEntityLocationId,l.strBLNumber,@intUserId,@intUserId
+			From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
+			Join tblLGLoadDetail ld on ld.intItemId=i.intItemId AND ld.strExternalShipmentItemNumber=ri.strDeliveryItemNo
+			Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
+			Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
+			Join tblLGLoad l on l.intLoadId=ld.intLoadId
+			Where ri.intStageReceiptId=@intMinRowNo AND ri.dblQuantity>0
+			 
+			SET @intReceiptId = SCOPE_IDENTITY();
+
+			--Receipt Items
+			Insert into tblICInventoryReceiptItem (intInventoryReceiptId,intLineNo,intOrderId,intSourceId,
+			intItemId,intContainerId,intSubLocationId,dblOrderQty,dblOpenReceive,intStorageLocationId,
+			intUnitMeasureId,intWeightUOMId,dblUnitCost,dblGross,dblNet,intConcurrencyId,dblLineTotal,dblUnitRetail,intCostUOMId)
+			Select @intReceiptId,ct.intContractDetailId,ct.intContractHeaderId,ld.intLoadDetailId,
+			i.intItemId,cl.intLoadContainerId,csl.intCompanyLocationSubLocationId,ri.dblQuantity,ri.dblQuantity,sl.intStorageLocationId,
+			iu.intItemUOMId,iu.intItemUOMId,ct.dblCashPrice,ri.dblQuantity,ri.dblQuantity,1,ri.dblQuantity * ct.dblCashPrice ,ct.dblCashPrice,ct.intPriceItemUOMId
 			From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
 			Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
 			Join tblICItemUOM iu on i.intItemId=iu.intItemId
-			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId AND um.strUnitMeasure=ri.strUOM
+			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId AND um.strUnitMeasure=dbo.fnIPConvertSAPUOMToi21(ri.strUOM)
 			Join tblLGLoadDetail ld on ld.intItemId=i.intItemId
 			Join tblSMCompanyLocationSubLocation csl on ri.strSubLocation=csl.strSubLocationName AND csl.intCompanyLocationId=@intLocationId
 			Join tblICStorageLocation sl on ri.strStorageLocation=sl.strName AND sl.intSubLocationId=csl.intCompanyLocationSubLocationId
-			Where ri.intStageReceiptId=@intMinRowNo AND ISNULL(ri.strHigherPositionRefNo,'')=''
+			Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
+			Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
+			Join tblCTContractDetail ct on ld.intPContractDetailId=ct.intContractDetailId
+			Join tblLGLoad l on l.intLoadId=ld.intLoadId
+			Join tblLGLoadDetailContainerLink cl on ld.intLoadDetailId=cl.intLoadDetailId AND cl.strExternalContainerId=ri.strDeliveryItemNo
+			Where ri.intStageReceiptId=@intMinRowNo AND ri.dblQuantity>0
 
-		--Lots
-		Insert Into @LotEntries(strReceiptType,intSourceType,intEntityVendorId,intLocationId,intCurrencyId,intShipFromId,
-					intItemId,intSubLocationId,intStorageLocationId,
-					intItemUnitMeasureId,dblQuantity)
-		Select strReceiptType,intSourceType,intEntityVendorId,intLocationId,intCurrencyId,intShipFromId,
-					intItemId,intSubLocationId,intStorageLocationId,
-					intItemUOMId,dblQty
-			From @ReceiptEntries
-
-			--Create Receipt
-			Exec [uspICAddItemReceipt]	 @ReceiptEntries	= @ReceiptEntries
-										,@OtherCharges		= NULL
-										,@intUserId			= NULL
-										,@LotEntries		= @LotEntries
-
-			IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
-			Begin
-				Select @intReceiptId=intInventoryReceiptId From #tmpAddItemReceiptResult
-				Select @strReceiptNo=strReceiptNumber From tblICInventoryReceipt Where intInventoryReceiptId=@intReceiptId
-			End
+			--Lots
+			Insert into tblICInventoryReceiptItemLot (intInventoryReceiptItemId,strLotNumber,intSubLocationId,intStorageLocationId,dblQuantity,
+			intItemUnitMeasureId,dblCost,dblGrossWeight,dblTareWeight,intConcurrencyId,strContainerNo)
+			Select ri.intInventoryReceiptItemId,c.strContainerNumber,ri.intSubLocationId,ri.intStorageLocationId,ri.dblNet,
+			ri.intWeightUOMId,ri.dblUnitCost,ri.dblNet,0,1,c.strContainerNumber
+			From tblICInventoryReceiptItem ri 
+			Join tblLGLoadContainer c on ri.intContainerId=c.intLoadContainerId
+			Where ri.intInventoryReceiptId=@intReceiptId
 
 			--Post Receipt
-			Exec [uspICPostInventoryReceipt]  @ysnPost					= 1
-											 ,@ysnRecap					= 0
-											 ,@strTransactionId			= @strReceiptNo
-											 ,@intEntityUserSecurityId	= NULL
+			Exec dbo.uspICPostInventoryReceipt 1,0,@strReceiptNo,@intUserId
 											 	
 		--Move to Archive
-		Insert Into tblIPReceiptArchive(strDeliveryNo,dtmReceiptDate,strImportStatus,strErrorMessage)
-		Select strDeliveryNo,dtmReceiptDate,'Success',''
+		Insert Into tblIPReceiptArchive(strDeliveryNo,strExternalRefNo,dtmReceiptDate,strImportStatus,strErrorMessage)
+		Select strDeliveryNo,strExternalRefNo,dtmReceiptDate,'Success',''
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
 		Select @intNewStageReceiptId=SCOPE_IDENTITY()
@@ -101,10 +113,11 @@ Begin
 			ROLLBACK TRANSACTION
 
 		SET @ErrMsg = ERROR_MESSAGE()
+		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 		----Move to Error
-		Insert Into tblIPReceiptError(strDeliveryNo,dtmReceiptDate,strImportStatus,strErrorMessage)
-		Select strDeliveryNo,dtmReceiptDate,'Failed',@ErrMsg
+		Insert Into tblIPReceiptError(strDeliveryNo,strExternalRefNo,dtmReceiptDate,strImportStatus,strErrorMessage)
+		Select strDeliveryNo,strExternalRefNo,dtmReceiptDate,'Failed',@ErrMsg
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
 		Select @intNewStageReceiptId=SCOPE_IDENTITY()
@@ -122,6 +135,8 @@ Begin
 
 	Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage Where intStageReceiptId>@intMinRowNo
 End
+
+If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 
 END TRY
 
