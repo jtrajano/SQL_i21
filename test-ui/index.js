@@ -381,6 +381,36 @@ Harness.start(
     { group: 'SmokeTesting',
         items: [
             {
+<<<<<<< HEAD
+=======
+                url: 'SmokeTesting/ICOpenScreens.js?v='+version,
+                title: 'ICOpenScreens',
+                preload: [
+                    functionalTest,
+                    commonIC,
+                    commonICST
+                ]
+            },
+            {
+                url: 'SmokeTesting/ICAddMaintenance.js?v='+version,
+                title: 'ICAddMaintenance',
+                preload: [
+                    functionalTest,
+                    commonIC,
+                    commonICST
+                ]
+            },
+            {
+                url: 'SmokeTesting/ICAddTransactions.js?v='+version,
+                title: 'ICAddTransactions',
+                preload: [
+                    functionalTest,
+                    commonIC,
+                    commonICST
+                ]
+            },
+            {
+>>>>>>> 6c9a49f... TS-2302
                 url: 'SmokeTesting/ICSmokeTests.js?v='+version,
                 title: 'ICSmokeTests',
                 preload: [
