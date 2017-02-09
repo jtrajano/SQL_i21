@@ -5014,6 +5014,8 @@
     <None Include="Scripts\Post-Deployment\CT\4_EventConfiguration.sql" />
     <Build Include="dbo\Tables\tblRKArchBlendDemand.sql" />
     <Build Include="dbo\Stored Procedures\GetDefaultData.sql" />
+    <Build Include="dbo\Functions\fnGetDebitForeign.sql" />
+    <Build Include="dbo\Functions\fnGetCreditForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
