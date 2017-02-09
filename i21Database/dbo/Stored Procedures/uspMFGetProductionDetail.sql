@@ -26,6 +26,8 @@ BEGIN
 		,L.intParentLotId 
 		,W.strBatchId 
 		,W.ysnFillPartialPallet 
+		,I.intCategoryId
+		,LS.strSecondaryStatus AS strLotStatus
 	FROM dbo.tblMFWorkOrderProducedLot W
 	Left JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -37,6 +39,7 @@ BEGIN
 	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId
+	LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	WHERE intWorkOrderId = @intWorkOrderId
 	ORDER BY W.intWorkOrderProducedLotId
 END
