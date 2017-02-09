@@ -381,8 +381,7 @@ Harness.start(
     { group: 'SmokeTesting',
         items: [
             {
-<<<<<<< HEAD
-=======
+
                 url: 'SmokeTesting/ICOpenScreens.js?v='+version,
                 title: 'ICOpenScreens',
                 preload: [
@@ -410,7 +409,6 @@ Harness.start(
                 ]
             },
             {
->>>>>>> 6c9a49f... TS-2302
                 url: 'SmokeTesting/ICSmokeTests.js?v='+version,
                 title: 'ICSmokeTests',
                 preload: [
