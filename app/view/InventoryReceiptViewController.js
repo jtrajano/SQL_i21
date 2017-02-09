@@ -1442,9 +1442,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onChargeCreateRecord: function (config, action) {
         var win = config.grid.up('window');
         //var current = win.viewModel.data.current;
-        //var currentCharge = win.viewModel.data.currentReceiptCharge;
+        var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        var strDefaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
+
         var record = Ext.create('Inventory.model.ReceiptCharge');
         record.set('strAllocateCostBy', 'Unit');
+        record.set('intCurrencyId', intDefaultCurrencyId);
+        record.set('strCurrency', strDefaultCurrency);
 
         action(record);
     },
@@ -2218,6 +2222,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var tax = currentReceiptItem.get('dblTax');
         var isSubCurrency = currentReceiptItem.get('ysnSubCurrency');
         var lineTotal = 0;
+        var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        var intCurrencyId = currentReceipt.get('intCurrencyId');
+        var dblForexRate = currentReceiptItem.get('dblForexRate');
 
         // sanitize the value for the sub currency.
         costCentsFactor = Ext.isNumeric(costCentsFactor) && costCentsFactor != 0 ? costCentsFactor : 1;
@@ -2254,6 +2261,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
             // {Line Total} = ( {Net Qty in Gross/Net UOM} x {New Cost} )
             lineTotal = (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
+        }
+
+        // Convert to the functional currency. 
+        if (intCurrencyId && intCurrencyId != defaultCurrency){
+            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+            lineTotal = lineTotal * dblForexRate; 
         }
 
         return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
@@ -2389,6 +2402,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     calculateOtherChargesTax: function(win) {
         var current = win.viewModel.data.current;
         var totalChargeTaxes = 0;
+        var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
 
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
@@ -2396,6 +2410,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
                         var otherChargeTax = charge.get('dblTax');  
+                        var intCurrencyId = charge.get('intCurrencyId');
+
+                        // Convert the amount to functional currency. 
+                        if (intCurrencyId && intCurrencyId != intDefaultCurrencyId){
+                            var dblForexRate = charge.get('dblForexRate');
+                            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
+                            otherChargeTax = otherChargeTax * dblForexRate; 
+                        }
+
+
                         totalChargeTaxes += otherChargeTax;
                     }
                 });
@@ -2408,6 +2432,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
         var totalCharges = 0;
         var lblCharges = win.down('#lblCharges');
+        var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
 
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
@@ -2415,6 +2440,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
                         var amount = charge.get('dblAmount');
+                        var intCurrencyId = charge.get('intCurrencyId');
+
+                        // Convert the amount to functional currency. 
+                        if (intCurrencyId && intCurrencyId != intDefaultCurrencyId){
+                            var dblForexRate = charge.get('dblForexRate');
+                            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
+                            amount = amount * dblForexRate; 
+                        }
 
                         if (charge.get('ysnPrice') === true) {
                             totalCharges -= amount;
@@ -4899,7 +4932,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblForexRate', null);
 
             iRely.Functions.getForexRate(
-                win.viewModel.data.current.get('intCurrencyId'),
+                //win.viewModel.data.current.get('intCurrencyId'),
+                current.get('intCurrencyId'),
                 current.get('intForexRateTypeId'),
                 win.viewModel.data.current.get('dtmReceiptDate'),
                 function(successResponse){
