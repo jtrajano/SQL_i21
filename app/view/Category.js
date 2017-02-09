@@ -325,6 +325,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                quantityField: true,
                                                                 itemId: 'txtStandardQty',
                                                                 fieldLabel: 'Standard Qty',
                                                                 labelWidth: 130
@@ -1129,6 +1130,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                quantityField: true,
                                                                 itemId: 'txtLifeTime',
                                                                 fieldLabel: 'Life Time (mins)',
                                                                 labelWidth: 160,
@@ -1137,6 +1139,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                quantityField: true,
                                                                 itemId: 'txtBOMItemShrinkage',
                                                                 fieldLabel: 'BOM Item Shrinkage',
                                                                 labelWidth: 160,
@@ -1145,6 +1148,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                quantityField: true,
                                                                 itemId: 'txtBOMItemUpperTolerance',
                                                                 fieldLabel: 'BOM Item Upper Tolerance',
                                                                 labelWidth: 160,
@@ -1153,6 +1157,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                quantityField: true,
                                                                 itemId: 'txtBOMItemLowerTolerance',
                                                                 fieldLabel: 'BOM Item Lower Tolerance',
                                                                 labelWidth: 160,
@@ -1202,6 +1207,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                currencyField: true,
                                                                 itemId: 'txtLaborCost',
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Labor Cost',
@@ -1211,6 +1217,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                quantityField: true,
                                                                 itemId: 'txtOverHead',
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Over Head',
@@ -1220,6 +1227,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                quantityField: true,
                                                                 itemId: 'txtPercentage',
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Percentage',
