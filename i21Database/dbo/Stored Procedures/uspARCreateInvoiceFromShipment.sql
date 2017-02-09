@@ -55,7 +55,7 @@ SELECT
 	,@Type						= 'Standard'
 	,@EntityCustomerId			= ICIS.[intEntityCustomerId]
 	,@CompanyLocationId			= ICIS.[intShipFromLocationId]	
-	,@CurrencyId				= ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))	
+	,@CurrencyId				= ISNULL((SELECT TOP 1 intCurrencyId FROM vyuARShippedItems WHERE intInventoryShipmentId = @ShipmentId AND intInventoryShipmentChargeId IS NOT NULL AND intCurrencyId IS nOT NULL),ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0)))
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
 	,@Date						= @DateOnly
@@ -313,6 +313,7 @@ FROM
 WHERE
 	ARSI.[strTransactionType] = 'Inventory Shipment'
 	AND ARSI.[intInventoryShipmentId] = @ShipmentId
+	AND ARSI.intEntityCustomerId = @EntityCustomerId
 
 UNION ALL
 
@@ -427,6 +428,7 @@ FROM
 	tblICInventoryShipment ICIS
 	INNER JOIN tblSOSalesOrder SO 
 		ON SO.strSalesOrderNumber = @strReferenceNumber
+		AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
 	INNER JOIN tblSOSalesOrderDetail SOD 
 		ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		AND SOD.intCommentTypeId IN (0,1,3)

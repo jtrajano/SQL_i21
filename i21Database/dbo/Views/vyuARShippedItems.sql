@@ -559,7 +559,7 @@ SELECT
 	,[strShippedItemId]					= 'icis:' + CAST(ICIS.[intInventoryShipmentId] AS NVARCHAR(250))
 	,[intEntityCustomerId]				= ICIS.[intEntityCustomerId]
 	,[strCustomerName]					= EME.[strName]
-	,[intCurrencyId]					= ISNULL(ISNULL(ARCC.[intCurrencyId], ARC.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
+	,[intCurrencyId]					= ISNULL((SELECT TOP 1 intCurrencyId FROM tblICInventoryShipmentCharge WHERE intInventoryShipmentId = ICIS.[intInventoryShipmentId] AND intCurrencyId IS nOT NULL),ISNULL(ISNULL(ARCC.[intCurrencyId], ARC.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0)))
 	,[intSalesOrderId]					= NULL
 	,[intSalesOrderDetailId]			= NULL
 	,[strSalesOrderNumber]				= ''
@@ -637,9 +637,9 @@ SELECT
 	,[strDestinationGrade]				= ISNULL(CTDG.[strDestinationGrade], ARCC.[strDestinationGrade])
 	,[intDestinationWeightId]			= ISNULL(ICISI.[intDestinationWeightId], ARCC.[intDestinationWeightId])
 	,[strDestinationWeight]				= ISNULL(CTDW.[strDestinationWeight], ARCC.[strDestinationWeight])
-	,[intSubCurrencyId]					= ARCC.[intSubCurrencyId]
-	,[dblSubCurrencyRate]				= ARCC.[dblSubCurrencyRate]
-	,[strSubCurrency]					= SMC.[strCurrency]
+	,[intSubCurrencyId]					= NULL
+	,[dblSubCurrencyRate]				= 1
+	,[strSubCurrency]					= ''
 FROM
 	tblICInventoryShipmentItem ICISI
 INNER JOIN
@@ -838,9 +838,9 @@ SELECT
 	,[strDestinationGrade]				= ''
 	,[intDestinationWeightId]			= NULL
 	,[strDestinationWeight]				= ''
-	,[intSubCurrencyId]					= ICISC.[intCurrencyId]
-	,[dblSubCurrencyRate]				= ICISC.[dblRate] 
-	,[strSubCurrency]					= SMC.[strCurrency]
+	,[intSubCurrencyId]					= NULL
+	,[dblSubCurrencyRate]				= 1
+	,[strSubCurrency]					= ''
 FROM
 	tblICInventoryShipmentCharge ICISC
 INNER JOIN
