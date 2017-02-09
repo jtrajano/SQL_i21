@@ -5006,8 +5006,6 @@
     <Build Include="dbo\Views\vyuTMLastLeakGasCheckTable.sql" />
     <Build Include="dbo\Views\vyuCTDocument.sql" />
     <Build Include="dbo\Views\vyuLGDashboardJDE.sql" />
-    <Build Include="dbo\Tables\tblSMOfflineMenu.sql" />
-    <Build Include="dbo\Tables\tblSMOfflineLog.sql" />
     <Build Include="dbo\Tables\tblSMApproverConfigurationForApprovalGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspARGLAccountReport.sql" />
   </ItemGroup>
