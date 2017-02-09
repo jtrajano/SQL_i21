@@ -5,6 +5,8 @@
     [dtmDate]          DATETIME        NULL,
     [dblDebit]         NUMERIC (18, 6) NULL,
     [dblCredit]        NUMERIC (18, 6) NULL,
+	[dblDebitForeign]        NUMERIC (18, 6) NULL,
+	[dblCreditForeign]        NUMERIC (18, 6) NULL,
     [dblDebitUnit]     NUMERIC (18, 6) NULL,
     [dblCreditUnit]    NUMERIC (18, 6) NULL,
     [strCode]          NVARCHAR (40)   COLLATE Latin1_General_CI_AS NULL,
