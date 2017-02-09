@@ -21,8 +21,8 @@ SELECT	Total.intCustomerId,
 			SELECT	intCustomerId = B.intCustomerPatronId,
 				B.intFiscalYear,
 				RR.intRefundTypeId,
-				dblRefundAmount = RRD.dblRate * dblVolume,
-				dblCashRefund = (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100),
+				dblRefundAmount = ROUND(RRD.dblRate * dblVolume,2),
+				dblCashRefund = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100),2),
 				RRD.intPatronageCategoryId
 				FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
@@ -55,9 +55,9 @@ SELECT  id = NEWID(),
 		dblCashPayout,
 		ysnQualified,
 		dtmLastActivityDate,
-		dblRefundAmount = SUM(ROUND(dblRefundAmount,2)),
-		dblCashRefund = SUM(ROUND(dblCashRefund,2)),
-		dblEquityRefund = SUM(ROUND(dblEquityRefund,2))
+		dblRefundAmount = SUM(dblRefundAmount),
+		dblCashRefund = SUM(dblCashRefund),
+		dblEquityRefund = SUM(dblEquityRefund)
 	FROM Refunds
 	CROSS APPLY ComPref
 	GROUP BY intCustomerId,
