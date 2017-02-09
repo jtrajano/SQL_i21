@@ -46,27 +46,29 @@ BEGIN TRY
 		INSERTBLOCK:
 		INSERT INTO tblCTContractFeed
 		(
-				intContractHeaderId,		intContractDetailId,		strCommodityCode,	strCommodityDesc,
-				strContractBasis,			strContractBasisDesc,		strSubLocation,		strCreatedBy,
-				strCreatedByNo,				strEntityNo,				strTerm,			strPurchasingGroup,
-				strContractNumber,			strERPPONumber,				intContractSeq,		strItemNo,
-				strStorageLocation,			dblQuantity,				dblCashPrice,		strQuantityUOM,
-				dtmPlannedAvailabilityDate,	dblBasis,					strCurrency,		dblUnitCashPrice,
-				strPriceUOM,				strRowState,				dtmContractDate,	dtmStartDate,	
-				dtmEndDate,					dtmFeedCreated,				strSubmittedBy,		strSubmittedByNo,
-				strOrigin,					dblNetWeight,				strNetWeightUOM,	strVendorAccountNum,
-				strTermCode,				strContractItemNo,			strContractItemName
+				intContractHeaderId,		intContractDetailId,		strCommodityCode,		strCommodityDesc,
+				strContractBasis,			strContractBasisDesc,		strSubLocation,			strCreatedBy,
+				strCreatedByNo,				strEntityNo,				strTerm,				strPurchasingGroup,
+				strContractNumber,			strERPPONumber,				intContractSeq,			strItemNo,
+				strStorageLocation,			dblQuantity,				dblCashPrice,			strQuantityUOM,
+				dtmPlannedAvailabilityDate,	dblBasis,					strCurrency,			dblUnitCashPrice,
+				strPriceUOM,				strRowState,				dtmContractDate,		dtmStartDate,	
+				dtmEndDate,					dtmFeedCreated,				strSubmittedBy,			strSubmittedByNo,
+				strOrigin,					dblNetWeight,				strNetWeightUOM,		strVendorAccountNum,
+				strTermCode,				strContractItemNo,			strContractItemName,	strERPItemNumber,			
+				strERPBatchNumber
 		)
-		SELECT	intContractHeaderId,		intContractDetailId,		strCommodityCode,	strCommodityDesc,
-				strContractBasis,			strContractBasisDesc,		strSubLocation,		strCreatedBy,
-				strCreatedByNo,				strEntityNo,				strTerm,			strPurchasingGroup,
-				strContractNumber,			strERPPONumber,				intContractSeq,		strItemNo,
-				strStorageLocation,			dblQuantity,				dblCashPrice,		strQuantityUOM,
-				dtmPlannedAvailabilityDate,	dblBasis,					strCurrency,		dblUnitCashPrice,	
-				strPriceUOM,				@strRowState,				dtmContractDate,	dtmStartDate,	
-				dtmEndDate,					GETDATE(),					strSubmittedBy,		strSubmittedByNo,
-				strOrigin,					dblNetWeight,				strNetWeightUOM,	strVendorAccountNum,
-				strTermCode,				strContractItemNo,			strContractItemName
+		SELECT	intContractHeaderId,		intContractDetailId,		strCommodityCode,		strCommodityDesc,
+				strContractBasis,			strContractBasisDesc,		strSubLocation,			strCreatedBy,
+				strCreatedByNo,				strEntityNo,				strTerm,				strPurchasingGroup,
+				strContractNumber,			strERPPONumber,				intContractSeq,			strItemNo,
+				strStorageLocation,			dblQuantity,				dblCashPrice,			strQuantityUOM,
+				dtmPlannedAvailabilityDate,	dblBasis,					strCurrency,			dblUnitCashPrice,	
+				strPriceUOM,				@strRowState,				dtmContractDate,		dtmStartDate,	
+				dtmEndDate,					GETDATE(),					strSubmittedBy,			strSubmittedByNo,
+				strOrigin,					dblNetWeight,				strNetWeightUOM,		strVendorAccountNum,
+				strTermCode,				strContractItemNo,			strContractItemName,	strERPItemNumber,			
+				strERPBatchNumber
 		FROM	vyuCTContractFeed
 		WHERE	intContractDetailId = @intContractDetailId
 
