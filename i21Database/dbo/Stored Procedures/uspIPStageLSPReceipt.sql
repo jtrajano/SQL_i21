@@ -11,7 +11,6 @@ BEGIN TRY
 		
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
-	DECLARE @intStageReceiptId int
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -20,17 +19,18 @@ BEGIN TRY
 
 	--Receipt
 	INSERT INTO tblIPReceiptStage(
-		 strDeliveryNo
-		,dtmReceiptDate
+		  strDeliveryNo
+		 ,strExternalRefNo
+		 ,dtmReceiptDate
 		)
 	SELECT   VBELN
+			,LIFEX
 			,CASE WHEN ISDATE(NTANF)=0 THEN NULL ELSE NTANF END
-	FROM OPENXML(@idoc, 'DELVRY07/IDOC/E1EDL20/E1EDL13', 2) WITH (
+	FROM OPENXML(@idoc, 'DELVRY07/IDOC/E1EDL20/E1EDT13', 2) WITH (
 			 VBELN NVARCHAR(100) '../VBELN' 
+			,LIFEX NVARCHAR(100) '../LIFEX' 
 			,NTANF DATETIME 
 			)
-
-	Select @intStageReceiptId=SCOPE_IDENTITY()
 
 	--Receipt Items
 	Insert Into tblIPReceiptItemStage(
@@ -44,25 +44,26 @@ BEGIN TRY
 		,strUOM
 		,strHigherPositionRefNo
 	)
-	SELECT 	 @intStageReceiptId
+	SELECT 	 s.intStageReceiptId
 			,POSNR  
 			,MATNR  
 			,WERKS  
 			,LGORT  
 			,CHARG  
-			,LFIMG  
+			,CASE WHEN ISNUMERIC(LFIMG)=1 THEN CAST(LFIMG AS NUMERIC(38,20)) ELSE 0.0 END
 			,VRKME  
 			,HIPOS 
 	FROM OPENXML(@idoc, 'DELVRY07/IDOC/E1EDL20/E1EDL24', 2) WITH (
-			 POSNR  NVARCHAR(100)
+			 VBELN NVARCHAR(100) COLLATE Latin1_General_CI_AS '../VBELN' 
+			,POSNR  NVARCHAR(100)
 			,MATNR  NVARCHAR(100)
 			,WERKS  NVARCHAR(100)
 			,LGORT  NVARCHAR(100)
 			,CHARG  NVARCHAR(100)
-			,LFIMG  NUMERIC(38,20)
+			,LFIMG  NVARCHAR(100)
 			,VRKME  NVARCHAR(100)
 			,HIPOS  NVARCHAR(100)
-			)
+			) x Join tblIPReceiptStage s on x.VBELN=s.strDeliveryNo
 
 	--Containers
 	Insert Into tblIPReceiptItemContainerStage(
@@ -74,21 +75,21 @@ BEGIN TRY
 		,dblQuantity
 		,strUOM
 	)
-	SELECT 	 @intStageReceiptId
+	SELECT 	 s.intStageReceiptId
 			,EXIDV   
 			,VHILM  
 			,VBELN   
 			,POSNR   
-			,VEMNG   
+			,CASE WHEN ISNUMERIC(VEMNG)=1 THEN CAST(VEMNG AS NUMERIC(38,20)) ELSE 0.0 END   
 			,VEMEH   
 	FROM OPENXML(@idoc, 'DELVRY07/IDOC/E1EDL20/E1EDL37/E1EDL44', 2) WITH (
 			 EXIDV   NVARCHAR(100) '../EXIDV' 
 			,VHILM   NVARCHAR(100) '../VHILM' 
-			,VBELN   NVARCHAR(100)
+			,VBELN   NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			,POSNR   NVARCHAR(100)
-			,VEMNG   NUMERIC(38,20)
+			,VEMNG   NVARCHAR(100)
 			,VEMEH   NVARCHAR(100)
-			)
+			) x Join tblIPReceiptStage s on x.VBELN=s.strDeliveryNo
 
 END TRY
 

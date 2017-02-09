@@ -19,7 +19,8 @@ Declare @intMinRowNo int,
 		@intEntityUserId int,
 		@intSourceId int=1,
 		@ErrMsg NVARCHAR(MAX),
-		@intMinRowNo1 int
+		@intMinRowNo1 int,
+		@strFinalErrMsg NVARCHAR(MAX)=''
 
 DECLARE @tblStock TABLE (
 [intRowNo] INT IDENTITY(1,1),
@@ -68,17 +69,21 @@ Begin
 			Select @intSubLocationId=intCompanyLocationSubLocationId 
 			From tblSMCompanyLocationSubLocation Where strSubLocationName=@strSubLocation AND intCompanyLocationId=@intMinRowNo1
 
-			Exec [uspICAdjustStockFromSAP]	 @dtmQtyChange			= NULL
-											,@intItemId				= @intItemId
-											,@strLotNumber			= 'FIFO'
-											,@intLocationId			= @intMinRowNo1
-											,@intSubLocationId		= @intSubLocationId
-											,@intStorageLocationId	= NULL
-											,@intItemUOMId			= NULL
-											,@dblNewQty				= 0
-											,@dblCost				= NULL 
-											,@intEntityUserId		= @intEntityUserId
-											,@intSourceId			= @intSourceId			
+			If EXISTS (Select 1 From tblICItemStock s Join tblICItemLocation il on s.intItemLocationId=il.intItemLocationId 
+					Where s.intItemId=@intItemId AND il.intLocationId=@intMinRowNo1)
+			Begin
+				Exec [uspICAdjustStockFromSAP]	 @dtmQtyChange			= NULL
+												,@intItemId				= @intItemId
+												,@strLotNumber			= 'FIFO'
+												,@intLocationId			= @intMinRowNo1
+												,@intSubLocationId		= @intSubLocationId
+												,@intStorageLocationId	= NULL
+												,@intItemUOMId			= NULL
+												,@dblNewQty				= 0
+												,@dblCost				= NULL 
+												,@intEntityUserId		= @intEntityUserId
+												,@intSourceId			= @intSourceId			
+			End
 
 			Select @intMinRowNo1=MIN(intCompanyLocationId) From tblSMCompanyLocation Where intCompanyLocationId<>@intLocationId AND intCompanyLocationId>@intMinRowNo1
 		End
@@ -98,6 +103,7 @@ Begin
 			ROLLBACK TRANSACTION
 
 		SET @ErrMsg = ERROR_MESSAGE()
+		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 		--Move to Error
 		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
@@ -109,6 +115,8 @@ Begin
 
 	Select @intMinRowNo=Min(intRowNo) From @tblStock Where intRowNo>@intMinRowNo
 End
+
+If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 
 END TRY
 

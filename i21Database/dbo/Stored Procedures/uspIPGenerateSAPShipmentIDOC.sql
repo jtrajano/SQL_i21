@@ -199,8 +199,13 @@ Begin
 	If @strTransactionType='Shipment'
 	Begin
 		If UPPER(@strCommodityCode)='COFFEE' AND @ysnBatchSplit=0
-			Update d Set d.strContainerNo=c.strContainerNumber From @tblDetail d Join tblLGLoadDetailContainerLink cl on d.intLoadDetailId=cl.intLoadDetailId 
-			Join tblLGLoadContainer c on c.intLoadContainerId=cl.intLoadContainerId
+			Begin
+				Update d Set d.strContainerNo=c.strContainerNumber From @tblDetail d Join tblLGLoadDetailContainerLink cl on d.intLoadDetailId=cl.intLoadDetailId 
+				Join tblLGLoadContainer c on c.intLoadContainerId=cl.intLoadContainerId
+
+				Update cl Set cl.strExternalContainerId=d.strDeliveryItemNo 
+				From tblLGLoadDetailContainerLink cl Join @tblDetail d on cl.intLoadDetailId=d.intLoadDetailId  Where cl.intLoadId=@intLoadId
+			End
 
 		If UPPER(@strCommodityCode)='COFFEE' AND @ysnBatchSplit=1
 			Update @tblDetail Set strContainerNo=''
