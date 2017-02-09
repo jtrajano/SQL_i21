@@ -44,6 +44,10 @@ BEGIN
 		[intTransactionId] [int] PRIMARY KEY,
 		UNIQUE (intTransactionId)
 	);
+	DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage';
+	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Refund';
+	DECLARE @MODULE_CODE NVARCHAR(5)  = 'PAT';
+
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 	
 
@@ -114,7 +118,7 @@ BEGIN
 		,[intEntityId] = @intUserId
 	FROM	tblGLDetail 
 	WHERE	intTransactionId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND ysnIsUnposted = 0
+	AND strModuleName = @MODULE_NAME AND strTransactionForm = @SCREEN_NAME AND strCode = @MODULE_CODE AND ysnIsUnposted = 0
 	ORDER BY intGLDetailId
 
 	RETURN
