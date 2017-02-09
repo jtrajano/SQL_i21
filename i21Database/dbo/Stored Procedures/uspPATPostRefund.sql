@@ -20,14 +20,15 @@ SET ANSI_WARNINGS OFF
 BEGIN TRANSACTION -- START TRANSACTION
 
 --DECLARE VARIABLES
-DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
-DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
-DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage'
-DECLARE @SCREEN_NAME NVARCHAR(25) = 'Refund'
-DECLARE @TRAN_TYPE NVARCHAR(25) = 'Refund'
-DECLARE @totalRecords INT
-DECLARE @GLEntries AS RecapTableType 
-DECLARE @error NVARCHAR(200)
+DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.';
+DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.';
+DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage';
+DECLARE @SCREEN_NAME NVARCHAR(25) = 'Refund';
+DECLARE @TRAN_TYPE NVARCHAR(25) = 'Refund';
+DECLARE @totalRecords INT;
+DECLARE @GLEntries AS RecapTableType;
+DECLARE @error NVARCHAR(200);
+DECLARE @batchId NVARCHAR(40);
 
 --=====================================================================================================================================
 --  VALIDATE REFUND DETAILS
@@ -101,6 +102,8 @@ BEGIN TRANSACTION
 -- 	CREATE GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 DECLARE @validRefundIds NVARCHAR(MAX)
 
@@ -114,7 +117,7 @@ DECLARE @intAdjustmentId INT
 IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId)
+	SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId, @batchId)
 
 ---------------------FORCE BALANCING------------------------------------------------
 --check out of balance 
