@@ -427,12 +427,33 @@ Harness.start(
         ]
     },
 
-
-
-
     {
         group: 'BusinessDomain',
         items: [
+
+            {
+                group: 'InventoryReceipt',
+                items: [
+
+                    {
+                        group: 'DirectInventoryReceipt',
+                        items: [
+                            {
+                                url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR1.js?v=' + version,
+                                title: 'DirectIR-Scen.1&2',
+                                preload: [
+                                    functionalTest,
+                                    commonIC
+
+                                ]
+                            }
+
+                        ]
+                    }
+                        ]
+
+
+            },
             {
                 group: 'StockChecking',
                 items: [
