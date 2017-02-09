@@ -316,7 +316,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "displayField": null,
+                                                "displayField": "value",
                                                 "fieldLabel": "Decimals",
                                                 "itemId": "cboDecimals",
                                                 "labelWidth": 57,
@@ -324,7 +324,7 @@
                                                 "margin": null,
                                                 "maxWidth": 110,
                                                 "minWidth": 110,
-                                                "valueField": null,
+                                                "valueField": "value",
                                                 "width": 110
                                             },
                                             "name": "MyComboBox77",

@@ -31,7 +31,6 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'i21.store.CountryBufferedStore',
         'i21.store.PurchasingGroupBuffered'
     ],
-
     stores: {
         purchasinggroups: {
             type: 'smpurchasinggroupbuffered',

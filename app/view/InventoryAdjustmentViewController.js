@@ -325,6 +325,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intItemId',
                                 value: '{grdInventoryAdjustment.selection.intItemId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'dblOnHand',
+                                value: 0,
+                                conjunction: 'and',
+                                condition: 'noteq'
                             }
                         ],
                         readOnly: '{formulaShowItemUOMEditor}'
@@ -1557,8 +1563,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboSubLocation": {
-                select: this.onAdjustmentDetailSelect,
-                change: this.onSubLocationChange
+                select: this.onAdjustmentDetailSelect
             },
             "#cboUOM": {
                 select: this.onAdjustmentDetailSelect,

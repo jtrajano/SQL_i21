@@ -962,6 +962,32 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         dataIndex: 'dblUnitQty',
                                                         dataType: 'float',
                                                         hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'dblOnHand',
+                                                        dataType: 'float',
+                                                        text: 'On Hand',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'intSubLocationId',
+                                                        dataType: 'numeric',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strSubLocationName',
+                                                        dataType: 'string',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'intStorageLocationId',
+                                                        dataType: 'numeric',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strStorageLocationName',
+                                                        dataType: 'string',
+                                                        hidden: true
                                                     }
                                                 ],
                                                 itemId: 'cboUOM',

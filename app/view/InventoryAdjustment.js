@@ -666,27 +666,27 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 {
                                                                     dataIndex: 'intStorageLocationId',
                                                                     dataType: 'float',
-                                                                    text: 'Unit Qty',
+                                                                    text: 'Storage Location Id',
                                                                     flex: 1,
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Unit Type',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'float',
-                                                                    text: 'Unit Qty',
+                                                                    text: 'Sub Location Id',
                                                                     flex: 1,
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Unit Type',
+                                                                    text: 'Sub Location',
                                                                     flex: 1
                                                                 },
                                                                 
