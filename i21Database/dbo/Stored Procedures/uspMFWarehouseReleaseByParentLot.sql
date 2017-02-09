@@ -13,6 +13,9 @@ BEGIN
 		,@intReleaseStatusId int
 		,@intLocationId int
 		,@dtmCurrentDate DATETIME
+		,@intWorkOrderId int
+		,@intManufacturingProcessId int
+		,@strAttributeValueByWorkOrder nvarchar(50)
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -22,19 +25,44 @@ BEGIN
 	SELECT @intParentLotId = intParentLotId
 			,@intReleaseStatusId=intReleaseStatusId
 			,@intLocationId=intLocationId
-	FROM OPENXML(@idoc, 'root', 2) WITH (intParentLotId INT,intReleaseStatusId int,intLocationId int)
+			,@intWorkOrderId=intWorkOrderId
+	FROM OPENXML(@idoc, 'root', 2) WITH (intParentLotId INT,intReleaseStatusId int,intLocationId int,intWorkOrderId int)
+
+	Select @intManufacturingProcessId=intManufacturingProcessId from tblMFWorkOrder Where intWorkOrderId =@intWorkOrderId
+
+	SELECT @strAttributeValueByWorkOrder = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 91
+
+		if @strAttributeValueByWorkOrder is null or @strAttributeValueByWorkOrder=''
+		Select @strAttributeValueByWorkOrder='False'
 
 	DECLARE @tblMFParentLot TABLE (
 		intRecordId INT identity(1, 1)
 		,intLotId INT
 		)
 
-	INSERT INTO @tblMFParentLot (intLotId)
-	SELECT L.intLotId
-	FROM dbo.tblICLot L
-	WHERE L.intParentLotId = @intParentLotId
-		AND L.intLotStatusId = 3
-		AND L.dblQty>0
+	IF @strAttributeValueByWorkOrder='True'
+	BEGIN
+		INSERT INTO @tblMFParentLot (intLotId)
+		SELECT Distinct L.intLotId
+		FROM dbo.tblMFWorkOrderProducedLot  PL
+		JOIN dbo.tblICLot L on L.intLotId=PL.intLotId
+		WHERE PL.intWorkOrderId = @intWorkOrderId
+			AND L.intLotStatusId = 3
+			AND L.dblQty>0
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblMFParentLot (intLotId)
+		SELECT L.intLotId
+		FROM dbo.tblICLot L
+		WHERE L.intParentLotId = @intParentLotId
+			AND L.intLotStatusId = 3
+			AND L.dblQty>0
+	END
 
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFParentLot

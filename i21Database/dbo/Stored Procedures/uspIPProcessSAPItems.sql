@@ -8,13 +8,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+Declare @intMinItem INT
 Declare @strItemNo nvarchar(50)
 Declare @strItemType nvarchar(50)
 Declare @strSKUItemNo nvarchar(50)
 Declare @intCommodityId int
 Declare @intCategoryId int
 Declare @strCommodity nvarchar(50)
-Declare @strItemPart nvarchar(8)
 Declare @intItemId int
 Declare @strStockUOM nvarchar(50)
 Declare @ErrMsg nvarchar(max)
@@ -26,12 +26,27 @@ Declare @strJson NVARCHAR(Max)
 Declare @dtmDate DateTime
 Declare @intUserId Int
 Declare @strUserName NVARCHAR(100)
+Declare @strFinalErrMsg NVARCHAR(MAX)=''
 
-Select TOP 1 @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
-@strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage
+Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
 
-If ISNULL(@intStageItemId,0)=0
-	RaisError('No data found.',16,1)
+While(@intMinItem is not null)
+Begin
+Begin Try
+
+Set @intItemId=NULL
+Set @intCategoryId=NULL
+Set @intCommodityId=NULL
+Set @strCommodity=NULL
+Set @strItemNo=NULL
+Set @strItemType=NULL
+Set @strSKUItemNo=NULL
+Set @strStockUOM=NULL
+Set @strDescription=NULL
+Set @ysnDeleted=0
+
+Select @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
+@strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage Where intStageItemId=@intMinItem
 
 Select @intCategoryId=intCategoryId From tblICCategory Where strCategoryCode=@strItemType
 
@@ -95,6 +110,9 @@ Else
 Begin --Inventory Item
 If ISNULL(@intItemId,0)=0 --Create
 Begin
+	If Not Exists (Select 1 From tblIPItemUOMStage Where intStageItemId=@intStageItemId)
+	RaisError('UOM is required.',16,1)
+
 	Insert Into tblICItem(strItemNo,strDescription,strShortName,strType,strLotTracking,strInventoryTracking,intCategoryId,intCommodityId,strStatus,intLifeTime)
 	Select strItemNo,strDescription,LEFT(strDescription,50),'Inventory','Yes - Manual/Serial Number','Lot Level',@intCategoryId,@intCommodityId,'Active',0
 	From tblIPItemStage Where strItemNo=@strItemNo AND intStageItemId=@intStageItemId
@@ -173,6 +191,7 @@ BEGIN CATCH
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()
+	SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 	--Move to Error
 	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strErrorMessage,strImportStatus)
@@ -187,6 +206,17 @@ BEGIN CATCH
 
 	Delete From tblIPItemStage Where intStageItemId=@intStageItemId
 	Delete From tblIPItemUOMStage Where intStageItemId=@intStageItemId
+END CATCH
+
+	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem
+End
+
+If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
+
+END TRY
+
+BEGIN CATCH
+	SET @ErrMsg = ERROR_MESSAGE()
 
 	RAISERROR (
 			@ErrMsg

@@ -37,6 +37,7 @@ BEGIN TRY
 	DECLARE @intTaskRecordId INT
 	DECLARE @dblTotalTaskWeight NUMERIC(18, 6)
 	DECLARE @dblLineItemWeight NUMERIC(18, 6)
+			,@intCategoryId int
 	DECLARE @tblTaskGenerated TABLE (
 		intTaskRecordId INT Identity(1, 1)
 		,intItemId INT
@@ -48,6 +49,21 @@ BEGIN TRY
 		,@intEntityCustomerId INT
 		,@intItemOwnerId INT
 		,@ysnPickByItemOwner BIT
+		,@intPackagingCategoryId int
+		,@strPackagingCategory nvarchar(50)
+		,@intPMCategoryId int
+
+	SELECT @intPackagingCategoryId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Packaging Category'
+
+	SELECT @strPackagingCategory = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = @intPackagingCategoryId
+
+	Select @intPMCategoryId=intCategoryId 
+	From tblICCategory
+	Where strCategoryCode =@strPackagingCategory
 
 	SELECT @intReceivedLife = 0
 		,@ysnPickByItemOwner = 0
@@ -104,6 +120,7 @@ BEGIN TRY
 			,intWeightUOMId INT
 			,ysnStrictTracking BIT
 			,intLotId INT
+			,intCategoryId int
 			)
 		DECLARE @tblLot TABLE (
 			intLotRecordId INT Identity(1, 1)
@@ -156,6 +173,7 @@ BEGIN TRY
 			,intWeightUOMId
 			,ysnStrictTracking
 			,intLotId
+			,intCategoryId 
 			)
 		SELECT DISTINCT oh.intOrderHeaderId
 			,oli.intOrderDetailId
@@ -176,6 +194,7 @@ BEGIN TRY
 			,oli.intWeightUOMId
 			,i.ysnStrictFIFO
 			,oli.intLotId
+			,i.intCategoryId 
 		FROM tblMFOrderHeader oh
 		JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 		JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -195,6 +214,7 @@ BEGIN TRY
 			SET @ysnStrictTracking = NULL
 			SET @dblQty = NULL
 			SET @intLineItemLotId = NULL
+			Select @intCategoryId=NULL
 
 			DELETE
 			FROM @tblLot
@@ -205,7 +225,8 @@ BEGIN TRY
 				,@dblRequiredWeight = dblRequiredWeight
 				,@ysnStrictTracking = ysnStrictTracking
 				,@intLineItemLotId = intLotId
-			FROM @tblLineItem
+				,@intCategoryId =intCategoryId 
+			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
 			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
@@ -218,6 +239,14 @@ BEGIN TRY
 				FROM tblMFItemOwner
 				WHERE intOwnerId = @intEntityCustomerId
 					AND intItemId = @intItemId
+
+				IF @intReceivedLife = 0
+					OR @intReceivedLife IS NULL
+				BEGIN
+					SELECT @intReceivedLife = intReceivedLife
+					FROM tblMFItemOwner
+					WHERE intOwnerId = @intEntityCustomerId
+				END
 
 				IF @intReceivedLife = 0
 					OR @intReceivedLife IS NULL
@@ -822,6 +851,21 @@ BEGIN TRY
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
+				If @intCategoryId<>@intPMCategoryId and @strOrderType = 'WO PROD STAGING'
+				Begin
+					EXEC [uspMFCreatePickTask] @intOrderHeaderId = @intOrderHeaderId
+						,@intLotId = @intLotId
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
+						,@intItemId=@intItemId
+
+					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
+
+					IF @dblRequiredWeight <= 0
+					BEGIN
+						BREAK;
+					END
+				End
+
 				IF (@dblRemainingLotWeight > @dblRequiredWeight)
 					AND (@dblRequiredWeight > (@dblRemainingLotWeight / 2))
 				BEGIN
@@ -833,6 +877,7 @@ BEGIN TRY
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@dblSplitAndPickWeight = @dblRequiredWeight
 						,@intTaskTypeId = 2
+						,@intItemId=@intItemId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 
@@ -847,6 +892,7 @@ BEGIN TRY
 					EXEC [uspMFCreatePickTask] @intOrderHeaderId = @intOrderHeaderId
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
+						,@intItemId=@intItemId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
 
@@ -869,6 +915,7 @@ BEGIN TRY
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
 							,@dblSplitAndPickWeight = @dblRemainingLotWeight
 							,@intTaskTypeId = 2
+							,@intItemId=@intItemId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 					END
@@ -879,6 +926,7 @@ BEGIN TRY
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
 							,@dblSplitAndPickWeight = @dblRequiredWeight
 							,@intTaskTypeId = 2
+							,@intItemId=@intItemId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
 					END
@@ -994,7 +1042,7 @@ BEGIN TRY
 		FROM @tblTaskGenerated
 		WHERE intTaskRecordId = @intTaskRecordId
 
-		IF (@dblTotalTaskWeight <> @dblLineItemWeight)
+		IF (@dblTotalTaskWeight < @dblLineItemWeight)
 		BEGIN
 			SET @ysnAllTasksNotGenerated = 1
 

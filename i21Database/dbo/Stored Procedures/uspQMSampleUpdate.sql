@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE uspQMSampleUpdate
-	 @strXml NVARCHAR(Max)
+﻿CREATE PROCEDURE uspQMSampleUpdate @strXml NVARCHAR(Max)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -267,6 +266,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -305,6 +305,11 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,CASE 
+			WHEN strPropertyValue <> ''
+				THEN GETDATE()
+			ELSE NULL
+			END AS dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -361,6 +366,16 @@ BEGIN TRY
 		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
+		,dtmPropertyValueCreated = (
+			CASE 
+				WHEN (
+						dtmPropertyValueCreated IS NULL
+						AND x.strPropertyValue <> ''
+						)
+					THEN GETDATE()
+				ELSE dtmPropertyValueCreated
+				END
+			)
 	FROM OPENXML(@idoc, 'root/TestResult', 2) WITH (
 			intTestResultId INT
 			,intProductTypeId INT

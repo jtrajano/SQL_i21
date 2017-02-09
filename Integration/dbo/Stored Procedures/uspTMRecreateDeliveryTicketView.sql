@@ -111,11 +111,15 @@ BEGIN
 				ON A.intTaxStateID = R.A4GLIdentity
 			LEFT JOIN vwlclmst S
 				ON C.intTaxId = S.A4GLIdentity
-			OUTER APPLY (
-				SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-				WHERE intSiteId = A.intSiteID
-					AND intCurrentSeasonYear = intSeasonYear
+			LEFT JOIN (
+				SELECT 
+					intSiteId
+					,dblTotalGallons = SUM(dblTotalGallons) 
+				FROM vyuTMSiteDeliveryHistoryTotal 
+				WHERE intCurrentSeasonYear = intSeasonYear
+				GROUP BY intSiteId,intCurrentSeasonYear,intSeasonYear
 			)HH
+				ON A.intSiteID = HH.intSiteId
 		')
 	END
 	ELSE
@@ -234,11 +238,15 @@ BEGIN
 				AND Q.intCntId = 1
 			LEFT JOIN tblSMTaxGroup R
 				ON A.intTaxStateID = R.intTaxGroupId
-			OUTER APPLY (
-				SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-				WHERE intSiteId = A.intSiteID
-					AND intCurrentSeasonYear = intSeasonYear
+			LEFT JOIN (
+				SELECT 
+					intSiteId
+					,dblTotalGallons = SUM(dblTotalGallons) 
+				FROM vyuTMSiteDeliveryHistoryTotal 
+				WHERE intCurrentSeasonYear = intSeasonYear
+				GROUP BY intSiteId,intCurrentSeasonYear,intSeasonYear
 			)HH
+				ON A.intSiteID = HH.intSiteId
 		')
 	END
 END

@@ -402,5 +402,6 @@
     <None Include="dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportTruck.sql" />
     <None Include="dbo\Stored Procedures\uspMFImportRecipe.sql" />
+    <None Include="dbo\Stored Procedures\uspTRImportSupplyPoint.sql" />
   </ItemGroup>
 </Project>

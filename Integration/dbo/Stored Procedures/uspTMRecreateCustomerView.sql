@@ -158,11 +158,15 @@ BEGIN
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
-				OUTER APPLY (
-					SELECT TOP 1 agtrm_desc 
-					FROM agtrmmst 
-					WHERE agtrm_key_n = A.agcus_terms_cd  
+				LEFT JOIN (
+					SELECT 
+						agtrm_desc
+						,agtrm_key_n
+						,intRecCountId = ROW_NUMBER() OVER(PARTITION BY agtrm_key_n ORDER BY A4GLIdentity)
+					FROM agtrmmst
 				) C 
+				ON  C.agtrm_key_n = A.agcus_terms_cd  
+					AND C.intRecCountId = 1
 				')
 		END
 		-- PT VIEW
@@ -304,11 +308,15 @@ BEGIN
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
-				OUTER APPLY (
-					SELECT TOP 1 pttrm_desc 
+				LEFT JOIN (
+					SELECT 
+						pttrm_desc
+						,pttrm_code
+						,intRecCountId = ROW_NUMBER() OVER(PARTITION BY pttrm_code ORDER BY A4GLIdentity)
 					FROM pttrmmst
-					WHERE pttrm_code = A.ptcus_terms_code  
 				) C 
+				ON  C.pttrm_code = A.ptcus_terms_code  
+					AND C.intRecCountId = 1
 				')
 		END
 	END

@@ -73,7 +73,7 @@ ELSE
 			 [strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]			
-			,[strDescription]		=  A.[strDescription]
+			,[strDescription]		=  A.strJournalLineDescription
 			,[strReference]			
 			,[dtmTransactionDate]	
 			,[dblDebit]				= [dblCredit]

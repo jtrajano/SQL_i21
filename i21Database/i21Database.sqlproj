@@ -4987,7 +4987,6 @@
     <Build Include="dbo\Tables\tblSMApproverConfiguration.sql" />
     <Build Include="dbo\Tables\tblSMApproverConfigurationDetail.sql" />
     <Build Include="dbo\Tables\tblSMApproverConfigurationApprovalFor.sql" />
-    <Build Include="dbo\Tables\tblSMApproverConfigurationForTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspLGLoadContractUnSlice.sql" />
     <Build Include="dbo\Tables\tblMFReportCategoryByCustomer.sql" />
@@ -5010,6 +5009,10 @@
     <Build Include="dbo\Views\vyuLGDashboardJDE.sql" />
     <Build Include="dbo\Functions\fnGetDebitForeign.sql" />
     <Build Include="dbo\Functions\fnGetCreditForeign.sql" />
+    <Build Include="dbo\Tables\tblSMOfflineMenu.sql" />
+    <Build Include="dbo\Tables\tblSMOfflineLog.sql" />
+    <Build Include="dbo\Tables\tblSMApproverConfigurationForApprovalGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGLAccountReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5201,5 +5204,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\23_ApproverConfigurationApprovalFor.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\24_OfflineMenu.sql" />
   </ItemGroup>
 </Project>

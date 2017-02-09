@@ -13,7 +13,8 @@ SELECT strJournalType,
            e.strName strUserName,
            total.dblCredit,
            total.dblDebit,
-		   strCurrency
+		   strCurrency,
+		   ysnRecurringTemplate
    FROM tblGLJournal j
    OUTER APPLY (SELECT  j.strJournalId,
           SUM(ISNULL(d.dblCredit,0.0)) dblCredit,

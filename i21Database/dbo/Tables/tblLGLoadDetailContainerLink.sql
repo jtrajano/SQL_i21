@@ -17,6 +17,7 @@
 [dtmIntegrationRequested] DATETIME NULL,
 [strIntegrationOrderNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
 [dblIntegrationOrderPrice] NUMERIC(18, 6) NULL,
+[strExternalContainerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [ysnExported] [bit] NULL,
 [dtmExportedDate] DATETIME NULL,
 [dtmIntegrationOrderDate] DATETIME NULL,

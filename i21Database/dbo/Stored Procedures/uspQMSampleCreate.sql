@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE uspQMSampleCreate
-	 @strXml NVARCHAR(Max)
+﻿CREATE PROCEDURE uspQMSampleCreate @strXml NVARCHAR(Max)
 	,@strSampleNumber NVARCHAR(30) OUTPUT
 	,@intSampleId INT OUTPUT
 AS
@@ -423,6 +422,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -461,6 +461,11 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,CASE 
+			WHEN strPropertyValue <> ''
+				THEN GETDATE()
+			ELSE NULL
+			END AS dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
