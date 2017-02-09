@@ -2,7 +2,8 @@
 (
 	@transactionIds NVARCHAR(MAX),
 	@intUserId INT,
-	@apClearing	INT
+	@apClearing	INT,
+	@batchId NVARCHAR(40)
 )
 RETURNS @returntable TABLE
 (
@@ -55,15 +56,15 @@ BEGIN
 	--UNDISTRIBUTED EQUITY
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-		[strBatchID]					=	'',
+		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intUndistributedEquityId,
 		[dblDebit]						=	0,
 		[dblCredit]						=	ROUND(B.dblEquityRefund,2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strRefund,
+		[strDescription]				=	A.strRefundNo,
 		[strCode]						=	'PAT',
-		[strReference]					=	A.strRefund,
+		[strReference]					=	A.strRefundNo,
 		[intCurrencyId]					=	0,
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
@@ -73,7 +74,7 @@ BEGIN
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
 		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.strRefund, 
+		[strTransactionId]				=	A.strRefundNo, 
 		[intTransactionId]				=	A.intRefundId, 
 		[strTransactionType]			=	'Undistributed Equity',
 		[strTransactionForm]			=	@SCREEN_NAME,
@@ -95,15 +96,15 @@ BEGIN
 	--AP Clearing
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-		[strBatchID]					=	'',
+		[strBatchID]					=	@batchId,
 		[intAccountId]					=	@apClearing, 
 		[dblDebit]						=	0,
 		[dblCredit]						=	ROUND(B.dblCashRefund,2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strRefund,
+		[strDescription]				=	A.strRefundNo,
 		[strCode]						=	'PAT',
-		[strReference]					=	A.strRefund,
+		[strReference]					=	A.strRefundNo,
 		[intCurrencyId]					=	0,
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
@@ -113,7 +114,7 @@ BEGIN
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
 		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.strRefund, 
+		[strTransactionId]				=	A.strRefundNo, 
 		[intTransactionId]				=	A.intRefundId, 
 		[strTransactionType]			=	'AP Clearing',
 		[strTransactionForm]			=	@SCREEN_NAME,
@@ -135,15 +136,15 @@ BEGIN
 	--GENERAL RESERVE
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-		[strBatchID]					=	'',
+		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intGeneralReserveId,
 		[dblDebit]						=	ROUND(B.dblRefundAmount,2),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strRefund,
+		[strDescription]				=	A.strRefundNo,
 		[strCode]						=	'PAT',
-		[strReference]					=	A.strRefund,
+		[strReference]					=	A.strRefundNo,
 		[intCurrencyId]					=	0,
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
@@ -153,7 +154,7 @@ BEGIN
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
 		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.strRefund, 
+		[strTransactionId]				=	A.strRefundNo, 
 		[intTransactionId]				=	A.intRefundId, 
 		[strTransactionType]			=	'General Reserve',
 		[strTransactionForm]			=	@SCREEN_NAME,
