@@ -24,6 +24,7 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         var selection = grid.selection;
 
         this.setupCombobox(me, cbo);
+        this.setupTextboxEvents(txt);
     },
 
     constructor: function(config) {
@@ -39,26 +40,102 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         var selection = grid.selection;
 
         var value = txt.getValue();
+        var decimals = me.getExpectedDecimals();
+
+        var n = me.setupQuantity(txt, value, decimals);
+        return n ? n.precisionValue : value;
+    },
+
+    getExpectedDecimals: function() {
+        var me = this;
+        var panel = me.items.items[0];
+        var cbo = panel.items.items[1];
+        var txt = panel.items.items[0];
+        var grid = me.column.container.component.grid;
+        var selection = grid.selection;
+
         var selectedDecimals = me.getSelectedDecimals(cbo);
         var decimals = me.getBoundDecimals(me, selection);
         decimals = selectedDecimals ? selectedDecimals : decimals;
+        return decimals;
+    },
 
-        /*  ===========================================================
-            =       Detect changes and format decimal precision       =
-            ===========================================================
-            TODO: This code block is kinda problematic.
-        *   Issue: Sometimes, when click the editor multiple times, 
-                the decimal part is lost.
-        */
-        if(txt.lastValue) {
-            if(txt.lastValue !== value) {
-                var lastValue = txt.lastValue;
-                value = me.getPrecisionNumber(lastValue, decimals);
-            }
+    setValue: function(value) {
+        var me = this;
+        var panel = me.items.items[0];
+        var cbo = panel.items.items[1];
+        var txt = panel.items.items[0];
+        me.resetValues();
+        var grid = me.column.container.component.grid;
+        var selection = grid.selection;
+
+        var currentValue = {
+            quantity: value,
+            id: selection.get(me.getValueField()),
+            uom: selection.get(me.getDisplayField())
+        };
+        
+        cbo.setValue(currentValue.id);
+        cbo.setRawValue(currentValue.uom);
+
+        var n = me.setupQuantity(txt, currentValue.quantity, me.getExpectedDecimals());
+        txt.setValue(n ? n.precisionValue : currentValue.quantity);
+    },
+
+    setupQuantity: function(txt, value, decimals) {
+        var numObj = this.getPrecisionNumberObject(value, decimals);
+        txt.setDecimalPrecision(numObj.precision);
+        txt.setDecimalToDisplay(numObj.decimalPlaces); 
+        return numObj;  
+    },
+
+    onSelect: function(combo, records, options) {
+        var me = this.up('panel');
+        var column = me.column;
+        var txt = me.items.items[0].items.items[0];
+        var grid = column.container.component.grid;
+        var selection = grid.selection;
+        if(records.length > 0) {
+            var value = records[0].get(me.getLookupValueField());
+            var display = records[0].get(me.getLookupDisplayField());
+            var decimals = records[0].get(me.getLookupDecimalPrecisionField());
+            decimals = decimals ? decimals : me.defaultDecimals;
+
+            if(value)
+                selection.set(me.getUpdateField(), value);
+            if(display)
+                selection.set(me.getDisplayField(), display);
+            selection.set(column.decimalPrecisionField, decimals);
+            
+            me.updateExtraFields(selection, records[0]);
+            var n = me.setupQuantity(txt, txt.getValue(), decimals);
+            var oldValue = txt.getValue();
+            txt.setValue(n ? n.precisionValue : oldValue);
         }
-        me.setupQuantity(txt, value, decimals);
+    },
 
-        return value;
+    resetValues: function() {
+        var me = this;
+        var panel = me.items.items[0];
+        var cbo = panel.items.items[1];
+        var txt = panel.items.items[0];
+
+        txt.setDecimalPrecision(this.defaultDecimals ? this.defaultDecimals : 6);
+        txt.setDecimalToDisplay(this.defaultDecimals ? this.defaultDecimals : 6);
+        cbo.setValue(null);
+        cbo.setRawValue(null);
+    },
+
+    updateExtraFields: function(currentRecord, lookupRecord) {
+        var me = this;
+        if(me.extraUpdateFields) {
+            _.each(me.extraUpdateFields, function(f) {
+                if(f.sourceField && f.lookupField) {
+                    var rec = lookupRecord.get(f.lookupField);
+                    currentRecord.set(f.sourceField, rec);
+                }
+            });
+        }
     },
 
     getBoundDecimals: function(me, data) {
@@ -81,34 +158,6 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
                 return decimals;
         }
         return null;
-    },
-
-    setValue: function(value) {
-        var me = this;
-        var panel = me.items.items[0];
-        var cbo = panel.items.items[1];
-        var txt = panel.items.items[0];
-        var grid = me.column.container.component.grid;
-        var selection = grid.selection;
-        var decimals = me.getBoundDecimals(me, selection);
-
-        var currentValue = {
-            quantity: value,
-            id: selection.get(me.getValueField()),
-            uom: selection.get(me.getDisplayField())
-        };
-        
-        cbo.setValue(currentValue.id);
-        cbo.setRawValue(currentValue.uom);
-
-        txt.setValue(currentValue.quantity);
-        me.setupQuantity(txt, currentValue.quantity, decimals);
-    },
-
-    setupQuantity: function(txt, value, decimals) {
-        var numObj = this.getPrecisionNumberObject(value, decimals);
-        txt.setDecimalPrecision(numObj.precision);
-        txt.setDecimalToDisplay(numObj.decimalPlaces);    
     },
 
     setupCombobox: function(me, cbo) {
@@ -170,6 +219,17 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         cbo.on('expand', this.onDropdown);
     },
 
+    setupTextboxEvents: function(txt) {
+        txt.on('blur', this.onBlur);
+    },
+
+    onBlur: function(field, event) {
+        var me = this.up('panel');
+        var n = me.setupQuantity(field, field.lastValue, field.decimalPrecision);
+        var origValue = field.getValue();
+        field.setValue(n ? n.precisionValue : origValue);
+    },
+
     onDropdown: function(combo) {
         var me = this.up('panel');
         var store = combo.getStore();
@@ -180,42 +240,6 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
                     
                 }
             });
-    },
-
-    onSelect: function(combo, records, options) {
-        var me = this.up('panel');
-        var column = me.column;
-        var txt = me.items.items[0].items.items[0];
-        var grid = column.container.component.grid;
-        var selection = grid.selection;
-        if(records.length > 0) {
-            var value = records[0].get(me.getLookupValueField());
-            var display = records[0].get(me.getLookupDisplayField());
-            var decimals = records[0].get(me.getLookupDecimalPrecisionField());
-            decimals = decimals ? decimals : me.defaultDecimals;
-
-            if(value)
-                selection.set(me.getUpdateField(), value);
-            if(display)
-                selection.set(me.getDisplayField(), display);
-            selection.set(column.decimalPrecisionField, decimals);
-            
-            me.updateExtraFields(selection, records[0]);
-            
-            me.setupQuantity(txt, value, decimals); 
-        }
-    },
-
-    updateExtraFields: function(currentRecord, lookupRecord) {
-        var me = this;
-        if(me.extraUpdateFields) {
-            _.each(me.extraUpdateFields, function(f) {
-                if(f.sourceField && f.lookupField) {
-                    var rec = lookupRecord.get(f.lookupField);
-                    selection.set(f.sourceField, rec);
-                }
-            });
-        }
     },
 
     setupComboboxFilters: function(me, cbo) {
@@ -258,7 +282,7 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
     },
 
     createStore: function(type, cfg) {
-        return Ext.create(type, cfg ? cfg : { pageSize: 50, autoLoad: true });
+        return Ext.create(type, cfg ? cfg : { pageSize: 50, autoLoad: false });
     },
 
     setupStore: function(me, cbo) {
