@@ -499,8 +499,8 @@ BEGIN
 
 	BEGIN TRY
 
-		--PATRONAGE
-		DECLARE @patVoucherId INT, @patVoucherVendorId INT;
+		--PATRONAGE 
+		/*DECLARE @patVoucherId INT, @patVoucherVendorId INT;
 		DECLARE @patVoucherIds AS Id;
 		INSERT INTO @patVoucherIds
 		SELECT intBillId FROM #tmpPostBillData
@@ -515,7 +515,8 @@ BEGIN
 			EXEC uspPATBillToCustomerVolume @patVoucherVendorId, @patVoucherId, @post
 
 			DELETE FROM @patVoucherIds WHERE intId = @patVoucherId;
-		END
+		END*/
+		EXEC uspPATGatherVolumeForPatronage @validBillIds, @post , 1 
 
 		--UPDATE PO Status
 		IF EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblICItem B 
