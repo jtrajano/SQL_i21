@@ -56,6 +56,14 @@ BEGIN TRY
 			,unit NVARCHAR(50)
 			)
 
+	--Move to Arch table (Previous Data)
+	Insert Into tblRKArchBlendDemand(intConcurrencyId,intItemId,strItemName,intSubLocationId,strSubLocation,dblQuantity,dblTotalDemand,intUOMId,strUOM,intYear,intWeek,strPeriod,dtmNeedDate,dtmImportDate)
+	Select intConcurrencyId,intItemId,strItemName,intSubLocationId,strSubLocation,dblQuantity,dblTotalDemand,intUOMId,strUOM,intYear,intWeek,strPeriod,dtmNeedDate,dtmImportDate
+	From tblRKStgBlendDemand
+
+	--Delete From Stg table (Previous Data)
+	Delete From tblRKStgBlendDemand
+
 	--Add to Staging tables
 	Insert into tblRKStgBlendDemand(strItemName,strSubLocation,intYear,intWeek,dblQuantity,dblTotalDemand,strUOM,dtmNeedDate,strPeriod,intConcurrencyId)
 	Select bp.strItemNo,bp.strSubLocation,LEFT(bp.strCalendarWeek,4),RIGHT(bp.strCalendarWeek,2),bp.dblPlannedDemand,bp.dblTotalDemand,bp.strUOM,

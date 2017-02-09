@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblRKStgBlendDemand]
+﻿CREATE TABLE [dbo].[tblRKArchBlendDemand]
 (
        [intStgBlendDemandId] INT NOT NULL IDENTITY,
        [intConcurrencyId] INT NULL,  
@@ -14,6 +14,6 @@
 	   [intWeek] INT,
        [strPeriod] NVARCHAR(20) COLLATE Latin1_General_CI_AS  NULL,
 	   [dtmNeedDate] DATE NULL,
-       [dtmImportDate] DATE NULL DEFAULT GETDATE(), 
-    CONSTRAINT [PK_tblRKStgBlendDemand_intStgBlendDemandId] PRIMARY KEY ([intStgBlendDemandId])
+       [dtmImportDate] DATE NULL, 
+    CONSTRAINT [PK_tblRKArchBlendDemand_intStgBlendDemandId] PRIMARY KEY ([intStgBlendDemandId])
 )
