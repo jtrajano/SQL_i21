@@ -409,10 +409,14 @@ BEGIN
 		[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0),
 		[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
 		[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END,
-		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
+		[intContractDetailId]		=	CASE WHEN ((A.strReceiptType = 'Purchase Contract') OR
+													 ( A.strReceiptType = 'Inventory Return' AND InventoryReturnOrigReceipt.strReceiptType = 'Purchase Contract'))
+													 THEN E1.intContractDetailId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
 											ELSE NULL END,
-		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId 
+		[intContractHeaderId]		=	CASE WHEN ((A.strReceiptType = 'Purchase Contract') OR
+													 ( A.strReceiptType = 'Inventory Return' AND InventoryReturnOrigReceipt.strReceiptType = 'Purchase Contract'))
+													 THEN E.intContractHeaderId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractHeaderId
 											ELSE NULL END,
 		[intUnitOfMeasureId]		=	B.intUnitMeasureId,
@@ -471,6 +475,13 @@ BEGIN
 		FROM tblPOPurchaseDetail PODetails
 		WHERE intPurchaseDetailId = B.intLineNo
 	) POContractItems
+	OUTER APPLY (
+		SELECT
+			TOP 1 ReturnReceipt.strReceiptType
+		FROM tblICInventoryReceipt ReturnReceipt
+		INNER JOIN tblICInventoryReceiptItem ReturnReceiptItem ON ReturnReceipt.intInventoryReceiptId = ReturnReceiptItem.intInventoryReceiptId
+		WHERE ReturnReceiptItem.intInventoryReceiptItemId = B.intSourceInventoryReceiptItemId
+	) InventoryReturnOrigReceipt
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1 AND B.dblUnitCost != 0
 	UNION ALL
 	--CHARGES
