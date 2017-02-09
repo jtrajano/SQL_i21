@@ -334,7 +334,10 @@ Ext.define('Inventory.CommonIC', {
 
 
 
-
+    /**
+     * Add Direct Inventory Shipment for Non Lotted Item
+     *
+     */
     addDirectISNonLotted: function (t,next, customer, freight, fromlocation,itemno,uom, quantity) {
         var linetotal =  quantity * 10;
         new iRely.FunctionalTest().start(t, next)
@@ -348,31 +351,19 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('icinventoryshipment')
             .selectComboBoxRowNumber('OrderType',4,0)
             .selectComboBoxRowNumber('Customer',customer,0)
-//            .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
             .selectComboBoxRowNumber('FreightTerms', freight,0)
-//            .selectComboBoxRowValue('FreightTerms', 'Truck', 'FreightTerms',1)
             .selectComboBoxRowNumber('Currency', 6,0)
             .selectComboBoxRowNumber('ShipFromAddress', fromlocation,0)
-//            .selectComboBoxRowValue('ShipFromAddress', '0001 - Fort Wayne', 'ShipFromAddress',1)
             .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
             .selectGridComboBoxRowValue('InventoryShipment',1,'strUnitMeasure', uom,'strUnitMeasure')
             .enterGridData('InventoryShipment', 1, 'colQuantity', quantity)
 
-
-
-
             .clickButton('PostPreview')
             .waitUntilLoaded('cmcmrecaptransaction')
             .waitUntilLoaded('')
             .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//            .addFunction(function (next){
-//                var win =  Ext.WindowManager.getActive(),
-//                    cost = win.down('#colUnitCost').text,
-//                    linetotal = quantity * cost;
-//                next();
-//            })
             .verifyGridData('RecapTransaction', 1, 'colRecapCredit', linetotal)
             .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
 
@@ -388,6 +379,63 @@ Ext.define('Inventory.CommonIC', {
 
             .done();
     },
+
+
+    /**
+     * Add Direct Inventory Shipment for Lotted Item
+     *
+     */
+
+    addDirectISLotted: function (t,next, customer, freight, fromlocation,itemno,uom, quantity, lotno) {
+        var linetotal =  quantity * 10;
+        new iRely.FunctionalTest().start(t, next)
+
+
+            .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Inventory Shipments','Screen')
+            .waitUntilLoaded()
+            .clickButton('New')
+            .waitUntilLoaded('icinventoryshipment')
+            .selectComboBoxRowNumber('OrderType',4,0)
+            .selectComboBoxRowNumber('Customer',customer,0)
+            .selectComboBoxRowNumber('FreightTerms', freight,0)
+            .selectComboBoxRowNumber('Currency', 6,0)
+            .selectComboBoxRowNumber('ShipFromAddress', fromlocation,0)
+            .selectComboBoxRowNumber('ShipToAddress',1,0)
+
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strUnitMeasure', uom,'strUnitMeasure')
+            .enterGridData('InventoryShipment', 1, 'colQuantity', quantity)
+
+            .selectGridComboBoxRowValue('LotTracking',1,'strLotId', lotno,'strLotId')
+            .enterGridData('LotTracking', 1, 'colShipQty', '100')
+            .verifyGridData('LotTracking', 1, 'colLotUOM', uom)
+            .verifyGridData('LotTracking', 1, 'colGrossWeight', '100')
+            .verifyGridData('LotTracking', 1, 'colTareWeight', '0')
+            .verifyGridData('LotTracking', 1, 'colNetWeight', '100')
+            .verifyGridData('LotTracking', 1, 'colLotWeightUOM', uom)
+
+            .clickButton('PostPreview')
+            .waitUntilLoaded('cmcmrecaptransaction')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colRecapCredit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
+
+            .verifyGridData('RecapTransaction', 2, 'colRecapDebit', linetotal)
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',1500)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
+            .clickMenuFolder('Inventory','Folder')
+
+            .done();
+    },
+
 
 
 
