@@ -238,8 +238,10 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('New')
             .waitUntilLoaded('icinventoryreceipt')
             .selectComboBoxRowNumber('ReceiptType',4,0)
-            .selectComboBoxRowValue('Vendor', 'ABC Trucking', vendor,1)
-            .selectComboBoxRowValue('Location', location, 'Location',0)
+            .selectComboBoxRowNumber('Vendor',vendor,0)
+            //.selectComboBoxRowValue('Vendor', 'ABC Trucking', vendor,1)
+            .selectComboBoxRowNumber('Location',location,0)
+            //.selectComboBoxRowValue('Location', location, 'Location',0)
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure',receiptuom,'strUnitMeasure')
             .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', qtytoreceive)
@@ -287,8 +289,10 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('New')
             .waitUntilLoaded('icinventoryreceipt')
             .selectComboBoxRowNumber('ReceiptType',4,0)
-            .selectComboBoxRowValue('Vendor', 'ABC Trucking', vendor,1)
-            .selectComboBoxRowValue('Location', location, 'Location',0)
+            .selectComboBoxRowNumber('Vendor',vendor,0)
+            //.selectComboBoxRowValue('Vendor', 'ABC Trucking', vendor,1)
+            .selectComboBoxRowNumber('Location',location,0)
+            //.selectComboBoxRowValue('Location', location, 'Location',0)
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure',receiptuom,'strUnitMeasure')
             .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', qtytoreceive)
@@ -328,6 +332,62 @@ Ext.define('Inventory.CommonIC', {
     },
 
 
+
+
+
+    addDirectISNonLotted: function (t,next, customer, freight, fromlocation,itemno,uom, quantity) {
+        var linetotal =  quantity * 10;
+        new iRely.FunctionalTest().start(t, next)
+
+
+            .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Inventory Shipments','Screen')
+            .waitUntilLoaded()
+            .clickButton('New')
+            .waitUntilLoaded('icinventoryshipment')
+            .selectComboBoxRowNumber('OrderType',4,0)
+            .selectComboBoxRowNumber('Customer',customer,0)
+//            .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
+            .selectComboBoxRowNumber('FreightTerms', freight,0)
+//            .selectComboBoxRowValue('FreightTerms', 'Truck', 'FreightTerms',1)
+            .selectComboBoxRowNumber('Currency', 6,0)
+            .selectComboBoxRowNumber('ShipFromAddress', fromlocation,0)
+//            .selectComboBoxRowValue('ShipFromAddress', '0001 - Fort Wayne', 'ShipFromAddress',1)
+            .selectComboBoxRowNumber('ShipToAddress',1,0)
+
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strUnitMeasure', uom,'strUnitMeasure')
+            .enterGridData('InventoryShipment', 1, 'colQuantity', quantity)
+
+
+
+
+            .clickButton('PostPreview')
+            .waitUntilLoaded('cmcmrecaptransaction')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+//            .addFunction(function (next){
+//                var win =  Ext.WindowManager.getActive(),
+//                    cost = win.down('#colUnitCost').text,
+//                    linetotal = quantity * cost;
+//                next();
+//            })
+            .verifyGridData('RecapTransaction', 1, 'colRecapCredit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
+
+            .verifyGridData('RecapTransaction', 2, 'colRecapDebit', linetotal)
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',1500)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
+            .clickMenuFolder('Inventory','Folder')
+
+            .done();
+    },
 
 
 

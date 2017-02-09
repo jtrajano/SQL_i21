@@ -400,6 +400,15 @@ Harness.start(
                 ]
             },
             {
+                url: 'SmokeTesting/ICAddTransactions.js?v='+version,
+                title: 'ICAddTransactions',
+                preload: [
+                    functionalTest,
+                    commonIC,
+                    commonICST
+                ]
+            },
+            {
                 url: 'SmokeTesting/ICSmokeTests.js?v='+version,
                 title: 'ICSmokeTests',
                 preload: [
