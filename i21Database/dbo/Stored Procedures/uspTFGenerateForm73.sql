@@ -48,7 +48,7 @@ DECLARE @DatePeriod DATETIME
 DECLARE @DateBegin DATETIME
 DECLARE @DateEnd DATETIME
 
-DECLARE @LicenseNumber NVARCHAR(50)
+DECLARE @NEIdNumber NVARCHAR(50)
 DECLARE @EIN NVARCHAR(50)
 DECLARE @FaxNumber NVARCHAR(50)
 
@@ -59,10 +59,10 @@ SELECT TOP 1 @TA = intTaxAuthorityId,
 			 @DateEnd = dtmReportingPeriodEnd
 		FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
 
-SET @LicenseNumber = (SELECT strConfiguration FROM tblTFReportingComponentConfiguration RCC 
+SET @NEIdNumber = (SELECT strConfiguration FROM tblTFReportingComponentConfiguration RCC 
 					  INNER JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
 					  WHERE RC.strFormCode = @FormCodeParam 
-					  AND RCC.strTemplateItemId = 'MF-360-LicenseNumber')
+					  AND RCC.strTemplateItemId = 'Form-73-Header-NEIdNumber')
 
 SELECT TOP 1 @EIN = strEin, 
 			@FaxNumber = strFax 
@@ -78,7 +78,7 @@ SELECT TOP 1 @EIN = strEin,
 		   dtmReportingPeriodBegin, 
 		   dtmReportingPeriodEnd, 
 		   strTaxPayerName, 
-		   strFEINSSN, 
+		   strTaxPayerFEIN, 
 		   strEmail, 
 		   strTaxPayerAddress, 
 		   strCity, 
@@ -86,7 +86,7 @@ SELECT TOP 1 @EIN = strEin,
 		   strZipCode, 
 		   strTelephoneNumber, 
 		   strContactName, 
-		   strLicenseNumber, 
+		   strTaxPayerIdentificationNumber, 
 		   strFaxNumber)
 	SELECT TOP 1 @Guid, 
 		   @TA, 
@@ -105,9 +105,10 @@ SELECT TOP 1 @EIN = strEin,
 		   strZipCode, 
 		   strContactPhone, 
 		   strContactName, 
-		   @LicenseNumber, 
+		   @NEIdNumber, 
 		   @FaxNumber 
 	FROM tblTFCompanyPreference
+
 
 	--INSERT INTO @TFTransactionSummaryItem (intTransactionSummaryItemId)  -- GET RC Config items BY FORM and insert into temp table
 
@@ -499,7 +500,35 @@ SELECT TOP 1 @EIN = strEin,
 					BEGIN
 						--Commissions allowed:
 						--Columns A & G (.0500 on first $5,000 plus .0250 on excess over $5,000)
-						DECLARE @PENDING NUMERIC(18, 6)
+						DECLARE @Line13ColA NUMERIC(18, 6)
+						DECLARE @Line13ColB NUMERIC(18, 6)
+						DECLARE @Line13ColG NUMERIC(18, 6)
+						DECLARE @Line13ColE NUMERIC(18, 6)
+
+						SET @Line13ColA = (SELECT strColumnValue FROM tblTFTransactionSummary 
+						WHERE intItemNumber IN(13) AND strColumn = 'Gasoline / Gasohol / Ethanol' AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid)
+						
+						SET @ColumnA = CASE WHEN @Line13ColA < 5000 THEN (@Line13ColA * .05) 
+											ELSE (5000 * .05 + ((@Line13ColA - 5000) * .025)) END
+
+						SET @Line13ColB = (SELECT strColumnValue FROM tblTFTransactionSummary 
+						WHERE intItemNumber IN(13) AND strColumn = 'Undyed Diesel / Biodiesel' AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid)
+
+						SET @ColumnB = CASE WHEN @Line13ColB < 5000 THEN (@Line13ColB * .02) 
+											ELSE (5000 * .02 + ((@Line13ColB - 5000) * .0050)) END
+
+						SET @Line13ColG = (SELECT strColumnValue FROM tblTFTransactionSummary 
+						WHERE intItemNumber IN(13) AND strColumn = 'Aviation Gasoline' AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid)
+
+						SET @ColumnG = CASE WHEN @Line13ColG < 5000 THEN (@Line13ColG * .05) 
+											ELSE (5000 * .05 + ((@Line13ColG - 5000) * .025)) END
+
+						SET @Line13ColE = (SELECT strColumnValue FROM tblTFTransactionSummary 
+						WHERE intItemNumber IN(13) AND strColumn = 'Propane (LPG)' AND strFormCode = @FormCodeParam AND strSummaryGuid = @Guid)
+
+						SET @ColumnE = CASE WHEN @Line13ColE < 5000 THEN (@Line13ColE * .02) 
+											ELSE (5000 * .02 + ((@Line13ColE - 5000) * .0050)) END
+
 					END
 				ELSE IF(@ItemId = 'Form-73-Details-015')
 					BEGIN
