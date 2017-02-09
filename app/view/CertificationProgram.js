@@ -326,7 +326,8 @@ Ext.define('Inventory.view.CertificationProgram', {
                                             width: 150,
                                             text: 'Certification Premium',
                                             editor: {
-                                                xtype: 'numberfield'
+                                                xtype: 'numberfield',
+                                                currencyField: true
                                             }
                                         },
                                         {
