@@ -18,10 +18,12 @@ Type the overview for the table here.
 		[intDocumentType] INT NOT NULL DEFAULT ((0)),
 		[intCommodityId] INT NOT NULL, 
 		[ysnStandard] BIT NOT NULL, 
+		[intCertificationId] INT,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [AK_tblICDocument_strDocumentName] UNIQUE ([strDocumentName]), 
 		CONSTRAINT [PK_tblICDocument] PRIMARY KEY ([intDocumentId]), 
-		CONSTRAINT [FK_tblICDocument_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])
+		CONSTRAINT [FK_tblICDocument_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
+		CONSTRAINT [FK_tblICDocument_tblICCertification_intCertificationId] FOREIGN KEY ([intCertificationId]) REFERENCES [tblICCertification]([intCertificationId])
 	)
 
 	GO
