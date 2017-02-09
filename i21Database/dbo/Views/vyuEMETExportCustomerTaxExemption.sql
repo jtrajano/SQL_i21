@@ -5,7 +5,7 @@
 		CustomerNumber = a.CustomerNumber,
 		ItemNumber = a.strItemNo,
 		state =Substring(c.strTaxGroup, 1, 2),
-		Authority1 = c.strTaxGroup,
+		Authority1 = c.intTaxGroupId,
 		Authority2 = '',
 		FETCharge = CASE WHEN b.strTaxCodeReference = 'FET' THEN 'Y' ELSE 'N' END,
 		SETCharge = CASE WHEN b.strTaxCodeReference = 'SET' THEN 'Y' ELSE 'N' END,
