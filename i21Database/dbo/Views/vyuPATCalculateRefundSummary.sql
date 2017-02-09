@@ -16,7 +16,7 @@ WITH Refunds AS (
 							RR.intRefundTypeId,
 							B.intFiscalYear,
 							dblVolume = B.dblVolume,
-							dblRefundAmount = RRD.dblRate * dblVolume
+							dblRefundAmount = ROUND(RRD.dblRate * dblVolume,2)
 				FROM tblPATCustomerVolume B
 				INNER JOIN tblPATRefundRateDetail RRD
 						ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -51,10 +51,10 @@ SELECT	id = NEWID(),
 		dblCashPayout,
 		ysnQualified,
 		dblVolume = SUM(dblVolume),
-		dblRefundAmount = SUM(ROUND(dblRefundAmount,2)),
-		dblNonRefundAmount = SUM(ROUND(dblNonRefundAmount,2)),
-		dblCashRefund = SUM(ROUND(dblRefundAmount * (dblCashPayout/100),2)),
-		dblEquityRefund = SUM(ROUND(dblRefundAmount - (dblRefundAmount * (dblCashPayout/100)),2)) 
+		dblRefundAmount = SUM(dblRefundAmount),
+		dblNonRefundAmount = SUM(dblNonRefundAmount),
+		dblCashRefund = SUM(dblRefundAmount * (dblCashPayout/100)),
+		dblEquityRefund = SUM(dblRefundAmount - (dblRefundAmount * (dblCashPayout/100))) 
 	FROM Refunds
 	GROUP BY intRefundTypeId,
 		strRefundType,

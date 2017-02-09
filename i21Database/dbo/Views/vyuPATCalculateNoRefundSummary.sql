@@ -20,8 +20,8 @@ WITH ComPref AS(
 					RR.intRefundTypeId,
 					dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN B.dblVolume ELSE 0 END,
 					dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN B.dblVolume ELSE 0 END,
-					dblRefundAmount = RRD.dblRate * B.dblVolume,
-					dblCashRefund = (RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100)
+					dblRefundAmount = ROUND(RRD.dblRate * B.dblVolume,2),
+					dblCashRefund = ROUND((RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100),2)
 				FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
 					ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -45,10 +45,10 @@ SELECT	id = NEWID(),
 		intRefundTypeId,
 		strStockStatus,
 		ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) < ComPref.dblMinimumRefund THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
-		dblTotalPurchases = SUM(ROUND(dblTotalPurchases,2)),
-		dblTotalSales = SUM(ROUND(dblTotalSales,2)),
-		dblRefundAmount = SUM(ROUND(dblRefundAmount,2)),
-		dblEquityRefund = SUM(ROUND(dblEquityRefund,2))
+		dblTotalPurchases = SUM(dblTotalPurchases),
+		dblTotalSales = SUM(dblTotalSales),
+		dblRefundAmount = SUM(dblRefundAmount),
+		dblEquityRefund = SUM(dblEquityRefund)
 	FROM Refunds
 	CROSS APPLY ComPref
 	GROUP BY intCustomerId,
